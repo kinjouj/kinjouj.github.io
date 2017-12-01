@@ -1,0 +1,780 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" まぁAndroid公式にBluetoothChatっていうのはありますけど。一応Android側はそれのソース読んでやってみたって話。ただこれはAndroidとPC(Ubuntu)をbluetooth RFCOMMを使って通信するというところになる " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="UbuntuとAndroidをbluetooth RFCOMMで通信する">
+    <meta name="twitter:description" content=" まぁAndroid公式にBluetoothChatっていうのはありますけど。一応Android側はそれのソース読んでやってみたって話。ただこれはAndroidとPC(Ubuntu)をbluetooth RFCOMMを使って通信するというところになる 
+
+">
+    <title>UbuntuとAndroidをbluetooth RFCOMMで通信する - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">UbuntuとAndroidをbluetooth RFCOMMで通信する</h3>
+            <p class="meta">
+              2013-01-21T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/android">Android</a>
+                <a class="category" href="/categories/java">Java</a>
+                <a class="category" href="/categories/python">Python</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>まぁAndroid公式にBluetoothChatっていうのはありますけど。一応Android側はそれのソース読んでやってみたって話。ただこれはAndroidとPC(Ubuntu)をbluetooth RFCOMMを使って通信するというところになる</p>
+
+
+
+<p>一応前持って行っておきますが、以下のソースはクソですので... (Threadの扱いとかダメ)。あくまでAndroidとRFCOMMにおける通信方法の手段にしかすぎないかと</p>
+
+<p>でソースですけど、AndroidManifest.xmlとかはBLUETOOTH/BLUETOOTH_ADMINのpermissionが必要なくらいなので端折る。という事でActivityだけ書く</p>
+<pre><code class="language-java")>package net.kinjouj.test;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.UUID;
+
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Process;
+import android.content.Intent;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Toast;
+
+public class SampleActivity extends Activity {
+
+    public static final String TAG = "SampleActivity";
+
+    private static final int REQUEST_ENABLE_BT = 2;
+    private static final int MESSAGE_CLIENT_ACCEPT = 1;
+    private static final int MESSAGE_RECEIVE = 2;
+
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+    private BluetoothAdapter adapter;
+    private BluetoothSocket socket;
+    private ArrayAdapter&lt;String&gt; arrays;
+    private AcceptThread mAcceptThread;
+    private ConnectThread mConnectThread;
+
+    private final Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MESSAGE_CLIENT_ACCEPT:
+                    if (msg.obj != null && msg.obj instanceof BluetoothSocket) {
+                        if (mConnectThread != null) {
+                            mConnectThread.cancel();
+                            mConnectThread = null;
+                        }
+
+                        LinearLayout layout = (LinearLayout)findViewById(R.id.layout);
+
+                        if (layout.getVisibility() == View.INVISIBLE) {
+                            layout.setVisibility(View.VISIBLE);
+                        }
+
+                        BluetoothSocket socket = (BluetoothSocket)msg.obj;
+
+                        mConnectThread = new ConnectThread(socket);
+                        mConnectThread.start();
+                    }
+
+                    break;
+
+                case MESSAGE_RECEIVE:
+                    if (msg.obj != null) {
+                        String text = (String)msg.obj;
+
+                        if (!TextUtils.isEmpty(text)) {
+                            arrays.add(text);
+                        }
+                    }
+
+                    break;
+            }
+        }
+    };
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        setContentView(R.layout.main);
+
+        ((Button)findViewById(R.id.btn)).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                String text = ((EditText)findViewById(R.id.text)).getText().toString();
+
+                if (TextUtils.isEmpty(text)) {
+                    return;
+                }
+
+                try {
+                    if (socket == null) {
+                        Set&lt;BluetoothDevice&gt; devices = adapter.getBondedDevices();
+
+                        if (devices.size() &lt;= 0) {
+                            return;
+                        }
+
+                        BluetoothDevice device = devices.iterator().next();
+                        socket = device.createRfcommSocketToServiceRecord(MY_UUID);
+                        socket.connect();
+                    }
+
+                    socket.getOutputStream().write(text.getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                    Toast.makeText(
+                        SampleActivity.this,
+                        String.format("connect unavailable: %s", socket.getRemoteDevice().getName()),
+                        Toast.LENGTH_LONG
+                    ).show();
+                } finally {
+                    if (socket != null) {
+                        try {
+                            socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+
+        arrays = new ArrayAdapter&lt;String&gt;(this, R.layout.messages);
+
+        ((ListView)findViewById(R.id.listView)).setAdapter(arrays);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        adapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (adapter == null) {
+            finish();
+
+            return;
+        }
+
+        if (!adapter.isEnabled()) {
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(intent, REQUEST_ENABLE_BT);
+        } else {
+            onBonding();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (socket != null) {
+            try {
+                socket.close();
+                socket = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (mConnectThread != null) {
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+
+        if (mAcceptThread != null) {
+            mAcceptThread.cancel();
+            mAcceptThread = null;
+        }
+
+        Process.killProcess(Process.myPid());
+    }
+
+    @Override
+    protected void onActivityResult(int request, int result, Intent intent) {
+        if (request == REQUEST_ENABLE_BT && result == RESULT_OK) {
+            onBonding();
+        }
+    }
+
+    private void onBonding() {
+        Set&lt;BluetoothDevice&gt; devices = adapter.getBondedDevices();
+
+        if (devices.size() &lt;= 0) {
+            return;
+        }
+
+        if (mAcceptThread != null) {
+            mAcceptThread.cancel();
+            mAcceptThread = null;
+        }
+
+        mAcceptThread = new AcceptThread(adapter);
+        mAcceptThread.start();
+    }
+
+    private class AcceptThread extends Thread {
+
+        private BluetoothServerSocket server;
+
+        public AcceptThread(BluetoothAdapter adapter) {
+            super("accept");
+
+            try {
+                server = adapter.listenUsingRfcommWithServiceRecord("RFCOMM Service", SampleActivity.MY_UUID);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void run() {
+            boolean isRunnable = true;
+
+            while (isRunnable) {
+                try {
+                    BluetoothSocket socket = server.accept();
+
+                    if (socket != null) {
+                        managedConnection(socket);
+                    }
+                } catch (IOException e) {
+                    Log.v(TAG, "disconnect", e);
+
+                    isRunnable = false;
+
+                    cancel();
+                }
+            }
+        }
+
+        private void managedConnection(final BluetoothSocket socket) {
+            handler.post(new Thread() {
+                @Override
+                public void run() {
+                    BluetoothDevice device = socket.getRemoteDevice();
+
+                    Toast.makeText(
+                        SampleActivity.this,
+                        String.format("Connect: %s:%s" ,device.getName(), device.getAddress()),
+                        Toast.LENGTH_LONG
+                    ).show();
+                }
+            });
+
+            handler.obtainMessage(SampleActivity.MESSAGE_CLIENT_ACCEPT, socket).sendToTarget();
+        }
+
+        public void cancel() {
+            try {
+                server.close();
+                server = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class ConnectThread extends Thread {
+
+        private BluetoothSocket socket;
+
+        public ConnectThread(BluetoothSocket socket) {
+            super("connect");
+
+            this.socket = socket;
+        }
+
+        @Override
+        public void run() {
+            InputStream is = null;
+
+            try {
+                is = socket.getInputStream();
+
+                try {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                    String str = null;
+
+                    while ((str = br.readLine()) != null) {
+                        handler.obtainMessage(SampleActivity.MESSAGE_RECEIVE, str).sendToTarget();
+                    }
+                } catch (IOException  e) {
+                    Log.v(TAG, "disconnect", e);
+
+                    cancel();
+                } finally {
+                    if (is != null) {
+                        try {
+                            is.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if(is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        public void cancel() {
+            if(socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<p>簡単に言うと起動するとAcceptThreadが走って、そこでBluetooth RFCOMMをリッスンする。でPC側のクライアントを使って接続するとConnectedThreadが走って、クライアントから受け取ったデータを取得してそれをListViewのアダプターにバインドする。まぁそんな感じ</p>
+
+<p>でPCからデータを送るクライアントは以前書いたネタにも書いてあるけど、python-bluezを使う</p>
+<pre><code class="language-py")>from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
+
+host = None
+port = 0
+
+for service in find_service():
+    if service["protocol"] == "RFCOMM" and service["name"] == "RFCOMM Service":
+        host = service["host"]
+        port = service["port"]
+
+if host is not None:
+    sock = BluetoothSocket(RFCOMM)
+    sock.connect((host, port))
+
+    print "Connected: %s:%d" % (host, port)
+
+    while True:
+        data = raw_input("message: ")
+
+        if data is not None:
+            try:
+                sock.send("%sn" % data)
+            except:
+                break;
+</code></pre>
+<p>まぁこれを実行してデータを送ったりするとスマフォ側にデータが表示される。でその動画を撮影しました</p>
+
+<p>{% youtube 9FjwF3B0rqo %}</p>
+
+<p>というような感じ。で問題はここからで逆にスマフォ側からPC側にデータをどうやって送るのかって話なんですが。上記のJavaソース上だとcreateRfcommSocketToServiceRecordのメソッドを使ってPC側デバイスのRFCOMMと接続してごにょごにょしているのですが、そもそもPC側のbluetoothにRFCOMMがバインドされてるかって所なんですが、基本的にはRFCOMMは自分でやらないとバインドされないはずなので</p>
+<pre><code>sudo sdptool browse local
+</code></pre>
+<p>をやったあとに。Serial Port通信なRFCOMMがあるかどうかを確認しなきゃならん。多分、デフォルトでは無いはずなので</p>
+<pre><code>sudo sdptool add --channel=15 SP
+</code></pre>
+<p>で登録しておく。でもっかい見ると</p>
+
+<pre>
+Service Name: Serial Port
+Service Description: COM Port
+Service Provider: BlueZ
+Service RecHandle: 0x10009
+Service Class ID List:
+  "Serial Port" (0x1101)
+Protocol Descriptor List:
+  "L2CAP" (0x0100)
+  "RFCOMM" (0x0003)
+    Channel: 15
+</pre>
+
+<p>な感じで出てるかと。あとはこっちもサーバープログラムを作って、スマフォから送られてきたデータを取得して表示したりするなりだけ。だが、上記のJavaソースだと一度PC側からクライアント接続しないと送信なフォームが出ないようになってるので、それと事前にPC側のRFCOMMレシーバーなプログラムを起動しておかないとスマフォ側からデータ送信出来ない。理由としてスマフォからPC側のサーバーへのコネクションは一度処理した一回のみだけ接続処理を行うので</p>
+
+<p>でそのRFCOMMサーバープログラムも書く。ここもPython</p>
+<pre><code class="language-py")>from bluetooth import BluetoothSocket,RFCOMM
+import notify2
+
+port = 15
+
+server = BluetoothSocket(RFCOMM)
+server.bind(("", port))
+server.listen(1)
+conn, addr = server.accept()
+
+notify2.init("bluetooth notify")
+
+while True:
+    data = conn.recv(4096)
+
+    n = notify2.Notification("Bluetooth Message", data)
+    n.show()
+</code></pre>
+<p>っていう感じ。今回のだと</p>
+
+<ul>
+<li>PC側のRFCOMMサーバーを起動する (その前にPC側でRFCOMMなSerial Portあるか確認)</li>
+<li>スマフォアプリ側を起動</li>
+<li>PC側クライアントからスマフォのRFCOMMへ接続するプログラムを実行 (ここで双方的なコネクションが立つ)</li>
+<li>PC側からデータを送る (スマフォアプリ側の画面に出る)</li>
+<li>スマフォ側からデータを送る (PC側にinoitfyなポップアップが出る)</li>
+</ul>
+
+            </div>
+            <p class="meta">
+              <a class="pull-right box-link" href="/2013/01/ubuntu-android-record-screen.html">UbuntuでAndroidの動作画面を動画で録画する方法</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/powermockignore-configuration.html">@PowerMockIgnoreの設定に関して</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/robolectric-powermock-2017.html">Robolectric3.4.2+Powermock1.7.3でのテスト (2017版)</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/mockito-final-class-mocking.html">今時のMockitoのfinal classの扱いについて</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/kotlin-unit-testing-1.html">Kotlin Unit Testing (1)</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (157)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,615 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" まだ微妙だけどメモる。一応、テストケースとかで色々してませんので " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="Androidアプリ上でのサーチハードウェアキーによる振る舞い機能を実装">
+    <meta name="twitter:description" content=" まだ微妙だけどメモる。一応、テストケースとかで色々してませんので 
+
+">
+    <title>Androidアプリ上でのサーチハードウェアキーによる振る舞い機能を実装 - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">Androidアプリ上でのサーチハードウェアキーによる振る舞い機能を実装</h3>
+            <p class="meta">
+              2013-01-02T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/android">Android</a>
+                <a class="category" href="/categories/java">Java</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>まだ微妙だけどメモる。一応、テストケースとかで色々してませんので</p>
+
+
+
+<h4>概要</h4>
+
+<p><img src="/images/2013/01/20130101000110.png" /></p>
+
+<p>というような画面があって、サーチハードウェアキーを押して「h」を入力した後に</p>
+
+<p><img src="/images/2013/01/20130101000217.png" /></p>
+
+<p>というようなフィルタリングを行ったり</p>
+
+<p><img src="/images/2013/01/20130101001319.png" /></p>
+
+<p>というようにサーチハードウェアキーを押してキーワードでインクレメンタル検索のようなのを実装したい場合にはSearchRecentSuggestionProvider等を駆使する事で出来る模様</p>
+
+<p>ただ結果をフィルタリングする機能自体はただのAdapterのFilterを実装するだけ</p>
+
+<h4>AndroidManifest.xml</h4>
+<pre><code class="language-xml")>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="sample.test"
+    android:versionCode="1"
+    android:versionName="1.0" &gt;
+
+    &lt;uses-sdk android:minSdkVersion="8" /&gt;
+
+    &lt;application android:icon="@drawable/ic_launcher" android:label="@string/app_name"&gt;
+        &lt;activity android:name=".MainActivity" android:label="@string/app_name" android:launchMode="singleTop"&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MAIN" /&gt;
+                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+            &lt;/intent-filter&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.SEARCH" /&gt;
+            &lt;/intent-filter&gt;
+            &lt;meta-data android:name="android.app.default_searchable" android:value=".MainActivity" /&gt;
+            &lt;meta-data android:name="android.app.searchable" android:resource="@xml/searchable" /&gt;
+        &lt;/activity&gt;
+        &lt;provider android:name=".SearchSuggestionProvider" android:authorities="sample.test.provider" /&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+<h4>res/xml/searchable.xml</h4>
+<pre><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
+&lt;searchable
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:label="@string/app_name"
+    android:searchSuggestAuthority="sample.test.provider"
+    android:searchSuggestSelection=" ? "
+    android:searchSuggestIntentAction="sample.test.action.SEARCH_SUGGEST" /&gt;
+</code></pre>
+<h4>SampleArrayAdapter.java</h4>
+
+<p>ListViewの結果な部分をフィルタするのに必要なArrayAdapter</p>
+<pre><code class="language-java")>package sample.test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+
+import android.content.Context;
+import android.widget.ArrayAdapter;
+import android.widget.Filter;
+
+public class SampleArrayAdapter extends ArrayAdapter&lt;String&gt; {
+
+    private Filter filter;
+    private List&lt;String&gt; items = new ArrayList&lt;String&gt;();
+
+    public SampleArrayAdapter(Context ctx) {
+        super(ctx, android.R.layout.simple_list_item_1);
+
+        String[] items = ctx.getResources().getStringArray(R.array.values);
+
+        // API Level11からならaddAllメソッドで対応可能かも
+
+        for (String item : items) {
+            add(item);
+
+            this.items.add(item);
+        }
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (filter == null) {
+            filter = new SampleFilter();
+        }
+
+        return filter;
+    }
+
+    private class SampleFilter extends Filter {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults results = new FilterResults();
+
+            // 検索クエリーから
+            SortedSet&lt;String&gt; filterItems = new TreeSet&lt;String&gt;();
+
+            if (constraint != null && constraint.toString().length() &gt; 0) {
+                StringTokenizer tokens = new StringTokenizer(constraint.toString());
+
+                while(tokens.hasMoreTokens()) {
+                    String token = tokens.nextToken();
+
+                    for (String item : items) {
+                        if (item.contains(token)) {
+                            filterItems.add(item);
+                        }
+                    }
+                }
+            } else {
+                filterItems = new TreeSet&lt;String&gt;(items);
+            }
+
+            results.values = filterItems;
+            results.count = filterItems.size();
+
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint,FilterResults results) {
+            @SuppressWarnings("unchecked")
+            SortedSet&lt;String&gt; filters = (SortedSet&lt;String&gt;)results.values;
+
+            clear();
+
+            for (String filter : filters) {
+                add(filter);
+            }
+        }
+    }
+}
+</code></pre>
+<h4>SearchSuggestionProvider.java</h4>
+
+<p>検索項目からフィルターしてサジェストする項目をCursorで出す</p>
+<pre><code class="language-java")>package sample.test;
+
+import android.content.SearchRecentSuggestionsProvider;
+import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.net.Uri;
+
+public class SearchSuggestionProvider extends SearchRecentSuggestionsProvider {
+
+    public SearchSuggestionProvider() {
+        setupSuggestions("sample.test.provider", SearchSuggestionProvider.DATABASE_MODE_QUERIES);
+    }
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        if (selectionArgs.length &gt; 0) {
+            MatrixCursor csr = new MatrixCursor(
+                new String[] { "_id", "suggest_text_1", "suggest_intent_query" }
+            );
+
+            String[] values = getContext().getResources().getStringArray(R.array.values);
+
+            String query = selectionArgs[0];
+            String[] queries = query.split("s");
+
+            for (int i = 0;i &lt; values.length;i++) {
+                String value = values[i];
+
+                for (String splitedQuery : queries) {
+                    if (value.contains(splitedQuery)) {
+                        csr.addRow(new Object[] { i, value, value });
+                    }
+                }
+            }
+
+            return csr;
+        }
+
+        return super.query(uri,projection,selection,selectionArgs,sortOrder);
+    }
+}
+</code></pre>
+<h4>MainActivity.java</h4>
+<pre><code class="language-java")>package sample.test;
+
+import android.app.ListActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Filter;
+import android.widget.Toast;
+
+import static android.app.SearchManager.QUERY;
+import static android.app.SearchManager.APP_DATA;
+
+public class MainActivity extends ListActivity {
+
+    public static final String ACTION_SEARCH_SUGGEST = "sample.test.action.SEARCH_SUGGEST";
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+
+        getListView().setTextFilterEnabled(true);
+        setListAdapter(new SampleArrayAdapter(this));
+
+        // onSearchRequested();
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        String action = intent.getAction();
+
+        // startSearch際に指定されたBundleを取得できる模様
+        Bundle  bundle = intent.getBundleExtra(APP_DATA);
+
+        if (Intent.ACTION_SEARCH.equals(action)) {
+            final Filter textFilter = ((SampleArrayAdapter)getListAdapter()).getFilter();
+
+            textFilter.filter(intent.getStringExtra(QUERY), new Filter.FilterListener() {
+                public void onFilterComplete(int count) {
+                    if (count &lt;= 0) {
+                        // もしマッチせず見つからなかった場合にListAdapterにバインドされてるフィルターを無効にしないと元のデータ一覧が表示されなくなる
+                        textFilter.filter(null);
+                    }
+                }
+            });
+        } else if (ACTION_SEARCH_SUGGEST.equals(action)) {
+            Bundle b = intent.getExtras();
+
+            // サーチハードウェア上の項目をクリックした際の項目はsuggest_intent_queryから取れる模様
+            String selectedValue = b.getString(QUERY);
+
+            if (selectedValue != null) {
+                Toast.makeText(this, "selected: " + selectedValue, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @Override
+    public boolean onSearchRequested() {
+        Bundle bundle = new Bundle();
+        bundle.putString("message", "hoge fuga foobar");
+
+        startSearch(null, false, bundle, false);
+
+        return true;
+    }
+}
+</code></pre>
+<p>ACTION_SEARCHはサーチハードウェアを押してキーワードを入力して検索した際に、ACTION_SEARCH_SUGGEST(searchabel.xmlで設定したIntentAction)は検索候補をタッチした際に返ってくる模様</p>
+
+<p>んまぁざっくり書いたけど、 <a href="http://y-anz-m.blogspot.jp/2010/03/android-searchmanager.html">http://y-anz-m.blogspot.jp/2010/03/android-searchmanager.html</a> が参考になるんじゃねーかなって所</p>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2013/01/mockito.html">Mockito</a>
+              <a class="pull-right box-link" href="/2013/01/linux-java-util-prefs-preferences.html">Linuxでのjava.util.prefs.Preferences</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/powermockignore-configuration.html">@PowerMockIgnoreの設定に関して</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/robolectric-powermock-2017.html">Robolectric3.4.2+Powermock1.7.3でのテスト (2017版)</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/mockito-final-class-mocking.html">今時のMockitoのfinal classの扱いについて</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/kotlin-unit-testing-1.html">Kotlin Unit Testing (1)</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (157)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

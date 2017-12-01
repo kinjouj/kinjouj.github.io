@@ -1,0 +1,836 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" 参考: http://yoshiko-pg.github.io/slides/20150425-jsfes/ 
+
+ babel.jsのLearn ES2015を読みつつECMAScript6を色々勉強してみた 
+
+ ※一部省略しているのもあり " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="babel.jsでECMAScript6">
+    <meta name="twitter:description" content=" 参考: http://yoshiko-pg.github.io/slides/20150425-jsfes/ 
+
+ babel.jsのLearn ES2015を読みつつECMAScript6を色々勉強してみた 
+
+ ※一部省略しているのもあり 
+
+">
+    <title>babel.jsでECMAScript6 - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">babel.jsでECMAScript6</h3>
+            <p class="meta">
+              2015-06-02T16:14:42+09:00
+              <span class="categories">
+                <a class="category" href="/categories/javascript">JavaScript</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>参考: <a href="http://yoshiko-pg.github.io/slides/20150425-jsfes/">http://yoshiko-pg.github.io/slides/20150425-jsfes/</a></p>
+
+<p>babel.jsの<a href="https://babeljs.io/docs/learn-es2015/">Learn ES2015</a>を読みつつECMAScript6を色々勉強してみた</p>
+
+<p>※一部省略しているのもあり</p>
+
+
+
+<h4>検証環境の構築</h4>
+
+<p>.jsを書いてテスト(jest)を書いてみたいな事をするのでそこら辺をサポートしてくれる環境を構築する。なのでとりあえずnpmでやるのでpackage.jsonを定義</p>
+<pre><code class="language-json")>{
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "babel-jest": "^5.2.0",
+    "jest-cli": "^0.4.5"
+  },
+  "jest": {
+    "scriptPreprocessor": "&lt;rootDir&gt;/node_modules/babel-jest",
+    "collectCoverage": true,
+    "unmockedModulePathPatterns": [
+      "node_modules",
+      "js"
+    ]
+  }
+}
+</code></pre>
+<p>今回、(jestの)モック的な機能を一切使わないのでunmockedModulePathPatternsを指定しておく。でECMAScript6で書く場合にはbabel-jestをscriptProcessorに指定する必要があるっぽいので</p>
+
+<p>という感じの環境で.jsを書いてテスト書いてみた事をしつつ進める</p>
+
+<h4>Arrows</h4>
+<pre><code class="language-js")>export default () =&gt; {
+  var messages = ["hoge", "fuga", "foobar"];
+
+  return messages.map(v =&gt; { return v.toUpperCase(); }).join(' ');
+  //return messages.map(v =&gt; v.toUpperCase()).join(' ');
+}
+</code></pre>
+<p>まぁECMAScript5とかだと引数にはfunctionを指定しないといけなかったんだけど、ECMAScript6ではブロック定義する事でさらっとかけるようになる。ちなみに</p>
+
+<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">関数の中身の式がひとつの場合、中カッコとreturnを省略できる&#10;引数が1つの場合は引数を囲むカッコを省略できる</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/604716206730272769">2015, 5月 30</a></blockquote>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>んまぁやってる事は単純なので</p>
+<pre><code class="language-js")>var printMessages = require("../Exam1");
+
+describe('Exam1', () =&gt; {
+  it("printMessages", () =&gt; {
+    var message = printMessages();
+    expect(message).toBe("HOGE FUGA FOOBAR");
+  });
+})
+</code></pre>
+<h4>Classes</h4>
+
+<p>まぁ要はクラス定義みたいにオブジェクトを定義出来ますよ的な</p>
+<pre><code class="language-js")>class Hoge {
+  say() {
+    return Hoge.filter("hoge")
+  }
+
+  static filter(s) {
+    return s.toUpperCase();
+  }
+}
+
+class Fuga extends Hoge {
+  say1() {
+    // 継承したクラスのstaticメソッドを自前クラスで呼んでもイケるっぽい
+    return Fuga.filter("fuga");
+  }
+
+  say2() {
+    // 親クラスのsayを呼んだ後にtoLowerCase
+    return super.say().toLowerCase();
+  }
+}
+
+export default Fuga;
+</code></pre>
+<p>もちろんコンストラクタもあるけど今回は使ってない。あと上記参考の<a href="http://yoshiko-pg.github.io/slides/20150425-jsfes/#19">19ページ</a>にも書いてるけど</p>
+
+<blockquote>
+ここ(setTimeout(function内))ではthisがグローバルオブジェクトになる
+アロー関数内のthisは外側のthisと同じ
+</blockquote>
+
+<p>っていうように若干thisに伴うスコープの扱いがややこしそう。という事で必要無いと思うけどテスト書く</p>
+<pre><code class="language-js")>var Fuga = require("../Exam2");
+
+describe("Fuga", () =&gt; {
+  it("say", () =&gt; {
+    var fuga = new Fuga();
+    expect(fuga.say1()).toBe("FUGA");
+    expect(fuga.say2()).toBe("hoge");
+  });
+});
+</code></pre>
+<h4>Template Strings</h4>
+
+<p>backticks(`の事)で文字列表現を使えばそこで${}によって変数展開が出来る</p>
+<pre><code class="language-js")>export default () =&gt; {
+  var name = "hoge";
+  return `name: ${name}`;
+}
+</code></pre>
+<p>んまぁほとんど言う事もないと思うので</p>
+<pre><code class="language-js")>var say = require("../Exam3");
+
+describe("Exam3", () =&gt; {
+  it("say", () =&gt; {
+    expect(say()).toBe("name: hoge");
+  });
+});
+</code></pre>
+<h4>Destructuring</h4>
+
+<p>日本語でいうと「分配束縛」っていうらしい。まぁわかりづらいのでやってみた方が早いかと</p>
+<pre><code class="language-js")>export default class Exam4 {
+  array() {
+    return ["hoge", "fuga", "foobar"];
+  }
+
+  hash() {
+    return {
+      "name": "hoge",
+      "age": 20
+    };
+  }
+}
+</code></pre>
+<p>まぁ単純に適当なクラスを定義しておいて</p>
+<pre><code class="language-js")>var Exam4 = require("../Exam4");
+
+describe("Exam4", () =&gt; {
+
+  var o;
+
+  beforeEach(() =&gt; {
+    o = new Exam4();
+  });
+
+  it("array", () =&gt; {
+    // o.arrayから返ってくる値は["hoge", "fuga", "foobar"]
+
+    var [a, b] = o.array();
+    expect(a).toBe("hoge");
+    expect(b).toBe("fuga");
+
+    var [, c, d] = o.array();
+    expect(c).toBe("fuga");
+    expect(d).toBe("foobar");
+  });
+
+  it("hash", () =&gt; {
+    // キーがハッシュのキー名で値がそれを格納する変数名
+    var { name: _name, age: _age } = o.hash();
+    expect(_name).toBe("hoge");
+    expect(_age).toBe(20);
+
+    // 以下でも出来る
+    var { name, age } = o.hash();
+    expect(name).toBe("hoge");
+    expect(age).toBe(20);
+  });
+});
+</code></pre>
+<p>っていう事。配列とかから値をまとめて取りたいとか、ハッシュから特定のキーをまとめて変数に個々に展開したいとかそういう場合に使える記法みたいな感じなのかなと</p>
+
+<p>それと引数とかにハッシュ等のオブジェクトを指定する場合にそのキーに対応する変数に展開する事も出来る模様</p>
+<pre><code class="language-js")>export default class Exam4 {
+  // 引数に指定された連想配列のキーを値に指定した変数で部分的に展開出来る
+  // 展開される変数にはデフォルト値を設定可能
+  ppos({ name: _name = "a" }) {
+    return _name.toUpperCase();
+  }
+}
+</code></pre>
+<p>っていうように引数に指定したオブジェクトのnameキーを_name変数に展開</p>
+<pre><code class="language-js")>var Exam4 = require("../Exam4");
+
+describe("Exam4", () =&gt; {
+  it("ppos", () =&gt; {
+    var o = new Exam4();
+    var name = o.ppos({ name: "hoge" });
+    expect(name).toBe("HOGE");
+    expect(o.ppos([])).toBe("A");
+  });
+});
+</code></pre>
+<p>っていうように</p>
+
+<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">引数に指定したのがObjectじゃないとか、連想配列じゃないとかそういう場合にバインドされるデフォルトの値を突っ込むみたいな感じ</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/604715543153623041">2015, 5月 30</a></blockquote>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>んまぁざっくりしているけどArrayだとかHashだとかで値を取り出してまとめて変数に個々に展開するのはさくっと出来るみたいな感じ(ざっくりしすぎてるけど)</p>
+
+<h3>Rest Parameter &amp; Spread Operator</h3>
+
+<p>...から始まる変数名を引数に持つと可変長引数として利用出来る(それをES6ではRest Parameterっていう?)。でES5とかで良くあるあるとして配列のデータを可変長引数っていう形として展開したいような場合はapply等を使ってやってたのも出来る(その方式をSpread Operatorという?)</p>
+<pre><code class="language-js")>export default class Exam5 {
+  sum(...nums) {
+    var count = 0;
+    nums.forEach(v =&gt; count += v);
+
+    return count;
+  }
+
+  sum_array(nums = []) {
+    // 配列のデータを可変長引数っていう形で引数に展開したい場合にも可能
+    return this.sum(...nums);
+  }
+}
+</code></pre>
+<p>っていうように...で始まる変数をメソッドの引数に定義、更に別のメソッドで可変長引数を持つメソッドに配列を流す場合にはその配列の変数の前に...を指定してやれば展開されるような仕組みかと</p>
+<pre><code class="language-js")>var Exam5 = require("../Exam5");
+
+describe("Exam5", () =&gt; {
+  it("sum", () =&gt; {
+    var o = new Exam5();
+    expect(o.sum(1, 2)).toBe(3);
+    expect(o.sum_array([1, 2])).toBe(3);
+  });
+});
+</code></pre>
+<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">最後の引数以外には使用できない &gt; Rest Parmaeters</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/604717612002459648">2015, 5月 30</a></blockquote>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<h4>Iterator</h4>
+
+<p>Symbol.iteratorを使ってIteratorを利用する事も出来るっぽい</p>
+<pre><code class="language-js")>// browserifyして実行する場合には必要無いけど、テストする場合の環境によっては必要
+var Symbol = require("es6-symbol");
+
+var one_two_three = {
+  [Symbol.iterator]() {
+    var values = [1, 2, 3];
+    var cur = 0;
+
+    return {
+      next() {
+        if (cur &lt; 3) {
+          var value = values[cur];
+          cur++;
+
+          return { done: false, value: value };
+        } else {
+          return { done: true };
+        }
+      }
+    }
+  }
+};
+
+export default one_two_three
+</code></pre>
+<p>っていうようにdone: trueになるまで処理が継続するような感じ</p>
+<pre><code class="language-js")>var Symbol = require("es6-symbol");
+var one_two_three = require("../Exam6");
+
+describe("123", () =&gt; {
+  it("123", () =&gt; {
+    var count = 0;
+
+    for (var n of one_two_three) {
+      count += n;
+    }
+
+    expect(count).toBe(6);
+  });
+});
+</code></pre>
+<p>「for var n of」ってなってるのに注意しないとイケないと思うんすけど。んな感じでIteratorのような実装を利用する事も出来る。でこれブラウザで動くのかっていう所なので</p>
+<pre><code class="language-js")>var one_two_three = require("./Exam6");
+
+for (var n of one_two_three) {
+  console.log(n);
+}
+</code></pre>
+<p>をindex.jsとして作っておいて</p>
+
+<pre>
+browserify -t babelify js/exam6/index.js > index.js
+</pre>
+
+<p>っていう風にして一度browserifyしてからHTMLで読み込むと普通に処理されてる模様(ちなみに余談に書いてるbabel --modules ignoreでやっても出来る。但しrequireは取り除く必要あり)</p>
+
+<h4>Generator</h4>
+
+<p>Iteratorではnextメソッドを持つ物をを定義して、それでdone: trueになるまでやるかループ自体を制御するかっていう話だと思うんすけど。それをよりシンプルにかけるのがgenerator的な所(詳しくは<a href="http://qiita.com/tomotaka_ito/items/35f3eb108f587022fa09">Pythonのイテレータとジェネレータ</a>とか)</p>
+<pre><code class="language-js")>var generator = {
+  [Symbol.iterator]: function*() {
+    var n = 0;
+
+    for (;;) {
+      yield n;
+      n++;
+    }
+  }
+};
+
+export default generator
+</code></pre>
+<p>まぁiteratorと違ってnextメソッドが必要だったりとかじゃなくてyield利用して</p>
+<pre><code class="language-js")>import {generator} from "./g.js"
+
+for (var n of generator) {
+  if (n &gt;= 10) {
+      break;
+  }
+
+  console.log("yield", n);
+}
+
+</code></pre>
+<p>というように一定になったらbreakみたいな事をする。でブラウザで動かすので</p>
+
+<pre>
+babel --modules ignore g.js app.js > index.js
+</pre>
+
+<p>な感じでコンパイルする。でgenerator周りをブラウザ側で使うにはbrowser-polyfill.jsが必要なのでそれをコピってくる(babel-coreパッケージに入ってる)</p>
+<pre><code class="language-html")>&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src="browser-polyfill.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;script src="index.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>っていう感じで動かすとyieldされた一定回数のconsole.logが出力されてる(めんどくさいのでスクショは無し)</p>
+
+<p>という感じでyieldされた値がブロックで利用できるっていう話なんすけど、これ普通に関数オブジェクトを提供しているだけでクラスで利用する場合はという事でやってみた</p>
+<pre><code class="language-js")>export default class Echo {
+  echo() {
+    var messages = ["hoge", "fuga", "foobar"];
+    var len = messages.length;
+
+    return {
+      [Symbol.iterator]: function*() {
+        for (var i = 0; i &lt; len; i++) {
+          var [m] = messages.splice(0, 1);
+          yield m;
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<p>メソッドから「[Symbol.iterator]: function*」を持つオブジェクトを返すようにする</p>
+<pre><code class="language-js")>import {Echo} from "./echo";
+
+var echo = new Echo();
+var g = echo.echo();
+
+for (var n of g) {
+  console.log("echo", n);
+}
+</code></pre>
+<p>というようにメソッドから取得したのを適切なブロックコンテキストで利用すれば良いだけ</p>
+
+<p>まぁ今回はブラウザで動かすっていうのを前提にしているけど、そうじゃないようなケースの場合にはbrowser-polyfill.jsを持ってくるんじゃなくて「require(&quot;babel/polyfill&quot;)」しろっとの事</p>
+
+<h4>Symbols</h4>
+
+<p>Symbolは基本的に同じのが作れない(インスタンス的な所として?)らしいのでそれを使ってクラスプロパティに格納する値のキーとかに使えば文字列として参照するのではなくSymbolとして参照するような事も出来るとか。まぁ用途は色々だろうと</p>
+<pre><code class="language-js")>/* hoge.js
+
+const key = Symbol("key");
+
+export default class Hoge {
+  set(s) {
+    this[key] = s;
+  }
+
+  get() {
+    return this[key];
+  }
+}
+*/
+
+import Hoge from "./hoge";
+
+var hoge = new Hoge();
+hoge.set("hoge");
+console.log(hoge.get());
+</code></pre>
+<p>hoge.jsで内部的にSymbolを作ったので格納しているのでそのオブジェクト側の外から作ったSymbolを使ってもアクセス出来ない</p>
+
+<p>以上。色々これからも勉強なり調査するなりで得られた事はレポートする予定で</p>
+
+<h4>余談1: デフォルト値に関して</h4>
+
+<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">undefinedを渡した場合はデフォルト値が使用される</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/604716791244324865">2015, 5月 30</a></blockquote>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">デフォルト値のない引数より後にしか置けない</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/604716699732942848">2015, 5月 30</a></blockquote>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>っていう事らしい</p>
+
+<h4>余談2: babelの--modules ignore</h4>
+<pre><code>babel --modules ignore hoge.js fuga.js
+</code></pre>
+<p>なんてやると</p>
+<pre><code class="language-js")>"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i &lt; props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Hoge = (function () {
+  function Hoge() {
+    _classCallCheck(this, Hoge);
+  }
+
+  _createClass(Hoge, [{
+    key: "say",
+    value: function say() {
+      return Hoge.say("hoge");
+    }
+  }], [{
+    key: "say",
+    value: function say(s) {
+      return s.toUpperCase();
+    }
+  }]);
+
+  return Hoge;
+})();
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i &lt; props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var Fuga = (function (_Hoge) {
+  function Fuga() {
+    _classCallCheck(this, Fuga);
+
+    if (_Hoge != null) {
+      _Hoge.apply(this, arguments);
+    }
+  }
+
+  _inherits(Fuga, _Hoge);
+
+  _createClass(Fuga, [{
+    key: "say",
+    value: function say() {
+      return Fuga.say("fuga");
+    }
+  }]);
+
+  return Fuga;
+})(Hoge);
+</code></pre>
+<p>っていう風に出力される。特にrequire等でmoduleを使う前提とかでなければこの方法でやっても使える場合もあるっぽい</p>
+
+<p>まぁbrowserifyとか使うのが無難では無いかと</p>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2015/06/rxandroid.html">RxAndroidをざっくり使ってみた</a>
+              <a class="pull-right box-link" href="/2015/06/google-appengine-oauth2-requested-by-android-accountmanager.html">Google AppEngine(+OAuth2)にAndroid AccountManagerを介してリクエストする</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/powermockignore-configuration.html">@PowerMockIgnoreの設定に関して</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/robolectric-powermock-2017.html">Robolectric3.4.2+Powermock1.7.3でのテスト (2017版)</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/mockito-final-class-mocking.html">今時のMockitoのfinal classの扱いについて</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/kotlin-unit-testing-1.html">Kotlin Unit Testing (1)</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (157)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

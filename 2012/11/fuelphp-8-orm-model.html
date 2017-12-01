@@ -1,0 +1,670 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" OrmパッケージなModelを使ってみる。この記事から検証バージョンが1.4 " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="FuelPHPをやってみる (8) - OrmModelを試す -">
+    <meta name="twitter:description" content=" OrmパッケージなModelを使ってみる。この記事から検証バージョンが1.4 
+
+">
+    <title>FuelPHPをやってみる (8) - OrmModelを試す - - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">FuelPHPをやってみる (8) - OrmModelを試す -</h3>
+            <p class="meta">
+              2012-11-10T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/fuelphp">FuelPHP</a>
+                <a class="category" href="/categories/php">PHP</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>OrmパッケージなModelを使ってみる。この記事から検証バージョンが1.4</p>
+
+
+
+<h4>Ormパッケージを使用できるように設定</h4>
+
+<p>fuel/app/config/config.phpをpackagesにormを指定する</p>
+<pre><code class="language-php")>&lt;?php
+
+return array(
+    "language" =&gt; "ja",
+    "always_load" =&gt; array(
+        "packages" =&gt; array(
+            "orm" // 通常はコメントアウトされているはず
+        )
+    )
+);
+</code></pre>
+<h4>fuel/app/classes/model/items.php</h4>
+<pre><code class="language-php")>&lt;?php
+
+class Model_Items extends Orm\Model {
+
+    protected static $_table_name = "items";
+
+    protected static $_has_many = array(
+        "sales" =&gt; array(
+            "model_to" =&gt; "Model_Sales",
+            "key_to" =&gt; "item_id",
+            "conditions" =&gt; array(
+                // salesリレーションを取得時にORDER BY
+                "order_by" =&gt; array("id" =&gt; "DESC")
+            )
+        )
+    );
+
+    protected static $_observers = array(
+
+        // 指定したイベント時に_event_イベント名なメソッドコールされるオブサーバー
+        "Orm\Observer_Self" =&gt; array(
+            "events" =&gt; array("before_insert")
+        ),
+
+        // 取得時等に適切な型にキャストされるオブサーバー
+        "Orm\Observer_Typing" =&gt; array(
+            "events" =&gt; array("after_load")
+        ),
+
+        // INSERT時にcreated_atカラムに適切な値を自動設定されるオブサーバー
+        "Orm\Observer_CreatedAt" =&gt; array(
+            "events" =&gt; array("before_insert"),
+            "mysql_timestamp" =&gt; true
+        ),
+
+        // sourceで指定したカラムをInflector::friendly_titleをやった値をぶち込まれる(例. "Galaxy Nexus" -&gt; "galaxy-nexus")
+        "Orm\Observer_Slug" =&gt; array(
+            "events" =&gt; array("before_insert"),
+            "source" =&gt; "item_name",
+            "property" =&gt; "slug"
+        )
+    );
+
+    private $validation = null;
+
+    public function _event_before_insert() {
+        Log::info("Observer_Self: before_insert: " . $this-&gt;price);
+
+        $this-&gt;price = $this-&gt;price * 2;
+    }
+
+    public static function find_all() {
+        $entries = array();
+
+        try {
+            // salesリレーションをロードしつつリストを取得する
+            $entries = static::find(
+                "all",
+                array("related" =&gt; "sales")
+            );
+        } catch (Database_Exception $e) {
+            Log::warning($e-&gt;getMessage());
+        }
+
+        return $entries;
+    }
+
+    public static function findById($id) {
+        $entry = null;
+
+        try {
+            $entry = static::find(
+                "first",
+                array(
+                    "where" =&gt; array("id" =&gt; $id),
+                    "related" =&gt; "sales"
+                )
+            );
+        } catch (Database_Exception $e) {
+            Log::warning($e-&gt;getMessage());
+        }
+
+        return $entry;
+    }
+
+    public function validation() {
+        if (is_null($this-&gt;validation)) {
+            $this-&gt;validation = Validation::forge();
+
+            $this-&gt;validation-&gt;add_field(
+                "item_name",
+                "アイテム名",
+                "required|max_length[50]"
+            );
+
+            $this-&gt;validation-&gt;add_field(
+                "price",
+                "値段",
+                "required|valid_string[numeric]"
+            );
+        }
+
+        return $this-&gt;validation;
+    }
+
+    public function validate() {
+        $v = $this-&gt;validation();
+
+        return $v-&gt;run();
+    }
+}
+</code></pre>
+<p>Orm\Modelを使用する事でテーブル間のリレーションを参照する事が出来る模様。でオブサーバーは現在サポートされているのは <a href="http://fuelphp.com/docs/packages/orm/observers/included.html">http://fuelphp.com/docs/packages/orm/observers/included.html</a> を参照</p>
+
+<h4>fuel/app/classses/model/sales.php</h4>
+<pre><code class="language-php")>&lt;?php
+
+class Model_Sales extends Orm\Model {
+
+    protected static $_table_name = "sales";
+    protected static $_belongs_to = array(
+        "item" =&gt; array(
+            "key_from" =&gt; "item_id",
+            "model_to" =&gt; "Model_Items",
+            "key_to" =&gt; "id",
+            "cascade_save" =&gt; true
+        )
+    );
+}
+</code></pre>
+<p>belongs_toを使う事で、Items&lt;-&gt;Sales間の参照をオブジェクトをぶち込んでINSERTしたり出来る模様。例えば</p>
+<pre><code class="language-php")>$sale = new Model_Sales();
+$sale-&gt;sales = $item // Model_Itemsの参照をぶち込む。上記の定義上で、item_idカラムにModel_Itemsのidを参照としてぶち込む
+
+$sale-&gt;save();
+</code></pre>
+<p>というような感じでぶち込める模様。これでOrm\Modelはこんな所</p>
+
+<h4>fuel/app/classes/controller/home.php</h4>
+<pre><code class="language-php")>&lt;?php
+
+class Controller_Home extends Controller {
+
+    public function get_index() {
+        $data["entries"] = Model_Items::find_all();
+        $data["errors"] = Session::get_flash("validation_errors", array());
+
+        return View::forge("home/index", $data);
+    }
+
+    public function action_incr($id) {
+        $item = Model_Items::findById($id);
+
+        if (!is_null($item)) {
+            $sale = new Model_Sales();
+            $sale-&gt;item = $item;
+
+            $sale-&gt;save();
+        }
+
+        return Response::redirect("/");
+    }
+
+    public function action_register() {
+        if (Input::method() === "POST") {
+            $item = Model_Items::forge(
+                array(
+                    "item_name" =&gt; Input::post("item_name"),
+                    "price" =&gt; Input::post("price")
+                )
+            );
+
+            if ($item-&gt;validate()) {
+                try {
+                    $item-&gt;save();
+                } catch (Database_Exception $e) {
+                    Log::warning($e-&gt;getMessage());
+                }
+            } else {
+                $save_errors = array();
+
+                $errors = $item-&gt;validation()-&gt;error();
+
+                foreach ($errors as $err) {
+                    array_push($save_errors, $err-&gt;get_message());
+                }
+
+                Session::set_flash("validation_errors", $save_errors);
+            }
+        }
+
+        return Response::redirect("/");
+    }
+}
+</code></pre>
+<p>Model_Crudとは違いリレーションやオブサーバー等を利用する事が出来るが、若干パフォーマンスは落ちる模様</p>
+
+<h4>余談1 Orm\Observer_Validationを使ってOrmModelにバリデーションを定義する</h4>
+<pre><code class="language-php")>&lt;?php
+
+class Model_Items extends Orm\Model {
+
+    protected static $_table_name = "items";
+
+    protected static $_properties = array(
+        "id",
+        "item_name" =&gt; array(
+            "data_type" =&gt; "varchar",
+            "null" =&gt; false,
+            "label" =&gt; "アイテム名",
+            "validation" =&gt; array(
+                "required",
+                array("max_length" =&gt; 50)
+            )
+        ),
+        "price" =&gt; array(
+            "data_type" =&gt; "int",
+            "null" =&gt; false,
+            "label" =&gt; "値段",
+            "validation" =&gt; array(
+                "required",
+                array("valid_string" =&gt; "numeric")
+            )
+        ),
+        "created_at"
+    );
+
+    protected static $_has_many = array(
+        "sales" =&gt; array(
+            "model_to" =&gt; "Model_Sales",
+            "key_to" =&gt; "item_id",
+            "conditions" =&gt; array(
+                "order_by" =&gt; array("id" =&gt; "DESC")
+            )
+        )
+    );
+
+    protected static $_observers = array(
+        "Orm\Observer_CreatedAt" =&gt; array(
+            "events" =&gt; array("before_insert"),
+            "mysql_timestamp" =&gt; true
+        ),
+        "Orm\Observer_Validation" =&gt; array(
+            "events" =&gt; array("before_save")
+        )
+    );
+
+}
+</code></pre>
+<p>っていうようにOrm\Observer_Validationなオブサーバーを定義しておいて、$_propertiesでカラム定義と共にバリデーションルールを定義する。で前とは違い、バリデーションに関わるようなメソッドは定義しない。(この場合だと)saveする際等にOrm\Observer_Validationが作用してsaveしようとしているオブジェクトに対してバリデーションが作用するようになる模様</p>
+
+<p>でコントローラーでバリデーションエラー時にはOrmValidationFailedな例外が送出される。以下な感じで取得してエラーをビューに渡したりする</p>
+<pre><code class="language-php")>&lt;?php
+
+class Controller_Home extends Controller {
+
+    public function get_index() {
+        $data["entries"] = Model_Items::find_all();
+        $data["errors"] = Session::get_flash("validation_errors", array());
+
+        return View::forge("home/index", $data);
+    }
+
+    public function action_register() {
+        if (Input::method() === "POST") {
+            $item = Model_Items::forge(
+                array(
+                    "item_name" =&gt; Input::post("item_name"),
+                    "price" =&gt; Input::post("price")
+                )
+            );
+
+            try {
+                $item-&gt;save();
+            } catch (Database_Exception $e) {
+                Log::warning($e-&gt;getMessage());
+            } catch (OrmValidationFailed $e) {
+                $save_errors = array();
+
+                // バリデーションエラーを取得する
+                $errors = $e-&gt;get_fieldset()-&gt;validation()-&gt;error();
+
+                foreach ($errors as $err) {
+                    array_push($save_errors, $err-&gt;get_message());
+                }
+
+                Session::set_flash("validation_errors", $save_errors);
+            }
+        }
+
+        return Response::redirect("/");
+    }
+}
+</code></pre>
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2012/11/fuelphp-9-controller_template.html">FuelPHPをやってみる (9) - Controller_Templateを使ってみる -</a>
+              <a class="pull-right box-link" href="/2012/11/fuelphp-7-controller-testing-passive-response.html">FuelPHPをやってみる (7) - コントローラーテスト時の例外を無視してレスポンスを取る</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/powermockignore-configuration.html">@PowerMockIgnoreの設定に関して</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/robolectric-powermock-2017.html">Robolectric3.4.2+Powermock1.7.3でのテスト (2017版)</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/mockito-final-class-mocking.html">今時のMockitoのfinal classの扱いについて</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/kotlin-unit-testing-1.html">Kotlin Unit Testing (1)</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (157)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

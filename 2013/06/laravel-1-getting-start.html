@@ -1,0 +1,487 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" なんか最近話題が多いような気がしなくもないPHPのFramework http://laravel.com を使ってみた " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="Laravel使ってみた">
+    <meta name="twitter:description" content=" なんか最近話題が多いような気がしなくもないPHPのFramework http://laravel.com を使ってみた 
+
+">
+    <title>Laravel使ってみた - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">Laravel使ってみた</h3>
+            <p class="meta">
+              2013-06-08T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/laravel">Laravel</a>
+                <a class="category" href="/categories/php">PHP</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>なんか最近話題が多いような気がしなくもないPHPのFramework <a href="http://laravel.com">http://laravel.com</a> を使ってみた</p>
+
+
+
+<h4>インストール</h4>
+
+<p><a href="http://laravel.com">http://laravel.com</a> からダウンロード。でこっちの環境がApache+mod_phpじゃないっていうかApache自体入ってない(nginx)ので、php-fpmとnginxなfastcgi環境?で利用できるにように設定。</p>
+
+<p>んまぁセットアップ関係はこんくらいかな</p>
+
+<h4>ルーティングの定義</h4>
+
+<p>LARAVEL_HOME/app/routes.phpに定義していく模様</p>
+<pre><code class="language-php")>&lt;?php
+
+Route::get("", "HomeController@index");
+Route::get("sample/{id}", "SampleController@index");
+
+Route::get("test", function() {
+    return "test";
+});
+</code></pre>
+<p>Route::なんちゃらで定義していくんだけど、第2引数にはfunctionなの渡せる模様。まぁちょっとした場合なら良いかも。他の場合にはコントローラークラス@メソッドで定義みたいな感じかと。まだRoutingなドキュメントの所読んでないので</p>
+
+<p>で今回は書かないけど、2つ目のSampleControllerでplaceholderでパラメーターを指定出来るようになってるけど、app/controllers/SampleController.phpでは</p>
+<pre><code class="language-php")>&lt;?php
+
+class SampleController extends BaseController {
+    public function index($id) {
+        var_dump($id);
+    }
+}
+</code></pre>
+<p>っていうように引数でパラメーターを受け取れる模様。んまぁ今回はとりあえずそこら辺すっとばす</p>
+
+<p>でDBでORM使ってなんかやってみる的な感じなので先に奨める</p>
+
+<h4>Database Migrationを作成</h4>
+<pre><code class="language-php")>php artisan migrate:make create_samples_table
+</code></pre>
+<p>やると、app/database/migrationsディレクトリ内にMigrationなクラスが定義されたPHPファイルが生成されるので</p>
+<pre><code class="language-php")>&lt;?php
+
+use Illuminate\Database\Migrations\Migration;
+
+class CreateSamplesTable extends Migration {
+
+    public function up() {
+        Schema::create(
+            "samples",
+            function($table) {
+                $table-&gt;increments("id");
+                $table-&gt;string("name");
+                $table-&gt;timestamps();
+            }
+        );
+    }
+
+    public function down() {
+        Schema::drop("samples");
+    }
+}
+</code></pre>
+<p>な感じで定義</p>
+<pre><code>php artisan migrate
+</code></pre>
+<p>でup出来る。</p>
+<pre><code>php artisan migrate:rolback
+</code></pre>
+<p>するとdownされる模様</p>
+
+<h4>モデルを作る</h4>
+
+<p>app/models/Sample.phpを作る</p>
+<pre><code class="language-php")>&lt;?php
+
+class Sample extends Eloquent {
+}
+</code></pre>
+<p>まー、なんも無いっす。LaravelではORMなモデル定義はEloquentっていうのを使うらしい。でまぁ</p>
+<pre><code class="language-php")>Sample::find(1)
+</code></pre>
+<p>とかみたいに使う模様。ちなみにメソッドに「OrFail」っていう接尾辞がつくメソッド系とかは「検索してマッチしなかったらModelNotFoundExceptionをスロー」的な感じで例外が発生する模様</p>
+
+<p>でちなみにLaravelでREPL的なのはtinkerっていうので使えるらしい</p>
+<pre><code>php artisan tinker
+</code></pre>
+<h4>コントローラーを使う</h4>
+
+<p>上記で</p>
+<pre><code class="language-php")>Routes::get("", "HomeController@index");
+</code></pre>
+<p>って定義したのでapp/controllers/HomeController.phpを作る</p>
+<pre><code class="language-php")>&lt;?php
+
+class HomeController extends BaseController {
+    public function index() {
+        return View::make("home")-&gt;with("samples", Sample::all());
+    }
+}
+</code></pre>
+<p>な感じ。まぁ大体な事は何やってるのか分かるので(ry</p>
+
+<h4>ビューを作る</h4>
+
+<p>まぁ良く一般的にレイアウト定義があってコンテンツ部だけなビューテンプレートを書くっていうのが多いと思うので、app/views/layout.blade.phpを作る</p>
+<pre><code class="language-html")>&lt;html&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Laravel Quickstart&lt;/h1&gt;
+
+        @yield("content")
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>@yield(&quot;content&quot;)な所に作成したビューの内容を突っ込まれるっていう感じっすね。でコントローラーではView::make(&quot;home&quot;)したのでapp/views/home.blade.phpを作る</p>
+<pre><code class="language-html")>@extends("layout")
+@section("content")
+    @foreach($samples as $sample)
+        &lt;h4&gt;{{ $sample-&gt;name }}&lt;/h4&gt;
+    @endforeach
+@stop
+</code></pre>
+<p>書かなくても分かるので(ry</p>
+
+<p>まぁという感じでざっくりとマニュアル読みつつやってみた。まだまだ続く</p>
+
+<h4>余談</h4>
+
+<p>良く、「FuelPHP vs Laravel」みたいな表現を目にする事があるような気がしますが、個人的には「まだ分からない」の一点だけ。というかやはり単体テストだとかそういう所まで行ってないので結構良い感じに勉強を進めて改めてどっちが良いかとかは評価してみたいなぁっと</p>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2013/06/laravel-2-configuration.html">Laravel使ってみた (2) - Configuration -</a>
+              <a class="pull-right box-link" href="/2013/06/doorkeeper-protection-controller-testing.html">doorkeeperでプロテクトされているコントローラーのテスト</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/powermockignore-configuration.html">@PowerMockIgnoreの設定に関して</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/robolectric-powermock-2017.html">Robolectric3.4.2+Powermock1.7.3でのテスト (2017版)</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/mockito-final-class-mocking.html">今時のMockitoのfinal classの扱いについて</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/kotlin-unit-testing-1.html">Kotlin Unit Testing (1)</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (157)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

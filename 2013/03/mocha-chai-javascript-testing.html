@@ -1,0 +1,545 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" http://visionmedia.github.com/mocha 
+
+ http://chaijs.com 
+
+ を使ってnode.jsでもbrowserでテストランナーなHTMLを読み込んでもテスト出来るテストフレームワークな感じ(正式的にはどういうスタンスなのか個人的に不明)。使ってみるとする " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="mochaとchaiでJavaScriptをテスト">
+    <meta name="twitter:description" content=" http://visionmedia.github.com/mocha 
+
+ http://chaijs.com 
+
+ を使ってnode.jsでもbrowserでテストランナーなHTMLを読み込んでもテスト出来るテストフレームワークな感じ(正式的にはどういうスタンスなのか個人的に不明)。使ってみるとする 
+
+">
+    <title>mochaとchaiでJavaScriptをテスト - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">mochaとchaiでJavaScriptをテスト</h3>
+            <p class="meta">
+              2013-03-05T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/javascript">JavaScript</a>
+                <a class="category" href="/categories/node-dot-js">Node.js</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p><a href="http://visionmedia.github.com/mocha">http://visionmedia.github.com/mocha</a></p>
+
+<p><a href="http://chaijs.com">http://chaijs.com</a></p>
+
+<p>を使ってnode.jsでもbrowserでテストランナーなHTMLを読み込んでもテスト出来るテストフレームワークな感じ(正式的にはどういうスタンスなのか個人的に不明)。使ってみるとする</p>
+
+
+
+<p>で上記の公式ドキュメント(正確にはgithubのwiki)にもあるように、mochaで使うアサーション的な所はnodejsとかだとassertがあるからいいけどブラウザとかでも実行できる方向で書いていくので、今回はchaiを使う。should.jsっていうのもあるけど、これブラウザ向けなやつが提供されてない模様(っていうそこら辺不明)</p>
+
+<h4>インストール</h4>
+
+<p>mochaとchaiを導入する</p>
+<pre><code>npm install -g mocha
+npm install -g chai
+</code></pre>
+<p>辺りで良いんじゃないかなーっと。で</p>
+
+<ul>
+<li>$NODE_PATH/mocha/mocha.js</li>
+<li>$NODE_PATH/mocha/mocha.css</li>
+<li>$NODE_PATH/chai/chai.js</li>
+</ul>
+
+<p>をコピってくる。これはあくまでブラウザで実行する際に使うだけ</p>
+
+<p>※追記部を参照</p>
+
+<h4>テストを書く</h4>
+<pre><code class="language-js")>var timerCallback = function(cb) {
+  setTimeout(
+    function() {
+      cb(100);
+    },
+    2500
+  );
+};
+
+describe("describe1", function() {
+
+  beforeEach(function() {
+    console.log("beforeEach");
+  });
+
+  before(function() {
+    console.log("before");
+  });
+
+  afterEach(function() {
+    console.log("afterEach");
+  });
+
+  after(function() {
+    console.log("after");
+  });
+
+  it("should 1+1 = 2", function() {
+    expect(1 + 1).to.equal(2);
+  });
+
+  it("should 2*2 = 4", function(done) {
+    setTimeout(
+      function() {
+        expect(2 * 2).to.equal(4);
+
+        done();
+      },
+      1000
+    );
+  });
+
+  it("timerCallbackを実行してみる", function(done) {
+    this.timeout(3000); // 非同期テストの際のタイムアウト値を設定。設定しない場合にはデフォルトで2000msな模様
+
+    timerCallback(function(x) {
+      expect(x).to.equal(100);
+
+      done();
+    });
+  });
+
+  it("XMLHttpRequestしてみる", function(done) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://localhost:5000/", true);
+    xhr.onload = function() {
+      expect(this.status).to.equal(200);
+
+      done();
+    };
+    xhr.send(null);
+  });
+
+  it("後で");
+
+  it("適当なオブジェクトのテスト", function() {
+    var o = { "name": "hoge" };
+
+    expect(o).to.be.a("object");
+    expect(o).to.have.property("name");
+    expect(o.name).to.have.length(4);
+    expect(o.name).to.equal("hoge");
+  });
+});
+</code></pre>
+<p>特に何かをテストする訳じゃなくてあくまで使い方的な所なので(ry</p>
+
+<p>まぁbeforeとbeforeEachとかの違いはRSpecなあれと同じなんじゃないかなと</p>
+
+<h4>実行</h4>
+
+<p>mochaのディレクトリ構造的には<span style="color: red">test</span>っていうディレクトリにjsなテストおけば</p>
+<pre><code>mocha
+</code></pre>
+<p>ってだけでテストを実行出来る。でこれ実行するとコケると思います。mochaはいいけどchaiがロードされてませんのでexpectとかそういう辺りでコケる(あとnode.jsにはXMLHttpRequestは無い。node-XMLHttpRequestを使うので)</p>
+
+<p>でそういう場合は</p>
+<pre><code class="language-js")>// require("should");
+
+var chai = require("chai");
+chai.should();
+
+global.expect = chai.expect;
+global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+</code></pre>
+<p>な感じでtest_helper.jsを作っておいて</p>
+<pre><code>mocha --require test_helper.js
+</code></pre>
+<p>的な感じで実行する。でオプションとか設定するのめんどいっすよねっていう事でtestディレクトリ内にmocha.optsを作ってオプション定義を指定する事が出来るので</p>
+<pre><code>--reporter spec
+--require test_helper.js
+</code></pre>
+<p>な感じで指定すれば、あとはmochaコマンドを実行するだけでオプションが認識してくれる模様。オプション的なのは</p>
+
+<ul>
+<li>--reporter(-R)でレポート方式を指定出来る。--reportersで一覧が見れる</li>
+<li>--watch(-w)でカレントディレクトリなファイルを監視してテストを自動実行してくれる模様</li>
+<li>--timeoutでtimeout値を設定出来る。これはテスト側でも設定可能</li>
+<li>--growlでgrowl(もしくはnotify-send?)で通知をしてくれる模様</li>
+</ul>
+
+<p>的なのがある模様。でまぁここまで来れば普通にmochaコマンドでテストしても問題なく実行出来るはずと</p>
+
+<h4>ブラウザでテストを実行する場合</h4>
+
+<p>上記でmocha.js/mocha.css/chai.jsをコピーしたと思うので</p>
+<pre><code class="language-html")>&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;link rel="stylesheet" type="text/css" href="mocha.css" /&gt;
+    &lt;script type="text/javascript" src="mocha.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="chai.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript"&gt;
+      chai.should();
+
+      var expect = chai.expect;
+      mocha.setup("bdd");
+    &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body style="background: #aaa"&gt;
+    &lt;script type="text/javascript" src="test/test1.js"&gt;&lt;/script&gt;
+    &lt;div id="mocha"&gt;&lt;/div&gt;
+    &lt;script type="text/javascript"&gt;
+(function() {
+  mocha.run();
+})();
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>な感じで書いてブラウザで見ると</p>
+
+<p><img src="/images/2013/03/20130305103626.jpg" /></p>
+
+<p>んまぁそんな感じでnode.jsでテストしてもブラウザでテストしても出来なくもない模様で。結構良い感じなのではとは個人的には思います</p>
+
+<h4>追記</h4>
+<pre><code>mocha init .
+</code></pre>
+<p>みたいな事をすると指定したディレクトリ内にmocha.cssとmocha.js及びそれを実行するランナーなhtmlが出力される模様</p>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2013/03/mocha-phantomjs.html">mocha-phantomjs</a>
+              <a class="pull-right box-link" href="/2013/03/jquery-selector-visiblility-action.html">jQueryで特定のセレクタとかが見えているに対してなんかするやつ</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/powermockignore-configuration.html">@PowerMockIgnoreの設定に関して</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/robolectric-powermock-2017.html">Robolectric3.4.2+Powermock1.7.3でのテスト (2017版)</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/mockito-final-class-mocking.html">今時のMockitoのfinal classの扱いについて</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/09/kotlin-unit-testing-1.html">Kotlin Unit Testing (1)</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (157)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>
