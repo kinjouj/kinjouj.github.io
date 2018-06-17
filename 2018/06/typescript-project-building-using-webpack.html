@@ -10,20 +10,32 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content=" これも1.6から入った物だと思うのだけど、まぁ名前の通り「SimpleAuthをOrmパッケージでやった物」的なスタンスなのかなと。まぁ「Orm自体だけでもパフォーマンスそんなに良いとは言えないような気がするのに、これ必要なんですか」っていう疑問がまず出たのだけど、まぁやってみましょうか的な感じで 
+    <meta name="description" content=" 前回のちょっとした続き 
 
- 恐らくはormパッケージも使うのでalways_loadにはorm及びauthが必要かと " />
+ ※前回はこちら 
+
+  まぁTypeScriptをwebpackで処理するんならまぁts-loader使えば良いんでしょ的なチャラい事言ってやってなかったので一応やってみたら普通に出来たのでおｋ — JK (@kinjou__j) 2018年6月16日 
+
+
+
+ っていうのをやってみた " />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@kinjou__j" />
     <meta name="twitter:creator" content="@kinjou__j" />
     <meta name="twitter:url" content="https://kinjouj.github.io" />
-    <meta name="twitter:title" content="FuelPHPをやってみる (29) - Orm\Auth -">
-    <meta name="twitter:description" content=" これも1.6から入った物だと思うのだけど、まぁ名前の通り「SimpleAuthをOrmパッケージでやった物」的なスタンスなのかなと。まぁ「Orm自体だけでもパフォーマンスそんなに良いとは言えないような気がするのに、これ必要なんですか」っていう疑問がまず出たのだけど、まぁやってみましょうか的な感じで 
+    <meta name="twitter:title" content="webpackでTypeScriptプロジェクトをビルド">
+    <meta name="twitter:description" content=" 前回のちょっとした続き 
 
- 恐らくはormパッケージも使うのでalways_loadにはorm及びauthが必要かと 
+ ※前回はこちら 
+
+  まぁTypeScriptをwebpackで処理するんならまぁts-loader使えば良いんでしょ的なチャラい事言ってやってなかったので一応やってみたら普通に出来たのでおｋ — JK (@kinjou__j) 2018年6月16日 
+
+
+
+ っていうのをやってみた 
 
 ">
-    <title>FuelPHPをやってみる (29) - Orm\Auth - - kinjouj.github.io</title>
+    <title>webpackでTypeScriptプロジェクトをビルド - kinjouj.github.io</title>
     <link rel="canonical" href="https://kinjouj.github.io/" />
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
@@ -67,68 +79,63 @@
           </section>
         </div>
           <div class="entry">
-            <h3 class="entry-title">FuelPHPをやってみる (29) - Orm\Auth -</h3>
+            <h3 class="entry-title">webpackでTypeScriptプロジェクトをビルド</h3>
             <p class="meta">
-              2013-05-08T00:00:00+00:00
+              2018-06-17T00:00:00+09:00
               <span class="categories">
-                <a class="category" href="/categories/fuelphp">FuelPHP</a>
-                <a class="category" href="/categories/php">PHP</a>
               </span>
             </p>
             <div class="entry-content">
-              <p>これも1.6から入った物だと思うのだけど、まぁ名前の通り「SimpleAuthをOrmパッケージでやった物」的なスタンスなのかなと。まぁ「Orm自体だけでもパフォーマンスそんなに良いとは言えないような気がするのに、これ必要なんですか」っていう疑問がまず出たのだけど、まぁやってみましょうか的な感じで</p>
+              <p>前回のちょっとした続き</p>
 
-<p>恐らくはormパッケージも使うのでalways_loadにはorm及びauthが必要かと</p>
+<p>※前回は<a href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html">こちら</a></p>
+
+<blockquote class="twitter-tweet" data-lang="ja"><p lang="ja" dir="ltr">まぁTypeScriptをwebpackで処理するんならまぁts-loader使えば良いんでしょ的なチャラい事言ってやってなかったので一応やってみたら普通に出来たのでおｋ</p>&mdash; JK (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/1007980141618688001?ref_src=twsrc%5Etfw">2018年6月16日</a></blockquote>
+
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>っていうのをやってみた</p>
 
 
 
-<h4>Orm\Authのモデルが使うテーブルをマイグレーション</h4>
-<pre><code>oil r migrate --packages=auth
+<h4>webpack.config.js</h4>
+<pre><code class="language-javascript")>module.exports = {
+  mode: "development",
+  entry: "./src/index.tsx",
+  output: {
+    filename: "index.js",
+    path: __dirname + "/build"
+  },
+  resolve: {
+    extensions: [".ts", ".tsx", ".json", ".js"]
+  },
+  devServer: {
+    contentBase: "build"
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx$/,
+        use: {
+          loader: "ts-loader",
+          options: {
+            transpileOnly: true
+          }
+        }
+      },
+      {
+        test: /\.js$/,
+        loader: "babel-loader"
+      }
+    ]
+  }
+};
 </code></pre>
-<p>っつーかauthパッケージで使うテーブルってマイグレーションで出来るのかと。それは知らんかった</p>
-
-<h4>fuel/app/config/auth.php</h4>
-
-<p>fuel/packages/auth/config/auth.phpからベースはコピー</p>
-<pre><code class="language-php")>&lt;?php
-
-return array(
-    "driver" =&gt; "Ormauth",
-    "verify_multiple_logins" =&gt; false,
-    "salt" =&gt; "put_your_salt_here",
-    "iterations" =&gt; 10000,
-);
-</code></pre>
-<p>driverをOrmauthに変える。でその他もろもろな設定はfuel/packages/config/ormauth.phpがあるのでこれもコピーして内容を要件に応じて変えれば良い</p>
-
-<p>これで終わり。あとは普通にAuthパッケージを使う用法で利用できる</p>
-<pre><code class="language-php")>Auth::create_user("demo", "demo", "demo@example.com");
-</code></pre>
-<p>なのをoil consoleとか使って適当に作る。あとはコントローラーとビューを作る(ビューは省略)</p>
-<pre><code class="language-php")>&lt;?php
-
-class Controller_Sample extends Controller {
-    public function action_index() {
-        var_dump(Auth::check());
-
-        return View::forge("login");
-    }
-
-    public function post_login() {
-        Auth::login();
-
-        Response::redirect("sample");
-    }
-}
-</code></pre>
-<p>ただAuth::checkな値を画面にvar_dumpするだけで、あとビューから入力されたユーザー名とパスワードでログインする処理と、その後にリダイレクトするだけ。まぁそこら辺はSimpleAuthと変わらないはずなので(ry</p>
-
-<p>でOrmAuthを使うメリットとして、モデルリレーションを行なって利用する方式な仕様の場合には有効かも知れないってところかなと</p>
+<p>んまぁts-loader使えばいいだけみたいよねって事で終わり</p>
 
             </div>
             <p class="meta">
-              <a class="pull-left box-link" href="/2013/05/fuelphp-28-orm-model_temporal.html">FuelPHPをやってみる (28) - OrmModel_Temporal -</a>
-              <a class="pull-right box-link" href="/2013/04/eclipse-arguments-newline-indent.html">Eclipseで引数とかを改行するとインデントが2倍になる</a>
+              <a class="pull-right box-link" href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html">react-script-tsを使ってTypeScriptプロジェクトをビルド</a>
             </p>
             <div style="clear: both"></div>
         </div>
