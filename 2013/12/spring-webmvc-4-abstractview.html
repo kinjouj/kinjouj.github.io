@@ -1,0 +1,528 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" 前回のSpring WebMVCをやってみる (3) – 返せるレスポンスタイプに関して -でも書いたように、レスポンスを返す型としてView型を返す事も出来る。又、ModelAndViewにsetViewNameを利用する事でも独自のViewを使ってレスポンスを返却させる事が出来る。という事で使ってみた " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="Spring WebMVCをやってみる (4) - AbstractViewを利用した独自Viewを利用する -">
+    <meta name="twitter:description" content=" 前回のSpring WebMVCをやってみる (3) – 返せるレスポンスタイプに関して -でも書いたように、レスポンスを返す型としてView型を返す事も出来る。又、ModelAndViewにsetViewNameを利用する事でも独自のViewを使ってレスポンスを返却させる事が出来る。という事で使ってみた 
+
+">
+    <title>Spring WebMVCをやってみる (4) - AbstractViewを利用した独自Viewを利用する - - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">Spring WebMVCをやってみる (4) - AbstractViewを利用した独自Viewを利用する -</h3>
+            <p class="meta">
+              2013-12-08T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/java">Java</a>
+                <a class="category" href="/categories/spring-framework">Spring Framework</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>前回の<a href="/spring-webmvc-3-result-reponse-type.html">Spring WebMVCをやってみる (3) – 返せるレスポンスタイプに関して -</a>でも書いたように、レスポンスを返す型としてView型を返す事も出来る。又、ModelAndViewにsetViewNameを利用する事でも独自のViewを使ってレスポンスを返却させる事が出来る。という事で使ってみた</p>
+
+
+
+<h4>SampleView.java</h4>
+
+<p>jsonpullparserを使ってJSONを出力するだけな事やってみる</p>
+<pre><code class="language-java")>package sample;
+
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.view.AbstractView;
+
+public class SampleView extends AbstractView {
+
+    @Override
+    protected void renderMergedOutputModel(
+        Map&lt;string, Object&gt; model,
+        HttpServletRequest request,
+        HttpServletResponse response) throws Exception {
+
+        Sample sample = null;
+
+        if (model.containsKey("sample"))
+            sample = (Sample)model.get("sample");
+
+        response.setStatus(200);
+        response.setContentType("application/json; charset=utf-8");
+        SampleGen.encode(response.getWriter(), sample);
+    }
+}
+</code></pre>
+<p>renderMergedOutputModelメソッドでレスポンスを返却するような処理を実装すれば良いだけ。で</p>
+<pre><code class="language-java")>package sample;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.View;
+
+@Controller
+@RequestMapping("/sample")
+public class SampleController {
+    @RequestMapping("/test")
+    public View test() {
+        Sample sample = new Sample();
+        sample.setName("hoge");
+
+        SampleView view = new SampleView();
+        view.getAttributesMap().put("sample", sample);
+
+        return view;
+    }
+}
+</code></pre>
+<p>のようにAbstractViewな実装クラスのインスタンスを返却するだけでも構わないが</p>
+<pre><code class="language-java")>package sample;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+@Controller
+@RequestMapping("/sample")
+public class SampleController {
+    @RequestMapping(value = "/test")
+    public ModelAndView test() {
+        Sample sample = new Sample();
+        sample.setName("hoge");
+
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("sample");
+        mav.addObject("sample", sample);
+
+        return mav;
+    }
+}
+</code></pre>
+<p>上記でも書いたようにModelAndView#setViewNameを利用してレスポンスを返却するのに使うビューを指定する事も出来る。但しこれを利用するには別途な設定が必要になる</p>
+
+<h4>spring-web-servlet.xml</h4>
+<pre><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+
+    &lt;context:component-scan base-package="sample" /&gt;
+
+    &lt;bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"&gt;
+        &lt;property name="mediaTypes"&gt;
+            &lt;map&gt;
+                &lt;entry key="html" value="text/html" /&gt;
+                &lt;entry key="json" value="application/json" /&gt;
+            &lt;/map&gt;
+        &lt;/property&gt;
+        &lt;property name="viewResolvers"&gt;
+            &lt;list&gt;
+                &lt;bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+                    &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
+                    &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
+                    &lt;property name="suffix" value=".jsp"/&gt;
+                    &lt;property name="order" value="1" /&gt;
+                &lt;/bean&gt;
+                &lt;bean class="org.springframework.web.servlet.view.XmlViewResolver"&gt;
+                    &lt;property name="order" value="0" /&gt;
+                    &lt;property name="location" value="/WEB-INF/views.xml" /&gt;
+                &lt;/bean&gt;
+            &lt;/list&gt;
+        &lt;/property&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt;
+</code></pre>
+<p><a href="http://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html" target="_blank"><a href="http://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html">http://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html</a></a> でも書かれているんだが</p>
+
+<blockquote>
+Note: When chaining ViewResolvers, an InternalResourceViewResolver always needs to be last, as it will attempt to resolve any view name, no matter whether the underlying resource actually exists.
+</blockquote>
+
+<p>というようにInternalResourceViewResolverを使うのであれば必ず最後に定義する事?的な感じなんじゃないのかなーと。でそれを意識せずに設定を行った場合だと、InternalResourceViewResolverでsetViewNameしてもそこで処理されて実際に要求しているViewResolverには作用しない事になる模様</p>
+
+<p>んまぁそこは注意っすねって事で。んでXmlViewResolverな設定ファイル(/WEB-INF/views.xml)が必要なのでこれも作る</p>
+
+<h4>/WEB-INF/views.xml</h4>
+<pre><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
+&lt;beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+
+    &lt;bean name="sample" class="sample.SampleView" /&gt;
+
+&lt;/beans&gt;
+</code></pre>
+<p>&lt;bean name=&quot;&quot;&gt;で指定してやりゃ良い。そこに指定されたのがViewNameになる模様</p>
+
+<p>んまぁあとはテスト書けば良いか</p>
+
+<h4>SampleControllerTest.java</h4>
+<pre><code class="language-java")>package swmvc;
+
+import org.junit.Test;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+public class SampleControllerTest extends AbstractTestCase {
+    @Test
+    public void test5() throws Exception {
+        mock.perform(get("/sample/test5"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json; charset=utf-8"))
+            .andReturn();
+    }
+}
+</code></pre>
+<p>終わり</p>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2013/12/spring-webmvc-5-pathvariable.html">Spring WebMVCをやってみる (5) - PathVariable -</a>
+              <a class="pull-right box-link" href="/2013/12/spring-webmvc-3-result-reponse-type.html">Spring WebMVCをやってみる (3) - 返せるレスポンスタイプに関して -</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2018/6/2018-06-22-almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-webpack.html">webpackでTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html">react-script-tsを使ってTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/05/es7-function-bind.html">ES7でのfunction bind</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (159)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/typescript.html">TypeScript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/almin.html">almin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

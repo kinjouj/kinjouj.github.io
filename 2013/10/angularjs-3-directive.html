@@ -1,0 +1,543 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" http://docs.angularjs.org/guide/directive を読みつつドキュメント読みを遂行してみる " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="angular.jsをやってみる (3) - directive -">
+    <meta name="twitter:description" content=" http://docs.angularjs.org/guide/directive を読みつつドキュメント読みを遂行してみる 
+
+">
+    <title>angular.jsをやってみる (3) - directive - - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">angular.jsをやってみる (3) - directive -</h3>
+            <p class="meta">
+              2013-10-26T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/angular-dot-js">angular.js</a>
+                <a class="category" href="/categories/javascript">JavaScript</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p><a href="http://docs.angularjs.org/guide/directive">http://docs.angularjs.org/guide/directive</a> を読みつつドキュメント読みを遂行してみる</p>
+
+
+
+<h4>directive</h4>
+<pre><code class="language-html")>&lt;span alert&gt;alert!!&lt;/span&gt;
+</code></pre>
+<p>的だったり</p>
+<pre><code class="language-html")>&lt;pane&gt;alert!!&lt;/pane&gt;
+</code></pre>
+<p>っていうようなタグ(エレメント)で定義したりした場合にangularによるコンパイルを行なって動的な処理を組み込む的な事をサポートする機能みたいな物っぽい。</p>
+
+<h4>app.html</h4>
+<pre><code class="language-html")>&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src="http://code.angularjs.org/1.0.8/angular.js"&gt;&lt;/script&gt;
+    &lt;!-- SampleController --&gt;
+    &lt;script type="text/javascript" src="sample.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div ng-controller="sample1"&gt;
+      &lt;input type="text" ng-model="name"/&gt;
+      &lt;ul class="entries"&gt;
+        &lt;li ng-repeat="sample in samples | filter:name"&gt;
+          &lt;!-- alertっていう属性をangular.directiveで処理してclickイベントを登録して処理するようにする --&gt;
+          &lt;span ng-bind-template="text: {% raw %}{{sample.text}}{% endraw %}" alert&gt;&lt;/span&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;script type="text/javascript" src="app.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>コメントで書いてる通りなので</p>
+
+<h4>sample.js</h4>
+<pre><code class="language-js")>var SampleController = (function () {
+  function SampleController($scope) {
+    $scope.samples = [
+      { id: 1, text: "hoge" },
+      { id: 2, text: "fuga" },
+      { id: 3, text: "foobar" }
+    ];
+
+    $scope.doClick = function(attr) {
+      if ("ngBindTemplate" in attr) alert(attr.ngBindTemplate);
+    };
+  }
+
+  return SampleController;
+})();
+</code></pre>
+<p>ただdoClickメソッドを生やしただけ</p>
+
+<h4>app.js</h4>
+<pre><code class="language-js")>angular.element(document).ready(function() {
+  var app = angular.module("hogeApp", []);
+  app.controller("sample1", SampleController);
+
+  app.directive(
+    "alert",
+    function() {
+      return function(scope, element, attr) {
+        element.bind("click", function() { scope.doClick(attr); });
+      };
+    }
+  );
+
+  angular.bootstrap(document, ["hogeApp"]);
+});
+</code></pre>
+<p>単にapp(angular).directiveでdirective名とそれを利用した際に発生する第2引数なコールバックにて関数を返す事でそのエレメントに処理を追加したりスコープやらにごちゃごちゃと出来るっていう</p>
+
+<p>この場合だと<span ng-bind-template="text: {% raw %}{{sample.text}}{% endraw %}" alert></span>っていうようなエレメントにclickイベントを登録して、クリックした際にscopeにあるdoClickを呼び出すっていう事を処理しているだけ</p>
+
+<p>でangular.directiveの第2引数から返せる値は関数であるかオブジェクトであるかを指定出来る。上記では関数を返したけどオブジェクトの場合(別途なdirective)には</p>
+<pre><code class="language-js")>angular.element(document).ready(function() {
+  var app = angular.module("hogeApp", []);
+  app.controller("sample1", SampleController);
+
+  app.directive(
+    "pane",
+    function() {
+      return {
+        // restrictはEACMの文字を指定する。組み合わせても問題無い、デフォルトはAでAttributeのみ(後術している所参照)
+        restrict: "E",
+
+        scope: { "text": "@" },
+
+        // このdirectiveを使用するにあたって別途なdirectiveが必要な場合にはrequireに指定すれば良い。例えばng-modelが必要ならngModelを指定する等
+
+        require: [],
+
+        //template: "&lt;span&gt;{% raw %}{{text}}{% endraw %}&lt;/span&gt;",
+
+        // templateとして使用するURLを指定XHRで取得される
+        templateUrl: "template.html",
+
+        // デフォルトはfalse。trueにすると元なエレメントを書き換えされる模様
+        replace: true,
+
+        controller: function($scope, $element, $attrs, $transclude) {
+          if (!("$parent" in $scope))
+            return;
+
+          var parent = $scope.$parent;
+
+          if (!("sample" in parent))
+            return;
+
+          var sample = parent.sample;
+
+          if (!("id" in sample))
+            return;
+
+          $scope.dataId = sample.id;
+        },
+
+        compile: function(tElement, tAttrs, trasclude) {
+          /* postLinkのみであればそのままFucntionを返せば良い
+          return function(scope, element, attrs, controller) {
+            element.css("color", "blue");
+          };
+          */
+
+          return {
+            // preを定義している場合にdirectiveから返すオブジェクトにrequireパラメータが設定されてないとエラーが起きる
+            pre: function(scope, element, attr, ngModels) {
+              element.css("color", "red");
+            },
+            post: function(scope, element, attr, controller) {
+              element.attr("data-id", scope.dataId);
+            }
+          };
+        },
+
+        // compileが定義されていると作用しない。これはドキュメントに「This property is used only if the compile property is not defined.」と明記されている
+        link: function(scope, element, attr, controller) {
+          element.css("color", "red");
+          element.attr("data-id", scope.dataId);
+        }
+      };
+    }
+  );
+
+  angular.bootstrap(document, ["hogeApp"]);
+});
+</code></pre>
+<p>っていうような感じかと。で先程関数を返した場合には</p>
+<pre><code class="language-js")>app.directive("alert", function() {
+  return {
+    link: function(scope, element, attr, controller) {
+      // 省略
+    }
+  }
+});
+</code></pre>
+<p>的な事をしているのと同じかと。んで更に上記コード中にも書いてるけどrestrictに関しては</p>
+
+<ul>
+<li>  E: Element</li>
+<li>  A: Attribute</li>
+<li>  C: Class</li>
+<li>  M: Comment</li>
+</ul>
+
+<p>で指定出来る。デフォルトは書いてる通りAなので、関数を返した場合にはデフォルトのAが使われて結果E方式なdirectiveは使用できないんじゃないかと。そこに伴うソースをまだ追えていないので憶測ですが</p>
+
+<p>で上記のdirectiveだと</p>
+<pre><code class="language-html")>&lt;pane text="{% raw %}{{sample.text}}{% endraw %}"&gt;&lt;/pane&gt;
+</code></pre>
+<p>的に利用できる。で上記ではtemplateUrlを指定しているが内容はコメントアウトしているtemplate属性と同じ。でコンパイル後には</p>
+<pre><code class="language-html")>&lt;span text="..." ng-model="name" class="ng-pristine ng-valid ng-binding" data-id="5" style="color: red;"&gt;...&lt;/span&gt;
+</code></pre>
+<p>的な感じでコンパイルされる。<pane>のtext属性はscope属性で指定している通りにscopeに格納されて利用できたはず(忘れた)。@や&amp;とか=で指定出来る。後術しているリファレンスを見た方が良いかと</p>
+
+<p>んまぁこのオブジェクト形式で返せる値の属性に関する件は<a href="http://docs.angularjs.org/api/ng.$compile">ng.$compile</a>に書かれているので、困ったらこれ読めば良いはずなので(ry</p>
+
+<p>若干微妙な所もあるので色々追記・修正するかも</p>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2013/10/supervisord-1.html">supervisord (1)</a>
+              <a class="pull-right box-link" href="/2013/10/angularjs-protractor-e2e-testing.html">protractorを使ったangular.jsのe2eテスト</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2018/6/2018-06-22-almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-webpack.html">webpackでTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html">react-script-tsを使ってTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/05/es7-function-bind.html">ES7でのfunction bind</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (159)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/typescript.html">TypeScript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/almin.html">almin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

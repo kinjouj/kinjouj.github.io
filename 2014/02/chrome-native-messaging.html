@@ -1,0 +1,464 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" https://developer.chrome.com/extensions/messaging.html#native-messaging っていうのがある模様なので色々やってみた " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="Chrome Native Messaging">
+    <meta name="twitter:description" content=" https://developer.chrome.com/extensions/messaging.html#native-messaging っていうのがある模様なので色々やってみた 
+
+">
+    <title>Chrome Native Messaging - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">Chrome Native Messaging</h3>
+            <p class="meta">
+              2014-02-08T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/c-plus-plus">C++</a>
+                <a class="category" href="/categories/chrome-extension">Chrome Extension</a>
+                <a class="category" href="/categories/javascript">JavaScript</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p><a href="https://developer.chrome.com/extensions/messaging.html#native-messaging">https://developer.chrome.com/extensions/messaging.html#native-messaging</a> っていうのがある模様なので色々やってみた</p>
+
+
+
+<p>参考1: <a href="http://laiso.hatenablog.com/entry/2013/12/15/Google_Chrome%E3%81%A7%E3%83%88%E3%83%AC%E3%82%A4%E3%81%8B%E3%82%89CD%E3%82%92%E6%8E%92%E5%87%BA%E3%81%A7%E3%81%8D%E3%82%8B%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E6%8B%A1%E5%BC%B5%E3%82%92%E3%81%A4%E3%81%8F">Google ChromeでトレイからCDを排出できるブラウザ拡張をつくりました(Native messaging版)</a></p>
+
+<p>参考2: <a href="http://stackoverflow.com/questions/20220668/communication-between-native-app-and-chrome-extension">communication between native-app and chrome-extension</a></p>
+
+<h4>/etc/opt/chrome/native-messaging-hosts/kinjouj.test.json</h4>
+<pre><code class="language-json")>{
+  "name": "kinjouj.test",
+  "description": "my app",
+  "path": "/etc/opt/chrome/native-messaging-hosts/kinjouj.test",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://gaegbpbojjgpmjkihclmjelhbopfflmp/"]
+}
+</code></pre>
+<p>公式ドキュメントにも書いてるけど、これを置く場所はOSによって異なる。上記の見出しのファイル場所はLinuxの置き場である/etc/opt/chrome/native-messaging-hosts/[name].jsonで定義している</p>
+
+<p>で今回の/etc/opt/chrome/native-messaging-hosts/kinjouj.testっていうプログラム自体はC++で作ってある</p>
+
+<h4>kinjouj.test.cc</h4>
+<pre><code class="language-cpp")>#include &lt;stdio.h&gt;
+#include &lt;iostream&gt;
+
+using namespace std;
+
+int main(int argc, char* argv[]) {
+  cout.setf(ios_base::unitbuf);
+  unsigned int i, c, l = 0;
+  string s;
+
+  for (i = 0; i &lt;= 3; i++) {
+    l += getchar();
+  }
+
+  for (i = 0; i &lt; l; i++) {
+    c = getchar();
+    s += c;
+  }
+
+  l = s.length();
+  cout &lt;&lt; char(((l &gt;&gt; 0) & 0xFF))
+       &lt;&lt; char(((l &gt;&gt; 8) & 0xFF))
+       &lt;&lt; char(((l &gt;&gt; 16) & 0xFF))
+       &lt;&lt; char(((l &gt;&gt; 24) & 0xFF));
+
+  cout &lt;&lt; s;
+}
+</code></pre>
+<p>参考2のプログラムをそのまんまだけど。要は</p>
+
+<ul>
+<li>最初のリクエストにはバイト長(4bytes分?)が入ってる? (おそらくはpostMessageで送ることができるデータもサイズに制限ありなんだろう)</li>
+<li>それ以降のデータをバイト長な分だけを取る (これが生データ?)</li>
+<li>レスポンスを返すときは最初にそのレスポンスのデータ長を出力?</li>
+<li>で生データを出力</li>
+</ul>
+
+<p>的な感じなのではないかと(多分)</p>
+
+<h4>manifest.json</h4>
+<pre><code class="language-json")>{
+  "name": "test",
+  "version": "1.0",
+  "manifest_version": 2,
+  "background": {
+    "scripts": ["bg.js"]
+  },
+  "browser_action": {
+    "default_title": "test"
+  },
+  "permissions": ["nativeMessaging"]
+}
+</code></pre>
+<p>permissionsにnativeMessagingが必要な模様</p>
+
+<h4>bg.js</h4>
+<pre><code class="language-js")>(function(undefined) {
+  chrome.browserAction.onClicked.addListener(function() {
+    var port = chrome.runtime.connectNative("kinjouj.test");
+    port.onMessage.addListener(onMessage);
+    port.postMessage("kinjouj.test");
+  });
+
+  function onMessage(data, port) {
+    console.log(port);
+    alert(data);
+  }
+})();
+</code></pre>
+<p>port.postMessageするとport connectionが切断される模様</p>
+
+<p>まぁ終わりなんですが、要は</p>
+
+<ul>
+<li>ブラウザアクションをクリックしたらnative messagingでデータを送信</li>
+<li>上記設定で書いたプログラムが作用されて、その出力がChrome側に帰る(onMessage)</li>
+</ul>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2014/02/progressfragment.html">ProgressFragment</a>
+              <a class="pull-right box-link" href="/2014/02/twitter-bootstrap-sidrjs-slidecontent-area.html">Twitter Bootstrap+sidr.jsによるスライドコンテンツ領域に関して</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2018/6/2018-06-22-almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-webpack.html">webpackでTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html">react-script-tsを使ってTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/05/es7-function-bind.html">ES7でのfunction bind</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (159)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/typescript.html">TypeScript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/almin.html">almin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

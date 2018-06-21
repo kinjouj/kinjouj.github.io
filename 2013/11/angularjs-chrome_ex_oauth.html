@@ -1,0 +1,533 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" angular.jsを使いつつ、chrome_ex_oauthを使ってTwitter APIを使うデモとか出来るんじゃないかなーって思ってやってみた " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="angular.js+chrome_ex_oauth">
+    <meta name="twitter:description" content=" angular.jsを使いつつ、chrome_ex_oauthを使ってTwitter APIを使うデモとか出来るんじゃないかなーって思ってやってみた 
+
+">
+    <title>angular.js+chrome_ex_oauth - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">angular.js+chrome_ex_oauth</h3>
+            <p class="meta">
+              2013-11-18T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/angular-dot-js">angular.js</a>
+                <a class="category" href="/categories/chrome-extension">Chrome Extension</a>
+                <a class="category" href="/categories/javascript">JavaScript</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>angular.jsを使いつつ、chrome_ex_oauthを使ってTwitter APIを使うデモとか出来るんじゃないかなーって思ってやってみた</p>
+
+
+
+<h4>manifest.json</h4>
+<pre><code class="language-json")>{
+  "name": "sample",
+  "version": "0.1",
+  "manifest_version": 2,
+  "background": {
+    "scripts": [
+      "js/angular.js",
+      "js/chrome_ex_oauth.js",
+      "js/chrome_ex_oauthsimple.js",
+      "const.js",
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://api.twitter.com/oauth/authorize"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["https://api.twitter.com/*"],
+  "content_security_policy": "script-src 'self' 'unsafe-eval';object-src 'self'"
+}
+</code></pre>
+<p>Twitter APIだとoauth_callback?でchrome-extension://な方式が使えない以前に、通常のアプリケーション方式だとリクエストトークンを取得する時点でoauth_callbackパラメーターが許容されない為、authorizeからのアクセストークンを取得する流れをコントロールする必要がある。そこはコンテントスクリプトを使ってアクセストークンを取得して保管する</p>
+
+<h4>popup.html</h4>
+<pre><code class="language-html")>&lt;html ng-app&gt;
+  &lt;head&gt;
+    &lt;script src="js/angular.js"&gt;&lt;/script&gt;
+    &lt;script src="js/chrome_ex_oauth.js"&gt;&lt;/script&gt;
+    &lt;script src="js/chrome_ex_oauthsimple.js"&gt;&lt;/script&gt;
+    &lt;script src="const.js"&gt;&lt;/script&gt;
+    &lt;script src="popup.js"&gt;&lt;/script&gt;
+    &lt;link rel="stylesheet" type="text/css" href="popup.css" /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div ng-controller="TwitterController"&gt;
+      &lt;div ng-repeat="tweet in tweets" class="tweet"&gt;
+        &lt;div class="tweet-icon"&gt;
+          &lt;img ng-src="{% raw %}{{tweet.user.profile_image_url_https}}{% endraw %}" /&gt;
+        &lt;/div&gt;
+        &lt;div class="tweet-text"&gt;{% raw %}{{tweet.text}}{% endraw %}&lt;/div&gt;
+        &lt;div style="clear: both"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>まぁ特にangular.js特有なの以外は無いので(ry</p>
+
+<h4>popup.js</h4>
+<pre><code class="language-js")>var TwitterController = (function() {
+
+  function TwitterController($scope, $http) {
+    var bgPage = chrome.extension.getBackgroundPage();
+    bgPage.authorize(function() {
+      // APIエンドポイントにOAuthパラメーター関係を付与したURLを作る
+      bgPage.signURL(
+        "https://api.twitter.com/1.1/statuses/home_timeline.json",
+        "GET",
+        function(url) {
+          $http.get(url).success(function(tweets) {
+            $scope.tweets = tweets;
+          });
+        }
+      );
+    });
+  }
+
+  return TwitterController;
+})();
+</code></pre>
+<p>angular.jsなコントローラーにchrome API依存するのもどうかとは思いますけど...</p>
+
+<p>要は認証されていればTwitter APIからタイムラインを取得する。認証されてなければChromeExOAuth方式の認証フローに入るっていう感じ</p>
+
+<h4>background.js</h4>
+<pre><code class="language-js")>var oauth = ChromeExOAuth.initBackgroundPage({
+  consumer_key: CONSUMER_KEY,
+  consumer_secret: CONSUMER_SECRET,
+  request_url: "https://api.twitter.com/oauth/request_token",
+  authorize_url: "https://api.twitter.com/oauth/authorize",
+  access_url: "https://api.twitter.com/oauth/access_token",
+  scope: "_chrome_extension_angularjs_twitter_oauth_demo"
+});
+oauth.callback_page = "callback.html";
+
+window.authorize = function(callback) {
+  oauth.authorize(callback);
+};
+
+window.signURL = function(url, method, callback) {
+  var url = oauth.signURL(url, method);
+  callback(url);
+};
+
+chrome.runtime.onMessage.addListener(function(req, sender, res) {
+  oauth.getAccessToken(oauth.getToken(), req.verifier, function() {
+    res(true);
+  });
+
+  return true;
+});
+</code></pre>
+<p>コンテントスクリプトから来たauthorizeをverifyするPINコードを受け取ったらそれを利用してアクセストークンを取得する</p>
+
+<h4>callback.html</h4>
+<pre><code class="language-html")>&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src="js/chrome_ex_oauth.js"&gt;&lt;/script&gt;
+    &lt;script src="js/chrome_ex_oauthsimple.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;script src="callback.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h4>callback.js</h4>
+<pre><code class="language-js")>ChromeExOAuth.initCallbackPage();
+</code></pre>
+<p>ただのChromeExOAuthによる認証フロー開始するだけなので(ry</p>
+
+<h4>content_script.js</h4>
+<pre><code class="language-js")>var pin = prompt("Enter the PIN displayed by Twitter");
+chrome.runtime.sendMessage({ "verifier": pin }, function(isSuccess) {
+  if (isSuccess === true) {
+    alert("Authorized, woot!");
+  }
+});
+</code></pre>
+<p>とここまでがChrome拡張になる訳。あとはビルド(crx生成)するなりで使う訳ですが、そのままでは動かない。chrome_ex_oauth.jsに所々問題があって動かない箇所があるので修正する必要がある</p>
+
+<h4>chrome_ex_oauth.jsの修正</h4>
+
+<p>487行目辺り</p>
+<pre><code class="language-js")>parameters: {
+  "xoauth_displayname" : this.app_name,
+  "scope" : this.oauth_scope,
+  // "oauth_callback" : url_callback
+}
+</code></pre>
+<p>oauth_callbackが入ってるとリクエストトークンを取得する時点でエラー起こすのでoauth_callbackをパラメーターとして入れないように</p>
+
+<p>514行目辺り</p>
+<pre><code class="language-js")>var token = params["oauth_token"];
+this.setToken(token);
+</code></pre>
+<p>コンテントスクリプトからバックグランドページにsendMessageを行なってアクセストークンを取得するフローにおいてトークンが必要となるがトークン鍵はlocalStorageに保管されているが、トークン自体は保管されていないのでフロー上でundefinedになってしまう。なのでトークンもlocalStorageに保管しておく</p>
+
+<p>但し、認証状態がtrueになるのはlocalStorageにトークンとトークン鍵があるかがチェックされるので、認証フローが途中で失敗した場合等にはChromeExOAuth#clearTokensを利用して取得しているリクエストトークンを保管しておかない等の工夫が若干必要になる</p>
+
+<p>あくまでこの修正が必要なのはchrome_ex_oauthでTwitter APIを使う場合にのみ限られるのでは無いかと(もしかしたらDropboxも)</p>
+
+<p>以上を行なって拡張機能をインストールして認証すると</p>
+
+<p><img src="/images/2013/11/201311172300.jpg" /></p>
+
+<p>っていうようにchrome_ex_oauthでOAuthを利用したREST API等をChrome Extensionでangular.jsを使いつつ出来るっていう感じで</p>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2013/11/android-viewpagerindicator-footerindicatorstyle.html">ViewPagerIndicatorのfooterIndicatorStyle</a>
+              <a class="pull-right box-link" href="/2013/11/slf4j-fluentd.html">slf4j+fluentd</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2018/6/2018-06-22-almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-webpack.html">webpackでTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html">react-script-tsを使ってTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/05/es7-function-bind.html">ES7でのfunction bind</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (159)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/typescript.html">TypeScript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/almin.html">almin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

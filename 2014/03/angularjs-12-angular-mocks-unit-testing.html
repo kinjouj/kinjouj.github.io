@@ -1,0 +1,482 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" 今まで 
+
+ angular.jsのkarmaを使ったテスト 
+protractorを使ったangular.jsのe2eテスト 
+
+ っていうのをやってたけど、angular-mocks.jsを使う事での単体テストすることも可能な模様なので色々整理する辺りな所としてやってみた " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="angular.jsをやってみる (12) - angular-mocks.jsを使ったテスト -">
+    <meta name="twitter:description" content=" 今まで 
+
+ angular.jsのkarmaを使ったテスト 
+protractorを使ったangular.jsのe2eテスト 
+
+ っていうのをやってたけど、angular-mocks.jsを使う事での単体テストすることも可能な模様なので色々整理する辺りな所としてやってみた 
+
+">
+    <title>angular.jsをやってみる (12) - angular-mocks.jsを使ったテスト - - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">angular.jsをやってみる (12) - angular-mocks.jsを使ったテスト -</h3>
+            <p class="meta">
+              2014-03-27T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/angular-dot-js">angular.js</a>
+                <a class="category" href="/categories/javascript">JavaScript</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>今まで</p>
+
+<p><a href="/angularjs-karma-e2e-testing.html">angular.jsのkarmaを使ったテスト</a><br>
+<a href="/angularjs-protractor-e2e-testing.html">protractorを使ったangular.jsのe2eテスト</a></p>
+
+<p>っていうのをやってたけど、angular-mocks.jsを使う事での単体テストすることも可能な模様なので色々整理する辺りな所としてやってみた</p>
+
+
+
+<h4>sample.js</h4>
+<pre><code class="language-js")>var SampleController = (function() {
+
+  function SampleController($scope, $http) {
+    $http.get("/samples").success(function(samples) {
+      $scope.samples = samples;
+    });
+  };
+
+  return SampleController;
+
+})();
+</code></pre>
+<p>っていう感じでangular.jsの$httpを使ってAPI呼び出しなりをしてデータを取得後$scopeに突っ込むという単純なangular.jsのコントローラーを定義</p>
+
+<p>まぁこれを単体テストしましょうってことなので(ry</p>
+
+<h4>mocha.html</h4>
+
+<p>テストにmochaを使う。なのでテストランナーなHTMLを作る</p>
+<pre><code class="language-html")>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;title&gt;Mocha&lt;/title&gt;
+    &lt;link rel="stylesheet" href="mocha.css" /&gt;
+    &lt;script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="mocha.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="chai.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript"&gt;
+      chai.should();
+
+      var expect = chai.expect;
+      mocha.setup({ "ui": "bdd", "timeout": 3000, "ignoreLeaks": false });
+    &lt;/script&gt;
+
+    &lt;!-- 上記コントローラーなJS --&gt;
+    &lt;script type="text/javascript" src="sample.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body style="background: #bbb"&gt;
+    &lt;script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular-mocks.js"&gt;&lt;/script&gt;
+    &lt;!-- テストスペック --&gt;
+    &lt;script src="test.js"&gt;&lt;/script&gt;
+    &lt;div id="mocha"&gt;&lt;/div&gt;
+    &lt;script&gt;
+        mocha.run();
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>な感じで。これでテストスペック上で<span style="color: red">inject</span>等が使えるのでこれを利用して$httpを利用して返されるレスポンスをテストしたり出来る</p>
+
+<h4>test.js</h4>
+<pre><code class="language-js")>describe("Sample", function() {
+
+  var $controller;
+  var $httpBackend;
+
+  function createController(scope) {
+    return $controller("SampleController", { "$scope": scope });
+  }
+
+  beforeEach(
+    inject(function($injector) {
+        $controller = $injector.get("$controller");
+        $httpBackend = $injector.get("$httpBackend");
+        $httpBackend
+          .when("GET", "/samples")
+          .respond([{ name: "hoge" }, { name: "fuga" }]);
+    })
+  );
+
+  afterEach(function() {
+    // flushで呼ばれるので必要ないのでは?
+    // リクエスト発生してないのにflushするとthrow new Errorされる
+    // $httpBackend.verifyNoOutstandingExpectation();
+
+    // flushしてないとthrow new Errorされる
+    $httpBackend.verifyNoOutstandingRequest();
+  });
+
+  it("constructor", function() {
+    var scope = {};
+    var sample = createController(scope);
+    $httpBackend.flush();
+
+    expect(scope.samples).not.to.be.empty;
+    // 実際に返される値数は2 (when -&gt; respondで返してる配列の要素数が2だから)
+    expect(scope.samples).to.have.length(3);
+  });
+});
+</code></pre>
+<p>っていう感じで。あとはテストランナーなHTMLを普通にブラウザで開けば良い。それをやると</p>
+
+<p><img src="/images/2014/03/201403271433.jpg" /></p>
+
+<p>っていうような結果が得られる。</p>
+
+<p>んまぁangular.jsなコントローラーとかの単体テストをする場合とかでangular.jsなproviderやserviceが必要になる要件な場合とかだとangular-mocks.jsを使う事で擬似オブジェクトを利用したテストを利用できるっていう感じかと</p>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2014/03/angularjs-13-sce-ng-sanitize.html">angular.jsをやってみる (13) - $sceとngSanitize -</a>
+              <a class="pull-right box-link" href="/2014/03/angularjs-11-interval.html">angular.jsをやってみる (11) - $interval -</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2018/6/2018-06-22-almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-webpack.html">webpackでTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html">react-script-tsを使ってTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/05/es7-function-bind.html">ES7でのfunction bind</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (159)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/typescript.html">TypeScript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/almin.html">almin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>

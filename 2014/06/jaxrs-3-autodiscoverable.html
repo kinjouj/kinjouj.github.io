@@ -1,0 +1,636 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="author" content="kinjouj" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=" JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。 
+
+ という事でやってみた " />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@kinjou__j" />
+    <meta name="twitter:creator" content="@kinjou__j" />
+    <meta name="twitter:url" content="https://kinjouj.github.io" />
+    <meta name="twitter:title" content="JAX-RSをやってみる (3) - AutoDiscoverable -">
+    <meta name="twitter:description" content=" JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。 
+
+ という事でやってみた 
+
+">
+    <title>JAX-RSをやってみる (3) - AutoDiscoverable - - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div>
+          <header class="logo-header center">
+            <h2><a href="/">kinjouj.github.io</a></h2>
+          </header>
+        </div>
+        <nav class="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/about.html">about</a></li>
+            <li><a href="/contact.html">お問い合わせ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="content">
+        <div class="ad">
+          <section>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </section>
+        </div>
+          <div class="entry">
+            <h3 class="entry-title">JAX-RSをやってみる (3) - AutoDiscoverable -</h3>
+            <p class="meta">
+              2014-06-10T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/java">Java</a>
+                <a class="category" href="/categories/jax-rs">JAX-RS</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。</p>
+
+<p>という事でやってみた</p>
+
+
+
+<h4>備考: glassfishのバージョンに関して</h4>
+
+<p>(記事投稿時の)glasshfish4では組み込まれているJAX-RS(Jersey2)のバージョンが古い模様なので、実装側とAPIのバージョンの整合性が合わないが為にエラーが起きる模様。なのでglassfishに同梱されているライブラリをアップデートするか、glassfish4.0.1(現時点では正式版は出ていない)を使う事で解決出来る模様</p>
+
+<p>参考: <a href="http://qiita.com/opengl-8080/items/cfdde684b36efec50477">GlassFish4.0でJAX-RSのクラスにCDIでインジェクションしようとしたらUnsatisfiedDependencyExceptionが発生するバグ？</a></p>
+
+<h4>概要</h4>
+
+<p>gsonを使って返された値をJSONにエンコードするだけのMessageBodyWriterをAutoDiscoverableを使って別パッケージにしてロード出来るようにする</p>
+
+<h4>SampleAutoDiscoverable.java</h4>
+<pre><code class="language-java")>package sample.internal;
+
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.core.FeatureContext;
+
+import org.glassfish.jersey.internal.spi.AutoDiscoverable;
+
+@Priority(Priorities.ENTITY_CODER)
+public class SampleAutoDiscoverable implements AutoDiscoverable {
+    @Override
+    public void configure(FeatureContext context) {
+        if (!context.getConfiguration().isRegistered(SampleFeature.class)) {
+            context.register(SampleFeature.class);
+        }
+    }
+}
+</code></pre>
+<h4>SampleFeature.java</h4>
+<pre><code class="language-java")>package sample.internal;
+
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.ext.MessageBodyWriter;
+
+import org.glassfish.jersey.CommonProperties;
+import org.glassfish.jersey.internal.util.PropertiesHelper;
+
+import sample.provider.GsonProvider;
+
+import static org.glassfish.jersey.internal.InternalProperties.JSON_FEATURE;
+
+public class SampleFeature implements Feature {
+
+    private static final String SAMPLE_JSON_FEATURE = SampleFeature.class.getSimpleName();
+
+    @Override
+    public boolean configure(final FeatureContext context) {
+        final Configuration config = context.getConfiguration();
+
+        // glasshfish4.0.0(リリース版)だとここでNoSuchMethodError出る
+        final String jsonFeature = CommonProperties.getValue(
+            config.getProperties(),
+            config.getRuntimeType(),
+            JSON_FEATURE,
+            null,
+            String.class
+        );
+
+        // このクラスとは違うのが入ってるのであれば、既にJSON_FEATUREがあるのでスキップする
+        if (jsonFeature != null) {
+            return false;
+        }
+
+        context.property(
+            PropertiesHelper.getPropertyNameForRuntime(JSON_FEATURE, config.getRuntimeType()),
+            SAMPLE_JSON_FEATURE
+        );
+
+        if (!config.isRegistered(GsonProvider.class)) {
+            context.register(GsonProvider.class, MessageBodyWriter.class);
+        }
+
+        return true;
+    }
+}
+</code></pre>
+<h4>GsonProvider.java</h4>
+<pre><code class="language-java")>package sample.provider;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
+import javax.inject.Singleton;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyWriter;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+@Singleton
+@Produces(MediaType.APPLICATION_JSON)
+public class GsonProvider implements MessageBodyWriter&lt;Object&gt; {
+
+    private final Gson gson = new GsonBuilder().create();
+
+    @Override
+    public boolean isWriteable(Class&lt;?&gt; type, Type genericType,
+        Annotation[] annotations, MediaType mediaType) {
+
+        // @Producesアノテーションがついてればそのメディアタイプに限定される模様
+        // return mediaType == MediaType.APPLICATION_JSON_TYPE;
+
+        return true;
+    }
+
+    @Override
+    public long getSize(Object t, Class&lt;?&gt; type, Type genericType,
+        Annotation[] annotations, MediaType mediaType) {
+        return -1;
+    }
+
+    @Override
+    public void writeTo(Object t, Class&lt;?&gt; type, Type genericType,
+        Annotation[] annotations, MediaType mediaType,
+        MultivaluedMap&lt;String, Object&gt; httpHeaders, OutputStream entityStream)
+        throws IOException, WebApplicationException {
+
+        try (OutputStreamWriter writer = new OutputStreamWriter(entityStream, "UTF-8")) {
+            gson.toJson(t, genericType, writer);
+        }
+    }
+}
+</code></pre>
+<h4>META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverableを作成</h4>
+
+<p>AutoDiscoverableを使う場合にはServiceLoader周りを設定しとけば良い</p>
+<pre><code>sample.internal.SampleAutoDiscoverable
+</code></pre>
+<p>中身はAutoDiscoverableのパッケージ名を含むクラス名を指定するだけ</p>
+
+<p>あとはこのプロジェクトをjar化してJAX-RSアプリケーションに含めるだけ</p>
+
+<h4>SampleApplication.java</h4>
+<pre><code class="language-java")>package sample;
+
+import javax.ws.rs.ApplicationPath;
+
+import org.glassfish.jersey.CommonProperties;
+import org.glassfish.jersey.server.ResourceConfig;
+
+@ApplicationPath("resources")
+public class SampleApplication extends ResourceConfig {
+
+    public SampleApplication() {
+        packages("sample");
+        property(CommonProperties.MOXY_JSON_FEATURE_DISABLE, true);
+    }
+}
+</code></pre>
+<p>デフォでMOXyなJSONシリアライザ的なので処理されちゃって上記のFeatureでJSON_FEATUREによりGsonProviderでの処理がスキップされちゃうので、そこら辺の使えるようにするように設定しとかなあかんっぽい</p>
+
+<h4>Home.java</h4>
+<pre><code class="language-java")>package sample.controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
+import sample.bean.SampleBean;
+import static javax.ws.rs.core.MediaType.*;
+
+@Path("/sample")
+public class Home {
+
+    @Path("list")
+    @GET
+    @Produces(APPLICATION_JSON)
+    public List&lt;SampleBean&gt; list() {
+        List&lt;SampleBean&gt; beans = new ArrayList&lt;SampleBean&gt;(2);
+        beans.add(new SampleBean("hoge"));
+        beans.add(new SampleBean("fuga"));
+
+        return beans;
+    }
+
+    @Path("map")
+    @GET
+    @Produces(APPLICATION_JSON)
+    public Map&lt;String, Object&gt; map() {
+        Map&lt;String, Object&gt; data = new HashMap&lt;String, Object&gt;(1);
+        data.put("sample", new SampleBean("hoge"));
+
+        return data;
+    }
+}
+</code></pre>
+<h4>HomeTest.java</h4>
+<pre><code class="language-java")>package sample.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.GenericType;
+
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.internal.LinkedTreeMap;
+
+import sample.SampleApplication;
+import sample.bean.SampleBean;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    private Gson gson;
+
+    @Override
+    protected Application configure() {
+        gson = new GsonBuilder().create();
+        return new SampleApplication();
+    }
+
+    @Test
+    public void test_list() {
+        String response = target("/sample/list").request().get(String.class);
+        assertThat(response, notNullValue());
+
+        List&lt;SampleBean&gt; beans = gson.fromJson(
+            response,
+            new GenericType&lt;List&lt;SampleBean&gt;&gt;() {}.getType()
+        );
+        assertThat(beans, notNullValue());
+        assertThat(beans, hasSize(2));
+    }
+
+    @Test
+    public void test_map() {
+        String response = target("/sample/map").request().get(String.class);
+        assertThat(response, notNullValue());
+
+        Map&lt;String, Object&gt; data = gson.fromJson(
+            response,
+            new GenericType&lt;Map&lt;String, Object&gt;&gt;() {}.getType()
+        );
+        assertThat(data, notNullValue());
+        assertThat(data, hasKey("sample"));
+    }
+}
+</code></pre>
+<p>んまぁデプロイ先はglassfishを前提にして調査してたので他のアプリケーションサーバーとかの検証だとかしてませんが、glassfishだと何かとバージョンやらの問題が出てきちゃうので</p>
+
+<p>とりまぁそういうように外部ライブラリに仕込んでやるような場合だとAutoDiscoverableのような仕組みを使う事で組み込む事が可能って事で</p>
+
+            </div>
+            <p class="meta">
+              <a class="pull-left box-link" href="/2014/06/jaxrs-4-messagebodyreader.html">JAX-RSをやってみる (4) - MessageBodyReader -</a>
+              <a class="pull-right box-link" href="/2014/04/jaxrs-2-glassfish-deployment.html">JAX-RSをやってみる (2) - glassfish deployment -</a>
+            </p>
+            <div style="clear: both"></div>
+        </div>
+      </div>
+      <div style="margin: 50px 0px">
+        <aside class="sidebar">
+          <div class="row">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <section style="text-align: center">
+                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px" data-ad-client="ca-pub-3593764998780061" data-ad-slot="9664194121"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+              </section>
+            </div>
+            <div class="col-sm-4 col-xs-4 col-md-4">
+              <section>
+                <h4>Recent Posts</h4>
+                <ul id="recent_posts">
+                  <li class="post">
+                    <a href="/2018/6/2018-06-22-almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-webpack.html">webpackでTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html">react-script-tsを使ってTypeScriptプロジェクトをビルド</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2018/05/es7-function-bind.html">ES7でのfunction bind</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                  </li>
+                  <li class="post">
+                    <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
+                  </li>
+                </ul>
+              </section>
+            </div>
+            <div id="categories" class="col-md-4 col-xs-4 col-sm-4">
+              <section>
+                <h4>Categories</h4>
+                <ul>
+  <li>
+    <a href="/categories/java.html">Java (238)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/sastruts.html">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/categories/spring-framework.html">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/categories/mahout.html">Mahout (4)</a>
+  </li>
+  <li>
+    <a href="/categories/gradle.html">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/categories/java-ee.html">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/categories/rxjava.html">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/categories/android.html">Android (100)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/robolectric.html">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/kotlin.html">Kotlin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/struts2.html">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/categories/google-app-engine.html">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/categories/doma.html">doma (5)</a>
+  </li>
+  <li>
+    <a href="/categories/hadoop.html">Hadoop (11)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
+  </li>
+  <li>
+    <a href="/categories/scala.html">scala (1)</a>
+  </li>
+  <li>
+    <a href="/categories/groovy.html">groovy (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jax-rs.html">JAX-RS (22)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/php.html">PHP (63)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/laravel.html">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/categories/phpunit.html">PHPUnit (3)</a>
+  </li>
+  <li>
+    <a href="/categories/smarty.html">Smarty (1)</a>
+  </li>
+  <li>
+    <a href="/categories/fuelphp.html">FuelPHP (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/javascript.html">JavaScript (159)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/chrome-extension.html">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/categories/node-dot-js.html">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/categories/backbone-dot-js.html">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/categories/grunt.html">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/categories/redux.html">redux (1)</a>
+  </li>
+  <li>
+    <a href="/categories/react-dot-js.html">React.js (7)</a>
+  </li>
+  <li>
+    <a href="/categories/webpack.html">webpack (1)</a>
+  </li>
+  <li>
+    <a href="/categories/typescript.html">TypeScript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/almin.html">almin (1)</a>
+  </li>
+  <li>
+    <a href="/categories/npapi.html">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/categories/native-client.html">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/categories/jquery.html">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/categories/gulp.html">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/categories/angular-dot-js.html">angular.js (40)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/ruby.html">Ruby (46)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/rspec.html">rspec (21)</a>
+  </li>
+  <li>
+    <a href="/categories/rails.html">Rails (33)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/c.html">C (5)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/c-plus-plus.html">C++ (10)</a>
+  </li>
+  <li>
+    <a href="/categories/objective-c.html">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/python.html">Python (7)</a>
+  </li>
+  <li>
+    <a href="/categories/sofalseta.html">その他 (12)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/linux.html">Linux (9)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/postfix.html">postfix (2)</a>
+  </li>
+  <li>
+    <a href="/categories/shellscript.html">shellscript (1)</a>
+  </li>
+  <li>
+    <a href="/categories/supervisord.html">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/beanstalk.html">beanstalk (1)</a>
+  </li>
+  <li>
+    <a href="/categories/database.html">Database (1)</a>
+  </li>
+  <ul>
+  <li>
+    <a href="/categories/hbase.html">HBase (3)</a>
+  </li>
+  <li>
+    <a href="/categories/mongodb.html">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/categories/cassandra.html">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/categories/mysql.html">MySQL (2)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/categories/git.html">git (1)</a>
+  </li>
+  <li>
+    <a href="/categories/artifactory.html">artifactory (1)</a>
+  </li>
+  <li>
+    <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/eclipse.html">Eclipse (6)</a>
+  </li>
+  <li>
+    <a href="/categories/html5.html">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/categories/fluentd.html">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/categories/css.html">CSS (6)</a>
+  </li>
+  <li>
+    <a href="/categories/nginx.html">nginx (4)</a>
+  </li>
+</ul>
+
+</ul>
+
+              </section>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+  </body>
+</html>
