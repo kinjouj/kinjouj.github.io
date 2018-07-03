@@ -57,6 +57,79 @@
       <div id="content">
         <div class="entry">
           <div>
+            <h3 class="entry-title"><a href="/2012/08/slim3-modeltojson-inversemodellistref.html">modelToJsonでInverseModelListRefを扱う</a></h3>
+            <p class="meta">
+              2012-08-18T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/java">Java</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <pre><code class="language-java")>package server_director.model;
+
+import java.io.Serializable;
+
+import org.slim3.datastore.Attribute;
+import org.slim3.datastore.InverseModelListRef;
+import org.slim3.datastore.Model;
+
+import server_director.meta.ServerMeta;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.users.User;
+
+@Model
+public class Profile implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Attribute(primaryKey = true)
+    private Key key;
+
+    @Attribute(persistent = true)
+    private User user;
+
+    @Attribute(persistent = false)
+    private InverseModelListRef&lt;Server, Profile&gt; servers = new InverseModelListRef&lt;Server, Profile&gt;(
+        Server.class,
+        ServerMeta.get().profileRef.getName(),
+        this
+    );
+
+    public Key getKey() {
+        return key;
+    }
+
+    public void setKey(Key key) {
+        this.key = key;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public InverseModelListRef&lt;Server, Profile&gt; getServers() {
+        return servers;
+    }
+}
+</code></pre>
+<p>みたいなのがあって、これをmodelToJsonを使ってJSON化するとInverseModelListRefなのはエンコードしたJSONに含まれない(ModelRefの場合はKeyが出るらしい)</p>
+
+<p>でこれをやる方法がちゃんとあるみたいで以下のようにJsonアノテーションを設定する</p>
+
+
+            </div>
+            <div class="excerpt">
+              <a class="box-link" href="/2012/08/slim3-modeltojson-inversemodellistref.html">続きを見る</a>
+            </div>
+          </div>
+        </div>
+        <div class="entry">
+          <div>
             <h3 class="entry-title"><a href="/2012/08/chrome-extension-16.html">Chrome Extension開発を勉強してみる (16) - chrome.extension.connect -</a></h3>
             <p class="meta">
               2012-08-17T00:00:00+00:00
@@ -240,25 +313,6 @@
             </div>
           </div>
         </div>
-        <div class="entry">
-          <div>
-            <h3 class="entry-title"><a href="/2012/07/mysql-innodb-fulltext-index.html">InnoDBで全文検索</a></h3>
-            <p class="meta">
-              2012-07-22T00:00:00+09:00
-              <span class="categories">
-                <a class="category" href="/categories/mysql">MySQL</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>今まではMySQL Fulltext IndexはMyISAMはサポートされているけど、InnoDBではサポートされていなかったと思うのですが、色々調べててMySQL5.6からサポートされるらしいってのを目にしたのでやってみた</p>
-
-
-            </div>
-            <div class="excerpt">
-              <a class="box-link" href="/2012/07/mysql-innodb-fulltext-index.html">続きを見る</a>
-            </div>
-          </div>
-        </div>
         <div class="pagination">
           <a class="pull-left prev box-link" href="/page/54.html">Prev</a>
           <a class="pull-right next box-link" href="/page/56.html">Next</a>
@@ -281,6 +335,9 @@
               <h4>Recent Posts</h4>
               <ul id="recent_posts">
                 <li class="post">
+                  <a href="/2018/07/graphql-1-graphqljs.html">graphql.jsを使ってみた</a>
+                </li>
+                <li class="post">
                   <a href="/2018/06/almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
                 </li>
                 <li class="post">
@@ -300,9 +357,6 @@
                 </li>
                 <li class="post">
                   <a href="/2017/11/serviceworker-appcaching.html">ServiceWorkerを使ったアプリケーションキャッシング</a>
-                </li>
-                <li class="post">
-                  <a href="/2017/10/serviceworker-self-signed-https.html">ServiceWorkerでオレオレ証明を使って検証する場合</a>
                 </li>
               </ul>
             </section>
@@ -390,7 +444,7 @@
 </ul>
 
   <li>
-    <a href="/categories/javascript.html">JavaScript (159)</a>
+    <a href="/categories/javascript.html">JavaScript (161)</a>
   </li>
   <ul>
   <li>
@@ -412,7 +466,7 @@
     <a href="/categories/react-dot-js.html">React.js (7)</a>
   </li>
   <li>
-    <a href="/categories/webpack.html">webpack (1)</a>
+    <a href="/categories/webpack.html">webpack (2)</a>
   </li>
   <li>
     <a href="/categories/typescript.html">TypeScript (1)</a>
@@ -512,6 +566,9 @@
   </li>
   <li>
     <a href="/categories/jenkins.html">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/categories/graphql.html">GraphQL (1)</a>
   </li>
   <li>
     <a href="/categories/eclipse.html">Eclipse (6)</a>
