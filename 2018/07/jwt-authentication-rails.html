@@ -10,16 +10,16 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content=" babel6からなにやら仕様が変わった模様で " />
+    <meta name="description" content=" RailsでのWeb API呼び出しにJWT認証を使ってみる " />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@kinjou__j" />
     <meta name="twitter:creator" content="@kinjou__j" />
     <meta name="twitter:url" content="https://kinjouj.github.io" />
-    <meta name="twitter:title" content="babel6の件">
-    <meta name="twitter:description" content=" babel6からなにやら仕様が変わった模様で 
+    <meta name="twitter:title" content="RailsでJWT認証">
+    <meta name="twitter:description" content=" RailsでのWeb API呼び出しにJWT認証を使ってみる 
 
 ">
-    <title>babel6の件 - kinjouj.github.io</title>
+    <title>RailsでJWT認証 - kinjouj.github.io</title>
     <link rel="canonical" href="https://kinjouj.github.io/" />
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
@@ -63,94 +63,125 @@
           </section>
         </div>
           <div class="entry" style="width: 100%">
-            <h3 class="entry-title">babel6の件</h3>
+            <h3 class="entry-title">RailsでJWT認証</h3>
             <p class="meta">
-              2015-11-01T13:49:50+09:00
+              2018-07-09T00:00:00+09:00
               <span class="categories">
-                <a class="category" href="/categories/javascript">JavaScript</a>
-                <a class="category" href="/categories/react-dot-js">react.js</a>
+                <a class="category" href="/categories/ruby">Ruby</a>
+                <a class="category" href="/categories/rails">Rails</a>
               </span>
             </p>
             <div class="entry-content">
-              <p>babel6からなにやら仕様が変わった模様で</p>
+              <p>RailsでのWeb API呼び出しにJWT認証を使ってみる</p>
 
 
-<pre><code class="language-js")>import React from 'react';
-import ReactDOM from 'react-dom';
 
-class SampleComponent extends React.Component {
-  render() {
-    return (
-      &lt;h1&gt;Sample&lt;/h1&gt;
-    );
+<p>※あくまでJWTを使ってみた的な感じなので本当ならknock等を利用したりだとかdeviseなどと連携出来るのを使うべきなんでしょうけど今回はそういう趣旨じゃないので</p>
+
+<h4>Gemfile</h4>
+
+<p>単純に</p>
+<pre><code class="language-ruby")>gems "jwt"
+</code></pre>
+<p>を追加するだけ</p>
+
+<h4>config/routes.rb</h4>
+<pre><code class="language-ruby")>Rails.application.routes.draw do
+  get "/user", to: "auth#user"
+  post "/auth", to: "auth#auth"
+end
+</code></pre>
+<h4>app/controllers/auth_controller.rb</h4>
+<pre><code class="language-ruby")>require "jwt"
+
+# ApplicationController = ActionController::API
+class AuthController &lt; ApplicationController
+  before_action :authenticate, :except =&gt; [:auth]
+
+  def user
+    render json: @user
+  end
+
+  def auth
+    data = { userid: params[:userid] }
+    render plain: JWT.encode(data, Rails.application.secrets.secret_key_base, "HS256")
+  end
+
+  private
+
+  def authenticate
+    if request.headers["Authorization"].present?
+      token = request.headers['Authorization'].split(' ').last
+      @user = JWT.decode(token, Rails.application.secrets.secret_key_base, true, { algorithm: "HS256" })[0]
+    else
+      render json: { status: "ERROR", message: "Not Authorized" }
+    end
+  end
+
+end
+</code></pre>
+<p>要は/userのAPIをコールするにはAuthorizationヘッダーにJWTトークンを仕込んでリクエストしなければならない。でそのトークン自体は/authから取得する事が出来るので、それをリクエストした結果をAuthorizationヘッダーに指定した上でリクエストする事でAPIをコールする事が出来るようになる感じ。でそのチェックをbefore_actionを使って呼び出してるだけ</p>
+
+<h4>public/index.html</h4>
+
+<p>JavaScript部分だけ抜粋</p>
+<pre><code class="language-javascript")>function getToken(userid) {
+  const token = localStorage["token"];
+
+  if (token) {
+    return new Promise(resolve =&gt; {
+      resolve(token);
+    });
+  } else {
+    return new Promise(resolve =&gt; {
+      fetch("/auth",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ "userid": userid })
+        }
+      ).then(res =&gt; {
+        res.text().then(token =&gt; {
+          localStorage["token"] = token;
+          resolve(token);
+        });
+      });
+    });
   }
 }
 
-ReactDOM.render(&lt;SampleComponent /&gt;, document.querySelector("#container"));
-</code></pre>
-<p>な漢字でES6でかつReact JSXを含むのをES5にトランスパイルする場合はbabelifyを入れれば良いだけだったが以下の方法を使わないと行けない(※あくまでどちらか)</p>
-
-<h4>.babelrcにpresetsを定義</h4>
-<pre><code class="language-js")>{
-  "presets": ["es2015", "react"]
+function getUser(token) {
+  return new Promise(resolve =&gt; {
+    fetch(
+      "/user",
+      {
+        headers: {
+          "Authorization": token
+        }
+      }
+    ).then(res =&gt; {
+      res.json().then(data =&gt; {
+        resolve(data);
+      });
+    });
+  });
 }
+
+getToken("hoge").then(token =&gt; {
+  getUser(token).then(data =&gt; {
+    console.log(data);
+  });
+});
 </code></pre>
-<p>babel-preset-[preset名]の依存性解決が必要になる(詳しくは以下のpackage.json)</p>
+<p>以上。誓いうちにknockだとか他の認証系モジュールとかも使っての検証とかやってみる予定</p>
 
-<h4>package.jsonでbabelifyにpresetオプションを設定</h4>
-<pre><code class="language-js")>{
-  "name": "sample",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "browserify src/app.js -o bundle.js"
-  },
-  "dependencies": {
-    "react": "^0.14.1",
-    "react-dom": "^0.14.1"
-  },
-  "devDependencies": {
-    "babel-preset-es2015": "^6.0.14",
-    "babel-preset-react": "^6.0.14",
-    "babelify": "^7.0.2"
-  },
-  "browserify": {
-    "transform": [
-      [
-        "babelify", { "presets": ["es2015", "react"] }
-      ]
-    ]
-  }
-}
-</code></pre>
-<p>っていうように設定をしないと適切にES6からES5にトランスパイル出来なかったりReact JSXを含んでもトランスパイルに失敗する模様</p>
-
-<h4>余談</h4>
-
-<p>ハマった時のTwitterのツイート</p>
-
-<blockquote class="twitter-tweet" data-cards="hidden" lang="ja"><p lang="ja" dir="ltr">babelifyいろいろ変わってるみたい &gt; choking on jsx syntax · Issue #126 · babel/babelify <a href="https://t.co/ag3vzTCgIN">https://t.co/ag3vzTCgIN</a></p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/660487284030988288">2015, 10月 31</a></blockquote>
-
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">babelifyならreactのJSXも処理してくれてたけど今はそういうのもプラグイン化みたいなのされてる模様</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/660487674399092736">2015, 10月 31</a></blockquote>
-
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">だから単純にbabelifyを入れてbrowserifyで-tでtransformerを指定してもビルド出来ない</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/660487805244575744">2015, 10月 31</a></blockquote>
-
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">つい最近の話なんだろか &gt; 6.0.0 Released · Babel <a href="https://t.co/Asi0C0JQ8S">https://t.co/Asi0C0JQ8S</a></p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/660488154483261440">2015, 10月 31</a></blockquote>
-
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">あくまでBabelのバージョンが6.0.xな話であってbabelifyのバージョンが6.0.0の事ではない模様</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/660488350768304128">2015, 10月 31</a></blockquote>
-
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>参考: <a href="https://www.pluralsight.com/guides/token-based-authentication-with-ruby-on-rails-5-api">https://www.pluralsight.com/guides/token-based-authentication-with-ruby-on-rails-5-api</a></p>
 
             </div>
             <p class="meta">
-              <a class="pull-right box-link" href="/2015/10/robolectric3-drawerlayout-testing.html">Robolectric3でDrawerLayoutをテスト</a>
+              <a class="pull-right box-link" href="/2018/07/graphql-1-graphqljs.html">graphql.jsを使ってみた</a>
             </p>
             <div style="clear: both"></div>
         </div>
