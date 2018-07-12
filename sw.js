@@ -80,6 +80,10 @@ self.__precacheManifest = [
   {
     "url": "js/prism.js",
     "revision": "531a01b20a2127c6cc4b3d8521e0290e"
+  },
+  {
+    "url": "js/start-sw.js",
+    "revision": "b360065886eb65f3c2234378c25701ff"
   }
 ].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
