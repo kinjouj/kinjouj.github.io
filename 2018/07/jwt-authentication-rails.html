@@ -190,61 +190,6 @@ getToken("hoge").then(token =&gt; {
 
 <p>参考: <a href="https://www.pluralsight.com/guides/token-based-authentication-with-ruby-on-rails-5-api">https://www.pluralsight.com/guides/token-based-authentication-with-ruby-on-rails-5-api</a></p>
 
-<h4>追記</h4>
-
-<p>トークンを取得する辺りとかはPromise.raceを使うのがいいのではないかと(多分)</p>
-<pre><code class="language-js")>function getToken(userid) {
-  const localStorageTokenPromise = new Promise(resolve =&gt; {
-    const token = localStorage["token"];
-
-    if (token) {
-      resolve(token);
-    }
-  });
-
-  const fetchTokenPromise = new Promise(resolve =&gt; {
-    fetch("/auth",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ "userid": userid })
-      }
-    ).then(res =&gt; {
-      res.text().then(token =&gt; {
-        localStorage["token"] = token;
-        resolve(token);
-      });
-    });
-  });
-
-  return Promise.race([ localStorageTokenPromise, fetchTokenPromise ]);
-}
-
-function getUser(token) {
-  return new Promise(resolve =&gt; {
-    fetch(
-      "/user",
-      {
-        headers: {
-          "Authorization": token
-        }
-      }
-    ).then(res =&gt; {
-      res.json().then(data =&gt; {
-        resolve(data);
-      });
-    });
-  });
-}
-
-getToken("hoge").then(token =&gt; {
-  getUser(token).then(data =&gt; {
-    console.log(data);
-  });
-});
-</code></pre>
           </div>
           <p class="meta">
             <a class="pull-right box-link" href="/2018/07/graphql-1-graphqljs.html">graphql.jsを使ってみた</a>
