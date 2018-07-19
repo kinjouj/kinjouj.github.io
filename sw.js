@@ -83,11 +83,12 @@ self.__precacheManifest = [
   },
   {
     "url": "js/start-sw.js",
-    "revision": "b360065886eb65f3c2234378c25701ff"
+    "revision": "fe6e2def0e5fc0a3394073e90513c4f6"
   }
 ].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerRoute(/\/\d+\/.*\.html/, workbox.strategies.cacheFirst(), 'GET');
+workbox.routing.registerRoute(/\/page/, workbox.strategies.networkOnly(), 'GET');
+workbox.routing.registerRoute(/\/\d+\/.*\.html$/, workbox.strategies.cacheFirst(), 'GET');
 workbox.routing.registerRoute(/\/image/, workbox.strategies.cacheFirst(), 'GET');
