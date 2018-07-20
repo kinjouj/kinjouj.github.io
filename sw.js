@@ -63,7 +63,7 @@ self.__precacheManifest = [
   },
   {
     "url": "css/style.css",
-    "revision": "52f0323dc76daaefbb36624fd82288eb"
+    "revision": "746f9bc3e6baebd7fb679ccd990504c4"
   },
   {
     "url": "js/bootstrap.js",
