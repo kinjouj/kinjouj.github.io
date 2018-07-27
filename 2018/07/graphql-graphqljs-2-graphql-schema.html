@@ -10,16 +10,16 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content=" マスターがあってスレーブがいくつかある、でマスターが落ちてもどっかのスレーブがマスターに昇格して運用を継続できるようにする的な事をやりたいのであれば、レプリカセットな機能を使えば良い模様 " />
+    <meta name="description" content=" graphql.jsでスキーマを外部定義して利用する方法をメモる " />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@kinjou__j" />
     <meta name="twitter:creator" content="@kinjou__j" />
     <meta name="twitter:url" content="https://kinjouj.github.io" />
-    <meta name="twitter:title" content="mongodbを使ってみる (11) - replica set -">
-    <meta name="twitter:description" content=" マスターがあってスレーブがいくつかある、でマスターが落ちてもどっかのスレーブがマスターに昇格して運用を継続できるようにする的な事をやりたいのであれば、レプリカセットな機能を使えば良い模様 
+    <meta name="twitter:title" content="GraphQLスキーマを定義して利用する方法">
+    <meta name="twitter:description" content=" graphql.jsでスキーマを外部定義して利用する方法をメモる 
 
 ">
-    <title>mongodbを使ってみる (11) - replica set - - kinjouj.github.io</title>
+    <title>GraphQLスキーマを定義して利用する方法 - kinjouj.github.io</title>
     <link rel="canonical" href="https://kinjouj.github.io/" />
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
@@ -66,11 +66,12 @@
       </header>
       <div id="content">
         <div class="entry" style="width: 100%">
-          <h3 class="entry-title">mongodbを使ってみる (11) - replica set -</h3>
+          <h3 class="entry-title">GraphQLスキーマを定義して利用する方法</h3>
           <p class="meta">
-            2013-01-24T00:00:00+00:00
+            2018-07-12T00:00:00+09:00
             <span class="categories">
-              <a class="category" href="/categories/mongodb">MongoDB</a>
+              <a class="category" href="/categories/javascript">JavaScript</a>
+              <a class="category" href="/categories/graphql">GraphQL</a>
             </span>
           </p>
           <div class="ad">
@@ -81,88 +82,61 @@
             </section>
           </div>
           <div class="entry-content">
-            <p>マスターがあってスレーブがいくつかある、でマスターが落ちてもどっかのスレーブがマスターに昇格して運用を継続できるようにする的な事をやりたいのであれば、レプリカセットな機能を使えば良い模様</p>
+            <p>graphql.jsでスキーマを外部定義して利用する方法をメモる</p>
 
 
 
-<h4>サーバーを起動</h4>
+<h4>graphql.schema</h4>
+<pre><code>schema {
+  query: PostSchema
+}
 
-<p>とりあえずマスター・スレーブとなる3つのMongoDBを起動</p>
-<pre><code>mongod --dbpath /tmp/mongo1 --logpath /tmp/mongo1/mongodb.log --port 10001 --replSet repltest --rest
+type Post {
+  title: String
+  permalink: String
+}
 
-mongod --dbpath /tmp/mongo2 --logpath /tmp/mongo2/mongodb.log --port 10002 --replSet repltest --rest
-
-mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --replSet repltest --rest
+type PostSchema {
+  posts: [Post]
+}
 </code></pre>
-<p>でrepltestっていう名前でレプリカセット名を指定している感じなのかな、んまぁそういう感じで</p>
+<h4>script.js</h4>
+<pre><code class="language-javascript")>import { buildSchema, graphql } from "graphql";
+import fs from "fs";
 
-<p>でレプリカセットな設定を行う</p>
-<pre><code class="language-js")>rs.initiate({
-  _id: "repltest",
-  members: [
-    { _id: 1, host: "localhost:10001" },
-    { _id: 2, host: "localhost:10002" },
-    { _id: 3, host: "localhost:10003" }
-  ]
-})
+const postsList = [
+  { title: "A" },
+  { title: "B" },
+  { title: "C" }
+];
+
+const root = {
+  posts: () =&gt; { return postsList; }
+};
+
+const schemaData = fs.readFileSync("graphql.schema").toString();
+const schema = buildSchema(schemaData);
+
+graphql(schema, "{ posts {title} }", root).then(res =&gt; {
+  for (var data of res.data.posts) {
+    console.log(data);
+  }
+});
 </code></pre>
-<p>な感じで設定を行う。で <a href="http://localhost:11001/_replSet">http://localhost:11001/_replSet</a> でレプリカセットの状態が見れるのでアクセスすると</p>
+<p>終わり</p>
 
-<p><img src="/images/2013/01/20130123213000.jpg" /></p>
+<h4>余談: graphql.jsのAPIで定義したスキーマを出力させる方法</h4>
 
-<p>っていう感じっすね。PRIMARYとSECONDARYの2つに分かれてる。でマスターを落とすと</p>
+<p>printSchemaがあるのでそれを使う</p>
+<pre><code class="language-javascript")>import { printSchema } from "graphql/utilities";
+const schema = new GraphQLSchema({ query: Query });
 
-<p><img src="/images/2013/01/20130123213117.jpg" /></p>
-
-<p>てな感じで10001がDOWNになって10003がSECONDARYからPRIMARYになってる(10001は落ちてるので上のWebコンソールは別のサーバーのやつでアクセスする)。でこの状態で現在は10003がPRIMARYなのでこれも落としてみると</p>
-
-<p><img src="/images/2013/01/20130123213344.jpg" /></p>
-
-<p>でそこら辺を柔軟に管理してPRIMARY/SECONDARYを監査してくれる?のがArbiterな模様なので、もう1個MongoDBを起動する</p>
-<pre><code>mongod --replSet repltest --dbpath /tmp/mongo4 --logpath /tmp/mongo4/mongdb.log --port 10004 --rest
+console.log(printSchema(schema));
 </code></pre>
-<p>この状態でもう一度上記の3つのサーバー起動しておく。でWebコンソールからPRIMARYに入って</p>
-<pre><code class="language-js")>db.addArb("localhost:10004")
-</code></pre>
-<p>でArbiterサーバーを設定しておく。で再度Webコンソールを見ると</p>
-
-<p><img src="/images/2013/01/20130123213948.jpg" /></p>
-
-<p>な感じARBITERな項目が増える。でちょっと停止させておいて、既に3つのサーバーをレプリカセットとして認識させているけど、10003だけ起動せずに停止したままにしてみると</p>
-
-<p><img src="/images/2013/01/20130123215449.jpg" /></p>
-
-<p>という風に10003が起動してないのでPRIMARYが決まってない。こういう状況になった場合にArbiterがPRIMARYを監査してくれる模様という事で停止しておいたArbiterを起動すると</p>
-
-<p><img src="/images/2013/01/20130123221002.jpg" /></p>
-
-<p>っていう感じ。まぁPRIMARYかSECONDARYか判断されてないようなケースだとArbiterにそれを委譲するっていう感じなんすかね。はっきりとした理論は無いんですけど</p>
-
-<p>んまぁレプリカセットな概要的なのはこんな感じかと</p>
-
-<p>で問題はデータとかどうなんの的な話になると思うんですが、PRIMARYが停止してSECONDARYがPRIMARYに昇格する際にPRIMARYが持ってたデータをsyncする模様。元々SECONDARYの状態で既に持ってるけどSECONDARYだからfind出来ないsave出来ない状態なので確認できないんですが、んまぁロックされててPRIMARYに昇格したらロック解除されて参照できるようになるっていう感じかなーっと</p>
-
-<p>でクライアントとかだとレプリカセットに指定されているサーバーを指定すれば良い模様。PRIMARYになってる所にデータが行くっていう感じかと。Perlだと</p>
-<pre><code class="language-pl")>use MongoDB;
-
-my $c = MongoDB::MongoClient-&gt;new(
-    host =&gt; "mongodb://localhost:10001,localhost:10002,localhost:10003"
-);
-my $db = $c-&gt;get_database("sample");
-my $coll = $db-&gt;get_collection("samples");
-
-$coll-&gt;save(+{ time =&gt; time() });
-</code></pre>
-<p>っていう感じでhostでレプリカセットで指定されているサーバーを指定する</p>
-
-<p>まぁドキュメント見た方が理論的でいいかと</p>
-
-<p>ちなみにArbiter運用でレプリカセットを運用する場合に最低でも必要なサーバー数は「N &gt; 2」な感じじゃないかと。最低でも2桁なサーバー数無いと辛そうな気がします</p>
-
           </div>
           <p class="meta">
-            <a class="pull-left box-link" href="/2013/01/npapi-1.html">NPAPIをざっくりやってみる (1)</a>
-            <a class="pull-right box-link" href="/2013/01/mongodb-10-replication.html">mongodbを使ってみる (10) - replication -</a>
+            <a class="pull-left box-link" href="/2018/07/graphql-graphqljs-3-mutation.html">GraphQL.jsでMutation</a>
+            <a class="pull-right box-link" href="/2018/07/jwt-authentication-rails.html">RailsでJWT認証</a>
           </p>
           <div style="clear: both"></div>
         </div>
