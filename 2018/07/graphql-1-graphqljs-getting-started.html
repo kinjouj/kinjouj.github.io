@@ -10,16 +10,20 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content=" タイトルどおりでSpring WebMVCでJSPを使わずにthymeleafを使ってやるってだけ。まぁドキュメント(但しSpring3)を見れば良いだけなので、ざっくり行きます " />
+    <meta name="description" content=" graphql.jsを使ってみた 
+
+ ※あくまでgraphql.jsのAPIを使ってやってみただけなので、GraphQLそのものについてはドキュメントを読みましょう " />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@kinjou__j" />
     <meta name="twitter:creator" content="@kinjou__j" />
     <meta name="twitter:url" content="https://kinjouj.github.io" />
-    <meta name="twitter:title" content="thymeleaf+spring mvc">
-    <meta name="twitter:description" content=" タイトルどおりでSpring WebMVCでJSPを使わずにthymeleafを使ってやるってだけ。まぁドキュメント(但しSpring3)を見れば良いだけなので、ざっくり行きます 
+    <meta name="twitter:title" content="graphql.jsを使ってみた">
+    <meta name="twitter:description" content=" graphql.jsを使ってみた 
+
+ ※あくまでgraphql.jsのAPIを使ってやってみただけなので、GraphQLそのものについてはドキュメントを読みましょう 
 
 ">
-    <title>thymeleaf+spring mvc - kinjouj.github.io</title>
+    <title>graphql.jsを使ってみた - kinjouj.github.io</title>
     <link rel="canonical" href="https://kinjouj.github.io/" />
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
@@ -66,12 +70,12 @@
       </header>
       <div id="content">
         <div class="entry" style="width: 100%">
-          <h3 class="entry-title">thymeleaf+spring mvc</h3>
+          <h3 class="entry-title">graphql.jsを使ってみた</h3>
           <p class="meta">
-            2014-01-02T00:00:00+00:00
+            2018-07-03T00:00:00+09:00
             <span class="categories">
-              <a class="category" href="/categories/java">Java</a>
-              <a class="category" href="/categories/spring-framework">Spring Framework</a>
+              <a class="category" href="/categories/javascript">JavaScript</a>
+              <a class="category" href="/categories/graphql">GraphQL</a>
             </span>
           </p>
           <div class="ad">
@@ -82,89 +86,139 @@
             </section>
           </div>
           <div class="entry-content">
-            <p>タイトルどおりでSpring WebMVCでJSPを使わずにthymeleafを使ってやるってだけ。まぁ<a href="http://www.thymeleaf.org/doc/html/Thymeleaf-Spring3.html">ドキュメント(但しSpring3)</a>を見れば良いだけなので、ざっくり行きます</p>
+            <p>graphql.jsを使ってみた</p>
+
+<p>※あくまでgraphql.jsのAPIを使ってやってみただけなので、GraphQLそのものについてはドキュメントを読みましょう</p>
 
 
 
-<p>まぁようはspring-web-servlet.xml(applicationContext.xml)とかを修正すれば良いとの事らしいので</p>
-<pre><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:p="http://www.springframework.org/schema/p"
-    xsi:schemaLocation="
-        http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-        http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context-4.0.xsd
-        http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd"&gt;
+<h4>要件</h4>
 
-    &lt;context:component-scan base-package="sample" /&gt;
-    &lt;mvc:annotation-driven /&gt;
-
-    &lt;bean
-        id="messageSource"
-        class="org.springframework.context.support.ResourceBundleMessageSource"
-        p:basename="applicationMessages" /&gt;
-
-    &lt;bean
-        id="templateResolver"
-        class="org.thymeleaf.templateresolver.ServletContextTemplateResolver"&gt;
-
-        &lt;property name="prefix" value="/WEB-INF/views/" /&gt;
-        &lt;property name="suffix" value=".html" /&gt;
-        &lt;property name="templateMode" value="HTML5" /&gt;
-        &lt;property name="characterEncoding" value="UTF-8" /&gt;
-
-    &lt;/bean&gt;
-
-    &lt;bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver"&gt;
-        &lt;property name="templateEngine"&gt;
-            &lt;bean class="org.thymeleaf.spring4.SpringTemplateEngine"&gt;
-                &lt;property name="templateResolver" ref="templateResolver" /&gt;
-            &lt;/bean&gt;
-        &lt;/property&gt;
-        &lt;property name="order" value="1" /&gt;
-        &lt;property name="characterEncoding" value="UTF-8" /&gt;
-    &lt;/bean&gt;
-&lt;/beans&gt;
+<p>当ブログのSPA化するにあたって出力しているJSONデータをデモとしてそれをGraphQLで操作出来るようにするだけ。JSONは以下のような感じになっている</p>
+<pre><code>[
+  {
+    "title": "react-routing-resolver",
+    "date": "2018-06-22T09:00:00+09:00",
+    "permalink": "/2018/06/almin-and-react-routing-resolver.html",
+    "categories": [
+      {
+        "name": "JavaScript",
+        "path": "javascript"
+      }
+    ]
+  }
+]
 </code></pre>
-<p>はい、終わり。あとは</p>
-<pre><code class="language-java")>package sample;
+<p>※データをちょっといじってます。あとこれは別サーバー上に置いてあるので(ry</p>
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
+<p>っていうようなJSONデータがあるのでそれをgraphql.jsを使って操作するような事をしてみる</p>
 
-@Controller
-@RequestMapping("/sample")
-public class SampleController {
+<h4>server.js</h4>
+<pre><code class="language-javascript")>import {
+  graphql,
+  GraphQLScalarType,
+  GraphQLObjectType,
+  GraphQLNonNull,
+  GraphQLString,
+  GraphQLList,
+  GraphQLInt,
+  GraphQLSchema
+} from "graphql";
+import axios from "axios";
+import express from "express";
+const app = express();
 
-    @RequestMapping
-    public void index(ModelMap model) {
-        model.addAttribute("message", "hoge fuga foobar");
+axios.defaults.baseURL = "http://localhost:8000";
+
+const GraphQLDate = new GraphQLScalarType({
+  name: "Date",
+  serialize(value) {
+    return new Date(value);
+  }
+});
+
+const Category = new GraphQLObjectType({
+  name: "Category",
+  fields: () =&gt; ({
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    path: { type: GraphQLString }
+  })
+});
+
+const Post = new GraphQLObjectType({
+  name: "Post",
+  fields: () =&gt; ({
+    title: { type: GraphQLString },
+    permalink: { type: GraphQLString },
+    date: { type: GraphQLDate },
+    categories: {
+      type: new GraphQLList(Category)
     }
+  })
+});
+
+
+const Query = new GraphQLObjectType({
+  name: "PostSchema",
+  fields: () =&gt; ({
+    posts: {
+      type: new GraphQLList(Post),
+      args: {
+        page: { type: GraphQLInt }
+      },
+      resolve: async (_, { page = 1 }) =&gt;  {
+        const res = await axios.get(`/page${page}.json`);
+        return res.data;
+      }
+    }
+  })
+});
+
+const Schema = new GraphQLSchema({
+  query: Query
+});
+
+app.get("/graphql", (req, res) =&gt; {
+  const query = req.query.query;
+  graphql(Schema, query).then(result =&gt; {
+    if (result.errors) {
+      res.send(result.errors);
+      return;
+    }
+    res.send(result.data);
+  });
+});
+app.listen(3000);
+</code></pre>
+<h4>結果</h4>
+
+<p><a href="http://localhost:3000/graphql?query=%7Bposts%7Btitle%7D%7D">http://localhost:3000/graphql?query={posts{title}}</a> みたいにリクエストしてみると</p>
+
+<p><img src="/images/2018/07/20180703-1.jpg" alt=""></p>
+
+<p>という風になる。んで上記のコードではそうなってないけど</p>
+<pre><code class="language-javascript")>args: {
+  page: { type: GraphQLNonNull(GraphQLInt) }
 }
 </code></pre>
-<p>みたいなコントローラー作って、/WEB-INF/views/sample.html (この場合 <a href="http://localhost:8080/context_name/sample.action">http://localhost:8080/context_name/sample.action</a> でアクセスするのでsample.htmlになる)</p>
-<pre><code class="language-html")>&lt;!DOCTYPE html&gt;
-&lt;html xmlns:th="http://www.thymeleaf.org"&gt;
-&lt;body&gt;
-    &lt;span th:text="${message}"&gt;&lt;/span&gt;
-    &lt;span th:text="#{message}"&gt;&lt;/span&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-<p>まぁコントローラーから値ぶっこんだコンテキスト内データとメッセージバンドルなデータを出力しているだけ。で上記でorg.springframework.context.support.ResourceBundleMessageSourceを設定しているのでそこから#{}記法なメッセージバンドルなデータ取得はそこから参照する事になる模様で</p>
+<p>っていう風に修正をして上記のURLでアクセスした場合</p>
 
-<p>とりまぁこんなもんで、Spring WebMVCでJSP使わずにthymeleafを利用する事も出来るって事で</p>
+<p><img src="/images/2018/07/20180703-2.jpg" alt=""></p>
+
+<p>というようにエラーになる。なので <a href="http://localhost:3000/graphql?query=%7Bposts(page:1)%7Btitle%7D%7D">http://localhost:3000/graphql?query={posts(page:1){title}}</a> というような形にすることでちゃんとレスポンスが返ってくるようになる</p>
+
+<p>でまぁもうちょっと深く出してみようってことで</p>
+
+<p><img src="/images/2018/07/20180703-3.jpg" alt=""></p>
+
+<p>というようなレスポンスになる</p>
+
+<p>まぁ今回は単純にgraphql.jsを使ってみようっていうネタだったので、普通であればexpress-graphql?とか使えばいいんでしょうね(使ってみるっていう前提であれば)。まだ勉強中の為これくらいで。今後はスキーマ周りだとかMutationわかったら書く(はず)</p>
 
           </div>
           <p class="meta">
-            <a class="pull-left box-link" href="/2014/01/spring-webmvc-17-formatter.html">Spring WebMVCをやってみる (17) - Formatter -</a>
-            <a class="pull-right box-link" href="/2013/12/thymeleaf.html">thymeleaf</a>
+            <a class="pull-left box-link" href="/2018/07/jwt-authentication-rails.html">RailsでJWT認証</a>
+            <a class="pull-right box-link" href="/2018/06/almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
           </p>
           <div style="clear: both"></div>
         </div>

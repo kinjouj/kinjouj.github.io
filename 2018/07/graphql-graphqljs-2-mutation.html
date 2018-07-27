@@ -10,20 +10,16 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content=" graphql.jsを使ってみた 
-
- ※あくまでgraphql.jsのAPIを使ってやってみただけなので、GraphQLそのものについてはドキュメントを読みましょう " />
+    <meta name="description" content=" graphql.jsを使ってMutationをやってみる " />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@kinjou__j" />
     <meta name="twitter:creator" content="@kinjou__j" />
     <meta name="twitter:url" content="https://kinjouj.github.io" />
-    <meta name="twitter:title" content="graphql.jsを使ってみた">
-    <meta name="twitter:description" content=" graphql.jsを使ってみた 
-
- ※あくまでgraphql.jsのAPIを使ってやってみただけなので、GraphQLそのものについてはドキュメントを読みましょう 
+    <meta name="twitter:title" content="GraphQL.jsでMutation">
+    <meta name="twitter:description" content=" graphql.jsを使ってMutationをやってみる 
 
 ">
-    <title>graphql.jsを使ってみた - kinjouj.github.io</title>
+    <title>GraphQL.jsでMutation - kinjouj.github.io</title>
     <link rel="canonical" href="https://kinjouj.github.io/" />
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
@@ -70,9 +66,9 @@
       </header>
       <div id="content">
         <div class="entry" style="width: 100%">
-          <h3 class="entry-title">graphql.jsを使ってみた</h3>
+          <h3 class="entry-title">GraphQL.jsでMutation</h3>
           <p class="meta">
-            2018-07-03T00:00:00+09:00
+            2018-07-27T00:00:00+09:00
             <span class="categories">
               <a class="category" href="/categories/javascript">JavaScript</a>
               <a class="category" href="/categories/graphql">GraphQL</a>
@@ -86,74 +82,90 @@
             </section>
           </div>
           <div class="entry-content">
-            <p>graphql.jsを使ってみた</p>
-
-<p>※あくまでgraphql.jsのAPIを使ってやってみただけなので、GraphQLそのものについてはドキュメントを読みましょう</p>
+            <p>graphql.jsを使ってMutationをやってみる</p>
 
 
 
-<h4>要件</h4>
+<h4>そもそもMutationってなんぞ？</h4>
 
-<p>当ブログのSPA化するにあたって出力しているJSONデータをデモとしてそれをGraphQLで操作出来るようにするだけ。JSONは以下のような感じになっている</p>
-<pre><code>[
-  {
-    "title": "react-routing-resolver",
-    "date": "2018-06-22T09:00:00+09:00",
-    "permalink": "/2018/06/almin-and-react-routing-resolver.html",
-    "categories": [
-      {
-        "name": "JavaScript",
-        "path": "javascript"
-      }
-    ]
-  }
-]
+<p>雑にいうとGraphQL上での更新系を扱うクエリーみたいなものっぽい</p>
+
+<h4>graphql.schema</h4>
+<pre><code>schema {
+  query: PostSchema
+  mutation: PostMutations
+}
+
+type Post {
+  title: String
+  permalink: String
+}
+
+type PostMutations {
+  createPost(title: String): Post
+}
+
+type PostSchema {
+  posts: [Post]
+}
 </code></pre>
-<p>※データをちょっといじってます。あとこれは別サーバー上に置いてあるので(ry</p>
+<p>このスキーマ定義を読み取ってGraphQLSchemaを生成するのに使う</p>
 
-<p>っていうようなJSONデータがあるのでそれをgraphql.jsを使って操作するような事をしてみる</p>
+<h4>script.js</h4>
+<pre><code class="language-javascript")>import { buildSchema, graphql } from "graphql";
+import fs from "fs";
 
-<h4>server.js</h4>
+const postsList = [
+  { title: "A" },
+  { title: "B" },
+  { title: "C" }
+];
+
+const query = {
+  posts: () =&gt; { return postsList; }
+};
+
+const mutation = {
+  createPost: (args) =&gt; {
+    const data = { title: args.title };
+    postsList.push(data);
+    return data;
+  }
+};
+
+const schemaData = fs.readFileSync("graphql.schema").toString();
+const schema = buildSchema(schemaData);
+const root = { ...query, ...mutation };
+
+graphql(schema, 'mutation { createPost(title: "hoge") { title }}', root).then(res =&gt; {
+  console.log(res.data);
+});
+
+graphql(schema, "{ posts { title }}", root).then(res =&gt; {
+  for (var data of res.data.posts) {
+    console.log(data);
+  }
+});
+</code></pre>
+<p>でスキーマ定義からcreatePostとなる実体の処理はrootValue(graphqlの第3引数?)に入れればいいらしい。あとはgraphqlを使って<h4>mutation { createPost(省略) }</h4>で呼び出せばいい</p>
+
+<p>めんどくさいのでとりあえずやれば分かるんじゃね</p>
+
+<h4>備考: スキーマ定義を使わずにgraphql.jsだけでやる方法</h4>
 <pre><code class="language-javascript")>import {
-  graphql,
-  GraphQLScalarType,
   GraphQLObjectType,
-  GraphQLNonNull,
   GraphQLString,
   GraphQLList,
   GraphQLInt,
-  GraphQLSchema
+  GraphQLSchema,
+  graphql
 } from "graphql";
-import axios from "axios";
-import express from "express";
-const app = express();
-
-axios.defaults.baseURL = "http://localhost:8000";
-
-const GraphQLDate = new GraphQLScalarType({
-  name: "Date",
-  serialize(value) {
-    return new Date(value);
-  }
-});
-
-const Category = new GraphQLObjectType({
-  name: "Category",
-  fields: () =&gt; ({
-    name: { type: new GraphQLNonNull(GraphQLString) },
-    path: { type: GraphQLString }
-  })
-});
 
 const Post = new GraphQLObjectType({
   name: "Post",
   fields: () =&gt; ({
     title: { type: GraphQLString },
-    permalink: { type: GraphQLString },
-    date: { type: GraphQLDate },
-    categories: {
-      type: new GraphQLList(Category)
-    }
+    permalink: { type: GraphQLString }
   })
 });
 
@@ -161,64 +173,57 @@ const Post = new GraphQLObjectType({
 const Query = new GraphQLObjectType({
   name: "PostSchema",
   fields: () =&gt; ({
-    posts: {
-      type: new GraphQLList(Post),
+    posts: { type: new GraphQLList(Post) }
+  })
+});
+
+const postsList = [
+  { title: "A" },
+  { title: "B" },
+  { title: "C" }
+];
+
+const root = {
+  posts: () =&gt; { return postsList; }
+};
+
+const Mutation = new GraphQLObjectType({
+  name: "PostMutations",
+  fields: () =&gt; ({
+    createPost: {
+      type: Post,
       args: {
-        page: { type: GraphQLInt }
+        title: { type: GraphQLString }
       },
-      resolve: async (_, { page = 1 }) =&gt;  {
-        const res = await axios.get(`/page${page}.json`);
-        return res.data;
+      resolve: (_, args) =&gt; {
+        const data = { title: args.title };
+        postsList.push(data);
+        return data;
       }
     }
   })
 });
 
-const Schema = new GraphQLSchema({
-  query: Query
+const schema = new GraphQLSchema({
+  query: Query,
+  mutation: Mutation
 });
 
-app.get("/graphql", (req, res) =&gt; {
-  const query = req.query.query;
-  graphql(Schema, query).then(result =&gt; {
-    if (result.errors) {
-      res.send(result.errors);
-      return;
-    }
-    res.send(result.data);
-  });
+graphql(schema, 'mutation { createPost(title: "hoge") { title }}', root).then(res =&gt; {
+  console.log(res);
 });
-app.listen(3000);
+
+graphql(schema, "{ posts {title} }", root).then(res =&gt; {
+  for (var data of res.data.posts) {
+    console.log(data);
+  }
+});
 </code></pre>
-<h4>結果</h4>
-
-<p><a href="http://localhost:3000/graphql?query=%7Bposts%7Btitle%7D%7D">http://localhost:3000/graphql?query={posts{title}}</a> みたいにリクエストしてみると</p>
-
-<p><img src="/images/2018/07/20180703-1.jpg" alt=""></p>
-
-<p>という風になる。んで上記のコードではそうなってないけど</p>
-<pre><code class="language-javascript")>args: {
-  page: { type: GraphQLNonNull(GraphQLInt) }
-}
-</code></pre>
-<p>っていう風に修正をして上記のURLでアクセスした場合</p>
-
-<p><img src="/images/2018/07/20180703-2.jpg" alt=""></p>
-
-<p>というようにエラーになる。なので <a href="http://localhost:3000/graphql?query=%7Bposts(page:1)%7Btitle%7D%7D">http://localhost:3000/graphql?query={posts(page:1){title}}</a> というような形にすることでちゃんとレスポンスが返ってくるようになる</p>
-
-<p>でまぁもうちょっと深く出してみようってことで</p>
-
-<p><img src="/images/2018/07/20180703-3.jpg" alt=""></p>
-
-<p>というようなレスポンスになる</p>
-
-<p>まぁ今回は単純にgraphql.jsを使ってみようっていうネタだったので、普通であればexpress-graphql?とか使えばいいんでしょうね(使ってみるっていう前提であれば)。まだ勉強中の為これくらいで。今後はスキーマ周りだとかMutationわかったら書く(はず)</p>
+<p>終わり</p>
 
           </div>
           <p class="meta">
-            <a class="pull-left box-link" href="/2018/07/jwt-authentication-rails.html">RailsでJWT認証</a>
-            <a class="pull-right box-link" href="/2018/06/almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
+            <a class="pull-right box-link" href="/2018/07/jwt-authentication-rails.html">RailsでJWT認証</a>
           </p>
           <div style="clear: both"></div>
         </div>
@@ -238,10 +243,13 @@ app.listen(3000);
                 <h4>Recent Posts</h4>
                 <ul id="recent_posts">
                   <li class="post">
+                    <a href="/2018/07/graphql-graphqljs-2-mutation.html">GraphQL.jsでMutation</a>
+                  </li>
+                  <li class="post">
                     <a href="/2018/07/jwt-authentication-rails.html">RailsでJWT認証</a>
                   </li>
                   <li class="post">
-                    <a href="/2018/07/graphql-1-graphqljs.html">graphql.jsを使ってみた</a>
+                    <a href="/2018/07/graphql-1-graphqljs-getting-started.html">graphql.jsを使ってみた</a>
                   </li>
                   <li class="post">
                     <a href="/2018/06/almin-and-react-routing-resolver.html">almin+react-routing-resolver</a>
@@ -257,9 +265,6 @@ app.listen(3000);
                   </li>
                   <li class="post">
                     <a href="/2017/11/es7-decorators.html">ES7 Decoratorsを試す</a>
-                  </li>
-                  <li class="post">
-                    <a href="/2017/11/webpack-inject-variable.html">webpackで変数を注入</a>
                   </li>
                 </ul>
               </section>
@@ -347,7 +352,7 @@ app.listen(3000);
 </ul>
 
   <li>
-    <a href="/categories/javascript.html">JavaScript (161)</a>
+    <a href="/categories/javascript.html">JavaScript (162)</a>
   </li>
   <ul>
   <li>
@@ -488,7 +493,7 @@ app.listen(3000);
     <a href="/categories/jwt.html">JWT (1)</a>
   </li>
   <li>
-    <a href="/categories/graphql.html">GraphQL (1)</a>
+    <a href="/categories/graphql.html">GraphQL (2)</a>
   </li>
 </ul>
 
