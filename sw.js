@@ -55,7 +55,7 @@ self.__precacheManifest = [
   },
   {
     "url": "css/prism.css",
-    "revision": "614117be6738df705daaac1bb2243b92"
+    "revision": "60692f2463d51dfeda8d01b7e25451b1"
   },
   {
     "url": "css/rve-styles.css",
@@ -79,7 +79,7 @@ self.__precacheManifest = [
   },
   {
     "url": "js/prism.js",
-    "revision": "a1c21cc8d516626d4b9ac1d64b95a8eb"
+    "revision": "1a5b5b4ef7587a824b935525b09355fe"
   },
   {
     "url": "js/start-sw.js",
