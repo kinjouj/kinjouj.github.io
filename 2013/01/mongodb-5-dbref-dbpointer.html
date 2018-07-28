@@ -86,16 +86,16 @@
 
 
 <p>例えばドキュメントから別のドキュメントのデータを参照したい場合にどうするかって話なんですが、DBRefを使えば一応そういった事も出来る模様。言うよりやれ論でとりあえずやってみる</p>
-<pre><code class="language-js")>db.samples.tags.save({ name: "テスト" })
+<pre class="line-numbers"><code class="language-js")>db.samples.tags.save({ name: "テスト" })
 </code></pre>
 <p>っていうのをやると_idが自動で付く。でその値は<span style="color: red">50f5370e85ac77daf3dd4bfb</span>っていう感じになってるとする。でそれを別のデータから参照したい場合には</p>
-<pre><code class="language-js")>db.samples.entry.save({
+<pre class="line-numbers"><code class="language-js")>db.samples.entry.save({
   name: "Test",
   tag: new DBRef("samples.tags", ObjectId("50f5370e85ac77daf3dd4bfb"))
 })
 </code></pre>
 <p>という感じでsaveする。んじゃとりあえずfindしてみると</p>
-<pre><code class="language-json")>{
+<pre class="line-numbers"><code class="language-json")>{
   "_id" : ObjectId("50f5379785ac77daf3dd4bfd"),
   "name" : "Test",
   "tag" : {
@@ -107,7 +107,7 @@
 <p>っていう結果になる。まぁDBRefとしてsaveしなくても上記のように$refと$idを持つ連想配列型を作れば参照できる模様。で$ref自体はあくまでコレクションからの名前なので、今回<span style="color: red">db.samples.tags</span>っていうのを参照したいのでsamples.tagsで指定しなければならないような感じ。$idは言わなくてもわかるとおもうので(ry</p>
 
 <p>んでもって</p>
-<pre><code class="language-js")>db.samples.entry.findOne().tag
+<pre class="line-numbers"><code class="language-js")>db.samples.entry.findOne().tag
 // 出力: { "$ref" : "samples.tags", "$id" : ObjectId("50f5370e85ac77daf3dd4bfb") }
 
 db.samples.entry.findOne().tag.fetch()
@@ -116,10 +116,10 @@ db.samples.entry.findOne().tag.fetch()
 <p>という感じで、データが参照しているデータを紐づけてフェッチする事が出来る模様。</p>
 
 <p>でDBRefじゃなくてDBPointerっていうのもある模様</p>
-<pre><code class="language-js")>db.samples.entry.save({ name: "Test", tag: new DBPointer("samples.tags", ObjectId("50f5370e85ac77daf3dd4bfb") })
+<pre class="line-numbers"><code class="language-js")>db.samples.entry.save({ name: "Test", tag: new DBPointer("samples.tags", ObjectId("50f5370e85ac77daf3dd4bfb") })
 </code></pre>
 <p>DBPointerってのを使うと</p>
-<pre><code class="language-json")>{
+<pre class="line-numbers"><code class="language-json")>{
   "ns": "samples.tags",
   "id": ObjectId("50f5370e85ac77daf3dd4bfb")
 }

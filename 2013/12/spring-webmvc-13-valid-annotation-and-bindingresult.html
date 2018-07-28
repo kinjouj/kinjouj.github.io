@@ -91,7 +91,7 @@
 <p>Spring Frameworkには@Validではなく、@Validatedっていうアノテーションがある。今回やるのは前者な方で後者に関しては今後やる可能性もあるのでとりあえずは「<a href="http://d.hatena.ne.jp/tatsu-no-toshigo/20131006/1381031027">アノテーション「@Validated」と「@Valid」</a>」を参考されたしという事で(ry</p>
 
 <p>で本題の必要なライブラリに関して、javax.validationとその実装であるライブラリが必要。んまぁ後者のその実装に関してはHibernate Validatorがサポートされているのでそれを使う。という事でそのライブラリ参照を追加する</p>
-<pre><code class="language-groovy")>repositories {
+<pre class="line-numbers"><code class="language-groovy")>repositories {
     mavenCentral()
 }
 
@@ -108,7 +108,7 @@ dependencies {
 }
 </code></pre>
 <h4>SampleForm.java</h4>
-<pre><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.io.Serializable;
 import javax.validation.constraints.NotNull;
@@ -145,12 +145,12 @@ public class SampleForm implements Serializable {
 <p>@NotEmptyで引数を指定しているが、引数を指定しない場合には<span style="color: red">org.hibernate.validator.constraints.NotEmpty.message</span>というメッセージリソースなプロパティが参照される。これに関しては後術するので(ry</p>
 
 <h4>ValidationMessages_ja.properties</h4>
-<pre><code class="language-ini")>#org.hibernate.validator.constraints.NotEmpty.message={sample_form.name}が未入力です
+<pre class="line-numbers"><code class="language-ini")>#org.hibernate.validator.constraints.NotEmpty.message={sample_form.name}が未入力です
 error.empty.sample_form.name="{sample_form.name}"が入力されてません
 sample_form.name=名前
 </code></pre>
 <h4>SampleController.java</h4>
-<pre><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -201,7 +201,7 @@ public class SampleController {
 <p>というようにフォーム検証を行うアノテーションを付与して@ModelAttributeで送信したデータとのオブジェクトのマッピングを行い、そのバインディング上でエラーがあるかをチェックすれば良い模様。んで正常な場合だと普通に画面に入力したデータが表示されるだけだけど、エラーな場合にはindexなビューなレスポンスをレンダリングする的な感じかと</p>
 
 <p>でJSPでは</p>
-<pre><code class="language-jsp")>&lt;%@ page contentType="text/html; charset=utf-8" %&gt;
+<pre class="line-numbers"><code class="language-jsp")>&lt;%@ page contentType="text/html; charset=utf-8" %&gt;
 &lt;%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%&gt;
 &lt;%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%&gt;
 &lt;%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %&gt;
@@ -229,7 +229,7 @@ public class SampleController {
 <p>というような方法がある模様。まぁテストも書きましょうって事で</p>
 
 <h4>SampleControllerTest.java</h4>
-<pre><code class="language-java")>package swmvc;
+<pre class="line-numbers"><code class="language-java")>package swmvc;
 
 import org.junit.Test;
 
@@ -265,13 +265,13 @@ public class SampleControllerTest extends AbstractTestCase {
 <h4>余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</h4>
 
 <p>上記でも書いたように検証エラーメッセージ等はValidationMessages_[locale].properties等から読まれる訳ですけど、Springが使うMessageSourceと共通化する形で</p>
-<pre><code class="language-xml")>&lt;bean
+<pre class="line-numbers"><code class="language-xml")>&lt;bean
     id="messageSource"
     class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
     p:basename="classpath:applicationMessages" /&gt;
 </code></pre>
 <p>で指定しても、検証メッセージで使用するプロパティはValidationMessagesから参照して無かったらデフォルトを出すっていう形になる模様。なので上記だけ設定してもapplicationMessages.propertiesからは検証メッセージなプロパティが作用しない状態になる模様。その場合は</p>
-<pre><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"

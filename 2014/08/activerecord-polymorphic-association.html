@@ -104,12 +104,12 @@
 <p>やってみた結果を見た方が分かりやすいような気がするので(※プロジェクト自体はRailsプロジェクトじゃない方で検証)</p>
 
 <h4>lib/product.rb</h4>
-<pre><code class="language-rb")>class Product &lt; ActiveRecord::Base
+<pre class="line-numbers"><code class="language-rb")>class Product &lt; ActiveRecord::Base
   has_many :pictures, :as =&gt; :imageable
 end
 </code></pre>
 <h4>lib/employee.rb</h4>
-<pre><code class="language-rb")>class Employee &lt; ActiveRecord::Base
+<pre class="line-numbers"><code class="language-rb")>class Employee &lt; ActiveRecord::Base
   has_many :pictures, :as =&gt; :imageable
 end
 </code></pre>
@@ -121,14 +121,14 @@ end
 </code></p>
 
 <p>んまぁ公式ドキュメントのやつをそのまま使う。上記で書いたけどRailsプロジェクトじゃないでやってるので</p>
-<pre><code class="language-sql")>CREATE TABLE products(id integer primary key, name varchar(30) not null);
+<pre class="line-numbers"><code class="language-sql")>CREATE TABLE products(id integer primary key, name varchar(30) not null);
 CREATE TABLE pictures(id integer primary key, imageable_id integer, imageable_type varchar(50) not null);
 CREATE TABLE employees(id integer primary key, name varchar(30) not null);
 </code></pre>
 <p>な感じでデータベースを作っておく(SQLite)。でその際にpicturesテーブルにはアソシエーション名_idとアソシエーション名_typeのカラムが必要になる</p>
 
 <p>ちなみにActiveRecord::Migration辺りを使う場合には</p>
-<pre><code class="language-rb")>class CreatePictures &lt; ActiveRecord::Migration
+<pre class="line-numbers"><code class="language-rb")>class CreatePictures &lt; ActiveRecord::Migration
   def self.up
     create_table :pictures do |t|
       t.string :name
@@ -147,7 +147,7 @@ end
 <p>んじゃ必要なのは定義したんでテストなり書いてる方向で検証</p>
 
 <h4>spec/spec_helper.rb</h4>
-<pre><code class="language-rb")>require "logger"
+<pre class="line-numbers"><code class="language-rb")>require "logger"
 require "database_cleaner"
 require "active_record"
 require "factory_girl"
@@ -187,7 +187,7 @@ end
 <p>な感じでActiveRecord及びFactoryGirl、あとテスト時に処理したデータベースのクリーンアップ関係を設定しておく</p>
 
 <h4>spec/factories/fixture.rb</h4>
-<pre><code class="language-rb")>FactoryGirl.define do
+<pre class="line-numbers"><code class="language-rb")>FactoryGirl.define do
   factory :product, :class =&gt; Product do
     name "hoge"
     after :create do |product|
@@ -211,7 +211,7 @@ end
 <p>な感じで、ProductとEmployeeなレコードを一つづつ定義。そしてPictureにそれぞれの参照するレコードを定義(この場合はPictureには2つのレコードが入る)</p>
 
 <h4>spec/models/product_spec.rb</h4>
-<pre><code class="language-rb")>require "spec_helper"
+<pre class="line-numbers"><code class="language-rb")>require "spec_helper"
 
 describe Product do
   it "product test" do
@@ -232,7 +232,7 @@ end
 <p>というようにProductを取って、そのpicturesなアソシエーションからPictureの参照(has_manyなので配列)を取る。で上記でPictureには2つ突っ込んだけど参照されてるのは1つというのはimageable_typeによってモデルの型により取れるレコードが限られるので</p>
 
 <h4>spec/models/employee_spec.rb</h4>
-<pre><code class="language-rb")>describe Employee do
+<pre class="line-numbers"><code class="language-rb")>describe Employee do
   it "employee test" do
     create(:employee)
 
@@ -253,7 +253,7 @@ end
 <h4>ログに出力したSQL</h4>
 
 <p>※説明不明なログは省略(部分的な値は埋め込みで記載)</p>
-<pre><code class="language-sql")>[Employeeのfixture投入]
+<pre class="line-numbers"><code class="language-sql")>[Employeeのfixture投入]
 begin transaction
   INSERT INTO "employees" ("name") VALUES (?)  [["name", "fuga"]]
 commit transaction

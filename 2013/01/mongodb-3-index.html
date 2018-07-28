@@ -84,22 +84,22 @@
             <p>ちょいとインデックスの使い方な感じでやってみる</p>
 
 
-<pre><code class="language-js")>db.samples.save({ name: "hoge", tags: ["A"] })
+<pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge", tags: ["A"] })
 db.samples.save({ name: "fuga", tags: ["A", "B"] })
 db.samples.save({ name: "foobar", tags: ["B", "C"] })
 </code></pre>
 <p>な感じで突っ込んでおいて、普通にキーに対する値の型が配列型でも</p>
-<pre><code class="language-js")>db.samples.find({ tags: "A" })
+<pre class="line-numbers"><code class="language-js")>db.samples.find({ tags: "A" })
 </code></pre>
 <p>っていう感じで検索は出来る。出力が</p>
-<pre><code class="language-json")>{ "_id" : ObjectId("50f475453f2dbe87db25fd00"), "name" : "hoge", "tags" : [ "A" ] }
+<pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f475453f2dbe87db25fd00"), "name" : "hoge", "tags" : [ "A" ] }
 { "_id" : ObjectId("50f475533f2dbe87db25fd01"), "name" : "fuga", "tags" : [ "A", "B" ] }
 </code></pre>
 <p>でどういうインデックスが使われてるかとかexplainで見れるらしいので</p>
-<pre><code class="language-js")>db.samples.find({ tags: "A" }).explain()
+<pre class="line-numbers"><code class="language-js")>db.samples.find({ tags: "A" }).explain()
 </code></pre>
 <p>でやると</p>
-<pre><code class="language-json")>{
+<pre class="line-numbers"><code class="language-json")>{
         "cursor" : "BasicCursor",
         "nscanned" : 3,
         "nscannedObjects" : 3,
@@ -115,12 +115,12 @@ db.samples.save({ name: "foobar", tags: ["B", "C"] })
 }
 </code></pre>
 <p>多分、indexBoundsが無いっていう事でインデックスが使われてない。っていうかそもそもインデックス自体作ってない</p>
-<pre><code class="language-js")>db.samples.ensureIndex({ tags: 1 })
+<pre class="line-numbers"><code class="language-js")>db.samples.ensureIndex({ tags: 1 })
 </code></pre>
 <p>でtagsキーに対してインデックスを作る。何やらドキュメントによるとensureIndexが同期型であり、インデックス作成が完了するまでは操作をブロックする模様(db.currentOp で見れるとか)。その場合には第2引数で、<span style="color: red">{ background: true }</span>な感じで作ればインデックスをバックグラウンドで作成するようになる模様。但し、マスター/スレーブな構成とかで使ってる場合にはこれを指定した所でもスレーブ側は完了するまで操作ブロックされるみたい。検証してないから微妙だけど</p>
 
 <p>という感じでもう一回explainしてみると</p>
-<pre><code class="language-json")>{
+<pre class="line-numbers"><code class="language-json")>{
         "cursor" : "BtreeCursor tags_1",
         "nscanned" : 2,
         "nscannedObjects" : 2,
@@ -145,20 +145,20 @@ db.samples.save({ name: "foobar", tags: ["B", "C"] })
 <h4>追記</h4>
 
 <p>ensureIndexに指定出来るキーと値についてドキュメントによると、キーはインデックスを適応するキー名であり、値が1であれば昇順、-1であれは降順になる模様</p>
-<pre><code class="language-js")>db.samples.insert({ name: "hoge", type: 1 })
+<pre class="line-numbers"><code class="language-js")>db.samples.insert({ name: "hoge", type: 1 })
 db.samples.insert({ name: "fuga", type: 1 })
 db.samples.insert({ name: "foobar", type: 1 })
 </code></pre>
 <p>というデータつっこんどいて</p>
-<pre><code class="language-js")>db.samples.ensureIndex({ type: 1, name: 1 })
+<pre class="line-numbers"><code class="language-js")>db.samples.ensureIndex({ type: 1, name: 1 })
 </code></pre>
 <p>っていうインデックスを突っ込んで、find({ type: 1 })すると</p>
-<pre><code class="language-json")>{ "_id" : ObjectId("50f4c6fe65d2c24c46dd38a9"), "name" : "foobar", "type" : 1 }
+<pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f4c6fe65d2c24c46dd38a9"), "name" : "foobar", "type" : 1 }
 { "_id" : ObjectId("50f4c6f465d2c24c46dd38a8"), "name" : "fuga", "type" : 1 }
 { "_id" : ObjectId("50f4c6eb65d2c24c46dd38a7"), "name" : "hoge", "type" : 1 }
 </code></pre>
 <p>という結果になる。もし、nameにインデックス適応させなかったら</p>
-<pre><code class="language-json")>{ "_id" : ObjectId("50f4c6eb65d2c24c46dd38a7"), "name" : "hoge", "type" : 1 }
+<pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f4c6eb65d2c24c46dd38a7"), "name" : "hoge", "type" : 1 }
 { "_id" : ObjectId("50f4c6f465d2c24c46dd38a8"), "name" : "fuga", "type" : 1 }
 { "_id" : ObjectId("50f4c6fe65d2c24c46dd38a9"), "name" : "foobar", "type" : 1 }
 </code></pre>

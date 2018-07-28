@@ -100,7 +100,7 @@
 <p>とりあえずはfacebook側の設定はこんだけ</p>
 
 <h4>Gemfile</h4>
-<pre><code class="language-rb")>source "https://rubygems.org"
+<pre class="line-numbers"><code class="language-rb")>source "https://rubygems.org"
 
 gem "omniauth-facebook"
 
@@ -113,7 +113,7 @@ gem "capybara-rails", group: :test
 <h4>config/initializers/omniauth.rb</h4>
 
 <p>ドキュメント(README.md)通りにconfig/initializers/omniauth.rbを作る</p>
-<pre><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
+<pre class="line-numbers"><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
   provider :facebook,
     "[APP ID]",
     "[APP SECRET KEY]",
@@ -137,7 +137,7 @@ auth_facebook_callback GET    /auth/facebook/callback(.:format) sessions#callbac
 </pre>
 
 <p>っていうようなルーティングを作るので</p>
-<pre><code class="language-rb")>Rails.application.routes.draw do
+<pre class="line-numbers"><code class="language-rb")>Rails.application.routes.draw do
   get "/auth/facebook/callback" =&gt; "sessions#callback"
   get "/auth/failure" =&gt; "sessions#failure"
 
@@ -147,7 +147,7 @@ end
 <p>ってな感じでSessionsControllerとAccountsControllerが必要なので(ry</p>
 
 <h4>app/controllers/sessions_controller.rb</h4>
-<pre><code class="language-rb")>class SessionsController &lt; ApplicationController
+<pre class="line-numbers"><code class="language-rb")>class SessionsController &lt; ApplicationController
   def callback
     session[:auth] = auth_hash
     redirect_to :controller =&gt; :accounts
@@ -167,7 +167,7 @@ end
 <p>んな感じで</p>
 
 <h4>app/controllers/accounts_controller.rb</h4>
-<pre><code class="language-rb")>class AccountsController &lt; ApplicationController
+<pre class="line-numbers"><code class="language-rb")>class AccountsController &lt; ApplicationController
   def index
     auth = session[:auth]
     return redirect_to "/auth/failure" if auth.nil?
@@ -181,7 +181,7 @@ end
 end
 </code></pre>
 <p>な感じでapp/views/accounts/index.erbで</p>
-<pre><code class="language-erb")>name = &lt;%= @user["info"]["nickname"] %&gt;
+<pre class="line-numbers"><code class="language-erb")>name = &lt;%= @user["info"]["nickname"] %&gt;
 </code></pre>
 <p>な感じでnicknameを出力しているだけ。</p>
 
@@ -190,7 +190,7 @@ end
 <h4>spec/rails_helper.rb</h4>
 
 <p>RSpec3(+Rails)辺りからはspec/rails_helper.rbにRailsに特有される設定等を行う模様げっぽいので</p>
-<pre><code class="language-rb")># ここから追加
+<pre class="line-numbers"><code class="language-rb")># ここから追加
 OmniAuth.config.test_mode = true
 OmniAuth.config.mock_auth[:facebook] = OmniAuth::AuthHash.new({
   :provider =&gt; "facebook",
@@ -213,7 +213,7 @@ end
 <p>な感じでOmniAuth.config.test_modeを使用する事でテスト時には/auth/facebook等にリクエストした場合は問答無用でコールバック先にリダイレクトされる模様。でその際のomniauth.authなのはOmniAuth.config.mock_authで設定する事が可能。んまぁこういうところはテストを実行する前にbefore :each等で設定するべきなんじゃないのかなって思う</p>
 
 <h4>spec/requests/auth_spec.rb</h4>
-<pre><code class="language-rb")>require "rails_helper"
+<pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
 describe "oauth callback test", :js =&gt; false do
 
@@ -271,7 +271,7 @@ end
 <p>参考: <a href="http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider">http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider</a></p>
 
 <p>デフォルトだと/authになっていて、それがStrategyを含むと/auth/:providerっていう感じになるわけなんだけど、それのprefixを変えたい場合</p>
-<pre><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
+<pre class="line-numbers"><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
   configure do |config|
     config.path_prefix = "/user/auth"
   end

@@ -95,7 +95,7 @@
 </ul>
 
 <p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p>
-<pre><code class="language-js")>// samplesコレクションを作る
+<pre class="line-numbers"><code class="language-js")>// samplesコレクションを作る
 db.createCollection("samples")
 
 // nameに対してUNIQUEインデックスを作っておく
@@ -117,12 +117,12 @@ db.samples.save({ name: "hoge", type: 1 })
 <p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p>
 
 <p>でdropDupsも一応検証してみますかという事で</p>
-<pre><code class="language-js")>db.samples.save({ name: "hoge", type: 1 })
+<pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge", type: 1 })
 db.samples.save({ name: "hoge", type: 1 })
 db.samples.find()
 </code></pre>
 <p>出力が</p>
-<pre><code class="language-json")>{ "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
+<pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
 { "_id" : ObjectId("50f4e5a2bc3d8a4279742236"), "name" : "hoge", "type" : 1 }
 </code></pre>
 <p>同じデータを突っ込んでおく。でこの状態でnameにUNIQUEインデックスをつけると</p>
@@ -132,7 +132,7 @@ E11000 duplicate key error index: sample.samples.$name_1 dup key: { : "hoge" }
 </blockquote>
 
 <p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p>
-<pre><code class="language-js")>db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
+<pre class="line-numbers"><code class="language-js")>db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
 db.samples.find()
 // { "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
 </code></pre>
@@ -143,10 +143,10 @@ db.samples.find()
 <h4>追記</h4>
 
 <p>DBに存在するインデックスを確認したい場合は</p>
-<pre><code class="language-js")>db.system.indexes.find()
+<pre class="line-numbers"><code class="language-js")>db.system.indexes.find()
 </code></pre>
 <p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p>
-<pre><code class="language-js")>// sampleデータベース中のsamplesコレクション -&gt; sample.samples
+<pre class="line-numbers"><code class="language-js")>// sampleデータベース中のsamplesコレクション -&gt; sample.samples
 db.system.indexes.find({ ns: "sample.samples" })
 </code></pre>
           </div>

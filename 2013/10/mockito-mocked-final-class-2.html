@@ -86,7 +86,7 @@
 
 
 <p>例えば</p>
-<pre><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java")>package sample;
 
 public final class Sample {
     public String say() {
@@ -95,7 +95,7 @@ public final class Sample {
 }
 </code></pre>
 <p>なんていうfinalクラスがあったとして</p>
-<pre><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java")>package sample;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -128,7 +128,7 @@ Mockito cannot mock/spy following:
 <p>っていうようにfinalクラスはモック化出来ねーよって怒られる訳ですが。で前回だと独自のクラスローダーを利用してjavassistを使ってfinal modifierを消したクラスバイトコードを動的にロードするっていう方式だったんですが、これだとこのクラスローダーからロードしないといけないとかめんどくさいよねっていう事で色々調べつつやってみた。無論上記のコードでテストは一切書き換えないっていう条件付き</p>
 
 <p>その前に「このクラスはfinalクラスでモック出来るようにするよ」っていうのを識別させる為にアノテーションを利用</p>
-<pre><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java")>package sample;
 
 public @interface FinalMock {
 }
@@ -140,7 +140,7 @@ public @interface FinalMock {
 <h4>ClassFileTransformerを実装したクラスを作る</h4>
 
 <p>簡単に言うと-javaagentな仕組みを使ってクラスからfinal modifierを消してロードするっていう仕組みを作るだけ</p>
-<pre><code class="language-java")>import java.io.IOException;
+<pre class="line-numbers"><code class="language-java")>import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.reflect.Modifier;
@@ -192,7 +192,7 @@ public class SampleClassTransformer implements ClassFileTransformer {
 }
 </code></pre>
 <p>で-javaagentな仕組みを使うので</p>
-<pre><code class="language-java")>import java.lang.instrument.Instrumentation;
+<pre class="line-numbers"><code class="language-java")>import java.lang.instrument.Instrumentation;
 
 public class JavaAgent {
     public static void premain(String args, Instrumentation inst) {
@@ -201,7 +201,7 @@ public class JavaAgent {
 }
 </code></pre>
 <p>っていうようなクラスを作る。んでMETA-INF/MANIFEST.MFで</p>
-<pre><code class="language-mf")>Manifest-Version: 1.0
+<pre class="line-numbers"><code class="language-mf")>Manifest-Version: 1.0
 Premain-Class: JavaAgent
 </code></pre>
 <p>を定義して、上記のJavaAgentクラスとSampleClassTransformerクラスをぶち込んでjar化する</p>

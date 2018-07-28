@@ -88,7 +88,7 @@
 <h4>サーバーを起動</h4>
 
 <p>とりあえずマスター・スレーブとなる3つのMongoDBを起動</p>
-<pre><code>mongod --dbpath /tmp/mongo1 --logpath /tmp/mongo1/mongodb.log --port 10001 --replSet repltest --rest
+<pre class="line-numbers"><code>mongod --dbpath /tmp/mongo1 --logpath /tmp/mongo1/mongodb.log --port 10001 --replSet repltest --rest
 
 mongod --dbpath /tmp/mongo2 --logpath /tmp/mongo2/mongodb.log --port 10002 --replSet repltest --rest
 
@@ -97,7 +97,7 @@ mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --rep
 <p>でrepltestっていう名前でレプリカセット名を指定している感じなのかな、んまぁそういう感じで</p>
 
 <p>でレプリカセットな設定を行う</p>
-<pre><code class="language-js")>rs.initiate({
+<pre class="line-numbers"><code class="language-js")>rs.initiate({
   _id: "repltest",
   members: [
     { _id: 1, host: "localhost:10001" },
@@ -119,10 +119,10 @@ mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --rep
 <p><img src="/images/2013/01/20130123213344.jpg" /></p>
 
 <p>でそこら辺を柔軟に管理してPRIMARY/SECONDARYを監査してくれる?のがArbiterな模様なので、もう1個MongoDBを起動する</p>
-<pre><code>mongod --replSet repltest --dbpath /tmp/mongo4 --logpath /tmp/mongo4/mongdb.log --port 10004 --rest
+<pre class="line-numbers"><code>mongod --replSet repltest --dbpath /tmp/mongo4 --logpath /tmp/mongo4/mongdb.log --port 10004 --rest
 </code></pre>
 <p>この状態でもう一度上記の3つのサーバー起動しておく。でWebコンソールからPRIMARYに入って</p>
-<pre><code class="language-js")>db.addArb("localhost:10004")
+<pre class="line-numbers"><code class="language-js")>db.addArb("localhost:10004")
 </code></pre>
 <p>でArbiterサーバーを設定しておく。で再度Webコンソールを見ると</p>
 
@@ -143,7 +143,7 @@ mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --rep
 <p>で問題はデータとかどうなんの的な話になると思うんですが、PRIMARYが停止してSECONDARYがPRIMARYに昇格する際にPRIMARYが持ってたデータをsyncする模様。元々SECONDARYの状態で既に持ってるけどSECONDARYだからfind出来ないsave出来ない状態なので確認できないんですが、んまぁロックされててPRIMARYに昇格したらロック解除されて参照できるようになるっていう感じかなーっと</p>
 
 <p>でクライアントとかだとレプリカセットに指定されているサーバーを指定すれば良い模様。PRIMARYになってる所にデータが行くっていう感じかと。Perlだと</p>
-<pre><code class="language-pl")>use MongoDB;
+<pre class="line-numbers"><code class="language-pl")>use MongoDB;
 
 my $c = MongoDB::MongoClient-&gt;new(
     host =&gt; "mongodb://localhost:10001,localhost:10002,localhost:10003"

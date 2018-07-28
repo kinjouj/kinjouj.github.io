@@ -91,7 +91,7 @@
 <p>でEventの登録方法はEvent::listenを使うんだけど、app/start/global.phpとかで普通に記述するか <a href="http://laravel.com/docs/events#event-subscribers">http://laravel.com/docs/events#event-subscribers</a> セクションのようにクラスを用いてEvent::listenさせるかっていう、とりあえずは2種類がある模様</p>
 
 <p>まずは前者の普通にクラスを使わずにapp/start/global.phpとかに定義</p>
-<pre><code class="language-php")>Event::listen(
+<pre class="line-numbers"><code class="language-php")>Event::listen(
     "hoge", // Event name
     function() {
         echo "hoge(1)";
@@ -108,32 +108,32 @@ Event::listen(
 );
 </code></pre>
 <p>っていうような感じなんですが、Priorityな引数が基本的に大きい方から実行されていく模様。で指定しなかった場合のデフォルトのプライオリティは0。でEventをtriggerしちゃう場合には</p>
-<pre><code class="language-php")>Event::fire("hoge", [引数]);
+<pre class="line-numbers"><code class="language-php")>Event::fire("hoge", [引数]);
 </code></pre>
 <p>引数が１つであれば別に引数な所をArrayで指定する必要はない(Illuminate\Events\Dispatcher.phpの174行目でArrayに内包するようになってる為)</p>
 
 <p>でちなみにEvent自体はクラスで利用する事も出来る</p>
-<pre><code class="language-php")>class HogeEvent {
+<pre class="line-numbers"><code class="language-php")>class HogeEvent {
     public function handle() {
         echo "hoge";
     }
 }
 </code></pre>
 <p>デフォルトだとhandleメソッドが動くけど</p>
-<pre><code class="language-php")>Event::listen("hoge", "HogeEvent@hoge");
+<pre class="line-numbers"><code class="language-php")>Event::listen("hoge", "HogeEvent@hoge");
 </code></pre>
 <p>のようにルーティングでアクションに対するコントローラーのメソッドを指定するような形式でEventが発動されるメソッドを指定する事も可能な模様。んまぁ定義から実行はこんな感じな訳で、でEvent::listenクラス上で行わせるsubscriberっていう機能もある</p>
-<pre><code class="language-php")>class HogeSubscribe {
+<pre class="line-numbers"><code class="language-php")>class HogeSubscribe {
     public function subscribe() {
         Event::listen("hoge", "HogeEvent");
     }
 }
 </code></pre>
 <p>でapp/start/global.phpとかで</p>
-<pre><code class="language-php")>Event::subscribe(new HogeSubscribe());
+<pre class="line-numbers"><code class="language-php")>Event::subscribe(new HogeSubscribe());
 </code></pre>
 <p>的な事やれば良い。subscribeの引数はインスタンスじゃなくても普通にクラス名でもオッケーっぽい感じがする(ソース読んだ所だと)。でイベントにはワイルドカードを使って定義する事も可能</p>
-<pre><code class="language-php")>Event::listen("hoge.fuga", function() {
+<pre class="line-numbers"><code class="language-php")>Event::listen("hoge.fuga", function() {
     echo "fuga";
 });
 
@@ -152,7 +152,7 @@ Event::listen("hoge.*", function() {
 <p>っていうようになる。どうやらこれはプライオリティを指定する事出来ないっぽい(ソース上でsetupWildcardListenで何かPriorityを維持するような構造になってないっぽい)</p>
 
 <p>でEvent::queueに関して。Queueクラスっていうのがあるけどこれとは関係が無い。単純に引数で指定したイベント名+_queueで定義しておいて、それがfireされたら元のイベント名の処理を実行するような感じ。んーわかりづらい</p>
-<pre><code class="language-php")>// この時点ではhoge_queueっていうイベントを作ってるだけなので何も起きない
+<pre class="line-numbers"><code class="language-php")>// この時点ではhoge_queueっていうイベントを作ってるだけなので何も起きない
 Event::queue("hoge");
 
 // Event::flushを使う事でqueueなイベントをfire出来る

@@ -111,10 +111,10 @@
 
 
 <h4>fluentd側のセットアップ</h4>
-<pre><code>sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
+<pre class="line-numbers"><code>sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
 </code></pre>
 <p>でとりあえずfluent-plugin-mongoを入れる。んで</p>
-<pre><code>&lt;source&gt;
+<pre class="line-numbers"><code>&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -128,14 +128,14 @@
 &lt;/match&gt;
 </code></pre>
 <p>なtd-agent.confを作って</p>
-<pre><code>/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
+<pre class="line-numbers"><code>/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
 </code></pre>
 <p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p>
 
 <h4>MongoDB側を確認</h4>
 
 <p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p>
-<pre><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
+<pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f6647c8cdabd1739000004"), "path" : "/" }
 { "_id" : ObjectId("50f6647c8cdabd1739000005"), "path" : "/favicon.ico" }
@@ -169,14 +169,14 @@
 { "_id" : ObjectId("50f712708cdabd1739000025"), "path" : "/favicon.ico" }
 </code></pre>
 <p>という風にずどどどどとぶっこまれるのが確認できる。ただこれフィルターしているので、あれなんすけど</p>
-<pre><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
+<pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f664408cdabd1739000003") }
 </code></pre>
 <p>という風にpath属性が無いのもあるので</p>
 
 <h4>MongoDBでMapReduce APIを使うJavaScriptを書く</h4>
-<pre><code class="language-js")>var res = db.accesslog.mapReduce(
+<pre class="line-numbers"><code class="language-js")>var res = db.accesslog.mapReduce(
   // Map
   function() {
     // fluentからmongoへプッシュされたログの行毎のデータはthisからアクセス出来る模様
@@ -208,7 +208,7 @@
 printjson(res)
 </code></pre>
 <p>な感じで実行すると</p>
-<pre><code class="language-json")>{
+<pre class="line-numbers"><code class="language-json")>{
     "results" : [
         {
             "_id" : "/",
@@ -245,7 +245,7 @@ printjson(res)
 <p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p>
 
 <h4>コレクション名</h4>
-<pre><code class="language-json")>{ out: "コレクション名" }
+<pre class="line-numbers"><code class="language-json")>{ out: "コレクション名" }
 </code></pre>
 <p>で指定すると指定したコレクション名にぶち込まれる</p>
 

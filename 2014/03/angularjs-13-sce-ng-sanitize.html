@@ -105,12 +105,12 @@
           </div>
           <div class="entry-content">
             <p>※ややこしいので公式ドキュメント読んだ方がいい</p>
-<pre><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
+<pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
   &lt;span&gt;{% raw %}{{message}}{% endraw %}&lt;/span&gt;
 &lt;/div&gt;
 </code></pre>
 <p>的な感じになってて</p>
-<pre><code class="language-js")>angular.module("app", [])
+<pre class="line-numbers"><code class="language-js")>angular.module("app", [])
   .controller("SampleController", function($scope) {
     $scope.message = '&lt;span style="color: red"&gt;hoge&lt;/span&gt;';
   });
@@ -118,14 +118,14 @@
 <p>みたいにすると、$scopeとかに含まれるHTMLとかはエスケープされて出力されるらしい</p>
 
 
-<pre><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
+<pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
   &lt;span ng-bind-html="message" /&gt;
 &lt;/div&gt;
 </code></pre>
 <p>みたいにすると「Error: $sce:unsafe」っていうエラーになる模様。但し、このエラーが発生するのはangular-sanitize.jsが参照されていない場合であって参照されている場合などにおいては物によっては出力は許可されるがCSP(Content Security Policy)に反するようなインラインなスタイルやスクリプトは除去される模様。あくまで汚染物を除去する的な所かと</p>
 
 <p>ちょっと余談が多いけど、それの出力を許可するようにするには$sce(Strict Contextual Escaping)を使う事で出来る模様。あくまで$sceはangular-sanitizeに含まれる物では無い模様</p>
-<pre><code class="language-js")>angular.module("app", [])
+<pre class="line-numbers"><code class="language-js")>angular.module("app", [])
   .controller("SampleController", function($scope, $sce) {
     var text = '&lt;span style="color: red"&gt;hoge&lt;/span&gt;';
     $scope.message = $sce.trustAsHtml($text);
@@ -147,12 +147,12 @@
 <h4>余談: linkyフィルターについて</h4>
 
 <p>angular-sanitize.jsのドキュメントによるとデータ中のURL等をマークアップ化する方法としてはlinkyフィルターを使えば良い模様</p>
-<pre><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
+<pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
   &lt;span ng-bind-html="message | linky" /&gt;
 &lt;/div&gt;
 </code></pre>
 <p>的な感じにして</p>
-<pre><code class="language-js")>angular.module("app", ["ngSanitize"])
+<pre class="line-numbers"><code class="language-js")>angular.module("app", ["ngSanitize"])
   .controller("SampleController", function($scope) {
     $scope.message = "http://localhost";
   });
