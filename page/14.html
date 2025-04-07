@@ -55,6 +55,85 @@
       <div id="content">
         <div class="entry">
           <div>
+            <h3 class="entry-title"><a name="article-link" href="/2014/06/jaxrs-4-messagebodyreader.html" rel="prefetch">JAX-RSをやってみる (4) - MessageBodyReader -</a></h3>
+            <p class="meta">
+              2014-06-11T00:00:00+00:00
+              <span class="categories">
+                <a class="category" href="/categories/java">Java</a>
+                <a class="category" href="/categories/jax-rs">JAX-RS</a>
+              </span>
+            </p>
+            <div class="entry-content">
+              <p>前回の「<a href="/jaxrs-3-autodiscoverable.html">JAX-RSをやってみる (3) – AutoDiscoverable -</a>」とかだと</p>
+<pre class="line-numbers"><code class="language-java")>package sample.controller;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
+import sample.bean.SampleBean;
+import static javax.ws.rs.core.MediaType.*;
+
+@Path("/sample")
+public class Home {
+
+    @Path("save")
+    @POST
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    public SampleBean save(SampleBean bean) {
+        return bean;
+    }
+}
+</code></pre>
+<p>なんていうので</p>
+<pre class="line-numbers"><code class="language-java")>package sample.controller;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
+
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.SampleApplication;
+import sample.bean.SampleBean;
+
+import static javax.ws.rs.core.MediaType.*;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new SampleApplication();
+    }
+
+    @Test
+    public void test_save() {
+        Entity&lt;SampleBean&gt; entity = Entity.entity(
+            new SampleBean("hoge"),
+            APPLICATION_JSON
+        );
+
+        SampleBean response = target("/sample/save").request().post(entity, SampleBean.class);
+        assertThat(response, notNullValue());
+    }
+}
+</code></pre>
+<p>なんていうテストをやってみると「not found MessageBodyReader」なんていうエラーになるわけで。もちろん前回のはMessageBodyWriterは実装してあるけど、MessageBodyReaderが実装されてないので。っていう事でMessageBodyReaderを実装してみた</p>
+
+
+            </div>
+            <div class="sticky"></div>
+            <div class="excerpt pull-right">
+              <a class="box-link" href="/2014/06/jaxrs-4-messagebodyreader.html">続きを見る</a>
+            </div>
+          </div>
+        </div>
+        <div class="entry">
+          <div>
             <h3 class="entry-title"><a name="article-link" href="/2014/06/jaxrs-3-autodiscoverable.html" rel="prefetch">JAX-RSをやってみる (3) - AutoDiscoverable -</a></h3>
             <p class="meta">
               2014-06-10T00:00:00+00:00
@@ -128,6 +207,15 @@
             </div>
           </div>
         </div>
+        <div style="width: 100%">
+          <div class="ad">
+            <section>
+               <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+              <ins class="adsbygoogle" style="display: block; height: 90px;" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+              <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </section>
+          </div>
+        </div>
         <div class="entry">
           <div>
             <h3 class="entry-title"><a name="article-link" href="/2014/05/scalatest.html" rel="prefetch">ScalaTest</a></h3>
@@ -146,15 +234,6 @@
             <div class="excerpt pull-right">
               <a class="box-link" href="/2014/05/scalatest.html">続きを見る</a>
             </div>
-          </div>
-        </div>
-        <div style="width: 100%">
-          <div class="ad">
-            <section>
-               <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-              <ins class="adsbygoogle" style="display: block; height: 90px;" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
-              <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </section>
           </div>
         </div>
         <div class="entry">
@@ -277,31 +356,6 @@
             </div>
           </div>
         </div>
-        <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/04/android-espresso-ui-testing.html" rel="prefetch">Espressoを使ったUIテスト</a></h3>
-            <p class="meta">
-              2014-04-27T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/android">Android</a>
-                <a class="category" href="/categories/java">Java</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>公式: <a href="https://code.google.com/p/android-test-kit/wiki/Espresso">https://code.google.com/p/android-test-kit/wiki/Espresso</a></p>
-
-<p>APIリファレンス: <a href="https://android-test-kit.googlecode.com/git-history/master/docs/javadocs/apidocs/index.html?r=master">https://android-test-kit.googlecode.com/git-history/master/docs/javadocs/apidocs/index.html?r=master</a></p>
-
-<p>タイトル通り、EspressoのUIテストキットなライブラリを使ってUIテストをするっていうのをやってみた。まぁ導入周りとかそっち系の単純な話だけなので(ry</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/04/android-espresso-ui-testing.html">続きを見る</a>
-            </div>
-          </div>
-        </div>
         <div class="pagination">
           <a class="pull-left prev box-link" href="/page/13.html">Prev</a>
           <a class="pull-right next box-link" href="/page/15.html">Next</a>
@@ -324,6 +378,9 @@
               <h4>Recent Posts</h4>
               <ul id="recent_posts">
                 <li class="post">
+                  <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
+                </li>
+                <li class="post">
                   <a href="/2018/07/graphql-graphqljs-3-mutation.html">GraphQL.jsでMutation</a>
                 </li>
                 <li class="post">
@@ -343,9 +400,6 @@
                 </li>
                 <li class="post">
                   <a href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html">react-script-tsを使ってTypeScriptプロジェクトをビルド</a>
-                </li>
-                <li class="post">
-                  <a href="/2018/05/es7-function-bind.html">ES7でのfunction bind</a>
                 </li>
               </ul>
             </section>
