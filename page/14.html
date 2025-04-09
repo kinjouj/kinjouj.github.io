@@ -54,306 +54,83 @@
       </header>
       <div id="content">
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/06/jaxrs-4-messagebodyreader.html" rel="prefetch">JAX-RSをやってみる (4) - MessageBodyReader -</a></h3>
-            <p class="meta">
-              2014-06-11T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/java">Java</a>
-                <a class="category" href="/categories/jax-rs">JAX-RS</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>前回の「<a href="/jaxrs-3-autodiscoverable.html">JAX-RSをやってみる (3) – AutoDiscoverable -</a>」とかだと</p>
-<pre class="line-numbers"><code class="language-java")>package sample.controller;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
-import sample.bean.SampleBean;
-import static javax.ws.rs.core.MediaType.*;
-
-@Path("/sample")
-public class Home {
-
-    @Path("save")
-    @POST
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
-    public SampleBean save(SampleBean bean) {
-        return bean;
-    }
-}
-</code></pre>
-<p>なんていうので</p>
-<pre class="line-numbers"><code class="language-java")>package sample.controller;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-
-import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Test;
-
-import sample.SampleApplication;
-import sample.bean.SampleBean;
-
-import static javax.ws.rs.core.MediaType.*;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
-public class HomeTest extends JerseyTest {
-
-    @Override
-    protected Application configure() {
-        return new SampleApplication();
-    }
-
-    @Test
-    public void test_save() {
-        Entity&lt;SampleBean&gt; entity = Entity.entity(
-            new SampleBean("hoge"),
-            APPLICATION_JSON
-        );
-
-        SampleBean response = target("/sample/save").request().post(entity, SampleBean.class);
-        assertThat(response, notNullValue());
-    }
-}
-</code></pre>
-<p>なんていうテストをやってみると「not found MessageBodyReader」なんていうエラーになるわけで。もちろん前回のはMessageBodyWriterは実装してあるけど、MessageBodyReaderが実装されてないので。っていう事でMessageBodyReaderを実装してみた</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/06/jaxrs-4-messagebodyreader.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/06/jaxrs-4-messagebodyreader.html">JAX-RSをやってみる (4) - MessageBodyReader -</a></h3>
           </div>
         </div>
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/06/jaxrs-3-autodiscoverable.html" rel="prefetch">JAX-RSをやってみる (3) - AutoDiscoverable -</a></h3>
-            <p class="meta">
-              2014-06-10T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/java">Java</a>
-                <a class="category" href="/categories/jax-rs">JAX-RS</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。</p>
-
-<p>という事でやってみた</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/06/jaxrs-3-autodiscoverable.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/06/jaxrs-3-autodiscoverable.html">JAX-RSをやってみる (3) - AutoDiscoverable -</a></h3>
           </div>
         </div>
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/04/jaxrs-2-glassfish-deployment.html" rel="prefetch">JAX-RSをやってみる (2) - glassfish deployment -</a></h3>
-            <p class="meta">
-              2014-06-08T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/java">Java</a>
-                <a class="category" href="/categories/jax-rs">JAX-RS</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>参考: <a href="https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3">https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3</a></p>
-
-<p>JAX-RSに準拠しているアプリケーションサーバー(glassfish等)ではデプロイ時の設定が若干異なる模様。またJAX-RSに準拠しているアプリケーションサーバーであれば特にデプロイメントデスクリプタ(web.xml)を定義しなくても@ApplicationPathを使う事で引数に指定したパスを&lt;servlet-mapping&gt;のベースとして利用できるようになるっぽい。微妙にややこしいけど</p>
-
-<p>※記述している内容が正しいかは微妙なのであくまで個人的なメモとして</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/04/jaxrs-2-glassfish-deployment.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/04/jaxrs-2-glassfish-deployment.html">JAX-RSをやってみる (2) - glassfish deployment -</a></h3>
           </div>
         </div>
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/04/jaxrs-1.html" rel="prefetch">JAX-RSをやってみる (1)</a></h3>
-            <p class="meta">
-              2014-06-05T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/java">Java</a>
-                <a class="category" href="/categories/jax-rs">JAX-RS</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>Jerseyドキュメント: <a href="https://jersey.java.net/documentation/latest/index.html">https://jersey.java.net/documentation/latest/index.html</a>  </p>
-
-<p>参考: <a href="http://backpaper0.github.io/2013/05/02/jaxrs.html">http://backpaper0.github.io/2013/05/02/jaxrs.html</a></p>
-
-<p>JavaでRESTfulなWebアプリケーションを作るっていう場合とかだとJAX-RSを使えば何かと便利っぽそうなのでいろいろ勉強してみたのでちょっとだけまとめる</p>
-
-<p>※JAX-RSのバージョンは2.x系をターゲットにしてます。又、以下で書くのはあくまでサーバーを起動して利用する前提ではなくテストを書いて実行しているだけなのでサーバー関係に伴ってくる部分に関しては今後に書く予定</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/04/jaxrs-1.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
           </div>
-        </div>
-        <div style="width: 100%">
-          <div class="ad">
-            <section>
-               <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-              <ins class="adsbygoogle" style="display: block; height: 90px;" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
-              <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </section>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/04/jaxrs-1.html">JAX-RSをやってみる (1)</a></h3>
           </div>
         </div>
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/05/scalatest.html" rel="prefetch">ScalaTest</a></h3>
-            <p class="meta">
-              2014-05-29T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/scala">scala</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>scalaでテスト書くのに<a href="http://www.scalatest.org/">ScalaTest</a>っていうのがなかなか良さそうな感じ。という事で使ってみた</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/05/scalatest.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/05/scalatest.html">ScalaTest</a></h3>
           </div>
         </div>
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/05/android-engineio.html" rel="prefetch">Androidでengine.io</a></h3>
-            <p class="meta">
-              2014-05-21T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/android">Android</a>
-                <a class="category" href="/categories/java">Java</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p><a href="/engine-io.html">前回やったengine.io</a>の記事にも書いてるが、Java向けのクライアントライブラリが既に<a href="https://github.com/nkzawa/engine.io-client.java">engine.io-client-java</a>っていうのがあるので、それを使えば出来るだろうってことでやってみた</p>
-
-<p>※サーバーは前回のをそのまま利用</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/05/android-engineio.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/05/android-engineio.html">Androidでengine.io</a></h3>
           </div>
         </div>
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/05/engine-io.html" rel="prefetch">engine.io</a></h3>
-            <p class="meta">
-              2014-05-20T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/javascript">JavaScript</a>
-                <a class="category" href="/categories/node-dot-js">Node.js</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>参考: <a href="http://shokai.org/blog/archives/8893">Engine.IO単体でチャットを作った</a></p>
-
-<p>上記の参考に触発されてやってみた</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/05/engine-io.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/05/engine-io.html">engine.io</a></h3>
           </div>
         </div>
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/05/angularjs-25-httpprovider-interceptors.html" rel="prefetch">angular.jsをやってみる (25) - $httpProvider.interceptors -</a></h3>
-            <p class="meta">
-              2014-05-17T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/angular-dot-js">angular.js</a>
-                <a class="category" href="/categories/javascript">JavaScript</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>たまたまドキュメントを見ていたら、$httpで処理されるリクエストやレスポンスなどにインターセプターを利用してfilter的なことできるっぽい。ということでやってみた</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/05/angularjs-25-httpprovider-interceptors.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/05/angularjs-25-httpprovider-interceptors.html">angular.jsをやってみる (25) - $httpProvider.interceptors -</a></h3>
           </div>
         </div>
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/05/angularjs-24-ng-non-bindable.html" rel="prefetch">angular.jsをやってみる (24) - ng-non-bindable -</a></h3>
-            <p class="meta">
-              2014-05-12T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/angular-dot-js">angular.js</a>
-                <a class="category" href="/categories/javascript">JavaScript</a>
-                <a class="category" href="/categories/ruby">Ruby</a>
-                <a class="category" href="/categories/rails">Rails</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p>参考: <a href="http://havelog.ayumusato.com/develop/security/e593-mixins_server_template_and_angular.html">AngularJSとサーバーサイドテンプレートの混在とngNonBindable</a></p>
-
-<p>※上記の参考を必読することをオススメ</p>
-
-<p>上記参考にも書いてるのですが、例えばクエリーなどにおいてangular.jsが処理されるような記法なクエリーが含まれているとXSSになるっていう話があるのですが、実際自分でやってみた。</p>
-
-<p>※実検証はRails4を使ってやった</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/05/angularjs-24-ng-non-bindable.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/05/angularjs-24-ng-non-bindable.html">angular.jsをやってみる (24) - ng-non-bindable -</a></h3>
           </div>
         </div>
         <div class="entry">
-          <div>
-            <h3 class="entry-title"><a name="article-link" href="/2014/04/gradle-android-test-plugin-robolectric-espresso.html" rel="prefetch">gradle-android-test-plugin+robolectric+espresso</a></h3>
-            <p class="meta">
-              2014-04-28T00:00:00+00:00
-              <span class="categories">
-                <a class="category" href="/categories/android">Android</a>
-                <a class="category" href="/categories/java">Java</a>
-                <a class="category" href="/categories/robolectric">robolectric</a>
-              </span>
-            </p>
-            <div class="entry-content">
-              <p><a href="https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4">https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4</a> にあるように元はJake Wharton氏が開発されていてdeprecatedになっていたgradle-android-test-pluginをrobolectric開発チームによってメンテされるようになった模様</p>
-
-<p>てな訳でgradle-android-test-pluginを使いつつの、robolectricでの単体テスト及びespressoによるUIテストをやってみる</p>
-
-
-            </div>
-            <div class="sticky"></div>
-            <div class="excerpt pull-right">
-              <a class="box-link" href="/2014/04/gradle-android-test-plugin-robolectric-espresso.html">続きを見る</a>
-            </div>
+          <div class="entry-header">
+            <img src="/images/no_image.png" />
+          </div>
+          <div class="entry-body">
+            <h3 class="entry-title"><a name="article-link" href="/2014/04/gradle-android-test-plugin-robolectric-espresso.html">gradle-android-test-plugin+robolectric+espresso</a></h3>
           </div>
         </div>
         <div class="pagination">
