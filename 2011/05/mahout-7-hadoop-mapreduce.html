@@ -10,349 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!--<meta name="description" content="Hadoop MapReduceでMahoutを使用してみる。事前にHadoop側にMahoutのライブラリをコピーしておく 
-Client.java 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Cluster;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.MapWritable;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.fs.Path;
-public class Client {
-   public static void main(String[] args) throws Exception {
-       Configuration conf = new Configuration();
-       Job job = Job.getInstance(new Cluster(conf), conf);
-       job.setJarByClass(Client.class);
-       job.setMapperClass(SampleMapper.class);
-       job.setReducerClass(SampleReducer.class);
-       job.setMapOutputKeyClass(LongWritable.class);
-       job.setMapOutputValueClass(NullWritable.class);
-       job.setOutputKeyClass(MapWritable.class);
-       job.setOutputValueClass(DoubleWritable.class);
-       job.setInputFormatClass(TextInputFormat.class);
-       job.setOutputFormatClass(SampleOutputFormat.class);
-       FileInputFormat.setInputPaths(job, new Path("input"));
-       FileOutputFormat.setOutputPath(job, new Path("output"));
-       System.exit(job.waitForCompletion(true) ? 0 : 1);
-   }
-}
-
-SampleMapper.java 
-import java.util.StringTokenizer;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.NullWritable;
-public class SampleMapper extends Mapper&lt;LongWritable, Text, LongWritable, NullWritable&gt; {
-   @Override
-   protected void map(LongWritable key, Text value, Context ctx) {
-       try {
-           StringTokenizer tokens = new StringTokenizer(value.toString(), ",");
-           while(tokens.hasMoreTokens()) {
-               String user = tokens.nextToken();
-               tokens.nextToken();
-               tokens.nextToken();
-               ctx.write(new LongWritable(Long.valueOf(user)), NullWritable.get());
-           }
-       } catch(Exception e) {
-           e.printStackTrace();
-       }
-   }
-}
-
-SampleReducer.java 
-import java.io.IOException;
-import java.io.File;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.MapWritable;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
-import org.apache.mahout.cf.taste.common.TasteException;
-public class SampleReducer extends Reducer&lt;LongWritable, NullWritable, MapWritable, DoubleWritable&gt; {
-   private DataModel model;
-   private LogLikelihoodSimilarity similar;
-   @Override
-   protected void setup(Context ctx) throws IOException {
-       Configuration conf = ctx.getConfiguration();
-       Path path = new Path("input/data.txt");
-       FileSystem fs = FileSystem.get(path.toUri(), conf);
-       File tmp = File.createTempFile("mahout", "txt");
-       tmp.deleteOnExit();
-       fs.copyToLocalFile(path, new Path(tmp.getAbsolutePath()));
-       model = new FileDataModel(tmp);
-       similar = new LogLikelihoodSimilarity(model);
-   }
-   @Override
-   protected void reduce(LongWritable key,Iterable&lt;NullWritable&gt; values, Context ctx) {
-       long user = key.get();
-       try {
-           LongPrimitiveIterator targets = model.getUserIDs();
-           while(targets.hasNext()) {
-               long target = targets.nextLong();
-               if(user == target) {
-                   continue;
-               }
-               Double distance = similar.userSimilarity(user, target);
-               if(!distance.isNaN()) {
-                   MapWritable w = new MapWritable();
-                   w.put(new Text("user"), new LongWritable(user));
-                   w.put(new Text("target"), new LongWritable(target));
-                   ctx.write(w,new DoubleWritable(distance));
-               }
-           }
-       } catch(TasteException e) {
-           e.printStackTrace();
-       } catch(IOException e) {
-           e.printStackTrace();
-       } catch(InterruptedException e) {
-           e.printStackTrace();
-       }
-   }
-}
-
-SampleOutputFormat.class 
-import java.io.IOException;
-import java.io.DataOutputStream;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.io.MapWritable;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FSDataOutputStream;
-public class SampleOutputFormat extends TextOutputFormat&lt;MapWritable, DoubleWritable&gt; {
-   @Override
-   public RecordWriter&lt;MapWritable, DoubleWritable&gt; getRecordWriter(TaskAttemptContext ctx) throws IOException, InterruptedException {
-       Configuration conf = ctx.getConfiguration();
-       Path path = getDefaultWorkFile(ctx, ".txt");
-       FileSystem fs = path.getFileSystem(conf);
-       FSDataOutputStream out = fs.create(path, true);
-       return new SampleRecordWriter(out);
-   }
-   private static class SampleRecordWriter extends LineRecordWriter&lt;MapWritable, DoubleWritable&gt; {
-       public SampleRecordWriter(DataOutputStream out) {
-           super(out);
-           try {
-               out.write("user\ttarget\tscore\n".getBytes());
-           } catch(IOException e) {
-               e.printStackTrace();
-           }
-       }
-       public synchronized void write(MapWritable key,DoubleWritable value) {
-           long user = ((LongWritable)key.get(new Text("user"))).get();
-           long target = ((LongWritable)key.get(new Text("target"))).get();
-           double distance = value.get();
-           try {
-               out.write(
-                   String.format(
-                       "%d\t%d\t%s\n",
-                       user,
-                       target,
-                       String.valueOf(distance)
-                   ).getBytes()
-               );
-           } catch(IOException e) {
-               e.printStackTrace();
-           }
-       }
-       public synchronized void close(TaskAttemptContext ctx) throws IOException {
-           super.close(null);
-       }
-   }
-}
-" />-->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@kinjou__j" />
-    <meta name="twitter:creator" content="@kinjou__j" />
-    <meta name="twitter:url" content="https://kinjouj.github.io" />
-    <meta name="twitter:title" content="Mahout (7) - HadoopでMahout -">
-    <meta name="twitter:description" content="Hadoop MapReduceでMahoutを使用してみる。事前にHadoop側にMahoutのライブラリをコピーしておく 
-Client.java 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Cluster;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.MapWritable;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.fs.Path;
-public class Client {
-   public static void main(String[] args) throws Exception {
-       Configuration conf = new Configuration();
-       Job job = Job.getInstance(new Cluster(conf), conf);
-       job.setJarByClass(Client.class);
-       job.setMapperClass(SampleMapper.class);
-       job.setReducerClass(SampleReducer.class);
-       job.setMapOutputKeyClass(LongWritable.class);
-       job.setMapOutputValueClass(NullWritable.class);
-       job.setOutputKeyClass(MapWritable.class);
-       job.setOutputValueClass(DoubleWritable.class);
-       job.setInputFormatClass(TextInputFormat.class);
-       job.setOutputFormatClass(SampleOutputFormat.class);
-       FileInputFormat.setInputPaths(job, new Path("input"));
-       FileOutputFormat.setOutputPath(job, new Path("output"));
-       System.exit(job.waitForCompletion(true) ? 0 : 1);
-   }
-}
-
-SampleMapper.java 
-import java.util.StringTokenizer;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.NullWritable;
-public class SampleMapper extends Mapper&lt;LongWritable, Text, LongWritable, NullWritable&gt; {
-   @Override
-   protected void map(LongWritable key, Text value, Context ctx) {
-       try {
-           StringTokenizer tokens = new StringTokenizer(value.toString(), ",");
-           while(tokens.hasMoreTokens()) {
-               String user = tokens.nextToken();
-               tokens.nextToken();
-               tokens.nextToken();
-               ctx.write(new LongWritable(Long.valueOf(user)), NullWritable.get());
-           }
-       } catch(Exception e) {
-           e.printStackTrace();
-       }
-   }
-}
-
-SampleReducer.java 
-import java.io.IOException;
-import java.io.File;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.MapWritable;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
-import org.apache.mahout.cf.taste.common.TasteException;
-public class SampleReducer extends Reducer&lt;LongWritable, NullWritable, MapWritable, DoubleWritable&gt; {
-   private DataModel model;
-   private LogLikelihoodSimilarity similar;
-   @Override
-   protected void setup(Context ctx) throws IOException {
-       Configuration conf = ctx.getConfiguration();
-       Path path = new Path("input/data.txt");
-       FileSystem fs = FileSystem.get(path.toUri(), conf);
-       File tmp = File.createTempFile("mahout", "txt");
-       tmp.deleteOnExit();
-       fs.copyToLocalFile(path, new Path(tmp.getAbsolutePath()));
-       model = new FileDataModel(tmp);
-       similar = new LogLikelihoodSimilarity(model);
-   }
-   @Override
-   protected void reduce(LongWritable key,Iterable&lt;NullWritable&gt; values, Context ctx) {
-       long user = key.get();
-       try {
-           LongPrimitiveIterator targets = model.getUserIDs();
-           while(targets.hasNext()) {
-               long target = targets.nextLong();
-               if(user == target) {
-                   continue;
-               }
-               Double distance = similar.userSimilarity(user, target);
-               if(!distance.isNaN()) {
-                   MapWritable w = new MapWritable();
-                   w.put(new Text("user"), new LongWritable(user));
-                   w.put(new Text("target"), new LongWritable(target));
-                   ctx.write(w,new DoubleWritable(distance));
-               }
-           }
-       } catch(TasteException e) {
-           e.printStackTrace();
-       } catch(IOException e) {
-           e.printStackTrace();
-       } catch(InterruptedException e) {
-           e.printStackTrace();
-       }
-   }
-}
-
-SampleOutputFormat.class 
-import java.io.IOException;
-import java.io.DataOutputStream;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.io.MapWritable;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FSDataOutputStream;
-public class SampleOutputFormat extends TextOutputFormat&lt;MapWritable, DoubleWritable&gt; {
-   @Override
-   public RecordWriter&lt;MapWritable, DoubleWritable&gt; getRecordWriter(TaskAttemptContext ctx) throws IOException, InterruptedException {
-       Configuration conf = ctx.getConfiguration();
-       Path path = getDefaultWorkFile(ctx, ".txt");
-       FileSystem fs = path.getFileSystem(conf);
-       FSDataOutputStream out = fs.create(path, true);
-       return new SampleRecordWriter(out);
-   }
-   private static class SampleRecordWriter extends LineRecordWriter&lt;MapWritable, DoubleWritable&gt; {
-       public SampleRecordWriter(DataOutputStream out) {
-           super(out);
-           try {
-               out.write("user\ttarget\tscore\n".getBytes());
-           } catch(IOException e) {
-               e.printStackTrace();
-           }
-       }
-       public synchronized void write(MapWritable key,DoubleWritable value) {
-           long user = ((LongWritable)key.get(new Text("user"))).get();
-           long target = ((LongWritable)key.get(new Text("target"))).get();
-           double distance = value.get();
-           try {
-               out.write(
-                   String.format(
-                       "%d\t%d\t%s\n",
-                       user,
-                       target,
-                       String.valueOf(distance)
-                   ).getBytes()
-               );
-           } catch(IOException e) {
-               e.printStackTrace();
-           }
-       }
-       public synchronized void close(TaskAttemptContext ctx) throws IOException {
-           super.close(null);
-       }
-   }
-}
-">
+    <meta name="description" content="" />
     <title>Mahout (7) - HadoopでMahout - - kinjouj.github.io</title>
     <link rel="canonical" href="https://kinjouj.github.io/2011/05/mahout-7-hadoop-mapreduce.html" />
     <link rel="author" href="http://www.hatena.ne.jp/KinjouJ" />
@@ -424,13 +82,6 @@ public class SampleOutputFormat extends TextOutputFormat&lt;MapWritable, DoubleW
               <a class="category" href="/categories/mahout.html">Mahout</a>
             </span>
           </p>
-          <div class="ad">
-            <section>
-              <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-              <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
-              <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </section>
-          </div>
           <div class="entry-content">
             <p>Hadoop MapReduceでMahoutを使用してみる。事前にHadoop側にMahoutのライブラリをコピーしておく</p>
 
@@ -634,6 +285,13 @@ public class SampleOutputFormat extends TextOutputFormat&lt;MapWritable, DoubleW
 }
 </code></pre>
           </div>
+          <div class="ad">
+            <section>
+              <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+              <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3593764998780061" data-ad-slot="5207980923" data-ad-format="auto"></ins>
+              <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </section>
+          </div>
           <p class="meta">
             <a class="float-start box-link" href="/2011/12/jquery-bind-arguments.html">jQuery.bindの引数</a>
             <a class="float-end box-link" href="/2011/05/mahout-6-clustering-recommender.html">Mahout (6) - ClusteringRecommender -</a>
@@ -735,7 +393,7 @@ public class SampleOutputFormat extends TextOutputFormat&lt;MapWritable, DoubleW
     <a href="/categories/perl.html">perl (2)</a>
   </li>
   <li>
-    <a href="/categories/java.html">Java (248)</a>
+    <a href="/categories/java.html">Java (253)</a>
   </li>
   <ul>
   <li>
@@ -778,7 +436,7 @@ public class SampleOutputFormat extends TextOutputFormat&lt;MapWritable, DoubleW
     <a href="/categories/doma.html">doma (5)</a>
   </li>
   <li>
-    <a href="/categories/hadoop.html">Hadoop (12)</a>
+    <a href="/categories/hadoop.html">Hadoop (17)</a>
   </li>
   <li>
     <a href="/categories/eclipse-birt.html">Eclipse BIRT (7)</a>
