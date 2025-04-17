@@ -11,8 +11,8 @@
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="" />
-    <title>postfixでDomainKeys - kinjouj.github.io</title>
-    <link rel="canonical" href="https://kinjouj.github.io/2009/12/2009-12-15-postfix-domainkeys.html" />
+    <title>postfixでSPF - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/2009/12/postfix-spf.html" />
     <link rel="author" href="http://www.hatena.ne.jp/KinjouJ" />
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
@@ -73,101 +73,40 @@
       </header>
       <div id="content">
         <div class="entry" style="width: 100%;margin: 10px">
-          <h3 class="entry-title">postfixでDomainKeys</h3>
+          <h3 class="entry-title">postfixでSPF</h3>
           <p class="meta">
-            2009-12-15T00:00:00+09:00
+            2009-12-14T00:00:00+09:00
             <span class="categories">
               <a class="category" href="/categories/postfix.html">postfix</a>
             </span>
           </p>
           <div class="entry-content">
-            <p>PostfixでDomainKeysを行う方法をメモ</p>
-
-<!--more-->
+            <p>PostfixでSPFを利用するメモ</p>
 
 <h4>インストール</h4>
 
-<p><a href="http://jason.long.name/dkfilter%E3%81%8B%E3%82%89DomainKeys">http://jason.long.name/dkfilterからDomainKeys</a> Filter dkfilterをダウンロードしてインストールする</p>
+<p>Postfixのインストールは省略。SPFのフィルタークライアントが<a href="http://cri.univ-tlse1.fr/documentations/spam/outils/spf.pl">http://cri.univ-tlse1.fr/documentations/spam/outils/spf.pl</a>。これをダウンロード</p>
 
-<h4>秘密鍵、公開鍵を生成</h4>
-<pre class="line-numbers"><code># 秘密鍵を生成
-openssl genrsa -out private.key 1024
+<p>※PerlのMail::SPF::Query等が必要になる。どっかに配置して実行権限を与えておく</p>
 
-# 公開鍵を生成
-openssl rsa -in private.key -pubout -out public.key
+<h4>DNSレコードにTXTを登録</h4>
+<pre class="line-numbers"><code class="language-dns")>hoge.com.    IN    TXT    "v=spf1 +a:hoge.com ~all"
 </code></pre>
-<h4>DNSレコードの設定</h4>
+<p>を追加してbindを再起動</p>
 
-<p>domainkeyとselector1._domainkeyの二つが必要になるので、以下のように設定を行う</p>
-<pre class="line-numbers"><code># _domainkey TXTレコードを設定
-_domainkey IN TXT "t=y; o=~"
+<h4>/etc/postfix/master.cfを設定</h4>
 
-# selector1._domainkey TXTレコードを設定
-selector1._domainkey IN TXT k=rsa; t=y; p=公開鍵内のデータを指定
+<p>以下をmaster.cfに追加する</p>
+<pre class="line-numbers"><code>policy unix - n n - - spawn user=nobody argv=/usr/bin/perl /path/to/spf.pl
 </code></pre>
-<h4>受信時のDomainKeysフィルターを起動</h4>
+<h4>/etc/postfix/main.cfを設定</h4>
 
-<p>メールを受信する際にDomainKeysの検証を行うフィルターを起動</p>
-<pre class="line-numbers"><code>dkfilter.in --hostname=ドメイン名 127.0.0.1:10025 127.0.0.1:10026
-</code></pre>
-<p>** 送信時のDomainKeysフィルターを起動</p>
-<pre class="line-numbers"><code>dkfilter.out \
-
-    # 秘密鍵のパスを指定
-    --keyfile=/etc/postfix/dk/private.key \
-
-    # DomainKeysのセレクタ名を指定
-    --selector=selector1 \
-    --domain=kdeveloper.biz \
-    --method=nofws \
-    --headers \
-    127.0.0.1:10027 127.0.0.1:10028
-</code></pre>
-<p>** /etc/postfix/master.cfを設定</p>
-<pre class="line-numbers"><code>smtp inet n - n - - smtpd
-   # 追加
-   -o smtpd_proxy_filter=127.0.0.1:10025
-
-# 設定していない場合は追加
-submission inet n - n - - smtpd
-   -o smtpd_sasl_auth_enable=yes
-   -o smtpd_sasl_security_options=noanonymous
-   -o smtpd_client_restrictions=
-   -o smtpd_helo_restrictions=
-   -o smtpd_sender_restrictions=
-   -o smtpd_recipient_restrictions=permit_sasl_authenticated,reject
-   -o smtpd_data_restrictions=
-   -o smtpd_etrn_restrictions=reject
-   -o content_filter=dksign:[127.0.0.1]:10027
-
-# 追加
-dksign unix - - n - 10 smtp
-   -o smtp_send_xforward_command=yes
-   -o smtp_use_tls=no
-
-# 以降全て追加
-localhost:10026 inet n - n - - smtpd
-   -o smtpd_authorized_xforward_hosts=127.0.0.0/8
-   -o smtpd_client_restrictions=
-   -o smtpd_helo_restrictions=
-   -o smtpd_sender_restrictions=
-   -o smtpd_recipient_restrictions=permit_mynetworks,reject
-   -o smtpd_data_restrictions=
-   -o mynetworks=127.0.0.0/8
-   -o receive_override_options=no_unknown_recipient_checks
-   -o smtpd_use_tls=no
-
-localhost:10028 inet n  - n - 10 smtpd
-   -o smtpd_authorized_xforward_hosts=127.0.0.0/8
-   -o smtpd_client_restrictions=
-   -o smtpd_helo_restrictions=
-   -o smtpd_sender_restrictions=
-   -o smtpd_recipient_restrictions=permit_mynetworks,reject
-   -o smtpd_data_restrictions=
-   -o mynetworks=127.0.0.0/8
-   -o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
-   -o content_filter=
-   -o smtpd_use_tls=no
+<p>smtpd<em>recipient</em>restrictionsを以下のように設定する</p>
+<pre class="line-numbers"><code class="language-ini")>smtpd_recipient_restrictions = \
+    permit_mynetworks, \
+    permit_sasl_authenticated, \
+    check_policy_service unix:private/policy, \
+    reject_unauth_destination
 </code></pre>
           </div>
           <div class="ad">
@@ -177,8 +116,9 @@ localhost:10028 inet n  - n - 10 smtpd
               <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </section>
           </div>
-          <p class="meta">
-            <a class="float-end box-link" href="/2009/12/2009-12-14-postfix-spf.html">postfixでSPF</a>
+          <p class="meta" style="margin-top: 30px">
+            <a class="float-start box-link" href="/2009/12/postfix-domainkeys.html">postfixでDomainKeys</a>
+            <a class="float-end box-link" href="/2009/12/syslog-ng.html">syslog-ngでログ転送</a>
           </p>
           <div style="clear: both"></div>
         </div>
@@ -198,7 +138,7 @@ localhost:10028 inet n  - n - 10 smtpd
                 <h4>Recent Posts</h4>
                 <ul id="recent_posts">
                   <li class="post">
-                    <a href="/2025/04/2025-04-13-programming-education-problem.html">プログラミング教育はただの利権</a>
+                    <a href="/2025/04/programming-education-problem.html">プログラミング教育はただの利権</a>
                   </li>
                   <li class="post">
                     <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
