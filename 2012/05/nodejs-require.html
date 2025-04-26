@@ -83,13 +83,7 @@
 <li>requireで参照された場合に特定の処理を行わない</li>
 <li>nodeコマンドによるスクリプト実行だと通常どおり処理を行う</li>
 </ul>
-
-<p>というもの。なぜこういうのが必要になったのかと言うと、単純に実行を行うスクリプトとそれに伴うオブジェクト定義等を行うスクリプト(module.exportsする)を分けてしまえば良いだけの話になるのだけど、それをする為だけにわざわざスクリプト別にするという明らかにめんどくさい事の必要性ってないよねって思う所。んで、そうすると「じゃあこれどうやって単体テストするの?」って話になるわけで。なので1と2で処理を分ける、つまりrequireをした時は特定の実行コンテキストに及ぶ処理は行わない、そうする事でオブジェクト定義側を単体テストで流し込む事が出来るでしょうと。じゃあそれNode.jsでどうやるのって話。ドキュメントにそれらしいのがある</p>
-
-<p><a href="http://nodejs.org/docs/v0.6.15/api/all.html#all_accessing_the_main_module">http://nodejs.org/docs/v0.6.15/api/all.html#all_accessing_the_main_module</a></p>
-
-<p>「require.main === module」とい式自体がnodeコマンドにより実行された場合はtrueで、逆にrequireを使って処理された場合はfalseになるっぽい。という感じでやれば良いらしい。という事でテスト的に書いてみると</p>
-
+<p>というもの。なぜこういうのが必要になったのかと言うと、単純に実行を行うスクリプトとそれに伴うオブジェクト定義等を行うスクリプト(module.exportsする)を分けてしまえば良いだけの話になるのだけど、それをする為だけにわざわざスクリプト別にするという明らかにめんどくさい事の必要性ってないよねって思う所。んで、そうすると「じゃあこれどうやって単体テストするの?」って話になるわけで。なので1と2で処理を分ける、つまりrequireをした時は特定の実行コンテキストに及ぶ処理は行わない、そうする事でオブジェクト定義側を単体テストで流し込む事が出来るでしょうと。じゃあそれNode.jsでどうやるのって話。ドキュメントにそれらしいのがある</p><br /><p><a href="http://nodejs.org/docs/v0.6.15/api/all.html#all_accessing_the_main_module">http://nodejs.org/docs/v0.6.15/api/all.html#all_accessing_the_main_module</a></p><br /><p>「require.main === module」とい式自体がnodeコマンドにより実行された場合はtrueで、逆にrequireを使って処理された場合はfalseになるっぽい。という感じでやれば良いらしい。という事でテスト的に書いてみると</p><br />
 <!--more-->
 <pre class="line-numbers"><code class="language-js")>if (require.main !== module) {
   module.exports = function() {
@@ -100,11 +94,7 @@
 }
 
 console.log("hoge fuga foobar");
-</code></pre>
-<p>ってのを書いて、nodeコマンドでは通常どおり処理出来るのに対してこのスクリプトをrequireを使って読み込もうとするとmodule.exportsで指定されているのが返ってくる</p>
-
-<p>んまぁ要件バッチリな事だと思うのでこれを採用しようと思います</p>
-
+</code></pre><p>ってのを書いて、nodeコマンドでは通常どおり処理出来るのに対してこのスクリプトをrequireを使って読み込もうとするとmodule.exportsで指定されているのが返ってくる</p><br /><p>んまぁ要件バッチリな事だと思うのでこれを採用しようと思います</p><br />
               </div>
             </div>
           </div>

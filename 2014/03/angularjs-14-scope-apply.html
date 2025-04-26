@@ -79,14 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>参考: <a href="http://angularjsninja.com/blog/2013/12/27/angularjs-apply/">AngularJS のデータバインドを支える $apply</a></p>
-
-<p>公式リファレンス: <a href="http://docs.angularjs.org/api/ng/type/$rootScope.Scope">http://docs.angularjs.org/api/ng/type/$rootScope.Scope</a></p>
-
-<p>angular.jsにある$httpを使ってXHRするようなケースパターンだと$applyは内部的に行われているらしいので必要ないらしいのですが、$httpを使わずに独自でXHRを使ってHTTPリクエストを行いレスポンスを取得して結果をビューにバインドしたいようなケースの場合には$applyをしないとデータバインドが正常に行われない模様。というか行われないではなくてされてはいるけど、それが反映されない状態になってるだけなのかなと</p>
-
-<p>という事でやってみた。ちょっと前に書いてたTwitter APIを使ったChrome拡張なやつでangular.jsを使ってはいるが$httpを使ってないケースなのでこれがちょうど良いのではと</p>
-
+                <p>参考: <a href="http://angularjsninja.com/blog/2013/12/27/angularjs-apply/">AngularJS のデータバインドを支える $apply</a></p><br /><p>公式リファレンス: <a href="http://docs.angularjs.org/api/ng/type/$rootScope.Scope">http://docs.angularjs.org/api/ng/type/$rootScope.Scope</a></p><br /><p>angular.jsにある$httpを使ってXHRするようなケースパターンだと$applyは内部的に行われているらしいので必要ないらしいのですが、$httpを使わずに独自でXHRを使ってHTTPリクエストを行いレスポンスを取得して結果をビューにバインドしたいようなケースの場合には$applyをしないとデータバインドが正常に行われない模様。というか行われないではなくてされてはいるけど、それが反映されない状態になってるだけなのかなと</p><br /><p>という事でやってみた。ちょっと前に書いてたTwitter APIを使ったChrome拡張なやつでangular.jsを使ってはいるが$httpを使ってないケースなのでこれがちょうど良いのではと</p><br />
 <!--more-->
 <pre class="line-numbers"><code class="language-js")>angular.module("twitterApp", [])
   .controller("twitter", function($scope) {
@@ -102,31 +95,21 @@
       $scope.navHome();
     });
   });
-</code></pre>
-<p>っていう感じなコントローラーでnavHomeな所でホームタイムラインを取得してバインドするような形になっているけど、これデータバインドは正常に行われない。まぁ$scope.$applyをすれば良いんですが</p>
-<pre class="line-numbers"><code class="language-js")>twitter.home_timeline(function(tweets) {
+</code></pre><p>っていう感じなコントローラーでnavHomeな所でホームタイムラインを取得してバインドするような形になっているけど、これデータバインドは正常に行われない。まぁ$scope.$applyをすれば良いんですが</p><br /><pre class="line-numbers"><code class="language-js")>twitter.home_timeline(function(tweets) {
   $scope.$apply(function() {
     $scope.tweets = tweets;
   });
 });
-</code></pre>
-<p>っていう感じにすれば良い。で$scope.$applyって何をしているのかというと</p>
-
+</code></pre><p>っていう感じにすれば良い。で$scope.$applyって何をしているのかというと</p><br />
 <ul>
 <li>  $apply(m) なmを$scope.evalする</li>
 <li>  finallyで$scope.$digestする</li>
 </ul>
-
-<p>っていう所っぽい。なので</p>
-<pre class="line-numbers"><code class="language-js")>twitter.home_timeline(function(tweets) {
+<p>っていう所っぽい。なので</p><br /><pre class="line-numbers"><code class="language-js")>twitter.home_timeline(function(tweets) {
   $scope.tweets = tweets;
   $scope.$digest();
 });
-</code></pre>
-<p>っていう感じで$applyしなくても最後に(そこはfinallyなりで)$scope.$digestを呼べば良い模様</p>
-
-<p>んまぁ実際になぜデータバインドが正常に行われないのが原因が不透明で微妙だったがこの参考記事を見て分かったような気がする</p>
-
+</code></pre><p>っていう感じで$applyしなくても最後に(そこはfinallyなりで)$scope.$digestを呼べば良い模様</p><br /><p>んまぁ実際になぜデータバインドが正常に行われないのが原因が不透明で微妙だったがこの参考記事を見て分かったような気がする</p><br />
               </div>
             </div>
           </div>

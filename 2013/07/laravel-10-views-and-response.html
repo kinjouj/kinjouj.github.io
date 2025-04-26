@@ -79,19 +79,14 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="http://laravel.com/docs/responses">http://laravel.com/docs/responses</a> 辺りのドキュメント読みつつやってみる的な事を遂行。部分的な事(ResponseとwithCookieとか)は既にやってるので省略。という事で主な所はViewsに関係する所くらいか</p>
-
+                <p><a href="http://laravel.com/docs/responses">http://laravel.com/docs/responses</a> 辺りのドキュメント読みつつやってみる的な事を遂行。部分的な事(ResponseとwithCookieとか)は既にやってるので省略。という事で主な所はViewsに関係する所くらいか</p><br />
 <!--more-->
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
 Route::get("/hoge", function() {
     return Response::view("hoge", array("name" =&gt; "hoge"));
 });
-</code></pre>
-<p>とか出来る。でView::makeした結果を返そうがResponse::viewでViewを作ったResponseを返そうが結局はResponseにViewが内包されるような形で処理されるのかも。んまぁここら辺な論理的な所はソース見てないので不明</p>
-
-<p>でまぁ単純なビューなレスポンスの出し方は置いといて、View::shareをしないとイケないケースっていうどういう場合だろうと思ったら、View::make-&gt;nestで処理される子のViewに置いては親側で使用しているビュー変数等にはアクセス出来ない? んだろうと思ってるのだけど、例えば親ビューでも子ビューでも同一の値を共有したい等の場合に使うんじゃないかと。という事で</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>とか出来る。でView::makeした結果を返そうがResponse::viewでViewを作ったResponseを返そうが結局はResponseにViewが内包されるような形で処理されるのかも。んまぁここら辺な論理的な所はソース見てないので不明</p><br /><p>でまぁ単純なビューなレスポンスの出し方は置いといて、View::shareをしないとイケないケースっていうどういう場合だろうと思ったら、View::make-&gt;nestで処理される子のViewに置いては親側で使用しているビュー変数等にはアクセス出来ない? んだろうと思ってるのだけど、例えば親ビューでも子ビューでも同一の値を共有したい等の場合に使うんじゃないかと。という事で</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 class TestController extends Controller {
     public function show($id) {
@@ -101,61 +96,41 @@ class TestController extends Controller {
         )-&gt;nest("child", "fuga");
     }
 }
-</code></pre>
-<p>っていうコントローラーを作って</p>
-<pre class="line-numbers"><code class="language-php")>@extends("layout")
+</code></pre><p>っていうコントローラーを作って</p><br /><pre class="line-numbers"><code class="language-php")>@extends("layout")
 @section("content")
 {% raw %}{{ $name }}{% endraw %}
 {% raw %}{{ $child }}{% endraw %}
 @stop
-</code></pre>
-<p>っていうhoge.blade.phpなビューを作る。で$childな部分はnestで指定された子のビューをレンダリングした結果? を持つんだと思うのでそのまま出力評価として出す</p>
-<pre class="line-numbers"><code class="language-php")>{% raw %}{{ $name }} {% endraw %}
-</code></pre>
-<p>fuga.blade.phpではこうなってる。で例えばこのまま実行すると「Undefined variable: name」っていう風になる。んまぁView::makeで指定したビュー変数は子ビューまでには作用しないっていう感じかと。んまぁView::make-&gt;nestの第3引数に指定する事も出来る。</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>っていうhoge.blade.phpなビューを作る。で$childな部分はnestで指定された子のビューをレンダリングした結果? を持つんだと思うのでそのまま出力評価として出す</p><br /><pre class="line-numbers"><code class="language-php")>{% raw %}{{ $name }} {% endraw %}
+</code></pre><p>fuga.blade.phpではこうなってる。で例えばこのまま実行すると「Undefined variable: name」っていう風になる。んまぁView::makeで指定したビュー変数は子ビューまでには作用しないっていう感じかと。んまぁView::make-&gt;nestの第3引数に指定する事も出来る。</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 return View::make(
     "hoge",
     array("name" =&gt; "hoge")
 )-&gt;nest("child", "fuga", array("name" =&gt; "fuga"));
-</code></pre>
-<p>的な感じで指定する事も出来るけど、上でも書いたように親ビューと子ビューでレンダリングに使用するビュー変数はView::shareを使う事で共有化する事も出来る模様。という事で上記を</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>的な感じで指定する事も出来るけど、上でも書いたように親ビューと子ビューでレンダリングに使用するビュー変数はView::shareを使う事で共有化する事も出来る模様。という事で上記を</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 View::share("name", "hoge fuga foobar");
 
 return View::make("hoge")-&gt;nest("child", "fuga");
-</code></pre>
-<p>っていう感じにするとhoge.blade.phpとfuga.blade.phpで作用するビュー変数の$nameは同一の「hoge fuga foobar」になるっていう感じ。んまぁ全体で共有すべきビュー変数等はView::shareを使って共有化する事が出来る感じかなと。ちなみにapp/start/global.phpとかでもView::shareは出来る模様</p>
-
-<p>でView::composer。composerを使えばビューが生成された際の処理を行える模様。例えば上記でView::shareをせずに</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>っていう感じにするとhoge.blade.phpとfuga.blade.phpで作用するビュー変数の$nameは同一の「hoge fuga foobar」になるっていう感じ。んまぁ全体で共有すべきビュー変数等はView::shareを使って共有化する事が出来る感じかなと。ちなみにapp/start/global.phpとかでもView::shareは出来る模様</p><br /><p>でView::composer。composerを使えばビューが生成された際の処理を行える模様。例えば上記でView::shareをせずに</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 View::composer("fuga", function($view) {
     $view-&gt;with("name", "fuga");
 });
 
 return View::make("hoge", array("name" =&gt; "hoge"))-&gt;nest("child", "fuga");
-</code></pre>
-<p>というようにfugaなビューが生成される際にあたっての処理を利用できるっていう感じかと。でView::composerの第2引数にはクラス名を指定出来るので、Composerなクラスを作っちゃって処理する事も可能。という事でapp/composersっていうディレクトリを作ってapp/start/global.phpで</p>
-<pre class="line-numbers"><code class="language-php")>ClassLoader::addDirectories(array(
+</code></pre><p>というようにfugaなビューが生成される際にあたっての処理を利用できるっていう感じかと。でView::composerの第2引数にはクラス名を指定出来るので、Composerなクラスを作っちゃって処理する事も可能。という事でapp/composersっていうディレクトリを作ってapp/start/global.phpで</p><br /><pre class="line-numbers"><code class="language-php")>ClassLoader::addDirectories(array(
     app_path()."/composers"
 ));
-</code></pre>
-<p>っていう設定をしておく事でapp/composersにクラスな.phpを置く事で利用できるようにする</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>っていう設定をしておく事でapp/composersにクラスな.phpを置く事で利用できるようにする</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 class FugaComposer {
     public function compose($view) {
         $view-&gt;with("name", "fuga");
     }
 }
-</code></pre>
-<p>引数にViewを持つcomposeっていうメソッド(引数の$viewの型はIlluminate\View\View)を実装。んまぁ特につっこみどころ無さそうなので(ry</p>
-
-<p>とりまぁ今回のセクションはこんなもんで。一応余談がありますので</p>
-
+</code></pre><p>引数にViewを持つcomposeっていうメソッド(引数の$viewの型はIlluminate\View\View)を実装。んまぁ特につっこみどころ無さそうなので(ry</p><br /><p>とりまぁ今回のセクションはこんなもんで。一応余談がありますので</p><br />
 <h4>余談1: リダイレクト時にflashオブジェクトを利用できる</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -165,9 +140,7 @@ Route::get("/", function() {
         array("id" =&gt; 1)
     )-&gt;with("message", "hoge");
 });
-</code></pre>
-<p>ってな感じでwithでflashオブジェクトを指定出来る模様</p>
-
+</code></pre><p>ってな感じでwithでflashオブジェクトを指定出来る模様</p><br />
 <h4>余談2: JSONレスポンスを出す</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -176,21 +149,13 @@ class EntryController extends Controller {
         return Response::json(["hoge", "fuga", "foobar"]);
     }
 }
-</code></pre>
-<p>Response::jsonの返り値はIlluminate\Http\JsonResponseな模様だけど、こいつの実体自体は<a href="http://api.symfony.com/2.2/Symfony/Component/HttpFoundation/JsonResponse.html">Symfony\Component\HttpFoundation\JsonResponse</a>な模様。でSymfonyなJsonResponse自体も<a href="http://api.symfony.com/2.0/Symfony/Component/HttpFoundation/Response.html">Symfony\Component\HttpFoundation\Response</a>が実体なのでヘッダーとか書き換えるようなケースとかだと</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>Response::jsonの返り値はIlluminate\Http\JsonResponseな模様だけど、こいつの実体自体は<a href="http://api.symfony.com/2.2/Symfony/Component/HttpFoundation/JsonResponse.html">Symfony\Component\HttpFoundation\JsonResponse</a>な模様。でSymfonyなJsonResponse自体も<a href="http://api.symfony.com/2.0/Symfony/Component/HttpFoundation/Response.html">Symfony\Component\HttpFoundation\Response</a>が実体なのでヘッダーとか書き換えるようなケースとかだと</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 $response = Response::json([]);
 $response-&gt;headers-&gt;set("HeaderName", "HeaderValue");
-</code></pre>
-<p>というような感じかなと。あとsetCallbackっていうメソッドでコールバック先を指定するとJSONPな出力になる模様</p>
-
+</code></pre><p>というような感じかなと。あとsetCallbackっていうメソッドでコールバック先を指定するとJSONPな出力になる模様</p><br />
 <h4>余談3: Content-Dispositionなレスポンスを出す</h4>
-
-<p>デフォルトだとattachmentになる模様だけど、Response::downloadっていうメソッドを使えば可能な模様。でその実体自体は<a href="http://laravel.com/api/class-Illuminate.Support.Facades.Response.html">Illuminate\Support\Facades\Response</a>でこれ自体も<a href="http://api.symfony.com/2.3/Symfony/Component/HttpFoundation/BinaryFileResponse.html">Symfony\Component\HttpFoundation\BinaryFileResponse</a>な模様</p>
-
-<p>つっこみどころはあるんだけど思ってるだけで証明出来てないので(ry</p>
-
+<p>デフォルトだとattachmentになる模様だけど、Response::downloadっていうメソッドを使えば可能な模様。でその実体自体は<a href="http://laravel.com/api/class-Illuminate.Support.Facades.Response.html">Illuminate\Support\Facades\Response</a>でこれ自体も<a href="http://api.symfony.com/2.3/Symfony/Component/HttpFoundation/BinaryFileResponse.html">Symfony\Component\HttpFoundation\BinaryFileResponse</a>な模様</p><br /><p>つっこみどころはあるんだけど思ってるだけで証明出来てないので(ry</p><br />
               </div>
             </div>
           </div>

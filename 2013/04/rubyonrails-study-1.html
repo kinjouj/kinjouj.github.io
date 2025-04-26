@@ -79,27 +79,14 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>色々演習的な事やってみようかと、とりあえずCSRFだとかヴァリデーターとかは今回はノータッチで</p>
-
+                <p>色々演習的な事やってみようかと、とりあえずCSRFだとかヴァリデーターとかは今回はノータッチで</p><br />
 <!--more-->
-
-<p>仕様は</p>
-
-<p><img src="/images/2012/01/20120531134010.png" loading="lazy" /></p>
-
-<p>な感じなのを作成したり削除したり更新したり等をやってみるのだけど、チェックポイントとして</p>
-
+<p>仕様は</p><br /><p><img src="/images/2012/01/20120531134010.png" loading="lazy" /></p><br /><p>な感じなのを作成したり削除したり更新したり等をやってみるのだけど、チェックポイントとして</p><br />
 <ul>
 <li>削除時にはエントリーとカテゴリーを結びつけな中間参照を保管しているentry_categoryテーブルからもデータを消す</li>
 <li>更新時に中間参照を再構築する</li>
 </ul>
-
-<p>ビュー的な所はかかないけど</p>
-
-<p><img src="/images/2013/04/20130423111524.jpg" loading="lazy" /></p>
-
-<p>んな感じで</p>
-
+<p>ビュー的な所はかかないけど</p><br /><p><img src="/images/2013/04/20130423111524.jpg" loading="lazy" /></p><br /><p>んな感じで</p><br />
 <h4>app/models/category.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>class Category &lt; ActiveRecord::Base
   has_and_belongs_to_many :entry, :join_table =&gt; "entry_category"
@@ -110,9 +97,7 @@
     "category"
   end
 end
-</code></pre>
-<p>上記仕様な画像中には書かれて無いけど、Categoryにはparentっていうカラムでカテゴリー自体が参照する親カテゴリーなIDを持つ。それをhas_manyしてサブカテゴリーを参照できるように。例的に「Category.find(ID).sub_category」すると</p>
-
+</code></pre><p>上記仕様な画像中には書かれて無いけど、Categoryにはparentっていうカラムでカテゴリー自体が参照する親カテゴリーなIDを持つ。それをhas_manyしてサブカテゴリーを参照できるように。例的に「Category.find(ID).sub_category」すると</p><br />
 <pre>
 [
   #&lt;Category id: 5, name: "JavaScript", parent: 15, sort: 2>,
@@ -123,19 +108,11 @@ end
   #&lt;Category id: 19, name: "Algorithm", parent: 15, sort: 3>
 ]
 </pre>
-
-<p>な感じでカテゴリーが持つ子カテゴリーを参照できるようにと。sortはやつは今回は無視</p>
-
-<p>で更にbelongs_toでもってカテゴリーが参照されている親カテゴリーを認識出来るように。こちらも例的に「Category.find(ID).parent_category」をすると(上記でID=5は親が15になっているので)</p>
-
+<p>な感じでカテゴリーが持つ子カテゴリーを参照できるようにと。sortはやつは今回は無視</p><br /><p>で更にbelongs_toでもってカテゴリーが参照されている親カテゴリーを認識出来るように。こちらも例的に「Category.find(ID).parent_category」をすると(上記でID=5は親が15になっているので)</p><br />
 <pre>
 #&lt;Category id: 15, name: "その他", parent: 0, sort: 8>
 </pre>
-
-<p>というように親カテゴリの参照が取れる。無ければnil</p>
-
-<p>まぁ今回そこまったく使ってないのであくまで余談的なネタとして</p>
-
+<p>というように親カテゴリの参照が取れる。無ければnil</p><br /><p>まぁ今回そこまったく使ってないのであくまで余談的なネタとして</p><br />
 <h4>app/models/entry.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>class Entry &lt; ActiveRecord::Base
   has_and_belongs_to_many :category, :join_table =&gt; "entry_category"
@@ -162,9 +139,7 @@ end
       category.clear
     end
 end
-</code></pre>
-<p>categoryに代入な辺りで文字列をカンマ区切りでスプリットして、それからCategoryな参照を取得する処理を突っ込む。で更新する際に再構築しないと重複する部分が出てきてしまうので、clearする事で中間参照なデータを消せる模様。それを利用して、削除する際にも中間参照なデータをclearで消すっていう感じかと</p>
-
+</code></pre><p>categoryに代入な辺りで文字列をカンマ区切りでスプリットして、それからCategoryな参照を取得する処理を突っ込む。で更新する際に再構築しないと重複する部分が出てきてしまうので、clearする事で中間参照なデータを消せる模様。それを利用して、削除する際にも中間参照なデータをclearで消すっていう感じかと</p><br />
 <h4>app/controllers/entry_controller.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>class EntryController &lt; ApplicationController
 
@@ -205,9 +180,7 @@ end
     redirect_to :action =&gt; :index
   end
 end
-</code></pre>
-<p>特にあーだらこーだら書く必要ないかなと</p>
-
+</code></pre><p>特にあーだらこーだら書く必要ないかなと</p><br />
               </div>
             </div>
           </div>

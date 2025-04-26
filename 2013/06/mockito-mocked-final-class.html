@@ -77,37 +77,28 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>※解釈が正しいかは微妙なのであしからず</p>
-
-<p>通常Mockitoではfinalクラス等はモック化出来ない。やってもエラーになるのだけど、それを無茶ぶりでやっちゃう方法がある模様</p>
-
+                <p>※解釈が正しいかは微妙なのであしからず</p><br /><p>通常Mockitoではfinalクラス等はモック化出来ない。やってもエラーになるのだけど、それを無茶ぶりでやっちゃう方法がある模様</p><br />
 <!--more-->
 
 <ul>
 <li>ClassLoaderを継承したクラスを作る。loadClassをオーバーライドしてモック化を対象とするクラスのターゲットにfinal修飾子を削除したクラスを定義させてそのClassを返すように実装</li>
 <li>Mockito.mockで指定するClassを上記のClassLoader経由で取得する。</li>
 </ul>
-
-<p>っていう工程を行う事で可能らしい。後述する参考ではPowerMockitoを使ってる模様。とりまぁやってみるか</p>
-
+<p>っていう工程を行う事で可能らしい。後述する参考ではPowerMockitoを使ってる模様。とりまぁやってみるか</p><br />
 <h4>モックするクラス</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
 public interface Sample {
     String say();
 }
-</code></pre>
-<p>なインターフェースがあって</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>なインターフェースがあって</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 public final class SampleImpl implements Sample {
     public String say() {
         return "hoge";
     }
 }
-</code></pre>
-<p>というようなクラスを対象にする</p>
-
+</code></pre><p>というようなクラスを対象にする</p><br />
 <h4>ClassLoaderを継承したクラスを作成</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -153,9 +144,7 @@ public class SampleClassLoader extends ClassLoader {
         return defineClass(name, b, 0, b.length);
     }
 }
-</code></pre>
-<p>利用するにはjavassistが必要</p>
-
+</code></pre><p>利用するにはjavassistが必要</p><br />
 <h4>テストを書く</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -186,23 +175,15 @@ public class SampleTestCase {
         assertThat(sample.say(), is("hoge")); // fail
     }
 }
-</code></pre>
-<p>っていう感じ。で</p>
-<pre class="line-numbers"><code class="language-java")>when(sample.say()).thenCallRealMethod();
-</code></pre>
-<p>とかにしとけばテストは通る。でテストスタックトレース的には</p>
-
+</code></pre><p>っていう感じ。で</p><br /><pre class="line-numbers"><code class="language-java")>when(sample.say()).thenCallRealMethod();
+</code></pre><p>とかにしとけばテストは通る。でテストスタックトレース的には</p><br />
 <pre>
 java.lang.AssertionError:
 Expected: is "hoge"
      but: was "fuga"
 </pre>
-
-<p>んで</p>
-<pre class="line-numbers"><code class="language-java")>Sample sample = (Sample)mock(SampleImpl.class);
-</code></pre>
-<p>なんていうのをやるとどうなるか</p>
-
+<p>んで</p><br /><pre class="line-numbers"><code class="language-java")>Sample sample = (Sample)mock(SampleImpl.class);
+</code></pre><p>なんていうのをやるとどうなるか</p><br />
 <pre>
 org.mockito.exceptions.base.MockitoException:
 Cannot mock/spy class sample.SampleImpl
@@ -211,15 +192,9 @@ Mockito cannot mock/spy following:
   - anonymous classes
   - primitive types
 </pre>
-
-<p>というようにfinal classはmock出来ねーよって怒られる。っていうような感じでfinalクラスをmock化する方法があったのでやってみた程度で</p>
-
-<p>参考: <a href="http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests">http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests</a></p>
-
+<p>というようにfinal classはmock出来ねーよって怒られる。っていうような感じでfinalクラスをmock化する方法があったのでやってみた程度で</p><br /><p>参考: <a href="http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests">http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests</a></p><br />
 <h4>追記</h4>
-
-<p><a href="/2013/10/mockito-mocked-final-class-2.html">続きとなる別アプローチ</a>を書きました</p>
-
+<p><a href="/2013/10/mockito-mocked-final-class-2.html">続きとなる別アプローチ</a>を書きました</p><br />
               </div>
             </div>
           </div>

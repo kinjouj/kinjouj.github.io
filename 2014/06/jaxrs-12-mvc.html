@@ -79,22 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#mvc">https://jersey.java.net/documentation/latest/user-guide.html#mvc</a></p>
-
-<p>参考: <a href="http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743">http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743</a></p>
-
-<p>jersey-mvcなAPIを使えばViewableをぶん投げたりする事によりテンプレートエンジンによりレスポンスを出したりする事も出来る。※現時点で公式でサポートされているテンプレートエンジンがfreemarkerとmustacheとjsp</p>
-
-<p>っていう事でやってみる</p>
-
+                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#mvc">https://jersey.java.net/documentation/latest/user-guide.html#mvc</a></p><br /><p>参考: <a href="http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743">http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743</a></p><br /><p>jersey-mvcなAPIを使えばViewableをぶん投げたりする事によりテンプレートエンジンによりレスポンスを出したりする事も出来る。※現時点で公式でサポートされているテンプレートエンジンがfreemarkerとmustacheとjsp</p><br /><p>っていう事でやってみる</p><br />
 <!--more-->
 
 <h4>その前に</h4>
-
-<p>jersey-mvc-jspなJSPをレンダリングする仕組みを使う場合にテスト書くとエラーを引き起こす。※freemarkerとmustacheでは起きない(HttpServletRequest等をマッピングしない為かと)</p>
-
-<p>っていう事でthymeleafを使ってテンプレートエンジンによりレスポンスを送信する仕組みのTemplateProcessorを作りながらやる</p>
-
+<p>jersey-mvc-jspなJSPをレンダリングする仕組みを使う場合にテスト書くとエラーを引き起こす。※freemarkerとmustacheでは起きない(HttpServletRequest等をマッピングしない為かと)</p><br /><p>っていう事でthymeleafを使ってテンプレートエンジンによりレスポンスを送信する仕組みのTemplateProcessorを作りながらやる</p><br />
 <h4>依存性</h4>
 <pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
 apply plugin: "jetty"
@@ -120,9 +109,7 @@ dependencies {
     testCompile "org.springframework:spring-test:+"
     testCompile "org.hamcrest:hamcrest-all:+"
 }
-</code></pre>
-<p>んでまずThymeleafなテンプレートエンジンを使ってレスポンスを処理するのを作る</p>
-
+</code></pre><p>んでまずThymeleafなテンプレートエンジンを使ってレスポンスを処理するのを作る</p><br />
 <h4>ThymeleafFeature.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -240,15 +227,9 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
         return templatePath;
     }
 }
-</code></pre>
-<p>@Injectで注入するのが正しいかは微妙。mvc-jspな奴はProvider&lt;Ref&lt;HttpServletRequest&gt;&gt;的な感じなのを注入しているが、これだとどうもテスト時の注入でAbstractBinder使っても上手く作用してくれないので</p>
-
-<p>んまぁてな感じでThymeleafを使ってテンプレートエンジンによるレスポンスの処理なところはこれだけ。設定しないと使えませんが</p>
-
+</code></pre><p>@Injectで注入するのが正しいかは微妙。mvc-jspな奴はProvider&lt;Ref&lt;HttpServletRequest&gt;&gt;的な感じなのを注入しているが、これだとどうもテスト時の注入でAbstractBinder使っても上手く作用してくれないので</p><br /><p>んまぁてな感じでThymeleafを使ってテンプレートエンジンによるレスポンスの処理なところはこれだけ。設定しないと使えませんが</p><br />
 <h4>web.xml</h4>
-
-<p>MVCによる処理を利用する場合においてはweb.xmlでfilter周りを設定しないといけないみたいな制約がある模様なので</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<p>MVCによる処理を利用する場合においてはweb.xmlでfilter周りを設定しないといけないみたいな制約がある模様なので</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;web-app
     xmlns="http://java.sun.com/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -270,13 +251,9 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
         &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
     &lt;/filter-mapping&gt;
 &lt;/web-app&gt;
-</code></pre>
-<p>な感じで</p>
-
+</code></pre><p>な感じで</p><br />
 <h4>beans.xml</h4>
-
-<p>glassfishとかで動かす場合に</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
+<p>glassfishとかで動かす場合に</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;beans
     xmlns="http://xmlns.jcp.org/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -284,9 +261,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
     version="1.1"
     bean-discovery-mode="all"&gt;
 &lt;/beans&gt;
-</code></pre>
-<p>となっているとデプロイエラーを起こすので、<span style="color: red">bean-discovery-mode=&quot;annotated&quot;</span>にしておく</p>
-
+</code></pre><p>となっているとデプロイエラーを起こすので、<span style="color: red">bean-discovery-mode=&quot;annotated&quot;</span>にしておく</p><br />
 <h4>SampleApplication.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -308,9 +283,7 @@ public class SampleApplication extends ResourceConfig {
         packages("sample");
     }
 }
-</code></pre>
-<p>あとはリソースで使うだけ。</p>
-
+</code></pre><p>あとはリソースで使うだけ。</p><br />
 <h4>Home.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.controller;
 
@@ -396,13 +369,9 @@ public class Home {
         throw new Exception("hoge");
     }
 }
-</code></pre>
-<p>んまぁという感じで大体どういうレスポンスになるかは想像出来るのはないかと</p>
-
+</code></pre><p>んまぁという感じで大体どういうレスポンスになるかは想像出来るのはないかと</p><br />
 <h4>HomeTest.java</h4>
-
-<p>テストする際にHttpServletRequest等の@Injectは行われないのでエラーになる。なのでSpring Framework Testingに入ってるMockHttpServletRequest等をAbstractBinderを使って差し込む的な事をする事で対処出来る模様</p>
-<pre class="line-numbers"><code class="language-java")>package sample.controller;
+<p>テストする際にHttpServletRequest等の@Injectは行われないのでエラーになる。なのでSpring Framework Testingに入ってるMockHttpServletRequest等をAbstractBinderを使って差し込む的な事をする事で対処出来る模様</p><br /><pre class="line-numbers"><code class="language-java")>package sample.controller;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -462,11 +431,7 @@ public class HomeTest extends JerseyTest {
         assertThat(response, containsString("error: hoge"));
     }
 }
-</code></pre>
-<p>終わり。まぁテスト出来ないとか難がちょいとあったけど、リソースメソッドでViewableを返す事でテンプレートエンジンを利用してレスポンスを出したり出来る仕組みを利用するのであればこれ使えば良い</p>
-
-<p>あとテスト動いてもglassfishとかじゃ動かないとかあるあるなのでちゃんと確認した方が良い。ちなみにそういうテストをサポートするTestContainerFactoryがあるっぽいので</p>
-
+</code></pre><p>終わり。まぁテスト出来ないとか難がちょいとあったけど、リソースメソッドでViewableを返す事でテンプレートエンジンを利用してレスポンスを出したり出来る仕組みを利用するのであればこれ使えば良い</p><br /><p>あとテスト動いてもglassfishとかじゃ動かないとかあるあるなのでちゃんと確認した方が良い。ちなみにそういうテストをサポートするTestContainerFactoryがあるっぽいので</p><br />
               </div>
             </div>
           </div>

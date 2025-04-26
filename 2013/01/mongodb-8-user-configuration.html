@@ -78,21 +78,14 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>今頃かって話ですが、MongoDBで操作するにはユーザー認証が必要っていう設定をやってみる事に</p>
-
+                <p>今頃かって話ですが、MongoDBで操作するにはユーザー認証が必要っていう設定をやってみる事に</p><br />
 <!--more-->
-
-<p>とりあえずユーザー設定をする前段階で</p>
-<pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge" })
+<p>とりあえずユーザー設定をする前段階で</p><br /><pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge" })
 db.samples.find()
 
 // { "_id" : ObjectId("50f7533baa1adeb4c2bf432b"), "name" : "hoge" }
-</code></pre>
-<p>っていうのは普通に無難に出来る事を前提に確認しておく。でMongoDBでユーザー認証しないとダメになるケースにするにはmongodb.confを設定しないといけない模様</p>
-<pre class="line-numbers"><code class="language-properties")>auth = true
-</code></pre>
-<p>を設定しておく。多分デフォルトで書かれてるけどコメントされてると思うので。でMongoDBを再起動。んでユーザーを作る</p>
-<pre class="line-numbers"><code class="language-js")>use admin
+</code></pre><p>っていうのは普通に無難に出来る事を前提に確認しておく。でMongoDBでユーザー認証しないとダメになるケースにするにはmongodb.confを設定しないといけない模様</p><br /><pre class="line-numbers"><code class="language-properties")>auth = true
+</code></pre><p>を設定しておく。多分デフォルトで書かれてるけどコメントされてると思うので。でMongoDBを再起動。んでユーザーを作る</p><br /><pre class="line-numbers"><code class="language-js")>use admin
 
 // ユーザーID: test1 パスワード:testで作る
 db.addUser("test1", "test")
@@ -102,9 +95,7 @@ db.auth("test1", "test")
 
 // ユーザーID: test2 パスワード: testで作る(但しリードオンリー)
 db.addUser("test2", "test", true)
-</code></pre>
-<p>っていう感じで作るとdb.system.usersに格納されているのでfind(show usersでも良いっぽい)すると</p>
-<pre class="line-numbers"><code class="language-json")>{
+</code></pre><p>っていう感じで作るとdb.system.usersに格納されているのでfind(show usersでも良いっぽい)すると</p><br /><pre class="line-numbers"><code class="language-json")>{
   "_id" : ObjectId("50f76961e832fd5a08ff5353"),
   "user" : "test1",
   "readOnly" : false,
@@ -116,25 +107,17 @@ db.addUser("test2", "test", true)
   "readOnly" : true,
   "pwd" : "e81ab577bdd505b13f1489e5295fe1be"
 }
-</code></pre>
-<p>な感じになってる。で一度mongo shellを一度抜けておく。で再度mongo shell起動して</p>
-<pre class="line-numbers"><code class="language-js")>db.samples.find()
-</code></pre>
-<p>をすると</p>
-<pre class="line-numbers"><code class="language-json")>error: {
+</code></pre><p>な感じになってる。で一度mongo shellを一度抜けておく。で再度mongo shell起動して</p><br /><pre class="line-numbers"><code class="language-js")>db.samples.find()
+</code></pre><p>をすると</p><br /><pre class="line-numbers"><code class="language-json")>error: {
         "$err" : "unauthorized db:sample lock type:-1 client:127.0.0.1",
         "code" : 10057
 }
-</code></pre>
-<p>んまぁログイン処理しとらんので。</p>
-<pre class="line-numbers"><code class="language-js")>use admin
+</code></pre><p>んまぁログイン処理しとらんので。</p><br /><pre class="line-numbers"><code class="language-js")>use admin
 db.auth("test1", "test")
 
 use sample
 db.samples.find()
-</code></pre>
-<p>っていう感じでログインしないと正常に結果が返ってこない。でtest2ユーザーはリードオンリーで作ったので</p>
-<pre class="line-numbers"><code class="language-js")>use admin
+</code></pre><p>っていう感じでログインしないと正常に結果が返ってこない。でtest2ユーザーはリードオンリーで作ったので</p><br /><pre class="line-numbers"><code class="language-js")>use admin
 db.auth("test2", "test")
 
 use sample
@@ -144,11 +127,7 @@ db.samples.find()
 
 //unauthorizedで処理出来ない
 db.samples.save({ name: "fuga" })
-</code></pre>
-<p>という感じでユーザー認証していない場合とかをエラーにしたりとかリードオンリーなユーザーにするとかっていうのはこんな感じ。</p>
-
-<p>参考: <a href="http://learnmongo.com/posts/quick-tip-mongodb-users">http://learnmongo.com/posts/quick-tip-mongodb-users</a></p>
-
+</code></pre><p>という感じでユーザー認証していない場合とかをエラーにしたりとかリードオンリーなユーザーにするとかっていうのはこんな感じ。</p><br /><p>参考: <a href="http://learnmongo.com/posts/quick-tip-mongodb-users">http://learnmongo.com/posts/quick-tip-mongodb-users</a></p><br />
               </div>
             </div>
           </div>

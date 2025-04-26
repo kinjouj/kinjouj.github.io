@@ -77,21 +77,14 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる</p>
-
+                <p>引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる</p><br />
 <!--more-->
-
-<p>で大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在するという事でやってみた</p>
-
-<p>まずその前に、MongoDBとかそういう系のKVSっていうのは基本的にスキーマレスである前提が存在すると思うのですが、UNIQUEインデックスを後で付けたら付けたで問題になるんじゃねーかなって思う所なので。でそれをサポートする為にdropDupsっていうオプションがあり、UNIQUEインデックスを保証させる際に既に重複している部分は削除するような仕組みがある模様。でもデータ消されたらたまったもんじゃねーってオチにならないかなーって思うので、とりあえず自分の無い頭で考えた所</p>
-
+<p>で大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在するという事でやってみた</p><br /><p>まずその前に、MongoDBとかそういう系のKVSっていうのは基本的にスキーマレスである前提が存在すると思うのですが、UNIQUEインデックスを後で付けたら付けたで問題になるんじゃねーかなって思う所なので。でそれをサポートする為にdropDupsっていうオプションがあり、UNIQUEインデックスを保証させる際に既に重複している部分は削除するような仕組みがある模様。でもデータ消されたらたまったもんじゃねーってオチにならないかなーって思うので、とりあえず自分の無い頭で考えた所</p><br />
 <ul>
 <li>db.createCollectionで事前にコレクションは作っておく</li>
 <li>db.コレクション名.ensureIndexでUNIQUEインデックス作っておく</li>
 </ul>
-
-<p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p>
-<pre class="line-numbers"><code class="language-js")>// samplesコレクションを作る
+<p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p><br /><pre class="line-numbers"><code class="language-js")>// samplesコレクションを作る
 db.createCollection("samples")
 
 // nameに対してUNIQUEインデックスを作っておく
@@ -109,40 +102,22 @@ db.samples.find()
 
 db.samples.save({ name: "hoge", type: 1 })
 // E11000 duplicate key error index: sample.samples.$name_1  dup key: { : "hoge" } なエラーになる
-</code></pre>
-<p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p>
-
-<p>でdropDupsも一応検証してみますかという事で</p>
-<pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge", type: 1 })
+</code></pre><p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p><br /><p>でdropDupsも一応検証してみますかという事で</p><br /><pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge", type: 1 })
 db.samples.save({ name: "hoge", type: 1 })
 db.samples.find()
-</code></pre>
-<p>出力が</p>
-<pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
+</code></pre><p>出力が</p><br /><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
 { "_id" : ObjectId("50f4e5a2bc3d8a4279742236"), "name" : "hoge", "type" : 1 }
-</code></pre>
-<p>同じデータを突っ込んでおく。でこの状態でnameにUNIQUEインデックスをつけると</p>
-
+</code></pre><p>同じデータを突っ込んでおく。でこの状態でnameにUNIQUEインデックスをつけると</p><br />
 <blockquote>
 E11000 duplicate key error index: sample.samples.$name_1 dup key: { : "hoge" }
 </blockquote>
-
-<p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p>
-<pre class="line-numbers"><code class="language-js")>db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
+<p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p><br /><pre class="line-numbers"><code class="language-js")>db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
 db.samples.find()
 // { "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
-</code></pre>
-<p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p>
-
-<p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p>
-
+</code></pre><p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p><br /><p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p><br />
 <h4>追記</h4>
-
-<p>DBに存在するインデックスを確認したい場合は</p>
-<pre class="line-numbers"><code class="language-js")>db.system.indexes.find()
-</code></pre>
-<p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p>
-<pre class="line-numbers"><code class="language-js")>// sampleデータベース中のsamplesコレクション -&gt; sample.samples
+<p>DBに存在するインデックスを確認したい場合は</p><br /><pre class="line-numbers"><code class="language-js")>db.system.indexes.find()
+</code></pre><p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p><br /><pre class="line-numbers"><code class="language-js")>// sampleデータベース中のsamplesコレクション -&gt; sample.samples
 db.system.indexes.find({ ns: "sample.samples" })
 </code></pre>
               </div>

@@ -79,12 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>参考: <a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html">http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html</a></p>
-
-<p>Rails(っていうかActiveRecord)での楽観的ロックを使う場合のドキュメント見ながらやってみた</p>
-
-<p>とりあえず実検証でのアプリケーションを作る必要があるので(ry</p>
-
+                <p>参考: <a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html">http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html</a></p><br /><p>Rails(っていうかActiveRecord)での楽観的ロックを使う場合のドキュメント見ながらやってみた</p><br /><p>とりあえず実検証でのアプリケーションを作る必要があるので(ry</p><br />
 <!--more-->
 
 <h4>app/controllers/entries_controller.rb</h4>
@@ -117,11 +112,7 @@ end
   &lt;%= f.text_field :name  %&gt;
   &lt;%= f.submit "update" %&gt;
 &lt;% end %&gt;
-</code></pre>
-<p>な感じで作ったとして、/entry/editに複数からアクセスしてアップデート処理を行った場合、一方が処理したのを他でアップデートされてデータが破壊されるっていうオチになる</p>
-
-<p>でそういう風にならないようにデータをロックするなりで一方がアップデートして他が同時にアップデートしようとしたような場合にはエラーが起こるように出来る</p>
-
+</code></pre><p>な感じで作ったとして、/entry/editに複数からアクセスしてアップデート処理を行った場合、一方が処理したのを他でアップデートされてデータが破壊されるっていうオチになる</p><br /><p>でそういう風にならないようにデータをロックするなりで一方がアップデートして他が同時にアップデートしようとしたような場合にはエラーが起こるように出来る</p><br />
 <h4>Entryモデルのマイグレーションを修正</h4>
 <pre class="line-numbers"><code class="language-rb")>class CreateEntries &lt; ActiveRecord::Migration
   def change
@@ -132,16 +123,10 @@ end
     end
   end
 end
-</code></pre>
-<p>lock_versionっていう名前のカラムを作っておけばそれを利用して楽観的ロックな機能を利用する事が出来る模様。又、モデルにて</p>
-<pre class="line-numbers"><code class="language-rb")>class Entry &lt; ActiveRecord::Base
+</code></pre><p>lock_versionっていう名前のカラムを作っておけばそれを利用して楽観的ロックな機能を利用する事が出来る模様。又、モデルにて</p><br /><pre class="line-numbers"><code class="language-rb")>class Entry &lt; ActiveRecord::Base
   self.locking_column = "lock_entry"
 end
-</code></pre>
-<p>のようにlocking_columnでロックに使用するカラムを指定出来る。だから別にlock_versionじゃなきゃダメっていうわけでもない模様</p>
-
-<p>これやれば良いだけのとちょっとアプリケーション自体を修正する必要もある</p>
-
+</code></pre><p>のようにlocking_columnでロックに使用するカラムを指定出来る。だから別にlock_versionじゃなきゃダメっていうわけでもない模様</p><br /><p>これやれば良いだけのとちょっとアプリケーション自体を修正する必要もある</p><br />
 <h4>app/controllers/entries_controller.rbを修正</h4>
 <pre class="line-numbers"><code class="language-rb")>class EntriesController &lt; ApplicationController
   def show
@@ -172,11 +157,7 @@ end
   &lt;%= f.text_field :name  %&gt;
   &lt;%= f.submit "update" %&gt;
 &lt;% end %&gt;
-</code></pre>
-<p>ってな感じでやると、一方がアップデート処理をした後にもう一方側でアップデート処理等を使用とすると「ActiveRecord::StaleObjectError」というようなエラーになる</p>
-
-<p>っていう感じ。疑問なのがこういうテストをどう書くのかっていう所。分かり次第追記する</p>
-
+</code></pre><p>ってな感じでやると、一方がアップデート処理をした後にもう一方側でアップデート処理等を使用とすると「ActiveRecord::StaleObjectError」というようなエラーになる</p><br /><p>っていう感じ。疑問なのがこういうテストをどう書くのかっていう所。分かり次第追記する</p><br />
               </div>
             </div>
           </div>

@@ -78,24 +78,15 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>※Amazon Elastic Beanstalkは関係ありません</p>
-
-<p><a href="http://kr.github.com/beanstalkd">http://kr.github.com/beanstalkd</a> がちょっと気になったので使ってみた</p>
-
+                <p>※Amazon Elastic Beanstalkは関係ありません</p><br /><p><a href="http://kr.github.com/beanstalkd">http://kr.github.com/beanstalkd</a> がちょっと気になったので使ってみた</p><br />
 <!--more-->
 
 <h4>インストール</h4>
 <pre class="line-numbers"><code class="language-sh")>sudo apt-get install beanstalkd
-</code></pre>
-<p>でインストール出来る。 もちディストリビューションによって違うと思うので、そこら辺はドキュメント参照するかapt-getなりyumなりで検索して探してインストールする</p>
-
-<p>んでその後起動しておく。デフォルト推奨ポート番号は11300な模様</p>
-
+</code></pre><p>でインストール出来る。 もちディストリビューションによって違うと思うので、そこら辺はドキュメント参照するかapt-getなりyumなりで検索して探してインストールする</p><br /><p>んでその後起動しておく。デフォルト推奨ポート番号は11300な模様</p><br />
 <h4>Rubyのライブラリをインストール</h4>
 <pre class="line-numbers"><code class="language-sh")>gem install beanstalk-client
-</code></pre>
-<p>まぁ色々クライアントライブラリはあるみたいですが、とりあえずbeanstalk-clientってのを使う</p>
-
+</code></pre><p>まぁ色々クライアントライブラリはあるみたいですが、とりあえずbeanstalk-clientってのを使う</p><br />
 <h4>worker.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>require "beanstalk-client"
 
@@ -111,11 +102,7 @@ loop do
 
   job.delete
 end
-</code></pre>
-<p>watchでキュー名(beanstalk的にはtubeというべきなのかも)を指定出来る。デフォルトは&quot;default&quot;な模様。でworker側でクライアント側から来たキュー名を特定するにはstatsで参照可能な模様</p>
-
-<p>んでソース上で</p>
-<pre class="line-numbers"><code class="language-rb")>class Beanstalk::Job
+</code></pre><p>watchでキュー名(beanstalk的にはtubeというべきなのかも)を指定出来る。デフォルトは&quot;default&quot;な模様。でworker側でクライアント側から来たキュー名を特定するにはstatsで参照可能な模様</p><br /><p>んでソース上で</p><br /><pre class="line-numbers"><code class="language-rb")>class Beanstalk::Job
 
   def [](name)
     ybody[name]
@@ -127,24 +114,16 @@ end
 
   # 以下省略
 end
-</code></pre>
-<p>っていうふうになってるので普通にjob[name]で参照可能。だけどこれyputされた際に限るものだと思われるので、普通の文字列なようなのがputでぶっこんで来られた場合にはjob.bodyで取得できる</p>
-
+</code></pre><p>っていうふうになってるので普通にjob[name]で参照可能。だけどこれyputされた際に限るものだと思われるので、普通の文字列なようなのがputでぶっこんで来られた場合にはjob.bodyで取得できる</p><br />
 <h4>client.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>require "beanstalk-client"
 
 beanstalk = Beanstalk::Pool.new(["127.0.0.1:11300"])
 beanstalk.use("sample")
 beanstalk.yput({ :name =&gt; "hoge" })
-</code></pre>
-<p>まぁ上でも書いたようにyputを使えばHashとかでも流せる。一応シリアライザー的なのはYAMLな模様。まぁだから接頭辞にyが付いてるんだと思うけど</p>
-
+</code></pre><p>まぁ上でも書いたようにyputを使えばHashとかでも流せる。一応シリアライザー的なのはYAMLな模様。まぁだから接頭辞にyが付いてるんだと思うけど</p><br />
 <h4>追記</h4>
-
-<p>beanstalkのEM(EventMachine)なライブラリもある模様で</p>
-
-<p>worker.rbが</p>
-<pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
+<p>beanstalkのEM(EventMachine)なライブラリもある模様で</p><br /><p>worker.rbが</p><br /><pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
 
 EM.run do
   beanstalk = EM::Beanstalk.new
@@ -165,9 +144,7 @@ EM.run do
     end
   end
 end
-</code></pre>
-<p>な感じで、client.rbが</p>
-<pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
+</code></pre><p>な感じで、client.rbが</p><br /><pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
 
 EM.run do
   beanstalk = EM::Beanstalk.new
@@ -177,11 +154,7 @@ EM.run do
     EM.stop
   end
 end
-</code></pre>
-<p>な感じ。だがクライアントまでEventMachineにする必要あるのかは分からないけど。又、putの引数にオブジェクトとか指定するとワーカー側で取る際にはinspectされてる模様。それをevalするのもどうかと思うのでJSONなりYAMLなりでダンプして流した方が良いのではと思う所</p>
-
-<p>ちなみにWorkerがEMでClientがbeanstalk-clientでも問題無いみたい。ただシリアライズ的な所は未確認</p>
-
+</code></pre><p>な感じ。だがクライアントまでEventMachineにする必要あるのかは分からないけど。又、putの引数にオブジェクトとか指定するとワーカー側で取る際にはinspectされてる模様。それをevalするのもどうかと思うのでJSONなりYAMLなりでダンプして流した方が良いのではと思う所</p><br /><p>ちなみにWorkerがEMでClientがbeanstalk-clientでも問題無いみたい。ただシリアライズ的な所は未確認</p><br />
               </div>
             </div>
           </div>

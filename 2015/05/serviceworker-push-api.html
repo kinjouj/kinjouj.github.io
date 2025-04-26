@@ -78,39 +78,22 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式ドラフトドキュメント?: http://www.w3.org/TR/push-api/</p>
-
-<p>参考1: http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web</p>
-
-<p>参考2: http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d</p>
-
-<p>前から気になってたServiceWorkerを使ってPush APIを実装するっていうのが話題になってた気がするので、ざっくりと参考を読みつつやってみた</p>
-
+                <p>公式ドラフトドキュメント?: <a href="http://www.w3.org/TR/push-api/">http://www.w3.org/TR/push-api/</a></p><br /><p>参考1: <a href="http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web">http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web</a></p><br /><p>参考2: <a href="http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d">http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d</a></p><br /><p>前から気になってたServiceWorkerを使ってPush APIを実装するっていうのが話題になってた気がするので、ざっくりと参考を読みつつやってみた</p><br />
 <!--more-->
 
 <h4>その前に</h4>
-
-<p>以前にChrome Extensionで使えるchrome.gcmっていうのがあるネタを書いたけど、今回はこれをChrome Extensionではなく普通のWebアプリケーションから使える基盤的な仕組みみたいなのっぽい</p>
-
+<p>以前にChrome Extensionで使えるchrome.gcmっていうのがあるネタを書いたけど、今回はこれをChrome Extensionではなく普通のWebアプリケーションから使える基盤的な仕組みみたいなのっぽい</p><br />
 <h4>必要なのを揃える</h4>
-
-<p>GoogleのPush Messagingサービスを使うので、まず必要なのが</p>
-
+<p>GoogleのPush Messagingサービスを使うので、まず必要なのが</p><br />
 <ul>
 <li>Cloud Messaging for Chromeを有効にする</li>
 <li>Cloud Messaging for Androidを有効にする</li>
 <li>Google APIsのAPI Key</li>
 <li>Google APIsのプロジェクト識別番号</li>
 </ul>
-
-<p>の4つが最低限でも必要っぽいので取得しておく。上記で書いたchrome.gcmのネタ中にも多分書いてるはずなので省略(APIへのアクセス権の設定項目)</p>
-
+<p>の4つが最低限でも必要っぽいので取得しておく。上記で書いたchrome.gcmのネタ中にも多分書いてるはずなので省略(APIへのアクセス権の設定項目)</p><br />
 <h4>manifest.json</h4>
-
-<p>※Chrome Extensionのmanifest.jsonでは無い</p>
-
-<p>Push Notification APIを使う際に必要となる情報を定義したJSONファイル</p>
-<pre class="line-numbers"><code class="language-json")>{
+<p>※Chrome Extensionのmanifest.jsonでは無い</p><br /><p>Push Notification APIを使う際に必要となる情報を定義したJSONファイル</p><br /><pre class="line-numbers"><code class="language-json")>{
   "name": "sample",
   "short_name": "sample",
   "start_url": "http://localhost:8000/index.html",
@@ -118,9 +101,7 @@
   "gcm_sender_id": "上記で取得したGoogle APIsプロジェクトのプロジェクト番号",
   "gcm_user_visible_only": true
 }
-</code></pre>
-<p>これに関するリファレンスがちょっとどこにあるのか分かってないので省略</p>
-
+</code></pre><p>これに関するリファレンスがちょっとどこにあるのか分かってないので省略</p><br />
 <h4>index.html</h4>
 <pre class="line-numbers"><code class="language-html")>&lt;!DOCTYPE html&gt;
 &lt;html&gt;
@@ -133,9 +114,7 @@
     &lt;script src="main.js"&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<p>上記で書いたmanifest.jsonを&lt;link rel=“manifest”&gt;で読み込む。んまぁあとはJSをダラっと書くだけ</p>
-
+</code></pre><p>上記で書いたmanifest.jsonを&lt;link rel=“manifest”&gt;で読み込む。んまぁあとはJSをダラっと書くだけ</p><br />
 <h4>main.js</h4>
 <pre class="line-numbers"><code class="language-js")>window.addEventListener("load", function() {
   var el = document.querySelector(".js-push-button");
@@ -194,25 +173,7 @@ self.addEventListener("push", function(event) {
     )
   );
 }, false);
-</code></pre>
-<p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p>
-
-<p>でとりあえず今までの流れを確認すると</p>
-
-<p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p>
-
-<p><img src="/images/2015/05/201505171800_1.jpg" loading="lazy" /></p>
-
-<p>んな感じになってる。でregisterボタンを押すと</p>
-
-<p><img src="/images/2015/05/201505171800_2.jpg" loading="lazy" /></p>
-
-<p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p>
-
-<p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p>
-
-<p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p>
-
+</code></pre><p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p><br /><p>でとりあえず今までの流れを確認すると</p><br /><p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p><br /><p><img src="/images/2015/05/201505171800_1.jpg" loading="lazy" /></p><br /><p>んな感じになってる。でregisterボタンを押すと</p><br /><p><img src="/images/2015/05/201505171800_2.jpg" loading="lazy" /></p><br /><p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p><br /><p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p><br /><p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p><br />
 <h4>send.sh</h4>
 <pre class="line-numbers"><code class="language-sh")>#!/bin/sh
 
@@ -225,25 +186,13 @@ curl \
     -H "Authorization: key=$KEY" \
     -d "{ \"registration_ids\": [\"$ID\"] }" \
     https://android.googleapis.com/gcm/send
-</code></pre>
-<p>を実行すると</p>
-
-<p><img src="/images/2015/05/201505171800_3.jpg" loading="lazy" /></p>
-
-<p>みたいにデスクトップ通知が出るようになる。何やら通知をクリックした時のイベントがどうたらとかもあるらしい</p>
-
-<p>まぁざっくり書きましたが現状でもまだ策定中な所もあるようだし実装もまだできてなくて制限が一部あるんですが</p>
-
+</code></pre><p>を実行すると</p><br /><p><img src="/images/2015/05/201505171800_3.jpg" loading="lazy" /></p><br /><p>みたいにデスクトップ通知が出るようになる。何やら通知をクリックした時のイベントがどうたらとかもあるらしい</p><br /><p>まぁざっくり書きましたが現状でもまだ策定中な所もあるようだし実装もまだできてなくて制限が一部あるんですが</p><br />
 <ul>
 <li>pushを受信したらshowNotificationしないといけないらしい</li>
 <li>データを現時点では受信出来ない(Chrome拡張のchrome.gcmはデータを受信することは可能)</li>
 <li>もしサービスに導入するならHTTPS環境にデプロイしないと出来ない(海外のHTML5のスペシャリストな人の記事では受信したらサーバーに通知情報をとりに行くみたいな事しているようなケースもある模様)</li>
 </ul>
-
-<p>他にも色々あるらしいので、詳しい事は上記の参考URLを見た方が良いかと</p>
-
-<p>んまぁとりあえず今後色々出来る事が増えると思うので分かった事なりを書いたり追記したりするとは思うって事で</p>
-
+<p>他にも色々あるらしいので、詳しい事は上記の参考URLを見た方が良いかと</p><br /><p>んまぁとりあえず今後色々出来る事が増えると思うので分かった事なりを書いたり追記したりするとは思うって事で</p><br />
               </div>
             </div>
           </div>

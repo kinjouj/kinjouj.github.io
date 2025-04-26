@@ -79,32 +79,25 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="/codemodel-annotation-processing-java-sourcecode-generation.html">codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成</a>とかでもやってるけど、色々思う所があったのでやってみた</p>
-
+                <p><a href="/codemodel-annotation-processing-java-sourcecode-generation.html">codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成</a>とかでもやってるけど、色々思う所があったのでやってみた</p><br />
 <!--more-->
 <pre class="line-numbers"><code class="language-java")>package sample.annotation;
 
 public @interface Bean {
 }
-</code></pre>
-<p>んなアノテーションがあって</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>んなアノテーションがあって</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import sample.annotation.Bean;
 
 @Bean
 public class Sample {
 }
-</code></pre>
-<p>的な感じで使っていると</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>的な感じで使っていると</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 
 public class SampleBean extends Sample {
 }
-</code></pre>
-<p>的な感じでソースが生成される的な事をやるアノテーションプロセッサーを作ると</p>
-<pre class="line-numbers"><code class="language-java")>package sample.processor;
+</code></pre><p>的な感じでソースが生成される的な事をやるアノテーションプロセッサーを作ると</p><br /><pre class="line-numbers"><code class="language-java")>package sample.processor;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -190,9 +183,7 @@ public class BeanAnnotationProcessor extends AbstractProcessor {
         return true;
     }
 }
-</code></pre>
-<p>的な感じになる訳だけど。問題はこれをどうやって実行するかっていう所かと。今までとかだとgradleで</p>
-<pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
+</code></pre><p>的な感じになる訳だけど。問題はこれをどうやって実行するかっていう所かと。今までとかだとgradleで</p><br /><pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
 
 configurations {
     apt
@@ -230,12 +221,8 @@ task compileAptJava(type: JavaCompile, group: "build", overwrite: true) {
 
 compileJava.dependsOn compileAptJava
 sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
-</code></pre>
-<p>っていう感じでアノテーションプロセッサーを指定してcompileJavaが行われる前にcompileAptJavaを処理する事が出来る訳だけど、これをしなくてもアノテーションプロセッサーなライブラリに<span style="color: red">META-INF/services/javax.annotation.processing.Processor</span>を定義する事でコンパイルプロセス上で勝手にやってくれる模様。で中身には</p>
-<pre class="line-numbers"><code>sample.processor.BeanAnnotationProcessor
-</code></pre>
-<p>っていう感じでアノテーションプロセッサーなクラスを指定する。それを行なってjarでパッケージ化した場合には</p>
-<pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
+</code></pre><p>っていう感じでアノテーションプロセッサーを指定してcompileJavaが行われる前にcompileAptJavaを処理する事が出来る訳だけど、これをしなくてもアノテーションプロセッサーなライブラリに<span style="color: red">META-INF/services/javax.annotation.processing.Processor</span>を定義する事でコンパイルプロセス上で勝手にやってくれる模様。で中身には</p><br /><pre class="line-numbers"><code>sample.processor.BeanAnnotationProcessor
+</code></pre><p>っていう感じでアノテーションプロセッサーなクラスを指定する。それを行なってjarでパッケージ化した場合には</p><br /><pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
 apply plugin: "eclipse"
 
 repositories {
@@ -249,11 +236,7 @@ dependencies {
 compileJava {
     options.compilerArgs = ["-s", "apt_generated"]
 }
-</code></pre>
-<p>な感じで特にcompileAptJavaなあれをしなくても良い。又、この場合デフォルトではクラスをコンパイルした先の所にソースが出力されるようになるが、-sオプションで指定しておけば良い模様</p>
-
-<p>んまぁこんな所かとは思うんだけど、Eclipseとかで利用する場合には注釈処理とファクトリーパスを設定するだけで良いんだが、アノテーションプロセッサーの処理段階だとクラスパスが何かと認識してくれないのでアノテーションプロセッサーなjarに関してはfat jar(依存性を組み込んだ?jar)を作れば良い</p>
-
+</code></pre><p>な感じで特にcompileAptJavaなあれをしなくても良い。又、この場合デフォルトではクラスをコンパイルした先の所にソースが出力されるようになるが、-sオプションで指定しておけば良い模様</p><br /><p>んまぁこんな所かとは思うんだけど、Eclipseとかで利用する場合には注釈処理とファクトリーパスを設定するだけで良いんだが、アノテーションプロセッサーの処理段階だとクラスパスが何かと認識してくれないのでアノテーションプロセッサーなjarに関してはfat jar(依存性を組み込んだ?jar)を作れば良い</p><br />
               </div>
             </div>
           </div>

@@ -80,14 +80,9 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>まぁAndroid公式にBluetoothChatっていうのはありますけど。一応Android側はそれのソース読んでやってみたって話。ただこれはAndroidとPC(Ubuntu)をbluetooth RFCOMMを使って通信するというところになる</p>
-
+                <p>まぁAndroid公式にBluetoothChatっていうのはありますけど。一応Android側はそれのソース読んでやってみたって話。ただこれはAndroidとPC(Ubuntu)をbluetooth RFCOMMを使って通信するというところになる</p><br />
 <!--more-->
-
-<p>一応前持って行っておきますが、以下のソースはクソですので... (Threadの扱いとかダメ)。あくまでAndroidとRFCOMMにおける通信方法の手段にしかすぎないかと</p>
-
-<p>でソースですけど、AndroidManifest.xmlとかはBLUETOOTH/BLUETOOTH_ADMINのpermissionが必要なくらいなので端折る。という事でActivityだけ書く</p>
-<pre class="line-numbers"><code class="language-java")>package net.kinjouj.test;
+<p>一応前持って行っておきますが、以下のソースはクソですので... (Threadの扱いとかダメ)。あくまでAndroidとRFCOMMにおける通信方法の手段にしかすぎないかと</p><br /><p>でソースですけど、AndroidManifest.xmlとかはBLUETOOTH/BLUETOOTH_ADMINのpermissionが必要なくらいなので端折る。という事でActivityだけ書く</p><br /><pre class="line-numbers"><code class="language-java")>package net.kinjouj.test;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -418,11 +413,7 @@ public class SampleActivity extends Activity {
         }
     }
 }
-</code></pre>
-<p>簡単に言うと起動するとAcceptThreadが走って、そこでBluetooth RFCOMMをリッスンする。でPC側のクライアントを使って接続するとConnectedThreadが走って、クライアントから受け取ったデータを取得してそれをListViewのアダプターにバインドする。まぁそんな感じ</p>
-
-<p>でPCからデータを送るクライアントは以前書いたネタにも書いてあるけど、python-bluezを使う</p>
-<pre class="line-numbers"><code class="language-py")>from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
+</code></pre><p>簡単に言うと起動するとAcceptThreadが走って、そこでBluetooth RFCOMMをリッスンする。でPC側のクライアントを使って接続するとConnectedThreadが走って、クライアントから受け取ったデータを取得してそれをListViewのアダプターにバインドする。まぁそんな感じ</p><br /><p>でPCからデータを送るクライアントは以前書いたネタにも書いてあるけど、python-bluezを使う</p><br /><pre class="line-numbers"><code class="language-py")>from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
 
 host = None
 port = 0
@@ -446,19 +437,9 @@ if host is not None:
                 sock.send("%sn" % data)
             except:
                 break;
-</code></pre>
-<p>まぁこれを実行してデータを送ったりするとスマフォ側にデータが表示される。でその動画を撮影しました</p>
-
-<p>{% youtube 9FjwF3B0rqo %}</p>
-
-<p>というような感じ。で問題はここからで逆にスマフォ側からPC側にデータをどうやって送るのかって話なんですが。上記のJavaソース上だとcreateRfcommSocketToServiceRecordのメソッドを使ってPC側デバイスのRFCOMMと接続してごにょごにょしているのですが、そもそもPC側のbluetoothにRFCOMMがバインドされてるかって所なんですが、基本的にはRFCOMMは自分でやらないとバインドされないはずなので</p>
-<pre class="line-numbers"><code>sudo sdptool browse local
-</code></pre>
-<p>をやったあとに。Serial Port通信なRFCOMMがあるかどうかを確認しなきゃならん。多分、デフォルトでは無いはずなので</p>
-<pre class="line-numbers"><code>sudo sdptool add --channel=15 SP
-</code></pre>
-<p>で登録しておく。でもっかい見ると</p>
-
+</code></pre><p>まぁこれを実行してデータを送ったりするとスマフォ側にデータが表示される。でその動画を撮影しました</p><br /><p>{% youtube 9FjwF3B0rqo %}</p><br /><p>というような感じ。で問題はここからで逆にスマフォ側からPC側にデータをどうやって送るのかって話なんですが。上記のJavaソース上だとcreateRfcommSocketToServiceRecordのメソッドを使ってPC側デバイスのRFCOMMと接続してごにょごにょしているのですが、そもそもPC側のbluetoothにRFCOMMがバインドされてるかって所なんですが、基本的にはRFCOMMは自分でやらないとバインドされないはずなので</p><br /><pre class="line-numbers"><code>sudo sdptool browse local
+</code></pre><p>をやったあとに。Serial Port通信なRFCOMMがあるかどうかを確認しなきゃならん。多分、デフォルトでは無いはずなので</p><br /><pre class="line-numbers"><code>sudo sdptool add --channel=15 SP
+</code></pre><p>で登録しておく。でもっかい見ると</p><br />
 <pre>
 Service Name: Serial Port
 Service Description: COM Port
@@ -471,11 +452,7 @@ Protocol Descriptor List:
   "RFCOMM" (0x0003)
     Channel: 15
 </pre>
-
-<p>な感じで出てるかと。あとはこっちもサーバープログラムを作って、スマフォから送られてきたデータを取得して表示したりするなりだけ。だが、上記のJavaソースだと一度PC側からクライアント接続しないと送信なフォームが出ないようになってるので、それと事前にPC側のRFCOMMレシーバーなプログラムを起動しておかないとスマフォ側からデータ送信出来ない。理由としてスマフォからPC側のサーバーへのコネクションは一度処理した一回のみだけ接続処理を行うので</p>
-
-<p>でそのRFCOMMサーバープログラムも書く。ここもPython</p>
-<pre class="line-numbers"><code class="language-py")>from bluetooth import BluetoothSocket,RFCOMM
+<p>な感じで出てるかと。あとはこっちもサーバープログラムを作って、スマフォから送られてきたデータを取得して表示したりするなりだけ。だが、上記のJavaソースだと一度PC側からクライアント接続しないと送信なフォームが出ないようになってるので、それと事前にPC側のRFCOMMレシーバーなプログラムを起動しておかないとスマフォ側からデータ送信出来ない。理由としてスマフォからPC側のサーバーへのコネクションは一度処理した一回のみだけ接続処理を行うので</p><br /><p>でそのRFCOMMサーバープログラムも書く。ここもPython</p><br /><pre class="line-numbers"><code class="language-py")>from bluetooth import BluetoothSocket,RFCOMM
 import notify2
 
 port = 15
@@ -492,9 +469,7 @@ while True:
 
     n = notify2.Notification("Bluetooth Message", data)
     n.show()
-</code></pre>
-<p>っていう感じ。今回のだと</p>
-
+</code></pre><p>っていう感じ。今回のだと</p><br />
 <ul>
 <li>PC側のRFCOMMサーバーを起動する (その前にPC側でRFCOMMなSerial Portあるか確認)</li>
 <li>スマフォアプリ側を起動</li>

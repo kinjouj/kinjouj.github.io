@@ -79,22 +79,13 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。</p>
-
-<p>という事でやってみた</p>
-
+                <p>JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。</p><br /><p>という事でやってみた</p><br />
 <!--more-->
 
 <h4>備考: glassfishのバージョンに関して</h4>
-
-<p>(記事投稿時の)glasshfish4では組み込まれているJAX-RS(Jersey2)のバージョンが古い模様なので、実装側とAPIのバージョンの整合性が合わないが為にエラーが起きる模様。なのでglassfishに同梱されているライブラリをアップデートするか、glassfish4.0.1(現時点では正式版は出ていない)を使う事で解決出来る模様</p>
-
-<p>参考: <a href="http://qiita.com/opengl-8080/items/cfdde684b36efec50477">GlassFish4.0でJAX-RSのクラスにCDIでインジェクションしようとしたらUnsatisfiedDependencyExceptionが発生するバグ？</a></p>
-
+<p>(記事投稿時の)glasshfish4では組み込まれているJAX-RS(Jersey2)のバージョンが古い模様なので、実装側とAPIのバージョンの整合性が合わないが為にエラーが起きる模様。なのでglassfishに同梱されているライブラリをアップデートするか、glassfish4.0.1(現時点では正式版は出ていない)を使う事で解決出来る模様</p><br /><p>参考: <a href="http://qiita.com/opengl-8080/items/cfdde684b36efec50477">GlassFish4.0でJAX-RSのクラスにCDIでインジェクションしようとしたらUnsatisfiedDependencyExceptionが発生するバグ？</a></p><br />
 <h4>概要</h4>
-
-<p>gsonを使って返された値をJSONにエンコードするだけのMessageBodyWriterをAutoDiscoverableを使って別パッケージにしてロード出来るようにする</p>
-
+<p>gsonを使って返された値をJSONにエンコードするだけのMessageBodyWriterをAutoDiscoverableを使って別パッケージにしてロード出来るようにする</p><br />
 <h4>SampleAutoDiscoverable.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.internal;
 
@@ -218,14 +209,8 @@ public class GsonProvider implements MessageBodyWriter&lt;Object&gt; {
 }
 </code></pre>
 <h4>META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverableを作成</h4>
-
-<p>AutoDiscoverableを使う場合にはServiceLoader周りを設定しとけば良い</p>
-<pre class="line-numbers"><code>sample.internal.SampleAutoDiscoverable
-</code></pre>
-<p>中身はAutoDiscoverableのパッケージ名を含むクラス名を指定するだけ</p>
-
-<p>あとはこのプロジェクトをjar化してJAX-RSアプリケーションに含めるだけ</p>
-
+<p>AutoDiscoverableを使う場合にはServiceLoader周りを設定しとけば良い</p><br /><pre class="line-numbers"><code>sample.internal.SampleAutoDiscoverable
+</code></pre><p>中身はAutoDiscoverableのパッケージ名を含むクラス名を指定するだけ</p><br /><p>あとはこのプロジェクトをjar化してJAX-RSアプリケーションに含めるだけ</p><br />
 <h4>SampleApplication.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -242,9 +227,7 @@ public class SampleApplication extends ResourceConfig {
         property(CommonProperties.MOXY_JSON_FEATURE_DISABLE, true);
     }
 }
-</code></pre>
-<p>デフォでMOXyなJSONシリアライザ的なので処理されちゃって上記のFeatureでJSON_FEATUREによりGsonProviderでの処理がスキップされちゃうので、そこら辺の使えるようにするように設定しとかなあかんっぽい</p>
-
+</code></pre><p>デフォでMOXyなJSONシリアライザ的なので処理されちゃって上記のFeatureでJSON_FEATUREによりGsonProviderでの処理がスキップされちゃうので、そこら辺の使えるようにするように設定しとかなあかんっぽい</p><br />
 <h4>Home.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.controller;
 
@@ -343,11 +326,7 @@ public class HomeTest extends JerseyTest {
         assertThat(data, hasKey("sample"));
     }
 }
-</code></pre>
-<p>んまぁデプロイ先はglassfishを前提にして調査してたので他のアプリケーションサーバーとかの検証だとかしてませんが、glassfishだと何かとバージョンやらの問題が出てきちゃうので</p>
-
-<p>とりまぁそういうように外部ライブラリに仕込んでやるような場合だとAutoDiscoverableのような仕組みを使う事で組み込む事が可能って事で</p>
-
+</code></pre><p>んまぁデプロイ先はglassfishを前提にして調査してたので他のアプリケーションサーバーとかの検証だとかしてませんが、glassfishだと何かとバージョンやらの問題が出てきちゃうので</p><br /><p>とりまぁそういうように外部ライブラリに仕込んでやるような場合だとAutoDiscoverableのような仕組みを使う事で組み込む事が可能って事で</p><br />
               </div>
             </div>
           </div>

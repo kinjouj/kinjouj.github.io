@@ -79,8 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>FuelPHPではHMVCリクエスト方式を利用してビューからコントローラーにリクエストを送ってそのレスポンスをビューにレンダリングしたりも出来る模様</p>
-
+                <p>FuelPHPではHMVCリクエスト方式を利用してビューからコントローラーにリクエストを送ってそのレスポンスをビューにレンダリングしたりも出来る模様</p><br />
 <!--more-->
 
 <h4>fuel/app/classes/controller/home.php</h4>
@@ -99,32 +98,20 @@ class Controller_Home extends Controller {
         throw new HttpNotFoundException();
     }
 }
-</code></pre>
-<p>HMVCリクエストかどうかについてはRequest::is_hmvcでチェック出来る。でHMVCリクエストで無い場合には404エラーをスローするようにしている(ブラウザからコントローラーアクションなURLにアクセスすると404になる)</p>
-
+</code></pre><p>HMVCリクエストかどうかについてはRequest::is_hmvcでチェック出来る。でHMVCリクエストで無い場合には404エラーをスローするようにしている(ブラウザからコントローラーアクションなURLにアクセスすると404になる)</p><br />
 <h4>fuel/app/views/home.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;html&gt;
   &lt;body&gt;
     &lt;?php echo Request::forge("home/sample")-&gt;execute(); ?&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<p>でちょっと気になるのが <a href="http://press.nekoget.com/fuelphp_doc/general/hmvc.html">http://press.nekoget.com/fuelphp_doc/general/hmvc.html</a> にある</p>
-
+</code></pre><p>でちょっと気になるのが <a href="http://press.nekoget.com/fuelphp_doc/general/hmvc.html">http://press.nekoget.com/fuelphp_doc/general/hmvc.html</a> にある</p><br />
 <blockquote>
 「デフォルトでは、すべてのリクエストは、Fuel のルーティングエンジンによって処理されます。 もし、ルーティング可能でないリクエストをしたい場合 (たとえば、ブラウザからそれをリクエストされたくない場合)、"false" を 2 番目のパラメータとして forge() の呼び出しに渡す必要があります。 そうしない場合、リクエストを実行すると、404 エラーで終了します!」
 </blockquote>
-
-<p>っていう所。第2引数にfalseを入れるとルーティングエンジンで解決しないっていうのがどうも動作的にどうなるのかが微妙。ソース見た所だと「Request::forge -&gt; Router::process -&gt; new Route(falseにした場合)」という流れになるような模様だけど、引数にfalseを設定した場合Router::processでルーティング定義から探索をしないっていう所だけはわかるけど、それが「ルーティング可能では無い」という意味合いがかなり微妙</p>
-
-<p>とりあえずまぁ、ビューからコントローラーアクションをコンポーネントな感じで扱う事が出来て、それを検知するのにis_hmvcを使えばチェック出来るよな感じかなと</p>
-
-<p>ちなみにHMVCリクエストなコントローラーアクションのテストケースに関してはまだ調査してないので判明次第追記する予定</p>
-
+<p>っていう所。第2引数にfalseを入れるとルーティングエンジンで解決しないっていうのがどうも動作的にどうなるのかが微妙。ソース見た所だと「Request::forge -&gt; Router::process -&gt; new Route(falseにした場合)」という流れになるような模様だけど、引数にfalseを設定した場合Router::processでルーティング定義から探索をしないっていう所だけはわかるけど、それが「ルーティング可能では無い」という意味合いがかなり微妙</p><br /><p>とりあえずまぁ、ビューからコントローラーアクションをコンポーネントな感じで扱う事が出来て、それを検知するのにis_hmvcを使えばチェック出来るよな感じかなと</p><br /><p>ちなみにHMVCリクエストなコントローラーアクションのテストケースに関してはまだ調査してないので判明次第追記する予定</p><br />
 <h4>追記 HMVCリクエストのテスト</h4>
-
-<p>普通にやれば良い模様</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>普通にやれば良い模様</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 class Test_Controller_Home extends TestCase {
     public function test_get_sample() {
@@ -133,12 +120,8 @@ class Test_Controller_Home extends TestCase {
         $this-&gt;assertEquals(200, $res-&gt;status);
     }
 }
-</code></pre>
-<p>ただ返ってくるFuel\CoreResponseのbodyがFuel\CoreViewになってるので、それの結果をテストする場合は</p>
-<pre class="line-numbers"><code class="language-php")>$res-&gt;body-&gt;render()
-</code></pre>
-<p>で出力結果とかを取れるのでそれをテストするなり、Fuel\Core\Viewのままテストするなりでも良いのかなと</p>
-
+</code></pre><p>ただ返ってくるFuel\CoreResponseのbodyがFuel\CoreViewになってるので、それの結果をテストする場合は</p><br /><pre class="line-numbers"><code class="language-php")>$res-&gt;body-&gt;render()
+</code></pre><p>で出力結果とかを取れるのでそれをテストするなり、Fuel\Core\Viewのままテストするなりでも良いのかなと</p><br />
               </div>
             </div>
           </div>

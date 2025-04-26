@@ -80,27 +80,12 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>参考1: https://developer.chrome.com/apps/cloudMessaging</p>
-
-<p>参考2: http://docs.monaca.mobi/3.5/ja/manual/backend/push_config/gcm/ (※主に設定の有効の仕方等)</p>
-
-<p>ちょっと前にはchrome.pushMessagingっていうAPIが公開(って言っても一年以上前)されてたはずなのですが、現在これがどうもlegacy扱いになっている模様で現在はchrome.gcmを使うのが良いっぽそう。確かpushMessagingの方はwebstoreを経由してインストールしたアプリで無いと使えないのかどうかまでは覚えてないが、gcmはcrxパッケージングした拡張であれば使う事が可能らしい</p>
-
-<p>っていう事でやってみた</p>
-
-<p>※おそらくはChrome Sync(ChromeでのGoogleアカウントのログイン機能)をやっておかないと出来ないのかも知れない</p>
-
+                <p>参考1: <a href="https://developer.chrome.com/apps/cloudMessaging">https://developer.chrome.com/apps/cloudMessaging</a></p><br /><p>参考2: <a href="http://docs.monaca.mobi/3.5/ja/manual/backend/push_config/gcm/">http://docs.monaca.mobi/3.5/ja/manual/backend/push_config/gcm/</a> (※主に設定の有効の仕方等)</p><br /><p>ちょっと前にはchrome.pushMessagingっていうAPIが公開(って言っても一年以上前)されてたはずなのですが、現在これがどうもlegacy扱いになっている模様で現在はchrome.gcmを使うのが良いっぽそう。確かpushMessagingの方はwebstoreを経由してインストールしたアプリで無いと使えないのかどうかまでは覚えてないが、gcmはcrxパッケージングした拡張であれば使う事が可能らしい</p><br /><p>っていう事でやってみた</p><br /><p>※おそらくはChrome Sync(ChromeでのGoogleアカウントのログイン機能)をやっておかないと出来ないのかも知れない</p><br />
 <!--more-->
 
 <h4>APIへのアクセス権の設定</h4>
-
-<p>https://console.developers.google.com/project にアクセスして使用するプロジェクトを選択後「APIs &amp; auth」のセクションからCredentialsを選択。Public API AccessからAPI KEYを取得(Server Key)</p>
-
-<p>んでAPIsセクションにアクセスしてGoogle Cloud Messaging for ChromeをONにしておく</p>
-
-<p>で作成したAPI KeyとプロジェクトのSender IDのProject Numberを控えておく<br>
-manifest.json</p>
-<pre class="line-numbers"><code class="language-json")>{
+<p><a href="https://console.developers.google.com/project">https://console.developers.google.com/project</a> にアクセスして使用するプロジェクトを選択後「APIs &amp; auth」のセクションからCredentialsを選択。Public API AccessからAPI KEYを取得(Server Key)</p><br /><p>んでAPIsセクションにアクセスしてGoogle Cloud Messaging for ChromeをONにしておく</p><br /><p>で作成したAPI KeyとプロジェクトのSender IDのProject Numberを控えておく
+manifest.json</p><br /><pre class="line-numbers"><code class="language-json")>{
   "name": "test",
   "version": "1.0",
   "manifest_version": 2,
@@ -142,10 +127,8 @@ manifest.json</p>
     messages.appendChild(message);
   });
 });
-</code></pre>
-<p>まぁここまでが拡張機能の実装なので、ここまでやったら拡張をcrxにビルドしてインストール。その後ブラウザアクションが追加されてるはずなのでクリックしてコンソールを開くとregIdの値が出力されているはずなのでそれも控えておく<br>
-curlでプッシュ送信</p>
-<pre class="line-numbers"><code class="language-sh")>#!/bin/sh
+</code></pre><p>まぁここまでが拡張機能の実装なので、ここまでやったら拡張をcrxにビルドしてインストール。その後ブラウザアクションが追加されてるはずなのでクリックしてコンソールを開くとregIdの値が出力されているはずなのでそれも控えておく
+curlでプッシュ送信</p><br /><pre class="line-numbers"><code class="language-sh")>#!/bin/sh
 
 curl \
     -H "Content-Type:application/x-www-form-urlencoded" \
@@ -153,10 +136,8 @@ curl \
     -d "registration_id=拡張ウィンドウ側のコンソールに出力されたregIdを指定" \
     -d data.message='データ' \
     https://android.googleapis.com/gcm/send
-</code></pre>
-<p>てな感じでchrome.gcmで取得したregIdを使ってChrome側にプッシュ送信出来る模様<br>
-Java(HttpsURLConnection)でプッシュ送信</p>
-<pre class="line-numbers"><code class="language-java")>import java.io.IOException;
+</code></pre><p>てな感じでchrome.gcmで取得したregIdを使ってChrome側にプッシュ送信出来る模様
+Java(HttpsURLConnection)でプッシュ送信</p><br /><pre class="line-numbers"><code class="language-java")>import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -193,11 +174,7 @@ public class Main {
         }
     }
 }
-</code></pre>
-<p>終わり。詳しい事はサーバー側等からリクエストを送る際にGoogle Cloud Messaging for AndroidがONになってないとHTTP/401 Unauthorize failureする事がある</p>
-
-<p>んまｘ一応プッシュ送信する仕組みが良い感じに使えるようになったのでは(以前と比べると)</p>
-
+</code></pre><p>終わり。詳しい事はサーバー側等からリクエストを送る際にGoogle Cloud Messaging for AndroidがONになってないとHTTP/401 Unauthorize failureする事がある</p><br /><p>んまｘ一応プッシュ送信する仕組みが良い感じに使えるようになったのでは(以前と比べると)</p><br />
               </div>
             </div>
           </div>

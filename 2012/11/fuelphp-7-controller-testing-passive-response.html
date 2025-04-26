@@ -79,12 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>前にも書いたんですが、コントローラーテスト時にset_methodとかしても結局ルーティングに合わない場合等にはHttpNotFoundExceptionがスローされたりして結局レスポンス取れないっていう事があったのですが、んまぁ大体の言語には「このテストでは例外が出る」っていうのを前提にテストを書く(expectedException)というケースがありきたりだとは思いますが</p>
-
-<p>例外うっせぇ、それでもレスポンスをちゃんとチェックしてえんだよ<s>クソが</s></p>
-
-<p>って思う人もいるでしょう。という事でごちゃごちゃでまだ理解出来た訳じゃないのですが、いろいろ調べてみた。という事で例題的なサンプルのコントローラーが</p>
-
+                <p>前にも書いたんですが、コントローラーテスト時にset_methodとかしても結局ルーティングに合わない場合等にはHttpNotFoundExceptionがスローされたりして結局レスポンス取れないっていう事があったのですが、んまぁ大体の言語には「このテストでは例外が出る」っていうのを前提にテストを書く(expectedException)というケースがありきたりだとは思いますが</p><br /><p>例外うっせぇ、それでもレスポンスをちゃんとチェックしてえんだよ<s>クソが</s></p><br /><p>って思う人もいるでしょう。という事でごちゃごちゃでまだ理解出来た訳じゃないのですが、いろいろ調べてみた。という事で例題的なサンプルのコントローラーが</p><br />
 <!--more-->
 
 <h4>fuel/app/classes/controller/home.php</h4>
@@ -101,9 +96,7 @@ class Controller_Home extends Controller {
         // return View::forge("home/index", $data);
     }
 }
-</code></pre>
-<p>メソッドがget_indexになっているので、このリクエスト自体はHTTP/GETしか容認しないと思うのですが。で前にも書いたけど、このコントローラーテストする場合</p>
-
+</code></pre><p>メソッドがget_indexになっているので、このリクエスト自体はHTTP/GETしか容認しないと思うのですが。で前にも書いたけど、このコントローラーテストする場合</p><br />
 <h4>fuel/app/tests/controller/test_home.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -112,13 +105,7 @@ class Test_Controller_Home extends TestCase {
         $response = Request::forge("home/index")-&gt;set_method("POST")-&gt;execute()-&gt;response();
     }
 }
-</code></pre>
-<p>としてもexecuteの時点でHttpNotFoundExceptionが発生する(本来は403エラーになるべきだと思うのだけど)。こっちが要求したいのは例外を起こさせる事ではなく例外が起きてもFurlCoreResponseが返ってきて欲しい場合。</p>
-
-<p>で更にproduction環境上はExceptionを例外を発生させた場合にはHTTP/500エラーになる。そこら辺をテストするには現状のRequestクラスでは出来ないはず。恐らくはcurlドライバーでテストしても変わらない。本質はFuelCoreRequest#executeにあるはずなので。</p>
-
-<p>という事でこれの例外をすべてラップしちゃってレスポンスを取るRequestクラスをでっち上げる</p>
-
+</code></pre><p>としてもexecuteの時点でHttpNotFoundExceptionが発生する(本来は403エラーになるべきだと思うのだけど)。こっちが要求したいのは例外を起こさせる事ではなく例外が起きてもFurlCoreResponseが返ってきて欲しい場合。</p><br /><p>で更にproduction環境上はExceptionを例外を発生させた場合にはHTTP/500エラーになる。そこら辺をテストするには現状のRequestクラスでは出来ないはず。恐らくはcurlドライバーでテストしても変わらない。本質はFuelCoreRequest#executeにあるはずなので。</p><br /><p>という事でこれの例外をすべてラップしちゃってレスポンスを取るRequestクラスをでっち上げる</p><br />
 <h4>fuel/app/classes/http_request.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -139,9 +126,7 @@ class HttpRequest extends Request {
         return $this;
     }
 }
-</code></pre>
-<p>ようはRequest#executeで実行する際に例外を処理しないから例外スローされちゃう訳だからそれをラップして例外をチェック。fuel/core/classes/httpexceptions.phpに定義されている例外クラスを確認すると</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>ようはRequest#executeで実行する際に例外を処理しないから例外スローされちゃう訳だからそれをラップして例外をチェック。fuel/core/classes/httpexceptions.phpに定義されている例外クラスを確認すると</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 namespace Fuel\Core;
 
@@ -161,13 +146,7 @@ class HttpServerErrorException extends HttpException
         return new Response(View::forge("500"), 500);
     }
 }
-</code></pre>
-<p>っつー感じになってる模様げなので、発生した例外がHttpException基底であるかをチャックして、それであればそのままレスポンスメソッドをRequest-&gt;responseにぶち込む。そうじゃなければ、HttpServerErrorExceptionでレスポンスを設定する</p>
-
-<p>っていう方法を取る事でたとえHttpNotFoundExceptionなどによる例外発生が出た場合にでもレスポンスをチェック出来る(はず)</p>
-
-<p>もちろん上に書いたように例外スローでもその例外スローをexpectedすれば良い。だけど、例外発生時のレスポンスのテストを行う際にはこういう手法を用いるとかで代用出来るのかも</p>
-
+</code></pre><p>っつー感じになってる模様げなので、発生した例外がHttpException基底であるかをチャックして、それであればそのままレスポンスメソッドをRequest-&gt;responseにぶち込む。そうじゃなければ、HttpServerErrorExceptionでレスポンスを設定する</p><br /><p>っていう方法を取る事でたとえHttpNotFoundExceptionなどによる例外発生が出た場合にでもレスポンスをチェック出来る(はず)</p><br /><p>もちろん上に書いたように例外スローでもその例外スローをexpectedすれば良い。だけど、例外発生時のレスポンスのテストを行う際にはこういう手法を用いるとかで代用出来るのかも</p><br />
               </div>
             </div>
           </div>

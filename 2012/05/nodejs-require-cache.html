@@ -79,16 +79,9 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>Node.jsのrequireは読み込んだ後にその.jsファイルをキャッシュするような事は以前書いた。でこれ不都合な場合もある。それが「テストケース時にモジュールのprototypeを意図的に書き換えた場合にその後のテストケースにも影響する」っていうところがあるようで。</p>
-
+                <p>Node.jsのrequireは読み込んだ後にその.jsファイルをキャッシュするような事は以前書いた。でこれ不都合な場合もある。それが「テストケース時にモジュールのprototypeを意図的に書き換えた場合にその後のテストケースにも影響する」っていうところがあるようで。</p><br />
 <!--more-->
-
-<p>で色々調べてたらこういう素晴らしすぎる記事を発見</p>
-
-<p><a href="http://kacchan6.hatenablog.com/entry/2012/03/31/133656">Node.jsでrequireをフックする</a></p>
-
-<p>つまりrequireは行われた後にmodule.loadで何やらしているらしい。上記の記事にも書いてあるような方法を使用することでrequireでキャッシュされたのを意図的に消すことも出来る。もちろんrequire.cacheを利用する仕組み関係なやつはやっちゃダメだけど。で実際やってみると</p>
-<pre class="line-numbers"><code class="language-js")>var module_load = module.constructor.prototype.load;
+<p>で色々調べてたらこういう素晴らしすぎる記事を発見</p><br /><p><a href="http://kacchan6.hatenablog.com/entry/2012/03/31/133656">Node.jsでrequireをフックする</a></p><br /><p>つまりrequireは行われた後にmodule.loadで何やらしているらしい。上記の記事にも書いてあるような方法を使用することでrequireでキャッシュされたのを意図的に消すことも出来る。もちろんrequire.cacheを利用する仕組み関係なやつはやっちゃダメだけど。で実際やってみると</p><br /><pre class="line-numbers"><code class="language-js")>var module_load = module.constructor.prototype.load;
 
 module.constructor.prototype.load = function(filename) {
   if (filename in require.cache) {
@@ -102,9 +95,7 @@ var express = require("express");
 
 console.log(require.cache);
 console.log(express);
-</code></pre>
-<p>deleteな記述な部分をコメントするとrequire.cacheにはたしかにexpressをロードしたのをキャッシュしたものが格納されているが、このまま動かすとrequire.cacheにはexpressをキャッシュしたのが入らない(正確には消される)</p>
-
+</code></pre><p>deleteな記述な部分をコメントするとrequire.cacheにはたしかにexpressをロードしたのをキャッシュしたものが格納されているが、このまま動かすとrequire.cacheにはexpressをキャッシュしたのが入らない(正確には消される)</p><br />
               </div>
             </div>
           </div>

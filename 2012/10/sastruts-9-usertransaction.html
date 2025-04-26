@@ -79,8 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>SAStrutsっていうかS2JDBCな件だとは思うのですが、それはおいといて。トランザクションを自動化せずに手動によるトランザクションを利用したい場合のメモ</p>
-
+                <p>SAStrutsっていうかS2JDBCな件だとは思うのですが、それはおいといて。トランザクションを自動化せずに手動によるトランザクションを利用したい場合のメモ</p><br />
 <!--more-->
 
 <h4>UserService.java</h4>
@@ -153,13 +152,7 @@ public class UserService extends S2AbstractService&lt;User&gt; {
         }
     }
 }
-</code></pre>
-<p>手動トランザクションしたいメソッドに@TransactionAttributeでNEVERにする(もしくはNOT_SUPPORTED?)。でメソッドで例外キャッチしたらUserTransaction.setRollbackOnlyを行う事でUserTransaction.getStatusがSTATUS_MARKED_ROLLBACK(値は1)になる。あとはfinally区において、現状のトランザクションステータスによりコミットするかロールバックするかとか</p>
-
-<p>っていう感じで自動トランザクションしちゃいけないケースの場合のUserTransactionの使い方はこんな感じかなと</p>
-
-<p>でこれテストする場合どうなるのって所</p>
-
+</code></pre><p>手動トランザクションしたいメソッドに@TransactionAttributeでNEVERにする(もしくはNOT_SUPPORTED?)。でメソッドで例外キャッチしたらUserTransaction.setRollbackOnlyを行う事でUserTransaction.getStatusがSTATUS_MARKED_ROLLBACK(値は1)になる。あとはfinally区において、現状のトランザクションステータスによりコミットするかロールバックするかとか</p><br /><p>っていう感じで自動トランザクションしちゃいけないケースの場合のUserTransactionの使い方はこんな感じかなと</p><br /><p>でこれテストする場合どうなるのって所</p><br />
 <h4>UserServiceTestCase.java</h4>
 <pre class="line-numbers"><code class="language-java")>import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -191,11 +184,7 @@ public class UserServiceTestCase {
         service.createUser(null);
     }
 }
-</code></pre>
-<p>な感じ。ちょっと気になったのはTxBehaviorしなきゃいけないケースに関してなんだけど、TransactionAttributeのNEVERとNOT_SUPPORTEDの違いとしては <a href="http://kokuzawa.blogspot.jp/2011/02/ejb31bean.html">http://kokuzawa.blogspot.jp/2011/02/ejb31bean.html</a> が参考になった</p>
-
-<p>なので今回テストトランザクションをNONEにしないとService側のトランザクションを行う際に既にテストトランザクションが開始されているので、そこでエラーになるみたいな感じなのかなと。NOT_SUPPORTEDだと既存するトランザクションを停止させてからトランザクション処理を開始する模様なのでテスト側でTxBehaviorをしなくてもテストトランザクションはメソッド実行された段階で停止するのかなと</p>
-
+</code></pre><p>な感じ。ちょっと気になったのはTxBehaviorしなきゃいけないケースに関してなんだけど、TransactionAttributeのNEVERとNOT_SUPPORTEDの違いとしては <a href="http://kokuzawa.blogspot.jp/2011/02/ejb31bean.html">http://kokuzawa.blogspot.jp/2011/02/ejb31bean.html</a> が参考になった</p><br /><p>なので今回テストトランザクションをNONEにしないとService側のトランザクションを行う際に既にテストトランザクションが開始されているので、そこでエラーになるみたいな感じなのかなと。NOT_SUPPORTEDだと既存するトランザクションを停止させてからトランザクション処理を開始する模様なのでテスト側でTxBehaviorをしなくてもテストトランザクションはメソッド実行された段階で停止するのかなと</p><br />
               </div>
             </div>
           </div>

@@ -78,12 +78,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>参考: https://developer.android.com/training/articles/security-ssl.html</p>
-
-<p>※セキュリティ対策を前提としたネタではないので</p>
-
-<p>以前にオレオレHTTPSにJavaから接続するメモというネタで書いてる。そこでTrustManagerを使用するがnullを返すだけなパターンが色々と問題なのでそういう手法を使わない方法をちょっと調べてみたのでメモ</p>
-
+                <p>参考: <a href="https://developer.android.com/training/articles/security-ssl.html">https://developer.android.com/training/articles/security-ssl.html</a></p><br /><p>※セキュリティ対策を前提としたネタではないので</p><br /><p>以前にオレオレHTTPSにJavaから接続するメモというネタで書いてる。そこでTrustManagerを使用するがnullを返すだけなパターンが色々と問題なのでそういう手法を使わない方法をちょっと調べてみたのでメモ</p><br />
 <!--more-->
 
 <h4>キーストアを作る</h4>
@@ -108,9 +103,7 @@ keytool \
   -keystore server.bks \
   -storetype BKS \
   -storepass abcdef
-</code></pre>
-<p>JKSとBKSのアルゴリズムの２つなパターンを検証してみるので(ただし以下ソースではJKSのみ)</p>
-
+</code></pre><p>JKSとBKSのアルゴリズムの２つなパターンを検証してみるので(ただし以下ソースではJKSのみ)</p><br />
 <h4>クライアント</h4>
 <pre class="line-numbers"><code class="language-java")>import java.io.IOException;
 import java.io.InputStream;
@@ -165,13 +158,7 @@ public class Main {
         }
     }
 }
-</code></pre>
-<p>っていう感じで作って、上記でプロキシを介してリクエストするのでmitmproxyを使ってサーバーから送られてくる証明書等?を偽装出来るようなプロキシを使うと使用しているキーストアとサーバーから送られてくる不適切な証明書を検証して問題があれば例外が発生してリクエストが成立しなくなる(もちろんプロキシする部分のコードを消してプロキシを介さないようにした場合はサーバー側の証明書とキーストアを検証して問題は起きないのでリクエストは成立する)</p>
-
-<p>で上記コードだとJKSを使ってるだけなので、BKSを使う場合にはserver.bksを使うのとKeyStore.getInstanceの引数にBKSを指定するだけでほかは特に変わらないので省略(※ただし、BKSの場合はキーストアパスを空にしてもロード出来る模様。詳しくは https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786 )</p>
-
-<p>っていうような感じでHTTPS通信するのはいいけど証明書周りの検証をやらないで問答無用ですっ飛ばすような実装するべきじゃないってことで。ちなみにそういう系の専門な人がいうにはサーバーから来た証明書とかのコモンネームなどもちゃんと検証するべきだとのこと</p>
-
+</code></pre><p>っていう感じで作って、上記でプロキシを介してリクエストするのでmitmproxyを使ってサーバーから送られてくる証明書等?を偽装出来るようなプロキシを使うと使用しているキーストアとサーバーから送られてくる不適切な証明書を検証して問題があれば例外が発生してリクエストが成立しなくなる(もちろんプロキシする部分のコードを消してプロキシを介さないようにした場合はサーバー側の証明書とキーストアを検証して問題は起きないのでリクエストは成立する)</p><br /><p>で上記コードだとJKSを使ってるだけなので、BKSを使う場合にはserver.bksを使うのとKeyStore.getInstanceの引数にBKSを指定するだけでほかは特に変わらないので省略(※ただし、BKSの場合はキーストアパスを空にしてもロード出来る模様。詳しくは <a href="https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786">https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786</a> )</p><br /><p>っていうような感じでHTTPS通信するのはいいけど証明書周りの検証をやらないで問答無用ですっ飛ばすような実装するべきじゃないってことで。ちなみにそういう系の専門な人がいうにはサーバーから来た証明書とかのコモンネームなどもちゃんと検証するべきだとのこと</p><br />
 <h4>余談: X509証明書からKeyStoreなインスタンスを作る方法</h4>
 <pre class="line-numbers"><code class="language-java")>import java.io.IOException;
 import java.io.InputStream;
@@ -232,9 +219,7 @@ public class Main {
         }
     }
 }
-</code></pre>
-<p>っていうような感じでCertificateFactoryを使って生成出来る</p>
-
+</code></pre><p>っていうような感じでCertificateFactoryを使って生成出来る</p><br />
 <h4>余談: TrustManagerを独自実装してチェックする場合</h4>
 <pre class="line-numbers"><code class="language-java")>import java.io.IOException;
 import java.io.InputStream;
@@ -317,9 +302,7 @@ public class Main {
         }
     }
 }
-</code></pre>
-<p>この方法がいいのかは微妙。まだ曖昧な部分も若干あるのでまたネタを色々書くかもしれないってことで終わり</p>
-
+</code></pre><p>この方法がいいのかは微妙。まだ曖昧な部分も若干あるのでまたネタを色々書くかもしれないってことで終わり</p><br />
               </div>
             </div>
           </div>

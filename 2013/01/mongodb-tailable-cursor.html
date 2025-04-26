@@ -78,18 +78,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>tailable Cursorを使う為にはcappedコレクションである必要がある模様なので</p>
-
+                <p>tailable Cursorを使う為にはcappedコレクションである必要がある模様なので</p><br />
 <!--more-->
 <pre class="line-numbers"><code class="language-js")>db.createCollection("samples", { capped: true, size: 4096 })
-</code></pre>
-<p>sizeは最小値が4096なんだとか。検証してないから事実かは不明ですけど、でcappedコレクションはあくまでLRUなコレクションでオプションによって指定されたサイズを超えたりした場合には古いのから削除されていく模様</p>
-
-<p>でtailable Cursorを使う事で&quot;tail -f&quot;のような動作を実現する事が可能らしい。という事でやってみる</p>
-<pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge" })
-</code></pre>
-<p>適当に突っ込んでおく。でPerlでtailable Cursorを使うスクリプトを書く</p>
-<pre class="line-numbers"><code class="language-pl")>use MongoDB;
+</code></pre><p>sizeは最小値が4096なんだとか。検証してないから事実かは不明ですけど、でcappedコレクションはあくまでLRUなコレクションでオプションによって指定されたサイズを超えたりした場合には古いのから削除されていく模様</p><br /><p>でtailable Cursorを使う事で&quot;tail -f&quot;のような動作を実現する事が可能らしい。という事でやってみる</p><br /><pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge" })
+</code></pre><p>適当に突っ込んでおく。でPerlでtailable Cursorを使うスクリプトを書く</p><br /><pre class="line-numbers"><code class="language-pl")>use MongoDB;
 use Data::Dumper;
 
 my $mdb = MongoDB::MongoClient-&gt;new;
@@ -103,20 +96,8 @@ while (1) {
         warn Dumper $row;
     }
 }
-</code></pre>
-<p>まぁ起動しておくと</p>
-
-<p><img src="/images/2013/01/20130117165142.png" loading="lazy" /></p>
-
-<p>初期状態で格納しているデータは普通に表示される。で起動したままmongoで</p>
-<pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "fuga" })
-</code></pre>
-<p>と追加して、画面を見ると</p>
-
-<p><img src="/images/2013/01/20130117165237.png" loading="lazy" /></p>
-
-<p>という風にDumpが増えてる。という感じで更新されたのをポインタとして取得して&quot;tail -f&quot;な事をやろうと思うのであればcappedコレクションとtailable Cursorを用いる事で可能な模様</p>
-
+</code></pre><p>まぁ起動しておくと</p><br /><p><img src="/images/2013/01/20130117165142.png" loading="lazy" /></p><br /><p>初期状態で格納しているデータは普通に表示される。で起動したままmongoで</p><br /><pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "fuga" })
+</code></pre><p>と追加して、画面を見ると</p><br /><p><img src="/images/2013/01/20130117165237.png" loading="lazy" /></p><br /><p>という風にDumpが増えてる。という感じで更新されたのをポインタとして取得して&quot;tail -f&quot;な事をやろうと思うのであればcappedコレクションとtailable Cursorを用いる事で可能な模様</p><br />
               </div>
             </div>
           </div>

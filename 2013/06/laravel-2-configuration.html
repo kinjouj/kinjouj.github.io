@@ -79,46 +79,29 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>引き続きドキュメント読み。 <a href="http://laravel.com/docs/configuration">http://laravel.com/docs/configuration</a> をやってみる</p>
-
+                <p>引き続きドキュメント読み。 <a href="http://laravel.com/docs/configuration">http://laravel.com/docs/configuration</a> をやってみる</p><br />
 <!--more-->
 
 <h4>Config.getとか</h4>
-
-<p>app/configに設定ファイルを定義すれば良い。設定ファイルはPHPファイルで内容はreturn arrayをする。例えばapp/config/hoge.phpを作る</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>app/configに設定ファイルを定義すれば良い。設定ファイルはPHPファイルで内容はreturn arrayをする。例えばapp/config/hoge.phpを作る</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 return array(
     "message" =&gt; "hoge fuga foobar"
 );
-</code></pre>
-<p>とかしたら</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>とかしたら</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 Config.get("hoge.message");
-</code></pre>
-<p>みたいにファイル名がaliasな感じ?でキー名をドットでつなげて利用できる模様</p>
-
+</code></pre><p>みたいにファイル名がaliasな感じ?でキー名をドットでつなげて利用できる模様</p><br />
 <h4>App::environmentに関して</h4>
-
-<p>App::environmentメソッドを使って環境名?的なを取る事が出来る模様。デフォルトではproductionが返されるけど、bootstrap/start.phpとかにそういう処理を書く事で制御する事が可能な模様</p>
-
-<p>でローカル環境で検証しているとか場合だと</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>App::environmentメソッドを使って環境名?的なを取る事が出来る模様。デフォルトではproductionが返されるけど、bootstrap/start.phpとかにそういう処理を書く事で制御する事が可能な模様</p><br /><p>でローカル環境で検証しているとか場合だと</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 $env = $app-&gt;detectEnvironment(
     array(
         "local" =&gt; array("your-machine-name")
     )
 );
-</code></pre>
-<p>みたいな感じになってる。your-machine-nameとローカルのマシン名?(恐らくは`hostname`とかでマッチする名)がマッチした場合にはこの環境名が使われる。つまりyour-machine-nameと一致したらApp::environmentはlocalが利用される事になる。でdetectEnvironmentはfunctionを渡すことも出来る</p>
-
-<p>今回検証している環境がnginx+php-fpmなので。nginxに</p>
-<pre class="line-numbers"><code class="language-nginx")>fastcgi_param LARAVEL_ENV development
-</code></pre>
-<p>と設定しておき</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>みたいな感じになってる。your-machine-nameとローカルのマシン名?(恐らくは`hostname`とかでマッチする名)がマッチした場合にはこの環境名が使われる。つまりyour-machine-nameと一致したらApp::environmentはlocalが利用される事になる。でdetectEnvironmentはfunctionを渡すことも出来る</p><br /><p>今回検証している環境がnginx+php-fpmなので。nginxに</p><br /><pre class="line-numbers"><code class="language-nginx")>fastcgi_param LARAVEL_ENV development
+</code></pre><p>と設定しておき</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 $env = $app-&gt;detectEnvironment(function() {
     if (isset($_SERVER["LARAVEL_ENV"])) {
@@ -127,37 +110,21 @@ $env = $app-&gt;detectEnvironment(function() {
 
     return "development";
 });
-</code></pre>
-<p>のようにしておけば、Webサーバーとのやり取りで環境名を設定する事も可能な模様。でapp/config/環境名とかにも設定を置く事が出来る模様。例えば上記で作成したhoge.phpをapp/config/development/hoge.phpと定義(値を変えて)した場合には、こっちの読み込みが優先される模様。</p>
-
-<p>更に</p>
-
+</code></pre><p>のようにしておけば、Webサーバーとのやり取りで環境名を設定する事も可能な模様。でapp/config/環境名とかにも設定を置く事が出来る模様。例えば上記で作成したhoge.phpをapp/config/development/hoge.phpと定義(値を変えて)した場合には、こっちの読み込みが優先される模様。</p><br /><p>更に</p><br />
 <ul>
 <li>app/config/database.phpが無い</li>
 <li>app/config/[development|production]/database.phpはある</li>
 <li>app/config/testing/database.phpは無い</li>
 </ul>
-
-<p>場合にLaravelのテストを実行するとコントローラーとかでデータベースを使ってるとエラーになる。要はapp/config/環境名/設定ファイルが無ければ、app/configディレクトリ直下にある設定を利用する。でそれも無ければ読み込まれない的な感じかなと。</p>
-
-<p>ちなみにテスト時の環境名はtestingになるのでテスト時に使用するデータベースとかを切り替えたりも出来る。その際にmigration辺りは</p>
-<pre class="line-numbers"><code>artisan --env=testing migrate
-</code></pre>
-<p>とかでテスト向けのmigrationを実行する事も可能な模様</p>
-
+<p>場合にLaravelのテストを実行するとコントローラーとかでデータベースを使ってるとエラーになる。要はapp/config/環境名/設定ファイルが無ければ、app/configディレクトリ直下にある設定を利用する。でそれも無ければ読み込まれない的な感じかなと。</p><br /><p>ちなみにテスト時の環境名はtestingになるのでテスト時に使用するデータベースとかを切り替えたりも出来る。その際にmigration辺りは</p><br /><pre class="line-numbers"><code>artisan --env=testing migrate
+</code></pre><p>とかでテスト向けのmigrationを実行する事も可能な模様</p><br />
 <h4>artisan up/downに関して</h4>
 
 <ul>
 <li>  artisan downでメンテナンスモード</li>
 <li>  artisan upでメンテナンスモードから復旧</li>
 </ul>
-
-<p>的な事が出来る。でそこでの処理自体がapp/start/global.phpなどに、down時のレスポンスを処理したり出来る模様。デフォルトではHTTP503なエラーを送出</p>
-
-<p>まぁ特に突っ込みどころも無い気がするので(ry</p>
-
-<p>という感じ。環境名による設定の制御だとかは可能だというのが判明かなと</p>
-
+<p>的な事が出来る。でそこでの処理自体がapp/start/global.phpなどに、down時のレスポンスを処理したり出来る模様。デフォルトではHTTP503なエラーを送出</p><br /><p>まぁ特に突っ込みどころも無い気がするので(ry</p><br /><p>という感じ。環境名による設定の制御だとかは可能だというのが判明かなと</p><br />
 <h4>追記</h4>
 
 <blockquote class="twitter-tweet">

@@ -79,16 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>簡単に入力検証なのを実現したいのであれば@ValidとBindingResultを利用する事で出来るらしい。色々突っかかる所があるのであくまで暫定的ではあるけどメモっておく</p>
-
+                <p>簡単に入力検証なのを実現したいのであれば@ValidとBindingResultを利用する事で出来るらしい。色々突っかかる所があるのであくまで暫定的ではあるけどメモっておく</p><br />
 <!--more-->
 
 <h4>必要なライブラリ</h4>
-
-<p>Spring Frameworkには@Validではなく、@Validatedっていうアノテーションがある。今回やるのは前者な方で後者に関しては今後やる可能性もあるのでとりあえずは「<a href="http://d.hatena.ne.jp/tatsu-no-toshigo/20131006/1381031027">アノテーション「@Validated」と「@Valid」</a>」を参考されたしという事で(ry</p>
-
-<p>で本題の必要なライブラリに関して、javax.validationとその実装であるライブラリが必要。んまぁ後者のその実装に関してはHibernate Validatorがサポートされているのでそれを使う。という事でそのライブラリ参照を追加する</p>
-<pre class="line-numbers"><code class="language-groovy")>repositories {
+<p>Spring Frameworkには@Validではなく、@Validatedっていうアノテーションがある。今回やるのは前者な方で後者に関しては今後やる可能性もあるのでとりあえずは「<a href="http://d.hatena.ne.jp/tatsu-no-toshigo/20131006/1381031027">アノテーション「@Validated」と「@Valid」</a>」を参考されたしという事で(ry</p><br /><p>で本題の必要なライブラリに関して、javax.validationとその実装であるライブラリが必要。んまぁ後者のその実装に関してはHibernate Validatorがサポートされているのでそれを使う。という事でそのライブラリ参照を追加する</p><br /><pre class="line-numbers"><code class="language-groovy")>repositories {
     mavenCentral()
 }
 
@@ -138,9 +133,7 @@ public class SampleForm implements Serializable {
         this.name = name;
     }
 }
-</code></pre>
-<p>@NotEmptyで引数を指定しているが、引数を指定しない場合には<span style="color: red">org.hibernate.validator.constraints.NotEmpty.message</span>というメッセージリソースなプロパティが参照される。これに関しては後術するので(ry</p>
-
+</code></pre><p>@NotEmptyで引数を指定しているが、引数を指定しない場合には<span style="color: red">org.hibernate.validator.constraints.NotEmpty.message</span>というメッセージリソースなプロパティが参照される。これに関しては後術するので(ry</p><br />
 <h4>ValidationMessages_ja.properties</h4>
 <pre class="line-numbers"><code class="language-ini")>#org.hibernate.validator.constraints.NotEmpty.message={sample_form.name}が未入力です
 error.empty.sample_form.name="{sample_form.name}"が入力されてません
@@ -194,11 +187,7 @@ public class SampleController {
         });
     }
 }
-</code></pre>
-<p>というようにフォーム検証を行うアノテーションを付与して@ModelAttributeで送信したデータとのオブジェクトのマッピングを行い、そのバインディング上でエラーがあるかをチェックすれば良い模様。んで正常な場合だと普通に画面に入力したデータが表示されるだけだけど、エラーな場合にはindexなビューなレスポンスをレンダリングする的な感じかと</p>
-
-<p>でJSPでは</p>
-<pre class="line-numbers"><code class="language-jsp")>&lt;%@ page contentType="text/html; charset=utf-8" %&gt;
+</code></pre><p>というようにフォーム検証を行うアノテーションを付与して@ModelAttributeで送信したデータとのオブジェクトのマッピングを行い、そのバインディング上でエラーがあるかをチェックすれば良い模様。んで正常な場合だと普通に画面に入力したデータが表示されるだけだけど、エラーな場合にはindexなビューなレスポンスをレンダリングする的な感じかと</p><br /><p>でJSPでは</p><br /><pre class="line-numbers"><code class="language-jsp")>&lt;%@ page contentType="text/html; charset=utf-8" %&gt;
 &lt;%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%&gt;
 &lt;%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%&gt;
 &lt;%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %&gt;
@@ -215,16 +204,12 @@ public class SampleController {
     &lt;form:errors path="name" /&gt;
     &lt;input type="submit" value="save" /&gt;
 &lt;/form:form&gt;
-</code></pre>
-<p>というようにフォームエラーがある場合には表示させるのは</p>
-
+</code></pre><p>というようにフォームエラーがある場合には表示させるのは</p><br />
 <ul>
 <li>  &lt;spring:hasBindErrors&gt;でチェックして&lt;spring:message&gt;で表示させる</li>
 <li>  &lt;form:errors path=&quot;&quot;/&gt;で表示させる</li>
 </ul>
-
-<p>というような方法がある模様。まぁテストも書きましょうって事で</p>
-
+<p>というような方法がある模様。まぁテストも書きましょうって事で</p><br />
 <h4>SampleControllerTest.java</h4>
 <pre class="line-numbers"><code class="language-java")>package swmvc;
 
@@ -256,19 +241,13 @@ public class SampleControllerTest extends AbstractTestCase {
             ));
     }
 }
-</code></pre>
-<p>終わり。ただ書いたやり方だと、フォーム検証でエラーが発生したらindexビューをレンダリングするようになっているのでリロードするとPOSTなデータを再送信するような方式になってしまうのでそこら辺の対処法は後日書く</p>
-
+</code></pre><p>終わり。ただ書いたやり方だと、フォーム検証でエラーが発生したらindexビューをレンダリングするようになっているのでリロードするとPOSTなデータを再送信するような方式になってしまうのでそこら辺の対処法は後日書く</p><br />
 <h4>余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</h4>
-
-<p>上記でも書いたように検証エラーメッセージ等はValidationMessages_[locale].properties等から読まれる訳ですけど、Springが使うMessageSourceと共通化する形で</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;bean
+<p>上記でも書いたように検証エラーメッセージ等はValidationMessages_[locale].properties等から読まれる訳ですけど、Springが使うMessageSourceと共通化する形で</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;bean
     id="messageSource"
     class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
     p:basename="classpath:applicationMessages" /&gt;
-</code></pre>
-<p>で指定しても、検証メッセージで使用するプロパティはValidationMessagesから参照して無かったらデフォルトを出すっていう形になる模様。なので上記だけ設定してもapplicationMessages.propertiesからは検証メッセージなプロパティが作用しない状態になる模様。その場合は</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</code></pre><p>で指定しても、検証メッセージで使用するプロパティはValidationMessagesから参照して無かったらデフォルトを出すっていう形になる模様。なので上記だけ設定してもapplicationMessages.propertiesからは検証メッセージなプロパティが作用しない状態になる模様。その場合は</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
@@ -298,13 +277,7 @@ public class SampleControllerTest extends AbstractTestCase {
         p:basename="classpath:applicationMessages" /&gt;
 
 &lt;/beans&gt;
-</code></pre>
-<p>っていうようにLocalValidatorFactoryBeanなvalidationMessageSourceな設定が別途で必要な模様。但し、これSpring3.2.x系で動かすと<a href="https://jira.springsource.org/browse/SPR-8199">Support Bean Validation 1.1 (JSR-349)</a>っていうエラーが起きた。</p>
-
-<p>3.2.x系で動かす場合には、 <a href="https://jira.springsource.org/browse/SPR-10466">https://jira.springsource.org/browse/SPR-10466</a> を参考にする事で同様な事を利用する事が出来るようになる模様</p>
-
-<p>一応メモ</p>
-
+</code></pre><p>っていうようにLocalValidatorFactoryBeanなvalidationMessageSourceな設定が別途で必要な模様。但し、これSpring3.2.x系で動かすと<a href="https://jira.springsource.org/browse/SPR-8199">Support Bean Validation 1.1 (JSR-349)</a>っていうエラーが起きた。</p><br /><p>3.2.x系で動かす場合には、 <a href="https://jira.springsource.org/browse/SPR-10466">https://jira.springsource.org/browse/SPR-10466</a> を参考にする事で同様な事を利用する事が出来るようになる模様</p><br /><p>一応メモ</p><br />
               </div>
             </div>
           </div>

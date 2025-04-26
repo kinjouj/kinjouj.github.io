@@ -79,16 +79,13 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="http://laravel.com/docs/templates">http://laravel.com/docs/templates</a> なドキュメント読みつつやってみた</p>
-
+                <p><a href="http://laravel.com/docs/templates">http://laravel.com/docs/templates</a> なドキュメント読みつつやってみた</p><br />
 <!--more-->
 <pre class="line-numbers"><code class="language-php")>@extends("layout")
 @section("content")
 省略
 @stop
-</code></pre>
-<p>的な事をしていたけど、<a href="http://laravel.com/api/class-Illuminate.Routing.Controllers.Controller.html">Illuminate\Routing\Controllers\Controller</a>には$layoutの設定及びsetupLayoutメソッドを実装する事でもテンプレートレイアウトな方式を利用出来るっぽい(Laravel初期状態からあるBaseControllerには実装されている?)</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>的な事をしていたけど、<a href="http://laravel.com/api/class-Illuminate.Routing.Controllers.Controller.html">Illuminate\Routing\Controllers\Controller</a>には$layoutの設定及びsetupLayoutメソッドを実装する事でもテンプレートレイアウトな方式を利用出来るっぽい(Laravel初期状態からあるBaseControllerには実装されている?)</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 class HomeController extends Controller {
 
@@ -104,9 +101,7 @@ class HomeController extends Controller {
         $this-&gt;layout-&gt;content = View::make("index", array("samples" =&gt; [1, 2, 3]));
     }
 }
-</code></pre>
-<p>的なコントローラーをしておいて</p>
-<pre class="line-numbers"><code class="language-php")>@section("content")
+</code></pre><p>的なコントローラーをしておいて</p><br /><pre class="line-numbers"><code class="language-php")>@section("content")
 {% raw %}
 &lt;ul&gt;
 @foreach ($samples as $sample)
@@ -115,9 +110,7 @@ class HomeController extends Controller {
 &lt;/ul&gt;
 {% endraw %}
 @stop
-</code></pre>
-<p>的な感じで使える模様。で例えばレイアウト側が</p>
-<pre class="line-numbers"><code class="language-php")>&lt;html&gt;
+</code></pre><p>的な感じで使える模様。で例えばレイアウト側が</p><br /><pre class="line-numbers"><code class="language-php")>&lt;html&gt;
   &lt;body&gt;
 @section("content")
 abc
@@ -125,22 +118,10 @@ abc
 @yield("Content")
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<p>的な事をしている場合にはこのレイアウト側の@sectionな部分はレンダリングされない模様。例えばサイドバーとかにコンテンツ特有のを追加する場合にレイアウト側では既存するサイドバーに追加されるような形でレンダリングされたいような要件のある場合には@parentを使って、レイアウトを使ってる側からレイアウト側なセクションコンテントをレンダリング出来るようにする事も可能っぽい</p>
-
-<p>でちょっと気になった件として、@extendsを使ってる場合だとコントローラーから設定された値等はView::share等を使わなくてもアクセス出来る。あくまで、@extendsを使ってる所からさらにネストされるView等に関してまでは伝播されないっていう所だったと思うのですが... でこのコントローラーでレイアウトをコントロールする方式だとコントローラーからView::makeした際に渡した値等は伝播されず利用できない模様。なのでView::share等を行うか、$this-&gt;layout-&gt;with等を使ってレイアウトに値を突っ込むなどのような処理が必要になる模様。んまぁ解釈が正しいかどうかまでは微妙ですけど...</p>
-
-<p>とりまぁビュー側からレイアウトをコントロールする方式以外にもsetupLayout等を使ってコントローラーからレイアウトをコントロール出来る仕組みもあるっていう感じかなと</p>
-
-<p>ちなみに、setupLayoutメソッドは<a href="http://laravel.com/api/class-Illuminate.Routing.Controllers.Controller.html">Illuminate\Routing\Controllers\Controller</a>#callActionメソッドで呼ばれてる模様</p>
-
+</code></pre><p>的な事をしている場合にはこのレイアウト側の@sectionな部分はレンダリングされない模様。例えばサイドバーとかにコンテンツ特有のを追加する場合にレイアウト側では既存するサイドバーに追加されるような形でレンダリングされたいような要件のある場合には@parentを使って、レイアウトを使ってる側からレイアウト側なセクションコンテントをレンダリング出来るようにする事も可能っぽい</p><br /><p>でちょっと気になった件として、@extendsを使ってる場合だとコントローラーから設定された値等はView::share等を使わなくてもアクセス出来る。あくまで、@extendsを使ってる所からさらにネストされるView等に関してまでは伝播されないっていう所だったと思うのですが... でこのコントローラーでレイアウトをコントロールする方式だとコントローラーからView::makeした際に渡した値等は伝播されず利用できない模様。なのでView::share等を行うか、$this-&gt;layout-&gt;with等を使ってレイアウトに値を突っ込むなどのような処理が必要になる模様。んまぁ解釈が正しいかどうかまでは微妙ですけど...</p><br /><p>とりまぁビュー側からレイアウトをコントロールする方式以外にもsetupLayout等を使ってコントローラーからレイアウトをコントロール出来る仕組みもあるっていう感じかなと</p><br /><p>ちなみに、setupLayoutメソッドは<a href="http://laravel.com/api/class-Illuminate.Routing.Controllers.Controller.html">Illuminate\Routing\Controllers\Controller</a>#callActionメソッドで呼ばれてる模様</p><br />
 <h4>余談: Bladeの評価タグを変える方法</h4>
-
-<p><a href="https://github.com/laravel/laravel/issues/1776#issuecomment-19350461">https://github.com/laravel/laravel/issues/1776#issuecomment-19350461</a> によると</p>
-<pre class="line-numbers"><code class="language-php")>Blade::setContentTags("開始タグ", "終了タグ");
-</code></pre>
-<p>的な事を使えば出来なくもないらしい</p>
-
+<p><a href="https://github.com/laravel/laravel/issues/1776#issuecomment-19350461">https://github.com/laravel/laravel/issues/1776#issuecomment-19350461</a> によると</p><br /><pre class="line-numbers"><code class="language-php")>Blade::setContentTags("開始タグ", "終了タグ");
+</code></pre><p>的な事を使えば出来なくもないらしい</p><br />
               </div>
             </div>
           </div>

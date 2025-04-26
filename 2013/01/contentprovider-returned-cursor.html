@@ -79,8 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>例えば以下のようなAbstractCursorを継承したクラスを作ったとする</p>
-
+                <p>例えば以下のようなAbstractCursorを継承したクラスを作ったとする</p><br />
 <!--more-->
 <pre class="line-numbers"><code class="language-java")>package sample.test;
 
@@ -134,11 +133,7 @@ public class SampleCursor extends AbstractCursor implements BaseColumns {
         return false;
     }
 }
-</code></pre>
-<p>あくまでネタとしてなんで実装はほとんど書いてません。それはおいといて</p>
-
-<p>でこれを返すContentProviderを作る</p>
-<pre class="line-numbers"><code class="language-java")>package sample.test;
+</code></pre><p>あくまでネタとしてなんで実装はほとんど書いてません。それはおいといて</p><br /><p>でこれを返すContentProviderを作る</p><br /><pre class="line-numbers"><code class="language-java")>package sample.test;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -185,19 +180,11 @@ public class SampleProvider extends ContentProvider {
         return 0;
     }
 }
-</code></pre>
-<p>でこれを Uri.parse(&quot;content://sample.provider/samples&quot;)をgetContentResolver().query した場合に実体クラスでキャストするとどうなるか。結果はClassCastException。理由としてgetContentResolver.queryが返すCursorクラスはContentResolver.CursorWrapperInnerにラップされてる。それはContentResolverのソースコードにもろ書いてる</p>
-
-<p>でこういう場合にqueryメソッドを使って返されるCursorクラスの実体を取得したい場合はどうなるかって話になる訳なのですが</p>
-
+</code></pre><p>でこれを Uri.parse(&quot;content://sample.provider/samples&quot;)をgetContentResolver().query した場合に実体クラスでキャストするとどうなるか。結果はClassCastException。理由としてgetContentResolver.queryが返すCursorクラスはContentResolver.CursorWrapperInnerにラップされてる。それはContentResolverのソースコードにもろ書いてる</p><br /><p>でこういう場合にqueryメソッドを使って返されるCursorクラスの実体を取得したい場合はどうなるかって話になる訳なのですが</p><br />
 <pre>
 getContentResolver -> acquireContentProviderClient(uri) -> query
 </pre>
-
-<p>っていうようにContentResolverのacquireContentProviderClientメソッドを使ってContentProviderClientクラスを取得する。でそのクラスからqueryをする事で、ラップされずにqueryメソッドから返される結果のCursor実体を取得する事が出来る</p>
-
-<p>実際それをやると</p>
-<pre class="line-numbers"><code class="language-java")>package sample.test;
+<p>っていうようにContentResolverのacquireContentProviderClientメソッドを使ってContentProviderClientクラスを取得する。でそのクラスからqueryをする事で、ラップされずにqueryメソッドから返される結果のCursor実体を取得する事が出来る</p><br /><p>実際それをやると</p><br /><pre class="line-numbers"><code class="language-java")>package sample.test;
 
 import android.app.Activity;
 import android.content.ContentProviderClient;
@@ -249,21 +236,9 @@ public class MainActivity extends Activity {
         }
     }
 }
-</code></pre>
-<p>これを実行すると</p>
-
-<p><img src="/images/2013/01/20130109074052.png" loading="lazy" /></p>
-
-<p>というようになる。っていう感じ。だけどそんなにCursorの実体クラスが必要になるケースなんてあんまり無いような気もするけど</p>
-
-<p>もっと簡単に出来る方法あるのかなーって思うところなんだけど</p>
-
+</code></pre><p>これを実行すると</p><br /><p><img src="/images/2013/01/20130109074052.png" loading="lazy" /></p><br /><p>というようになる。っていう感じ。だけどそんなにCursorの実体クラスが必要になるケースなんてあんまり無いような気もするけど</p><br /><p>もっと簡単に出来る方法あるのかなーって思うところなんだけど</p><br />
 <h4>追記</h4>
-
-<p><a href="http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html">http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html</a></p>
-
-<p>を見ておいた方がいいかも</p>
-
+<p><a href="http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html">http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html</a></p><br /><p>を見ておいた方がいいかも</p><br />
               </div>
             </div>
           </div>

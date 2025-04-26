@@ -79,14 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>とりあえずなんかやってみようと</p>
-
+                <p>とりあえずなんかやってみようと</p><br />
 <!--more-->
 
 <h4>fuel/app/config/routes.phpを設定</h4>
-
-<p>ルーティングを何やら設定出来る模様</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>ルーティングを何やら設定出来る模様</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 return array(
     "_root_" =&gt; "home/index",
@@ -97,9 +94,7 @@ return array(
         )
     )
 );
-</code></pre>
-<p>_root_でルートなコントローラーアクションを指定出来る。詳しいことは <a href="http://docs.fuelphp.com/general/routing.html">http://docs.fuelphp.com/general/routing.html</a> を読んだ方が早いかも</p>
-
+</code></pre><p>_root_でルートなコントローラーアクションを指定出来る。詳しいことは <a href="http://docs.fuelphp.com/general/routing.html">http://docs.fuelphp.com/general/routing.html</a> を読んだ方が早いかも</p><br />
 <h4>fuel/app/classes/controller/home.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -108,9 +103,7 @@ class Controller_Home extends Controller {
         return Response::forge("hoge");
     }
 }
-</code></pre>
-<p>書いたら前回書いたようにfpm+Nginxで動かしてるので<a href="http://localhost">http://localhost</a>にアクセスすると画面にはhogeと出る</p>
-
+</code></pre><p>書いたら前回書いたようにfpm+Nginxで動かしてるので<a href="http://localhost">http://localhost</a>にアクセスすると画面にはhogeと出る</p><br />
 <h4>fuel/app/classes/controller/error.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -119,15 +112,9 @@ class Controller_Error extends Controller {
         return new Response("404 Not Found", 404);
     }
 }
-</code></pre>
-<p>HTTP404 Errorなページのアクションコントローラーを定義。で404を送出するような場合において</p>
-<pre class="line-numbers"><code class="language-php")>throw new HttpNotFoundException();
-</code></pre>
-<p>だと問題無いけど</p>
-<pre class="line-numbers"><code class="language-php")>return new Response("not found", 404);
-</code></pre>
-<p>とするとController_Error#action_404には及ばない模様</p>
-
+</code></pre><p>HTTP404 Errorなページのアクションコントローラーを定義。で404を送出するような場合において</p><br /><pre class="line-numbers"><code class="language-php")>throw new HttpNotFoundException();
+</code></pre><p>だと問題無いけど</p><br /><pre class="line-numbers"><code class="language-php")>return new Response("not found", 404);
+</code></pre><p>とするとController_Error#action_404には及ばない模様</p><br />
 <h4>fuel/app/classes/controller/sample.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -144,9 +131,7 @@ class Controller_Sample extends Controller {
         throw new HttpNotFoundException();
     }
 }
-</code></pre>
-<p>$dataに展開したデータは引数のキーが変数名となってビューで使用可能な感じな模様。でリクエストメソッドをチェックしている訳はあとで説明する。でリクエストの要件に合わない場合はHttpNotFoundExceptionがスローされるようにする</p>
-
+</code></pre><p>$dataに展開したデータは引数のキーが変数名となってビューで使用可能な感じな模様。でリクエストメソッドをチェックしている訳はあとで説明する。でリクエストの要件に合わない場合はHttpNotFoundExceptionがスローされるようにする</p><br />
 <h4>fuel/app/views/sample/index.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;html&gt;
   &lt;body&gt;
@@ -190,19 +175,9 @@ class Test_Controller_Sample extends TestCase {
         $this-&gt;assertEquals("hoge fuga foobar", $res-&gt;body-&gt;message);
     }
 }
-</code></pre>
-<p>まぁPHPUnitベースでテストを書けるんですが、コントローラーテストをする際にルーティングではGETのみって定義した場合にset_method(&quot;POST&quot;)等をしてもルーティングがコントローラーまで届いてしまう。これちょっと原因がよく分かってない。</p>
-
-<p>でHttpNotFoundExceptionがスローされても_404_なハンドラーとか作用しないんで、例外が起きるっていうのを前提にしたexpectedを指定しなきゃならん模様。</p>
-
-<p>一応、こんな感じでコントローラーテスト出来る模様。ちょっとまだ微妙なので色々判明次第追記する予定</p>
-
-<p>ってな感じでFuelPHPの(標準的な?)コントローラーの作り方は以上な感じ</p>
-
+</code></pre><p>まぁPHPUnitベースでテストを書けるんですが、コントローラーテストをする際にルーティングではGETのみって定義した場合にset_method(&quot;POST&quot;)等をしてもルーティングがコントローラーまで届いてしまう。これちょっと原因がよく分かってない。</p><br /><p>でHttpNotFoundExceptionがスローされても_404_なハンドラーとか作用しないんで、例外が起きるっていうのを前提にしたexpectedを指定しなきゃならん模様。</p><br /><p>一応、こんな感じでコントローラーテスト出来る模様。ちょっとまだ微妙なので色々判明次第追記する予定</p><br /><p>ってな感じでFuelPHPの(標準的な?)コントローラーの作り方は以上な感じ</p><br />
 <h4>追記</h4>
-
-<p>デフォルトでログの出力レベルだとか、ログのタイムゾーンがen_USベースな模様。なので以下のようにfuel/app/config/config.phpを修正</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>デフォルトでログの出力レベルだとか、ログのタイムゾーンがen_USベースな模様。なので以下のようにfuel/app/config/config.phpを修正</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 return array(
     "base_url"  =&gt; null,

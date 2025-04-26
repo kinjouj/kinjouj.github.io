@@ -79,16 +79,9 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式リファレンス: http://www.oracle.com/technetwork/articles/java/batch-1965499.html</p>
-
-<p>参考(jBatch): http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf</p>
-
-<p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p>
-
+                <p>公式リファレンス: <a href="http://www.oracle.com/technetwork/articles/java/batch-1965499.html">http://www.oracle.com/technetwork/articles/java/batch-1965499.html</a></p><br /><p>参考(jBatch): <a href="http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf">http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf</a></p><br /><p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p><br />
 <!--more-->
-
-<p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p>
-
+<p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p><br />
 <h4>SampleItemReader.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -107,13 +100,7 @@ public class SampleItemReader extends AbstractItemReader {
         return count &lt; 10 ? "hoge" : null;
     }
 }
-</code></pre>
-<p>上記のjBatch参考に書いてけど、後々設定ファイルで参照するクラスは@Namedで指定した名前でも参照させる事が可能な模様。あと公式ではItemReaderっていうインターフェースを実装しているけど、今回はそれの抽象クラスにあたると思われるAbstractItemReaderを継承して実装</p>
-
-<p>おそらくはここでnullを返す事をすればバッチチャンク終了となり、すでにあるバッチチャンクをItemWriterに流して終了的な感じになるのではと</p>
-
-<p>**** SampleItemProcessor.java</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>上記のjBatch参考に書いてけど、後々設定ファイルで参照するクラスは@Namedで指定した名前でも参照させる事が可能な模様。あと公式ではItemReaderっていうインターフェースを実装しているけど、今回はそれの抽象クラスにあたると思われるAbstractItemReaderを継承して実装</p><br /><p>おそらくはここでnullを返す事をすればバッチチャンク終了となり、すでにあるバッチチャンクをItemWriterに流して終了的な感じになるのではと</p><br /><p>**** SampleItemProcessor.java</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import javax.batch.api.chunk.ItemProcessor;
 
@@ -123,9 +110,7 @@ public class SampleItemProcessor implements ItemProcessor {
         return ((String)item).toUpperCase();
     }
 }
-</code></pre>
-<p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p>
-
+</code></pre><p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p><br />
 <h4>SampleItemWriter.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -138,9 +123,7 @@ public class SampleItemWriter extends AbstractItemWriter {
         // ItemProcessor側で処理したデータをチャンクサイズに応じてたまった分がこちらで処理出来るので、書き出し処理等を実装
     }
 }
-</code></pre>
-<p>とまぁBatch Processingを動かすのに必要なのは書いたので</p>
-
+</code></pre><p>とまぁBatch Processingを動かすのに必要なのは書いたので</p><br />
 <h4>Main.java</h4>
 <pre class="line-numbers"><code class="language-java")>import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
@@ -151,9 +134,7 @@ public class Main {
         job.start("sample", new java.util.Properties());
     }
 }
-</code></pre>
-<p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p>
-
+</code></pre><p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p><br />
 <h4>META-INF/batch-jobs/sample.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;job id="sample" xmlns="http://xmlns.jcp.org/xml/ns/javaee"  version="1.0"&gt;
@@ -167,11 +148,7 @@ public class Main {
         &lt;/chunk&gt;
     &lt;/step&gt;
 &lt;/job&gt;
-</code></pre>
-<p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p>
-
-<p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p>
-
+</code></pre><p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p><br /><p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p><br />
 <h4>baseContext.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -208,9 +185,7 @@ public class Main {
         p:isolationLevelForCreate="ISOLATION_SERIALIZABLE" /&gt;
 
 &lt;/beans&gt;
-</code></pre>
-<p>database.xmlは</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
+</code></pre><p>database.xmlは</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;beans
     xmlns="http://www.springframework.org/schema/beans"
     xmlns:jdbc="http://www.springframework.org/schema/jdbc"
@@ -238,13 +213,9 @@ public class Main {
         &lt;jdbc:script location="org/springframework/batch/core/schema-mysql.sql" /&gt;
     &lt;/jdbc:initialize-database&gt;
 &lt;/beans&gt;
-</code></pre>
-<p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p>
-
+</code></pre><p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p><br />
 <h4>実行</h4>
-
-<p>実装して処理の流れなログとってみると</p>
-
+<p>実装して処理の流れなログとってみると</p><br />
 <pre>
 情報: Executing step: [sample-chunk]
 
@@ -292,11 +263,7 @@ public class Main {
 12 28, 2014 4:32:26 午後 sample.SampleItemWriter writeItems
 情報: writeItems: 9
 </pre>
-
-<p>てな感じで実行結果になる。item-countで指定した分のチャンクサイズに応じてItemWriter#writeItemsが作用するようになっている模様。またreadItemがnullを返した場合にはprocessItemは発生せずにすでにたまっているチャンクをそのままwriteItemsに作用するように受け流している模様</p>
-
-<p>んまぁそんなざっくりとした感じでやってみた。まだざっくりとした調査しかしてないので今後も色々勉強しつつ書く予定。今回はこんくらいで</p>
-
+<p>てな感じで実行結果になる。item-countで指定した分のチャンクサイズに応じてItemWriter#writeItemsが作用するようになっている模様。またreadItemがnullを返した場合にはprocessItemは発生せずにすでにたまっているチャンクをそのままwriteItemsに作用するように受け流している模様</p><br /><p>んまぁそんなざっくりとした感じでやってみた。まだざっくりとした調査しかしてないので今後も色々勉強しつつ書く予定。今回はこんくらいで</p><br />
               </div>
             </div>
           </div>

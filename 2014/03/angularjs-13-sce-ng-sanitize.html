@@ -79,63 +79,40 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>※ややこしいので公式ドキュメント読んだ方がいい</p>
-<pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
+                <p>※ややこしいので公式ドキュメント読んだ方がいい</p><br /><pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
   &lt;span&gt;{% raw %}{{message}}{% endraw %}&lt;/span&gt;
 &lt;/div&gt;
-</code></pre>
-<p>的な感じになってて</p>
-<pre class="line-numbers"><code class="language-js")>angular.module("app", [])
+</code></pre><p>的な感じになってて</p><br /><pre class="line-numbers"><code class="language-js")>angular.module("app", [])
   .controller("SampleController", function($scope) {
     $scope.message = '&lt;span style="color: red"&gt;hoge&lt;/span&gt;';
   });
-</code></pre>
-<p>みたいにすると、$scopeとかに含まれるHTMLとかはエスケープされて出力されるらしい</p>
-
+</code></pre><p>みたいにすると、$scopeとかに含まれるHTMLとかはエスケープされて出力されるらしい</p><br />
 <!--more-->
 <pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
   &lt;span ng-bind-html="message" /&gt;
 &lt;/div&gt;
-</code></pre>
-<p>みたいにすると「Error: $sce:unsafe」っていうエラーになる模様。但し、このエラーが発生するのはangular-sanitize.jsが参照されていない場合であって参照されている場合などにおいては物によっては出力は許可されるがCSP(Content Security Policy)に反するようなインラインなスタイルやスクリプトは除去される模様。あくまで汚染物を除去する的な所かと</p>
-
-<p>ちょっと余談が多いけど、それの出力を許可するようにするには$sce(Strict Contextual Escaping)を使う事で出来る模様。あくまで$sceはangular-sanitizeに含まれる物では無い模様</p>
-<pre class="line-numbers"><code class="language-js")>angular.module("app", [])
+</code></pre><p>みたいにすると「Error: $sce:unsafe」っていうエラーになる模様。但し、このエラーが発生するのはangular-sanitize.jsが参照されていない場合であって参照されている場合などにおいては物によっては出力は許可されるがCSP(Content Security Policy)に反するようなインラインなスタイルやスクリプトは除去される模様。あくまで汚染物を除去する的な所かと</p><br /><p>ちょっと余談が多いけど、それの出力を許可するようにするには$sce(Strict Contextual Escaping)を使う事で出来る模様。あくまで$sceはangular-sanitizeに含まれる物では無い模様</p><br /><pre class="line-numbers"><code class="language-js")>angular.module("app", [])
   .controller("SampleController", function($scope, $sce) {
     var text = '&lt;span style="color: red"&gt;hoge&lt;/span&gt;';
     $scope.message = $sce.trustAsHtml($text);
   });
-</code></pre>
-<p>$sceで使えるAPIについては<a href="http://docs.angularjs.org/api/ng/service/$sce">http://docs.angularjs.org/api/ng/service/$sce</a>を参照</p>
-
-<p>若干ややこしいが</p>
-
+</code></pre><p>$sceで使えるAPIについては<a href="http://docs.angularjs.org/api/ng/service/$sce">http://docs.angularjs.org/api/ng/service/$sce</a>を参照</p><br /><p>若干ややこしいが</p><br />
 <ul>
 <li>  $scopeに突っ込んだHTMLはエスケープされて出力される</li>
 <li>  angular-sanitize.jsを参照せずにng-bind-htmlでHTMLをバインドしようとするとエラーが出る</li>
 <li>  angular-sanitize.jsを参照してng-bind-htmlでHTMLをバインドすると出力されるが、CSPに反するような部分は除去される</li>
 <li>  $sceのAPIを使う事でCSPに反するようなのを除去せずにHTMLとして出力する事が可能(但し、許可されないのもある)</li>
 </ul>
-
-<p>っていう感じかと。んまぁセキュリティ観点からするとむやみに$sce.trustAsHtmlとかしないようにするべきなのが一番良いのだろうと。</p>
-
+<p>っていう感じかと。んまぁセキュリティ観点からするとむやみに$sce.trustAsHtmlとかしないようにするべきなのが一番良いのだろうと。</p><br />
 <h4>余談: linkyフィルターについて</h4>
-
-<p>angular-sanitize.jsのドキュメントによるとデータ中のURL等をマークアップ化する方法としてはlinkyフィルターを使えば良い模様</p>
-<pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
+<p>angular-sanitize.jsのドキュメントによるとデータ中のURL等をマークアップ化する方法としてはlinkyフィルターを使えば良い模様</p><br /><pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
   &lt;span ng-bind-html="message | linky" /&gt;
 &lt;/div&gt;
-</code></pre>
-<p>的な感じにして</p>
-<pre class="line-numbers"><code class="language-js")>angular.module("app", ["ngSanitize"])
+</code></pre><p>的な感じにして</p><br /><pre class="line-numbers"><code class="language-js")>angular.module("app", ["ngSanitize"])
   .controller("SampleController", function($scope) {
     $scope.message = "http://localhost";
   });
-</code></pre>
-<p>的な感じでURL等が含まれるデータはlinkyフィルターによってマークアップされる模様</p>
-
-<p>んまぁ詳しいことはドキュメント(<a href="http://docs.angularjs.org/api/ngSanitize/filter/linky)">http://docs.angularjs.org/api/ngSanitize/filter/linky)</a>読めって事で</p>
-
+</code></pre><p>的な感じでURL等が含まれるデータはlinkyフィルターによってマークアップされる模様</p><br /><p>んまぁ詳しいことはドキュメント(<a href="http://docs.angularjs.org/api/ngSanitize/filter/linky)">http://docs.angularjs.org/api/ngSanitize/filter/linky)</a>読めって事で</p><br />
               </div>
             </div>
           </div>

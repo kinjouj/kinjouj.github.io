@@ -79,26 +79,13 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>参考1: <a href="http://android-developers.blogspot.jp/2013/10/getting-your-sms-apps-ready-for-kitkat.html">Getting Your SMS Apps Ready for KitKat</a>  </p>
-
-<p>参考2: <a href="http://brightechno.com/blog/archives/231">Android KITKAT: デフォルトSMSアプリを作る - ブライテクノBlog</a></p>
-
-<p>※非常に内容がざっくりとしてますので上記参考を(ry</p>
-
-<p>Android 4.4(Kitkat)からデフォルトなSMSのアプリを作って利用する事が出来るらしいとの事は知っていたのだけど検証的な辺りとかしてなかったので色々やってみた</p>
-
+                <p>参考1: <a href="http://android-developers.blogspot.jp/2013/10/getting-your-sms-apps-ready-for-kitkat.html">Getting Your SMS Apps Ready for KitKat</a>  </p><br /><p>参考2: <a href="http://brightechno.com/blog/archives/231">Android KITKAT: デフォルトSMSアプリを作る - ブライテクノBlog</a></p><br /><p>※非常に内容がざっくりとしてますので上記参考を(ry</p><br /><p>Android 4.4(Kitkat)からデフォルトなSMSのアプリを作って利用する事が出来るらしいとの事は知っていたのだけど検証的な辺りとかしてなかったので色々やってみた</p><br />
 <!--more-->
 
 <h4>要点</h4>
-
-<p>ポイントはandroid.provider.Telephony.SmsなContent Providerのandroid.net.Uriに対してinsertしたりする事でどのアプリを使っても不整合になったりしないような仕組みを採用しているんじゃないかと。つまりはSMSを受信したらそのContent Providerにinsertしろ、見るアプリ側ではContent Providerでqueryして取得しろ的な事なのではと</p>
-
-<p>多分、android.provider.Telephony.Sms.CONTENT_URIは&quot;<a href="">content://sms</a>&quot;だと思われる。ソースは読んでないけど</p>
-
+<p>ポイントはandroid.provider.Telephony.SmsなContent Providerのandroid.net.Uriに対してinsertしたりする事でどのアプリを使っても不整合になったりしないような仕組みを採用しているんじゃないかと。つまりはSMSを受信したらそのContent Providerにinsertしろ、見るアプリ側ではContent Providerでqueryして取得しろ的な事なのではと</p><br /><p>多分、android.provider.Telephony.Sms.CONTENT_URIは&quot;<a href="">content://sms</a>&quot;だと思われる。ソースは読んでないけど</p><br />
 <h4>AndroidManifest.xml</h4>
-
-<p>公式ブログな参考読めば分かるけど適切な設定を行えばデフォルトSMSとして切り替える事が可能な模様。その条件は上記参考2に記載されている</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<p>公式ブログな参考読めば分かるけど適切な設定を行えばデフォルトSMSとして切り替える事が可能な模様。その条件は上記参考2に記載されている</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="sample.test"
     android:versionCode="1"
     android:versionName="1.0" &gt;
@@ -165,13 +152,9 @@
         &lt;/service&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre>
-<p>HeadlessSmsSendServiceとComposeSmsActivityは今回ノータッチだけど、さっきも書いた参考2の所にソースが記載されているのでそれ読めば良い。要はComposeSmsActivity自体はSMS関係のschemeに対応するメール送信フォーム的なのじゃないかと。で実際に送るのはHeadlessSmsSendServiceかと</p>
-
+</code></pre><p>HeadlessSmsSendServiceとComposeSmsActivityは今回ノータッチだけど、さっきも書いた参考2の所にソースが記載されているのでそれ読めば良い。要はComposeSmsActivity自体はSMS関係のschemeに対応するメール送信フォーム的なのじゃないかと。で実際に送るのはHeadlessSmsSendServiceかと</p><br />
 <h4>SmsReceiver.java</h4>
-
-<p>MmsReceiverに関しては実験出来る環境が無いのでパス</p>
-<pre class="line-numbers"><code class="language-java")>package sample.test;
+<p>MmsReceiverに関しては実験出来る環境が無いのでパス</p><br /><pre class="line-numbers"><code class="language-java")>package sample.test;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -215,15 +198,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 }
-</code></pre>
-<p>っていう感じでさっきも書いたけど、SMSなContent Providerにinsertすりゃ良いみたいなので</p>
-
-<p>でそんなこんなで入れてみると</p>
-
-<p><img src="/images/2014/01/201401291220.png" loading="lazy" /></p>
-
-<p>っていうように「設定」から「無線とネットワーク」「デフォルトSMSアプリ」で設定出来る模様</p>
-
+</code></pre><p>っていう感じでさっきも書いたけど、SMSなContent Providerにinsertすりゃ良いみたいなので</p><br /><p>でそんなこんなで入れてみると</p><br /><p><img src="/images/2014/01/201401291220.png" loading="lazy" /></p><br /><p>っていうように「設定」から「無線とネットワーク」「デフォルトSMSアプリ」で設定出来る模様</p><br />
               </div>
             </div>
           </div>

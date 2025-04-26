@@ -79,18 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>前回のあかん事が発覚。まぁほとんどあかんと思うんだけど</p>
-
+                <p>前回のあかん事が発覚。まぁほとんどあかんと思うんだけど</p><br />
 <!--more-->
-
-<p>前回のだと、config/routes.rbの最後に定義されている</p>
-<pre class="line-numbers"><code class="language-rb")>match ":controller(/:action(/:id))(.:format)"
-</code></pre>
-<p>なやつを使ってて、今時なRailsではこれあかん系らしい。resourcesを使いましょうという事らしい。という事で直して見ることに。という事でconfig/routes.rbに</p>
-<pre class="line-numbers"><code class="language-rb")>resources :entry
-</code></pre>
-<p>な感じで定義。URL的には</p>
-
+<p>前回のだと、config/routes.rbの最後に定義されている</p><br /><pre class="line-numbers"><code class="language-rb")>match ":controller(/:action(/:id))(.:format)"
+</code></pre><p>なやつを使ってて、今時なRailsではこれあかん系らしい。resourcesを使いましょうという事らしい。という事で直して見ることに。という事でconfig/routes.rbに</p><br /><pre class="line-numbers"><code class="language-rb")>resources :entry
+</code></pre><p>な感じで定義。URL的には</p><br />
 <ul>
 <li>  /entry -&gt; method:index (HTTP: GET)</li>
 <li>  /entry -&gt; method:create (HTTP: POST?)</li>
@@ -98,9 +91,7 @@
 <li>  /entry/(:id) -&gt; method:update (HTTP: PUT)</li>
 <li>  /entdy/(:id) -&gt; method:destroy (HTTP: DELETE)</li>
 </ul>
-
-<p>な感じでRestfulな方式なURL方式が生成される模様。でこれに沿ってコントローラーとビューをいじる</p>
-
+<p>な感じでRestfulな方式なURL方式が生成される模様。でこれに沿ってコントローラーとビューをいじる</p><br />
 <h4>app/controllers/entry_controller.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>class EntryController &lt; ApplicationController
 
@@ -150,9 +141,7 @@
     redirect_to :action =&gt; :index
   end
 end
-</code></pre>
-<p>メソッド名とかが前回とちょっと異なる程度。あとちょっとだけバリデーションなコードが含まれてるけど、今回もノータッチで</p>
-
+</code></pre><p>メソッド名とかが前回とちょっと異なる程度。あとちょっとだけバリデーションなコードが含まれてるけど、今回もノータッチで</p><br />
 <h4>app/views/entry/index.erb</h4>
 <pre class="line-numbers"><code class="language-erb")>&lt;div id="container"&gt;
   &lt;div id="menu"&gt;
@@ -174,22 +163,10 @@ end
   &lt;/div&gt;
   &lt;% end %&gt;
 &lt;/div&gt;
-</code></pre>
-<p>destroyな処理をするにはDELETEメソッドでリクエストされるようにしないといけないのだけど、普通にlink_toをするとGETメソッドな方式になる模様なので:method =&gt; :deleteにしてDELETEメソッドで処理するようにJavaScriptでごにょごにょされるようになるらしい。</p>
-<pre class="line-numbers"><code class="language-html")>&lt;a href="/entry/[id]" data-confirm="OK?" data-method="delete"&gt;Delete&lt;/a&gt;
-</code></pre>
-<p>みたいな感じで出力されていれば処理出来る模様。で昨日はまったのが、上記のように出力されずに?method=deleteみたいにクエリーについちゃうのはlink_toの引数が「ラベル, モデル?, オプション」な形式で指定しないとその方式で出力されない模様</p>
-
-<p>でnewとeditに関してはHTTPメソッドが異なる訳なのだけど、</p>
-<pre class="line-numbers"><code class="language-erb")>form_for(@entry, :method =&gt; :put)
-</code></pre>
-<p>な感じでやっても<form>のmethodはpostになってるけど、</p>
-<pre class="line-numbers"><code class="language-html")>&lt;input type="hidden" name="_method" value="put" /&gt;
-</code></pre>
-<p>なるのが埋め込まれている。これがX-Method-Override的な扱いされるのかどうかは不明</p>
-
-<p>とりまぁこんな所かなー。とにかく旧式なルーティング方式は採用するべきでは無いっていう所で</p>
-
+</code></pre><p>destroyな処理をするにはDELETEメソッドでリクエストされるようにしないといけないのだけど、普通にlink_toをするとGETメソッドな方式になる模様なので:method =&gt; :deleteにしてDELETEメソッドで処理するようにJavaScriptでごにょごにょされるようになるらしい。</p><br /><pre class="line-numbers"><code class="language-html")>&lt;a href="/entry/[id]" data-confirm="OK?" data-method="delete"&gt;Delete&lt;/a&gt;
+</code></pre><p>みたいな感じで出力されていれば処理出来る模様。で昨日はまったのが、上記のように出力されずに?method=deleteみたいにクエリーについちゃうのはlink_toの引数が「ラベル, モデル?, オプション」な形式で指定しないとその方式で出力されない模様</p><br /><p>でnewとeditに関してはHTTPメソッドが異なる訳なのだけど、</p><br /><pre class="line-numbers"><code class="language-erb")>form_for(@entry, :method =&gt; :put)
+</code></pre><p>な感じでやっても<form>のmethodはpostになってるけど、</p><br /><pre class="line-numbers"><code class="language-html")>&lt;input type="hidden" name="_method" value="put" /&gt;
+</code></pre><p>なるのが埋め込まれている。これがX-Method-Override的な扱いされるのかどうかは不明</p><br /><p>とりまぁこんな所かなー。とにかく旧式なルーティング方式は採用するべきでは無いっていう所で</p><br />
               </div>
             </div>
           </div>

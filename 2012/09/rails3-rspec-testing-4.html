@@ -92,18 +92,14 @@
     end
   end
 end
-</code></pre>
-<p>単純にPOSTメソッドでぶち込むと404になるようにする。</p>
-
+</code></pre><p>単純にPOSTメソッドでぶち込むと404になるようにする。</p><br />
 <h4>app/helpers/sample_helper.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>module SampleHelper
   def say
     return content_tag(:h1, "hoge")
   end
 end
-</code></pre>
-<p>まぁ機能自体使ってないけど。あくまでRSpecでテストする事だけが目的なので</p>
-
+</code></pre><p>まぁ機能自体使ってないけど。あくまでRSpecでテストする事だけが目的なので</p><br />
 <h4>spec/controllers/sample_controller_spec.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>require "spec_helper"
 
@@ -124,34 +120,20 @@ describe SampleController do
     response.should_not be_success
   end
 end
-</code></pre>
-<p>コントローラーなテストな部分。GETで成功して、POSTで失敗するかだけをチェック</p>
-
+</code></pre><p>コントローラーなテストな部分。GETで成功して、POSTで失敗するかだけをチェック</p><br />
 <h4>spec/helpers/sample_helper_spec.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>describe SampleHelper do
   it "helper.say test" do
     helper.say().should == "&lt;h1&gt;hoge&lt;/h1&gt;"
   end
 end
-</code></pre>
-<p>,例えば、ApplicationHelperとSampleHelperに一つづつ機能付けて、RSpecでヘルパーをテストしようとすると両方helperで参照可能なのはなぜなんだろうと分からないのですが</p>
-
-<p>まぁとりあえずこの件はほっとく</p>
-
-<p>あとは普通どおりテストするコマンド投げれば良い</p>
-
+</code></pre><p>,例えば、ApplicationHelperとSampleHelperに一つづつ機能付けて、RSpecでヘルパーをテストしようとすると両方helperで参照可能なのはなぜなんだろうと分からないのですが</p><br /><p>まぁとりあえずこの件はほっとく</p><br /><p>あとは普通どおりテストするコマンド投げれば良い</p><br />
 <h4>追記</h4>
-
-<p>コントローラーテストでcontrollerで参照できるはずなので、コントローラーにメソッド生やした場合はそれを介して出来るのはと思ったのだけど、例えば(あんまりやるべきでは無いとは思うのですが)コントローラーからViewHelperを参照して使った場合のテストってどうするんだろうと思ってたら、上記のままそんままSampleHelperをSampleControllerでincludeしちゃっても出来ない事が判明</p>
-<pre class="line-numbers"><code class="language-rb")>class SampleController &lt; ApplicationController
+<p>コントローラーテストでcontrollerで参照できるはずなので、コントローラーにメソッド生やした場合はそれを介して出来るのはと思ったのだけど、例えば(あんまりやるべきでは無いとは思うのですが)コントローラーからViewHelperを参照して使った場合のテストってどうするんだろうと思ってたら、上記のままそんままSampleHelperをSampleControllerでincludeしちゃっても出来ない事が判明</p><br /><pre class="line-numbers"><code class="language-rb")>class SampleController &lt; ApplicationController
   include ActionView::Helpers::TagHelper
   include SampleHelper
 end
-</code></pre>
-<p>あくまでcontent_tagとかが参照できないのでActionView::Helpers::TagHelperとかぶち込む必要がある模様。</p>
-
-<p>あとは普通にコントローラーテスト側なcontrollerでメソッド参照すりゃ良いっぽい</p>
-
+</code></pre><p>あくまでcontent_tagとかが参照できないのでActionView::Helpers::TagHelperとかぶち込む必要がある模様。</p><br /><p>あとは普通にコントローラーテスト側なcontrollerでメソッド参照すりゃ良いっぽい</p><br />
               </div>
             </div>
           </div>

@@ -78,31 +78,14 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>参考1: https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja</p>
-
-<p>参考2: https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja</p>
-
-<p>PWA(Progressive Web Apps)などで、Webアプリケーションをネイティブアプリケーションのような内部にリソースを持つようにWebアプリケーションでもそういうリソースをServiceWorkerでキャッシュさせて利用する事が出来るとのことなのでちょっとやってみた</p>
-
-<p>※上記参考を必読推奨</p>
-
-<p>※あくまで個人的なメモです</p>
-
+                <p>参考1: <a href="https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja">https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja</a></p><br /><p>参考2: <a href="https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja">https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja</a></p><br /><p>PWA(Progressive Web Apps)などで、Webアプリケーションをネイティブアプリケーションのような内部にリソースを持つようにWebアプリケーションでもそういうリソースをServiceWorkerでキャッシュさせて利用する事が出来るとのことなのでちょっとやってみた</p><br /><p>※上記参考を必読推奨</p><br /><p>※あくまで個人的なメモです</p><br />
 <!--more-->
 
 <h4>前提条件</h4>
-
-<p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p>
-<pre class="line-numbers"><code class="language-js")>navigator.serviceWorker.register("sw.js").then(() =&gt; {
+<p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p><br /><pre class="line-numbers"><code class="language-js")>navigator.serviceWorker.register("sw.js").then(() =&gt; {
   fetch("省略");
 });
-</code></pre>
-<p>みたいにやっても初回アクセス時はコントロール化に置かれるまではthenからのfetchがコントロール化になってない場合にはキャッシュなどの処理が行われないと思われる。よってfetch処理などはコントロール化に置かれてから処理する必要があるのでそこも考慮する</p>
-
-<p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p>
-
-<p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p>
-
+</code></pre><p>みたいにやっても初回アクセス時はコントロール化に置かれるまではthenからのfetchがコントロール化になってない場合にはキャッシュなどの処理が行われないと思われる。よってfetch処理などはコントロール化に置かれてから処理する必要があるのでそこも考慮する</p><br /><p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p><br /><p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p><br />
 <h4>index.html</h4>
 <pre class="line-numbers"><code class="language-html")>&lt;!doctype html&gt;
 &lt;html&gt;
@@ -148,9 +131,7 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
-</code></pre>
-<p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p>
-
+</code></pre><p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p><br />
 <h4>service-worker.js</h4>
 <pre class="line-numbers"><code class="language-js")>let cacheName = "sample-pwa-cache-v1";
 let cacheDataName = "sample-pwa-data-cache-v1";
@@ -212,21 +193,7 @@ self.addEventListener("fetch", event =&gt; {
 });
 </code></pre>
 <h4>結果</h4>
-
-<p>初回リクエスト時にはAPIコールにしつつそのデータをキャッシュすることになるので</p>
-
-<p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-1.png" loading="lazy" /></p>
-
-<p>となる。次回リクエスト時には</p>
-
-<p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-2.png" loading="lazy" /></p>
-
-<p>となる。またindex.htmlやapp.jsなどもキャッシュしているので初回時にキャッシュされるので再度ロードされる際にはServiceWorkerからのキャッシュとして配信されるようになる。なので一度キャッシュした状態でサーバーを落としてみても結果はキャッシュされたのがServiceWorkerから配信されるようになる</p>
-
-<p>ちなみにこういうのを実現したいのであればそれをサポートしてくれるライブラリ(sw-precache等)があるのでそれを使っても良いかと</p>
-
-<p>今回はAPIコールした結果をキャッシュしてそれがある場合にはそれをレンダリングしているが、本式としてはキャッシュをしつつAPIをコールして得られる結果を取得する前にキャッシュからレンダリングしておいて、リアルタイムなデータをレンダリングするような形になるかと</p>
-
+<p>初回リクエスト時にはAPIコールにしつつそのデータをキャッシュすることになるので</p><br /><p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-1.png" loading="lazy" /></p><br /><p>となる。次回リクエスト時には</p><br /><p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-2.png" loading="lazy" /></p><br /><p>となる。またindex.htmlやapp.jsなどもキャッシュしているので初回時にキャッシュされるので再度ロードされる際にはServiceWorkerからのキャッシュとして配信されるようになる。なので一度キャッシュした状態でサーバーを落としてみても結果はキャッシュされたのがServiceWorkerから配信されるようになる</p><br /><p>ちなみにこういうのを実現したいのであればそれをサポートしてくれるライブラリ(sw-precache等)があるのでそれを使っても良いかと</p><br /><p>今回はAPIコールした結果をキャッシュしてそれがある場合にはそれをレンダリングしているが、本式としてはキャッシュをしつつAPIをコールして得られる結果を取得する前にキャッシュからレンダリングしておいて、リアルタイムなデータをレンダリングするような形になるかと</p><br />
               </div>
             </div>
           </div>

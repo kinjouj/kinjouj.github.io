@@ -80,52 +80,29 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様</p>
-
+                <p>何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様</p><br />
 <!--more-->
-
-<p>ActiveRecordにもfixtureな機能自体はあるけど、こっちはyamlとかで定義したりすると思うのだけど、事細かいリレーション構造とかだとテストデータをどう表現するのかはちょっと謎。っていうかそこまで使いこなせてないっていうオチな気もするけど</p>
-
-<p>とりまぁ使ってみる</p>
-
+<p>ActiveRecordにもfixtureな機能自体はあるけど、こっちはyamlとかで定義したりすると思うのだけど、事細かいリレーション構造とかだとテストデータをどう表現するのかはちょっと謎。っていうかそこまで使いこなせてないっていうオチな気もするけど</p><br /><p>とりまぁ使ってみる</p><br />
 <h4>導入</h4>
-
-<p>Gemfileに</p>
-<pre class="line-numbers"><code class="language-rb")>gem "factory_girl_rails", :group =&gt; [:development, :test]
-</code></pre>
-<p>を記述して、bundle installしておく。んで</p>
-<pre class="line-numbers"><code>rails g factory_girl:model モデル
-</code></pre>
-<p>な感じでファイルを生成する。RSpecとかの場合にはspec/factoriesディレクトリ内にファイルが生成される模様(RSpecじゃない場合にはtest/factories)</p>
-
-<p>んでもって、ドキュメント通りにテストで使用する環境によってFactoryGirlなメソッドをincludeしちゃったりする(しなくてもFactoryGirlクラスのメソッドを使う事で出来るのかも、それは未検証)。今回はRSpecを使ってるんでspec_helper.rbに</p>
-<pre class="line-numbers"><code class="language-rb")>RSpec.configure do |config|
+<p>Gemfileに</p><br /><pre class="line-numbers"><code class="language-rb")>gem "factory_girl_rails", :group =&gt; [:development, :test]
+</code></pre><p>を記述して、bundle installしておく。んで</p><br /><pre class="line-numbers"><code>rails g factory_girl:model モデル
+</code></pre><p>な感じでファイルを生成する。RSpecとかの場合にはspec/factoriesディレクトリ内にファイルが生成される模様(RSpecじゃない場合にはtest/factories)</p><br /><p>んでもって、ドキュメント通りにテストで使用する環境によってFactoryGirlなメソッドをincludeしちゃったりする(しなくてもFactoryGirlクラスのメソッドを使う事で出来るのかも、それは未検証)。今回はRSpecを使ってるんでspec_helper.rbに</p><br /><pre class="line-numbers"><code class="language-rb")>RSpec.configure do |config|
   # 追加
   config.include FactoryGirl::Syntax::Methods
 end
-</code></pre>
-<p>を追加</p>
-
+</code></pre><p>を追加</p><br />
 <h4>モデル仕様</h4>
-
-<p><img src="/images/2013/06/201304241014072.png" loading="lazy" /></p>
-
+<p><img src="/images/2013/06/201304241014072.png" loading="lazy" /></p><br />
 <ul>
 <li>  Entry.categoryでカテゴリー(Category)参照を取得できる</li>
 <li>  Category.entryでカテゴリーを参照しているエントリー(Entry)参照を取得できる</li>
 <li>  Category.parent_categoryでカテゴリーが参照している親カテゴリーを取得できる</li>
 <li>  Category.sub_categoriesでカテゴリーを参照している子カテゴリーを参照できる</li>
 </ul>
-
-<p>っていうような仕様がぶち込まれている。それをやってるのがhas_and_belongs_to_many辺り</p>
-
-<p>んまぁ仕様的なはこんなもんかなと。あとはspec/factories等やモデルテストを書く</p>
-
+<p>っていうような仕様がぶち込まれている。それをやってるのがhas_and_belongs_to_many辺り</p><br /><p>んまぁ仕様的なはこんなもんかなと。あとはspec/factories等やモデルテストを書く</p><br />
 <h4>spec/factories/categories.rb</h4>
 <pre class="line-numbers"><code>rails g factory_girl:model category
-</code></pre>
-<p>で生成したFactoryGirlの定義を書く</p>
-<pre class="line-numbers"><code class="language-rb")># Read about factories at https://github.com/thoughtbot/factory_girl
+</code></pre><p>で生成したFactoryGirlの定義を書く</p><br /><pre class="line-numbers"><code class="language-rb")># Read about factories at https://github.com/thoughtbot/factory_girl
 
 FactoryGirl.define do
   factory :category1, :class =&gt; Category do
@@ -137,14 +114,10 @@ FactoryGirl.define do
     association :parent_category, :factory =&gt; :category1
   end
 end
-</code></pre>
-<p>2つのカテゴリーを定義するけど、カテゴリーBはカテゴリーAの子カテゴリーとなりCategoryクラスのparent_categoryを参照する事で親カテゴリーなカテゴリーAを取得できるっていうような形になっているので、associationでカテゴリーAなfactoryを指定する</p>
-
+</code></pre><p>2つのカテゴリーを定義するけど、カテゴリーBはカテゴリーAの子カテゴリーとなりCategoryクラスのparent_categoryを参照する事で親カテゴリーなカテゴリーAを取得できるっていうような形になっているので、associationでカテゴリーAなfactoryを指定する</p><br />
 <h4>spec/factories/entries.rb</h4>
 <pre class="line-numbers"><code>rails g factory_girl:model entry
-</code></pre>
-<p>で生成したFactoryGirlの定義を書いていく</p>
-<pre class="line-numbers"><code class="language-rb")># Read about factories at https://github.com/thoughtbot/factory_girl
+</code></pre><p>で生成したFactoryGirlの定義を書いていく</p><br /><pre class="line-numbers"><code class="language-rb")># Read about factories at https://github.com/thoughtbot/factory_girl
 
 FactoryGirl.define do
   factory :entry, :class =&gt; Entry do
@@ -156,15 +129,9 @@ FactoryGirl.define do
     end
   end
 end
-</code></pre>
-<p>entryを作った後にafter :createが発生する模様で、そこでカテゴリーな参照をぶち込まないとちゃんとhas_and_belongs_to_manyなリレーション関係が解決出来なかった。これはちょっと要確認</p>
-
-<p>で見て分かるようにentryからはcategory1な参照は含まれていない。だけどcategory2側からはcategory1なfactoryを参照する方式で親カテゴリーの参照をぶち込んでるのでそれで利用されるっていう感じ</p>
-
+</code></pre><p>entryを作った後にafter :createが発生する模様で、そこでカテゴリーな参照をぶち込まないとちゃんとhas_and_belongs_to_manyなリレーション関係が解決出来なかった。これはちょっと要確認</p><br /><p>で見て分かるようにentryからはcategory1な参照は含まれていない。だけどcategory2側からはcategory1なfactoryを参照する方式で親カテゴリーの参照をぶち込んでるのでそれで利用されるっていう感じ</p><br />
 <h4>spec/models/entry_spec.rb</h4>
-
-<p>まぁテストを書く。要件的には</p>
-
+<p>まぁテストを書く。要件的には</p><br />
 <ul>
 <li>  FactoryGirlでentryを作る</li>
 <li>  作ったエントリーのカテゴリー参照を取得。結果は1件のみで結果はcategory2なCategoryクラスが入ってる (hashは異なる)</li>
@@ -216,9 +183,7 @@ describe Entry do
     expect(sub_category_entry).to eq(entry)
   end
 end
-</code></pre>
-<p>終わり。なかなか難しいような感じも否めないんだけど、ドキュメント読みつつやってみようかと。んまぁおさわり的にはこんなもんかなーっと</p>
-
+</code></pre><p>終わり。なかなか難しいような感じも否めないんだけど、ドキュメント読みつつやってみようかと。んまぁおさわり的にはこんなもんかなーっと</p><br />
               </div>
             </div>
           </div>

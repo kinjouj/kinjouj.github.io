@@ -78,8 +78,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>exec_filterを使えば指定したコマンドでフィルタリング(っていうか中継?)したり出来る模様</p>
-
+                <p>exec_filterを使えば指定したコマンドでフィルタリング(っていうか中継?)したり出来る模様</p><br />
 <!--more-->
 
 <h4>/etc/td-agent/td-agent.conf</h4>
@@ -104,9 +103,7 @@
     type file
     path /var/log/td-agent/accesslog
 &lt;/match&gt;
-</code></pre>
-<p>/var/log/nginx/access.logをtailした結果をexec_filterで/var/lib/fluentd/accesslog_filter.plをかましてから/var/log/td-agent/accesslogへ持っていく</p>
-
+</code></pre><p>/var/log/nginx/access.logをtailした結果をexec_filterで/var/lib/fluentd/accesslog_filter.plをかましてから/var/log/td-agent/accesslogへ持っていく</p><br />
 <h4>/var/lib/fluentd/accesslog_filter.pl</h4>
 <pre class="line-numbers"><code class="language-pl")>#!/usr/bin/env perl
 
@@ -143,20 +140,14 @@ while (my $data = &lt;STDIN&gt;) {
         print $mp-&gt;pack($json);
     });
 }
-</code></pre>
-<p>/var/log/nginx/access.logをtailして、キャッチされた時点で標準入力にin_formatで指定した形式で入ってくる(んだと思われる)。なので、それをdecode_jsonでデコードしてそこからホストとパスだけを取って、MessagePack形式で出力する</p>
-
+</code></pre><p>/var/log/nginx/access.logをtailして、キャッチされた時点で標準入力にin_formatで指定した形式で入ってくる(んだと思われる)。なので、それをdecode_jsonでデコードしてそこからホストとパスだけを取って、MessagePack形式で出力する</p><br />
 <h4>結果</h4>
 
 <pre>
 2012-11-17T18:34:01+09:00   accesslog.filter.output {"host":"127.0.0.1","path":"/"}
 2012-11-17T18:34:01+09:00   accesslog.filter.output {"host":"127.0.0.1","path":"/favicon.ico"}
 </pre>
-
-<p>んな形式でaccesslog.filter.output先で出力される。っていう感じで中間的にプログラムを挟んでごにょごにょ出来る模様</p>
-
-<p>公式ドキュメント: <a href="http://docs.fluentd.org/articles/out_exec_filter">http://docs.fluentd.org/articles/out_exec_filter</a></p>
-
+<p>んな形式でaccesslog.filter.output先で出力される。っていう感じで中間的にプログラムを挟んでごにょごにょ出来る模様</p><br /><p>公式ドキュメント: <a href="http://docs.fluentd.org/articles/out_exec_filter">http://docs.fluentd.org/articles/out_exec_filter</a></p><br />
               </div>
             </div>
           </div>

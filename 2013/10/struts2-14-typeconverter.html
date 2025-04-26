@@ -79,28 +79,19 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>何やらアクションで評価されるパラメーターとか?を指定した型で変換する仕組みが備わってるようで。<a href="http://struts.apache.org/release/2.0.x/docs/type-conversion.html">公式ドキュメント</a></p>
-
-<p>とりまぁ読みつつ進めてみるかってことで</p>
-
+                <p>何やらアクションで評価されるパラメーターとか?を指定した型で変換する仕組みが備わってるようで。<a href="http://struts.apache.org/release/2.0.x/docs/type-conversion.html">公式ドキュメント</a></p><br /><p>とりまぁ読みつつ進めてみるかってことで</p><br />
 <!--more-->
 
 <h2>概要</h2>
-
-<p>この型変換の仕組みを利用する方法は3つ</p>
-
+<p>この型変換の仕組みを利用する方法は3つ</p><br />
 <ul>
 <li>com.opensymphony.xwork2.conversion.annotations.Conversion(アノテーション)をActionに指定する</li>
 <li>アクションクラス名-conversion.propertiesで指定する</li>
 <li>もしくはクラスパスルートにxwork-conversion.propertiesで指定する</li>
 </ul>
-
-<p>全てやり方的なのは紹介するけど、2と3の違いに関しては「型で指定するか」「変数名的な感じで指定するか」って所なのではと</p>
-
+<p>全てやり方的なのは紹介するけど、2と3の違いに関しては「型で指定するか」「変数名的な感じで指定するか」って所なのではと</p><br />
 <h4>struts.xml</h4>
-
-<p><a href="http://localhost:8080/struts2/top/page/1">http://localhost:8080/struts2/top/page/1</a> 的なURLを表現するにはどうすれば良いのかって所としては</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<p><a href="http://localhost:8080/struts2/top/page/1">http://localhost:8080/struts2/top/page/1</a> 的なURLを表現するにはどうすれば良いのかって所としては</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
 &lt;struts&gt;
     &lt;package name="sample" extends="struts-default"&gt;
@@ -125,15 +116,9 @@
         &lt;/action&gt;
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre>
-<p>/topと/top/page/(.*)的なののマッピングが2つ必要になるだろうと思ってやってるけど、これをひとまとめに出来ないものかと。んまぁそれはおいといて</p>
-
-<p>通常だと&lt;action&gt;で指定出来るname属性にスラッシュを組み込む事は出来ない模様だけど、<span style="color: red">struts.enable.SlashesInActionNames</span>な設定をtrueにしておくと認識させる事が出来る模様</p>
-
+</code></pre><p>/topと/top/page/(.*)的なののマッピングが2つ必要になるだろうと思ってやってるけど、これをひとまとめに出来ないものかと。んまぁそれはおいといて</p><br /><p>通常だと&lt;action&gt;で指定出来るname属性にスラッシュを組み込む事は出来ない模様だけど、<span style="color: red">struts.enable.SlashesInActionNames</span>な設定をtrueにしておくと認識させる事が出来る模様</p><br />
 <h4>Page.java</h4>
-
-<p>上記でパラメーターとして認識するpageパラメーターは元はStringになってるはず。それをもとにPageオブジェクトで変換してアクションにマッピングする。でそのクラス</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>上記でパラメーターとして認識するpageパラメーターは元はStringになってるはず。それをもとにPageオブジェクトで変換してアクションにマッピングする。でそのクラス</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.io.Serializable;
 
@@ -154,9 +139,7 @@ public class Page implements Serializable {
         return page;
     }
 }
-</code></pre>
-<p>(ry</p>
-
+</code></pre><p>(ry</p><br />
 <h4>TopAction.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.controllers.sample;
 
@@ -234,15 +217,9 @@ public class TopAction extends ActionSupport {
         this.date = date;
     }
 }
-</code></pre>
-<p>っていう感じで上記で説明したようにPageオブジェクトで受け取るという形なので、それに伴うセッターメソッドを定義。あと他にも書いてるけどそれは公式ドキュメント上の「Built in Type Conversion Support」セクションに書いてあるようにデフォルトでサポートされている型変換っていうのもちょっと利用してみる的な感じで書いておいた</p>
-
-<p>でこのアクションでPageオブジェクトを変換する仕組みのコンバータークラスを作ってないので作る</p>
-
+</code></pre><p>っていう感じで上記で説明したようにPageオブジェクトで受け取るという形なので、それに伴うセッターメソッドを定義。あと他にも書いてるけどそれは公式ドキュメント上の「Built in Type Conversion Support」セクションに書いてあるようにデフォルトでサポートされている型変換っていうのもちょっと利用してみる的な感じで書いておいた</p><br /><p>でこのアクションでPageオブジェクトを変換する仕組みのコンバータークラスを作ってないので作る</p><br />
 <h4>PageConverter.java</h4>
-
-<p>適当に書いたのでorz (ていうかテストすら書いてない)</p>
-<pre class="line-numbers"><code class="language-java")>package sample.converters;
+<p>適当に書いたのでorz (ていうかテストすら書いてない)</p><br /><pre class="line-numbers"><code class="language-java")>package sample.converters;
 
 import java.lang.reflect.Member;
 import java.util.Map;
@@ -294,33 +271,19 @@ public class PageConverter implements TypeConverter {
         return new Page(page);
     }
 }
-</code></pre>
-<p>公式ドキュメントではStrutsTypeConverterっていうのを継承する形でやってますけど、これ実体はTypeConverterインターフェースを実装したものなので、それを使ってやってる</p>
-
-<p>で上記のアクションでアノテーション方式でのをコメントアウトしていたのでプロパティファイルを使って処理する</p>
-
+</code></pre><p>公式ドキュメントではStrutsTypeConverterっていうのを継承する形でやってますけど、これ実体はTypeConverterインターフェースを実装したものなので、それを使ってやってる</p><br /><p>で上記のアクションでアノテーション方式でのをコメントアウトしていたのでプロパティファイルを使って処理する</p><br />
 <h4>src/main/resources/sample/controllers/samppe/TopAction-conversion.properties</h4>
 <pre class="line-numbers"><code class="language-ini")>page = sample.converters.PageConverter
-</code></pre>
-<p>的な感じで作れば良い。方式は&lt;propertyName&gt;=&lt;Converter Class&gt;ってドキュメント書いてるので</p>
-
+</code></pre><p>的な感じで作れば良い。方式は&lt;propertyName&gt;=&lt;Converter Class&gt;ってドキュメント書いてるので</p><br />
 <h4>src/main/resources/xwork-conversion.properties</h4>
-
-<p>アノテーションで指定するか上記のプロパティファイルを利用するなら良い。型で指定するのであれば</p>
-<pre class="line-numbers"><code class="language-ini")>sample.Page = sample.converters.PageConverter
-</code></pre>
-<p>的な感じで書けば良い。</p>
-
-<p>以上で必要な</p>
-
+<p>アノテーションで指定するか上記のプロパティファイルを利用するなら良い。型で指定するのであれば</p><br /><pre class="line-numbers"><code class="language-ini")>sample.Page = sample.converters.PageConverter
+</code></pre><p>的な感じで書けば良い。</p><br /><p>以上で必要な</p><br />
 <ul>
 <li>  Action: TopAction</li>
 <li>  Convert Object: Page</li>
 <li>  Converter: PageCovnerter</li>
 </ul>
-
-<p>あと上記のプロパティファイルを作成が終わったので検証してみる。まぁテスト書いた方が楽なので</p>
-
+<p>あと上記のプロパティファイルを作成が終わったので検証してみる。まぁテスト書いた方が楽なので</p><br />
 <h4>TopActionTestCase.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.actions;
 
@@ -366,9 +329,7 @@ public class TopActionTestCase extends StrutsSpringTestCase {
         assertThat(action.getPage().getPage(), is(2));
     }
 }
-</code></pre>
-<p>終わり。まだ微妙な所もあるし色々追記するかと</p>
-
+</code></pre><p>終わり。まだ微妙な所もあるし色々追記するかと</p><br />
               </div>
             </div>
           </div>

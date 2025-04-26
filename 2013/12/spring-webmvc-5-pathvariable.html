@@ -79,14 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>例えばRequestMappingで指定するパスの一部を変数で引数にマッピングしたい時とかに使うのが@PathVariableアノテーションな模様。</p>
-
+                <p>例えばRequestMappingで指定するパスの一部を変数で引数にマッピングしたい時とかに使うのが@PathVariableアノテーションな模様。</p><br />
 <!--more-->
 
 <h4>SampleController.java</h4>
-
-<p><http://localhost:8080/[context path]/sample/test/2013-01-01.action> のようなURLを使い、日付な部分を@RequestMappingで使用するメソッドの引数に値をバインドするっていうようなケースな場合</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p><http://localhost:8080/[context path]/sample/test/2013-01-01.action> のようなURLを使い、日付な部分を@RequestMappingで使用するメソッドの引数に値をバインドするっていうようなケースな場合</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.util.Date;
 
@@ -104,15 +101,11 @@ public class SampleController {
         return "date: " + date;
     }
 }
-</code></pre>
-<p>っていうように引数なアノテーションに@PathVariableを指定する。但し、Date型は無設定な状態だと型変換されないので</p>
-
+</code></pre><p>っていうように引数なアノテーションに@PathVariableを指定する。但し、Date型は無設定な状態だと型変換されないので</p><br />
 <blockquote>
 Failed to convert value of type 'java.lang.String' to required type 'java.util.Date'; nested exception is java.lang.IllegalStateException: Cannot convert value of type [java.lang.String] to required type [java.util.Date]: no matching editors or conversion strategy found」
 </blockquote>
-
-<p>っていうようなエラーが起きる。なので@InitBinderを使ってDate型を処理するPropertyEditorを設定すれば良い模様</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>っていうようなエラーが起きる。なので@InitBinderを使ってDate型を処理するPropertyEditorを設定すれば良い模様</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -146,9 +139,7 @@ public class SampleController {
         return "date: " + date;
     }
 }
-</code></pre>
-<p>ちなみにこの@InitBinderはWebBindingInitializerインターフェースを実装する事でコントローラーで@InitBinderを利用しなくても出来る</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>ちなみにこの@InitBinderはWebBindingInitializerインターフェースを実装する事でコントローラーで@InitBinderを利用しなくても出来る</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -174,9 +165,7 @@ public class DateTimeBindingInitializer implements WebBindingInitializer {
         );
     }
 }
-</code></pre>
-<p>っていうクラスを作っておいて、spring-web-servlet.xmlにて</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</code></pre><p>っていうクラスを作っておいて、spring-web-servlet.xmlにて</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
@@ -196,11 +185,7 @@ public class DateTimeBindingInitializer implements WebBindingInitializer {
         &lt;/property&gt;
     &lt;/bean&gt;
 &lt;/beans&gt;
-</code></pre>
-<p>っていうような感じで作ったWebBingingInitializerな実装を注入させる事が出来ると</p>
-
-<p>あとは普通にテストケースなりで</p>
-<pre class="line-numbers"><code class="language-java")>package swmvc;
+</code></pre><p>っていうような感じで作ったWebBingingInitializerな実装を注入させる事が出来ると</p><br /><p>あとは普通にテストケースなりで</p><br /><pre class="line-numbers"><code class="language-java")>package swmvc;
 
 import org.junit.Test;
 
@@ -216,9 +201,7 @@ public class SampleControllerTest extends AbstractTestCase {
 }
 </code></pre>
 <h4>余談: @DateTimeFormatを使う</h4>
-
-<p>@PathVariableに@DateTimeFormatを設定してもDate型をサポートさせる事が出来る模様</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>@PathVariableに@DateTimeFormatを設定してもDate型をサポートさせる事が出来る模様</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.util.Date;
 
@@ -239,9 +222,7 @@ public class SampleController {
         return "date: " + date;
     }
 }
-</code></pre>
-<p>但しこれを使うにはconversationServiceの設定が必要な模様</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</code></pre><p>但しこれを使うにはconversationServiceの設定が必要な模様</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"

@@ -78,8 +78,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>ふと思って</p>
-
+                <p>ふと思って</p><br />
 <blockquote class="twitter-tweet">
   <p>
     そういや、AccountManager.getAuthTokenで返されるトークンってキャッシュされなかったっけ?
@@ -89,33 +88,23 @@
     &mdash; kinjouj (@kinjou_j) <a href="https://twitter.com/kinjou_j/statuses/342824075351183360">June 7, 2013</a>
   </p>
 </blockquote>
-
-<p>って書いちゃったので調べた</p>
-
+<p>って書いちゃったので調べた</p><br />
 <!--more-->
-
-<p><a href="http://d.hatena.ne.jp/adsaria/20101012/1286886888">http://d.hatena.ne.jp/adsaria/20101012/1286886888</a> に書かれている通り、一定期間で持ってアクセストークンは有効期限切れで失効するような場合だといくらgetAuthTokenを実行してもキャッシュされているアクセストークンを取ってくる。つまりサーバー側にアクセストークンをくれと要求する事が無い模様。まぁ端末内にどれくらいの期間アクセストークンをキャッシュするのかは要調査。フロー的には</p>
-
+<p><a href="http://d.hatena.ne.jp/adsaria/20101012/1286886888">http://d.hatena.ne.jp/adsaria/20101012/1286886888</a> に書かれている通り、一定期間で持ってアクセストークンは有効期限切れで失効するような場合だといくらgetAuthTokenを実行してもキャッシュされているアクセストークンを取ってくる。つまりサーバー側にアクセストークンをくれと要求する事が無い模様。まぁ端末内にどれくらいの期間アクセストークンをキャッシュするのかは要調査。フロー的には</p><br />
 <ul>
 <li>getAuthTokenを最初に呼び出した際にサーバーからアクセストークンを取得 (この時点でキャッシュされる?)</li>
 <li>APIコールしたりとか(ry</li>
 <li>再度getAuthTokenで取得する (この際にはサーバーへリクエスト送信されずキャッシュされたのが返される?)</li>
 <li>APIコールする。この際アクセストークンが失効しているとエラーになる</li>
 </ul>
-
-<p>っていう感じじゃないかと。で上記参考先にも書いてあるけど、失効しているアクセストークンをキャッシュから取り除くにはAccountManager#invalidateAuthTokenメソッドを使ってキャッシュから取り除く必要がある。例えば、一定のインターバルを過ぎた場合にはAccountManagerのgetAuthTokenを実行する処理のfinally辺りでAccountManager.invlaidateAuthToken実行するとか</p>
-
+<p>っていう感じじゃないかと。で上記参考先にも書いてあるけど、失効しているアクセストークンをキャッシュから取り除くにはAccountManager#invalidateAuthTokenメソッドを使ってキャッシュから取り除く必要がある。例えば、一定のインターバルを過ぎた場合にはAccountManagerのgetAuthTokenを実行する処理のfinally辺りでAccountManager.invlaidateAuthToken実行するとか</p><br />
 <h4>追記</h4>
-
-<p>doorkeeperのaccess_token_expires_inで有効期限を小さくして、以下のような検証してみた</p>
-
+<p>doorkeeperのaccess_token_expires_inで有効期限を小さくして、以下のような検証してみた</p><br />
 <ul>
 <li>AccountManager.invalidateAuthTokenをしない場合: 初回時にアクセストークンを取得。AccountManagerによりキャッシュされる。その後サーバー側でアクセストークンが破棄されるまで放置し、有効期限切れになるとそこ後はアクセストークンがキャッシュされているのしか出ないのでWeb API通信が失敗する</li>
 <li>AccountManager.invalidateAuthTokenをした場合、上記同様だが、アクセストークンは通信される際に毎回取得するのでクライアント側で以前に使ったアクセストークンなどは使用されず、新しくアクセストークンを取り直す。但し、有効期限で執行しない限りはアクセストークンは変わらない。執行すると新しいアクセストークンが取得できる。とりあえずは通信は失敗しない</li>
 </ul>
-
-<p>というような感じ。インターバルとかで(クライアント側)キャッシュを破棄されるような仕組みっていうは時と場合によっては同期が無効になってたりすると不整合を招く恐れがあるので、通信自体の間隔を大きくして低減させる方が望ましいのかも</p>
-
+<p>というような感じ。インターバルとかで(クライアント側)キャッシュを破棄されるような仕組みっていうは時と場合によっては同期が無効になってたりすると不整合を招く恐れがあるので、通信自体の間隔を大きくして低減させる方が望ましいのかも</p><br />
               </div>
             </div>
           </div>

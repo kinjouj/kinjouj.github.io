@@ -79,23 +79,18 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>MongoDBにもれなく付いてくる(笑)MapReduceを使ってみる。ただ使っても面白くないので</p>
-
+                <p>MongoDBにもれなく付いてくる(笑)MapReduceを使ってみる。ただ使っても面白くないので</p><br />
 <ul>
 <li>fluentdを使ってnginxのアクセスログをtailする</li>
 <li>fluentdでパースされたアクセスログをfluent-plugin-mongoを使ってMongoDBにプッシュする</li>
 <li>MongoDB MapReduce APIを使って、アクセスカウント統計を作る</li>
 </ul>
-
-<p>という流れで</p>
-
+<p>という流れで</p><br />
 <!--more-->
 
 <h4>fluentd側のセットアップ</h4>
 <pre class="line-numbers"><code>sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
-</code></pre>
-<p>でとりあえずfluent-plugin-mongoを入れる。んで</p>
-<pre class="line-numbers"><code>&lt;source&gt;
+</code></pre><p>でとりあえずfluent-plugin-mongoを入れる。んで</p><br /><pre class="line-numbers"><code>&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -107,16 +102,10 @@
     database fluent
     collection accesslog
 &lt;/match&gt;
-</code></pre>
-<p>なtd-agent.confを作って</p>
-<pre class="line-numbers"><code>/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
-</code></pre>
-<p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p>
-
+</code></pre><p>なtd-agent.confを作って</p><br /><pre class="line-numbers"><code>/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
+</code></pre><p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p><br />
 <h4>MongoDB側を確認</h4>
-
-<p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p>
-<pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
+<p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p><br /><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f6647c8cdabd1739000004"), "path" : "/" }
 { "_id" : ObjectId("50f6647c8cdabd1739000005"), "path" : "/favicon.ico" }
@@ -148,14 +137,10 @@
 { "_id" : ObjectId("50f712708cdabd1739000023"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f712708cdabd1739000024"), "path" : "/home/index" }
 { "_id" : ObjectId("50f712708cdabd1739000025"), "path" : "/favicon.ico" }
-</code></pre>
-<p>という風にずどどどどとぶっこまれるのが確認できる。ただこれフィルターしているので、あれなんすけど</p>
-<pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
+</code></pre><p>という風にずどどどどとぶっこまれるのが確認できる。ただこれフィルターしているので、あれなんすけど</p><br /><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f664408cdabd1739000003") }
-</code></pre>
-<p>という風にpath属性が無いのもあるので</p>
-
+</code></pre><p>という風にpath属性が無いのもあるので</p><br />
 <h4>MongoDBでMapReduce APIを使うJavaScriptを書く</h4>
 <pre class="line-numbers"><code class="language-js")>var res = db.accesslog.mapReduce(
   // Map
@@ -187,9 +172,7 @@
 );
 
 printjson(res)
-</code></pre>
-<p>な感じで実行すると</p>
-<pre class="line-numbers"><code class="language-json")>{
+</code></pre><p>な感じで実行すると</p><br /><pre class="line-numbers"><code class="language-json")>{
     "results" : [
         {
             "_id" : "/",
@@ -222,25 +205,17 @@ printjson(res)
     },
     "ok" : 1,
 }
-</code></pre>
-<p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p>
-
+</code></pre><p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p><br />
 <h4>コレクション名</h4>
 <pre class="line-numbers"><code class="language-json")>{ out: "コレクション名" }
-</code></pre>
-<p>で指定すると指定したコレクション名にぶち込まれる</p>
-
+</code></pre><p>で指定すると指定したコレクション名にぶち込まれる</p><br />
 <h4>mergeとreplace</h4>
 
 <ul>
 <li>  既存するデータをぶち消して、新しい結果をぶち込むのがreplace</li>
 <li>  既存するデータを消さずにそのまま新しい結果をマージするのがmerge</li>
 </ul>
-
-<p>な感じなんじゃないかなーっと</p>
-
-<p>以上な感じでMongoDBにあるMapReduce APIを使ってごにょごにょする事も出来る模様で</p>
-
+<p>な感じなんじゃないかなーっと</p><br /><p>以上な感じでMongoDBにあるMapReduce APIを使ってごにょごにょする事も出来る模様で</p><br />
               </div>
             </div>
           </div>

@@ -79,8 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>さらにちょっと進めてみた。やってみる項目として、継承・AnonymousPropertyHandling(ドキュメントではAnonymousPropertyAddHandler)・Listなデータを突っ込んでみる</p>
-
+                <p>さらにちょっと進めてみた。やってみる項目として、継承・AnonymousPropertyHandling(ドキュメントではAnonymousPropertyAddHandler)・Listなデータを突っ込んでみる</p><br />
 <!--more-->
 
 <h4>BaseTable.java</h4>
@@ -132,13 +131,7 @@ public abstract class BaseTable {
         return anonymousProperties.entrySet();
     }
 }
-</code></pre>
-<p>例えば、毎回テーブルマッピングを行う度にIdアノテーションなの定義するのめんどくさい。なのでこれを外部クラスで提供して継承することで実装をしない方向で</p>
-
-<p>Inheritanceアノテーションとabstract classに関しては省略。でDiscriminatorColumnアノテーションによって、クラスを識別するにあたって必要な情報を格納するカラムを指定する模様。で値になるのはDiscriminatorValueアノテーションになる</p>
-
-<p>んでAnonymousPropertyHandlingアノテーションによって、Columnアノテーションで指定してない等のプロパティもCassandraに突っ込みたい場合にadderに対応するメソッドを介してデータをつっこみ、getterに対応するメソッドが返すCollection<Map.Entry>によって返されたデータがCassandraに突っ込まれる模様</p>
-
+</code></pre><p>例えば、毎回テーブルマッピングを行う度にIdアノテーションなの定義するのめんどくさい。なのでこれを外部クラスで提供して継承することで実装をしない方向で</p><br /><p>Inheritanceアノテーションとabstract classに関しては省略。でDiscriminatorColumnアノテーションによって、クラスを識別するにあたって必要な情報を格納するカラムを指定する模様。で値になるのはDiscriminatorValueアノテーションになる</p><br /><p>んでAnonymousPropertyHandlingアノテーションによって、Columnアノテーションで指定してない等のプロパティもCassandraに突っ込みたい場合にadderに対応するメソッドを介してデータをつっこみ、getterに対応するメソッドが返すCollection<Map.Entry>によって返されたデータがCassandraに突っ込まれる模様</p><br />
 <h4>Sample.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -180,9 +173,7 @@ public class Sample extends BaseTable {
         colors.add(color);
     }
 }
-</code></pre>
-<p>前回の記事で違うのは、BaseTableを継承する・(set/get)Colorでは無く、(get/set)ColorsでList&lt;Color&gt;を使う点。もちろん前回で書いたColor.javaももろもろ修正する</p>
-
+</code></pre><p>前回の記事で違うのは、BaseTableを継承する・(set/get)Colorでは無く、(get/set)ColorsでList&lt;Color&gt;を使う点。もちろん前回で書いたColor.javaももろもろ修正する</p><br />
 <h4>Color.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -278,9 +269,7 @@ public class HectorClient {
         em.persist(sample);
     }
 }
-</code></pre>
-<p>これは前回とほとんど変わらない。ただputする際にsetColorからaddColorに変わったのと、addAnonymousPropertyでカラム指定無しなデータを突っ込むところだけは異なる。で実行後にCassandra側のデータを確認すると</p>
-
+</code></pre><p>これは前回とほとんど変わらない。ただputする際にsetColorからaddColorに変わったのと、addAnonymousPropertyでカラム指定無しなデータを突っ込むところだけは異なる。で実行後にCassandra側のデータを確認すると</p><br />
 <pre>
 RowKey: 1348330541878
 => (column=class, value=sample, timestamp=1348330541907000)

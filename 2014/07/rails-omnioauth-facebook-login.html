@@ -80,18 +80,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式: <a href="https://github.com/intridea/omniauth">https://github.com/intridea/omniauth</a></p>
-
-<p>タイトル通りRails(じゃなくても出来る。Sinatraとかもサポートされている)で、facebookへのログインを行ってアカウント情報なりを利用するようなパターン(ソーシャルログインなり登録時の情報の自動設定なり)を行う場合には、omniauthでサポートされているfacebook strategyを使えば簡単にできちゃう模様</p>
-
+                <p>公式: <a href="https://github.com/intridea/omniauth">https://github.com/intridea/omniauth</a></p><br /><p>タイトル通りRails(じゃなくても出来る。Sinatraとかもサポートされている)で、facebookへのログインを行ってアカウント情報なりを利用するようなパターン(ソーシャルログインなり登録時の情報の自動設定なり)を行う場合には、omniauthでサポートされているfacebook strategyを使えば簡単にできちゃう模様</p><br />
 <!--more-->
 
 <h4>facebook APIの設定</h4>
-
-<p><a href="https://developers.facebook.com">https://developers.facebook.com</a> からアプリケーションを作成しアプリケーションIDとシークレットキーをコピーする。でValid OAuth Redirect URIsっていう所に認証後にリダイレクト先を指定しておかないとOAuth failureするので設定しておく</p>
-
-<p>とりあえずはfacebook側の設定はこんだけ</p>
-
+<p><a href="https://developers.facebook.com">https://developers.facebook.com</a> からアプリケーションを作成しアプリケーションIDとシークレットキーをコピーする。でValid OAuth Redirect URIsっていう所に認証後にリダイレクト先を指定しておかないとOAuth failureするので設定しておく</p><br /><p>とりあえずはfacebook側の設定はこんだけ</p><br />
 <h4>Gemfile</h4>
 <pre class="line-numbers"><code class="language-rb")>source "https://rubygems.org"
 
@@ -100,13 +93,9 @@ gem "omniauth-facebook"
 # テストで使うので
 gem "rspec-rails", group: :test
 gem "capybara-rails", group: :test
-</code></pre>
-<p>まぁ設定したらbundle install</p>
-
+</code></pre><p>まぁ設定したらbundle install</p><br />
 <h4>config/initializers/omniauth.rb</h4>
-
-<p>ドキュメント(README.md)通りにconfig/initializers/omniauth.rbを作る</p>
-<pre class="line-numbers"><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
+<p>ドキュメント(README.md)通りにconfig/initializers/omniauth.rbを作る</p><br /><pre class="line-numbers"><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
   provider :facebook,
     "[APP ID]",
     "[APP SECRET KEY]",
@@ -118,9 +107,7 @@ gem "capybara-rails", group: :test
     OmniAuth::FailureEndpoint.new(env).redirect_to_failure
   end
 end
-</code></pre>
-<p>omniauth-facebookに関しての設定項目は <a href="https://github.com/mkdynamic/omniauth-facebook">https://github.com/mkdynamic/omniauth-facebook</a> を参照</p>
-
+</code></pre><p>omniauth-facebookに関しての設定項目は <a href="https://github.com/mkdynamic/omniauth-facebook">https://github.com/mkdynamic/omniauth-facebook</a> を参照</p><br />
 <h4>config/routes.rb</h4>
 
 <pre>
@@ -128,17 +115,13 @@ auth_facebook_callback GET    /auth/facebook/callback(.:format) sessions#callbac
           auth_failure GET    /auth/failure(.:format)           sessions#failure
               accounts GET    /accounts(.:format)               accounts#index
 </pre>
-
-<p>っていうようなルーティングを作るので</p>
-<pre class="line-numbers"><code class="language-rb")>Rails.application.routes.draw do
+<p>っていうようなルーティングを作るので</p><br /><pre class="line-numbers"><code class="language-rb")>Rails.application.routes.draw do
   get "/auth/facebook/callback" =&gt; "sessions#callback"
   get "/auth/failure" =&gt; "sessions#failure"
 
   resources :accounts
 end
-</code></pre>
-<p>ってな感じでSessionsControllerとAccountsControllerが必要なので(ry</p>
-
+</code></pre><p>ってな感じでSessionsControllerとAccountsControllerが必要なので(ry</p><br />
 <h4>app/controllers/sessions_controller.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>class SessionsController &lt; ApplicationController
   def callback
@@ -156,9 +139,7 @@ end
     end
 
 end
-</code></pre>
-<p>んな感じで</p>
-
+</code></pre><p>んな感じで</p><br />
 <h4>app/controllers/accounts_controller.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>class AccountsController &lt; ApplicationController
   def index
@@ -172,18 +153,10 @@ end
     @user = auth
   end
 end
-</code></pre>
-<p>な感じでapp/views/accounts/index.erbで</p>
-<pre class="line-numbers"><code class="language-erb")>name = &lt;%= @user["info"]["nickname"] %&gt;
-</code></pre>
-<p>な感じでnicknameを出力しているだけ。</p>
-
-<p>まぁ要は/auth/facebookにアクセスしアクセス許可を承認されると /auth/facebook/callbackに行って、セッションデータにログイン時のユーザー情報を格納後/accountsにリダイレクト、そこで最終的に情報が表示されるような感じ</p>
-
+</code></pre><p>な感じでapp/views/accounts/index.erbで</p><br /><pre class="line-numbers"><code class="language-erb")>name = &lt;%= @user["info"]["nickname"] %&gt;
+</code></pre><p>な感じでnicknameを出力しているだけ。</p><br /><p>まぁ要は/auth/facebookにアクセスしアクセス許可を承認されると /auth/facebook/callbackに行って、セッションデータにログイン時のユーザー情報を格納後/accountsにリダイレクト、そこで最終的に情報が表示されるような感じ</p><br />
 <h4>spec/rails_helper.rb</h4>
-
-<p>RSpec3(+Rails)辺りからはspec/rails_helper.rbにRailsに特有される設定等を行う模様げっぽいので</p>
-<pre class="line-numbers"><code class="language-rb")># ここから追加
+<p>RSpec3(+Rails)辺りからはspec/rails_helper.rbにRailsに特有される設定等を行う模様げっぽいので</p><br /><pre class="line-numbers"><code class="language-rb")># ここから追加
 OmniAuth.config.test_mode = true
 OmniAuth.config.mock_auth[:facebook] = OmniAuth::AuthHash.new({
   :provider =&gt; "facebook",
@@ -202,9 +175,7 @@ RSpec.configure do |config|
   config.include Capybara::DSL
 
 end
-</code></pre>
-<p>な感じでOmniAuth.config.test_modeを使用する事でテスト時には/auth/facebook等にリクエストした場合は問答無用でコールバック先にリダイレクトされる模様。でその際のomniauth.authなのはOmniAuth.config.mock_authで設定する事が可能。んまぁこういうところはテストを実行する前にbefore :each等で設定するべきなんじゃないのかなって思う</p>
-
+</code></pre><p>な感じでOmniAuth.config.test_modeを使用する事でテスト時には/auth/facebook等にリクエストした場合は問答無用でコールバック先にリダイレクトされる模様。でその際のomniauth.authなのはOmniAuth.config.mock_authで設定する事が可能。んまぁこういうところはテストを実行する前にbefore :each等で設定するべきなんじゃないのかなって思う</p><br />
 <h4>spec/requests/auth_spec.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
@@ -254,26 +225,16 @@ describe "oauth callback test", :js =&gt; false do
     expect(page.response_headers["Location"]).to match(%r!/auth/failure?.*!)
   end
 end
-</code></pre>
-<p>終わり。っていう事で若干適当感がハンパないけどomniauthとomniauth strategyを使えば簡単にソーシャルログイン等を使ってデータを取得したり出来るんじゃないかと</p>
-
-<p>余談としてomniauthで使えるstrategyは <a href="https://github.com/intridea/omniauth/wiki/List-of-Strategies">https://github.com/intridea/omniauth/wiki/List-of-Strategies</a> に載ってるので使いたいサービスとかに対応するのを使えば良いっぽい</p>
-
+</code></pre><p>終わり。っていう事で若干適当感がハンパないけどomniauthとomniauth strategyを使えば簡単にソーシャルログイン等を使ってデータを取得したり出来るんじゃないかと</p><br /><p>余談としてomniauthで使えるstrategyは <a href="https://github.com/intridea/omniauth/wiki/List-of-Strategies">https://github.com/intridea/omniauth/wiki/List-of-Strategies</a> に載ってるので使いたいサービスとかに対応するのを使えば良いっぽい</p><br />
 <h4>追記1: omniauthのURL prefixを変える方法</h4>
-
-<p>参考: <a href="http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider">http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider</a></p>
-
-<p>デフォルトだと/authになっていて、それがStrategyを含むと/auth/:providerっていう感じになるわけなんだけど、それのprefixを変えたい場合</p>
-<pre class="line-numbers"><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
+<p>参考: <a href="http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider">http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider</a></p><br /><p>デフォルトだと/authになっていて、それがStrategyを含むと/auth/:providerっていう感じになるわけなんだけど、それのprefixを変えたい場合</p><br /><pre class="line-numbers"><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
   configure do |config|
     config.path_prefix = "/user/auth"
   end
 
   # 以降省略
 end
-</code></pre>
-<p>ってな感じにすれば良いらしい</p>
-
+</code></pre><p>ってな感じにすれば良いらしい</p><br />
               </div>
             </div>
           </div>

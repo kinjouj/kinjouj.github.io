@@ -78,22 +78,13 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="/javamail.html">「JavaMailを使ってgmailでメールを送る件」</a>なコードをそのまま使う</p>
-
-<p>前回のをそのまま実行すると普通にメール送れるのは良いんですが、それをテストする方法としてまぁちょっと古いけれどもmock-javamailっていうのがある模様。どうやらjavamailで使用するメールトランサポートをモックする事で送ったメールをMailboxクラスで参照できる的な所かと</p>
-
+                <p><a href="/javamail.html">「JavaMailを使ってgmailでメールを送る件」</a>なコードをそのまま使う</p><br /><p>前回のをそのまま実行すると普通にメール送れるのは良いんですが、それをテストする方法としてまぁちょっと古いけれどもmock-javamailっていうのがある模様。どうやらjavamailで使用するメールトランサポートをモックする事で送ったメールをMailboxクラスで参照できる的な所かと</p><br />
 <!--more-->
-
-<p>まぁクラスパスに追加するだけで良い模様。理論的な理由としては微妙だけど、mock-javamailのJARにはMETA-INF/javamail.providersがあり</p>
-<pre class="line-numbers"><code class="language-ini")># See http://java.sun.com/products/javamail/javadocs/javax/mail/Session.html
+<p>まぁクラスパスに追加するだけで良い模様。理論的な理由としては微妙だけど、mock-javamailのJARにはMETA-INF/javamail.providersがあり</p><br /><pre class="line-numbers"><code class="language-ini")># See http://java.sun.com/products/javamail/javadocs/javax/mail/Session.html
 protocol=smtp; type=transport; class=org.jvnet.mock_javamail.MockTransport; vendor=java.net mock-javamail project;
 protocol=pop3; type=store; class=org.jvnet.mock_javamail.MockStore; vendor=java.net mock-javamail project;
 protocol=imap; type=store; class=org.jvnet.mock_javamail.MockStore; vendor=java.net mock-javamail project;
-</code></pre>
-<p>てな感じになってる。おそらくはJavaMail本式で持っているのを模倣したクラス的なのに差し替える事で実送信テストを行わずにテスト出来る仕組みを提供しているんかと</p>
-
-<p>使い方は上記でも書いてるようにクラスパスに入れてメールを送信する処理をしてMailboxクラスをテストするっていうだけ</p>
-<pre class="line-numbers"><code class="language-java")>import java.util.List;
+</code></pre><p>てな感じになってる。おそらくはJavaMail本式で持っているのを模倣したクラス的なのに差し替える事で実送信テストを行わずにテスト出来る仕組みを提供しているんかと</p><br /><p>使い方は上記でも書いてるようにクラスパスに入れてメールを送信する処理をしてMailboxクラスをテストするっていうだけ</p><br /><pre class="line-numbers"><code class="language-java")>import java.util.List;
 
 import javax.mail.Message;
 
@@ -123,16 +114,10 @@ public class ClientTest {
         assertThat(msg.getSubject(), is("タイトル"));
     }
 }
-</code></pre>
-<p>はい、終わり</p>
-
-<p>ちなみにjavax.mail.Sessionに渡すjava.util.Propertiesで</p>
-<pre class="line-numbers"><code class="language-java")>Properties prop = System.getProperties();
+</code></pre><p>はい、終わり</p><br /><p>ちなみにjavax.mail.Sessionに渡すjava.util.Propertiesで</p><br /><pre class="line-numbers"><code class="language-java")>Properties prop = System.getProperties();
 prop.setProperty("mail.debug", "true");
 // 以下省略
-</code></pre>
-<p>mail.debugを利用する事でログ見れる模様</p>
-
+</code></pre><p>mail.debugを利用する事でログ見れる模様</p><br />
               </div>
             </div>
           </div>

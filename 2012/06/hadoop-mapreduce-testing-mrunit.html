@@ -79,8 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>Hadoop MapReduceのテストを書く方法としてMRUnitっていうのがあるのを以前から知ってて、だけどまったく検証する気配が無いのでやってみた。但し、相変わらずMaven2を使う</p>
-
+                <p>Hadoop MapReduceのテストを書く方法としてMRUnitっていうのがあるのを以前から知ってて、だけどまったく検証する気配が無いのでやってみた。但し、相変わらずMaven2を使う</p><br />
 <!--more-->
 
 <h4>pom.xml</h4>
@@ -124,11 +123,7 @@
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/project&gt;
-</code></pre>
-<p>なぜかmvnrepositoryにはMRUnitの0.9.0-incubatingが上がってる模様げなのに、それを指定すると取得できないという罠に若干ハマったのでバージョンをひとつ下げました</p>
-
-<p>これに書いてある通り使用するHadoopのバージョンは0.20.205</p>
-
+</code></pre><p>なぜかmvnrepositoryにはMRUnitの0.9.0-incubatingが上がってる模様げなのに、それを指定すると取得できないという罠に若干ハマったのでバージョンをひとつ下げました</p><br /><p>これに書いてある通り使用するHadoopのバージョンは0.20.205</p><br />
 <h4>src/main/java/sample/SampleMapper.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -190,9 +185,7 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, Text, IntWritab
 }
 </code></pre>
 <h4>src/test/java/SampleHadoopTestCase.java</h4>
-
-<p>で上記で書いたMapperとReducerを単一でもテストしつつMapReduceで処理した場合のテストを行なってみる</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>で上記で書いたMapperとReducerを単一でもテストしつつMapReduceで処理した場合のテストを行なってみる</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -263,27 +256,17 @@ public class SampleHadoopTestCase {
         mrDriver.runTest();
     }
 }
-</code></pre>
-<p>ってな感じで、MapperをテストするならMapDriver、ReducerをテストするならReduceDriver、MapperとReducerを流してMapReduceとして?テストするならMapReduceDriver(他にもPipelineMapReduceDriverとかもあるらしい)</p>
-
-<p>でそれに対して、withInputで入力データをやってあげて、withOutputでそれのContext.writeなどから流れるのをテスト出来るっていう仕組みっぽい。であとは</p>
-<pre class="line-numbers"><code class="language-sh")>mvn test
-</code></pre>
-<p>参考: <a href="https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial">https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial</a></p>
-
+</code></pre><p>ってな感じで、MapperをテストするならMapDriver、ReducerをテストするならReduceDriver、MapperとReducerを流してMapReduceとして?テストするならMapReduceDriver(他にもPipelineMapReduceDriverとかもあるらしい)</p><br /><p>でそれに対して、withInputで入力データをやってあげて、withOutputでそれのContext.writeなどから流れるのをテスト出来るっていう仕組みっぽい。であとは</p><br /><pre class="line-numbers"><code class="language-sh")>mvn test
+</code></pre><p>参考: <a href="https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial">https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial</a></p><br />
 <h4>追記</h4>
-
-<p>MavenでMRUnit-0.9.0-incubatingを使う場合には</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;dependency&gt;
+<p>MavenでMRUnit-0.9.0-incubatingを使う場合には</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;dependency&gt;
   &lt;groupId&gt;org.apache.mrunit&lt;/groupId&gt;
   &lt;artifactId&gt;mrunit&lt;/artifactId&gt;
   &lt;version&gt;0.9.0-incubating&lt;/version&gt;
   &lt;scope&gt;test&lt;/scope&gt;
   &lt;classifier&gt;hadoop1&lt;/classifier&gt;
 &lt;/dependency&gt;
-</code></pre>
-<p>というように&lt;classifier&gt;を設定しないといけない(0.20及び1.0系ならhadoop1、0.23とかの場合はhadoop2っぽい)</p>
-
+</code></pre><p>というように&lt;classifier&gt;を設定しないといけない(0.20及び1.0系ならhadoop1、0.23とかの場合はhadoop2っぽい)</p><br />
               </div>
             </div>
           </div>

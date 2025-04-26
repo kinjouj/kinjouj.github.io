@@ -80,14 +80,9 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="https://developer.chrome.com/extensions/messaging.html#native-messaging">https://developer.chrome.com/extensions/messaging.html#native-messaging</a> っていうのがある模様なので色々やってみた</p>
-
+                <p><a href="https://developer.chrome.com/extensions/messaging.html#native-messaging">https://developer.chrome.com/extensions/messaging.html#native-messaging</a> っていうのがある模様なので色々やってみた</p><br />
 <!--more-->
-
-<p>参考1: <a href="http://laiso.hatenablog.com/entry/2013/12/15/Google_Chrome%E3%81%A7%E3%83%88%E3%83%AC%E3%82%A4%E3%81%8B%E3%82%89CD%E3%82%92%E6%8E%92%E5%87%BA%E3%81%A7%E3%81%8D%E3%82%8B%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E6%8B%A1%E5%BC%B5%E3%82%92%E3%81%A4%E3%81%8F">Google ChromeでトレイからCDを排出できるブラウザ拡張をつくりました(Native messaging版)</a></p>
-
-<p>参考2: <a href="http://stackoverflow.com/questions/20220668/communication-between-native-app-and-chrome-extension">communication between native-app and chrome-extension</a></p>
-
+<p>参考1: <a href="http://laiso.hatenablog.com/entry/2013/12/15/Google_Chrome%E3%81%A7%E3%83%88%E3%83%AC%E3%82%A4%E3%81%8B%E3%82%89CD%E3%82%92%E6%8E%92%E5%87%BA%E3%81%A7%E3%81%8D%E3%82%8B%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E6%8B%A1%E5%BC%B5%E3%82%92%E3%81%A4%E3%81%8F">Google ChromeでトレイからCDを排出できるブラウザ拡張をつくりました(Native messaging版)</a></p><br /><p>参考2: <a href="http://stackoverflow.com/questions/20220668/communication-between-native-app-and-chrome-extension">communication between native-app and chrome-extension</a></p><br />
 <h4>/etc/opt/chrome/native-messaging-hosts/kinjouj.test.json</h4>
 <pre class="line-numbers"><code class="language-json")>{
   "name": "kinjouj.test",
@@ -96,11 +91,7 @@
   "type": "stdio",
   "allowed_origins": ["chrome-extension://gaegbpbojjgpmjkihclmjelhbopfflmp/"]
 }
-</code></pre>
-<p>公式ドキュメントにも書いてるけど、これを置く場所はOSによって異なる。上記の見出しのファイル場所はLinuxの置き場である/etc/opt/chrome/native-messaging-hosts/[name].jsonで定義している</p>
-
-<p>で今回の/etc/opt/chrome/native-messaging-hosts/kinjouj.testっていうプログラム自体はC++で作ってある</p>
-
+</code></pre><p>公式ドキュメントにも書いてるけど、これを置く場所はOSによって異なる。上記の見出しのファイル場所はLinuxの置き場である/etc/opt/chrome/native-messaging-hosts/[name].jsonで定義している</p><br /><p>で今回の/etc/opt/chrome/native-messaging-hosts/kinjouj.testっていうプログラム自体はC++で作ってある</p><br />
 <h4>kinjouj.test.cc</h4>
 <pre class="line-numbers"><code class="language-cpp")>#include &lt;stdio.h&gt;
 #include &lt;iostream&gt;
@@ -129,18 +120,14 @@ int main(int argc, char* argv[]) {
 
   cout &lt;&lt; s;
 }
-</code></pre>
-<p>参考2のプログラムをそのまんまだけど。要は</p>
-
+</code></pre><p>参考2のプログラムをそのまんまだけど。要は</p><br />
 <ul>
 <li>最初のリクエストにはバイト長(4bytes分?)が入ってる? (おそらくはpostMessageで送ることができるデータもサイズに制限ありなんだろう)</li>
 <li>それ以降のデータをバイト長な分だけを取る (これが生データ?)</li>
 <li>レスポンスを返すときは最初にそのレスポンスのデータ長を出力?</li>
 <li>で生データを出力</li>
 </ul>
-
-<p>的な感じなのではないかと(多分)</p>
-
+<p>的な感じなのではないかと(多分)</p><br />
 <h4>manifest.json</h4>
 <pre class="line-numbers"><code class="language-json")>{
   "name": "test",
@@ -154,9 +141,7 @@ int main(int argc, char* argv[]) {
   },
   "permissions": ["nativeMessaging"]
 }
-</code></pre>
-<p>permissionsにnativeMessagingが必要な模様</p>
-
+</code></pre><p>permissionsにnativeMessagingが必要な模様</p><br />
 <h4>bg.js</h4>
 <pre class="line-numbers"><code class="language-js")>(function(undefined) {
   chrome.browserAction.onClicked.addListener(function() {
@@ -170,11 +155,7 @@ int main(int argc, char* argv[]) {
     alert(data);
   }
 })();
-</code></pre>
-<p>port.postMessageするとport connectionが切断される模様</p>
-
-<p>まぁ終わりなんですが、要は</p>
-
+</code></pre><p>port.postMessageするとport connectionが切断される模様</p><br /><p>まぁ終わりなんですが、要は</p><br />
 <ul>
 <li>ブラウザアクションをクリックしたらnative messagingでデータを送信</li>
 <li>上記設定で書いたプログラムが作用されて、その出力がChrome側に帰る(onMessage)</li>

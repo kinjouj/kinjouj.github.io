@@ -80,14 +80,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>doma2の機能ではなくSpring Frameworkの@Repositoryで定義した場合どうなるのか気になったのでやってみた</p>
-
+                <p>doma2の機能ではなくSpring Frameworkの@Repositoryで定義した場合どうなるのか気になったのでやってみた</p><br />
 <!--more-->
 
 <h4>SampleRepository.java</h4>
-
-<p>正式的?だと@Repositoryを付けるのはインターフェースだという概念があるっぽいけど、めんどくさいので普通にクラスにつけちゃう</p>
-<pre class="line-numbers"><code class="language-java")>package sample.repository;
+<p>正式的?だと@Repositoryを付けるのはインターフェースだという概念があるっぽいけど、めんどくさいので普通にクラスにつけちゃう</p><br /><pre class="line-numbers"><code class="language-java")>package sample.repository;
 
 import java.util.List;
 
@@ -128,11 +125,7 @@ public class SampleRepository {
         return status;
     }
 }
-</code></pre>
-<p>まぁ@Repositoryを付けてDAOとのやりとりをした結果を返すだけのしょうもないのを作っておく(前回は@Serviceにそういうのをやってたけど、あれはあれで微妙なんじゃないかって思う所もあるので)</p>
-
-<p>でこの状態のまま前回のテストをちょいと書き換えてテストを実行する</p>
-
+</code></pre><p>まぁ@Repositoryを付けてDAOとのやりとりをした結果を返すだけのしょうもないのを作っておく(前回は@Serviceにそういうのをやってたけど、あれはあれで微妙なんじゃないかって思う所もあるので)</p><br /><p>でこの状態のまま前回のテストをちょいと書き換えてテストを実行する</p><br />
 <h4>SampleDaoTest.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.dao;
 
@@ -167,24 +160,16 @@ public class SampleDaoTest {
         dao.save(sample);
     }
 }
-</code></pre>
-<p>まぁsave側でExceptionをスローしているからテストは落ちる。でもその例外が</p>
-
+</code></pre><p>まぁsave側でExceptionをスローしているからテストは落ちる。でもその例外が</p><br />
 <blockquote>
 org.springframework.transaction.UnexpectedRollbackException: Transaction rolled back because it has been marked as rollback-only
 </blockquote>
-
-<p>となる。詳解な原因がちゃんと特定できた訳じゃないのだけど、恐らくはTransactionInterceptor等によるトランザクションが重なってしまっているのではないかと。要は&lt;tx:annotation-driven /&gt;によるTransactionInterceptorと&lt;aop:advice/&gt;によるTransactionInterceptorによってトランザクションが重なりメソッドで例外を創出するとsetRollbackOnlyはしているので問題なくロールバックはされるが結果的にその上のトランザクションスコープによってcommit実行しようとして結果上記のような例外が送出されてしまうのではないかという予測(あくまで予測なので確証はありません)</p>
-
-<p>っていうことでこれを回避するには</p>
-
+<p>となる。詳解な原因がちゃんと特定できた訳じゃないのだけど、恐らくはTransactionInterceptor等によるトランザクションが重なってしまっているのではないかと。要は&lt;tx:annotation-driven /&gt;によるTransactionInterceptorと&lt;aop:advice/&gt;によるTransactionInterceptorによってトランザクションが重なりメソッドで例外を創出するとsetRollbackOnlyはしているので問題なくロールバックはされるが結果的にその上のトランザクションスコープによってcommit実行しようとして結果上記のような例外が送出されてしまうのではないかという予測(あくまで予測なので確証はありません)</p><br /><p>っていうことでこれを回避するには</p><br />
 <ul>
 <li>&lt;tx:annotation-driven /&gt;を止める (@Transactionalは効かなくなる?)</li>
 <li>&lt;aop:advice&gt;によるトランザクション属性のインターセプトをしない (@Transactionalで属性を自前で定義する必要性が出てくる)</li>
 </ul>
-
-<p>のどっちかをやれば良い</p>
-
+<p>のどっちかをやれば良い</p><br />
 <h4>applicationContext.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;beans
@@ -224,9 +209,7 @@ org.springframework.transaction.UnexpectedRollbackException: Transaction rolled 
     &lt;tx:annotation-driven /&gt;
 
 &lt;/beans&gt;
-</code></pre>
-<p>んまぁ&lt;aop:advice&gt;を使わないので@Transactionalには適切な属性を設定する必要がある</p>
-
+</code></pre><p>んまぁ&lt;aop:advice&gt;を使わないので@Transactionalには適切な属性を設定する必要がある</p><br />
 <h4>SampleRepository.java (修正)</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.repository;
 
@@ -271,13 +254,7 @@ public class SampleRepository {
         return status;
     }
 }
-</code></pre>
-<p>てな感じで実行すれば上記のUnexpectedRollbackExceptionは発生しなくなる。一応、上記でのエラーの時点でTransaction PropagationをREQUIREDからREQUIRES_NEW等にすればこの問題は出なくなる。でも例えばひとつのメソッドで他のトランザクションを実行する処理をやる場合にその他のメソッド単位でトランザクションが管理される為部分的に例外等が発生しても部分的にロールバックされなくなるのではないかと</p>
-
-<p>まぁとりあえずそういう問題でちょっとハマってたのでメモ。</p>
-
-<p>ちなみに@Serviceならこういう問題は出てこない</p>
-
+</code></pre><p>てな感じで実行すれば上記のUnexpectedRollbackExceptionは発生しなくなる。一応、上記でのエラーの時点でTransaction PropagationをREQUIREDからREQUIRES_NEW等にすればこの問題は出なくなる。でも例えばひとつのメソッドで他のトランザクションを実行する処理をやる場合にその他のメソッド単位でトランザクションが管理される為部分的に例外等が発生しても部分的にロールバックされなくなるのではないかと</p><br /><p>まぁとりあえずそういう問題でちょっとハマってたのでメモ。</p><br /><p>ちなみに@Serviceならこういう問題は出てこない</p><br />
               </div>
             </div>
           </div>

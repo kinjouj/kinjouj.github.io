@@ -79,8 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>多分、Androidに限った話じゃないと思うのですが</p>
-
+                <p>多分、Androidに限った話じゃないと思うのですが</p><br />
 <!--more-->
 <pre class="line-numbers"><code class="language-java")>package sample.test;
 
@@ -97,9 +96,7 @@ public class SampleResponseHandler implements ResponseHandler&lt;InputStream&gt;
         return response.getEntity().getContent();
     }
 }
-</code></pre>
-<p>っていうのを作って</p>
-<pre class="line-numbers"><code class="language-java")>package sample.test;
+</code></pre><p>っていうのを作って</p><br /><pre class="line-numbers"><code class="language-java")>package sample.test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -168,11 +165,7 @@ public class MainActivity extends Activity {
 
     }
 }
-</code></pre>
-<p>なんてやるケースとして、executeでInputStream等を取りたいとかする場合にはタイトルで書かれている例外が発生する。そういう場合はHttpEntityをBufferedHttpEntityでラップする事で解決出来るらしい、external/apache-http/src/org/apache/http/entity/BufferedHttpEntity.java見てみたけど一時的にストリームなバイト列辺りを取得しておいて、getContentを利用する際にByteArrayInputStreamを新しく作りなおして返すっていう感じな模様</p>
-
-<p>なので上記に書いたSampleResponseHandlerを修正</p>
-<pre class="line-numbers"><code class="language-java")>package sample.test;
+</code></pre><p>なんてやるケースとして、executeでInputStream等を取りたいとかする場合にはタイトルで書かれている例外が発生する。そういう場合はHttpEntityをBufferedHttpEntityでラップする事で解決出来るらしい、external/apache-http/src/org/apache/http/entity/BufferedHttpEntity.java見てみたけど一時的にストリームなバイト列辺りを取得しておいて、getContentを利用する際にByteArrayInputStreamを新しく作りなおして返すっていう感じな模様</p><br /><p>なので上記に書いたSampleResponseHandlerを修正</p><br /><pre class="line-numbers"><code class="language-java")>package sample.test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -188,13 +181,9 @@ public class SampleResponseHandler implements ResponseHandler&lt;InputStream&gt;
         return new BufferedHttpEntity(response.getEntity()).getContent();
     }
 }
-</code></pre>
-<p>んまぁそういうケースもある模様なので。っていうか以前にも自分もハマった事があるんですが、要件がまったく違う(画像を取得する際にエラーが出る画像とそうじゃないのが存在したり等)</p>
-
+</code></pre><p>んまぁそういうケースもある模様なので。っていうか以前にも自分もハマった事があるんですが、要件がまったく違う(画像を取得する際にエラーが出る画像とそうじゃないのが存在したり等)</p><br />
 <h4>追記</h4>
-
-<p>そもそも普通にInputStreamを返すとなぜ例外が出るのかっていうのを調査</p>
-
+<p>そもそも普通にInputStreamを返すとなぜ例外が出るのかっていうのを調査</p><br />
 <blockquote class="twitter-tweet">
   <p>
     確証って訳じゃないけど、IOExceptionが出る原因ってHttpEntityの実装によってはconsumeContentでInputStreamがcloseされてる模様。だからその後でreadしたりしようとしても例外になるっていうオチか

@@ -81,28 +81,21 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="https://github.com/Gottox/socket.io-java-client">socket.io-java-client</a>を使えば出来るらしいのでちょっと要件検証目的でやってみた。ちなみにsocket.ioサーバーはnode.jsなやつを使う</p>
-
+                <p><a href="https://github.com/Gottox/socket.io-java-client">socket.io-java-client</a>を使えば出来るらしいのでちょっと要件検証目的でやってみた。ちなみにsocket.ioサーバーはnode.jsなやつを使う</p><br />
 <!--more-->
 
 <h4>サーバー側</h4>
 <pre class="line-numbers"><code>npm install -g socket.io
-</code></pre>
-<p>-gオプションつける必要あるかどうかはおいといて</p>
-<pre class="line-numbers"><code class="language-js")>var io = require("socket.io").listen(8080);
+</code></pre><p>-gオプションつける必要あるかどうかはおいといて</p><br /><pre class="line-numbers"><code class="language-js")>var io = require("socket.io").listen(8080);
 io.sockets.on("connection", function(socket) {
   socket.on("message", function(data) {
     // 送った自身以外のクライアントへsend
     socket.broadcast.send(data);
   });
 });
-</code></pre>
-<p>的なsocket.ioサーバーを作って起動しておく</p>
-
+</code></pre><p>的なsocket.ioサーバーを作って起動しておく</p><br />
 <h4>クライアント側 (ブラウザ)</h4>
-
-<p>ブラウザで使うsocket.ioのライブラリ(<a href="http://socket.io/#how-to-use">http://socket.io/#how-to-use</a>で書かれてるやつ)は、npmでインストールしたsocket.ioパッケージ内の<span style="color: red">node_modules/socket.io-client/dist</span>内に入ってるのでコピペでしておく</p>
-<pre class="line-numbers"><code class="language-html")>&lt;html&gt;
+<p>ブラウザで使うsocket.ioのライブラリ(<a href="http://socket.io/#how-to-use">http://socket.io/#how-to-use</a>で書かれてるやつ)は、npmでインストールしたsocket.ioパッケージ内の<span style="color: red">node_modules/socket.io-client/dist</span>内に入ってるのでコピペでしておく</p><br /><pre class="line-numbers"><code class="language-html")>&lt;html&gt;
   &lt;head&gt;
     &lt;script type="text/javascript" src="socket.io.js"&gt;&lt;/script&gt;
   &lt;/head&gt;
@@ -121,15 +114,9 @@ io.sockets.on("connection", function(socket) {
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<p>socket.sendとsocket.emitってのがあるのけどsocket.sendだけ使う。socket.sendだとmessageというイベントキーによりデータをキャッチ出来るので(ry</p>
-
+</code></pre><p>socket.sendとsocket.emitってのがあるのけどsocket.sendだけ使う。socket.sendだとmessageというイベントキーによりデータをキャッチ出来るので(ry</p><br />
 <h4>クライアント側 (Android)</h4>
-
-<p>上記にも書いてるsocket.io-java-clientをダウンロードしてくる。ビルドの仕方は書いてるので省略する。socketio.jarをAndroidプロジェクトのlibsディレクトリに突っ込んでおけば良い</p>
-
-<p>でブラウザ側なクライアントから受信したデータをListViewで出すだけっていう単純な事をする</p>
-<pre class="line-numbers"><code class="language-java")>package sample.test.socketio;
+<p>上記にも書いてるsocket.io-java-clientをダウンロードしてくる。ビルドの仕方は書いてるので省略する。socketio.jarをAndroidプロジェクトのlibsディレクトリに突っ込んでおけば良い</p><br /><p>でブラウザ側なクライアントから受信したデータをListViewで出すだけっていう単純な事をする</p><br /><pre class="line-numbers"><code class="language-java")>package sample.test.socketio;
 
 import java.net.MalformedURLException;
 
@@ -273,26 +260,14 @@ public class MainActivity extends Activity {
         }
     }
 }
-</code></pre>
-<p>んまぁエラー処理とか適当なのでもうちょい厳密的にチェックしなきゃならんのですが。要はIOCallbackで適切なメソッドが呼び出されるってだけなんですが</p>
-
+</code></pre><p>んまぁエラー処理とか適当なのでもうちょい厳密的にチェックしなきゃならんのですが。要はIOCallbackで適切なメソッドが呼び出されるってだけなんですが</p><br />
 <ul>
 <li>  emitならonメソッドが作用</li>
 <li>  sendならonMessage(以下参考)</li>
 </ul>
-
-<p>っていうようなメソッドが発生する。んまぁonConnectとかそういう系はおいといて、onMessageのメソッドがオーバーロードにより複数存在するのには、socket.ioサーバーにおいて</p>
-<pre class="line-numbers"><code class="language-js")>socket.send("...")
+<p>っていうようなメソッドが発生する。んまぁonConnectとかそういう系はおいといて、onMessageのメソッドがオーバーロードにより複数存在するのには、socket.ioサーバーにおいて</p><br /><pre class="line-numbers"><code class="language-js")>socket.send("...")
 socket.json.send({})
-</code></pre>
-<p>等によって処理されるメソッドが異なるっていう点は注意しなきゃならんかと</p>
-
-<p>んまぁてな感じでやればブラウザクライアントから送ったデータがAndroidにも表示されて、Android側から送ったデータがHTML側にもブロードキャストされてるはず</p>
-
-<p>終わり</p>
-
-<p>参考: <a href="http://dev.classmethod.jp/smartphone/android-socket-io">http://dev.classmethod.jp/smartphone/android-socket-io</a></p>
-
+</code></pre><p>等によって処理されるメソッドが異なるっていう点は注意しなきゃならんかと</p><br /><p>んまぁてな感じでやればブラウザクライアントから送ったデータがAndroidにも表示されて、Android側から送ったデータがHTML側にもブロードキャストされてるはず</p><br /><p>終わり</p><br /><p>参考: <a href="http://dev.classmethod.jp/smartphone/android-socket-io">http://dev.classmethod.jp/smartphone/android-socket-io</a></p><br />
               </div>
             </div>
           </div>

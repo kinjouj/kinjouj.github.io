@@ -79,29 +79,16 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>ページング及びカテゴリーの親子関係のネスト構造をrender :partial等を用いて出力出来るようにしてみた</p>
-
+                <p>ページング及びカテゴリーの親子関係のネスト構造をrender :partial等を用いて出力出来るようにしてみた</p><br />
 <!--more-->
 
 <h4>ページングなライブラリ</h4>
-
-<p>昔Rails使ってた時とかはwill_paginateとか使ってたような記憶があるのだけど、kaminariっていうライブラリがあるらしいのでそれを使う事にする</p>
-
-<p>Gemfileに</p>
-<pre class="line-numbers"><code class="language-rb")>gem "kaminari"
-</code></pre>
-<p>を記述。</p>
-<pre class="line-numbers"><code>rails g kaminari:views [THEME]
-</code></pre>
-<p>でkaminariが使うページングなUIなテンプレートを出力できる。別に出さなくても出来るんだけど、色々修正したいだとかTwitter Bootstrap方式なページングで出したいっていうのであれば</p>
-<pre class="line-numbers"><code>rails g kaminari:views bootstrap
-</code></pre>
-<p>等で出せる。app/views/kaminariに出力されるのでそれをいじればページングなUIを修正出来るっていう感じ。んまぁkaminariに関してはドキュメント読んだ方が良さそうなんで以降はある程度省略</p>
-
+<p>昔Rails使ってた時とかはwill_paginateとか使ってたような記憶があるのだけど、kaminariっていうライブラリがあるらしいのでそれを使う事にする</p><br /><p>Gemfileに</p><br /><pre class="line-numbers"><code class="language-rb")>gem "kaminari"
+</code></pre><p>を記述。</p><br /><pre class="line-numbers"><code>rails g kaminari:views [THEME]
+</code></pre><p>でkaminariが使うページングなUIなテンプレートを出力できる。別に出さなくても出来るんだけど、色々修正したいだとかTwitter Bootstrap方式なページングで出したいっていうのであれば</p><br /><pre class="line-numbers"><code>rails g kaminari:views bootstrap
+</code></pre><p>等で出せる。app/views/kaminariに出力されるのでそれをいじればページングなUIを修正出来るっていう感じ。んまぁkaminariに関してはドキュメント読んだ方が良さそうなんで以降はある程度省略</p><br />
 <h4>app/controllers/entry_controller.rb</h4>
-
-<p>サイドバー的なところにカテゴリーをネストして出力出来るようにする為に、特定のアクションが起きる前に事前にカテゴリーデータを取得をおこなっておく。それはbefore_filterとかで良いと思う。利用されるアクションが1特定であれば普通にそのアクションでも良いとは思うけど、そうじゃないケースがあると思うので</p>
-<pre class="line-numbers"><code class="language-rb")>class EntryController &lt; ApplicationController
+<p>サイドバー的なところにカテゴリーをネストして出力出来るようにする為に、特定のアクションが起きる前に事前にカテゴリーデータを取得をおこなっておく。それはbefore_filterとかで良いと思う。利用されるアクションが1特定であれば普通にそのアクションでも良いとは思うけど、そうじゃないケースがあると思うので</p><br /><pre class="line-numbers"><code class="language-rb")>class EntryController &lt; ApplicationController
   before_filter :load_sidebar, :only =&gt; :index
 
   def load_sidebar
@@ -112,9 +99,7 @@
     @entries = Entry.page(params[:page])
   end
 end
-</code></pre>
-<p>とりあえず関係無い所なアクションは省略。load_sidebarでparentカラムが0(ルートカテゴリー)なデータを取得。それはrender :partialで利用する</p>
-
+</code></pre><p>とりあえず関係無い所なアクションは省略。load_sidebarでparentカラムが0(ルートカテゴリー)なデータを取得。それはrender :partialで利用する</p><br />
 <h4>app/views/entry/index.erb</h4>
 <pre class="line-numbers"><code class="language-erb")>&lt;div class="row"&gt;
   &lt;div class="span4"&gt;
@@ -134,16 +119,12 @@ end
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;
-</code></pre>
-<p>今回関係ない所は省略。paginateなView Helperでページングなビューを表示。恐らくはapp/views/kaminari/_paginator.html.erbがレンダリングされるんだと</p>
-
+</code></pre><p>今回関係ない所は省略。paginateなView Helperでページングなビューを表示。恐らくはapp/views/kaminari/_paginator.html.erbがレンダリングされるんだと</p><br />
 <h4>app/views/sidebar/_index.erb</h4>
 <pre class="line-numbers"><code class="language-erb")>&lt;% @categories.each do |category| %&gt;
   &lt;%= render :partial =&gt; "sidebar/category", :locals =&gt; { :category =&gt; category } %&gt;
 &lt;% end %&gt;
-</code></pre>
-<p>load_sidebarで取得したカテゴリーなデータをレンダリングする。ここから更にapp/views/sidebar_category.erbに部分レンダリングされる</p>
-
+</code></pre><p>load_sidebarで取得したカテゴリーなデータをレンダリングする。ここから更にapp/views/sidebar_category.erbに部分レンダリングされる</p><br />
 <h4>app/views/sidebar/_category.erb</h4>
 <pre class="line-numbers"><code class="language-erb")>&lt;!-- エントリー数が無いカテゴリーもあるけど、そのカテゴリーがサブカテゴリーを持ってないとは限らない --&gt;
 &lt;% if category.entry.size &gt; 0 || category.sub_category.size &gt; 0 %&gt;
@@ -156,11 +137,7 @@ end
   &lt;/li&gt;
 &lt;/ul&gt;
 &lt;% end %&gt;
-</code></pre>
-<p>んまぁ再帰でrender :partialをしてネスト構造を出力するような感じ。あんまりよくないケースだとは思いますが(遅い為)</p>
-
-<p>ってな感じで、render :partialを使う事で部分的なテンプレートを差し込めたり出来るっていう事と、kaminariっていうページングライブラリを使う事でページングのビューをカスタマイズ出来る</p>
-
+</code></pre><p>んまぁ再帰でrender :partialをしてネスト構造を出力するような感じ。あんまりよくないケースだとは思いますが(遅い為)</p><br /><p>ってな感じで、render :partialを使う事で部分的なテンプレートを差し込めたり出来るっていう事と、kaminariっていうページングライブラリを使う事でページングのビューをカスタマイズ出来る</p><br />
               </div>
             </div>
           </div>

@@ -79,18 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>検証したのいつかは覚えてないんですが、ネタとして書いておく</p>
-
-<p>Android API Level 11(Android3.x)くらいから(RemoteViews.setRemoteAdapter辺りがAPI Level14が必要なのでAndroid4.0以降)だと思うんですが、AppWidgetにListViewが使えるようになってる。それを検証したという件</p>
-
+                <p>検証したのいつかは覚えてないんですが、ネタとして書いておく</p><br /><p>Android API Level 11(Android3.x)くらいから(RemoteViews.setRemoteAdapter辺りがAPI Level14が必要なのでAndroid4.0以降)だと思うんですが、AppWidgetにListViewが使えるようになってる。それを検証したという件</p><br />
 <!--more-->
 
 <h4>要件</h4>
-
-<p>AppWidgetで自分のTwitterのTLの10件を取得してそれをListViewとして表示する。OAuth使いません、まだ普通にリクエストしても取得できる模様なので(正確にはTwitter API 1.1を使う場合には認証が必須かと)</p>
-
-<p>あとAndroid4.2(Emulator)で検証</p>
-
+<p>AppWidgetで自分のTwitterのTLの10件を取得してそれをListViewとして表示する。OAuth使いません、まだ普通にリクエストしても取得できる模様なので(正確にはTwitter API 1.1を使う場合には認証が必須かと)</p><br /><p>あとAndroid4.2(Emulator)で検証</p><br />
 <h4>AndroidManifest.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;manifest
@@ -124,11 +117,7 @@
     &lt;/application&gt;
 
 &lt;/manifest&gt;
-</code></pre>
-<p>API Level 11以上なんですが、RemoteViews.setRemoteAdapterのメソッドがAPI Level 14以上じゃないといけないのでminSdkVersionは14で良いんじゃないかと</p>
-
-<p>んでAppWidgetの定義ファイルを作る</p>
-
+</code></pre><p>API Level 11以上なんですが、RemoteViews.setRemoteAdapterのメソッドがAPI Level 14以上じゃないといけないのでminSdkVersionは14で良いんじゃないかと</p><br /><p>んでAppWidgetの定義ファイルを作る</p><br />
 <h4>res/xml/widget.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;appwidget-provider
@@ -136,11 +125,7 @@
     android:minWidth="294dp"
     android:minHeight="294dp"
     android:initialLayout="@layout/widget_layout" /&gt;
-</code></pre>
-<p>確かAppWidgetのWidth/Heightの計算式が「74 * セル数 - 2」なので、今回4面を使うので「74 * 4 - 2 = 294」になるような感じかと</p>
-
-<p>でinitialLayoutで指定されているレイアウト定義を使うのでそれを作る</p>
-
+</code></pre><p>確かAppWidgetのWidth/Heightの計算式が「74 * セル数 - 2」なので、今回4面を使うので「74 * 4 - 2 = 294」になるような感じかと</p><br /><p>でinitialLayoutで指定されているレイアウト定義を使うのでそれを作る</p><br />
 <h4>res/layout/widget_layout.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;RelativeLayout
@@ -175,9 +160,7 @@
     &lt;/LinearLayout&gt;
 
 &lt;/RelativeLayout&gt;
-</code></pre>
-<p>reload_btn_labelは適当にres/values/strings.xmlに設定しとく。まぁただのレイアウトなんだが、ListViewを使ってるっていう所。でListViewを使うのにデータをレンダリングする際に使うレイアウトファイルも必要なのでそれも作る</p>
-
+</code></pre><p>reload_btn_labelは適当にres/values/strings.xmlに設定しとく。まぁただのレイアウトなんだが、ListViewを使ってるっていう所。でListViewを使うのにデータをレンダリングする際に使うレイアウトファイルも必要なのでそれも作る</p><br />
 <h4>res/layout/widget_listview_row.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;LinearLayout
@@ -199,11 +182,7 @@
         android:padding="10dp" /&gt;
 
 &lt;/LinearLayout&gt;
-</code></pre>
-<p>プロフィール画像とツイートだけを表示するだけ</p>
-
-<p>でここからAppWidgetのプログラミングを書く</p>
-
+</code></pre><p>プロフィール画像とツイートだけを表示するだけ</p><br /><p>でここからAppWidgetのプログラミングを書く</p><br />
 <h4>SampleWidgetProvider.java</h4>
 <pre class="line-numbers"><code class="language-java")>package net.kinjouj.test.android_appwidget_listview_demo;
 
@@ -287,13 +266,7 @@ public class SampleWidgetProvider extends AppWidgetProvider {
         rv.setOnClickPendingIntent(R.id.btn, btnClickPendingIntent);
     }
 }
-</code></pre>
-<p>まぁ定期更新処理はしてません。ボタンを押してリロードする感じ。そこまでは今回の要件じゃないので</p>
-
-<p>まぁやりたいならAlarmManagerとか使ってやる方で良いかと</p>
-
-<p>でRemoteViews自体の画面処理自体はSampleWidgetServiceに要求している?ので作る</p>
-
+</code></pre><p>まぁ定期更新処理はしてません。ボタンを押してリロードする感じ。そこまでは今回の要件じゃないので</p><br /><p>まぁやりたいならAlarmManagerとか使ってやる方で良いかと</p><br /><p>でRemoteViews自体の画面処理自体はSampleWidgetServiceに要求している?ので作る</p><br />
 <h4>SampleWidgetService.java</h4>
 <pre class="line-numbers"><code class="language-java")>package net.kinjouj.test.android_appwidget_listview_demo;
 
@@ -453,17 +426,9 @@ public class SampleWidgetService extends RemoteViewsService {
         }
     }
 }
-</code></pre>
-<p>以上。で実際に動かしてみると</p>
-
-<p><img src="/images/2013/01/20130118104310.png" loading="lazy" /></p>
-
-<p>っつー感じでAppWidgetでListView使えるみたいな感じ</p>
-
+</code></pre><p>以上。で実際に動かしてみると</p><br /><p><img src="/images/2013/01/20130118104310.png" loading="lazy" /></p><br /><p>っつー感じでAppWidgetでListView使えるみたいな感じ</p><br />
 <h4>追記</h4>
-
-<p>AndoidAnnotations使われているけど、一応上記同様なソースは <a href="https://github.com/kinjouj/android_appwidget_listview_demo">https://github.com/kinjouj/android_appwidget_listview_demo</a> にて公開してます</p>
-
+<p>AndoidAnnotations使われているけど、一応上記同様なソースは <a href="https://github.com/kinjouj/android_appwidget_listview_demo">https://github.com/kinjouj/android_appwidget_listview_demo</a> にて公開してます</p><br />
               </div>
             </div>
           </div>

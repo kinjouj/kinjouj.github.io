@@ -79,35 +79,22 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>とあるチャットにて、「クラスについたアノテーションからJavaソース生成させるとかどうやるの」っていう相談を受けたんだが、まぁ出来るんだろうけどやった事が無いっていう事でやってみた</p>
-
+                <p>とあるチャットにて、「クラスについたアノテーションからJavaソース生成させるとかどうやるの」っていう相談を受けたんだが、まぁ出来るんだろうけどやった事が無いっていう事でやってみた</p><br />
 <!--more-->
-
-<p>でJavaコード(.java)を生成させる方法としてまず思いついたのが、codemodelっていうのを使う。多分これSun Microsystems時代にそこが公式的に作ったのじゃないのかなーって。まぁパッケージ名もそうなってとるしね、そんなことはおいといてアノテーションプロセッサから得られたクラスに対するアノテートを処理させ、その情報を元にcodemodelを使ってコードを生成させる事は出来るのではっていう事</p>
-
-<p>んまぁグダグダ言ってないでコード書けよハゲっておこられそうなので(ry</p>
-
-<p>※いろいろとイケてないのでネタとして</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>でJavaコード(.java)を生成させる方法としてまず思いついたのが、codemodelっていうのを使う。多分これSun Microsystems時代にそこが公式的に作ったのじゃないのかなーって。まぁパッケージ名もそうなってとるしね、そんなことはおいといてアノテーションプロセッサから得られたクラスに対するアノテートを処理させ、その情報を元にcodemodelを使ってコードを生成させる事は出来るのではっていう事</p><br /><p>んまぁグダグダ言ってないでコード書けよハゲっておこられそうなので(ry</p><br /><p>※いろいろとイケてないのでネタとして</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 public class Sample {
     @Attribute
     protected String name;
 }
-</code></pre>
-<p>的な事やれば</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>的な事やれば</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 public class SampleBean extends Sample {
     public String getName() {
         return name;
     }
 }
-</code></pre>
-<p>的なJavaコードを出力できるように。んじゃアノテーションプロセッサーを書く</p>
-
-<p>簡単に言うと@Attributeのアノテーションがついてるフィールドを走査してcodemodelを使ってメソッドを作り、ソースを生成させる</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>的なJavaコードを出力できるように。んじゃアノテーションプロセッサーを書く</p><br /><p>簡単に言うと@Attributeのアノテーションがついてるフィールドを走査してcodemodelを使ってメソッドを作り、ソースを生成させる</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -252,9 +239,7 @@ public class SampleAnnotationProcessor extends AbstractProcessor {
         }
     }
 }
-</code></pre>
-<p>ていう感じで、ビルドしてjarに突っ込んでおく。で別プロジェクトでこのjarを参照して利用するんだけど、Eclipseとか使わずに単純にgradleでbuildタスクでAPT処理をお願いする形で使ってみる</p>
-<pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
+</code></pre><p>ていう感じで、ビルドしてjarに突っ込んでおく。で別プロジェクトでこのjarを参照して利用するんだけど、Eclipseとか使わずに単純にgradleでbuildタスクでAPT処理をお願いする形で使ってみる</p><br /><pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
 
 repositories {
     mavenCentral()
@@ -283,13 +268,7 @@ task compileAptJava(type: Compile, group: "build", overwrite: true) {
 
 compileJava.dependsOn compileAptJava
 sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
-</code></pre>
-<p>んな感じ。でやってみて思ったのが、通常アノテーションを処理する際にはアノテーション自体がどこに付与出来るかは@Target等で指定出来る。でもそのチェック処理等の前にアノテーションプロセッサが働いてしまってるので、そのバリデーションを行う前に処理される為にフィールドに付与出来るのをクラスに付与したりしてもソースが生成されちゃう。そこら辺のチェックやる方法がちょっと微妙に分かってない</p>
-
-<p>んまぁとりあえずはアノテーションプロセッサとcodemodelを使ってソースを生成しちゃったりする的な事は出来なくも無いって模様。ただ、それをやるにはアノテーションプロセッサのかなりな知識が必要になりそう。んまぁこういうの普通にJavaでWebシステム開発とかやってるだけならまず出会わないだろうなぁっと</p>
-
-<p>んまぁ、良い体験できた気がする</p>
-
+</code></pre><p>んな感じ。でやってみて思ったのが、通常アノテーションを処理する際にはアノテーション自体がどこに付与出来るかは@Target等で指定出来る。でもそのチェック処理等の前にアノテーションプロセッサが働いてしまってるので、そのバリデーションを行う前に処理される為にフィールドに付与出来るのをクラスに付与したりしてもソースが生成されちゃう。そこら辺のチェックやる方法がちょっと微妙に分かってない</p><br /><p>んまぁとりあえずはアノテーションプロセッサとcodemodelを使ってソースを生成しちゃったりする的な事は出来なくも無いって模様。ただ、それをやるにはアノテーションプロセッサのかなりな知識が必要になりそう。んまぁこういうの普通にJavaでWebシステム開発とかやってるだけならまず出会わないだろうなぁっと</p><br /><p>んまぁ、良い体験できた気がする</p><br />
               </div>
             </div>
           </div>

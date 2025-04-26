@@ -79,14 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>前回でも書いたように、@DateTimeFormatのようなアノテーションによってFormatterが作用する仕組みっていうのを作る事も出来る。それを担うのがAnnotationFormatterFactoryになる模様</p>
-
+                <p>前回でも書いたように、@DateTimeFormatのようなアノテーションによってFormatterが作用する仕組みっていうのを作る事も出来る。それを担うのがAnnotationFormatterFactoryになる模様</p><br />
 <!--more-->
 
 <h4>要件</h4>
-
-<p>前回のをそのまま利用するけどコントローラー側では@SampleFormatっていうアノテーションを利用することによりFormatterを作用させるようにする。でそのFormatter自体は前回とまったくそのまま</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>前回のをそのまま利用するけどコントローラー側では@SampleFormatっていうアノテーションを利用することによりFormatterを作用させるようにする。でそのFormatter自体は前回とまったくそのまま</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -105,13 +102,9 @@ public class SampleFormatter implements Formatter&lt;Sample&gt; {
         return Sample.valueOf(text.toUpperCase());
     }
 }
-</code></pre>
-<p>を使う</p>
-
+</code></pre><p>を使う</p><br />
 <h4>SampleFormat.java</h4>
-
-<p>引数実装とかもやっておけばAnnotationFormatterFactoryを通じてFormatterに渡す事も可能だと思うのだけど今回はパス</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>引数実装とかもやっておけばAnnotationFormatterFactoryを通じてFormatterに渡す事も可能だと思うのだけど今回はパス</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -122,9 +115,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SampleFormat {
 }
-</code></pre>
-<p>まぁ見て分かるようにアノテーションのインターフェースなだけ</p>
-
+</code></pre><p>まぁ見て分かるようにアノテーションのインターフェースなだけ</p><br />
 <h4>SampleFormmaterFactory.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -153,9 +144,7 @@ public class SampleFormatterFactory implements AnnotationFormatterFactory&lt;Sam
         return new SampleFormatter();
     }
 }
-</code></pre>
-<p>Formatterはorg.springframework.format.Parser自体を継承しているインターフェースなので、そのままインスタンス作ってぶん投げれば良い</p>
-
+</code></pre><p>Formatterはorg.springframework.format.Parser自体を継承しているインターフェースなので、そのままインスタンス作ってぶん投げれば良い</p><br />
 <h4>spring-web-servlet.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -186,9 +175,7 @@ public class SampleFormatterFactory implements AnnotationFormatterFactory&lt;Sam
     &lt;/bean&gt;
 
 &lt;/beans&gt;
-</code></pre>
-<p>まぁ前回同様にformattersにAnnotationFormatterFactoryの実装クラスを指定してやりゃいい模様で</p>
-
+</code></pre><p>まぁ前回同様にformattersにAnnotationFormatterFactoryの実装クラスを指定してやりゃいい模様で</p><br />
 <h4>SampleController.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -206,16 +193,8 @@ public class SampleController {
         model.addAttribute("sample", sample);
     }
 }
-</code></pre>
-<p>っていう感じで利用できる。</p>
-
-<p>ただ不明な所として1点上げると、「getPrinter実装してもどういう作用で発生するのかが謎」。普通にFormatterを使う場合とかだと&lt;spring:bind expression=&quot;&quot; /&gt;等で作用されるっていうはあるのだけど、このAnnotationFormatterFactoryの事象だけはgetPrinterメソッドが作用する事が無い。ここがよう分からんっていうところかなと</p>
-
-<p>んまぁFormatterに関するネタはこれで終わり(なはず)なんだけど、疑問点として「フォームコンポーネントにフォーマット化した文字列を処理させたい場合はどうなのか」っていう点。&lt;form:input&gt;とか使ってもFormatter#printが作用してくれないので</p>
-<pre class="line-numbers"><code class="language-jsp")>&lt;input type="text" value="&lt;spring:eval expression="省略" /&gt;" /&gt;
-</code></pre>
-<p>みたいに書かないとダメなのかっていう点。そこも微妙なのでわかり次第書く予定</p>
-
+</code></pre><p>っていう感じで利用できる。</p><br /><p>ただ不明な所として1点上げると、「getPrinter実装してもどういう作用で発生するのかが謎」。普通にFormatterを使う場合とかだと&lt;spring:bind expression=&quot;&quot; /&gt;等で作用されるっていうはあるのだけど、このAnnotationFormatterFactoryの事象だけはgetPrinterメソッドが作用する事が無い。ここがよう分からんっていうところかなと</p><br /><p>んまぁFormatterに関するネタはこれで終わり(なはず)なんだけど、疑問点として「フォームコンポーネントにフォーマット化した文字列を処理させたい場合はどうなのか」っていう点。&lt;form:input&gt;とか使ってもFormatter#printが作用してくれないので</p><br /><pre class="line-numbers"><code class="language-jsp")>&lt;input type="text" value="&lt;spring:eval expression="省略" /&gt;" /&gt;
+</code></pre><p>みたいに書かないとダメなのかっていう点。そこも微妙なのでわかり次第書く予定</p><br />
 <h4>余談: FormatterRegistrarを使う場合</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -229,9 +208,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
         registry.addFormatterForFieldAnnotation(new SampleFormatterFactory());
     }
 }
-</code></pre>
-<p>みたいにやれば良いっぽい</p>
-
+</code></pre><p>みたいにやれば良いっぽい</p><br />
               </div>
             </div>
           </div>

@@ -81,23 +81,16 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>タイトル通り、Hadoop MapReduce上でReducer側から処理したデータをHBaseにぶっこむ為にTableReducerを使う事が出来る。やってみた</p>
-
+                <p>タイトル通り、Hadoop MapReduce上でReducer側から処理したデータをHBaseにぶっこむ為にTableReducerを使う事が出来る。やってみた</p><br />
 <!--more-->
 
 <h4>セットアップ</h4>
-
-<p>Hadoop(1.2.1)は既にあるのでHBase(0.94.11)を構築する。んまぁ特筆する事も無いけど</p>
-
+<p>Hadoop(1.2.1)は既にあるのでHBase(0.94.11)を構築する。んまぁ特筆する事も無いけど</p><br />
 <pre>
 [/bin/sh] hbase shell
 hbase(main) > create "output", "score"
 </pre>
-
-<p>的な事を行なってHadoopで処理したデータをHBaseに突っ込む為の所を作っておく。あとHDFS上にデータ突っ込んでおくのも忘れずに。んまぁこんかいは「hoge fuga foobar」が含まれるテキストを適当に書いて突っ込んだけ</p>
-
-<p>あとはクラスをだらだらと書く</p>
-
+<p>的な事を行なってHadoopで処理したデータをHBaseに突っ込む為の所を作っておく。あとHDFS上にデータ突っ込んでおくのも忘れずに。んまぁこんかいは「hoge fuga foobar」が含まれるテキストを適当に書いて突っ込んだけ</p><br /><p>あとはクラスをだらだらと書く</p><br />
 <h4>SampleMapper.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -122,9 +115,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
         }
     }
 }
-</code></pre>
-<p>とりあえずスルー</p>
-
+</code></pre><p>とりあえずスルー</p><br />
 <h4>SampleReducer.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -164,9 +155,7 @@ public class SampleReducer extends TableReducer&lt;Text, IntWritable, NullWritab
         }
     }
 }
-</code></pre>
-<p>ReducerクラスじゃなくてHBaseのTableReducerを継承する。公式ではwriteの第1引数の型がImmutableByteWritable的なのになってるけど、まぁnullしか指定してないならNullWritableでええんじゃないのかという事で</p>
-
+</code></pre><p>ReducerクラスじゃなくてHBaseのTableReducerを継承する。公式ではwriteの第1引数の型がImmutableByteWritable的なのになってるけど、まぁnullしか指定してないならNullWritableでええんじゃないのかという事で</p><br />
 <h4>SampleTaskRunner.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -203,12 +192,8 @@ public class SampleTaskRunner {
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
 }
-</code></pre>
-<p>っていう感じで。あとはjar化して</p>
-<pre class="line-numbers"><code>hadoop jar sample.jar sample.SampleTaskRunner
-</code></pre>
-<p>辺りすれば良いんだけど依存性関係でめんどくさい。という事でgradleのJavaExecを使いつつのProgramDriverで処理する方向で</p>
-
+</code></pre><p>っていう感じで。あとはjar化して</p><br /><pre class="line-numbers"><code>hadoop jar sample.jar sample.SampleTaskRunner
+</code></pre><p>辺りすれば良いんだけど依存性関係でめんどくさい。という事でgradleのJavaExecを使いつつのProgramDriverで処理する方向で</p><br />
 <h4>Client.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -228,12 +213,8 @@ public class Client {
         System.exit(0);
     }
 }
-</code></pre>
-<p>つまりは</p>
-<pre class="line-numbers"><code>java sample.Client sample
-</code></pre>
-<p>っていう感じでやれば動かせられますよっていう事で</p>
-
+</code></pre><p>つまりは</p><br /><pre class="line-numbers"><code>java sample.Client sample
+</code></pre><p>っていう感じでやれば動かせられますよっていう事で</p><br />
 <h4>build.gradle</h4>
 <pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
 apply plugin: "eclipse"
@@ -252,9 +233,7 @@ task run(type: JavaExec) {
     main = "sample.Runner"
     args = ["sample"]
 }
-</code></pre>
-<p>runタスクを実行するだけで良い。んまぁこれで終わり。実行し、HBaseシェル側で見てみる</p>
-
+</code></pre><p>runタスクを実行するだけで良い。んまぁこれで終わり。実行し、HBaseシェル側で見てみる</p><br />
 <pre>
 hbase(main) > scan "output"
 ROW                    COLUMN+CELL
@@ -262,11 +241,7 @@ ROW                    COLUMN+CELL
  fuga                  column=score:count, timestamp=1379472861619, value=2
  hoge                  column=score:count, timestamp=1379472861619, value=3
 </pre>
-
-<p>という感じでHadoop MapReduceで処理されて最終的にHBaseにぶっこまれるっていう感じ</p>
-
-<p>参考: <a href="http://hbase.apache.org/book/mapreduce.example.html">http://hbase.apache.org/book/mapreduce.example.html</a></p>
-
+<p>という感じでHadoop MapReduceで処理されて最終的にHBaseにぶっこまれるっていう感じ</p><br /><p>参考: <a href="http://hbase.apache.org/book/mapreduce.example.html">http://hbase.apache.org/book/mapreduce.example.html</a></p><br />
               </div>
             </div>
           </div>

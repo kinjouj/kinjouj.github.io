@@ -79,20 +79,15 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>テストする時とかに、サーバーを必要とするAPIのテストする前にそのサーバーをテストランナーから起動しテストが終わったらシャットダウンするっていう工程をやったりする事があると思うのですが、それをRSpecっていうかRubyでやる方法的な事として、サーバープロセスをspawnしちゃってテスト終了時にプロセスを終了させちゃうとかっていうのを利用する事で出来る模様。という事でやってみた</p>
-
+                <p>テストする時とかに、サーバーを必要とするAPIのテストする前にそのサーバーをテストランナーから起動しテストが終わったらシャットダウンするっていう工程をやったりする事があると思うのですが、それをRSpecっていうかRubyでやる方法的な事として、サーバープロセスをspawnしちゃってテスト終了時にプロセスを終了させちゃうとかっていうのを利用する事で出来る模様。という事でやってみた</p><br />
 <!--more-->
-
-<p>例題的にはMongoDBとかが分かりやすそう。んまぁ工程的には</p>
-
+<p>例題的にはMongoDBとかが分かりやすそう。んまぁ工程的には</p><br />
 <ul>
 <li>beforeでmongodを実行</li>
 <li>テスト処理</li>
 <li>afterでmongodなプロセスを落とす</li>
 </ul>
-
-<p>的な感じなんなんですが、MongoDB自体のデフォルトなポート辺りは27017辺りだと思うんですが、もしかしたらこれ使っちゃってるかも知れないっていう可能性もあるので使ってないポート辺りを使って動的にサーバーを起動する。んまぁPerlで言うとTest::TCP:empty_port辺りかなと。という事も踏まえつつやるって事で</p>
-
+<p>的な感じなんなんですが、MongoDB自体のデフォルトなポート辺りは27017辺りだと思うんですが、もしかしたらこれ使っちゃってるかも知れないっていう可能性もあるので使ってないポート辺りを使って動的にサーバーを起動する。んまぁPerlで言うとTest::TCP:empty_port辺りかなと。という事も踏まえつつやるって事で</p><br />
 <h4>lib/sample.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>require "mongo"
 
@@ -108,9 +103,7 @@ class Sample
     coll.find_one
   end
 end
-</code></pre>
-<p>適当にMongoDBのコレクションからfind_oneした結果だけを取る。で接続するサーバーはENVで突っ込んだ情報を元に利用できるような感じ。以下のspec_helperでも補足しているので(ry</p>
-
+</code></pre><p>適当にMongoDBのコレクションからfind_oneした結果だけを取る。で接続するサーバーはENVで突っ込んだ情報を元に利用できるような感じ。以下のspec_helperでも補足しているので(ry</p><br />
 <h4>spec_helper.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>require "socket"
 require "sample"
@@ -164,11 +157,7 @@ describe Sample do
     expect(sample["name"]).to eq("hoge")
   end
 end
-</code></pre>
-<p>まぁ特にこっちではMongoDBな処理とか一切せずに、単純に書いたクラスのメソッドをテストするだけ</p>
-
-<p>以上。問題はRSpec.configureなbeforeとかafterでやってるけど必要な所でこういう手法使えば良いんじゃねーかと</p>
-
+</code></pre><p>まぁ特にこっちではMongoDBな処理とか一切せずに、単純に書いたクラスのメソッドをテストするだけ</p><br /><p>以上。問題はRSpec.configureなbeforeとかafterでやってるけど必要な所でこういう手法使えば良いんじゃねーかと</p><br />
               </div>
             </div>
           </div>

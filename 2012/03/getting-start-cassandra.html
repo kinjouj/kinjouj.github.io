@@ -79,28 +79,17 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p>
-
+                <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p><br />
 <!--more-->
 
 <h4>インストール</h4>
-
-<p><a href="http://cassandra.apache.org">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p>
-
+<p><a href="http://cassandra.apache.org">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p><br />
 <h4>起動とその他もろもろ</h4>
-
-<p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p>
-<pre class="line-numbers"><code class="language-sh")>mkdir -p /var/{log,lib}/cassandra
+<p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p><br /><pre class="line-numbers"><code class="language-sh")>mkdir -p /var/{log,lib}/cassandra
 
 # ※各ディレクトリの所有者関係も設定する
-</code></pre>
-<p>まずサーバーを起動。</p>
-<pre class="line-numbers"><code class="language-sh")>cassandra -f
-</code></pre>
-<p>で起動出来る。-fは-foregroundの略称っぽい、指定しなかった場合にはCassandraDaemonがバックグランド動作になる模様。で起動すると、サーバーが9160なポートを開放する。これはAPI通信を行う際に利用するThriftサーバーのポートな模様。詳しくはログを嫁ということにしときます</p>
-
-<p>んでクライアントから</p>
-<pre class="line-numbers"><code class="language-sh")>cassandra-cli -h localhost```
+</code></pre><p>まずサーバーを起動。</p><br /><pre class="line-numbers"><code class="language-sh")>cassandra -f
+</code></pre><p>で起動出来る。-fは-foregroundの略称っぽい、指定しなかった場合にはCassandraDaemonがバックグランド動作になる模様。で起動すると、サーバーが9160なポートを開放する。これはAPI通信を行う際に利用するThriftサーバーのポートな模様。詳しくはログを嫁ということにしときます</p><br /><p>んでクライアントから</p><br /><pre class="line-numbers"><code class="language-sh")>cassandra-cli -h localhost```
 
 
 な感じでcassandra-cliを使って接続する。でデータモデルを理解しないといけないが今回は詳細をぶっ飛ばして、とりあえずこんな感じになるっぽい↓
@@ -117,16 +106,10 @@
 
 </code></pre>
 <h1>Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</h1>
-
-<p>use Keyspace1;</p>
-
+<p>use Keyspace1;</p><br />
 <h1>Column Familyを作る</h1>
-
-<p>create column family Sample with comparator = UTF8Type and key<em>validation</em>class = UTF8Type and default<em>validation</em>class = UTF8Type<br>
-```</p>
-
-<p>まぁこんな感じで作る。で最後の所ですが、作ったColumn Familyをdescribeしてみると</p>
-
+<p>create column family Sample with comparator = UTF8Type and key<em>validation</em>class = UTF8Type and default<em>validation</em>class = UTF8Type
+```</p><br /><p>まぁこんな感じで作る。で最後の所ですが、作ったColumn Familyをdescribeしてみると</p><br />
 <pre>
 ColumnFamily: Sample
   Key Validation Class: org.apache.cassandra.db.marshal.UTF8Type
@@ -143,9 +126,7 @@ ColumnFamily: Sample
   Built indexes: []
   Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
 </pre>
-
-<p>な感じになる(自分の環境の場合は)。でオプションを指定せずに「create column family Sample」だけにすると</p>
-
+<p>な感じになる(自分の環境の場合は)。でオプションを指定せずに「create column family Sample」だけにすると</p><br />
 <pre>ColumnFamily: Sample
   Key Validation Class: org.apache.cassandra.db.marshal.BytesType
   Default column value validator: org.apache.cassandra.db.marshal.BytesType
@@ -155,19 +136,13 @@ ColumnFamily: Sample
   Key cache size / save period in seconds: 200000.0/14400
   GC grace seconds: 864000  Compaction min/max thresholds: 4/32  Read repair chance: 1.0  Replicate on write: true  Bloom Filter FP chance: default  Built indexes: []  Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
 </pre>
-
-<p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p>
-<pre class="line-numbers"><code>use Keyspace1;
+<p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p><br /><pre class="line-numbers"><code>use Keyspace1;
 set Sample[test1][name] = "hoge";
-</code></pre>
-<p>で突っ込んだので</p>
-<pre class="line-numbers"><code>use Keyspace1;
+</code></pre><p>で突っ込んだので</p><br /><pre class="line-numbers"><code>use Keyspace1;
 get Sample[test1];
 
 # 出力 =&gt; (column=name, value=hoge, timestamp=省略)
-</code></pre>
-<p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p>
-
+</code></pre><p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p><br />
 <h4>pom.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;project
@@ -210,9 +185,7 @@ get Sample[test1];
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/project&gt;
-</code></pre>
-<p>んじゃJava側のClientクラスを書く</p>
-
+</code></pre><p>んじゃJava側のClientクラスを書く</p><br />
 <h4>Client.java</h4>
 <pre class="line-numbers"><code class="language-java")>import java.nio.ByteBuffer;
 import java.io.UnsupportedEncodingException;
@@ -291,11 +264,7 @@ public class Client {
         return new String(b, "UTF-8");
     }
 }
-</code></pre>
-<p>(ByteBufferな変換あれこれはCassandraにByteBufferUtilっていうのがあるのでそれを使うべきかと思われる)</p>
-
-<p>あとはmvn compileしたあとにmvn exec:javaで実行してみる。現時点で勉強しているのはここまでなので終了乙</p>
-
+</code></pre><p>(ByteBufferな変換あれこれはCassandraにByteBufferUtilっていうのがあるのでそれを使うべきかと思われる)</p><br /><p>あとはmvn compileしたあとにmvn exec:javaで実行してみる。現時点で勉強しているのはここまでなので終了乙</p><br />
               </div>
             </div>
           </div>

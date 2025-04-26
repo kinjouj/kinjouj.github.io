@@ -79,17 +79,14 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>Struts2でセッション管理な機能を使うには</p>
-
+                <p>Struts2でセッション管理な機能を使うには</p><br />
 <!--more-->
 
 <ul>
 <li>org.apache.struts2.interceptor.SessionAwareを実装する</li>
 <li>setSession(Map<String, Object>)なメソッドが発生する</li>
 </ul>
-
-<p>っていう感じらしい。でセッションにデータを突っ込むにはsetSessionの引数で指定されるMap&lt;String, Object&gt;にデータを突っ込んでいく模様</p>
-<pre class="line-numbers"><code class="language-java")>package sample.action;
+<p>っていう感じらしい。でセッションにデータを突っ込むにはsetSessionの引数で指定されるMap&lt;String, Object&gt;にデータを突っ込んでいく模様</p><br /><pre class="line-numbers"><code class="language-java")>package sample.action;
 
 import java.util.Map;
 
@@ -115,17 +112,13 @@ public class IndexAction extends ActionSupport implements Preparable, SessionAwa
         userSession.put("message", "hoge fuga foobar");
     }
 }
-</code></pre>
-<p>っていう場合、流れは</p>
-
+</code></pre><p>っていう場合、流れは</p><br />
 <ul>
 <li>setSession</li>
 <li>prepareInput</li>
 <li>input</li>
 </ul>
-
-<p>という流れで実行される模様。でstruts.xmlで定義する際には</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<p>という流れで実行される模様。でstruts.xmlで定義する際には</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.3.dtd"&gt;
 &lt;struts&gt;
     &lt;constant name="struts.devMode" value="true" /&gt;
@@ -140,11 +133,7 @@ public class IndexAction extends ActionSupport implements Preparable, SessionAwa
         &lt;/action&gt;
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre>
-<p>上記に書いてあるexcludeParamsを設定せずに、/index.action?session=hoge とかでアクセスしてしまうとsetSession(String)が発生。でもそんなメソッド無いって事でNoSuchMethodExceptionが出る。そういう事象を発生させないようにparams.excludeParamsは適切に設定する必要性があるかと。ちなみに公式ドキュメントなサンプルとかだとインターセプタースタックを作ってそこをデフォルトとして利用している模様</p>
-
-<p>でJSPとかでは</p>
-<pre class="line-numbers"><code class="language-jsp")>&lt;%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="utf-8" %&gt;
+</code></pre><p>上記に書いてあるexcludeParamsを設定せずに、/index.action?session=hoge とかでアクセスしてしまうとsetSession(String)が発生。でもそんなメソッド無いって事でNoSuchMethodExceptionが出る。そういう事象を発生させないようにparams.excludeParamsは適切に設定する必要性があるかと。ちなみに公式ドキュメントなサンプルとかだとインターセプタースタックを作ってそこをデフォルトとして利用している模様</p><br /><p>でJSPとかでは</p><br /><pre class="line-numbers"><code class="language-jsp")>&lt;%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="utf-8" %&gt;
 &lt;%@ taglib prefix="s" uri="/struts-tags" %&gt;
 &lt;html&gt;
   &lt;head&gt;
@@ -155,13 +144,9 @@ public class IndexAction extends ActionSupport implements Preparable, SessionAwa
     ${session.message}
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<p>というような感じで${session}で評価して取得できるのでそれを利用する。</p>
-
+</code></pre><p>というような感じで${session}で評価して取得できるのでそれを利用する。</p><br />
 <h4>余談: セッション管理が関係する場合のテスト</h4>
-
-<p>ActionProxyを通じてexecuteした場合においても、setSessionまでは処理が行われない模様。なので自前でそういう処理をしてからexecuteすれば良いっぽい</p>
-<pre class="line-numbers"><code class="language-java")>package sample.action;
+<p>ActionProxyを通じてexecuteした場合においても、setSessionまでは処理が行われない模様。なので自前でそういう処理をしてからexecuteすれば良いっぽい</p><br /><pre class="line-numbers"><code class="language-java")>package sample.action;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -197,11 +182,7 @@ public class IndexActionTestCase extends StrutsTestCase {
         assertThat(session.size(), is(1));
     }
 }
-</code></pre>
-<p>staticにするか否かは要件次第なんじゃないのかと。</p>
-
-<p>以上。微妙にグダグダな感じになったので色々やってみて追記するかも知れないので(ry</p>
-
+</code></pre><p>staticにするか否かは要件次第なんじゃないのかと。</p><br /><p>以上。微妙にグダグダな感じになったので色々やってみて追記するかも知れないので(ry</p><br />
               </div>
             </div>
           </div>

@@ -79,20 +79,13 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>※おそらくは書いてる内容は自分以外は理解しにくいと思いますので興味ないならCTRL+Wしてください(笑)</p>
-
-<p><a href="/spring-webmvc-18-annotationformatterfactory.html">Spring WebMVCをやってみる (18) – AnnotationFormatterFactory -</a>でも書いてるけど</p>
-
+                <p>※おそらくは書いてる内容は自分以外は理解しにくいと思いますので興味ないならCTRL+Wしてください(笑)</p><br /><p><a href="/spring-webmvc-18-annotationformatterfactory.html">Spring WebMVCをやってみる (18) – AnnotationFormatterFactory -</a>でも書いてるけど</p><br />
 <blockquote>
 「getPrinter実装してもどういう作用で発生するのかが謎」。普通にFormatterを使う場合とかだと<spring:bind expression=”…” />等で作用されるっていうはあるのだけど、このAnnotationFormatterFactoryの事象だけはgetPrinterメソッドが作用する事が無い
 </blockquote>
-
-<p>っていう件に関して。結論から言うと「やり方が悪い」っていうだけだった模様</p>
-
+<p>っていう件に関して。結論から言うと「やり方が悪い」っていうだけだった模様</p><br />
 <!--more-->
-
-<p>いわゆる@ModelAttributeなオブジェクトにプッシュしてやる事で発生する模様。単純に</p>
-<pre class="line-numbers"><code class="language-jsp")>&lt;form:form action="/swmvc/sample/save.action" method="post" modelAttribute="sample_form"&gt;
+<p>いわゆる@ModelAttributeなオブジェクトにプッシュしてやる事で発生する模様。単純に</p><br /><pre class="line-numbers"><code class="language-jsp")>&lt;form:form action="/swmvc/sample/save.action" method="post" modelAttribute="sample_form"&gt;
 
     &lt;!-- java.util.Dateを@DateTimeFormatterでフォーマット出力をする --&gt;
     &lt;form:input path="createdAt" /&gt;
@@ -102,13 +95,7 @@
 
     &lt;input type="submit" value="save" /&gt;
 &lt;/form:form&gt;
-</code></pre>
-<p>で前回のだとURLから受け取ったデータをそのままModelMapに突っ込んでJSPで参照するっていう方式でやったけれども、それをやるといざform:input等で利用してもフォーマット出力されない</p>
-
-<p>で検証してみた所だと@ModelAttributeで使用されるクラスでゲッターセッターを持ち、そのフィールドでアノテーションを付与しておいてそれを利用する事でgetPrinterを利用したフォーマット出力を利用できる模様</p>
-
-<p>という事で長いけどやってみる。要件は上記でも書いてるようにEnumをフォーマット出力するAnnotationFormatterFactoryを利用する</p>
-
+</code></pre><p>で前回のだとURLから受け取ったデータをそのままModelMapに突っ込んでJSPで参照するっていう方式でやったけれども、それをやるといざform:input等で利用してもフォーマット出力されない</p><br /><p>で検証してみた所だと@ModelAttributeで使用されるクラスでゲッターセッターを持ち、そのフィールドでアノテーションを付与しておいてそれを利用する事でgetPrinterを利用したフォーマット出力を利用できる模様</p><br /><p>という事で長いけどやってみる。要件は上記でも書いてるようにEnumをフォーマット出力するAnnotationFormatterFactoryを利用する</p><br />
 <h4>Sample.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -147,9 +134,7 @@ public class SampleFormatter implements Formatter&lt;Sample&gt; {
         return Sample.valueOf(text.toUpperCase());
     }
 }
-</code></pre>
-<p>前回のだとURLのクエリーからこのparseメソッドを使ってStringからEnumへ変換するっていうのをやったけど、printが発生しない(正確にはAnnotationFormatterFactory#getPrinterが発生しない)</p>
-
+</code></pre><p>前回のだとURLのクエリーからこのparseメソッドを使ってStringからEnumへ変換するっていうのをやったけど、printが発生しない(正確にはAnnotationFormatterFactory#getPrinterが発生しない)</p><br />
 <h4>SampleFormatterFactory</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -178,9 +163,7 @@ public class SampleFormatterFactory implements AnnotationFormatterFactory&lt;Sam
         return new SampleFormatter();
     }
 }
-</code></pre>
-<p>おそらくは前回のとまったく変わってないはずなので(ry</p>
-
+</code></pre><p>おそらくは前回のとまったく変わってないはずなので(ry</p><br />
 <h4>SampleForm.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -251,11 +234,7 @@ public class SampleController {
         return "index";
     }
 }
-</code></pre>
-<p>っていう感じで@ModelAttributeなコマンドオブジェクトにリクエストからparseされたSampleなenumをセットする。でそのコマンドオブジェクトなSampleFormでSampleなenumは@SampleFormatがついてるので、それがAnnotationFormatterFactory#getPrinterからFormatter#printに処理が発生するっていう感じ</p>
-
-<p>ちなみにSampleFormの@SampleFormatなアノテーションを外すとSampleFormatterでは処理されないがEnum#nameメソッドが表記で出力される模様</p>
-
+</code></pre><p>っていう感じで@ModelAttributeなコマンドオブジェクトにリクエストからparseされたSampleなenumをセットする。でそのコマンドオブジェクトなSampleFormでSampleなenumは@SampleFormatがついてるので、それがAnnotationFormatterFactory#getPrinterからFormatter#printに処理が発生するっていう感じ</p><br /><p>ちなみにSampleFormの@SampleFormatなアノテーションを外すとSampleFormatterでは処理されないがEnum#nameメソッドが表記で出力される模様</p><br />
               </div>
             </div>
           </div>

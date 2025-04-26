@@ -78,22 +78,13 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>以前から流行ってるfluentdを色々使ってみようと。とりあえずnginxのログをfluentdに流してみる。環境はあくまで勉強用途なのでUbuntu12.10</p>
-
+                <p>以前から流行ってるfluentdを色々使ってみようと。とりあえずnginxのログをfluentdに流してみる。環境はあくまで勉強用途なのでUbuntu12.10</p><br />
 <!--more-->
 
 <h4>セットアップ</h4>
-
-<p><a href="http://help.treasure-data.com/kb/installing-td-agent-daemon/installing-td-agent-for-debian-and-ubuntu">http://help.treasure-data.com/kb/installing-td-agent-daemon/installing-td-agent-for-debian-and-ubuntu</a></p>
-
-<p>通りにapt-getでtd-agentを入れる。で、td-agentっていうユーザーも作られるのでnginxからのログをfluentdでtailする際に出力先として/var/log/fluentd辺りを作って権限もtd-agentユーザーでアクセス出来るようにしとく(しないとPermission Deniedになる模様)</p>
-
-<p>で今回使わないけど、fluent-catとか色々コマンドがあるんだがこれが/usr/lib/fluent/ruby/binっていうところになってる模様げなので、そこをパス設定しておく</p>
-
+<p><a href="http://help.treasure-data.com/kb/installing-td-agent-daemon/installing-td-agent-for-debian-and-ubuntu">http://help.treasure-data.com/kb/installing-td-agent-daemon/installing-td-agent-for-debian-and-ubuntu</a></p><br /><p>通りにapt-getでtd-agentを入れる。で、td-agentっていうユーザーも作られるのでnginxからのログをfluentdでtailする際に出力先として/var/log/fluentd辺りを作って権限もtd-agentユーザーでアクセス出来るようにしとく(しないとPermission Deniedになる模様)</p><br /><p>で今回使わないけど、fluent-catとか色々コマンドがあるんだがこれが/usr/lib/fluent/ruby/binっていうところになってる模様げなので、そこをパス設定しておく</p><br />
 <h4>td-agent.conf</h4>
-
-<p>/etc/td-agentにtd-agent.confがあるので、それをいじる</p>
-<pre class="line-numbers"><code>&lt;source&gt;
+<p>/etc/td-agentにtd-agent.confがあるので、それをいじる</p><br /><pre class="line-numbers"><code>&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -106,22 +97,14 @@
 &lt;/match&gt;
 </code></pre>
 <h4>起動</h4>
-
-<p>普通にサービスを起動するか</p>
-<pre class="line-numbers"><code class="language-sh")>sudo -u td-agent /usr/lib/fluent/ruby/bin/fluentd -c /etc/td-agent/td-agent.conf
-</code></pre>
-<p>な感じでtd-agentユーザーでfluentdを起動する、その際に-cオプションで設定ファイルを指定する感じかなと。で起動した状態でnginxなWebサーバーにアクセスすると</p>
-
+<p>普通にサービスを起動するか</p><br /><pre class="line-numbers"><code class="language-sh")>sudo -u td-agent /usr/lib/fluent/ruby/bin/fluentd -c /etc/td-agent/td-agent.conf
+</code></pre><p>な感じでtd-agentユーザーでfluentdを起動する、その際に-cオプションで設定ファイルを指定する感じかなと。で起動した状態でnginxなWebサーバーにアクセスすると</p><br />
 <pre>
 2012-10-29T16:54:00+09:00   nginx.accesslog {"host":"127.0.0.1","user":"-","method":"GET","path":"/","code":"502","size":"568","referer":"-","agent":"Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4"}
 </pre>
-
-<p>な感じでログがフォーマットにより解析されて、それがJSONとして書き込まれる模様</p>
-
+<p>な感じでログがフォーマットにより解析されて、それがJSONとして書き込まれる模様</p><br />
 <h4>余談: 設定ファイルに関して</h4>
-
-<p>今回は/etc/td-agent/td-agent.confをそのままいじりましたけど、 <a href="http://fluentd.org/doc/config.html">http://fluentd.org/doc/config.html</a> に普通にincludeも出来る模様なので、/etc/td-agent/conf.dとかに設定ファイルを書いてそれをincludeする方が良いのかなと</p>
-
+<p>今回は/etc/td-agent/td-agent.confをそのままいじりましたけど、 <a href="http://fluentd.org/doc/config.html">http://fluentd.org/doc/config.html</a> に普通にincludeも出来る模様なので、/etc/td-agent/conf.dとかに設定ファイルを書いてそれをincludeする方が良いのかなと</p><br />
               </div>
             </div>
           </div>

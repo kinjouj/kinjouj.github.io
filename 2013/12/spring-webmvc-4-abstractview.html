@@ -79,14 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>前回の<a href="/spring-webmvc-3-result-reponse-type.html">Spring WebMVCをやってみる (3) – 返せるレスポンスタイプに関して -</a>でも書いたように、レスポンスを返す型としてView型を返す事も出来る。又、ModelAndViewにsetViewNameを利用する事でも独自のViewを使ってレスポンスを返却させる事が出来る。という事で使ってみた</p>
-
+                <p>前回の<a href="/spring-webmvc-3-result-reponse-type.html">Spring WebMVCをやってみる (3) – 返せるレスポンスタイプに関して -</a>でも書いたように、レスポンスを返す型としてView型を返す事も出来る。又、ModelAndViewにsetViewNameを利用する事でも独自のViewを使ってレスポンスを返却させる事が出来る。という事で使ってみた</p><br />
 <!--more-->
 
 <h4>SampleView.java</h4>
-
-<p>jsonpullparserを使ってJSONを出力するだけな事やってみる</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>jsonpullparserを使ってJSONを出力するだけな事やってみる</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -112,9 +109,7 @@ public class SampleView extends AbstractView {
         SampleGen.encode(response.getWriter(), sample);
     }
 }
-</code></pre>
-<p>renderMergedOutputModelメソッドでレスポンスを返却するような処理を実装すれば良いだけ。で</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>renderMergedOutputModelメソッドでレスポンスを返却するような処理を実装すれば良いだけ。で</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -134,9 +129,7 @@ public class SampleController {
         return view;
     }
 }
-</code></pre>
-<p>のようにAbstractViewな実装クラスのインスタンスを返却するだけでも構わないが</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>のようにAbstractViewな実装クラスのインスタンスを返却するだけでも構わないが</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -157,9 +150,7 @@ public class SampleController {
         return mav;
     }
 }
-</code></pre>
-<p>上記でも書いたようにModelAndView#setViewNameを利用してレスポンスを返却するのに使うビューを指定する事も出来る。但しこれを利用するには別途な設定が必要になる</p>
-
+</code></pre><p>上記でも書いたようにModelAndView#setViewNameを利用してレスポンスを返却するのに使うビューを指定する事も出来る。但しこれを利用するには別途な設定が必要になる</p><br />
 <h4>spring-web-servlet.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -198,17 +189,11 @@ public class SampleController {
         &lt;/property&gt;
     &lt;/bean&gt;
 &lt;/beans&gt;
-</code></pre>
-<p><a href="http://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html" target="_blank">http://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html</a> でも書かれているんだが</p>
-
+</code></pre><p><a href="http://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html" target="_blank"><a href="http://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html">http://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html</a></a> でも書かれているんだが</p><br />
 <blockquote>
 Note: When chaining ViewResolvers, an InternalResourceViewResolver always needs to be last, as it will attempt to resolve any view name, no matter whether the underlying resource actually exists.
 </blockquote>
-
-<p>というようにInternalResourceViewResolverを使うのであれば必ず最後に定義する事?的な感じなんじゃないのかなーと。でそれを意識せずに設定を行った場合だと、InternalResourceViewResolverでsetViewNameしてもそこで処理されて実際に要求しているViewResolverには作用しない事になる模様</p>
-
-<p>んまぁそこは注意っすねって事で。んでXmlViewResolverな設定ファイル(/WEB-INF/views.xml)が必要なのでこれも作る</p>
-
+<p>というようにInternalResourceViewResolverを使うのであれば必ず最後に定義する事?的な感じなんじゃないのかなーと。でそれを意識せずに設定を行った場合だと、InternalResourceViewResolverでsetViewNameしてもそこで処理されて実際に要求しているViewResolverには作用しない事になる模様</p><br /><p>んまぁそこは注意っすねって事で。んでXmlViewResolverな設定ファイル(/WEB-INF/views.xml)が必要なのでこれも作る</p><br />
 <h4>/WEB-INF/views.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;beans
@@ -219,11 +204,7 @@ Note: When chaining ViewResolvers, an InternalResourceViewResolver always needs 
     &lt;bean name="sample" class="sample.SampleView" /&gt;
 
 &lt;/beans&gt;
-</code></pre>
-<p>&lt;bean name=&quot;&quot;&gt;で指定してやりゃ良い。そこに指定されたのがViewNameになる模様</p>
-
-<p>んまぁあとはテスト書けば良いか</p>
-
+</code></pre><p>&lt;bean name=&quot;&quot;&gt;で指定してやりゃ良い。そこに指定されたのがViewNameになる模様</p><br /><p>んまぁあとはテスト書けば良いか</p><br />
 <h4>SampleControllerTest.java</h4>
 <pre class="line-numbers"><code class="language-java")>package swmvc;
 
@@ -241,9 +222,7 @@ public class SampleControllerTest extends AbstractTestCase {
             .andReturn();
     }
 }
-</code></pre>
-<p>終わり</p>
-
+</code></pre><p>終わり</p><br />
               </div>
             </div>
           </div>

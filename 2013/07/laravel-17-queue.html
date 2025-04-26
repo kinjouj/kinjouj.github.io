@@ -80,30 +80,19 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="http://laravel.com/docs/queues">http://laravel.com/docs/queues</a> のドキュメント読みなんですが、一部IronMQっていうのに依存する機能がある模様げで、そのIronMQを使ってないのでそこは(ry</p>
-
-<p>でMQサーバー何使うのって所として、んまぁ手軽だしBeanstalkで良いんじゃないかって事で。</p>
-
+                <p><a href="http://laravel.com/docs/queues">http://laravel.com/docs/queues</a> のドキュメント読みなんですが、一部IronMQっていうのに依存する機能がある模様げで、そのIronMQを使ってないのでそこは(ry</p><br /><p>でMQサーバー何使うのって所として、んまぁ手軽だしBeanstalkで良いんじゃないかって事で。</p><br />
 <!--more-->
 <pre class="line-numbers"><code>apt-get install beanstalkd
-</code></pre>
-<p>Ubuntuとかだったら提供されているっぽいのでサクッと入れられますって事で。でLaravel側はこっから</p>
-
-<p>でLaravelのQueueを動かすには</p>
-
+</code></pre><p>Ubuntuとかだったら提供されているっぽいのでサクッと入れられますって事で。でLaravel側はこっから</p><br /><p>でLaravelのQueueを動かすには</p><br />
 <ul>
 <li>beanstalkd等を起動</li>
 <li>app/config/環境名/queue.phpを作成</li>
 <li>artisan queue:listenを起動</li>
 <li>Queue::pushを使う</li>
 </ul>
-
-<p>な感じ</p>
-
+<p>な感じ</p><br />
 <h4>app/config/development/queue.phpを作成</h4>
-
-<p>とりあえず今回は環境名をdevelopmentにしておく。んでデフォルトはapp/config/queue.phpにある(はず)のでコピーして修正</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>とりあえず今回は環境名をdevelopmentにしておく。んでデフォルトはapp/config/queue.phpにある(はず)のでコピーして修正</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 return array(
     "default" =&gt; "beanstalkd",
@@ -115,43 +104,21 @@ return array(
         )
     )
 );
-</code></pre>
-<p>んまぁdefaultとconnections.beanstalkd.queueの値を変えただけ</p>
-
+</code></pre><p>んまぁdefaultとconnections.beanstalkd.queueの値を変えただけ</p><br />
 <h4>キューとして処理されるクラスを作成</h4>
-
-<p>Closure型でQueue::pushを指定する事も出来る模様</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>Closure型でQueue::pushを指定する事も出来る模様</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 class HogeQueue {
     public function fire($job, $data) {
         $job-&gt;delete();
     }
 }
-</code></pre>
-<p>デフォルトで動くメソッド名はfireな模様だけどQueue::pushの引数でルーティング同様な形式でメソッドを指定する事も出来るっぽい</p>
-
-<p>又、ジョブキュー自体は自動的には消えない(はず)。$jobのdeleteメソッドを使う事で明示的にキューを削除する事が出来る。又、release(秒?)を使う事で遅延リトライ的な事も出来る模様</p>
-
-<p>恐らくは$jobの型は使ってるMQによって変わるんだと。Beanstalkの場合には<a href="http://laravel.com/api/class-Illuminate.Queue.Jobs.BeanstalkdJob.html">Illuminate\Queue\Jobs\BeanstalkdJob</a>になるかも。んまぁ使えるAPIとかは左のリンクを参照</p>
-
-<p>あとは上記でも書いたように</p>
-<pre class="line-numbers"><code>artisan queue:listen
-</code></pre>
-<p>をする。ちなみに-timeoutでジョブのタイムアウト値。-envで環境名とかを指定したりも出来る模様。んで</p>
-<pre class="line-numbers"><code class="language-php")>Queue::push("HogeQueue", $id);
-</code></pre>
-<p>とかで使うっていう感じかと</p>
-
-<p>Queueで処理されるクラスの単体テストとかはあとで追記する</p>
-
+</code></pre><p>デフォルトで動くメソッド名はfireな模様だけどQueue::pushの引数でルーティング同様な形式でメソッドを指定する事も出来るっぽい</p><br /><p>又、ジョブキュー自体は自動的には消えない(はず)。$jobのdeleteメソッドを使う事で明示的にキューを削除する事が出来る。又、release(秒?)を使う事で遅延リトライ的な事も出来る模様</p><br /><p>恐らくは$jobの型は使ってるMQによって変わるんだと。Beanstalkの場合には<a href="http://laravel.com/api/class-Illuminate.Queue.Jobs.BeanstalkdJob.html">Illuminate\Queue\Jobs\BeanstalkdJob</a>になるかも。んまぁ使えるAPIとかは左のリンクを参照</p><br /><p>あとは上記でも書いたように</p><br /><pre class="line-numbers"><code>artisan queue:listen
+</code></pre><p>をする。ちなみに-timeoutでジョブのタイムアウト値。-envで環境名とかを指定したりも出来る模様。んで</p><br /><pre class="line-numbers"><code class="language-php")>Queue::push("HogeQueue", $id);
+</code></pre><p>とかで使うっていう感じかと</p><br /><p>Queueで処理されるクラスの単体テストとかはあとで追記する</p><br />
 <h4>追記1</h4>
-
-<p>書くの忘れてた。beanstalkdが入っててもPHP用のクライアントライブラリ入ってないといけないと思うのでだけど、ドキュメント的には</p>
-<pre class="line-numbers"><code>Beanstalkd: pda/pheanstalk
-</code></pre>
-<p>って書かれているので、composer.json辺りに追加してcomposer updateすりゃいいかと</p>
-
+<p>書くの忘れてた。beanstalkdが入っててもPHP用のクライアントライブラリ入ってないといけないと思うのでだけど、ドキュメント的には</p><br /><pre class="line-numbers"><code>Beanstalkd: pda/pheanstalk
+</code></pre><p>って書かれているので、composer.json辺りに追加してcomposer updateすりゃいいかと</p><br />
               </div>
             </div>
           </div>

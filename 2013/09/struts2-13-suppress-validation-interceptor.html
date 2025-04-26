@@ -79,19 +79,14 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="/struts2-6-form-validation-1.html">validateメソッドによる入力検証</a>だったり、<a href="/struts2-7-form-validation-2.html">XML定義による入力検証</a>っていうような方式がある。でこういう処理はフレームワークレベルで判断される訳だけど、これを抑制して自動で処理せずに自分でコントロールしたい場合とかの方法も用意されているようで</p>
-
-<p>ちなみにStruts2のバリデーションインターセプターの実体はcom.opensymphony.xwork2.validator.ValidationInterceptorとなっている模様。でこちらで色々オプションなパラメーターがある模様</p>
-
+                <p><a href="/struts2-6-form-validation-1.html">validateメソッドによる入力検証</a>だったり、<a href="/struts2-7-form-validation-2.html">XML定義による入力検証</a>っていうような方式がある。でこういう処理はフレームワークレベルで判断される訳だけど、これを抑制して自動で処理せずに自分でコントロールしたい場合とかの方法も用意されているようで</p><br /><p>ちなみにStruts2のバリデーションインターセプターの実体はcom.opensymphony.xwork2.validator.ValidationInterceptorとなっている模様。でこちらで色々オプションなパラメーターがある模様</p><br />
 <!--more-->
 
 <ul>
 <li>  programmatic: validateメソッドフローを行わない</li>
 <li>  declarative: XML定義によるバリデーションフローをサポートしない</li>
 </ul>
-
-<p>的な感じじゃないかなと。ってな訳で自分でコントロールする方式をやってみた</p>
-
+<p>的な感じじゃないかなと。ってな訳で自分でコントロールする方式をやってみた</p><br />
 <h4>src/main/resources/sample/controllers/SampleAction-validation.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;!DOCTYPE validators PUBLIC "-//Apache Struts//XWork Validator 1.0.3//EN" "http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd"&gt;
@@ -101,9 +96,7 @@
         &lt;message&gt;name is required&lt;/message&gt;
     &lt;/validator&gt;
 &lt;/validators&gt;
-</code></pre>
-<p>これも作用しないけどとりあえず書いておく</p>
-
+</code></pre><p>これも作用しないけどとりあえず書いておく</p><br />
 <h4>SampleAction.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.controllers;
 
@@ -127,9 +120,7 @@ public class SampleAction extends ActionSupport {
         this.name = name;
     }
 }
-</code></pre>
-<p>でここまでだと普通にアクションをstruts.xmlに定義した場合においても、validateメソッドも実行されるしXML定義なバリデーションフローをサポートされる。でこれらを無効にして、上記だとsubmitメソッドが作用する際に手動で検証を行いActionSupport.ERRORなりを出す事で入力画面に戻す的なことをやる。なのでちょっと上記のアクションを書き換える</p>
-<pre class="line-numbers"><code class="language-java")>package sample.controllers;
+</code></pre><p>でここまでだと普通にアクションをstruts.xmlに定義した場合においても、validateメソッドも実行されるしXML定義なバリデーションフローをサポートされる。でこれらを無効にして、上記だとsubmitメソッドが作用する際に手動で検証を行いActionSupport.ERRORなりを出す事で入力画面に戻す的なことをやる。なのでちょっと上記のアクションを書き換える</p><br /><pre class="line-numbers"><code class="language-java")>package sample.controllers;
 
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.commons.lang3.StringUtils;
@@ -152,9 +143,7 @@ public class SampleAction extends ActionSupport {
         this.name = name;
     }
 }
-</code></pre>
-<p>という感じで。でvalidateメソッドもフォローせずXML定義もフォローしない設定を行いこれをサポートさせる設定を行う</p>
-
+</code></pre><p>という感じで。でvalidateメソッドもフォローせずXML定義もフォローしない設定を行いこれをサポートさせる設定を行う</p><br />
 <h4>struts.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
@@ -179,11 +168,7 @@ public class SampleAction extends ActionSupport {
         &lt;/action&gt;
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre>
-<p>んまぁデフォルトなインターセプターのスタックにvalidationが入ってるのでそれのパラメーターをいじる感じでprogrammaticとdeclarativeをfalseにする。後者のdeclarativeをfalseにする事でXML定義なのはフォローされない模様。programmaticは別にvalidateメソッド実装していなければ良いんじゃないかと思うので</p>
-
-<p>という感じでオプションパラメーターを使う事でデフォルトなバリデーションインターセプターが行う検証機構なフローをすっ飛ばして自分でコントロールする事も可能な模様</p>
-
+</code></pre><p>んまぁデフォルトなインターセプターのスタックにvalidationが入ってるのでそれのパラメーターをいじる感じでprogrammaticとdeclarativeをfalseにする。後者のdeclarativeをfalseにする事でXML定義なのはフォローされない模様。programmaticは別にvalidateメソッド実装していなければ良いんじゃないかと思うので</p><br /><p>という感じでオプションパラメーターを使う事でデフォルトなバリデーションインターセプターが行う検証機構なフローをすっ飛ばして自分でコントロールする事も可能な模様</p><br />
 <h4>追記</h4>
 
 <blockquote class="twitter-tweet" lang="ja">
@@ -195,9 +180,7 @@ public class SampleAction extends ActionSupport {
     &mdash; A-pZ/ぢつにんさん/ヨーグリッター (@alpha_pz) <a href="https://twitter.com/alpha_pz/statuses/383496945198571520">2013, 9月 27</a>
   </p>
 </blockquote>
-
-<p>との事</p>
-
+<p>との事</p><br />
               </div>
             </div>
           </div>

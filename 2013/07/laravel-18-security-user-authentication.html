@@ -79,34 +79,21 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="http://laravel.com/docs/security">http://laravel.com/docs/security</a> のドキュメント読み。なんだがユーザー認証的な所だけを書く。っていう事でフォーム認証な所をやってみる。パスワードリマインダー的な所は次回に書く。まとめて書くとわけわかめになるので</p>
-
-<p>あとめんどくさいのでクラス作らずにroutes.phpにClosureでダラ書き</p>
-
+                <p><a href="http://laravel.com/docs/security">http://laravel.com/docs/security</a> のドキュメント読み。なんだがユーザー認証的な所だけを書く。っていう事でフォーム認証な所をやってみる。パスワードリマインダー的な所は次回に書く。まとめて書くとわけわかめになるので</p><br /><p>あとめんどくさいのでクラス作らずにroutes.phpにClosureでダラ書き</p><br />
 <!--more-->
 
 <h4>フォーム認証な辺りに関して</h4>
-
-<p>単純にルーティングフィルターでauthっていうのが提供されている。んまぁコード的には</p>
-<pre class="line-numbers"><code class="language-php")>Route::filter("auth", function() {
+<p>単純にルーティングフィルターでauthっていうのが提供されている。んまぁコード的には</p><br /><pre class="line-numbers"><code class="language-php")>Route::filter("auth", function() {
     if (Auth::guest()) return Redirect::guest("login");
 });
-</code></pre>
-<p>的な感じになっててログインしてなきゃログインフォームなページにリダイレクトな感じな事しているっぽい訳で。でログインを行わせるには</p>
-
+</code></pre><p>的な感じになっててログインしてなきゃログインフォームなページにリダイレクトな感じな事しているっぽい訳で。でログインを行わせるには</p><br />
 <ul>
 <li>Auth::attemptで認証処理を行う</li>
 <li>Auth::login(User)で認証処理を行う</li>
 </ul>
-
-<p>とか。Auth::loginUsingIdっていうAPIがあって、引数にユーザーのID(int?)辺りを指定する事でもログイン出来るらしいけど、これはこれでどうなのっていう所なので特に使わない</p>
-
-<p>まぁという感じな概要になってる訳で。とにかくやってみる</p>
-
+<p>とか。Auth::loginUsingIdっていうAPIがあって、引数にユーザーのID(int?)辺りを指定する事でもログイン出来るらしいけど、これはこれでどうなのっていう所なので特に使わない</p><br /><p>まぁという感じな概要になってる訳で。とにかくやってみる</p><br />
 <h4>Authを使う為の使用準備</h4>
-
-<p>まぁUserっていうモデルが必要。まぁデフォルトで入ってる気がするけどマイグレーションが無いっていう訳で</p>
-
+<p>まぁUserっていうモデルが必要。まぁデフォルトで入ってる気がするけどマイグレーションが無いっていう訳で</p><br />
 <ul>
 <li>usernameカラムを持つ</li>
 <li>passwordカラムを持つ</li>
@@ -114,9 +101,7 @@
 <li>created_atカラムを持つ</li>
 <li>updated_atカラムを持つ</li>
 </ul>
-
-<p>なテーブルを作る。んまぁセットアップな感じはこんなもんかと。</p>
-
+<p>なテーブルを作る。んまぁセットアップな感じはこんなもんかと。</p><br />
 <h4>ルーティングを定義</h4>
 <pre class="line-numbers"><code class="language-php")>// /dashboardと/logoutはログインしてないとダメって事でフィルターを付ける
 Route::group(["before" =&gt; "auth"], function() {
@@ -156,23 +141,15 @@ Route::post(
         }
     )
 );
-</code></pre>
-<p>っていう感じで。ちなみに</p>
-
+</code></pre><p>っていう感じで。ちなみに</p><br />
 <ul>
 <li>  Auth::attemptを使うとauth.attemptなイベントが発生</li>
 <li>  ログインされたら?auth.loginなイベントが発生</li>
 </ul>
-
-<p>っていうのがあるのでEvent::listenとかで拾う事が出来る模様</p>
-
+<p>っていうのがあるのでEvent::listenとかで拾う事が出来る模様</p><br />
 <h4>余談: authフィルターのコントローラーテストをする</h4>
-
-<p>何やら普通にコントローラーテストとかで</p>
-<pre class="line-numbers"><code class="language-php")>$this-&gt;call("GET", "/dashboard");
-</code></pre>
-<p>とかやってもフィルターが作用しないっぽい? Route::enableFiltersを明示的に呼ぶ必要性があるっぽい事をとあるフォーラムに書かれてたので</p>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>何やら普通にコントローラーテストとかで</p><br /><pre class="line-numbers"><code class="language-php")>$this-&gt;call("GET", "/dashboard");
+</code></pre><p>とかやってもフィルターが作用しないっぽい? Route::enableFiltersを明示的に呼ぶ必要性があるっぽい事をとあるフォーラムに書かれてたので</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 class DashboardControllerTest extends TestCase {
 
@@ -188,11 +165,7 @@ class DashboardControllerTest extends TestCase {
         $this-&gt;assertResponseStatus(200);
     }
 }
-</code></pre>
-<p>上記のAuth::onceな所をコメントすると認証状態が保護されてない為にレスポンスステータスが302を返すのでこのテストはずっこける</p>
-
-<p>っていう感じかなと</p>
-
+</code></pre><p>上記のAuth::onceな所をコメントすると認証状態が保護されてない為にレスポンスステータスが302を返すのでこのテストはずっこける</p><br /><p>っていう感じかなと</p><br />
               </div>
             </div>
           </div>

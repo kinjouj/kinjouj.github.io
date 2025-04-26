@@ -78,14 +78,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>例えば、テスト時に同時リクエストが発生させて処理が異常がなのをチェックしたりする方法</p>
-
+                <p>例えば、テスト時に同時リクエストが発生させて処理が異常がなのをチェックしたりする方法</p><br />
 <!--more-->
 
 <h4>検証アプリケーションの作成</h4>
-
-<p>単純にSpring Frameworkでの依存性注入は基本的にはSingletonで行われる。そこでSingletonで注入されると問題になるようなケースを利用する。ちなみにhttp://javatechnology.net/spring/spring-singleton-scope/を利用</p>
-
+<p>単純にSpring Frameworkでの依存性注入は基本的にはSingletonで行われる。そこでSingletonで注入されると問題になるようなケースを利用する。ちなみに<a href="http://javatechnology.net/spring/spring-singleton-scope/%E3%82%92%E5%88%A9%E7%94%A8">http://javatechnology.net/spring/spring-singleton-scope/を利用</a></p><br />
 <h4>SampleService.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -135,17 +132,9 @@ public class SampleController {
         return service.getName();
     }
 }
-</code></pre>
-<p>ここには@Scope(“prototype”)を指定しているけど、コントローラー自体はprototypeインスタンス方式が採用されてもそれで注入されるSampleService側自体はprototypeインスタンスではなくSingletonインスタンスになる。なので同時リクエストをした場合等においては返ってくるレスポンス自体が後でリクエストされたので汚染されてしまって不整合な値になるのではと思う</p>
-
-<p>まぁ単純にこういうケースな処理する事まずありえないと思うんですが(あくまで注入したオブジェクトの状態を破壊するような実装する事自体が)</p>
-
-<p>まぁあくまでアプリケーション側の例題なので(ry</p>
-
+</code></pre><p>ここには@Scope(“prototype”)を指定しているけど、コントローラー自体はprototypeインスタンス方式が採用されてもそれで注入されるSampleService側自体はprototypeインスタンスではなくSingletonインスタンスになる。なので同時リクエストをした場合等においては返ってくるレスポンス自体が後でリクエストされたので汚染されてしまって不整合な値になるのではと思う</p><br /><p>まぁ単純にこういうケースな処理する事まずありえないと思うんですが(あくまで注入したオブジェクトの状態を破壊するような実装する事自体が)</p><br /><p>まぁあくまでアプリケーション側の例題なので(ry</p><br />
 <h4>SampleTest.java</h4>
-
-<p>でテスト時の要求として複数のURLに同時にリクエストして処理する的な所だと思うので</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>でテスト時の要求として複数のURLに同時にリクエストして処理する的な所だと思うので</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -229,17 +218,9 @@ public class SampleTest {
         assertThat(result2.getResponse().getContentAsString(), is("fuga"));
     }
 }
-</code></pre>
-<p>んな感じでExecutorServiceを使ってやれば良いっぽい。テスト実行してレポート見ると</p>
-
-<p>っていうような感じで同時リクエストして注入オブジェクトが汚染されるような状態になりエラーになるような感じ。でSampleService側に@Scope(“prototype”)をつけるとテストが正常になる</p>
-
-<p>一応メモっておく</p>
-
+</code></pre><p>んな感じでExecutorServiceを使ってやれば良いっぽい。テスト実行してレポート見ると</p><br /><p>っていうような感じで同時リクエストして注入オブジェクトが汚染されるような状態になりエラーになるような感じ。でSampleService側に@Scope(“prototype”)をつけるとテストが正常になる</p><br /><p>一応メモっておく</p><br />
 <h4>余談</h4>
-
-<p>今回のプロジェクトに限らずにJUnitのテストを並列で動かすようなケースであれば http://java.dzone.com/articles/concurrent-junit-tests を参考にConcurrentJUnitRunnerを使えば出来るっぽい</p>
-
+<p>今回のプロジェクトに限らずにJUnitのテストを並列で動かすようなケースであれば <a href="http://java.dzone.com/articles/concurrent-junit-tests">http://java.dzone.com/articles/concurrent-junit-tests</a> を参考にConcurrentJUnitRunnerを使えば出来るっぽい</p><br />
               </div>
             </div>
           </div>

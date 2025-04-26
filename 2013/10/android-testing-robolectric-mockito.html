@@ -80,12 +80,9 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="/android-testing-robolectric-powermockito.html">Robolectric+powermockito</a>でRobolectricを利用している際におけるstaticメソッドのモック化っていうのを書いたけど、単純にRobolectric+Mockitoを使ったインスタンスメソッドのモック化に関してはスルーしてたので色々検証</p>
-
+                <p><a href="/android-testing-robolectric-powermockito.html">Robolectric+powermockito</a>でRobolectricを利用している際におけるstaticメソッドのモック化っていうのを書いたけど、単純にRobolectric+Mockitoを使ったインスタンスメソッドのモック化に関してはスルーしてたので色々検証</p><br />
 <!--more-->
-
-<p>まぁ通常であればRobolectricでActivityをテストするのには</p>
-<pre class="line-numbers"><code class="language-java")>package shareroid.app;
+<p>まぁ通常であればRobolectricでActivityをテストするのには</p><br /><pre class="line-numbers"><code class="language-java")>package shareroid.app;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -111,21 +108,13 @@ public class SampleActivityTestCase {
         assertThat(activity.mTextView.getText().toString(), is("aG9nZQ"));
     }
 }
-</code></pre>
-<p>んな感じで実行するのだけど、Robolectric.buildActivityの返り値はorg.robolectric.util.ActivityController<T>になる。でcreateメソッドで内部的なattachとperformCreateメソッド(継承しても不可視なメソッド)をコール、startでperformStartをコールするっていう仕組みになっている模様</p>
-
-<p>まぁそこは良いとして、要点としては</p>
-
+</code></pre><p>んな感じで実行するのだけど、Robolectric.buildActivityの返り値はorg.robolectric.util.ActivityController<T>になる。でcreateメソッドで内部的なattachとperformCreateメソッド(継承しても不可視なメソッド)をコール、startでperformStartをコールするっていう仕組みになっている模様</p><br /><p>まぁそこは良いとして、要点としては</p><br />
 <ul>
 <li>Robolectric.buildActivityを利用するのでMockitoを使ってどうやってモック化するのか</li>
 <li>onCreateが走る前にonCreateメソッドが利用する他のメソッドをモック化する場合はどうすれば良いのか</li>
 <li>上記のようにRobolectricクラスを使ってonStartまでを処理させず自分でやりたい場合はどうすれば良いのか</li>
 </ul>
-
-<p>っていう所。1に関してはMockito.spyを使えば良いはずなので、2と3に関して色々やってみる。本題はここから</p>
-
-<p>その前に対象となるActivityは</p>
-<pre class="line-numbers"><code class="language-java")>package shareroid.app;
+<p>っていう所。1に関してはMockito.spyを使えば良いはずなので、2と3に関して色々やってみる。本題はここから</p><br /><p>その前に対象となるActivityは</p><br /><pre class="line-numbers"><code class="language-java")>package shareroid.app;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -155,11 +144,7 @@ public class SampleActivity extends Activity {
 }
 </code></pre>
 <h4>onCreateをRobolectric側で作用させずにモック化してから実行する場合</h4>
-
-<p>※onStartは使わないのでコメントアウト</p>
-
-<p>まぁただTextViewなインスタンス作って、それのテキストにbuildTextを使うだけ。でそのbuildTextメソッドをモック化して返す値を変えたりするだけ</p>
-<pre class="line-numbers"><code class="language-java")>package shareroid.app;
+<p>※onStartは使わないのでコメントアウト</p><br /><p>まぁただTextViewなインスタンス作って、それのテキストにbuildTextを使うだけ。でそのbuildTextメソッドをモック化して返す値を変えたりするだけ</p><br /><pre class="line-numbers"><code class="language-java")>package shareroid.app;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -256,11 +241,7 @@ public class SampleActivityTestCase {
         verify(activity).buildText();
     }
 }
-</code></pre>
-<p>まぁこれに関しては特にツッコミどころ無い。ActivityController.startをしないだけで自分でonStartするだけだし。ActivityController.createはやってるけど、それもやらないのであればonCreateな時と同様に一度attachをしておく必要がある</p>
-
-<p>無難なのはonCreateでモック化する必要とするようなケースの仕様にしない方がテストもすんなり出来るんじゃないかなっては思う所。onCreateでグダグダしてもねぇって所も</p>
-
+</code></pre><p>まぁこれに関しては特にツッコミどころ無い。ActivityController.startをしないだけで自分でonStartするだけだし。ActivityController.createはやってるけど、それもやらないのであればonCreateな時と同様に一度attachをしておく必要がある</p><br /><p>無難なのはonCreateでモック化する必要とするようなケースの仕様にしない方がテストもすんなり出来るんじゃないかなっては思う所。onCreateでグダグダしてもねぇって所も</p><br />
               </div>
             </div>
           </div>

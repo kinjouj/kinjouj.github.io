@@ -81,14 +81,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>参考: <a href="http://havelog.ayumusato.com/develop/security/e593-mixins_server_template_and_angular.html">AngularJSとサーバーサイドテンプレートの混在とngNonBindable</a></p>
-
-<p>※上記の参考を必読することをオススメ</p>
-
-<p>上記参考にも書いてるのですが、例えばクエリーなどにおいてangular.jsが処理されるような記法なクエリーが含まれているとXSSになるっていう話があるのですが、実際自分でやってみた。</p>
-
-<p>※実検証はRails4を使ってやった</p>
-
+                <p>参考: <a href="http://havelog.ayumusato.com/develop/security/e593-mixins_server_template_and_angular.html">AngularJSとサーバーサイドテンプレートの混在とngNonBindable</a></p><br /><p>※上記の参考を必読することをオススメ</p><br /><p>上記参考にも書いてるのですが、例えばクエリーなどにおいてangular.jsが処理されるような記法なクエリーが含まれているとXSSになるっていう話があるのですが、実際自分でやってみた。</p><br /><p>※実検証はRails4を使ってやった</p><br />
 <!--more-->
 
 <h4>app/assets/javascripts/app.js</h4>
@@ -98,36 +91,22 @@
       alert("click");
     };
   });
-</code></pre>
-<p>んまぁ適当に$scopeに関数を打ち込む。で例えばこのコントローラーの内部にサーバーサイドなテンプレートエンジンを利用してクエリーで指定したデータで<span style="color: red">&quot;{% raw %}{{onClick()}}{% endraw %}&quot;</span>がそのまま参照されたらどうなるのかっていう</p>
-
+</code></pre><p>んまぁ適当に$scopeに関数を打ち込む。で例えばこのコントローラーの内部にサーバーサイドなテンプレートエンジンを利用してクエリーで指定したデータで<span style="color: red">&quot;{% raw %}{{onClick()}}{% endraw %}&quot;</span>がそのまま参照されたらどうなるのかっていう</p><br />
 <h4>app/controllers/sample_controller.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>class SamplesController &lt; ApplicationController
   def show
     @query = params[:query]
   end
 end
-</code></pre>
-<p>単純に<http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}>のようなクエリーを送れるような形で、そのデータをビューにバインドする</p>
-
+</code></pre><p>単純に<http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}>のようなクエリーを送れるような形で、そのデータをビューにバインドする</p><br />
 <h4>app/views/sample/show.erb</h4>
 <pre class="line-numbers"><code class="language-erb")>&lt;div ng-controller="SampleController"&gt;
     &lt;h2&gt;&lt;%= @query %&gt;&lt;/h2&gt;
 &lt;/div&gt;
-</code></pre>
-<p>終わり。でこのまま動かしてコントローラーのところに書いてるURL( <http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}> ) にアクセスしてみると$scopeに突っ込んだ関数な処理が発生してしまう。つまりalertが出るっていうオチになる</p>
-
-<p>っていうことでサーバーサイドからテンプレートエンジンを用いてレンダリングされる部分において、angular.jsで評価される可能性のあるのはng-non-bindableを指定すればいい模様。なので上記のビューを</p>
-<pre class="line-numbers"><code class="language-erb")>&lt;div ng-controller="SampleController"&gt;
+</code></pre><p>終わり。でこのまま動かしてコントローラーのところに書いてるURL( <http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}> ) にアクセスしてみると$scopeに突っ込んだ関数な処理が発生してしまう。つまりalertが出るっていうオチになる</p><br /><p>っていうことでサーバーサイドからテンプレートエンジンを用いてレンダリングされる部分において、angular.jsで評価される可能性のあるのはng-non-bindableを指定すればいい模様。なので上記のビューを</p><br /><pre class="line-numbers"><code class="language-erb")>&lt;div ng-controller="SampleController"&gt;
     &lt;h2 ng-non-bindable&gt;&lt;%= @query %&gt;&lt;/h2&gt;
 &lt;/div&gt;
-</code></pre>
-<p>っていうように修正する。というようにすることでサーバーサイドでテンプレートエンジンを介してレンダリングされる場合でもangular.jsとして評価しないようにすることで対処することは可能らしい</p>
-
-<p>ただしなんらかの形としてangular.js内部に影響を与えるような攻撃が今後も出てきてしまうっていうのも否定し難いので、こういうデータをレンダリングされる場合においては$interpolateProviderのstartSymbolとendSymbol(デフォルトはダブルカーリーブラケット)をエスケープするような対策が必要になるのではないかと</p>
-
-<p>んまぁとりあえず読んでやってみただけなのですが一応メモっておく</p>
-
+</code></pre><p>っていうように修正する。というようにすることでサーバーサイドでテンプレートエンジンを介してレンダリングされる場合でもangular.jsとして評価しないようにすることで対処することは可能らしい</p><br /><p>ただしなんらかの形としてangular.js内部に影響を与えるような攻撃が今後も出てきてしまうっていうのも否定し難いので、こういうデータをレンダリングされる場合においては$interpolateProviderのstartSymbolとendSymbol(デフォルトはダブルカーリーブラケット)をエスケープするような対策が必要になるのではないかと</p><br /><p>んまぁとりあえず読んでやってみただけなのですが一応メモっておく</p><br />
               </div>
             </div>
           </div>

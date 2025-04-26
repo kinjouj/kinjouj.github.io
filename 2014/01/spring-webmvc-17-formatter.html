@@ -79,10 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>前回のConverter同様に型を変換したりする仕組みな模様。@DateTimeFormatのようにアノテーションによって型変換を行うのも可能(後日書く)。んまぁ違い的な所としては非常に曖昧で微妙なのだけど、Formatterはインターフェースによりパースする所と出力サポートを行うメソッドを実装する必要がある。んまぁ詳しい違いとかわかり次第補足なりする予定</p>
-
-<p>とりあえず使ってみる。題材的なのとしてEnumを変換する仕組み的なのを作ってみる</p>
-
+                <p>前回のConverter同様に型を変換したりする仕組みな模様。@DateTimeFormatのようにアノテーションによって型変換を行うのも可能(後日書く)。んまぁ違い的な所としては非常に曖昧で微妙なのだけど、Formatterはインターフェースによりパースする所と出力サポートを行うメソッドを実装する必要がある。んまぁ詳しい違いとかわかり次第補足なりする予定</p><br /><p>とりあえず使ってみる。題材的なのとしてEnumを変換する仕組み的なのを作ってみる</p><br />
 <!--more-->
 
 <h4>Sample.java</h4>
@@ -103,9 +100,7 @@ public enum Sample {
         return name;
     }
 }
-</code></pre>
-<p>でこのEnumに変換なりを行うFormatterインターフェースの実装クラスが必要</p>
-
+</code></pre><p>でこのEnumに変換なりを行うFormatterインターフェースの実装クラスが必要</p><br />
 <h4>SampleFormatter.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -126,9 +121,7 @@ public class SampleFormatter implements Formatter&lt;Sample&gt; {
         return Sample.valueOf(text.toUpperCase());
     }
 }
-</code></pre>
-<p>んでこのFormatterが使えるように設定を行う</p>
-
+</code></pre><p>んでこのFormatterが使えるように設定を行う</p><br />
 <h4>spring-web-servlet.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -176,9 +169,7 @@ public class SampleController {
         model.addAttribute(sample);
     }
 }
-</code></pre>
-<p>的な感じで@RequestParamに指定している型な引数がFormatterで変換される。もし変換に失敗した場合などには400エラーになる</p>
-
+</code></pre><p>的な感じで@RequestParamに指定している型な引数がFormatterで変換される。もし変換に失敗した場合などには400エラーになる</p><br />
 <h4>余談1: XMLで定義せずにFormatterを使う</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -204,13 +195,9 @@ public class SampleController {
         model.addAttribute(sample);
     }
 }
-</code></pre>
-<p>っていう感じで、DefaultFormattingConversionService.addFormatterForFieldTypeメソッドを使う事で出来る模様</p>
-
+</code></pre><p>っていう感じで、DefaultFormattingConversionService.addFormatterForFieldTypeメソッドを使う事で出来る模様</p><br />
 <h4>余談2: FormatterRegistrarを使う場合</h4>
-
-<p>例えば複数のFormatterとかをまとめてregisterしたい時とか</p>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<p>例えば複数のFormatterとかをまとめてregisterしたい時とか</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
 
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
@@ -222,9 +209,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
         registry.addFormatterForFieldType(Sample.class, new SampleFormatter());
     }
 }
-</code></pre>
-<p>とかで定義してこれを</p>
-<pre class="line-numbers"><code class="language-xml")>&lt;bean
+</code></pre><p>とかで定義してこれを</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;bean
     id="conversionService"
     class="org.springframework.format.support.FormattingConversionServiceFactoryBean"&gt;
 
@@ -234,9 +219,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
         &lt;/list&gt;
     &lt;/property&gt;
 &lt;/bean&gt;
-</code></pre>
-<p>っていう感じでformatterRegistrarsに追加してあげれば良い模様</p>
-
+</code></pre><p>っていう感じでformatterRegistrarsに追加してあげれば良い模様</p><br />
               </div>
             </div>
           </div>

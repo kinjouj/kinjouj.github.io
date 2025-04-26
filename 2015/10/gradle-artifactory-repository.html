@@ -78,30 +78,15 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>gradle(maven)に対応したパッケージ管理のOSSっていうのかね。artifactoryを使ってみた(実際にはgradleとかだけでなくRubyとかのライブラリとかも管理出来るっぽい</p>
-
+                <p>gradle(maven)に対応したパッケージ管理のOSSっていうのかね。artifactoryを使ってみた(実際にはgradleとかだけでなくRubyとかのライブラリとかも管理出来るっぽい</p><br />
 <!--more-->
 
 <h4>インストール</h4>
-
-<p>https://www.jfrog.com/open-source からダウンロード。今回はzipをダウンロード</p>
-
-<p>そのままでも動かす事出来るんですが、既存するTomcatサーブレットコンテナ内にデプロイしたいのでwebappsにあるartifactory.warを既存するTomcatにデプロイする</p>
-
-<p>※データベース関係はデフォルトだとderbyを使う模様。色々変える事も出来るみたいだけど今回はパス</p>
-
+<p><a href="https://www.jfrog.com/open-source">https://www.jfrog.com/open-source</a> からダウンロード。今回はzipをダウンロード</p><br /><p>そのままでも動かす事出来るんですが、既存するTomcatサーブレットコンテナ内にデプロイしたいのでwebappsにあるartifactory.warを既存するTomcatにデプロイする</p><br /><p>※データベース関係はデフォルトだとderbyを使う模様。色々変える事も出来るみたいだけど今回はパス</p><br />
 <h4>リポジトリの作成</h4>
-
-<p>おそらくは作らなくてもパッケージをデプロイする事自体は出来る(libs-release-local等を使えば)。ちなみに作るとこんな感じになる</p>
-
-<p><img src="/images/2015/10/201510061645_1.png" loading="lazy" /></p>
-
-<p>んまぁ作らなくてもイケるので今回はlibs-release-localを使う</p>
-
+<p>おそらくは作らなくてもパッケージをデプロイする事自体は出来る(libs-release-local等を使えば)。ちなみに作るとこんな感じになる</p><br /><p><img src="/images/2015/10/201510061645_1.png" loading="lazy" /></p><br /><p>んまぁ作らなくてもイケるので今回はlibs-release-localを使う</p><br />
 <h4>パッケージのデプロイ</h4>
-
-<p>パッケージのデプロイはgradle pluginを使って行う事が可能</p>
-<pre class="line-numbers"><code class="language-groovy")>buildscript {
+<p>パッケージのデプロイはgradle pluginを使って行う事が可能</p><br /><pre class="line-numbers"><code class="language-groovy")>buildscript {
     repositories {
         maven {
             url 'http://localhost:8080/artifactory/plugins-release'
@@ -159,16 +144,8 @@ publishing {
         }
     }
 }
-</code></pre>
-<p>っていうようにbuild.gradleを定義。artifactory pluginを使うとartifactoryPublishが使えるようになるので</p>
-<pre class="line-numbers"><code class="language-sh")>gradle clean test artifactoryPublish
-</code></pre>
-<p>な感じでデプロイすると</p>
-
-<p><img src="/images/2015/10/201510061645_2.png" loading="lazy" /></p>
-
-<p>っていう感じでパッケージがデプロイされる。あとは使う側で</p>
-<pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
+</code></pre><p>っていうようにbuild.gradleを定義。artifactory pluginを使うとartifactoryPublishが使えるようになるので</p><br /><pre class="line-numbers"><code class="language-sh")>gradle clean test artifactoryPublish
+</code></pre><p>な感じでデプロイすると</p><br /><p><img src="/images/2015/10/201510061645_2.png" loading="lazy" /></p><br /><p>っていう感じでパッケージがデプロイされる。あとは使う側で</p><br /><pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
 
 repositories {
     jcenter()
@@ -181,19 +158,9 @@ dependencies {
     testCompile "sample:sample:+"
     testCompile "junit:junit:+"
 }
-</code></pre>
-<p>な感じでrepositoriesにmavenでurlを与えてやればいい。んまぁ非常に使い方がざっくりとしてますが...</p>
-
+</code></pre><p>な感じでrepositoriesにmavenでurlを与えてやればいい。んまぁ非常に使い方がざっくりとしてますが...</p><br />
 <h4>余談: Jenkinsでビルドする場合</h4>
-
-<p>Jenkins Artifactory Pluginがあるのでインストール</p>
-
-<p>んでジョブを作成して設定でartifactoryを使う部分の情報を設定するが「gradleでartifactory pluginを使用している場合にJenkins Artifactory Pluginでも同様にプラグインを処理しようとする為にエラーになる」っていう件に関しては「Project uses the Artifactory Gradle Plugin」が入っているとJenkins側でもプラグインのロードをしようとするので、gradle側でもデプロイ出来るようにプラグインを使用する場合にはこちらをチェック入れておかないとビルドでエラーになる</p>
-
-<p>あとはまぁ普通に適切に設定を行った上でビルドを実行すればJenkinsでビルドを行ってartifactoryにデプロイしてくれる</p>
-
-<p>んまぁという感じでgradle(maven)で使う自社開発ライブラリの管理とかはartifactoryを構築して使うのは良さそう</p>
-
+<p>Jenkins Artifactory Pluginがあるのでインストール</p><br /><p>んでジョブを作成して設定でartifactoryを使う部分の情報を設定するが「gradleでartifactory pluginを使用している場合にJenkins Artifactory Pluginでも同様にプラグインを処理しようとする為にエラーになる」っていう件に関しては「Project uses the Artifactory Gradle Plugin」が入っているとJenkins側でもプラグインのロードをしようとするので、gradle側でもデプロイ出来るようにプラグインを使用する場合にはこちらをチェック入れておかないとビルドでエラーになる</p><br /><p>あとはまぁ普通に適切に設定を行った上でビルドを実行すればJenkinsでビルドを行ってartifactoryにデプロイしてくれる</p><br /><p>んまぁという感じでgradle(maven)で使う自社開発ライブラリの管理とかはartifactoryを構築して使うのは良さそう</p><br />
               </div>
             </div>
           </div>
