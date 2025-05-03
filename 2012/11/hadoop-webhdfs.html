@@ -90,18 +90,18 @@
         &lt;value&gt;true&lt;/value&gt;
     &lt;/property&gt;
 &lt;/configuration&gt;
-</code></pre><p>設定はこんだけです。あとは</p><br /><pre class="line-numbers"><code>sudo -u hadoop /opt/hadoop/bin/hadoop namenode -format
+</code></pre><p>設定はこんだけです。あとは</p><br /><pre class="line-numbers"><code class="language-none")>sudo -u hadoop /opt/hadoop/bin/hadoop namenode -format
 sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start namenode
 sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 </code></pre><p>でデータノードが立ち上がったら、初期時は何も無いのでユーザーディレクトリを作っておく。でユーザーディレクトリな所の所有者権限とかも直しておく。それは昨日の記事で書いたので省略</p><br />
 <h4>WebHDFS Rest APIを使って操作する</h4>
 <p>WebHDFS Rest APIのエントリーポイントとなるURLのベースが、「 <a href="http://host:port/webhdfs/v1">http://host:port/webhdfs/v1</a> 」になる。でポートっていうのはネームノードフロントエンドページとなる、恐らくはデフォルトでは50070のポート番号になる。そこにリクエストをぶっ飛ばす</p><br />
 <h4>ユーザーディレクトリ内にdataディレクトリを作る</h4>
-<pre class="line-numbers"><code>curl -i -X PUT "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&user.name=kinjouj"
+<pre class="line-numbers"><code class="language-none")>curl -i -X PUT "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&user.name=kinjouj"
 </code></pre><p>user.nameっていうのは指定しない場合はデフォルトの「webuser」っていうのが使用されるので、所有者関係上がある場合には指定しておく。この場合は自分のkinjoujアカウント。レスポンスが</p><br /><pre class="line-numbers"><code class="language-json")>{"boolean": true}
 </code></pre><p>な感じでJSONで返ってくる</p><br />
 <h4>作ったディレクトリのステータスを見る</h4>
-<pre class="line-numbers"><code>curl -i "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS"
+<pre class="line-numbers"><code class="language-none")>curl -i "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS"
 </code></pre><p>結果として</p><br /><pre class="line-numbers"><code class="language-json")>{
   "FileStatus": {
     "accessTime":0,
@@ -118,10 +118,10 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 }
 </code></pre><p>なレスポンスが返ってくる</p><br />
 <h4>ディレクトリにファイルを突っ込んでみる</h4>
-<pre class="line-numbers"><code>curl -i -X PUT "http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&user.name=kinjouj" -T accesslog.json
+<pre class="line-numbers"><code class="language-none")>curl -i -X PUT "http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&user.name=kinjouj" -T accesslog.json
 </code></pre><p>ここポートが50075ってなってるのが50070で投げると50075に要求しろみたいにHTTP/307が出る。まぁ実際はそのLocationヘッダーに投げれば良い</p><br />
 <h4>ディレクトリにあるファイルステータスを取る</h4>
-<pre class="line-numbers"><code>curl -i "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus"
+<pre class="line-numbers"><code class="language-none")>curl -i "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus"
 </code></pre><p>レスポンスとして</p><br /><pre class="line-numbers"><code class="language-json")>{
   "FileStatuses":{
     "FileStatus":[
@@ -154,10 +154,10 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 }
 </code></pre><p>な感じで返ってくるくる。そこに更にディレクトリがあったらどうなるのかの検証のためにテストなディレクトリを作ってる</p><br />
 <h4>ファイルを読み取る</h4>
-<pre class="line-numbers"><code>curl -i "http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open"
+<pre class="line-numbers"><code class="language-none")>curl -i "http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open"
 </code></pre><p>こちらも50070なNamenodeな所のポートにぶん投げるとDatanode側にアクセスしろっと要求される。ちょっと気になるのがブロックサイズでチャンクされてるファイルとかどうなるんだっけと。ビッグデータが無いんでそこ未確認</p><br />
 <h4>ファイル等を消す</h4>
-<pre class="line-numbers"><code>curl -i -X DELETE "http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&user.name=kinjouj"
+<pre class="line-numbers"><code class="language-none")>curl -i -X DELETE "http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&user.name=kinjouj"
 </code></pre><p>な感じでファイル・ディレクトリ等を削除可能</p><br /><p>という感じでHTTPリクエストぶん投げるだけでHDFS操作が出来る模様。まぁ詳しい事は <a href="http://hadoop.apache.org/docs/r1.1.0/webhdfs.html">http://hadoop.apache.org/docs/r1.1.0/webhdfs.html</a> 見た方が良いかも</p><br /><p>ちなみにPerlでWebHDFSを利用する場合にNet::Hadoop::WebHDFSっていうモジュールがある模様</p><br />
 <h4>追記1</h4>
 <p>appendサポートをするにはhdfs-site.xmlに設定が必要な模様</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;property&gt;
@@ -166,7 +166,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 &lt;/property&gt;
 </code></pre>
 <h4>追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</h4>
-<pre class="line-numbers"><code>&lt;source&gt;
+<pre class="line-numbers"><code class="language-none")>&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -243,7 +243,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
 </ul>
 
-  <li><a href="/category/javascript.html">JavaScript (163)</a></li>
+  <li><a href="/category/javascript.html">JavaScript (164)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/chrome-extension.html">Chrome Extension (38)</a></li>
   <li><a href="/category/node-dot-js.html">Node.js (17)</a></li>
@@ -297,7 +297,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li><a href="/category/cassandra.html">Cassandra (10)</a></li>
   <li><a href="/category/mysql.html">MySQL (2)</a></li>
   <li><a href="/category/pl-slash-sql.html">PL/SQL (5)</a></li>
-  <li><a href="/category/oracle.html">Oracle (9)</a></li>
+  <li><a href="/category/oracle.html">Oracle (10)</a></li>
 </ul>
 
   <li><a href="/category/git.html">git (1)</a></li>
@@ -321,7 +321,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (2)</a></li>
+  <li><a href="/category/perl.html">perl (3)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 
