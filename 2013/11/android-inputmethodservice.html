@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">InputMethodServiceを使ってIMを作るメモ</h3>
+              <h1 class="entry-title">InputMethodServiceを使ってIMを作るメモ</h1>
               <p class="meta">
                 2013-11-06T00:00:00+00:00
                 <span class="categories">
@@ -79,11 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをやってた。とりあえず書いておこうかと</p><br />
+                <p>ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをやってた。とりあえず書いておこうかと</p>
 <!--more-->
 
 <h4>方式</h4>
-<p>bluetooth RFCOMMなプロファイルを利用してPC側からスマフォ側にbluetooth経由でテキストを送信。それをアクティブなIMで受け取って入力を反映させるっていうだけ</p><br />
+<p>bluetooth RFCOMMなプロファイルを利用してPC側からスマフォ側にbluetooth経由でテキストを送信。それをアクティブなIMで受け取って入力を反映させるっていうだけ</p>
 <h4>AndroidManifest.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;manifest
@@ -114,14 +114,14 @@
     android:layout_alignParentBottom="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" /&gt;
-</code></pre><p>後々必要になるので</p><br />
+</code></pre><p>後々必要になるので</p>
 <h4>res/xml/inputmethod.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;input-method
     xmlns:android="http://schemas.android.com/apk/res/android" /&gt;
-</code></pre><p>設定要件は<a href="http://developer.android.com/reference/android/R.styleable.html#InputMethod">R.styleable#InputMethod</a>を参照</p><br />
+</code></pre><p>設定要件は<a href="http://developer.android.com/reference/android/R.styleable.html#InputMethod">R.styleable#InputMethod</a>を参照</p>
 <h4>res/xml/keyboard.xml</h4>
-<p>ソフトウェアキーボードなレイアウトを定義</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
+<p>ソフトウェアキーボードなレイアウトを定義</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;Keyboard xmlns:android="http://schemas.android.com/apk/res/android"&gt;
     &lt;Row android:rowEdgeFlags="top" android:keyHeight="100px"&gt;
         &lt;Key
@@ -139,7 +139,7 @@
 
     &lt;/Row&gt;
 &lt;/Keyboard&gt;
-</code></pre><p>codesで指定されたコードはキーをタッチしたい等な場合に引数に指定される(primaryCodeとか)。又、設定要件は　<a href="http://developer.android.com/reference/android/inputmethodservice/Keyboard.html">http://developer.android.com/reference/android/inputmethodservice/Keyboard.html</a> を参照</p><br /><p>まぁ設定ファイル系はこれだけ。あとはサービスクラスを書いたりとか</p><br />
+</code></pre><p>codesで指定されたコードはキーをタッチしたい等な場合に引数に指定される(primaryCodeとか)。又、設定要件は　<a href="http://developer.android.com/reference/android/inputmethodservice/Keyboard.html">http://developer.android.com/reference/android/inputmethodservice/Keyboard.html</a> を参照</p><p>まぁ設定ファイル系はこれだけ。あとはサービスクラスを書いたりとか</p>
 <h4>BluetoothKeyboardService.java</h4>
 <pre class="line-numbers"><code class="language-java")>package net.kinjouj.app.bluetooth_keyboard;
 
@@ -332,9 +332,9 @@ public class BluetoothKeyboardService extends InputMethodService implements Keyb
         }
     }
 }
-</code></pre><p>キーボード入力が開始される(ソフトウェアキーボードが起動される?)際にbluetoothの接続を行なってRFCOMMプロファイルで要求を待ち受ける。でテキストな要求が来た際にはソフトウェアキーボードに対してテキストをコミットする。まぁそんだけ</p><br />
+</code></pre><p>キーボード入力が開始される(ソフトウェアキーボードが起動される?)際にbluetoothの接続を行なってRFCOMMプロファイルで要求を待ち受ける。でテキストな要求が来た際にはソフトウェアキーボードに対してテキストをコミットする。まぁそんだけ</p>
 <h4>動かしてみる</h4>
-<p>アプリを入れるとキーボード設定で</p><br /><p><img src="/images/2013/11/201311061735_1.png" loading="lazy" /></p><br /><p>っていうように表示されるようになる。でチェックを入れておかないと使えるようにならないのでチェックしておく</p><br /><p>あとはテキストを入力するフォーカスで入力方式でBluetoothKeyboardを選択すると</p><br /><p><img src="/images/2013/11/201311061735_2.png" loading="lazy" /></p><br /><p>って言うように出る。あとはPC側から入力を反映させる適当なスクリプトを書く</p><br /><pre class="line-numbers"><code class="language-py")>from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
+<p>アプリを入れるとキーボード設定で</p><p><img src="/images/2013/11/201311061735_1.png" loading="lazy" /></p><p>っていうように表示されるようになる。でチェックを入れておかないと使えるようにならないのでチェックしておく</p><p>あとはテキストを入力するフォーカスで入力方式でBluetoothKeyboardを選択すると</p><p><img src="/images/2013/11/201311061735_2.png" loading="lazy" /></p><p>って言うように出る。あとはPC側から入力を反映させる適当なスクリプトを書く</p><pre class="line-numbers"><code class="language-py")>from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
 
 host = None
 port = 0
@@ -360,7 +360,7 @@ if host is not None:
                 break
 
     sock.close()
-</code></pre><p>っていう感じでやればPC側からスマフォ側にbluetoothを経由してIMでキャッチしてテキスト入力をさせたりとかっていう事案もまぁ出来るっちゃ出来る</p><br />
+</code></pre><p>っていう感じでやればPC側からスマフォ側にbluetoothを経由してIMでキャッチしてテキスト入力をさせたりとかっていう事案もまぁ出来るっちゃ出来る</p>
               </div>
             </div>
           </div>
@@ -399,7 +399,7 @@ if host is not None:
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -415,7 +415,7 @@ if host is not None:
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -442,7 +442,7 @@ if host is not None:
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -450,7 +450,7 @@ if host is not None:
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -458,7 +458,7 @@ if host is not None:
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -492,14 +492,14 @@ if host is not None:
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">retrofit</h3>
+              <h1 class="entry-title">retrofit</h1>
               <p class="meta">
                 2015-06-15T17:45:49+09:00
                 <span class="categories">
@@ -80,15 +80,15 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式: <a href="http://square.github.io/retrofit/">http://square.github.io/retrofit/</a></p><br /><p>以前に</p><br />
+                <p>公式: http://square.github.io/retrofit/</p><p>以前に</p>
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">っていうかインターフェース定義してアノテーションつけてみたいな事して、Webクライアントのクラスとなるソースを生成するの作れば良いんじゃないの</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/609336030387245056">2015, 6月 12</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<p>っていうように単純なデータのやりとりだけなのであればそういうのがあれば良いんじゃねって思ってたんですが、ソースとかを生成したりはしない(はずだ)けど、retrofitっていうのがあるみたいで使ってみた</p><br />
+<p>っていうように単純なデータのやりとりだけなのであればそういうのがあれば良いんじゃねって思ってたんですが、ソースとかを生成したりはしない(はずだ)けど、retrofitっていうのがあるみたいで使ってみた</p>
 <!--more-->
 
 <h4>サーバー側</h4>
-<p>とりあえずRailsで適当にResource Controller辺りを使って</p><br /><pre class="line-numbers"><code class="language-rb")>class EntryController &lt; ApplicationController
+<p>とりあえずRailsで適当にResource Controller辺りを使って</p><pre class="line-numbers"><code class="language-rb")>class EntryController &lt; ApplicationController
 
   def index
     sort = params[:sortBy] || "id"
@@ -110,26 +110,26 @@
     end
   end
 end
-</code></pre><p>単純に</p><br />
+</code></pre><p>単純に</p>
 <ul>
 <li>データベースのデータを取得してJSONで出力(その際にORDERを指定出来る)</li>
 <li>指定したIDのデータを取得してJSONで出力</li>
 <li>送られたデータを利用して格納</li>
 </ul>
-<p>っていうようなのを作っておく。よってルーティング定義は</p><br />
+<p>っていうようなのを作っておく。よってルーティング定義は</p>
 <pre>
      Prefix Verb   URI Pattern     Controller#Action
 entry_index GET    /entry          entry#index
             POST   /entry          entry#create
       entry GET    /entry/:id      entry#show
 </pre>
-<p>というような感じになる。これをretrofitで使う</p><br />
+<p>というような感じになる。これをretrofitで使う</p>
 <h4>retrofitの概要</h4>
-<p>retrofitでは基本的にインターフェースを定義して、メソッドに適切なアノテーションを付与する事によって利用する事が出来る</p><br /><p>でretrofitで使用されるHTTPクライアントの実装はデフォルト(retrofitの依存性だけ追加した場合)で使用されるのはソースまでちょっと追いかけれてないので分からないのだけど</p><br />
+<p>retrofitでは基本的にインターフェースを定義して、メソッドに適切なアノテーションを付与する事によって利用する事が出来る</p><p>でretrofitで使用されるHTTPクライアントの実装はデフォルト(retrofitの依存性だけ追加した場合)で使用されるのはソースまでちょっと追いかけれてないので分からないのだけど</p>
 <blockquote>
 Retrofit will automatically use OkHttp (version 2.0 or newer) when it is present.
 </blockquote>
-<p>というようにokhttp及びokhttp-urlconnectionの依存性を追加していると自動でokhttpを使うようになる模様</p><br /><p>あと後述するが、RxJavaを使ったObservableを使う事も出来るので</p><br /><p>んまぁ概要はこんなもんで</p><br />
+<p>というようにokhttp及びokhttp-urlconnectionの依存性を追加していると自動でokhttpを使うようになる模様</p><p>あと後述するが、RxJavaを使ったObservableを使う事も出来るので</p><p>んまぁ概要はこんなもんで</p>
 <h4>全件を取得する</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -157,14 +157,14 @@ public interface SampleService {
     // Observable&lt;List&lt;Entry&gt;&gt; listEntries();
 
 }
-</code></pre><p>っていうように</p><br />
+</code></pre><p>っていうように</p>
 <ul>
 <li>@GET等のHTTPメソッドに対応したアノテーションを付与</li>
 <li>HTTPヘッダーに特有のヘッダーを設定したい場合には@Headerや@Headers等を利用する事が出来る</li>
 <li>パラメーター等が必要な場合には@Queryや@QueryMap等を利用してクエリーストリングを設定する事も可能</li>
 <li>書いてる通り、RxJavaを使った結果取得方法を利用する事も出来る</li>
 </ul>
-<p>っていう感じでやって</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+<p>っていう感じでやって</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.util.List;
 
@@ -221,7 +221,7 @@ public class SampleServiceTest {
         assertThat(entries.size(), is(3));
     }
 }
-</code></pre><p>RestAdapterのインスタンスでエンドポイントを設定してcreateメソッドで作成したインターフェースを指定してインスタンスを取得。あとはインターフェースのメソッドを呼ぶだけでHTTPリクエストを行い結果を取得してくれる模様(JSONの実装は多分GSON)</p><br />
+</code></pre><p>RestAdapterのインスタンスでエンドポイントを設定してcreateメソッドで作成したインターフェースを指定してインスタンスを取得。あとはインターフェースのメソッドを呼ぶだけでHTTPリクエストを行い結果を取得してくれる模様(JSONの実装は多分GSON)</p>
 <h4>URLパスに埋め込んでリクエスト</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -236,7 +236,7 @@ public interface SampleService {
     Entry getEntry(@Path("id") int id);
 
 }
-</code></pre><p>っていうようにリクエストメソッドに対応するアノテーションにメソッドの引数で指定させた値を埋め込む事も出来る。さきほどのでは言ってないが@Queryにも@EncodedQueryがあったり、この@Pathにも@EncodedPathっていうのがあるのでURLエンコードされてリクエストされるべきデータに応じてはそのアノテーションを付与する必要</p><br /><p>ちなみに結果を取得する際にサーバーがエラーを起こした場合にはRetrofitErrorの例外が送出される模様</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>っていうようにリクエストメソッドに対応するアノテーションにメソッドの引数で指定させた値を埋め込む事も出来る。さきほどのでは言ってないが@Queryにも@EncodedQueryがあったり、この@Pathにも@EncodedPathっていうのがあるのでURLエンコードされてリクエストされるべきデータに応じてはそのアノテーションを付与する必要</p><p>ちなみに結果を取得する際にサーバーがエラーを起こした場合にはRetrofitErrorの例外が送出される模様</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -274,7 +274,7 @@ public class SampleServiceTest {
         service.getEntry(9);
     }
 }
-</code></pre><p>特に言う事無いので次</p><br />
+</code></pre><p>特に言う事無いので次</p>
 <h4>POSTでデータを送信する場合 (@Bodyを使用)</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -288,16 +288,16 @@ public interface SampleService {
     void createEntry(@Body Entry entry, Callback&lt;Entry&gt; callback);
 
 }
-</code></pre><p>っていうように@POSTで定義して@Bodyを持つ引数を定義する事で可能。但し</p><br />
+</code></pre><p>っていうように@POSTで定義して@Bodyを持つ引数を定義する事で可能。但し</p>
 <ul>
 <li>@Bodyをつけた場合はapplication/jsonとして送られるので他の方式の@FormUrlEncoded等と共用する事は出来ない</li>
 <li>返り値か引数の最後にCallbackを持つ必要がある</li>
 </ul>
-<p>2つ目のCallbackを持つ件に関しては</p><br />
+<p>2つ目のCallbackを持つ件に関しては</p>
 <blockquote>
 Asynchronous execution requires the last parameter of the method be a Callback.
 </blockquote>
-<p>と明記されており、Callbackを引数の最後に持つ場合には非同期処理によって実行される模様</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+<p>と明記されており、Callbackを引数の最後に持つ場合には非同期処理によって実行される模様</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -365,7 +365,7 @@ public class SampleServiceTest {
         executor.awaitTermination(3, TimeUnit.SECONDS);
     }
 }
-</code></pre><p>というようにテストする際にはExecutorで一定の待機処理等を行わないと正常にテスト実行されないはずなので</p><br /><p>という感じで@Bodyを持った引数を持った場合にはapplication/jsonとしてリクエストされてデータを送信できる</p><br />
+</code></pre><p>というようにテストする際にはExecutorで一定の待機処理等を行わないと正常にテスト実行されないはずなので</p><p>という感じで@Bodyを持った引数を持った場合にはapplication/jsonとしてリクエストされてデータを送信できる</p>
 <h4>POSTでデータを送信する場合 (@FormUrlEncodedを使用)</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -383,7 +383,7 @@ public interface SampleService {
     void createEntry(@Field("name") String name, Callback&lt;Entry&gt; callback);
 
 }
-</code></pre><p>上記で書いたように@Bodyを使う場合にはapplication/jsonで送られるので、application/x-www-form-urlencoded?で送りたいような事案の場合には@FormUrlEncodedを使えば良い</p><br /><p>但し、@Bodyが使えないので送るデータはメソッドに一つづつ持つようになる。それか@Fieldじゃなくて@FieldMapで持つ事で可能な模様。又、TypedString(クエリーのようにid=1&amp;name=hogeのようにフォームデータとしてエンコードしたデータ)等を使ってなんとかする方法もあるらしい</p><br /><p>というような感じで使用する事が出来る</p><br />
+</code></pre><p>上記で書いたように@Bodyを使う場合にはapplication/jsonで送られるので、application/x-www-form-urlencoded?で送りたいような事案の場合には@FormUrlEncodedを使えば良い</p><p>但し、@Bodyが使えないので送るデータはメソッドに一つづつ持つようになる。それか@Fieldじゃなくて@FieldMapで持つ事で可能な模様。又、TypedString(クエリーのようにid=1&amp;name=hogeのようにフォームデータとしてエンコードしたデータ)等を使ってなんとかする方法もあるらしい</p><p>というような感じで使用する事が出来る</p>
 <h4>余談: その他のアノテーションやAPI</h4>
 
 <ul>
@@ -391,7 +391,7 @@ public interface SampleService {
 <li>RequestInterceptorを使う事でリクエストを行う前に共通する設定等を仕込む事も可能</li>
 <li>ErrorHandlerによるエラー処理を定義する事も可能</li>
 </ul>
-<p>他にも色々ありそうですが、検証次第追記なりネタ書くかも</p><br />
+<p>他にも色々ありそうですが、検証次第追記なりネタ書くかも</p>
               </div>
             </div>
           </div>
@@ -430,7 +430,7 @@ public interface SampleService {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -446,7 +446,7 @@ public interface SampleService {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -473,7 +473,7 @@ public interface SampleService {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -481,7 +481,7 @@ public interface SampleService {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -489,7 +489,7 @@ public interface SampleService {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -523,14 +523,14 @@ public interface SampleService {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

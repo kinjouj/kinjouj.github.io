@@ -68,7 +68,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">jestを使ってReact.jsなスクリプトをテストする</h3>
+              <h1 class="entry-title">jestを使ってReact.jsなスクリプトをテストする</h1>
               <p class="meta">
                 2015-04-11T12:00:00+09:00
                 <span class="categories">
@@ -77,11 +77,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式ドキュメント: <a href="https://facebook.github.io/jest/docs/tutorial-react.html">https://facebook.github.io/jest/docs/tutorial-react.html</a></p><br /><p>参考: <a href="http://qiita.com/koba04/items/2f97904b3ca247fc1917">http://qiita.com/koba04/items/2f97904b3ca247fc1917</a></p><br /><p>参考資料1: <a href="https://facebook.github.io/react/docs/test-utils.html">https://facebook.github.io/react/docs/test-utils.html</a></p><br /><p>参考資料2: <a href="https://facebook.github.io/jest/docs/mock-functions.html">https://facebook.github.io/jest/docs/mock-functions.html</a></p><br /><p>React.jsで書かれたコンポーネントをjestを使ってテストしてみる。ただそれだけ</p><br />
+                <p>公式ドキュメント: https://facebook.github.io/jest/docs/tutorial-react.html</p><p>参考: http://qiita.com/koba04/items/2f97904b3ca247fc1917</p><p>参考資料1: https://facebook.github.io/react/docs/test-utils.html</p><p>参考資料2: https://facebook.github.io/jest/docs/mock-functions.html</p><p>React.jsで書かれたコンポーネントをjestを使ってテストしてみる。ただそれだけ</p>
 <!--more-->
 
 <h4>環境設定</h4>
-<p>jest自体がnode0.8系か0.10系でしか動かない模様(node0.12系でやるとSEGVする)のでnodeのバージョンは0.10系を使う</p><br /><p>で例のごとくpackage.jsonを設定する</p><br /><pre class="line-numbers"><code class="language-json")>{
+<p>jest自体がnode0.8系か0.10系でしか動かない模様(node0.12系でやるとSEGVする)のでnodeのバージョンは0.10系を使う</p><p>で例のごとくpackage.jsonを設定する</p><pre class="line-numbers"><code class="language-json")>{
   "name": "sample",
   "version": "0.0.1",
   "main": "js/app.js",
@@ -115,20 +115,20 @@
     ]
   }
 }
-</code></pre><p>devDependenciesにてjest-cliの依存性を追加して、testでjestが動く似用に設定。んでjestの設定部分ではscriptProcessorで指定したpreprocessor.jsを使って、jestがテストを行う際にJSX構文が認識出来るように事前にコンパイルするような形で提供してテストを実行出来るようにしておかないといけない模様。っていう事で以下をpreprocessor.jsとして作成しておく</p><br /><pre class="line-numbers"><code class="language-js")>var ReactTools = require('react-tools');
+</code></pre><p>devDependenciesにてjest-cliの依存性を追加して、testでjestが動く似用に設定。んでjestの設定部分ではscriptProcessorで指定したpreprocessor.jsを使って、jestがテストを行う際にJSX構文が認識出来るように事前にコンパイルするような形で提供してテストを実行出来るようにしておかないといけない模様。っていう事で以下をpreprocessor.jsとして作成しておく</p><pre class="line-numbers"><code class="language-js")>var ReactTools = require('react-tools');
 
 module.exports = {
   process: function(src) {
     return ReactTools.transform(src);
   }
 };
-</code></pre><p>公式ドキュメントにも同様に書いてたはずなのでそのまま使う。ちなみにbabel.jsを使ってES6で書いてるようなケースの場合は普通にscriptProcessorにbabel-nodeを指定すれば良い模様(詳しくは上記参考のkoba04さんが書いてるreact-boilerplateを参照)</p><br /><p>でunmockedModulePathPatternsはjestでテストする際にあたって読み込まれるスクリプトがまるごとモック化される模様。React.jsをモック化されても困るのでそういうのを除外する対象とするのがこの設定っぽい(自動でそういうふうにされないようにするにはjest.autoMockOffなりをテスト上でやればイケるっぽいらしい)</p><br /><p>でこれからReactを使ったアプリケーションを作っていく</p><br />
+</code></pre><p>公式ドキュメントにも同様に書いてたはずなのでそのまま使う。ちなみにbabel.jsを使ってES6で書いてるようなケースの場合は普通にscriptProcessorにbabel-nodeを指定すれば良い模様(詳しくは上記参考のkoba04さんが書いてるreact-boilerplateを参照)</p><p>でunmockedModulePathPatternsはjestでテストする際にあたって読み込まれるスクリプトがまるごとモック化される模様。React.jsをモック化されても困るのでそういうのを除外する対象とするのがこの設定っぽい(自動でそういうふうにされないようにするにはjest.autoMockOffなりをテスト上でやればイケるっぽいらしい)</p><p>でこれからReactを使ったアプリケーションを作っていく</p>
 <h4>js/app.js</h4>
 <pre class="line-numbers"><code class="language-js")>var React = require("react"),
     Echo  = require("./components/Echo.js");
 
 React.render(&lt;Echo /&gt;, document.body);
-</code></pre><p>んまぁここは今回関係無いので省略</p><br />
+</code></pre><p>んまぁここは今回関係無いので省略</p>
 <h4>js/components/Echo.js</h4>
 <pre class="line-numbers"><code class="language-js")>// AppActionCreators.sayは引数をtoUpperCaseされるだけのメソッドが定義されたオブジェクト
 
@@ -164,13 +164,13 @@ var Echo = React.createClass({
 });
 
 module.exports = Echo;
-</code></pre><p>っていう感じで</p><br />
+</code></pre><p>っていう感じで</p>
 <ul>
 <li>デフォルトのstate.msgはhoge</li>
 <li>&lt;input type=“text&quot;&gt;でvalueLinkを設定してchangeイベントをfire出来るようにする</li>
 <li>&lt;button&gt;でAppActionCreators.sayした結果をmsgに突っ込む</li>
 </ul>
-<p>的な要件なだけなのだけど、これが意図した動作になるかどうかをテストする</p><br />
+<p>的な要件なだけなのだけど、これが意図した動作になるかどうかをテストする</p>
 <h4>js/components/_<em>tests</em>_/Echo-test.js</h4>
 <pre class="line-numbers"><code class="language-js")>"use strict";
 
@@ -259,11 +259,11 @@ describe("Echo", function() {
     expect(child4.type).toEqual("button");
   });
 });
-</code></pre><p>button click event testだけはテストがfailする。&lt;input&gt;にchange eventでfireしているのにも関わらず&lt;button&gt;をクリックした場合に発生するAppActionCreators.sayがモックされてAしか返さないようになっているので</p><br /><p>んまぁjasmineベースなテストを書く事で出来る。ただ上記でも書いてるけど特定していないスクリプト等のオブジェクトは全てモック化されるので呼び出されるメソッド等に適切にreturnValue等を返すか、特定の処理をするようにする(mockImplementationとか)ような感じな事しなければならない(現在モック化されたメソッドのオリジナルをコールする方法は判明してない)</p><br /><p>結構長ったらしく書いたけどこれでもReact.js+jestでのテストのほんの一部にしかすぎないので色々今後も使って分かった事とか色々書くと思う</p><br />
+</code></pre><p>button click event testだけはテストがfailする。&lt;input&gt;にchange eventでfireしているのにも関わらず&lt;button&gt;をクリックした場合に発生するAppActionCreators.sayがモックされてAしか返さないようになっているので</p><p>んまぁjasmineベースなテストを書く事で出来る。ただ上記でも書いてるけど特定していないスクリプト等のオブジェクトは全てモック化されるので呼び出されるメソッド等に適切にreturnValue等を返すか、特定の処理をするようにする(mockImplementationとか)ような感じな事しなければならない(現在モック化されたメソッドのオリジナルをコールする方法は判明してない)</p><p>結構長ったらしく書いたけどこれでもReact.js+jestでのテストのほんの一部にしかすぎないので色々今後も使って分かった事とか色々書くと思う</p>
 <h4>余談</h4>
 
 <blockquote class="twitter-tweet" lang="ja" data-twttr-rendered="true"><p>ほう &gt; モジュールの実装をテスト時に常に差し替えておきたい場合は、__mocks__を作りその中にmoduleの実装を置いておくことで可能</p>— kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/586492732924760065">2015, 4月 10</a></blockquote>
-<p>っていう事らしい。詳しくはやってみてから書く</p><br />
+<p>っていう事らしい。詳しくはやってみてから書く</p>
               </div>
             </div>
           </div>
@@ -302,7 +302,7 @@ describe("Echo", function() {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -318,7 +318,7 @@ describe("Echo", function() {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -345,7 +345,7 @@ describe("Echo", function() {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -353,7 +353,7 @@ describe("Echo", function() {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -361,7 +361,7 @@ describe("Echo", function() {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -395,14 +395,14 @@ describe("Echo", function() {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

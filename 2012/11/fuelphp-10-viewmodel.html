@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">FuelPHPをやってみる (10) - ViewModelを使ってみる -</h3>
+              <h1 class="entry-title">FuelPHPをやってみる (10) - ViewModelを使ってみる -</h1>
               <p class="meta">
                 2012-11-11T00:00:00+00:00
                 <span class="categories">
@@ -78,7 +78,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>ViewModelを使えば、本来コントローラーから値をセットしてビューで表示すると言ったような処理をViewModelに任せる事でコンポーネント化?のように出来る模様</p><br />
+                <p>ViewModelを使えば、本来コントローラーから値をセットしてビューで表示すると言ったような処理をViewModelに任せる事でコンポーネント化?のように出来る模様</p>
 <!--more-->
 
 <h4>fuel/app/classes/view/sample.php</h4>
@@ -95,12 +95,12 @@ class View_Sample extends ViewModel {
         $this-&gt;message = $title;
     }
 }
-</code></pre><p>コントローラー等でセットされたデータ(set_globalメソッドでもsetでも設定可能。ちょっと余談の方で書いてます)をVieWModelでも扱える。で上記の</p><br /><pre class="line-numbers"><code class="language-php")>$this-&gt;_view-&gt;get("title", null)
-</code></pre><p>は</p><br /><pre class="line-numbers"><code class="language-php")>$this-&gt;_view-&gt;title
-</code></pre><p>でもアクセス可能だけど、fuel/core/classes/view.phpで「データが存在しない場合にはOutOfBoundsExceptionをスローする」ような仕組みになっているので、getメソッドを使う事で存在しない場合でもデフォルトの値を設定する事が出来る。そこら辺認知しておかないと後々やばそうなので(tryすれば良いだろっていう事で解決する問題ではないと思うので)</p><br /><p>通常のViewと同様にapp/views/(View_名前のCamelCaseを階層化).phpなビューが参照されるので、今回はapp/views/sample.phpを作る</p><br />
+</code></pre><p>コントローラー等でセットされたデータ(set_globalメソッドでもsetでも設定可能。ちょっと余談の方で書いてます)をVieWModelでも扱える。で上記の</p><pre class="line-numbers"><code class="language-php")>$this-&gt;_view-&gt;get("title", null)
+</code></pre><p>は</p><pre class="line-numbers"><code class="language-php")>$this-&gt;_view-&gt;title
+</code></pre><p>でもアクセス可能だけど、fuel/core/classes/view.phpで「データが存在しない場合にはOutOfBoundsExceptionをスローする」ような仕組みになっているので、getメソッドを使う事で存在しない場合でもデフォルトの値を設定する事が出来る。そこら辺認知しておかないと後々やばそうなので(tryすれば良いだろっていう事で解決する問題ではないと思うので)</p><p>通常のViewと同様にapp/views/(View_名前のCamelCaseを階層化).phpなビューが参照されるので、今回はapp/views/sample.phpを作る</p>
 <h4>fuel/app/views/sample.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;h2&gt;&lt;?php echo $message; ?&gt;&lt;/h2&gt;
-</code></pre><p>後ほど書くけど、前回同様にController_Templateを使っているので</p><br />
+</code></pre><p>後ほど書くけど、前回同様にController_Templateを使っているので</p>
 <h4>fuel/app/classes/controller/home.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -113,9 +113,9 @@ class Controller_Home extends Controller_Template {
         $this-&gt;template-&gt;content = ViewModel::forge("sample");
     }
 }
-</code></pre><p>ViewModel::forgeを使ってViewModelをレンダリング出来る。で第2引数でViewModelのメソッドを変えられる模様(デフォルトはviewメソッド)</p><br />
+</code></pre><p>ViewModel::forgeを使ってViewModelをレンダリング出来る。で第2引数でViewModelのメソッドを変えられる模様(デフォルトはviewメソッド)</p>
 <h4>余談: ViewModelのデータの扱いについて</h4>
-<p>上記で、ViewModel上で<span style="color:red">$this-&gt;<em>view-&gt;get</span>を使う事でコントローラー等から設定されたデータを利用する事が出来ると書いたけど、例えばテストケース等でテストする際にどうやってデータをセットするのかって所。今回はコントローラーな所がController_Tempalteなんで、set_globalを用いてデータを設定している。んじゃset</em>globalを使わずにデータをセットする場合はどうなのかって所</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>上記で、ViewModel上で<span style="color:red">$this-&gt;<em>view-&gt;get</span>を使う事でコントローラー等から設定されたデータを利用する事が出来ると書いたけど、例えばテストケース等でテストする際にどうやってデータをセットするのかって所。今回はコントローラーな所がController_Tempalteなんで、set_globalを用いてデータを設定している。んじゃset</em>globalを使わずにデータをセットする場合はどうなのかって所</p><pre class="line-numbers"><code class="language-php")>&lt;?php
 class Controller_Home extends Controller_Template {
 
     public $template = "layout";
@@ -128,7 +128,7 @@ class Controller_Home extends Controller_Template {
         //$this-&gt;template-&gt;set_global("title", "AAA");
     }
 }
-</code></pre><p>多分、こんな感じかと。ViewModelインスタンスのrenderメソッドを使えばレンダリング結果も取得できるので、テストする際はそんな感じでやれば良いんじゃないかという感じで、なにもコントローラーだけで実装書くという方式ではなくViewModelを使う事で実装を分離したりも出来る模様</p><br />
+</code></pre><p>多分、こんな感じかと。ViewModelインスタンスのrenderメソッドを使えばレンダリング結果も取得できるので、テストする際はそんな感じでやれば良いんじゃないかという感じで、なにもコントローラーだけで実装書くという方式ではなくViewModelを使う事で実装を分離したりも出来る模様</p>
               </div>
             </div>
           </div>
@@ -167,7 +167,7 @@ class Controller_Home extends Controller_Template {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -183,7 +183,7 @@ class Controller_Home extends Controller_Template {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -210,7 +210,7 @@ class Controller_Home extends Controller_Template {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -218,7 +218,7 @@ class Controller_Home extends Controller_Template {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -226,7 +226,7 @@ class Controller_Home extends Controller_Template {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -260,14 +260,14 @@ class Controller_Home extends Controller_Template {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

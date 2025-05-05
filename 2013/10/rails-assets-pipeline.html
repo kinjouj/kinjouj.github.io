@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">Rails assets pipeline</h3>
+              <h1 class="entry-title">Rails assets pipeline</h1>
               <p class="meta">
                 2013-10-08T00:00:00+00:00
                 <span class="categories">
@@ -79,12 +79,12 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>何やらRailsを使っててJavaScriptとかをgemとかで配布してRailsプロジェクトに組み込んだりするっていうのがあったりするわけで。例えばTwitter BootstrapのCSSとかJSとかをGemfileにそういうgemを定義する事でサクッと出来るっつー訳。でその仕組み的なのがRails assets pipelineっていうのかなと、これCoffeeScriptとかならコンパイルして使えるようにする事も出来るらしいとの事(今回はやらないけど)</p><br /><p>とりあえずこの仕組みを使ってangular.jsなプロジェクトを別にしてRailsプロジェクトに組み込むっていう事をしてみる</p><br />
+                <p>何やらRailsを使っててJavaScriptとかをgemとかで配布してRailsプロジェクトに組み込んだりするっていうのがあったりするわけで。例えばTwitter BootstrapのCSSとかJSとかをGemfileにそういうgemを定義する事でサクッと出来るっつー訳。でその仕組み的なのがRails assets pipelineっていうのかなと、これCoffeeScriptとかならコンパイルして使えるようにする事も出来るらしいとの事(今回はやらないけど)</p><p>とりあえずこの仕組みを使ってangular.jsなプロジェクトを別にしてRailsプロジェクトに組み込むっていう事をしてみる</p>
 <!--more-->
 
 <h4>angular.jsなプロジェクトを作る</h4>
 <pre class="line-numbers"><code class="language-none")>bundle gem sample-ui-rails
-</code></pre><p>的な感じでプロジェクトを作る。やると何やらsample-ui-rails.gemspecなりが作られる訳で。でlib/sample/ui/rails.rbがあるので</p><br /><pre class="line-numbers"><code class="language-rb")>require "sample/ui/rails/version"
+</code></pre><p>的な感じでプロジェクトを作る。やると何やらsample-ui-rails.gemspecなりが作られる訳で。でlib/sample/ui/rails.rbがあるので</p><pre class="line-numbers"><code class="language-rb")>require "sample/ui/rails/version"
 
 module Sample
   module Ui
@@ -95,18 +95,18 @@ module Sample
     end
   end
 end
-</code></pre><p>的な感じでちょいと修正しておく。でJavaScriptだとかCSSとかを提供したい場合には</p><br />
+</code></pre><p>的な感じでちょいと修正しておく。でJavaScriptだとかCSSとかを提供したい場合には</p>
 <ul>
 <li>  JavaScript: vendor/assets/javascripts</li>
 <li>  CSS: vendor/assets/stylesheets</li>
 </ul>
-<p>におけば良い。という事でangular.jsなコントローラーなJSを書いて上記のルールに沿った方式な所は配置する</p><br /><pre class="line-numbers"><code class="language-js")>var SampleController = function($scope, $http) {
+<p>におけば良い。という事でangular.jsなコントローラーなJSを書いて上記のルールに沿った方式な所は配置する</p><pre class="line-numbers"><code class="language-js")>var SampleController = function($scope, $http) {
   $http.get("/sample/index")
     .success(function(data) {
       $scope.samples = data;
     });
 };
-</code></pre><p>んまぁテストも書きましょうかって事でkarma initでkarma.conf.jsを作る</p><br /><pre class="line-numbers"><code class="language-js")>// Karma configuration
+</code></pre><p>んまぁテストも書きましょうかって事でkarma initでkarma.conf.jsを作る</p><pre class="line-numbers"><code class="language-js")>// Karma configuration
 // Generated on Tue Oct 08 2013 05:21:20 GMT+0900 (JST)
 
 module.exports = function(config) {
@@ -175,7 +175,7 @@ module.exports = function(config) {
     singleRun: false
   });
 };
-</code></pre><p>angular-mocks.jsはangular.js公式なやつに入ってるのでコピペして持ってくる。んでテスト書く</p><br /><pre class="line-numbers"><code class="language-js")>describe("SampleController", function() {
+</code></pre><p>angular-mocks.jsはangular.js公式なやつに入ってるのでコピペして持ってくる。んでテスト書く</p><pre class="line-numbers"><code class="language-js")>describe("SampleController", function() {
 
   var $_httpBackend, scope, controller;
 
@@ -202,26 +202,26 @@ module.exports = function(config) {
     expect(scope.samples.length).toEqual(1);
   });
 });
-</code></pre><p>karma startなりで起動してテスト実行。あとはこのプロジェクトをRailsプロジェクトで参照してコピペとかする事無く利用できるようにと</p><br />
+</code></pre><p>karma startなりで起動してテスト実行。あとはこのプロジェクトをRailsプロジェクトで参照してコピペとかする事無く利用できるようにと</p>
 <h4>Railsプロジェクトを作る</h4>
 <pre class="line-numbers"><code class="language-none")>rails new sample
-</code></pre><p>で、Gemfileにangularjs-railsと上記で作ったプロジェクトの参照を追加する</p><br /><pre class="line-numbers"><code class="language-rb")>gem "angularjs-rails"
+</code></pre><p>で、Gemfileにangularjs-railsと上記で作ったプロジェクトの参照を追加する</p><pre class="line-numbers"><code class="language-rb")>gem "angularjs-rails"
 gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
-</code></pre><p>でこれだけじゃスクリプトとか参照してくれないので、app/assets/javascripts/application.jsに追加する</p><br /><pre class="line-numbers"><code class="language-none")>//= require jquery
+</code></pre><p>でこれだけじゃスクリプトとか参照してくれないので、app/assets/javascripts/application.jsに追加する</p><pre class="line-numbers"><code class="language-none")>//= require jquery
 //= require jquery_ujs
 //= require_tree .
 
 // 以降追加
 //= require angular
 //= require sample
-</code></pre><p>あとはビューとかで</p><br /><p><code>html&lt;div ng-controller=&quot;SampleController&quot;&gt;
+</code></pre><p>あとはビューとかで</p><p><code>html&lt;div ng-controller=&quot;SampleController&quot;&gt;
   &lt;ul&gt;
     &lt;li ng-repeat=&quot;sample in samples&quot;&gt;
       &lt;span ng-bind-template=&quot;{% raw %}{{sample.name}}{% endraw %}&quot;&gt;&lt;/span&gt;
     &lt;/li&gt;
   &lt;/ul&gt;
 &lt;/div&gt;
-</code></p><br /><p>的な事やってみて確認。書いてないけどコントローラーではrespond_toとかで(ry</p><br />
+</code></p><p>的な事やってみて確認。書いてないけどコントローラーではrespond_toとかで(ry</p>
               </div>
             </div>
           </div>
@@ -260,7 +260,7 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -276,7 +276,7 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -303,7 +303,7 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -311,7 +311,7 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -319,7 +319,7 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -353,14 +353,14 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

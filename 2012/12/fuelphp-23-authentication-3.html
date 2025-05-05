@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">FuelPHPをやってみる (23) - 認証機能 (3) 独自のAuthドライバを実装する -</h3>
+              <h1 class="entry-title">FuelPHPをやってみる (23) - 認証機能 (3) 独自のAuthドライバを実装する -</h1>
               <p class="meta">
                 2012-12-01T00:00:00+00:00
                 <span class="categories">
@@ -78,7 +78,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>前回でSimpleAuthを使って認証する方法がありましたが、これを独自実装でやりたい場合にAuthパッケージな機能を利用し認証ドライバを開発する事で組み込める模様。なのでちょっとやってみた</p><br /><p>※一応、暫定版です。色々追記するかも</p><br />
+                <p>前回でSimpleAuthを使って認証する方法がありましたが、これを独自実装でやりたい場合にAuthパッケージな機能を利用し認証ドライバを開発する事で組み込める模様。なのでちょっとやってみた</p><p>※一応、暫定版です。色々追記するかも</p>
 <!--more-->
 
 <h4>データベーステーブル仕様</h4>
@@ -93,7 +93,7 @@
   UNIQUE KEY `userid` (`username`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
-</code></pre><p>というようなテーブルを作る。で前回はやらなかったけど、指定したページのアクセス権限となる機能(Authパッケージで言うとGroupとかAclとか)を組み込む為にpermissionカラムに権限的なのを付ける</p><br /><p>でまずはAuthドライバーパッケージは後回しで機能そういう機能的な所をコントローラー等に実装する</p><br />
+</code></pre><p>というようなテーブルを作る。で前回はやらなかったけど、指定したページのアクセス権限となる機能(Authパッケージで言うとGroupとかAclとか)を組み込む為にpermissionカラムに権限的なのを付ける</p><p>でまずはAuthドライバーパッケージは後回しで機能そういう機能的な所をコントローラー等に実装する</p>
 <h4>fuel/app/classess/controller/home.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -118,7 +118,7 @@ class Controller_Home extends Controller {
         return View::forge("home");
     }
 }
-</code></pre><p>まぁ前回同様ですが、今回はアクセス権限があるかまでチェックしたいのでそこら辺を使う。has_accessでログインユーザーが持つ権限でアクセス可能かをチェックする</p><br /><p>でログインフォームだとかログイン処理を行うauthコントローラーを作る</p><br />
+</code></pre><p>まぁ前回同様ですが、今回はアクセス権限があるかまでチェックしたいのでそこら辺を使う。has_accessでログインユーザーが持つ権限でアクセス可能かをチェックする</p><p>でログインフォームだとかログイン処理を行うauthコントローラーを作る</p>
 <h4>fuel/app/classess/controller/auth.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -146,9 +146,9 @@ class Controller_Auth extends Controller {
         return Response::forge("Access Denied");
     }
 }
-</code></pre><p>これも前回のSimpleAuthとほとんど同じ。ビューはそのまま再利用しているので省略</p><br /><p>でここから独自のAuthドライバーを作って、ログイン処理等を実装する</p><br />
+</code></pre><p>これも前回のSimpleAuthとほとんど同じ。ビューはそのまま再利用しているので省略</p><p>でここから独自のAuthドライバーを作って、ログイン処理等を実装する</p>
 <h4>Authドライバの構成</h4>
-<p>fuel/app/classes/authに置く。で必要なのがLogin・Group・Aclなクラスの3つが必要になる。で今回はLiteっていうドライバ名にしたので</p><br />
+<p>fuel/app/classes/authに置く。で必要なのがLogin・Group・Aclなクラスの3つが必要になる。で今回はLiteっていうドライバ名にしたので</p>
 <pre>
 auth
 ├── acl
@@ -158,14 +158,14 @@ auth
 └── login
 └── lite.php
 </pre>
-<p>っていうのが必要になるような感じで。んで認証ドライバを設定しなきゃならんのでfuel/app/config/auth.phpを</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>っていうのが必要になるような感じで。んで認証ドライバを設定しなきゃならんのでfuel/app/config/auth.phpを</p><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 return array(
     "driver" =&gt; "Lite",
     "verify_multiple_logins" =&gt; false,
     "salt" =&gt; "put_your_salt_here",
 );
-</code></pre><p>な感じで以降で作るAuthドライバを指定しておく</p><br />
+</code></pre><p>な感じで以降で作るAuthドライバを指定しておく</p>
 <h4>fuel/app/classes/auth/login/lite.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -295,7 +295,7 @@ class Auth_Login_Lite extends Auth\Auth_Login_Driver {
         return parent::has_access($condition, $driver, $entity);
     }
 }
-</code></pre><p>コメント書かなくても何してるかは大体は分かると思うのですが、でどうやらhas_accessでもAuth::checkか何やらが走る模様なので、このクラスのperform_checkが数回走るので既にログインチェック済みかを検証して行った方が良いかと(そうしないとDBアクセスが数回走るという微妙な事になる)</p><br /><p>んでhas_accessでアクセス権限チェックするのはGroupとAclの方になるのでそこを実装する</p><br />
+</code></pre><p>コメント書かなくても何してるかは大体は分かると思うのですが、でどうやらhas_accessでもAuth::checkか何やらが走る模様なので、このクラスのperform_checkが数回走るので既にログインチェック済みかを検証して行った方が良いかと(そうしないとDBアクセスが数回走るという微妙な事になる)</p><p>んでhas_accessでアクセス権限チェックするのはGroupとAclの方になるのでそこを実装する</p>
 <h4>fuel/app/classes/auth/group/lite.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -318,7 +318,7 @@ class Auth_Group_Lite extends Auth\Auth_Group_Driver {
         return in_array(array($this-&gt;id, $group), $groups);
     }
 }
-</code></pre><p>で実際に権限チェックを行う側はAclになる(Authのmemberメソッドでも呼び出せる)。memberメソッドはAclから呼び出すので</p><br />
+</code></pre><p>で実際に権限チェックを行う側はAclになる(Authのmemberメソッドでも呼び出せる)。memberメソッドはAclから呼び出すので</p>
 <h4>fuel/app/classes/auth/acl/lite.php</h4>
 <pre class="line-numbers"><code class="language-php")>&lt;?php
 
@@ -335,7 +335,7 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
         return false;
     }
 }
-</code></pre><p>ってな感じな模様</p><br /><p>で参考としてはドキュメントもぶっちゃけさっぱりな感じなので、SimpleAuthの実装を参考にした方が良いかと</p><br />
+</code></pre><p>ってな感じな模様</p><p>で参考としてはドキュメントもぶっちゃけさっぱりな感じなので、SimpleAuthの実装を参考にした方が良いかと</p>
               </div>
             </div>
           </div>
@@ -374,7 +374,7 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -390,7 +390,7 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -417,7 +417,7 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -425,7 +425,7 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -433,7 +433,7 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -467,14 +467,14 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

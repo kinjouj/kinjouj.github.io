@@ -68,7 +68,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">gradle使ってみる (2) - タスク定義な小メモ -</h3>
+              <h1 class="entry-title">gradle使ってみる (2) - タスク定義な小メモ -</h1>
               <p class="meta">
                 2012-12-12T00:00:00+00:00
                 <span class="categories">
@@ -76,28 +76,28 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>ひとまずちょいとGroovyな勉強が必要だったので間が開いちゃいましたが進めてみる。ちなみにこのgradle使ってみるに関しては基本的に公式ドキュメント(と思われる)のを見てやってるのでそっち見た方が良いかと</p><br /><p>前の続き的な感じでGradleのタスク定義なちょっとしたメモ的なのを</p><br />
+                <p>ひとまずちょいとGroovyな勉強が必要だったので間が開いちゃいましたが進めてみる。ちなみにこのgradle使ってみるに関しては基本的に公式ドキュメント(と思われる)のを見てやってるのでそっち見た方が良いかと</p><p>前の続き的な感じでGradleのタスク定義なちょっとしたメモ的なのを</p>
 <!--more-->
 
 <h4>タスクをスキップする</h4>
-<p>色々方法がある模様で</p><br /><pre class="line-numbers"><code class="language-groovy")>task test &lt;&lt; {
+<p>色々方法がある模様で</p><pre class="line-numbers"><code class="language-groovy")>task test &lt;&lt; {
     println "test"
 }
 
 test.onlyIf {
     project.hasProperty("ok")
 }
-</code></pre><p>上記の場合onlyIfに指定されているクロージャ部分がtrueを返さない限りはタスクはスキップされる模様。なので</p><br /><pre class="line-numbers"><code class="language-sh")># スキップされる
+</code></pre><p>上記の場合onlyIfに指定されているクロージャ部分がtrueを返さない限りはタスクはスキップされる模様。なので</p><pre class="line-numbers"><code class="language-sh")># スキップされる
 gradle test
 
 # 実行される
 gradle test -Pok
-</code></pre><p>な感じ。で2つ目の方法として、gradleのタスクにはenabledっていうプロパティが存在する、デフォルトではtrueになっているけどこれをfalseにするとタスクはスキップされる模様</p><br /><pre class="line-numbers"><code class="language-groovy")>task test &lt;&lt; {
+</code></pre><p>な感じ。で2つ目の方法として、gradleのタスクにはenabledっていうプロパティが存在する、デフォルトではtrueになっているけどこれをfalseにするとタスクはスキップされる模様</p><pre class="line-numbers"><code class="language-groovy")>task test &lt;&lt; {
     println "test"
 }
 
 test.enabled = false
-</code></pre><p>という感じになる。この場合testタスクを実行してもスキップされる。一定の理由でタスクを実行させる場合にはenabledを切り替えて実行させるようにすれば良い模様</p><br /><pre class="line-numbers"><code class="language-groovy")>task test &lt;&lt; {
+</code></pre><p>という感じになる。この場合testタスクを実行してもスキップされる。一定の理由でタスクを実行させる場合にはenabledを切り替えて実行させるようにすれば良い模様</p><pre class="line-numbers"><code class="language-groovy")>task test &lt;&lt; {
     println "test"
 }
 
@@ -110,7 +110,7 @@ task test2 &lt;&lt; {
 }
 
 test.enabled = false
-</code></pre><p>でさらに、StopExecutionExceptionをスローする事で以降のタスクが実行されなくなる。但し、あくまでタスク単位な話っぽい</p><br /><pre class="line-numbers"><code class="language-groovy")>task test &lt;&lt; {
+</code></pre><p>でさらに、StopExecutionExceptionをスローする事で以降のタスクが実行されなくなる。但し、あくまでタスク単位な話っぽい</p><pre class="line-numbers"><code class="language-groovy")>task test &lt;&lt; {
     println "test"
 }
 
@@ -123,18 +123,18 @@ test.doFirst {
         throw new StopExecutionException()
     }
 }
-</code></pre><p>こうするとtest2タスクを実行するとtestタスクを依存性としているので実行されるが-Pokしない限りはStopExecutionExceptionがスローされる。でこれはdoFirstでスローしているけど、あくまでtestタスク内でのみ限る模様。test2タスクは普通に実行される。ちょっとtest2のタスクまで止める方法は判明してない...orz</p><br /><p>とりあえずはタスクをスキップする方法はこんな感じの方法がある模様</p><br />
+</code></pre><p>こうするとtest2タスクを実行するとtestタスクを依存性としているので実行されるが-Pokしない限りはStopExecutionExceptionがスローされる。でこれはdoFirstでスローしているけど、あくまでtestタスク内でのみ限る模様。test2タスクは普通に実行される。ちょっとtest2のタスクまで止める方法は判明してない...orz</p><p>とりあえずはタスクをスキップする方法はこんな感じの方法がある模様</p>
 <h4>タスクのパターンマッチ</h4>
-<p>task.addRule使えば出来る模様</p><br /><pre class="line-numbers"><code class="language-groovy")>tasks.addRule("Pattern: test&lt;ID&gt;") { name -&gt;
+<p>task.addRule使えば出来る模様</p><pre class="line-numbers"><code class="language-groovy")>tasks.addRule("Pattern: test&lt;ID&gt;") { name -&gt;
     if (name.startsWith("test")) {
         task(name) &lt;&lt; {
             println "task: " + (name - "test")
         }
     }
 }
-</code></pre><p>例えば</p><br /><pre class="line-numbers"><code class="language-sh")># 出力は「task: 123」
+</code></pre><p>例えば</p><pre class="line-numbers"><code class="language-sh")># 出力は「task: 123」
 gradle test123
-</code></pre><p>になる。という感じとかで使える模様</p><br />
+</code></pre><p>になる。という感じとかで使える模様</p>
               </div>
             </div>
           </div>
@@ -173,7 +173,7 @@ gradle test123
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -189,7 +189,7 @@ gradle test123
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -216,7 +216,7 @@ gradle test123
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -224,7 +224,7 @@ gradle test123
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -232,7 +232,7 @@ gradle test123
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -266,14 +266,14 @@ gradle test123
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

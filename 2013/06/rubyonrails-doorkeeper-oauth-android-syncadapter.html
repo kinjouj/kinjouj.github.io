@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">Rails(OAuth)+Android SyncAdapter</h3>
+              <h1 class="entry-title">Rails(OAuth)+Android SyncAdapter</h1>
               <p class="meta">
                 2013-06-04T00:00:00+00:00
                 <span class="categories">
@@ -78,7 +78,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>今まで書いたAccountManager及びSyncAdapterなやつは認証トークンを適当に作ってそれを利用してAPIにリクエストを投げるという方式だったのですが、そのサーバー側の問題が色々あるのでそこら辺をRailsで組み直し、Android AccountManager+SyncAdapterではOAuthを使ってAPIリクエストを行う方式というのを採用してみた。要は</p><br />
+                <p>今まで書いたAccountManager及びSyncAdapterなやつは認証トークンを適当に作ってそれを利用してAPIにリクエストを投げるという方式だったのですが、そのサーバー側の問題が色々あるのでそこら辺をRailsで組み直し、Android AccountManager+SyncAdapterではOAuthを使ってAPIリクエストを行う方式というのを採用してみた。要は</p>
 <!--more-->
 
 <ul>
@@ -86,23 +86,23 @@
 <li>アプリがgetAuthTokenでアクセストークンを要求する際に、アカウントでログインを行いそのアカウントのアクセストークンを取得する</li>
 <li>取得したアクセストークンを使ってSyncAdapter側でサーバー側とやり取りを行いデータをContent Provider経由でSQLiteに保管する</li>
 </ul>
-<p>っていうような手順になる</p><br />
+<p>っていうような手順になる</p>
 <h4>サーバー側にOAuth Providerの機能を追加</h4>
-<p>サーバー側はタイトル通りRailsを使用する。で適当にAPIを利用できるようにして、ログイン処理等の機能を実装する。でOAuth Providerな所は <a href="https://github.com/applicake/doorkeeper">https://github.com/applicake/doorkeeper</a> を使用する事でサクッと出来る模様。でdoorkeeperのドキュメント読めば分かるんだけど <a href="http://d.hatena.ne.jp/camelmasa/20121005/1349459738">http://d.hatena.ne.jp/camelmasa/20121005/1349459738</a> っていう超参考になるのがあるのでそれ読むと良い。とりあえずここであーだらこーだら書くのは避ける</p><br /><p>でRails側の <a href="http://localhost:3000/oauth/applications">http://localhost:3000/oauth/applications</a> にアクセスしてアプリケーション登録を行いClient IDとClient Secretを取得する。でAPI側にはOAuth経由でリクエストされるのを期待させなければならないのでそういうところも盛り込む(doorkeeper_for :allとbefore_filterとか使って)</p><br /><p>サーバー側はこんな感じ</p><br />
+<p>サーバー側はタイトル通りRailsを使用する。で適当にAPIを利用できるようにして、ログイン処理等の機能を実装する。でOAuth Providerな所は <a href="https://github.com/applicake/doorkeeper">https://github.com/applicake/doorkeeper</a> を使用する事でサクッと出来る模様。でdoorkeeperのドキュメント読めば分かるんだけど <a href="http://d.hatena.ne.jp/camelmasa/20121005/1349459738">http://d.hatena.ne.jp/camelmasa/20121005/1349459738</a> っていう超参考になるのがあるのでそれ読むと良い。とりあえずここであーだらこーだら書くのは避ける</p><p>でRails側の <a href="http://localhost:3000/oauth/applications">http://localhost:3000/oauth/applications</a> にアクセスしてアプリケーション登録を行いClient IDとClient Secretを取得する。でAPI側にはOAuth経由でリクエストされるのを期待させなければならないのでそういうところも盛り込む(doorkeeper_for :allとbefore_filterとか使って)</p><p>サーバー側はこんな感じ</p>
 <h4>Androidアプリ側のAccountManagerにOAuth2のアクセストークン取得処理を実装する</h4>
-<p>流れ的には</p><br />
+<p>流れ的には</p>
 <ul>
 <li>アカウント作成時に呼ばれるActivityにおいてDialogを表示させてユーザーIDとパスワードを入力させる</li>
 <li>登録処理が開始したらAccountManager#addAccountExplicitly等を使ってアカウント登録処理を行う</li>
 <li>AbstractAccountAuthenticatorを継承しているクラスにおいて、getAuthTokenメソッドをサーバーからアクセストークンを取得するように実装する。そのトークンをBundleにAccountManager.KEY_AUTHTOKENで返させる。</li>
 <li>そのアクセストークンを使って(ry</li>
 </ul>
-<p>な感じかと。でOAuthのアクセストークンを取る方法が</p><br />
+<p>な感じかと。でOAuthのアクセストークンを取る方法が</p>
 <ul>
-<li>(GET) <a href="http://localhost:3000/oauth/authorize?client_id=%7BClient">http://localhost:3000/oauth/authorize?client_id={Client</a> ID}&amp;redirect_uri={Redirect URI}&amp;response_type=code</li>
+<li>(GET) http://localhost:3000/oauth/authorize?client_id={Client ID}&amp;redirect_uri={Redirect URI}&amp;response_type=code</li>
 <li>(POST) <a href="http://localhost:3000/oauth/token">http://localhost:3000/oauth/token</a></li>
 </ul>
-<p>パラメーターが</p><br />
+<p>パラメーターが</p>
 <ul>
 <li>  client_id</li>
 <li>  client_secret</li>
@@ -110,7 +110,7 @@
 <li>  grant_Type</li>
 <li>  redirect_uri</li>
 </ul>
-<p>なパラメーターをセットしてリクエスト。で結果がJSONでアクセストークン・リフレッシュトークン等を含んで出力されるので(ry</p><br /><p>な感じな処理をgetAuthTokenに実装する。でアクセストークンに有効期限がある模様だけど、 <a href="https://github.com/applicake/doorkeeper/wiki/Customizing-Token-Expiration">https://github.com/applicake/doorkeeper/wiki/Customizing-Token-Expiration</a> によると期間を指定出来る模様。なのでサーバーの仕様に合わせてそこら辺をうまくキャッシュしたりすれば良いんじゃないかなーっと</p><br /><p>とりあえずフロー的なのうｐする</p><br /><p><img src="/images/2013/06/20130604203044.png" loading="lazy" /></p><br /><p>まぁアカウントが無いので作れよーって言われるのでOKを押して独自アカウントを選択すると</p><br /><p><img src="/images/2013/06/20130604203118.png" loading="lazy" /></p><br /><p>というようにユーザーIDとパスワードが要求される。でオッケーを押すとアカウントが作られる。んでアプリに戻る前に</p><br /><p><img src="/images/2013/06/20130604203214.png" loading="lazy" /></p><br /><p>同期を有効にする。でアプリに戻ると</p><br /><p><img src="/images/2013/06/20130604203251.png" loading="lazy" /></p><br /><p>というようにSyncAdapter側でサーバーと通信を行なって取得したデータをContent Providerを通じてSQLiteに保管される</p><br /><p>まぁそんな感じ</p><br /><p>でやってみて思ったのが結構ややこしい。あとサーバー側のOAuthじゃない所の認証システム辺りが素で自分で組んだんだけど、そこら辺はやはりdeviseとか使って認証システム組んだ方が良さそうな気もする</p><br />
+<p>なパラメーターをセットしてリクエスト。で結果がJSONでアクセストークン・リフレッシュトークン等を含んで出力されるので(ry</p><p>な感じな処理をgetAuthTokenに実装する。でアクセストークンに有効期限がある模様だけど、 <a href="https://github.com/applicake/doorkeeper/wiki/Customizing-Token-Expiration">https://github.com/applicake/doorkeeper/wiki/Customizing-Token-Expiration</a> によると期間を指定出来る模様。なのでサーバーの仕様に合わせてそこら辺をうまくキャッシュしたりすれば良いんじゃないかなーっと</p><p>とりあえずフロー的なのうｐする</p><p><img src="/images/2013/06/20130604203044.png" loading="lazy" /></p><p>まぁアカウントが無いので作れよーって言われるのでOKを押して独自アカウントを選択すると</p><p><img src="/images/2013/06/20130604203118.png" loading="lazy" /></p><p>というようにユーザーIDとパスワードが要求される。でオッケーを押すとアカウントが作られる。んでアプリに戻る前に</p><p><img src="/images/2013/06/20130604203214.png" loading="lazy" /></p><p>同期を有効にする。でアプリに戻ると</p><p><img src="/images/2013/06/20130604203251.png" loading="lazy" /></p><p>というようにSyncAdapter側でサーバーと通信を行なって取得したデータをContent Providerを通じてSQLiteに保管される</p><p>まぁそんな感じ</p><p>でやってみて思ったのが結構ややこしい。あとサーバー側のOAuthじゃない所の認証システム辺りが素で自分で組んだんだけど、そこら辺はやはりdeviseとか使って認証システム組んだ方が良さそうな気もする</p>
               </div>
             </div>
           </div>
@@ -149,7 +149,7 @@
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -165,7 +165,7 @@
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -192,7 +192,7 @@
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -200,7 +200,7 @@
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -208,7 +208,7 @@
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -242,14 +242,14 @@
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

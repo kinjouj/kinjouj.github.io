@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">angular.jsをやってみる (13) - $sceとngSanitize -</h3>
+              <h1 class="entry-title">angular.jsをやってみる (13) - $sceとngSanitize -</h1>
               <p class="meta">
                 2014-03-28T00:00:00+00:00
                 <span class="categories">
@@ -78,40 +78,40 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>※ややこしいので公式ドキュメント読んだ方がいい</p><br /><pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
+                <p>※ややこしいので公式ドキュメント読んだ方がいい</p><pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
   &lt;span&gt;{% raw %}{{message}}{% endraw %}&lt;/span&gt;
 &lt;/div&gt;
-</code></pre><p>的な感じになってて</p><br /><pre class="line-numbers"><code class="language-js")>angular.module("app", [])
+</code></pre><p>的な感じになってて</p><pre class="line-numbers"><code class="language-js")>angular.module("app", [])
   .controller("SampleController", function($scope) {
     $scope.message = '&lt;span style="color: red"&gt;hoge&lt;/span&gt;';
   });
-</code></pre><p>みたいにすると、$scopeとかに含まれるHTMLとかはエスケープされて出力されるらしい</p><br />
+</code></pre><p>みたいにすると、$scopeとかに含まれるHTMLとかはエスケープされて出力されるらしい</p>
 <!--more-->
 <pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
   &lt;span ng-bind-html="message" /&gt;
 &lt;/div&gt;
-</code></pre><p>みたいにすると「Error: $sce:unsafe」っていうエラーになる模様。但し、このエラーが発生するのはangular-sanitize.jsが参照されていない場合であって参照されている場合などにおいては物によっては出力は許可されるがCSP(Content Security Policy)に反するようなインラインなスタイルやスクリプトは除去される模様。あくまで汚染物を除去する的な所かと</p><br /><p>ちょっと余談が多いけど、それの出力を許可するようにするには$sce(Strict Contextual Escaping)を使う事で出来る模様。あくまで$sceはangular-sanitizeに含まれる物では無い模様</p><br /><pre class="line-numbers"><code class="language-js")>angular.module("app", [])
+</code></pre><p>みたいにすると「Error: $sce:unsafe」っていうエラーになる模様。但し、このエラーが発生するのはangular-sanitize.jsが参照されていない場合であって参照されている場合などにおいては物によっては出力は許可されるがCSP(Content Security Policy)に反するようなインラインなスタイルやスクリプトは除去される模様。あくまで汚染物を除去する的な所かと</p><p>ちょっと余談が多いけど、それの出力を許可するようにするには$sce(Strict Contextual Escaping)を使う事で出来る模様。あくまで$sceはangular-sanitizeに含まれる物では無い模様</p><pre class="line-numbers"><code class="language-js")>angular.module("app", [])
   .controller("SampleController", function($scope, $sce) {
     var text = '&lt;span style="color: red"&gt;hoge&lt;/span&gt;';
     $scope.message = $sce.trustAsHtml($text);
   });
-</code></pre><p>$sceで使えるAPIについては<a href="http://docs.angularjs.org/api/ng/service/$sce">http://docs.angularjs.org/api/ng/service/$sce</a>を参照</p><br /><p>若干ややこしいが</p><br />
+</code></pre><p>$sceで使えるAPIについては<a href="http://docs.angularjs.org/api/ng/service/$sce">http://docs.angularjs.org/api/ng/service/$sce</a>を参照</p><p>若干ややこしいが</p>
 <ul>
 <li>  $scopeに突っ込んだHTMLはエスケープされて出力される</li>
 <li>  angular-sanitize.jsを参照せずにng-bind-htmlでHTMLをバインドしようとするとエラーが出る</li>
 <li>  angular-sanitize.jsを参照してng-bind-htmlでHTMLをバインドすると出力されるが、CSPに反するような部分は除去される</li>
 <li>  $sceのAPIを使う事でCSPに反するようなのを除去せずにHTMLとして出力する事が可能(但し、許可されないのもある)</li>
 </ul>
-<p>っていう感じかと。んまぁセキュリティ観点からするとむやみに$sce.trustAsHtmlとかしないようにするべきなのが一番良いのだろうと。</p><br />
+<p>っていう感じかと。んまぁセキュリティ観点からするとむやみに$sce.trustAsHtmlとかしないようにするべきなのが一番良いのだろうと。</p>
 <h4>余談: linkyフィルターについて</h4>
-<p>angular-sanitize.jsのドキュメントによるとデータ中のURL等をマークアップ化する方法としてはlinkyフィルターを使えば良い模様</p><br /><pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
+<p>angular-sanitize.jsのドキュメントによるとデータ中のURL等をマークアップ化する方法としてはlinkyフィルターを使えば良い模様</p><pre class="line-numbers"><code class="language-html")>&lt;div ng-controller="SampleController"&gt;
   &lt;span ng-bind-html="message | linky" /&gt;
 &lt;/div&gt;
-</code></pre><p>的な感じにして</p><br /><pre class="line-numbers"><code class="language-js")>angular.module("app", ["ngSanitize"])
+</code></pre><p>的な感じにして</p><pre class="line-numbers"><code class="language-js")>angular.module("app", ["ngSanitize"])
   .controller("SampleController", function($scope) {
     $scope.message = "http://localhost";
   });
-</code></pre><p>的な感じでURL等が含まれるデータはlinkyフィルターによってマークアップされる模様</p><br /><p>んまぁ詳しいことはドキュメント(<a href="http://docs.angularjs.org/api/ngSanitize/filter/linky)">http://docs.angularjs.org/api/ngSanitize/filter/linky)</a>読めって事で</p><br />
+</code></pre><p>的な感じでURL等が含まれるデータはlinkyフィルターによってマークアップされる模様</p><p>んまぁ詳しいことはドキュメント(<a href="http://docs.angularjs.org/api/ngSanitize/filter/linky)">http://docs.angularjs.org/api/ngSanitize/filter/linky)</a>読めって事で</p>
               </div>
             </div>
           </div>
@@ -150,7 +150,7 @@
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -166,7 +166,7 @@
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -193,7 +193,7 @@
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -201,7 +201,7 @@
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -209,7 +209,7 @@
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -243,14 +243,14 @@
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

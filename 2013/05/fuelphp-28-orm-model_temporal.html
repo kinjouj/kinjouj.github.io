@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">FuelPHPをやってみる (28) - OrmModel_Temporal -</h3>
+              <h1 class="entry-title">FuelPHPをやってみる (28) - OrmModel_Temporal -</h1>
               <p class="meta">
                 2013-05-08T00:00:00+00:00
                 <span class="categories">
@@ -78,11 +78,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>FuelPHP 1.6 Release(祝)</p><br /><p>っていう事で1.6から追加された模様気なOrmModel_Temporalを使ってみる。まずこれなんなのかって、バージョニング出来るモデルみたいな感じなのかなと。で</p><br />
+                <p>FuelPHP 1.6 Release(祝)</p><p>っていう事で1.6から追加された模様気なOrmModel_Temporalを使ってみる。まずこれなんなのかって、バージョニング出来るモデルみたいな感じなのかなと。で</p>
 <div style="margin-bottom:5px">
   <strong> <a href="https://www.slideshare.net/takyam1213/temporal-model-takyam" title="What"s Temporal model FuelPHP東京勉強会03" target="_blank">What"s Temporal model FuelPHP東京勉強会03</a> </strong> from <strong><a href="http://www.slideshare.net/takyam1213" target="_blank">Takayuki Yamaguchi</a></strong>
 </div>
-<p>ぶっちゃけこれ見た方が概要全て解説されているかと思いますんで、是非一読される事をオススメします。っていうか自分もこれ見てやってみただけなので</p><br />
+<p>ぶっちゃけこれ見た方が概要全て解説されているかと思いますんで、是非一読される事をオススメします。っていうか自分もこれ見てやってみただけなので</p>
 <!--more-->
 
 <h4>fuel/app/models/sample.php</h4>
@@ -104,7 +104,7 @@ class Model_Sample extends Orm\Model_Temporal {
         "mysql_timestamp" =&gt; true
     );
 }
-</code></pre><p>っつー感じでOrmModel_Temporalを継承したモデルクラスを定義。ドキュメントと違うのはmysql_timestampがtrueなくらい。あとマイグレーション的なの作っとけば</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>っつー感じでOrmModel_Temporalを継承したモデルクラスを定義。ドキュメントと違うのはmysql_timestampがtrueなくらい。あとマイグレーション的なの作っとけば</p><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 namespace Fuel\Migrations;
 
@@ -129,7 +129,7 @@ class Sample {
     public function down() {
     }
 }
-</code></pre><p>な感じかと。で本題はこれから、ただモデル定義しただけなので</p><br /><p>でOrm\Model_Temporalの特徴だと思われる「find(ID)-&gt;saveしてもupdateでは無く、同一のIDを持ったINSERTが行われる」模様。もちろんoverwriteメソッドを使う事でリビジョン管理をする事無く同一のIDをupdateする事は出来る。コード的に書くと</p><br /><pre class="line-numbers"><code class="language-php")>$model = Model_Sample::forge();
+</code></pre><p>な感じかと。で本題はこれから、ただモデル定義しただけなので</p><p>でOrm\Model_Temporalの特徴だと思われる「find(ID)-&gt;saveしてもupdateでは無く、同一のIDを持ったINSERTが行われる」模様。もちろんoverwriteメソッドを使う事でリビジョン管理をする事無く同一のIDをupdateする事は出来る。コード的に書くと</p><pre class="line-numbers"><code class="language-php")>$model = Model_Sample::forge();
 $model-&gt;name = "test1";
 $model-&gt;save(); // 普通にsave
 
@@ -148,7 +148,7 @@ $model = Model_Sample::find_revision(1, "2013-05-08 xx:xx:xx")-&gt;restore();
 
 // purgeをすればレコード自体にもリビジョンを残さず削除出来る
 $model-&gt;purge();
-</code></pre><p>っていう感じっぽい。でfind(&quot;all&quot;)とかしちゃったらどうなるのか、コントローラーで</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>っていう感じっぽい。でfind(&quot;all&quot;)とかしちゃったらどうなるのか、コントローラーで</p><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 class Controller_Sample extends Controller {
     public function action_index() {
@@ -161,14 +161,14 @@ class Controller_Sample extends Controller {
         return Response::forge();
     }
 }
-</code></pre><p>なやつを</p><br />
+</code></pre><p>なやつを</p>
 <ul>
 <li>普通にsave (2回)</li>
 <li>find(1)してsave</li>
 <li>find(1)してoverwrite</li>
 <li>再度、find(1)してsave</li>
 </ul>
-<p>した場合</p><br /><p><img src="/images/2013/05/20130508135359.jpg" loading="lazy" /></p><br /><p>になり、レコード的には</p><br />
+<p>した場合</p><p><img src="/images/2013/05/20130508135359.jpg" loading="lazy" /></p><p>になり、レコード的には</p>
 <pre>
 +----+-------+---------------------+---------------------+
 | id | name  | temporal_start      | temporal_end        |
@@ -178,7 +178,7 @@ class Controller_Sample extends Controller {
 |  2 | test2 | 2013-05-08 13:51:07 | 2038-01-18 22:14:08 |
 +----+-------+---------------------+---------------------+
 </pre>
-<p>同一IDなのは後に処理された方のみがfind(&quot;all&quot;)では列挙される形にはなる。という感じでModel_Softを使った論理削除方式とはちょっと違う方式を利用できる模様。</p><br /><p>公式ドキュメント: <a href="http://fuelphp.com/docs/packages/orm/model/temporal.html">http://fuelphp.com/docs/packages/orm/model/temporal.html</a></p><br />
+<p>同一IDなのは後に処理された方のみがfind(&quot;all&quot;)では列挙される形にはなる。という感じでModel_Softを使った論理削除方式とはちょっと違う方式を利用できる模様。</p><p>公式ドキュメント: <a href="http://fuelphp.com/docs/packages/orm/model/temporal.html">http://fuelphp.com/docs/packages/orm/model/temporal.html</a></p>
               </div>
             </div>
           </div>
@@ -217,7 +217,7 @@ class Controller_Sample extends Controller {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -233,7 +233,7 @@ class Controller_Sample extends Controller {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -260,7 +260,7 @@ class Controller_Sample extends Controller {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -268,7 +268,7 @@ class Controller_Sample extends Controller {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -276,7 +276,7 @@ class Controller_Sample extends Controller {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -310,14 +310,14 @@ class Controller_Sample extends Controller {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

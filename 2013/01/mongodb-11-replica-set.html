@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">mongodbを使ってみる (11) - replica set -</h3>
+              <h1 class="entry-title">mongodbを使ってみる (11) - replica set -</h1>
               <p class="meta">
                 2013-01-24T00:00:00+00:00
                 <span class="categories">
@@ -77,16 +77,16 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>マスターがあってスレーブがいくつかある、でマスターが落ちてもどっかのスレーブがマスターに昇格して運用を継続できるようにする的な事をやりたいのであれば、レプリカセットな機能を使えば良い模様</p><br />
+                <p>マスターがあってスレーブがいくつかある、でマスターが落ちてもどっかのスレーブがマスターに昇格して運用を継続できるようにする的な事をやりたいのであれば、レプリカセットな機能を使えば良い模様</p>
 <!--more-->
 
 <h4>サーバーを起動</h4>
-<p>とりあえずマスター・スレーブとなる3つのMongoDBを起動</p><br /><pre class="line-numbers"><code class="language-none")>mongod --dbpath /tmp/mongo1 --logpath /tmp/mongo1/mongodb.log --port 10001 --replSet repltest --rest
+<p>とりあえずマスター・スレーブとなる3つのMongoDBを起動</p><pre class="line-numbers"><code class="language-none")>mongod --dbpath /tmp/mongo1 --logpath /tmp/mongo1/mongodb.log --port 10001 --replSet repltest --rest
 
 mongod --dbpath /tmp/mongo2 --logpath /tmp/mongo2/mongodb.log --port 10002 --replSet repltest --rest
 
 mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --replSet repltest --rest
-</code></pre><p>でrepltestっていう名前でレプリカセット名を指定している感じなのかな、んまぁそういう感じで</p><br /><p>でレプリカセットな設定を行う</p><br /><pre class="line-numbers"><code class="language-js")>rs.initiate({
+</code></pre><p>でrepltestっていう名前でレプリカセット名を指定している感じなのかな、んまぁそういう感じで</p><p>でレプリカセットな設定を行う</p><pre class="line-numbers"><code class="language-js")>rs.initiate({
   _id: "repltest",
   members: [
     { _id: 1, host: "localhost:10001" },
@@ -94,9 +94,9 @@ mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --rep
     { _id: 3, host: "localhost:10003" }
   ]
 })
-</code></pre><p>な感じで設定を行う。で <a href="http://localhost:11001/_replSet">http://localhost:11001/_replSet</a> でレプリカセットの状態が見れるのでアクセスすると</p><br /><p><img src="/images/2013/01/20130123213000.jpg" loading="lazy" /></p><br /><p>っていう感じっすね。PRIMARYとSECONDARYの2つに分かれてる。でマスターを落とすと</p><br /><p><img src="/images/2013/01/20130123213117.jpg" loading="lazy" /></p><br /><p>てな感じで10001がDOWNになって10003がSECONDARYからPRIMARYになってる(10001は落ちてるので上のWebコンソールは別のサーバーのやつでアクセスする)。でこの状態で現在は10003がPRIMARYなのでこれも落としてみると</p><br /><p><img src="/images/2013/01/20130123213344.jpg" loading="lazy" /></p><br /><p>でそこら辺を柔軟に管理してPRIMARY/SECONDARYを監査してくれる?のがArbiterな模様なので、もう1個MongoDBを起動する</p><br /><pre class="line-numbers"><code class="language-none")>mongod --replSet repltest --dbpath /tmp/mongo4 --logpath /tmp/mongo4/mongdb.log --port 10004 --rest
-</code></pre><p>この状態でもう一度上記の3つのサーバー起動しておく。でWebコンソールからPRIMARYに入って</p><br /><pre class="line-numbers"><code class="language-js")>db.addArb("localhost:10004")
-</code></pre><p>でArbiterサーバーを設定しておく。で再度Webコンソールを見ると</p><br /><p><img src="/images/2013/01/20130123213948.jpg" loading="lazy" /></p><br /><p>な感じARBITERな項目が増える。でちょっと停止させておいて、既に3つのサーバーをレプリカセットとして認識させているけど、10003だけ起動せずに停止したままにしてみると</p><br /><p><img src="/images/2013/01/20130123215449.jpg" loading="lazy" /></p><br /><p>という風に10003が起動してないのでPRIMARYが決まってない。こういう状況になった場合にArbiterがPRIMARYを監査してくれる模様という事で停止しておいたArbiterを起動すると</p><br /><p><img src="/images/2013/01/20130123221002.jpg" loading="lazy" /></p><br /><p>っていう感じ。まぁPRIMARYかSECONDARYか判断されてないようなケースだとArbiterにそれを委譲するっていう感じなんすかね。はっきりとした理論は無いんですけど</p><br /><p>んまぁレプリカセットな概要的なのはこんな感じかと</p><br /><p>で問題はデータとかどうなんの的な話になると思うんですが、PRIMARYが停止してSECONDARYがPRIMARYに昇格する際にPRIMARYが持ってたデータをsyncする模様。元々SECONDARYの状態で既に持ってるけどSECONDARYだからfind出来ないsave出来ない状態なので確認できないんですが、んまぁロックされててPRIMARYに昇格したらロック解除されて参照できるようになるっていう感じかなーっと</p><br /><p>でクライアントとかだとレプリカセットに指定されているサーバーを指定すれば良い模様。PRIMARYになってる所にデータが行くっていう感じかと。Perlだと</p><br /><pre class="line-numbers"><code class="language-pl")>use MongoDB;
+</code></pre><p>な感じで設定を行う。で <a href="http://localhost:11001/_replSet">http://localhost:11001/_replSet</a> でレプリカセットの状態が見れるのでアクセスすると</p><p><img src="/images/2013/01/20130123213000.jpg" loading="lazy" /></p><p>っていう感じっすね。PRIMARYとSECONDARYの2つに分かれてる。でマスターを落とすと</p><p><img src="/images/2013/01/20130123213117.jpg" loading="lazy" /></p><p>てな感じで10001がDOWNになって10003がSECONDARYからPRIMARYになってる(10001は落ちてるので上のWebコンソールは別のサーバーのやつでアクセスする)。でこの状態で現在は10003がPRIMARYなのでこれも落としてみると</p><p><img src="/images/2013/01/20130123213344.jpg" loading="lazy" /></p><p>でそこら辺を柔軟に管理してPRIMARY/SECONDARYを監査してくれる?のがArbiterな模様なので、もう1個MongoDBを起動する</p><pre class="line-numbers"><code class="language-none")>mongod --replSet repltest --dbpath /tmp/mongo4 --logpath /tmp/mongo4/mongdb.log --port 10004 --rest
+</code></pre><p>この状態でもう一度上記の3つのサーバー起動しておく。でWebコンソールからPRIMARYに入って</p><pre class="line-numbers"><code class="language-js")>db.addArb("localhost:10004")
+</code></pre><p>でArbiterサーバーを設定しておく。で再度Webコンソールを見ると</p><p><img src="/images/2013/01/20130123213948.jpg" loading="lazy" /></p><p>な感じARBITERな項目が増える。でちょっと停止させておいて、既に3つのサーバーをレプリカセットとして認識させているけど、10003だけ起動せずに停止したままにしてみると</p><p><img src="/images/2013/01/20130123215449.jpg" loading="lazy" /></p><p>という風に10003が起動してないのでPRIMARYが決まってない。こういう状況になった場合にArbiterがPRIMARYを監査してくれる模様という事で停止しておいたArbiterを起動すると</p><p><img src="/images/2013/01/20130123221002.jpg" loading="lazy" /></p><p>っていう感じ。まぁPRIMARYかSECONDARYか判断されてないようなケースだとArbiterにそれを委譲するっていう感じなんすかね。はっきりとした理論は無いんですけど</p><p>んまぁレプリカセットな概要的なのはこんな感じかと</p><p>で問題はデータとかどうなんの的な話になると思うんですが、PRIMARYが停止してSECONDARYがPRIMARYに昇格する際にPRIMARYが持ってたデータをsyncする模様。元々SECONDARYの状態で既に持ってるけどSECONDARYだからfind出来ないsave出来ない状態なので確認できないんですが、んまぁロックされててPRIMARYに昇格したらロック解除されて参照できるようになるっていう感じかなーっと</p><p>でクライアントとかだとレプリカセットに指定されているサーバーを指定すれば良い模様。PRIMARYになってる所にデータが行くっていう感じかと。Perlだと</p><pre class="line-numbers"><code class="language-pl")>use MongoDB;
 
 my $c = MongoDB::MongoClient-&gt;new(
     host =&gt; "mongodb://localhost:10001,localhost:10002,localhost:10003"
@@ -105,7 +105,7 @@ my $db = $c-&gt;get_database("sample");
 my $coll = $db-&gt;get_collection("samples");
 
 $coll-&gt;save(+{ time =&gt; time() });
-</code></pre><p>っていう感じでhostでレプリカセットで指定されているサーバーを指定する</p><br /><p>まぁドキュメント見た方が理論的でいいかと</p><br /><p>ちなみにArbiter運用でレプリカセットを運用する場合に最低でも必要なサーバー数は「N &gt; 2」な感じじゃないかと。最低でも2桁なサーバー数無いと辛そうな気がします</p><br />
+</code></pre><p>っていう感じでhostでレプリカセットで指定されているサーバーを指定する</p><p>まぁドキュメント見た方が理論的でいいかと</p><p>ちなみにArbiter運用でレプリカセットを運用する場合に最低でも必要なサーバー数は「N &gt; 2」な感じじゃないかと。最低でも2桁なサーバー数無いと辛そうな気がします</p>
               </div>
             </div>
           </div>
@@ -144,7 +144,7 @@ $coll-&gt;save(+{ time =&gt; time() });
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -160,7 +160,7 @@ $coll-&gt;save(+{ time =&gt; time() });
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -187,7 +187,7 @@ $coll-&gt;save(+{ time =&gt; time() });
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -195,7 +195,7 @@ $coll-&gt;save(+{ time =&gt; time() });
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -203,7 +203,7 @@ $coll-&gt;save(+{ time =&gt; time() });
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -237,14 +237,14 @@ $coll-&gt;save(+{ time =&gt; time() });
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

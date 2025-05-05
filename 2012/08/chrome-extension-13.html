@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">Chrome Extension開発を勉強してみる (13) - oauth.jsでTwitter API -</h3>
+              <h1 class="entry-title">Chrome Extension開発を勉強してみる (13) - oauth.jsでTwitter API -</h1>
               <p class="meta">
                 2012-08-02T00:00:00+00:00
                 <span class="categories">
@@ -78,13 +78,13 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを<a href="http://dev.twitter.com">http://dev.twitter.com</a>から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる</p><br />
+                <p>oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを<a href="http://dev.twitter.com">http://dev.twitter.com</a>から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる</p>
 <!--more-->
 
 <h4>概要</h4>
-<p>ブラウザアクションをクリックした際に出るポップアップにホームタイムラインを表示する。その際に認証されてなかったらOAuthで認証を要求させてAccess Tokenを取得する。あくまでAccess Token自体をソース内にコピペはしない。sha1.js、oauth.js、jquery.jsは別途でダウンロードしてくる</p><br /><p>で今回はChrome ExtensionなのでTwitter OAuthのCallback URLは空にしてPINを画面上に出るようにする。その際にそのPINをコピペしなくてもそこはコンテントスクリプトを使って自動で処理出来るようにする</p><br />
+<p>ブラウザアクションをクリックした際に出るポップアップにホームタイムラインを表示する。その際に認証されてなかったらOAuthで認証を要求させてAccess Tokenを取得する。あくまでAccess Token自体をソース内にコピペはしない。sha1.js、oauth.js、jquery.jsは別途でダウンロードしてくる</p><p>で今回はChrome ExtensionなのでTwitter OAuthのCallback URLは空にしてPINを画面上に出るようにする。その際にそのPINをコピペしなくてもそこはコンテントスクリプトを使って自動で処理出来るようにする</p>
 <h4>twitter.js</h4>
-<p>oauth.jsを使ってTwitter APIを云々するJavaScriptを作る</p><br /><pre class="line-numbers"><code class="language-js")>const CONSUMER_KEY = "省略";
+<p>oauth.jsを使ってTwitter APIを云々するJavaScriptを作る</p><pre class="line-numbers"><code class="language-js")>const CONSUMER_KEY = "省略";
 const CONSUMER_SECRET = "省略";
 
 const OAUTH_SIGNATURE_METHOD = "HMAC-SHA1";
@@ -232,7 +232,7 @@ Twitter.prototype.fetchTimelines = function(cb) {
     cb(data);
   });
 };
-</code></pre><p>チェック系をまったくしてないですけど、ざっくり書くとこんな感じで。まぁ認証してアクセストークンを取得して、そこからホームタイムラインを取得するAPIにリクエストを投げるという処理</p><br /><p>んじゃこれからChrome Extensionの開発をする</p><br />
+</code></pre><p>チェック系をまったくしてないですけど、ざっくり書くとこんな感じで。まぁ認証してアクセストークンを取得して、そこからホームタイムラインを取得するAPIにリクエストを投げるという処理</p><p>んじゃこれからChrome Extensionの開発をする</p>
 <h4>manifest.json</h4>
 <pre class="line-numbers"><code class="language-json")>{
   "name": "test",
@@ -254,7 +254,7 @@ Twitter.prototype.fetchTimelines = function(cb) {
   },
   "permissions": ["https://api.twitter.com/"]
 }
-</code></pre><p>今回はContent Scriptを使ってPINコードを自動でコピペして処理するが、その処理自体は主にBackground Pageに促すようにする。でBrowser Action側も主な処理は同様にBackground Pageを介して行う(getBackgroundPageを使うだけ)</p><br />
+</code></pre><p>今回はContent Scriptを使ってPINコードを自動でコピペして処理するが、その処理自体は主にBackground Pageに促すようにする。でBrowser Action側も主な処理は同様にBackground Pageを介して行う(getBackgroundPageを使うだけ)</p>
 <h4>background.js</h4>
 <pre class="line-numbers"><code class="language-js")>var api = new Twitter();
 
@@ -327,9 +327,9 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   // Background PageでonRequestさせて処理させる
   chrome.extension.sendRequest({ "verifier": pin.innerText });
 }
-</code></pre><p>という感じ。動かすと認証してない時にブラウザアクションをクリックすると</p><br /><p><img src="/images/2012/08/20120802181056.png" loading="lazy" /></p><br /><p>てな感じで認証後に行うと</p><br /><p><img src="/images/2012/08/20120802181114.png" loading="lazy" /></p><br /><p>というようにホームタイムラインが表示される。んまぁそんな感じでTwitter APIをアクセストークンを取得して行う場合は大体こんな感じかなと</p><br />
+</code></pre><p>という感じ。動かすと認証してない時にブラウザアクションをクリックすると</p><p><img src="/images/2012/08/20120802181056.png" loading="lazy" /></p><p>てな感じで認証後に行うと</p><p><img src="/images/2012/08/20120802181114.png" loading="lazy" /></p><p>というようにホームタイムラインが表示される。んまぁそんな感じでTwitter APIをアクセストークンを取得して行う場合は大体こんな感じかなと</p>
 <h4>追記</h4>
-<p><a href="https://github.com/kinjouj/chrome-extension-twitter-oauth-demo">https://github.com/kinjouj/chrome-extension-twitter-oauth-demo</a> の方にてチェックアウト出来るようにしました(但し、oauth.js・sha1.js・jquery.js等は未混入)</p><br /><p>又、主に記事は修正せずにgithub側の方へ修正を行いますのであしからず</p><br />
+<p><a href="https://github.com/kinjouj/chrome-extension-twitter-oauth-demo">https://github.com/kinjouj/chrome-extension-twitter-oauth-demo</a> の方にてチェックアウト出来るようにしました(但し、oauth.js・sha1.js・jquery.js等は未混入)</p><p>又、主に記事は修正せずにgithub側の方へ修正を行いますのであしからず</p>
               </div>
             </div>
           </div>
@@ -368,7 +368,7 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -384,7 +384,7 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -411,7 +411,7 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -419,7 +419,7 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -427,7 +427,7 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -461,14 +461,14 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

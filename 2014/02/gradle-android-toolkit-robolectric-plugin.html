@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">gradle-android-toolkit+robolectric-plugin</h3>
+              <h1 class="entry-title">gradle-android-toolkit+robolectric-plugin</h1>
               <p class="meta">
                 2014-02-18T00:00:00+00:00
                 <span class="categories">
@@ -88,13 +88,13 @@
     &mdash; なかざん＠ミラ・イース現象だ！！！ (@Nkzn) <a href="https://twitter.com/Nkzn/statuses/435417429317935106">2014, 2月 17</a>
   </p>
 </blockquote>
-<p>っていう事でrobolectric-pluginっていうのがあるっては知ってはいたんですが、どうも上手く行かなずな感じで。まぁ一回は挫折したんですが再チャレンジでようやくテストの実行が出来たのでメモっておく</p><br />
+<p>っていう事でrobolectric-pluginっていうのがあるっては知ってはいたんですが、どうも上手く行かなずな感じで。まぁ一回は挫折したんですが再チャレンジでようやくテストの実行が出来たのでメモっておく</p>
 <!--more-->
 
 <h4>構成</h4>
-<p>構成は前回の<a href="/gradle-android-test-plugin-robolectric-testing.html">gradle-android-test-plugin+Robolectricでテスト</a>のをそのまま利用する。build.gradle等を色々書き換えしたりとかをする</p><br />
+<p>構成は前回の<a href="/gradle-android-test-plugin-robolectric-testing.html">gradle-android-test-plugin+Robolectricでテスト</a>のをそのまま利用する。build.gradle等を色々書き換えしたりとかをする</p>
 <h4>公式のrobolectric-pluginが動かない</h4>
-<p>どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 <a href="http://qiita.com/turugina/items/972f46b40bb972c180f0">http://qiita.com/turugina/items/972f46b40bb972c180f0</a> にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど</p><br /><p>まぁ <a href="https://github.com/turugina/robolectric-plugin">https://github.com/turugina/robolectric-plugin</a> からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る</p><br />
+<p>どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 <a href="http://qiita.com/turugina/items/972f46b40bb972c180f0">http://qiita.com/turugina/items/972f46b40bb972c180f0</a> にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど</p><p>まぁ <a href="https://github.com/turugina/robolectric-plugin">https://github.com/turugina/robolectric-plugin</a> からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る</p>
 <h4>build.gradle</h4>
 <pre class="line-numbers"><code class="language-groovy")>buildscript {
     repositories {
@@ -146,9 +146,9 @@ tasks.withType(Test) {
     scanForTestClasses = false
     include "**/*Test.class"
 }
-</code></pre><p>あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない</p><br />
+</code></pre><p>あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない</p>
 <h4>android.content.res.Resources$NotFoundException が出る</h4>
-<p>まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る</p><br /><p>で記事トップに書いてる<a href="http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments%E3%80%80">robolectric-pluginを使うサンプル</a>は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと</p><br /><p>んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で</p><br /><pre class="line-numbers"><code class="language-java")>package sample.test;
+<p>まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る</p><p>で記事トップに書いてる<a href="http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments%E3%80%80">robolectric-pluginを使うサンプル</a>は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと</p><p>んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で</p><pre class="line-numbers"><code class="language-java")>package sample.test;
 
 import org.junit.runners.model.InitializationError;
 import org.robolectric.AndroidManifest;
@@ -187,7 +187,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
         );
     }
 }
-</code></pre><p><img src="/images/2014/02/201402160218.jpg" loading="lazy" /></p><br /><p>結果前回どうようのAssertionErrorが出る (これはわざと出している)</p><br />
+</code></pre><p><img src="/images/2014/02/201402160218.jpg" loading="lazy" /></p><p>結果前回どうようのAssertionErrorが出る (これはわざと出している)</p>
               </div>
             </div>
           </div>
@@ -226,7 +226,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -242,7 +242,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -269,7 +269,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -277,7 +277,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -285,7 +285,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -319,14 +319,14 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

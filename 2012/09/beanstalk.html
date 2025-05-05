@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">beanstalkを使ってみる</h3>
+              <h1 class="entry-title">beanstalkを使ってみる</h1>
               <p class="meta">
                 2012-09-13T00:00:00+00:00
                 <span class="categories">
@@ -77,15 +77,15 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>※Amazon Elastic Beanstalkは関係ありません</p><br /><p><a href="http://kr.github.com/beanstalkd">http://kr.github.com/beanstalkd</a> がちょっと気になったので使ってみた</p><br />
+                <p>※Amazon Elastic Beanstalkは関係ありません</p><p><a href="http://kr.github.com/beanstalkd">http://kr.github.com/beanstalkd</a> がちょっと気になったので使ってみた</p>
 <!--more-->
 
 <h4>インストール</h4>
 <pre class="line-numbers"><code class="language-sh")>sudo apt-get install beanstalkd
-</code></pre><p>でインストール出来る。 もちディストリビューションによって違うと思うので、そこら辺はドキュメント参照するかapt-getなりyumなりで検索して探してインストールする</p><br /><p>んでその後起動しておく。デフォルト推奨ポート番号は11300な模様</p><br />
+</code></pre><p>でインストール出来る。 もちディストリビューションによって違うと思うので、そこら辺はドキュメント参照するかapt-getなりyumなりで検索して探してインストールする</p><p>んでその後起動しておく。デフォルト推奨ポート番号は11300な模様</p>
 <h4>Rubyのライブラリをインストール</h4>
 <pre class="line-numbers"><code class="language-sh")>gem install beanstalk-client
-</code></pre><p>まぁ色々クライアントライブラリはあるみたいですが、とりあえずbeanstalk-clientってのを使う</p><br />
+</code></pre><p>まぁ色々クライアントライブラリはあるみたいですが、とりあえずbeanstalk-clientってのを使う</p>
 <h4>worker.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>require "beanstalk-client"
 
@@ -101,7 +101,7 @@ loop do
 
   job.delete
 end
-</code></pre><p>watchでキュー名(beanstalk的にはtubeというべきなのかも)を指定出来る。デフォルトは&quot;default&quot;な模様。でworker側でクライアント側から来たキュー名を特定するにはstatsで参照可能な模様</p><br /><p>んでソース上で</p><br /><pre class="line-numbers"><code class="language-rb")>class Beanstalk::Job
+</code></pre><p>watchでキュー名(beanstalk的にはtubeというべきなのかも)を指定出来る。デフォルトは&quot;default&quot;な模様。でworker側でクライアント側から来たキュー名を特定するにはstatsで参照可能な模様</p><p>んでソース上で</p><pre class="line-numbers"><code class="language-rb")>class Beanstalk::Job
 
   def [](name)
     ybody[name]
@@ -113,16 +113,16 @@ end
 
   # 以下省略
 end
-</code></pre><p>っていうふうになってるので普通にjob[name]で参照可能。だけどこれyputされた際に限るものだと思われるので、普通の文字列なようなのがputでぶっこんで来られた場合にはjob.bodyで取得できる</p><br />
+</code></pre><p>っていうふうになってるので普通にjob[name]で参照可能。だけどこれyputされた際に限るものだと思われるので、普通の文字列なようなのがputでぶっこんで来られた場合にはjob.bodyで取得できる</p>
 <h4>client.rb</h4>
 <pre class="line-numbers"><code class="language-rb")>require "beanstalk-client"
 
 beanstalk = Beanstalk::Pool.new(["127.0.0.1:11300"])
 beanstalk.use("sample")
 beanstalk.yput({ :name =&gt; "hoge" })
-</code></pre><p>まぁ上でも書いたようにyputを使えばHashとかでも流せる。一応シリアライザー的なのはYAMLな模様。まぁだから接頭辞にyが付いてるんだと思うけど</p><br />
+</code></pre><p>まぁ上でも書いたようにyputを使えばHashとかでも流せる。一応シリアライザー的なのはYAMLな模様。まぁだから接頭辞にyが付いてるんだと思うけど</p>
 <h4>追記</h4>
-<p>beanstalkのEM(EventMachine)なライブラリもある模様で</p><br /><p>worker.rbが</p><br /><pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
+<p>beanstalkのEM(EventMachine)なライブラリもある模様で</p><p>worker.rbが</p><pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
 
 EM.run do
   beanstalk = EM::Beanstalk.new
@@ -143,7 +143,7 @@ EM.run do
     end
   end
 end
-</code></pre><p>な感じで、client.rbが</p><br /><pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
+</code></pre><p>な感じで、client.rbが</p><pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
 
 EM.run do
   beanstalk = EM::Beanstalk.new
@@ -153,7 +153,7 @@ EM.run do
     EM.stop
   end
 end
-</code></pre><p>な感じ。だがクライアントまでEventMachineにする必要あるのかは分からないけど。又、putの引数にオブジェクトとか指定するとワーカー側で取る際にはinspectされてる模様。それをevalするのもどうかと思うのでJSONなりYAMLなりでダンプして流した方が良いのではと思う所</p><br /><p>ちなみにWorkerがEMでClientがbeanstalk-clientでも問題無いみたい。ただシリアライズ的な所は未確認</p><br />
+</code></pre><p>な感じ。だがクライアントまでEventMachineにする必要あるのかは分からないけど。又、putの引数にオブジェクトとか指定するとワーカー側で取る際にはinspectされてる模様。それをevalするのもどうかと思うのでJSONなりYAMLなりでダンプして流した方が良いのではと思う所</p><p>ちなみにWorkerがEMでClientがbeanstalk-clientでも問題無いみたい。ただシリアライズ的な所は未確認</p>
               </div>
             </div>
           </div>
@@ -192,7 +192,7 @@ end
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -208,7 +208,7 @@ end
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -235,7 +235,7 @@ end
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -243,7 +243,7 @@ end
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -251,7 +251,7 @@ end
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -285,14 +285,14 @@ end
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

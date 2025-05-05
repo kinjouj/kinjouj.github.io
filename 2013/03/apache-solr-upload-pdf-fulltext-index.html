@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">Apache SolrでPDFをアップロードしてインデックスする</h3>
+              <h1 class="entry-title">Apache SolrでPDFをアップロードしてインデックスする</h1>
               <p class="meta">
                 2013-03-16T00:00:00+00:00
                 <span class="categories">
@@ -77,16 +77,16 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>普通にドキュメントに書いてるのでそれを参考にしつつやってみた</p><br />
+                <p>普通にドキュメントに書いてるのでそれを参考にしつつやってみた</p>
 <!--more-->
-<p><a href="http://wiki.apache.org/solr/SolrTomcat">http://wiki.apache.org/solr/SolrTomcat</a> を参考にして環境構築</p><br /><p>とりあえずTomcatにデプロイしてやるのでTomcatを用意。んでSolrをダウンロードしてきてdistディレクトリに入ってるwarファイルをTomcatにデプロイ(/path/to/tomcat/webapps/solr.warな感じで)</p><br /><p>で動かしても動かない。設定ファイル等がもろもろ無いので、solrのパッケージにあるexample/solrっていうディレクトリをデプロイ先にコピーする。でその前にsolr/homeっていうのの設定が必要な模様なので/path/to/tomcat/conf/Catalina/localhost/solr.xmlを作成</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+<p><a href="http://wiki.apache.org/solr/SolrTomcat">http://wiki.apache.org/solr/SolrTomcat</a> を参考にして環境構築</p><p>とりあえずTomcatにデプロイしてやるのでTomcatを用意。んでSolrをダウンロードしてきてdistディレクトリに入ってるwarファイルをTomcatにデプロイ(/path/to/tomcat/webapps/solr.warな感じで)</p><p>で動かしても動かない。設定ファイル等がもろもろ無いので、solrのパッケージにあるexample/solrっていうディレクトリをデプロイ先にコピーする。でその前にsolr/homeっていうのの設定が必要な模様なので/path/to/tomcat/conf/Catalina/localhost/solr.xmlを作成</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;Context docBase="/opt/tomcat/webapps/solr/solr.war" debug="0" crossContext="true"&gt;
   &lt;Environment name="solr/home" type="java.lang.String" value="/opt/tomcat/webapps/solr/solr" override="true"/&gt;
 &lt;/Context&gt;
-</code></pre><p>んまぁドキュメントに書いてますんでそれをそのまま参考にして作成ってな感じ。でまだ動かない。正確には動くんだけどPDFとかを処理してくれるRequestHandlerなやつが動かない。なのでsolrconfig.xmlを修正。場所は/path/to/tomcat/webapps/solr/solr/collections/conf/solrconfig.xmlにあるはず、上記の設定だと</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;lib dir="/opt/tomcat/webapps/solr/contrib/extraction/lib" regex=".*.jar" /&gt;
+</code></pre><p>んまぁドキュメントに書いてますんでそれをそのまま参考にして作成ってな感じ。でまだ動かない。正確には動くんだけどPDFとかを処理してくれるRequestHandlerなやつが動かない。なのでsolrconfig.xmlを修正。場所は/path/to/tomcat/webapps/solr/solr/collections/conf/solrconfig.xmlにあるはず、上記の設定だと</p><pre class="line-numbers"><code class="language-xml")>&lt;lib dir="/opt/tomcat/webapps/solr/contrib/extraction/lib" regex=".*.jar" /&gt;
 &lt;lib dir="/opt/tomcat/webapps/solr/dist/" regex="solr-cell-d.*.jar" /&gt;
-</code></pre><p>この2つに直せば良いかと。でこのcontribとdistはsolrパッケージ内にある同名のディレクトリを上記の設定通りにコピーする</p><br /><p>多分これでオッケー。サーバーを起動してstartupエラーが出てない事を確認。あとはインデックスに載せたいPDFファイルをcurlでぶん投げるだけ。ぶん投げ先は <a href="http://localhost:8080/solr/update/extract">http://localhost:8080/solr/update/extract</a></p><br /><p>そのドキュメントは <a href="http://wiki.apache.org/solr/ExtractingRequestHandler">http://wiki.apache.org/solr/ExtractingRequestHandler</a> にある</p><br /><pre class="line-numbers"><code class="language-none")>curl "http://localhost:8080/solr/update/extract?literal.id=test1&captureAttr=true" --data-binary @test.pdf -H "Content-Type:application/pdf
-</code></pre><p>な感じで。で <a href="http://localhost:8080/solr">http://localhost:8080/solr</a> なDashboardを見てみると</p><br /><p><img src="/images/2013/03/20130316204634.jpg" loading="lazy" /></p><br /><p>な感じで(他にもやっちゃったんで2つインデックスがありますけど)</p><br /><p>んじゃ検索を実行してみるのでインデックスに入れたPDFがFuelPHP関係のやつだったので <a href="http://localhost:8080/solr/query?q=fuelphp">http://localhost:8080/solr/query?q=fuelphp</a> な感じでアクセスすると</p><br /><p><img src="/images/2013/03/20130316204817.jpg" loading="lazy" /></p><br /><p>な感じでPDFの内容が解析されてインデックスに載せれたり出来る模様(解析される方式はApache Tikaを使ってる模様)</p><br /><p>まぁそんな感じでPDFだとかWord等のデータをインデックスに載せちゃう事もできちゃうっていうオチで</p><br />
+</code></pre><p>この2つに直せば良いかと。でこのcontribとdistはsolrパッケージ内にある同名のディレクトリを上記の設定通りにコピーする</p><p>多分これでオッケー。サーバーを起動してstartupエラーが出てない事を確認。あとはインデックスに載せたいPDFファイルをcurlでぶん投げるだけ。ぶん投げ先は <a href="http://localhost:8080/solr/update/extract">http://localhost:8080/solr/update/extract</a></p><p>そのドキュメントは <a href="http://wiki.apache.org/solr/ExtractingRequestHandler">http://wiki.apache.org/solr/ExtractingRequestHandler</a> にある</p><pre class="line-numbers"><code class="language-none")>curl "http://localhost:8080/solr/update/extract?literal.id=test1&captureAttr=true" --data-binary @test.pdf -H "Content-Type:application/pdf
+</code></pre><p>な感じで。で <a href="http://localhost:8080/solr">http://localhost:8080/solr</a> なDashboardを見てみると</p><p><img src="/images/2013/03/20130316204634.jpg" loading="lazy" /></p><p>な感じで(他にもやっちゃったんで2つインデックスがありますけど)</p><p>んじゃ検索を実行してみるのでインデックスに入れたPDFがFuelPHP関係のやつだったので <a href="http://localhost:8080/solr/query?q=fuelphp">http://localhost:8080/solr/query?q=fuelphp</a> な感じでアクセスすると</p><p><img src="/images/2013/03/20130316204817.jpg" loading="lazy" /></p><p>な感じでPDFの内容が解析されてインデックスに載せれたり出来る模様(解析される方式はApache Tikaを使ってる模様)</p><p>まぁそんな感じでPDFだとかWord等のデータをインデックスに載せちゃう事もできちゃうっていうオチで</p>
               </div>
             </div>
           </div>
@@ -125,7 +125,7 @@
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -141,7 +141,7 @@
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -168,7 +168,7 @@
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -176,7 +176,7 @@
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -184,7 +184,7 @@
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -218,14 +218,14 @@
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

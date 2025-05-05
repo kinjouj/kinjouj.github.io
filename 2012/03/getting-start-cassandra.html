@@ -68,7 +68,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">Cassandra使ってみた</h3>
+              <h1 class="entry-title">Cassandra使ってみた</h1>
               <p class="meta">
                 2012-03-21T00:00:00+00:00
                 <span class="categories">
@@ -77,17 +77,17 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p><br />
+                <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p>
 <!--more-->
 
 <h4>インストール</h4>
-<p><a href="http://cassandra.apache.org">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p><br />
+<p><a href="http://cassandra.apache.org">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p>
 <h4>起動とその他もろもろ</h4>
-<p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p><br /><pre class="line-numbers"><code class="language-sh")>mkdir -p /var/{log,lib}/cassandra
+<p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p><pre class="line-numbers"><code class="language-sh")>mkdir -p /var/{log,lib}/cassandra
 
 # ※各ディレクトリの所有者関係も設定する
-</code></pre><p>まずサーバーを起動。</p><br /><pre class="line-numbers"><code class="language-sh")>cassandra -f
-</code></pre><p>で起動出来る。-fは-foregroundの略称っぽい、指定しなかった場合にはCassandraDaemonがバックグランド動作になる模様。で起動すると、サーバーが9160なポートを開放する。これはAPI通信を行う際に利用するThriftサーバーのポートな模様。詳しくはログを嫁ということにしときます</p><br /><p>んでクライアントから</p><br /><pre class="line-numbers"><code class="language-sh")>cassandra-cli -h localhost```
+</code></pre><p>まずサーバーを起動。</p><pre class="line-numbers"><code class="language-sh")>cassandra -f
+</code></pre><p>で起動出来る。-fは-foregroundの略称っぽい、指定しなかった場合にはCassandraDaemonがバックグランド動作になる模様。で起動すると、サーバーが9160なポートを開放する。これはAPI通信を行う際に利用するThriftサーバーのポートな模様。詳しくはログを嫁ということにしときます</p><p>んでクライアントから</p><pre class="line-numbers"><code class="language-sh")>cassandra-cli -h localhost```
 
 
 な感じでcassandra-cliを使って接続する。でデータモデルを理解しないといけないが今回は詳細をぶっ飛ばして、とりあえずこんな感じになるっぽい↓
@@ -104,10 +104,10 @@
 
 </code></pre>
 <h1>Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</h1>
-<p>use Keyspace1;</p><br />
+<p>use Keyspace1;</p>
 <h1>Column Familyを作る</h1>
 <p>create column family Sample with comparator = UTF8Type and key<em>validation</em>class = UTF8Type and default<em>validation</em>class = UTF8Type
-```</p><br /><p>まぁこんな感じで作る。で最後の所ですが、作ったColumn Familyをdescribeしてみると</p><br />
+```</p><p>まぁこんな感じで作る。で最後の所ですが、作ったColumn Familyをdescribeしてみると</p>
 <pre>
 ColumnFamily: Sample
   Key Validation Class: org.apache.cassandra.db.marshal.UTF8Type
@@ -124,7 +124,7 @@ ColumnFamily: Sample
   Built indexes: []
   Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
 </pre>
-<p>な感じになる(自分の環境の場合は)。でオプションを指定せずに「create column family Sample」だけにすると</p><br />
+<p>な感じになる(自分の環境の場合は)。でオプションを指定せずに「create column family Sample」だけにすると</p>
 <pre>ColumnFamily: Sample
   Key Validation Class: org.apache.cassandra.db.marshal.BytesType
   Default column value validator: org.apache.cassandra.db.marshal.BytesType
@@ -134,13 +134,13 @@ ColumnFamily: Sample
   Key cache size / save period in seconds: 200000.0/14400
   GC grace seconds: 864000  Compaction min/max thresholds: 4/32  Read repair chance: 1.0  Replicate on write: true  Bloom Filter FP chance: default  Built indexes: []  Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
 </pre>
-<p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p><br /><pre class="line-numbers"><code class="language-none")>use Keyspace1;
+<p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p><pre class="line-numbers"><code class="language-none")>use Keyspace1;
 set Sample[test1][name] = "hoge";
-</code></pre><p>で突っ込んだので</p><br /><pre class="line-numbers"><code class="language-none")>use Keyspace1;
+</code></pre><p>で突っ込んだので</p><pre class="line-numbers"><code class="language-none")>use Keyspace1;
 get Sample[test1];
 
 # 出力 =&gt; (column=name, value=hoge, timestamp=省略)
-</code></pre><p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p><br />
+</code></pre><p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p>
 <h4>pom.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;project
@@ -183,7 +183,7 @@ get Sample[test1];
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/project&gt;
-</code></pre><p>んじゃJava側のClientクラスを書く</p><br />
+</code></pre><p>んじゃJava側のClientクラスを書く</p>
 <h4>Client.java</h4>
 <pre class="line-numbers"><code class="language-java")>import java.nio.ByteBuffer;
 import java.io.UnsupportedEncodingException;
@@ -262,7 +262,7 @@ public class Client {
         return new String(b, "UTF-8");
     }
 }
-</code></pre><p>(ByteBufferな変換あれこれはCassandraにByteBufferUtilっていうのがあるのでそれを使うべきかと思われる)</p><br /><p>あとはmvn compileしたあとにmvn exec:javaで実行してみる。現時点で勉強しているのはここまでなので終了乙</p><br />
+</code></pre><p>(ByteBufferな変換あれこれはCassandraにByteBufferUtilっていうのがあるのでそれを使うべきかと思われる)</p><p>あとはmvn compileしたあとにmvn exec:javaで実行してみる。現時点で勉強しているのはここまでなので終了乙</p>
               </div>
             </div>
           </div>
@@ -301,7 +301,7 @@ public class Client {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -317,7 +317,7 @@ public class Client {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -344,7 +344,7 @@ public class Client {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -352,7 +352,7 @@ public class Client {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -360,7 +360,7 @@ public class Client {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -394,14 +394,14 @@ public class Client {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

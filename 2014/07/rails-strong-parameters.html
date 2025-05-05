@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">strong parameters</h3>
+              <h1 class="entry-title">strong parameters</h1>
               <p class="meta">
                 2014-07-27T00:00:00+00:00
                 <span class="categories">
@@ -79,9 +79,9 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式ドキュメント: <a href="http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters">http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters</a></p><br /><p>ActionController::Parametersリファレンス: <a href="http://api.rubyonrails.org/classes/ActionController/Parameters.html">http://api.rubyonrails.org/classes/ActionController/Parameters.html</a> </p><br /><p>参考: <a href="http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters">http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters</a></p><br />
+                <p>公式ドキュメント: <a href="http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters">http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters</a></p><p>ActionController::Parametersリファレンス: <a href="http://api.rubyonrails.org/classes/ActionController/Parameters.html">http://api.rubyonrails.org/classes/ActionController/Parameters.html</a> </p><p>参考: <a href="http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters">http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters</a></p>
 <!--more-->
-<p>例えば以下のようなテストを実行したらどうなるか</p><br /><pre class="line-numbers"><code class="language-ruby")>require "rails_helper"
+<p>例えば以下のようなテストを実行したらどうなるか</p><pre class="line-numbers"><code class="language-ruby")>require "rails_helper"
 
 describe ApplicationController do
   fixtures :entry, :author
@@ -110,14 +110,14 @@ describe ApplicationController do
   end
 end
 
-</code></pre><p>※config/environments/test.rbにて「<span style="color: red">config.action_controller.permit_all_parameters = true</span>」をしておく。設定しない場合にはホワイトリスト化されてないパラメーター?に対してActiveModel::ForbiddenAttributesErrorが発生してエラーになる模様</p><br /><p>テスト実行する前にspec/fixturesに</p><br /><pre class="line-numbers"><code class="language-yml")>entry1:
+</code></pre><p>※config/environments/test.rbにて「<span style="color: red">config.action_controller.permit_all_parameters = true</span>」をしておく。設定しない場合にはホワイトリスト化されてないパラメーター?に対してActiveModel::ForbiddenAttributesErrorが発生してエラーになる模様</p><p>テスト実行する前にspec/fixturesに</p><pre class="line-numbers"><code class="language-yml")>entry1:
   id: 1
   author_id: 1
   name: hoge
-</code></pre><p>と</p><br /><pre class="line-numbers"><code class="language-yml")>author1:
+</code></pre><p>と</p><pre class="line-numbers"><code class="language-yml")>author1:
   id: 1
   name: author1
-</code></pre><p>初期データを突っ込んでおく。で、このテストを実行すると</p><br />
+</code></pre><p>初期データを突っ込んでおく。で、このテストを実行すると</p>
 <pre>
 F
 
@@ -128,7 +128,7 @@ Failures:
        expected: not nil
             got: nil
 </pre>
-<p>意図しないデータを送ってしまう事により改変されてしまうような事態になる。こういう事態になるのを防ぐのがStrong Parametersっていう機能な模様。てな訳でStrong Parametersを使ってみる</p><br /><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>意図しないデータを送ってしまう事により改変されてしまうような事態になる。こういう事態になるのを防ぐのがStrong Parametersっていう機能な模様。てな訳でStrong Parametersを使ってみる</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
 describe ApplicationController do
   fixtures :entry, :author
@@ -156,7 +156,7 @@ describe ApplicationController do
     expect(author).not_to be_nil
   end
 end
-</code></pre><p>っていうように:nameは通すけど:author<em>idは通さないようにする。又、config/environments/test.rbにて「<span style="color: red">config.action</em>controller.action<em>on</em>unpermitted_parameters = :raise</span>」っていう設定をする事でpermitする段階において、許容されないパラメーターが含まれているような場合にはActionController::UnpermittedParametersのエラーが発生するようになる。なのでその設定をした状態で上記のテストを動かすと</p><br />
+</code></pre><p>っていうように:nameは通すけど:author<em>idは通さないようにする。又、config/environments/test.rbにて「<span style="color: red">config.action</em>controller.action<em>on</em>unpermitted_parameters = :raise</span>」っていう設定をする事でpermitする段階において、許容されないパラメーターが含まれているような場合にはActionController::UnpermittedParametersのエラーが発生するようになる。なのでその設定をした状態で上記のテストを動かすと</p>
 <pre>
 F
 
@@ -167,7 +167,7 @@ Failures:
      ActionController::UnpermittedParameters:
        found unpermitted parameters: author_id
 </pre>
-<p>というようにauthor_idが許容されないパラメーターな為にエラーが発生するようになる。</p><br /><p>終わり。というのがStrong Parametersの機能概要的な感じかと。要はパラメーターをフィルターする事で不当な注入による処理をされないようにするっていう感じかと</p><br />
+<p>というようにauthor_idが許容されないパラメーターな為にエラーが発生するようになる。</p><p>終わり。というのがStrong Parametersの機能概要的な感じかと。要はパラメーターをフィルターする事で不当な注入による処理をされないようにするっていう感じかと</p>
               </div>
             </div>
           </div>
@@ -206,7 +206,7 @@ Failures:
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -222,7 +222,7 @@ Failures:
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -249,7 +249,7 @@ Failures:
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -257,7 +257,7 @@ Failures:
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -265,7 +265,7 @@ Failures:
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -299,14 +299,14 @@ Failures:
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">mongodbを使ってみる (7) - MapReduce -</h3>
+              <h1 class="entry-title">mongodbを使ってみる (7) - MapReduce -</h1>
               <p class="meta">
                 2013-01-17T00:00:00+00:00
                 <span class="categories">
@@ -78,18 +78,18 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>MongoDBにもれなく付いてくる(笑)MapReduceを使ってみる。ただ使っても面白くないので</p><br />
+                <p>MongoDBにもれなく付いてくる(笑)MapReduceを使ってみる。ただ使っても面白くないので</p>
 <ul>
 <li>fluentdを使ってnginxのアクセスログをtailする</li>
 <li>fluentdでパースされたアクセスログをfluent-plugin-mongoを使ってMongoDBにプッシュする</li>
 <li>MongoDB MapReduce APIを使って、アクセスカウント統計を作る</li>
 </ul>
-<p>という流れで</p><br />
+<p>という流れで</p>
 <!--more-->
 
 <h4>fluentd側のセットアップ</h4>
 <pre class="line-numbers"><code class="language-none")>sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
-</code></pre><p>でとりあえずfluent-plugin-mongoを入れる。んで</p><br /><pre class="line-numbers"><code class="language-none")>&lt;source&gt;
+</code></pre><p>でとりあえずfluent-plugin-mongoを入れる。んで</p><pre class="line-numbers"><code class="language-none")>&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -101,10 +101,10 @@
     database fluent
     collection accesslog
 &lt;/match&gt;
-</code></pre><p>なtd-agent.confを作って</p><br /><pre class="line-numbers"><code class="language-none")>/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
-</code></pre><p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p><br />
+</code></pre><p>なtd-agent.confを作って</p><pre class="line-numbers"><code class="language-none")>/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
+</code></pre><p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p>
 <h4>MongoDB側を確認</h4>
-<p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p><br /><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
+<p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f6647c8cdabd1739000004"), "path" : "/" }
 { "_id" : ObjectId("50f6647c8cdabd1739000005"), "path" : "/favicon.ico" }
@@ -136,10 +136,10 @@
 { "_id" : ObjectId("50f712708cdabd1739000023"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f712708cdabd1739000024"), "path" : "/home/index" }
 { "_id" : ObjectId("50f712708cdabd1739000025"), "path" : "/favicon.ico" }
-</code></pre><p>という風にずどどどどとぶっこまれるのが確認できる。ただこれフィルターしているので、あれなんすけど</p><br /><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
+</code></pre><p>という風にずどどどどとぶっこまれるのが確認できる。ただこれフィルターしているので、あれなんすけど</p><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f664408cdabd1739000003") }
-</code></pre><p>という風にpath属性が無いのもあるので</p><br />
+</code></pre><p>という風にpath属性が無いのもあるので</p>
 <h4>MongoDBでMapReduce APIを使うJavaScriptを書く</h4>
 <pre class="line-numbers"><code class="language-js")>var res = db.accesslog.mapReduce(
   // Map
@@ -171,7 +171,7 @@
 );
 
 printjson(res)
-</code></pre><p>な感じで実行すると</p><br /><pre class="line-numbers"><code class="language-json")>{
+</code></pre><p>な感じで実行すると</p><pre class="line-numbers"><code class="language-json")>{
     "results" : [
         {
             "_id" : "/",
@@ -204,17 +204,17 @@ printjson(res)
     },
     "ok" : 1,
 }
-</code></pre><p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p><br />
+</code></pre><p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p>
 <h4>コレクション名</h4>
 <pre class="line-numbers"><code class="language-json")>{ out: "コレクション名" }
-</code></pre><p>で指定すると指定したコレクション名にぶち込まれる</p><br />
+</code></pre><p>で指定すると指定したコレクション名にぶち込まれる</p>
 <h4>mergeとreplace</h4>
 
 <ul>
 <li>  既存するデータをぶち消して、新しい結果をぶち込むのがreplace</li>
 <li>  既存するデータを消さずにそのまま新しい結果をマージするのがmerge</li>
 </ul>
-<p>な感じなんじゃないかなーっと</p><br /><p>以上な感じでMongoDBにあるMapReduce APIを使ってごにょごにょする事も出来る模様で</p><br />
+<p>な感じなんじゃないかなーっと</p><p>以上な感じでMongoDBにあるMapReduce APIを使ってごにょごにょする事も出来る模様で</p>
               </div>
             </div>
           </div>
@@ -253,7 +253,7 @@ printjson(res)
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -269,7 +269,7 @@ printjson(res)
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -296,7 +296,7 @@ printjson(res)
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -304,7 +304,7 @@ printjson(res)
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -312,7 +312,7 @@ printjson(res)
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -346,14 +346,14 @@ printjson(res)
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

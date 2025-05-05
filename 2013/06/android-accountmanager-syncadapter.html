@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">Android AccountManager+SyncAdapter</h3>
+              <h1 class="entry-title">Android AccountManager+SyncAdapter</h1>
               <p class="meta">
                 2013-06-04T00:00:00+00:00
                 <span class="categories">
@@ -78,9 +78,9 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>以前Android AccountManagerで使えるアカウントを開発する方法を書きましたが同期的な機能のSyncAdapterをすっぽかしてたのでやってみた</p><br />
+                <p>以前Android AccountManagerで使えるアカウントを開発する方法を書きましたが同期的な機能のSyncAdapterをすっぽかしてたのでやってみた</p>
 <!--more-->
-<p>その前に現状だとSyncAdapterを使える仕様じゃないので、そこら辺をまず修正しなければならない。SyncAdapterを使う為にはContent Providerが必要な模様、なのでアクティビティ等のアプリに関わる部分(AccountAuthenticator以外)からサーバーに通信してデータを取る部分を全てContent Provider経由で取る。でバックグラウンドで同期が行われる際に、サーバー側から取得したデータをSQLiteデータベースに保管しておいて、それをContent Providerでやり取りをする</p><br /><p>という感じな仕様に変えないといけない。んまぁそこら辺はちゃちゃっと修正して、SyncAdapterの本体辺りな所だけ書く</p><br />
+<p>その前に現状だとSyncAdapterを使える仕様じゃないので、そこら辺をまず修正しなければならない。SyncAdapterを使う為にはContent Providerが必要な模様、なのでアクティビティ等のアプリに関わる部分(AccountAuthenticator以外)からサーバーに通信してデータを取る部分を全てContent Provider経由で取る。でバックグラウンドで同期が行われる際に、サーバー側から取得したデータをSQLiteデータベースに保管しておいて、それをContent Providerでやり取りをする</p><p>という感じな仕様に変えないといけない。んまぁそこら辺はちゃちゃっと修正して、SyncAdapterの本体辺りな所だけ書く</p>
 <h4>SyncAdapterを使う手順</h4>
 
 <ul>
@@ -89,20 +89,20 @@
 <li>  SyncAdapterなandroid.app.Serviceを実装</li>
 <li>  SyncAdapterなandroid.content.AbstractThreadedSyncAdapterを実装</li>
 </ul>
-<p>以上。これだけの追加が必要。でアプリ側の処理フロー的な流れ的には</p><br />
+<p>以上。これだけの追加が必要。でアプリ側の処理フロー的な流れ的には</p>
 <ul>
 <li>  SyncAdapterによるサーバーとのデータの同期を行う。その際そこからContent Providerを通じてSQLiteにデータを保管</li>
 <li>  Activity等からデータを利用するにはサーバーに通信せずにContent Providerを仲介する。でその際に必要になるのがCursorの扱いだが、そこはCursorLoader等を用いて利用する</li>
 </ul>
-<p>っていう感じ。これは上でも書いてるので</p><br /><p>又、SyncAdapterな機能を使う際には</p><br />
+<p>っていう感じ。これは上でも書いてるので</p><p>又、SyncAdapterな機能を使う際には</p>
 <ul>
 <li>  android.permission.READ_SYNC_STATS</li>
 <li>  android.permission.READ_SYNC_SETTINGS</li>
 <li>  android.permission.WRITE_SYNC_SETTINGS</li>
 </ul>
-<p>っていう権限が必要になる模様</p><br />
+<p>っていう権限が必要になる模様</p>
 <h4>AndroidManifest.xmlを修正する</h4>
-<p>SyncAdapterな所を追加する。上記でも書いてるようにパーミッションな所はすっ飛ばす</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;service android:name=".SampleSyncService" android:exported="true"&gt;
+<p>SyncAdapterな所を追加する。上記でも書いてるようにパーミッションな所はすっ飛ばす</p><pre class="line-numbers"><code class="language-xml")>&lt;service android:name=".SampleSyncService" android:exported="true"&gt;
     &lt;intent-filter&gt;
         &lt;action android:name="android.content.SyncAdapter" /&gt;
     &lt;/intent-filter&gt;
@@ -124,7 +124,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:accountType="@string/account_type"
     android:contentAuthority="@string/provider_name" /&gt;
-</code></pre><p><a href="http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html">http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html</a> に書いてるのでそれ参考に</p><br />
+</code></pre><p><a href="http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html">http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html</a> に書いてるのでそれ参考に</p>
 <h4>SampleSyncService.java</h4>
 <pre class="line-numbers"><code class="language-java")>package kinjouj.sample.authadapter;
 
@@ -151,7 +151,7 @@ public class SampleSyncService extends Service {
         return mSyncAdadter.getSyncAdapterBinder();
     }
 }
-</code></pre><p>AbstractThreadedSyncAdapter#getSyncAdapterBinderを返すだけ</p><br />
+</code></pre><p>AbstractThreadedSyncAdapter#getSyncAdapterBinderを返すだけ</p>
 <h4>SampleSyncAdapter.java</h4>
 <pre class="line-numbers"><code class="language-java")>package kinjouj.sample.authadapter;
 
@@ -207,7 +207,7 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
         return authToken;
     }
 }
-</code></pre><p>で大量のデータを登録するような場合だと、ContentProvider.applyBatch辺りを使えば良いんじゃないかなーっと</p><br /><p>以上。アプリ入れてアカウント作ると</p><br /><p><img src="/images/2013/06/20130604092943.png" loading="lazy" /></p><br /><p>というように同期なチェックが出来るようになる。チェック入れると30秒毎にonPerformSyncが実行されてデータの同期が行われる。でこの間隔を設定にはどうしたらいいのかっていう所はまだ判明してない</p><br /><p>んまぁAndroid公式のサンプルにあるSampleSyncAdapterのソース読んだ方が早いかも</p><br />
+</code></pre><p>で大量のデータを登録するような場合だと、ContentProvider.applyBatch辺りを使えば良いんじゃないかなーっと</p><p>以上。アプリ入れてアカウント作ると</p><p><img src="/images/2013/06/20130604092943.png" loading="lazy" /></p><p>というように同期なチェックが出来るようになる。チェック入れると30秒毎にonPerformSyncが実行されてデータの同期が行われる。でこの間隔を設定にはどうしたらいいのかっていう所はまだ判明してない</p><p>んまぁAndroid公式のサンプルにあるSampleSyncAdapterのソース読んだ方が早いかも</p>
               </div>
             </div>
           </div>
@@ -246,7 +246,7 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -262,7 +262,7 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -289,7 +289,7 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -297,7 +297,7 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -305,7 +305,7 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -339,14 +339,14 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">ActiveRecord Validation #1</h3>
+              <h1 class="entry-title">ActiveRecord Validation #1</h1>
               <p class="meta">
                 2014-08-22T00:00:00+00:00
                 <span class="categories">
@@ -79,7 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式ドキュメント: <a href="http://guides.rubyonrails.org/active_record_validations.html">http://guides.rubyonrails.org/active_record_validations.html</a></p><br /><p>公式ドキュメントを読みつつ進めてみようかと。ただやたらと長いので何回かに分けて書く予定</p><br />
+                <p>公式ドキュメント: <a href="http://guides.rubyonrails.org/active_record_validations.html">http://guides.rubyonrails.org/active_record_validations.html</a></p><p>公式ドキュメントを読みつつ進めてみようかと。ただやたらと長いので何回かに分けて書く予定</p>
 <!--more-->
 
 <h4>基本的な使い方</h4>
@@ -111,9 +111,9 @@ describe Entry do
     expect(message).to eq([:name, ["can"t be blank"]])
   end
 end
-</code></pre><p>っていうような感じになる。valid等を動かさなくてもsaveやupdate等のメソッドを実行すると検証エラーな場合はfalseが返り、破壊的メソッドとして実行するとActiveRecord::RecordInvalidがスローされる模様</p><br /><p>っていう感じで、基本的な事は終わり。presence等のValidation Helpersな所を進める</p><br />
+</code></pre><p>っていうような感じになる。valid等を動かさなくてもsaveやupdate等のメソッドを実行すると検証エラーな場合はfalseが返り、破壊的メソッドとして実行するとActiveRecord::RecordInvalidがスローされる模様</p><p>っていう感じで、基本的な事は終わり。presence等のValidation Helpersな所を進める</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#presence">presence</a></h4>
-<p>.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど</p><br /><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :name, presence: { message: "can`t be empty" }
@@ -135,9 +135,9 @@ describe Entry do
     expect(message).to eq([:name, ["can`t be empty"]])
   end
 end
-</code></pre><p>っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry</p><br />
+</code></pre><p>っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#acceptance">acceptance</a></h4>
-<p>「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様</p><br /><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: true
@@ -153,10 +153,10 @@ describe Entry do
     expect(Entry.new.valid?).to eq true
   end
 end
-</code></pre><p>このテストは通る。2つ目のテストでterms_of_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので</p><br /><pre class="line-numbers"><code class="language-rb")>class Entry &lt; ActiveRecord::Base
+</code></pre><p>このテストは通る。2つ目のテストでterms_of_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので</p><pre class="line-numbers"><code class="language-rb")>class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: true, allow_nil: false
 end
-</code></pre><p>とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能</p><br /><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+</code></pre><p>とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: { accept: "yes" }, allow_nil: false
@@ -172,7 +172,7 @@ describe Entry do
     expect(Entry.new.valid?).to eq false
   end
 end
-</code></pre><p>っていうような感じでacceptanceオプションを修正することで&quot;1&#8243;以外で作用させる事も可能</p><br /><p>んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)</p><br />
+</code></pre><p>っていうような感じでacceptanceオプションを修正することで&quot;1&#8243;以外で作用させる事も可能</p><p>んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#confirmation">confirmation</a></h4>
 <pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
@@ -204,9 +204,9 @@ describe Entry do
     expect(entry.valid?).to eq true
   end
 end
-</code></pre><p>ってな感じでconfirmation validation helperを使っているのに対して、_confirmationな仮想的属性の値を比較して同一かをチェック出来る。但しその仮想的属性がnilでは無い場合にのみチェックされる模様なので、2つ目のテストではemail_confirmationを指定してない為にバリデーションが作用しない為trueが返るような感じかと</p><br />
+</code></pre><p>ってな感じでconfirmation validation helperを使っているのに対して、_confirmationな仮想的属性の値を比較して同一かをチェック出来る。但しその仮想的属性がnilでは無い場合にのみチェックされる模様なので、2つ目のテストではemail_confirmationを指定してない為にバリデーションが作用しない為trueが返るような感じかと</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#exclusion">exclusion</a></h4>
-<p>指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion</p><br /><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :subdomain, exclusion: { in: %w(www blog) }
@@ -219,9 +219,9 @@ describe Entry do
     expect(Entry.new({ subdomain: "blog" }).valid?).to eq false
   end
 end
-</code></pre><p>inで指定したリストに該当するのが入るとバリデーションとしては不整合という形になる模様。恐らくはnilな場合だと検証が作用しないんかと思われる</p><br />
+</code></pre><p>inで指定したリストに該当するのが入るとバリデーションとしては不整合という形になる模様。恐らくはnilな場合だと検証が作用しないんかと思われる</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#inclusion">inclusion</a></h4>
-<p>上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい</p><br /><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :subdomain, inclusion: { in: %w(www blog) }
@@ -234,9 +234,9 @@ describe Entry do
     expect(Entry.new({ subdomain: "user" }).valid?).to eq false
   end
 end
-</code></pre><p>inで指定してあるのみ許容される。</p><br />
+</code></pre><p>inで指定してあるのみ許容される。</p>
 <h4><a href="http://edgeguides.rubyonrails.org/active_record_validations.html#format">format</a></h4>
-<p>正規表現とかで値の検証を行うようなパターンの場合に使う</p><br /><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>正規表現とかで値の検証を行うようなパターンの場合に使う</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :postal_code, format: { with: /\A[\d]{3}\-[\d]{4}\z/ }
@@ -261,7 +261,7 @@ describe Entry do
     expect(message).to eq([:postal_code, ["is invalid"]])
   end
 end
-</code></pre><p>てな感じでwithで指定した正規表現で値をチェック出来る。</p><br /><p>とりあえず今回は以上。続きは後日</p><br />
+</code></pre><p>てな感じでwithで指定した正規表現で値をチェック出来る。</p><p>とりあえず今回は以上。続きは後日</p>
               </div>
             </div>
           </div>
@@ -300,7 +300,7 @@ end
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -316,7 +316,7 @@ end
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -343,7 +343,7 @@ end
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -351,7 +351,7 @@ end
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -359,7 +359,7 @@ end
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -393,14 +393,14 @@ end
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

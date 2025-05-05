@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">Spring WebMVCをやってみる (18) - AnnotationFormatterFactory -</h3>
+              <h1 class="entry-title">Spring WebMVCをやってみる (18) - AnnotationFormatterFactory -</h1>
               <p class="meta">
                 2014-01-04T00:00:00+00:00
                 <span class="categories">
@@ -78,11 +78,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>前回でも書いたように、@DateTimeFormatのようなアノテーションによってFormatterが作用する仕組みっていうのを作る事も出来る。それを担うのがAnnotationFormatterFactoryになる模様</p><br />
+                <p>前回でも書いたように、@DateTimeFormatのようなアノテーションによってFormatterが作用する仕組みっていうのを作る事も出来る。それを担うのがAnnotationFormatterFactoryになる模様</p>
 <!--more-->
 
 <h4>要件</h4>
-<p>前回のをそのまま利用するけどコントローラー側では@SampleFormatっていうアノテーションを利用することによりFormatterを作用させるようにする。でそのFormatter自体は前回とまったくそのまま</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+<p>前回のをそのまま利用するけどコントローラー側では@SampleFormatっていうアノテーションを利用することによりFormatterを作用させるようにする。でそのFormatter自体は前回とまったくそのまま</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -101,9 +101,9 @@ public class SampleFormatter implements Formatter&lt;Sample&gt; {
         return Sample.valueOf(text.toUpperCase());
     }
 }
-</code></pre><p>を使う</p><br />
+</code></pre><p>を使う</p>
 <h4>SampleFormat.java</h4>
-<p>引数実装とかもやっておけばAnnotationFormatterFactoryを通じてFormatterに渡す事も可能だと思うのだけど今回はパス</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+<p>引数実装とかもやっておけばAnnotationFormatterFactoryを通じてFormatterに渡す事も可能だと思うのだけど今回はパス</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -114,7 +114,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SampleFormat {
 }
-</code></pre><p>まぁ見て分かるようにアノテーションのインターフェースなだけ</p><br />
+</code></pre><p>まぁ見て分かるようにアノテーションのインターフェースなだけ</p>
 <h4>SampleFormmaterFactory.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -143,7 +143,7 @@ public class SampleFormatterFactory implements AnnotationFormatterFactory&lt;Sam
         return new SampleFormatter();
     }
 }
-</code></pre><p>Formatterはorg.springframework.format.Parser自体を継承しているインターフェースなので、そのままインスタンス作ってぶん投げれば良い</p><br />
+</code></pre><p>Formatterはorg.springframework.format.Parser自体を継承しているインターフェースなので、そのままインスタンス作ってぶん投げれば良い</p>
 <h4>spring-web-servlet.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -174,7 +174,7 @@ public class SampleFormatterFactory implements AnnotationFormatterFactory&lt;Sam
     &lt;/bean&gt;
 
 &lt;/beans&gt;
-</code></pre><p>まぁ前回同様にformattersにAnnotationFormatterFactoryの実装クラスを指定してやりゃいい模様で</p><br />
+</code></pre><p>まぁ前回同様にformattersにAnnotationFormatterFactoryの実装クラスを指定してやりゃいい模様で</p>
 <h4>SampleController.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -192,8 +192,8 @@ public class SampleController {
         model.addAttribute("sample", sample);
     }
 }
-</code></pre><p>っていう感じで利用できる。</p><br /><p>ただ不明な所として1点上げると、「getPrinter実装してもどういう作用で発生するのかが謎」。普通にFormatterを使う場合とかだと&lt;spring:bind expression=&quot;&quot; /&gt;等で作用されるっていうはあるのだけど、このAnnotationFormatterFactoryの事象だけはgetPrinterメソッドが作用する事が無い。ここがよう分からんっていうところかなと</p><br /><p>んまぁFormatterに関するネタはこれで終わり(なはず)なんだけど、疑問点として「フォームコンポーネントにフォーマット化した文字列を処理させたい場合はどうなのか」っていう点。&lt;form:input&gt;とか使ってもFormatter#printが作用してくれないので</p><br /><pre class="line-numbers"><code class="language-jsp")>&lt;input type="text" value="&lt;spring:eval expression="省略" /&gt;" /&gt;
-</code></pre><p>みたいに書かないとダメなのかっていう点。そこも微妙なのでわかり次第書く予定</p><br />
+</code></pre><p>っていう感じで利用できる。</p><p>ただ不明な所として1点上げると、「getPrinter実装してもどういう作用で発生するのかが謎」。普通にFormatterを使う場合とかだと&lt;spring:bind expression=&quot;&quot; /&gt;等で作用されるっていうはあるのだけど、このAnnotationFormatterFactoryの事象だけはgetPrinterメソッドが作用する事が無い。ここがよう分からんっていうところかなと</p><p>んまぁFormatterに関するネタはこれで終わり(なはず)なんだけど、疑問点として「フォームコンポーネントにフォーマット化した文字列を処理させたい場合はどうなのか」っていう点。&lt;form:input&gt;とか使ってもFormatter#printが作用してくれないので</p><pre class="line-numbers"><code class="language-jsp")>&lt;input type="text" value="&lt;spring:eval expression="省略" /&gt;" /&gt;
+</code></pre><p>みたいに書かないとダメなのかっていう点。そこも微妙なのでわかり次第書く予定</p>
 <h4>余談: FormatterRegistrarを使う場合</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -207,7 +207,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
         registry.addFormatterForFieldAnnotation(new SampleFormatterFactory());
     }
 }
-</code></pre><p>みたいにやれば良いっぽい</p><br />
+</code></pre><p>みたいにやれば良いっぽい</p>
               </div>
             </div>
           </div>
@@ -246,7 +246,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -262,7 +262,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -289,7 +289,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -297,7 +297,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -305,7 +305,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -339,14 +339,14 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">RxAndroidをざっくり使ってみた</h3>
+              <h1 class="entry-title">RxAndroidをざっくり使ってみた</h1>
               <p class="meta">
                 2015-06-11T16:49:40+09:00
                 <span class="categories">
@@ -79,13 +79,13 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>参考1: <a href="http://qiita.com/KeithYokoma/items/1120ea1aacd6841d4e4d">【翻訳】AsyncTask と AsyncTaskLoader を rx.Observable に置き換える - RxJava Android Patterns</a></p><br /><p>参考2: <a href="http://stablekernel.com/blog/replace-asynctask-asynctaskloader-rx-observable-rxjava-android-patterns">http://stablekernel.com/blog/replace-asynctask-asynctaskloader-rx-observable-rxjava-android-patterns</a> (参考1の元)</p><br /><p>参考3: <a href="http://p-side.net/entry/113">俺が RxAndroid について知っているいくつかのまとめ</a></p><br /><p>大分前から色々話題になってるRxAndroidをちょっとざっくりと使ってみた</p><br /><p>※あくまで個人的なメモなので詳しく知りたいなら上記の参考を読んだ方が良い</p><br /><p>※0.24以降になるとAndroidScheduler以外は無くなるそうなので以下のAppObservableを使うには0.24より上のバージョンでは使えなくなるらしい</p><br />
+                <p>参考1: <a href="http://qiita.com/KeithYokoma/items/1120ea1aacd6841d4e4d">【翻訳】AsyncTask と AsyncTaskLoader を rx.Observable に置き換える - RxJava Android Patterns</a></p><p>参考2: http://stablekernel.com/blog/replace-asynctask-asynctaskloader-rx-observable-rxjava-android-patterns (参考1の元)</p><p>参考3: <a href="http://p-side.net/entry/113">俺が RxAndroid について知っているいくつかのまとめ</a></p><p>大分前から色々話題になってるRxAndroidをちょっとざっくりと使ってみた</p><p>※あくまで個人的なメモなので詳しく知りたいなら上記の参考を読んだ方が良い</p><p>※0.24以降になるとAndroidScheduler以外は無くなるそうなので以下のAppObservableを使うには0.24より上のバージョンでは使えなくなるらしい</p>
 <!--more-->
 
 <h4>そもそもReactive Programmingって何よ?</h4>
-<p><a href="http://www.slideshare.net/shinnosukekugimiya/reactive-android">http://www.slideshare.net/shinnosukekugimiya/reactive-android</a> によると「反応的プログラミング」</p><br /><p>まぁ使ってみたら分かるとは思うんですが、合ってるのか定かじゃないけどJavaScriptにあるPromiseの機構と似た仕組みを持つ物に近いのではないかと</p><br />
+<p>http://www.slideshare.net/shinnosukekugimiya/reactive-android によると「反応的プログラミング」</p><p>まぁ使ってみたら分かるとは思うんですが、合ってるのか定かじゃないけどJavaScriptにあるPromiseの機構と似た仕組みを持つ物に近いのではないかと</p>
 <h4>検証の概要</h4>
-<p>AccountManager.getAuthTokenByFeaturesの結果で返ってくるGoogleアカウントを利用したトークンの取得結果をRxAndroid(もといRxJava)を介して通知させる</p><br />
+<p>AccountManager.getAuthTokenByFeaturesの結果で返ってくるGoogleアカウントを利用したトークンの取得結果をRxAndroid(もといRxJava)を介して通知させる</p>
 <h4>MainActivity.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.test;
 
@@ -187,16 +187,16 @@ public class MainActivity extends Activity {
         .observeOn(newThread());
     }
 }
-</code></pre><p>っていう感じで使えるのですけど、AccountManagerでトークンを取得した際に発生するコールバック上でsubscribe.onNextで値を伝播させるような形でそれをsubscribeした時にonNextで指定した値をObserver&lt;String&gt;.onNextの引数にて参照されるようになる。んまぁ良く解説しているサイトとかではストリームを扱うライブラリがRxJavaのような物みたいな表現しているけど、そのストリームを伝播する役割っていう所なんじゃないかと</p><br /><p>ただちょっと色々罠があって</p><br />
+</code></pre><p>っていう感じで使えるのですけど、AccountManagerでトークンを取得した際に発生するコールバック上でsubscribe.onNextで値を伝播させるような形でそれをsubscribeした時にonNextで指定した値をObserver&lt;String&gt;.onNextの引数にて参照されるようになる。んまぁ良く解説しているサイトとかではストリームを扱うライブラリがRxJavaのような物みたいな表現しているけど、そのストリームを伝播する役割っていう所なんじゃないかと</p><p>ただちょっと色々罠があって</p>
 <ul>
 <li>AppObservable.bindActivityは基本メインスレッドで動くようになっているのでobserveOnとかでnewThread等を指定するとエラーになる。なのでbindActivityの返り値にobserveOnするのではなく、その引数に指定するObservableに対してobservceOnしないとメインスレッドで動いて場合によってはエラーになるはず</li>
 <li>subscribeしたSubscriptionは適切にunsubscribeをしないとメモリリークする恐れがあるとの事</li>
 </ul>
-<p>ちなみに</p><br />
+<p>ちなみに</p>
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">なるほ &gt; AndroidObservable(現在のAppObservable).bindActivity()等を使ってくるむと、「Activityが既に終了していたらonNext()を呼ばない」といった事を自動でやってくれるようになる</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/606828924190859264">2015, 6月 5</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<p>あとobservceされる所で例外起きるとonError(Throwable)が発生するとの事。確認してませんが</p><br /><p>んまぁちょっと余談が多いですが、この場合とかだと画面を回転させたりした場合とかでもretrieveTokenで指定した処理が行われてしまう事になる訳ですが、画面回転等の場合において部分的にキャッシュするような役割をもたせる事で回避したりする事も出来るとの事(上記参考の翻訳のやつに書いてる)</p><br /><pre class="line-numbers"><code class="language-java")>package sample.test;
+<p>あとobservceされる所で例外起きるとonError(Throwable)が発生するとの事。確認してませんが</p><p>んまぁちょっと余談が多いですが、この場合とかだと画面を回転させたりした場合とかでもretrieveTokenで指定した処理が行われてしまう事になる訳ですが、画面回転等の場合において部分的にキャッシュするような役割をもたせる事で回避したりする事も出来るとの事(上記参考の翻訳のやつに書いてる)</p><pre class="line-numbers"><code class="language-java")>package sample.test;
 
 import java.io.IOException;
 
@@ -309,7 +309,7 @@ public class MainActivity extends Activity {
         return cacheSubject;
     }
 }
-</code></pre><p>というようにAsyncSubjectを利用してキャッシュしておいて、画面回転時等にはそれを利用してretrieveTokenでキャッシュされた値だけをストリームとして返すObservableようなのとして利用する感じかと</p><br /><p>でなんだらかんだらでログを取って見てみると</p><br /><pre class="line-numbers"><code class="language-sh")>[開始]
+</code></pre><p>というようにAsyncSubjectを利用してキャッシュしておいて、画面回転時等にはそれを利用してretrieveTokenでキャッシュされた値だけをストリームとして返すObservableようなのとして利用する感じかと</p><p>でなんだらかんだらでログを取って見てみると</p><pre class="line-numbers"><code class="language-sh")>[開始]
 V/sample  ( 1233): bundle = null
 
 # まだretrieveToken処理はされてないのでcacheはnull
@@ -337,16 +337,16 @@ V/sample  ( 1233): cache = null
 V/sample  ( 1233): [startAuthorization] thread: Thread[main,5,main]
 V/sample  ( 1233): [retrieveAccessToken] thread: Thread[RxNewThreadScheduler-3,5,main]
 V/sample  ( 1233): [subscribe.onCompleted] thread: Thread[main,5,main]
-</code></pre><p>っていうように画面回転時等にキャッシュしておいたストリームを利用するような事も可能。今回はAsyncSubjectを使ってるがPublishSubject等の他のもあるけど</p><br />
+</code></pre><p>っていうように画面回転時等にキャッシュしておいたストリームを利用するような事も可能。今回はAsyncSubjectを使ってるがPublishSubject等の他のもあるけど</p>
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">「PublishSubjectは値を一切保持せず、AndroidのUIイベント同じく一度限りの値をpostする無限ストリーム」 <a href="http://t.co/BQCgfPDffv">http://t.co/BQCgfPDffv</a></p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/608183081577508864">2015, 6月 9</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<p>てな感じでちょっとざっくりとして使い方でやってみて思ったのは</p><br />
+<p>てな感じでちょっとざっくりとして使い方でやってみて思ったのは</p>
 <ul>
 <li>RxJavaを理解してないと正直キツい</li>
 <li>ちゃんとプロファイル取ってチェックしましょう (当たり前なような事で実は出来てなかったりする)</li>
 </ul>
-<p>っていう所ですかねと</p><br /><p>ということで今後RxJavaに関する勉強はちょっとづつでも進めていく予定で</p><br />
+<p>っていう所ですかねと</p><p>ということで今後RxJavaに関する勉強はちょっとづつでも進めていく予定で</p>
               </div>
             </div>
           </div>
@@ -385,7 +385,7 @@ V/sample  ( 1233): [subscribe.onCompleted] thread: Thread[main,5,main]
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -401,7 +401,7 @@ V/sample  ( 1233): [subscribe.onCompleted] thread: Thread[main,5,main]
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -428,7 +428,7 @@ V/sample  ( 1233): [subscribe.onCompleted] thread: Thread[main,5,main]
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -436,7 +436,7 @@ V/sample  ( 1233): [subscribe.onCompleted] thread: Thread[main,5,main]
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -444,7 +444,7 @@ V/sample  ( 1233): [subscribe.onCompleted] thread: Thread[main,5,main]
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -478,14 +478,14 @@ V/sample  ( 1233): [subscribe.onCompleted] thread: Thread[main,5,main]
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

@@ -68,7 +68,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">FuelPHPのエラー処理の雑多メモ</h3>
+              <h1 class="entry-title">FuelPHPのエラー処理の雑多メモ</h1>
               <p class="meta">
                 2013-03-10T00:00:00+00:00
                 <span class="categories">
@@ -77,9 +77,9 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>久々にFuelPHPを使ってて思う所がいろいろあったのでメモ</p><br />
+                <p>久々にFuelPHPを使ってて思う所がいろいろあったのでメモ</p>
 <!--more-->
-<p>まずFuelPHPのhttpexceptions.php。PHPの例外クラスが定義されていて、それで且つresponseメソッドを使う事でエラービューなどを表示したりなどの事が出来ている訳なんだが。個人的には例外出しても良いんだろうけど、前にも書いたがFuel\CoreRequestとかを使ってテストを書いたりする際には例外ではなくHttpNotFoundExceptionであれば404、HttpServerErrorExceptionであれば500を取得できるようにしてテストしたいって思う所があるんだけど。で思ったのが「throw new HttpNotFoundException」ではなく「return new HttpNotFoundException」をしつつafterでそれを処理するっていうのはどうだろうと。という事で色々やってみた</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>まずFuelPHPのhttpexceptions.php。PHPの例外クラスが定義されていて、それで且つresponseメソッドを使う事でエラービューなどを表示したりなどの事が出来ている訳なんだが。個人的には例外出しても良いんだろうけど、前にも書いたがFuel\CoreRequestとかを使ってテストを書いたりする際には例外ではなくHttpNotFoundExceptionであれば404、HttpServerErrorExceptionであれば500を取得できるようにしてテストしたいって思う所があるんだけど。で思ったのが「throw new HttpNotFoundException」ではなく「return new HttpNotFoundException」をしつつafterでそれを処理するっていうのはどうだろうと。という事で色々やってみた</p><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 class Controller_Home extends Controller_Rest {
 
@@ -110,7 +110,7 @@ class Controller_Home extends Controller_Rest {
         return parent::after($res);
     }
 }
-</code></pre><p>でこれをテストする場合</p><br /><pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>でこれをテストする場合</p><pre class="line-numbers"><code class="language-php")>&lt;?php
 
 class SampleTestCase extends PHPUnit_Framework_TestCase {
 
@@ -145,12 +145,12 @@ class SampleTestCase extends PHPUnit_Framework_TestCase {
         }
     }
 }
-</code></pre><p>とするとどうなるか。まだ例外が出る。理由としてfuel/core/classes/request/curl.php(178行目辺り)では</p><br /><pre class="line-numbers"><code class="language-php")>elseif ($this-&gt;response-&gt;status &gt;= 400) {
+</code></pre><p>とするとどうなるか。まだ例外が出る。理由としてfuel/core/classes/request/curl.php(178行目辺り)では</p><pre class="line-numbers"><code class="language-php")>elseif ($this-&gt;response-&gt;status &gt;= 400) {
     throw new RequestStatusException($body, $this-&gt;response-&gt;status);
 
     // スローしない場合は普通に$thisを返せばエラーでもレスポンス(404とか500)を取るのは可能
 }
-</code></pre><p>というような処理が行われて結局例外を出さずともこっちで例外にしちゃってる訳。マジうざいんだけどっていうギャルJKっぽい発言が飛び出しちゃう訳で。とりあえずそこな所のコードもろもろ消しちゃう(やった場合にテストするべきかと)</p><br /><p>でテストを実行</p><br />
+</code></pre><p>というような処理が行われて結局例外を出さずともこっちで例外にしちゃってる訳。マジうざいんだけどっていうギャルJKっぽい発言が飛び出しちゃう訳で。とりあえずそこな所のコードもろもろ消しちゃう(やった場合にテストするべきかと)</p><p>でテストを実行</p>
 <pre>
 Tests Running...This may take a few moments.
 [Thu Mar  7 18:09:44 2013] 127.0.0.1:46269 [500]: /
@@ -176,7 +176,7 @@ Failed asserting that 500 matches expected 200.
 FAILURES!
 Tests: 1, Assertions: 1, Failures: 1.
 </pre>
-<p>っていう感じになる訳だ。まぁテストコケるようになってるので(コメントしている所が)</p><br /><p>てな感じかなーっと。なんつーかなんでもかんでも例外出しちゃってそれを「PHPUnitのsetExpectedException的なのを処理すればオッケーよ」みたいなのはこういうケースだとどうなのかなーって思う所</p><br />
+<p>っていう感じになる訳だ。まぁテストコケるようになってるので(コメントしている所が)</p><p>てな感じかなーっと。なんつーかなんでもかんでも例外出しちゃってそれを「PHPUnitのsetExpectedException的なのを処理すればオッケーよ」みたいなのはこういうケースだとどうなのかなーって思う所</p>
               </div>
             </div>
           </div>
@@ -215,7 +215,7 @@ Tests: 1, Assertions: 1, Failures: 1.
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -231,7 +231,7 @@ Tests: 1, Assertions: 1, Failures: 1.
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -258,7 +258,7 @@ Tests: 1, Assertions: 1, Failures: 1.
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -266,7 +266,7 @@ Tests: 1, Assertions: 1, Failures: 1.
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -274,7 +274,7 @@ Tests: 1, Assertions: 1, Failures: 1.
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -308,14 +308,14 @@ Tests: 1, Assertions: 1, Failures: 1.
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

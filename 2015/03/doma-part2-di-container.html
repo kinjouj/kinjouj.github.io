@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">doma2を使ってみた (2) - DI Containerを使う場合 -</h3>
+              <h1 class="entry-title">doma2を使ってみた (2) - DI Containerを使う場合 -</h1>
               <p class="meta">
                 2015-03-14T00:00:00+09:00
                 <span class="categories">
@@ -78,7 +78,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式ドキュメント: <a href="http://doma.readthedocs.org/ja/latest/config/#id21">http://doma.readthedocs.org/ja/latest/config/#id21</a></p><br /><p>参考: <a href="http://qiita.com/nyasba/items/1e22c2401f3849f9071d">http://qiita.com/nyasba/items/1e22c2401f3849f9071d</a></p><br /><p>前回にも記述した通り前回ではdomaで使うConfig実装なAppConfig上でDataSource等の設定をそのまま埋め込んでる。でそういう所をDI Containerに設定されているDataSource等を依存性注入して使うような形の場合には設定がいろいろ異なるっていうことでやってみた(使うDI ContainerはSpring Framework)</p><br />
+                <p>公式ドキュメント: http://doma.readthedocs.org/ja/latest/config/#id21</p><p>参考: http://qiita.com/nyasba/items/1e22c2401f3849f9071d</p><p>前回にも記述した通り前回ではdomaで使うConfig実装なAppConfig上でDataSource等の設定をそのまま埋め込んでる。でそういう所をDI Containerに設定されているDataSource等を依存性注入して使うような形の場合には設定がいろいろ異なるっていうことでやってみた(使うDI ContainerはSpring Framework)</p>
 <!--more-->
 
 <h4>build.gradle</h4>
@@ -107,7 +107,7 @@ dependencies {
     testCompile "junit:junit:+"
     testCompile "org.hamcrest:hamcrest-all:+"
 }
-</code></pre><p>Spring Frameworkを使うのとそれとSpring JDBCな設定を使うのとSpring Transactionを使うのでそれに必要な依存性を追加するだけ</p><br />
+</code></pre><p>Spring Frameworkを使うのとそれとSpring JDBCな設定を使うのとSpring Transactionを使うのでそれに必要な依存性を追加するだけ</p>
 <h4>applicationContext.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;beans
@@ -158,7 +158,7 @@ dependencies {
     &lt;/aop:config&gt;
 
 &lt;/beans&gt;
-</code></pre><p>まぁDataSource関連とTransaction関連の設定をやっておく</p><br />
+</code></pre><p>まぁDataSource関連とTransaction関連の設定をやっておく</p>
 <h4>AppConfig.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -193,7 +193,7 @@ public class AppConfig {
         };
     }
 }
-</code></pre><p>な感じで@AutowiredでDataSourceなインスタンスを引っ張ってきてBean登録したConfigの実装でそれを返すようにするような感じ。上記参考ではgetSqlFileRepositoryとかも実装しているけど、デフォルト実装を使えば良いんだと思われるのであえてオーバーライドはしてないけど必要なら実装しておくと良いんじゃないかと。あんま事細かくチェックしてないので何か問題起きそうな気もしなくもないんだけど</p><br />
+</code></pre><p>な感じで@AutowiredでDataSourceなインスタンスを引っ張ってきてBean登録したConfigの実装でそれを返すようにするような感じ。上記参考ではgetSqlFileRepositoryとかも実装しているけど、デフォルト実装を使えば良いんだと思われるのであえてオーバーライドはしてないけど必要なら実装しておくと良いんじゃないかと。あんま事細かくチェックしてないので何か問題起きそうな気もしなくもないんだけど</p>
 <h4>DomaRepository.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.dao;
 
@@ -212,7 +212,7 @@ import org.springframework.stereotype.Component;
 })
 public @interface DomaRepository {
 }
-</code></pre><p>簡単に言うとDAOオブジェクトなのがSpringでAutowired出来るようにするにはそれに応じたアノテーションなりを実装するか自前で登録するかのどっちかをしなきゃならないんだけど、DAO実装クラスは自動生成されるのでそれに応じたアノテーションを付与するようにしなきゃならない。でDAO毎にこの設定が必要になるのだけど、毎回毎回DAOに設定するのもめんどいと思うのでこういうアノテーションインターフェースを書いておいてDAOインターフェースでアノテーション定義しておけば良い。それは以下に書くので</p><br /><p>ちなみに今回はSpring Frameworkを使ってるからこうなってるけど、javax.injectなのを使うのならtype属性で指定するクラスを変える必要があるかと</p><br />
+</code></pre><p>簡単に言うとDAOオブジェクトなのがSpringでAutowired出来るようにするにはそれに応じたアノテーションなりを実装するか自前で登録するかのどっちかをしなきゃならないんだけど、DAO実装クラスは自動生成されるのでそれに応じたアノテーションを付与するようにしなきゃならない。でDAO毎にこの設定が必要になるのだけど、毎回毎回DAOに設定するのもめんどいと思うのでこういうアノテーションインターフェースを書いておいてDAOインターフェースでアノテーション定義しておけば良い。それは以下に書くので</p><p>ちなみに今回はSpring Frameworkを使ってるからこうなってるけど、javax.injectなのを使うのならtype属性で指定するクラスを変える必要があるかと</p>
 <h4>SampleDao.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.dao;
 
@@ -238,7 +238,7 @@ public interface SampleDao {
     @Insert
     int save(Sample s);
 }
-</code></pre><p>先ほど書いた@DomaRepositoryを追加するだけ。@Daoのconfig属性は実装クラスのコンストラクタで@Autowiredされるので必要無いんじゃないかと</p><br />
+</code></pre><p>先ほど書いた@DomaRepositoryを追加するだけ。@Daoのconfig属性は実装クラスのコンストラクタで@Autowiredされるので必要無いんじゃないかと</p>
 <h4>SampleService.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.service;
 
@@ -271,7 +271,7 @@ public class SampleService {
         return dao.save(sample);
     }
 }
-</code></pre><p>んまぁ@AutowiredでDAOを注入して使うオブジェクトなだけ(@Repositoryでも良かったんじゃないのかって思ったけど、そこ詳しくないので今回はパス)。@Transactionalをつけたメソッドをコールする場合にはトランザクション処理が行われるけど、applicationContext.xmlで指定したようにトランザクション情報に関わるAOPをしていない場合にはアノテーションの属性で指定すれば良い</p><br />
+</code></pre><p>んまぁ@AutowiredでDAOを注入して使うオブジェクトなだけ(@Repositoryでも良かったんじゃないのかって思ったけど、そこ詳しくないので今回はパス)。@Transactionalをつけたメソッドをコールする場合にはトランザクション処理が行われるけど、applicationContext.xmlで指定したようにトランザクション情報に関わるAOPをしていない場合にはアノテーションの属性で指定すれば良い</p>
 <h4>SampleDaoTest.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.dao;
 
@@ -324,9 +324,9 @@ public class SampleDaoTest {
         service.save(sample);
     }
 }
-</code></pre><p>ってな感じでテスト書けば良いんだけど、SampleServiceのsaveメソッドでDAO側のsaveをコールしたあとに例外等が送出された場合、@Transactionalによるトランザクション情報に応じてトランザクションがロールバックされる</p><br /><p>まぁざっくりとざらーっと書いたけど、domaとSpring Frameworkを連携するような感じでやる場合はこんな所かと</p><br /><p>んまぁSpring Bootを使う場合な要件においては上記参考先がSpring Bootを使う場合のテクになってるのでそれ参考にすれば良いかと</p><br />
+</code></pre><p>ってな感じでテスト書けば良いんだけど、SampleServiceのsaveメソッドでDAO側のsaveをコールしたあとに例外等が送出された場合、@Transactionalによるトランザクション情報に応じてトランザクションがロールバックされる</p><p>まぁざっくりとざらーっと書いたけど、domaとSpring Frameworkを連携するような感じでやる場合はこんな所かと</p><p>んまぁSpring Bootを使う場合な要件においては上記参考先がSpring Bootを使う場合のテクになってるのでそれ参考にすれば良いかと</p>
 <h4>追記</h4>
-<p>上記で&lt;tx:annotation-driven /&gt;と&lt;aop:advice&gt;を利用した場合に@Repositoryを使うと問題が起きる。その件は近い内に記事書く</p><br />
+<p>上記で&lt;tx:annotation-driven /&gt;と&lt;aop:advice&gt;を利用した場合に@Repositoryを使うと問題が起きる。その件は近い内に記事書く</p>
               </div>
             </div>
           </div>
@@ -365,7 +365,7 @@ public class SampleDaoTest {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -381,7 +381,7 @@ public class SampleDaoTest {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -408,7 +408,7 @@ public class SampleDaoTest {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -416,7 +416,7 @@ public class SampleDaoTest {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -424,7 +424,7 @@ public class SampleDaoTest {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -458,14 +458,14 @@ public class SampleDaoTest {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

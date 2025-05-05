@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">Google Cloud Endpoints(Java)を使ってみた</h3>
+              <h1 class="entry-title">Google Cloud Endpoints(Java)を使ってみた</h1>
               <p class="meta">
                 2015-06-24T17:03:46+09:00
                 <span class="categories">
@@ -79,7 +79,7 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式ドキュメント: <a href="https://cloud.google.com/appengine/docs/java/endpoints">https://cloud.google.com/appengine/docs/java/endpoints</a></p><br /><p>今までGoogle App Engineを使ってWeb API的なのを定義する際、Slim3を使ってOAuthServiceで認証情報を取得してJSONでレスポンス返す的な事を一から実装してたりとかしてたけど、今時そんな事しなくてもGoogle Cloud Endpointsを使う事で同等な事をさらっと出来るようになってるらしい</p><br /><p>っていう事でドキュメントを読みつつやってみた</p><br />
+                <p>公式ドキュメント: https://cloud.google.com/appengine/docs/java/endpoints</p><p>今までGoogle App Engineを使ってWeb API的なのを定義する際、Slim3を使ってOAuthServiceで認証情報を取得してJSONでレスポンス返す的な事を一から実装してたりとかしてたけど、今時そんな事しなくてもGoogle Cloud Endpointsを使う事で同等な事をさらっと出来るようになってるらしい</p><p>っていう事でドキュメントを読みつつやってみた</p>
 <!--more-->
 
 <h4>環境構築</h4>
@@ -129,16 +129,16 @@ test {
     }
     dependsOn += ['appengineRun']
 }
-</code></pre><p>んまぁこれだけ。テストする際に実際にサーバーを動かしてURLFetchServiceを使って結果をテストするので</p><br />
+</code></pre><p>んまぁこれだけ。テストする際に実際にサーバーを動かしてURLFetchServiceを使って結果をテストするので</p>
 <h4>WebApi.java</h4>
-<p>基本的には@Apiと@ApiMethodを使うのだけど、@Apiで共通項目だけを設定したクラスを用意しておいて、一部実際のAPI実装クラス上で特有する設定部分は@ApiClassで定義するのがよろしい模様。っていうか複数の@Apiを持つクラスを定義して同一のnameを持つ場合に設定項目が異なるとエラーになるので</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+<p>基本的には@Apiと@ApiMethodを使うのだけど、@Apiで共通項目だけを設定したクラスを用意しておいて、一部実際のAPI実装クラス上で特有する設定部分は@ApiClassで定義するのがよろしい模様。っていうか複数の@Apiを持つクラスを定義して同一のnameを持つ場合に設定項目が異なるとエラーになるので</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 import com.google.api.server.spi.config.Api;
 
 @Api(name = "sample")
 public class WebApi {
 }
-</code></pre><p>っていうように@Apiを使ったクラスをベースとしたのを定義しておいて、クラスを継承するか@ApiReferenceでこのクラスを指定するなどの方式を取れば基底となる@Apiを継承して定義出来るような感じっぽい</p><br />
+</code></pre><p>っていうように@Apiを使ったクラスをベースとしたのを定義しておいて、クラスを継承するか@ApiReferenceでこのクラスを指定するなどの方式を取れば基底となる@Apiを継承して定義出来るような感じっぽい</p>
 <h4>HogeApi.java</h4>
 <pre class="line-numbers"><code class="language-java")>{% raw %}
 package sample;
@@ -168,11 +168,11 @@ public class HogeApi {
     */
 }
 {% endraw %}
-</code></pre><p>っていうように@ApiMethodを使ってAPIを定義出来る。その際にhttpMethodを指定しないような場合にはそのメソッド名から特定されたhttpMethodが自動で設定される模様。例えば上記のgetSayのような場合であればhttpMethod=&quot;GET&quot;しなくてもGETメソッドで作用するようになる</p><br />
+</code></pre><p>っていうように@ApiMethodを使ってAPIを定義出来る。その際にhttpMethodを指定しないような場合にはそのメソッド名から特定されたhttpMethodが自動で設定される模様。例えば上記のgetSayのような場合であればhttpMethod=&quot;GET&quot;しなくてもGETメソッドで作用するようになる</p>
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr"><a href="https://t.co/D4Wfyijp2i">https://t.co/D4Wfyijp2i</a> によるとhttpMethodは指定しなければメソッド名から推定される処理されるべきhttpMethodが採用される。例えばgetが接頭辞とかについてればGETメソッドで処理されるみたいで、ついてなければPOSTっぽい。確証は無い</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612359638789390336">2015, 6月 20</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<p>んで、@ApiMethodのpathにはパスパラメーターを含むようにする事も可能。コメントしてるけどgetFugaのpathように指定する事が出来るが</p><br />
+<p>んで、@ApiMethodのpathにはパスパラメーターを含むようにする事も可能。コメントしてるけどgetFugaのpathように指定する事が出来るが</p>
 <ul>
 <li>@Namedで引数に指定したパスパラメーターをメソッドの引数に適応出来る</li>
 <li>但し、パスパラメーターをマッピングする場合には@Nullableと@DefaultValueを同時に併用する事は出来ない</li>
@@ -181,7 +181,7 @@ public class HogeApi {
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">一応念の為にやってみた所、「<a href="http://t.co/KOQe04U1g4">http://t.co/KOQe04U1g4</a>.api.server.spi.config.validation.InvalidParameterAnnotationsException」っていう例外ぶっ飛ぶ</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/613354241004998656">2015, 6月 23</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<p>てな感じで定義する事でAPI定義することが出来る。まだ設定が足りないので動かす事は出来ないけど、実際サーバーを動かすと [<a href="http://localhost:8080/_ah/api/explorer">http://localhost:8080/_ah/api/explorer</a>] っていうようなURLにアクセスしてAPI定義上から上記のgetSayを動かすと</p><br /><p><img src="/images/2015/06/201506242115_1.jpg" loading="lazy" /></p><br /><p>っていうようなレスポンス結果が得られるようになる</p><br />
+<p>てな感じで定義する事でAPI定義することが出来る。まだ設定が足りないので動かす事は出来ないけど、実際サーバーを動かすと [http://localhost:8080/_ah/api/explorer] っていうようなURLにアクセスしてAPI定義上から上記のgetSayを動かすと</p><p><img src="/images/2015/06/201506242115_1.jpg" loading="lazy" /></p><p>っていうようなレスポンス結果が得られるようになる</p>
 <h4>SampleApi.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -214,7 +214,7 @@ public class SampleApi extends WebApi {
         return user;
     }
 }
-</code></pre><p>まずgetSayから、引数にオブジェクトを持つ場合クエリーからの内容を元にオブジェクトのインスタンスを生成して注入してくれる模様。但し@Namedを指定して利用できるクラスはプリミティブ型と一部のオブジェクト型のみサポートされているだけなので、自前のクラスを@Namedを使って注入する事は出来ないっぽい</p><br /><p>んでgetUser、引数にcom.google.appengine.users.Userを持つ事で@Api及び@ApiClass等で指定しているclientIdsによるOAuth2認証を利用してユーザー情報を取得出来るようになる。ちなみにOAuth2関係無く認証情報が取得出来ないようなケースの場合にはnullが入る模様。で上記ではUnauthorizedExceptionをスローしているのでレスポンス結果は</p><br /><pre class="line-numbers"><code class="language-json")>{
+</code></pre><p>まずgetSayから、引数にオブジェクトを持つ場合クエリーからの内容を元にオブジェクトのインスタンスを生成して注入してくれる模様。但し@Namedを指定して利用できるクラスはプリミティブ型と一部のオブジェクト型のみサポートされているだけなので、自前のクラスを@Namedを使って注入する事は出来ないっぽい</p><p>んでgetUser、引数にcom.google.appengine.users.Userを持つ事で@Api及び@ApiClass等で指定しているclientIdsによるOAuth2認証を利用してユーザー情報を取得出来るようになる。ちなみにOAuth2関係無く認証情報が取得出来ないようなケースの場合にはnullが入る模様。で上記ではUnauthorizedExceptionをスローしているのでレスポンス結果は</p><pre class="line-numbers"><code class="language-json")>{
   "error" : {
     "message" : "not found user",
     "code" : 401,
@@ -225,7 +225,7 @@ public class SampleApi extends WebApi {
     } ]
   }
 }
-</code></pre><p>っていうようなレスポンス結果が得られるようになる</p><br /><p>んまぁここまでがざっくりとしたAPI実装部分。動かすには設定(web.xml)が必要</p><br />
+</code></pre><p>っていうようなレスポンス結果が得られるようになる</p><p>んまぁここまでがざっくりとしたAPI実装部分。動かすには設定(web.xml)が必要</p>
 <h4>web.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd"&gt;
@@ -246,7 +246,7 @@ public class SampleApi extends WebApi {
     &lt;/servlet-mapping&gt;
 
 &lt;/web-app&gt;
-</code></pre><p>っていうようにservicesに@Api及び@ApiClassで定義しているAPI実装クラスを指定する必要がある模様で</p><br /><p>んまぁここまで設定を行った上でサーバーを起動して <a href="http://localhost:8080/_ah/api/explorer">http://localhost:8080/_ah/api/explorer</a> にアクセスすると</p><br /><p><img src="/images/2015/06/201506242115_2.jpg" loading="lazy" /></p><br /><p>ていうようなAPIが定義されそれぞれ適切なリクエストを行う事で結果をJSON等で取得出来るようになる</p><br />
+</code></pre><p>っていうようにservicesに@Api及び@ApiClassで定義しているAPI実装クラスを指定する必要がある模様で</p><p>んまぁここまで設定を行った上でサーバーを起動して http://localhost:8080/_ah/api/explorer にアクセスすると</p><p><img src="/images/2015/06/201506242115_2.jpg" loading="lazy" /></p><p>ていうようなAPIが定義されそれぞれ適切なリクエストを行う事で結果をJSON等で取得出来るようになる</p>
 <h4>Google API Clieng Library for JavaScriptを使ってAPIをコールする</h4>
 <pre class="line-numbers"><code class="language-html")>&lt;html&gt;
   &lt;head&gt;
@@ -257,7 +257,7 @@ public class SampleApi extends WebApi {
     &lt;script src="https://apis.google.com/js/client.js?onload=init"&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>みたいなHTMLでapp.jsで</p><br /><pre class="line-numbers"><code class="language-js")>const CLIENT_ID = "省略";
+</code></pre><p>みたいなHTMLでapp.jsで</p><pre class="line-numbers"><code class="language-js")>const CLIENT_ID = "省略";
 const SCOPE = "https://www.googleapis.com/auth/userinfo.email";
 
 function init() {
@@ -278,7 +278,7 @@ function init() {
 
   gapi.client.load('sample', 'v1', callback, "//" + window.location.host + "/_ah/api");
 }
-</code></pre><p>のような感じでgapiを使ってAPI定義をインポートして利用する事も出来る模様(ちなみに <a href="https://kinjouj-test.appspot.com">https://kinjouj-test.appspot.com</a> にてこの記事投稿時点では見れるので)</p><br /><p>っていうような感じで使う事が出来る</p><br /><p>んまぁそんな感じで今時のGoogle App Engineを使ってWeb APIを実装するような場合であればGoogle Cloud Endpointsを利用する事も出来るって事で</p><br />
+</code></pre><p>のような感じでgapiを使ってAPI定義をインポートして利用する事も出来る模様(ちなみに https://kinjouj-test.appspot.com にてこの記事投稿時点では見れるので)</p><p>っていうような感じで使う事が出来る</p><p>んまぁそんな感じで今時のGoogle App Engineを使ってWeb APIを実装するような場合であればGoogle Cloud Endpointsを利用する事も出来るって事で</p>
 <h4>余談1: 例外について</h4>
 
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr"><a href="https://t.co/g6lOKpa5PF">https://t.co/g6lOKpa5PF</a> に書いてるけど、API側で例外ぶん投げた場合はその後にServiceUnavailableになると思うのでそれによるサービスの例外エラーが503になるとか</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612666965790887937">2015, 6月 21</a></blockquote>
@@ -292,7 +292,7 @@ function init() {
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">「All HTTP 5xx status codes are converted to be HTTP 503 in the client response.」って書いとるがな</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612669940844236800">2015, 6月 21</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<p>っていう事でまとめると</p><br />
+<p>っていう事でまとめると</p>
 <ul>
 <li>特定の例外を送出する事でそれに対応したレスポンスが送出されるようになる</li>
 <li>nullを返すと204(No Content?)になる</li>
@@ -300,9 +300,9 @@ function init() {
 <li>500とかは503で変換される</li>
 <li>自前の例外を実装する場合にはcom.google.api.server.spi.ServiceExceptionを継承したクラスを定義する事でその例外を送出した場合に対応するレスポンスを送出する事が可能</li>
 </ul>
-<p>っていうような感じになる</p><br />
+<p>っていうような感じになる</p>
 <h4>余談2: ApiResourcePropertyに関して</h4>
-<p>APIのレスポンスを出す際にオブジェクトのこのプロパティは出したくないとかそういうような制御をする事も出来る</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+<p>APIのレスポンスを出す際にオブジェクトのこのプロパティは出したくないとかそういうような制御をする事も出来る</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.io.Serializable;
 
@@ -331,9 +331,9 @@ public class Sample implements Serializable {
         this.name = name;
     }
 }
-</code></pre><p>っていうような@ApiResourcePropertyでignoredを指定する事でこのプロパティを出力しない等の設定を定義する事が出来る。又、nameパラメーターでこのプロパティを出力する際の名前等も変更する事が可能っぽい</p><br />
+</code></pre><p>っていうような@ApiResourcePropertyでignoredを指定する事でこのプロパティを出力しない等の設定を定義する事が出来る。又、nameパラメーターでこのプロパティを出力する際の名前等も変更する事が可能っぽい</p>
 <h4>余談3: @ApiTransformerについて</h4>
-<p>ようなオブジェクトとかをJSONとかに変換や解析するような仕組み等をオブジェクトに組み込む機能かと。まったく検証してないので詳しくは書かないけど、デフォルトとかだとjacksonを使ってJSONをエンコード/デコードしているんじゃないかと</p><br /><p>んまぁ詳しくは<a href="https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer">ドキュメント</a>読めって事で</p><br />
+<p>ようなオブジェクトとかをJSONとかに変換や解析するような仕組み等をオブジェクトに組み込む機能かと。まったく検証してないので詳しくは書かないけど、デフォルトとかだとjacksonを使ってJSONをエンコード/デコードしているんじゃないかと</p><p>んまぁ詳しくは<a href="https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer">ドキュメント</a>読めって事で</p>
               </div>
             </div>
           </div>
@@ -372,7 +372,7 @@ public class Sample implements Serializable {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -388,7 +388,7 @@ public class Sample implements Serializable {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -415,7 +415,7 @@ public class Sample implements Serializable {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -423,7 +423,7 @@ public class Sample implements Serializable {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -431,7 +431,7 @@ public class Sample implements Serializable {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -465,14 +465,14 @@ public class Sample implements Serializable {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

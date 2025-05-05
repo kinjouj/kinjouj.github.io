@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">doma2を使ってみた (3) - @Repositoryを使う -</h3>
+              <h1 class="entry-title">doma2を使ってみた (3) - @Repositoryを使う -</h1>
               <p class="meta">
                 2015-03-16T00:00:00+09:00
                 <span class="categories">
@@ -79,11 +79,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>doma2の機能ではなくSpring Frameworkの@Repositoryで定義した場合どうなるのか気になったのでやってみた</p><br />
+                <p>doma2の機能ではなくSpring Frameworkの@Repositoryで定義した場合どうなるのか気になったのでやってみた</p>
 <!--more-->
 
 <h4>SampleRepository.java</h4>
-<p>正式的?だと@Repositoryを付けるのはインターフェースだという概念があるっぽいけど、めんどくさいので普通にクラスにつけちゃう</p><br /><pre class="line-numbers"><code class="language-java")>package sample.repository;
+<p>正式的?だと@Repositoryを付けるのはインターフェースだという概念があるっぽいけど、めんどくさいので普通にクラスにつけちゃう</p><pre class="line-numbers"><code class="language-java")>package sample.repository;
 
 import java.util.List;
 
@@ -124,7 +124,7 @@ public class SampleRepository {
         return status;
     }
 }
-</code></pre><p>まぁ@Repositoryを付けてDAOとのやりとりをした結果を返すだけのしょうもないのを作っておく(前回は@Serviceにそういうのをやってたけど、あれはあれで微妙なんじゃないかって思う所もあるので)</p><br /><p>でこの状態のまま前回のテストをちょいと書き換えてテストを実行する</p><br />
+</code></pre><p>まぁ@Repositoryを付けてDAOとのやりとりをした結果を返すだけのしょうもないのを作っておく(前回は@Serviceにそういうのをやってたけど、あれはあれで微妙なんじゃないかって思う所もあるので)</p><p>でこの状態のまま前回のテストをちょいと書き換えてテストを実行する</p>
 <h4>SampleDaoTest.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.dao;
 
@@ -159,16 +159,16 @@ public class SampleDaoTest {
         dao.save(sample);
     }
 }
-</code></pre><p>まぁsave側でExceptionをスローしているからテストは落ちる。でもその例外が</p><br />
+</code></pre><p>まぁsave側でExceptionをスローしているからテストは落ちる。でもその例外が</p>
 <blockquote>
 org.springframework.transaction.UnexpectedRollbackException: Transaction rolled back because it has been marked as rollback-only
 </blockquote>
-<p>となる。詳解な原因がちゃんと特定できた訳じゃないのだけど、恐らくはTransactionInterceptor等によるトランザクションが重なってしまっているのではないかと。要は&lt;tx:annotation-driven /&gt;によるTransactionInterceptorと&lt;aop:advice/&gt;によるTransactionInterceptorによってトランザクションが重なりメソッドで例外を創出するとsetRollbackOnlyはしているので問題なくロールバックはされるが結果的にその上のトランザクションスコープによってcommit実行しようとして結果上記のような例外が送出されてしまうのではないかという予測(あくまで予測なので確証はありません)</p><br /><p>っていうことでこれを回避するには</p><br />
+<p>となる。詳解な原因がちゃんと特定できた訳じゃないのだけど、恐らくはTransactionInterceptor等によるトランザクションが重なってしまっているのではないかと。要は&lt;tx:annotation-driven /&gt;によるTransactionInterceptorと&lt;aop:advice/&gt;によるTransactionInterceptorによってトランザクションが重なりメソッドで例外を創出するとsetRollbackOnlyはしているので問題なくロールバックはされるが結果的にその上のトランザクションスコープによってcommit実行しようとして結果上記のような例外が送出されてしまうのではないかという予測(あくまで予測なので確証はありません)</p><p>っていうことでこれを回避するには</p>
 <ul>
 <li>&lt;tx:annotation-driven /&gt;を止める (@Transactionalは効かなくなる?)</li>
 <li>&lt;aop:advice&gt;によるトランザクション属性のインターセプトをしない (@Transactionalで属性を自前で定義する必要性が出てくる)</li>
 </ul>
-<p>のどっちかをやれば良い</p><br />
+<p>のどっちかをやれば良い</p>
 <h4>applicationContext.xml</h4>
 <pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
 &lt;beans
@@ -208,7 +208,7 @@ org.springframework.transaction.UnexpectedRollbackException: Transaction rolled 
     &lt;tx:annotation-driven /&gt;
 
 &lt;/beans&gt;
-</code></pre><p>んまぁ&lt;aop:advice&gt;を使わないので@Transactionalには適切な属性を設定する必要がある</p><br />
+</code></pre><p>んまぁ&lt;aop:advice&gt;を使わないので@Transactionalには適切な属性を設定する必要がある</p>
 <h4>SampleRepository.java (修正)</h4>
 <pre class="line-numbers"><code class="language-java")>package sample.repository;
 
@@ -253,7 +253,7 @@ public class SampleRepository {
         return status;
     }
 }
-</code></pre><p>てな感じで実行すれば上記のUnexpectedRollbackExceptionは発生しなくなる。一応、上記でのエラーの時点でTransaction PropagationをREQUIREDからREQUIRES_NEW等にすればこの問題は出なくなる。でも例えばひとつのメソッドで他のトランザクションを実行する処理をやる場合にその他のメソッド単位でトランザクションが管理される為部分的に例外等が発生しても部分的にロールバックされなくなるのではないかと</p><br /><p>まぁとりあえずそういう問題でちょっとハマってたのでメモ。</p><br /><p>ちなみに@Serviceならこういう問題は出てこない</p><br />
+</code></pre><p>てな感じで実行すれば上記のUnexpectedRollbackExceptionは発生しなくなる。一応、上記でのエラーの時点でTransaction PropagationをREQUIREDからREQUIRES_NEW等にすればこの問題は出なくなる。でも例えばひとつのメソッドで他のトランザクションを実行する処理をやる場合にその他のメソッド単位でトランザクションが管理される為部分的に例外等が発生しても部分的にロールバックされなくなるのではないかと</p><p>まぁとりあえずそういう問題でちょっとハマってたのでメモ。</p><p>ちなみに@Serviceならこういう問題は出てこない</p>
               </div>
             </div>
           </div>
@@ -292,7 +292,7 @@ public class SampleRepository {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -308,7 +308,7 @@ public class SampleRepository {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -335,7 +335,7 @@ public class SampleRepository {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -343,7 +343,7 @@ public class SampleRepository {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -351,7 +351,7 @@ public class SampleRepository {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -385,14 +385,14 @@ public class SampleRepository {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

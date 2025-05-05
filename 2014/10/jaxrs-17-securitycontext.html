@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">JAX-RSをやってみる (17) - SecurityContext -</h3>
+              <h1 class="entry-title">JAX-RSをやってみる (17) - SecurityContext -</h1>
               <p class="meta">
                 2014-10-06T00:00:00+00:00
                 <span class="categories">
@@ -78,11 +78,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/security.html">https://jersey.java.net/documentation/latest/security.html</a></p><br /><p>サーブレットシステムとかで使われるようなPrincipalを使ったセキュリティロールをアノテーションで補助する機能を持つような感じかと。言ってる事わかりづらいと思うのでさっさと本題に入る</p><br />
+                <p>公式ドキュメント: https://jersey.java.net/documentation/latest/security.html</p><p>サーブレットシステムとかで使われるようなPrincipalを使ったセキュリティロールをアノテーションで補助する機能を持つような感じかと。言ってる事わかりづらいと思うのでさっさと本題に入る</p>
 <!--more-->
 
 <h4>web.xml</h4>
-<p>※jettyで確認</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<p>※jettyで確認</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;web-app
     xmlns="http://java.sun.com/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -119,9 +119,9 @@
     &lt;/login-config&gt;
 
 &lt;/web-app&gt;
-</code></pre><p>ってな感じで&lt;security-constraint&gt;周りを設定。</p><br />
+</code></pre><p>ってな感じで&lt;security-constraint&gt;周りを設定。</p>
 <h4>検証で使うjettyな設定ファイルを作る</h4>
-<p>jetty-env.xmlを作る</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0"?&gt;
+<p>jetty-env.xmlを作る</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0"?&gt;
 &lt;!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd"&gt;
 &lt;Configure class="org.mortbay.jetty.webapp.WebAppContext"&gt;
     &lt;Get name="securityHandler"&gt;
@@ -133,9 +133,9 @@
         &lt;/Set&gt;
     &lt;/Get&gt;
 &lt;/Configure&gt;
-</code></pre><p>realm.propertiesで指定しているので</p><br /><pre class="line-numbers"><code class="language-properties")>hoge:hoge,a
+</code></pre><p>realm.propertiesで指定しているので</p><pre class="line-numbers"><code class="language-properties")>hoge:hoge,a
 fuga:fuga,a,b
-</code></pre><p>な感じで「ユーザー名:パスワード,ロール名」みたいに指定する</p><br />
+</code></pre><p>な感じで「ユーザー名:パスワード,ロール名」みたいに指定する</p>
 <h4>SampleApplication.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -151,7 +151,7 @@ public class SampleApplication extends ResourceConfig {
         packages("sample");
     }
 }
-</code></pre><p>RolesAllowedDynamicFeatureに関しては後ほど</p><br />
+</code></pre><p>RolesAllowedDynamicFeatureに関しては後ほど</p>
 <h4>Sample.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -183,9 +183,9 @@ public class Sample {
         return "B";
     }
 }
-</code></pre><p>っていうような感じでリソースアクションとなる部分などに@RolesAllowedアノテーションを使ってリソースにアクセス出来るロールを持つユーザーを限定する事が出来る。この機能自体は上記のRolesAllowedDynamicFeatureで提供されるので、それが有効になっている状態で特定のロールを持たないユーザーがアクセスしようとするとHTTP/403エラーになる。つまりaリソースは上記で設定したユーザーロールだとhogeとfugaユーザー両方でアクセス出来るけど、bリソースに関してはhogeユーザーでアクセスすると403エラーになる、理由は書いた通り特定のロールを持たないユーザーでアクセスは出来ない</p><br /><p>あと@PermitAllっていうのもある。又、引数などにSecurityContextを持つ事が出来るがログイン処理がされていない場合などにはgetUserPrincipalはnullが返ってくる</p><br />
+</code></pre><p>っていうような感じでリソースアクションとなる部分などに@RolesAllowedアノテーションを使ってリソースにアクセス出来るロールを持つユーザーを限定する事が出来る。この機能自体は上記のRolesAllowedDynamicFeatureで提供されるので、それが有効になっている状態で特定のロールを持たないユーザーがアクセスしようとするとHTTP/403エラーになる。つまりaリソースは上記で設定したユーザーロールだとhogeとfugaユーザー両方でアクセス出来るけど、bリソースに関してはhogeユーザーでアクセスすると403エラーになる、理由は書いた通り特定のロールを持たないユーザーでアクセスは出来ない</p><p>あと@PermitAllっていうのもある。又、引数などにSecurityContextを持つ事が出来るがログイン処理がされていない場合などにはgetUserPrincipalはnullが返ってくる</p>
 <h4>テストを書く</h4>
-<p>SecurityContextを伴う場合のテストはContainerRequestFilterを使ってContainerRequestContextにsetSecurityContextを使ってやれば良いらしい(公式のgithubになるテストによると)</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+<p>SecurityContextを伴う場合のテストはContainerRequestFilterを使ってContainerRequestContextにsetSecurityContextを使ってやれば良いらしい(公式のgithubになるテストによると)</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -302,7 +302,7 @@ public class SampleTest extends JerseyTest {
 
     }
 }
-</code></pre><p>ってな感じで。まだ内部的なソースな部分読んでないので色々発見があったら追記する</p><br />
+</code></pre><p>ってな感じで。まだ内部的なソースな部分読んでないので色々発見があったら追記する</p>
               </div>
             </div>
           </div>
@@ -341,7 +341,7 @@ public class SampleTest extends JerseyTest {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -357,7 +357,7 @@ public class SampleTest extends JerseyTest {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -384,7 +384,7 @@ public class SampleTest extends JerseyTest {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -392,7 +392,7 @@ public class SampleTest extends JerseyTest {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -400,7 +400,7 @@ public class SampleTest extends JerseyTest {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -434,14 +434,14 @@ public class SampleTest extends JerseyTest {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">mongodbを使ってみる (4) - インデックスに関して (2) -</h3>
+              <h1 class="entry-title">mongodbを使ってみる (4) - インデックスに関して (2) -</h1>
               <p class="meta">
                 2013-01-15T00:00:00+00:00
                 <span class="categories">
@@ -77,14 +77,14 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる</p><br />
+                <p>引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる</p>
 <!--more-->
-<p>で大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在するという事でやってみた</p><br /><p>まずその前に、MongoDBとかそういう系のKVSっていうのは基本的にスキーマレスである前提が存在すると思うのですが、UNIQUEインデックスを後で付けたら付けたで問題になるんじゃねーかなって思う所なので。でそれをサポートする為にdropDupsっていうオプションがあり、UNIQUEインデックスを保証させる際に既に重複している部分は削除するような仕組みがある模様。でもデータ消されたらたまったもんじゃねーってオチにならないかなーって思うので、とりあえず自分の無い頭で考えた所</p><br />
+<p>で大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在するという事でやってみた</p><p>まずその前に、MongoDBとかそういう系のKVSっていうのは基本的にスキーマレスである前提が存在すると思うのですが、UNIQUEインデックスを後で付けたら付けたで問題になるんじゃねーかなって思う所なので。でそれをサポートする為にdropDupsっていうオプションがあり、UNIQUEインデックスを保証させる際に既に重複している部分は削除するような仕組みがある模様。でもデータ消されたらたまったもんじゃねーってオチにならないかなーって思うので、とりあえず自分の無い頭で考えた所</p>
 <ul>
 <li>db.createCollectionで事前にコレクションは作っておく</li>
 <li>db.コレクション名.ensureIndexでUNIQUEインデックス作っておく</li>
 </ul>
-<p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p><br /><pre class="line-numbers"><code class="language-js")>// samplesコレクションを作る
+<p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p><pre class="line-numbers"><code class="language-js")>// samplesコレクションを作る
 db.createCollection("samples")
 
 // nameに対してUNIQUEインデックスを作っておく
@@ -102,22 +102,22 @@ db.samples.find()
 
 db.samples.save({ name: "hoge", type: 1 })
 // E11000 duplicate key error index: sample.samples.$name_1  dup key: { : "hoge" } なエラーになる
-</code></pre><p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p><br /><p>でdropDupsも一応検証してみますかという事で</p><br /><pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge", type: 1 })
+</code></pre><p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p><p>でdropDupsも一応検証してみますかという事で</p><pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge", type: 1 })
 db.samples.save({ name: "hoge", type: 1 })
 db.samples.find()
-</code></pre><p>出力が</p><br /><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
+</code></pre><p>出力が</p><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
 { "_id" : ObjectId("50f4e5a2bc3d8a4279742236"), "name" : "hoge", "type" : 1 }
-</code></pre><p>同じデータを突っ込んでおく。でこの状態でnameにUNIQUEインデックスをつけると</p><br />
+</code></pre><p>同じデータを突っ込んでおく。でこの状態でnameにUNIQUEインデックスをつけると</p>
 <blockquote>
 E11000 duplicate key error index: sample.samples.$name_1 dup key: { : "hoge" }
 </blockquote>
-<p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p><br /><pre class="line-numbers"><code class="language-js")>db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
+<p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p><pre class="line-numbers"><code class="language-js")>db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
 db.samples.find()
 // { "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
-</code></pre><p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p><br /><p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p><br />
+</code></pre><p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p><p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p>
 <h4>追記</h4>
-<p>DBに存在するインデックスを確認したい場合は</p><br /><pre class="line-numbers"><code class="language-js")>db.system.indexes.find()
-</code></pre><p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p><br /><pre class="line-numbers"><code class="language-js")>// sampleデータベース中のsamplesコレクション -&gt; sample.samples
+<p>DBに存在するインデックスを確認したい場合は</p><pre class="line-numbers"><code class="language-js")>db.system.indexes.find()
+</code></pre><p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p><pre class="line-numbers"><code class="language-js")>// sampleデータベース中のsamplesコレクション -&gt; sample.samples
 db.system.indexes.find({ ns: "sample.samples" })
 </code></pre>
               </div>
@@ -158,7 +158,7 @@ db.system.indexes.find({ ns: "sample.samples" })
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -174,7 +174,7 @@ db.system.indexes.find({ ns: "sample.samples" })
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -201,7 +201,7 @@ db.system.indexes.find({ ns: "sample.samples" })
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -209,7 +209,7 @@ db.system.indexes.find({ ns: "sample.samples" })
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -217,7 +217,7 @@ db.system.indexes.find({ ns: "sample.samples" })
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -251,14 +251,14 @@ db.system.indexes.find({ ns: "sample.samples" })
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成</h3>
+              <h1 class="entry-title">codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成</h1>
               <p class="meta">
                 2013-08-10T00:00:00+00:00
                 <span class="categories">
@@ -78,22 +78,22 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>とあるチャットにて、「クラスについたアノテーションからJavaソース生成させるとかどうやるの」っていう相談を受けたんだが、まぁ出来るんだろうけどやった事が無いっていう事でやってみた</p><br />
+                <p>とあるチャットにて、「クラスについたアノテーションからJavaソース生成させるとかどうやるの」っていう相談を受けたんだが、まぁ出来るんだろうけどやった事が無いっていう事でやってみた</p>
 <!--more-->
-<p>でJavaコード(.java)を生成させる方法としてまず思いついたのが、codemodelっていうのを使う。多分これSun Microsystems時代にそこが公式的に作ったのじゃないのかなーって。まぁパッケージ名もそうなってとるしね、そんなことはおいといてアノテーションプロセッサから得られたクラスに対するアノテートを処理させ、その情報を元にcodemodelを使ってコードを生成させる事は出来るのではっていう事</p><br /><p>んまぁグダグダ言ってないでコード書けよハゲっておこられそうなので(ry</p><br /><p>※いろいろとイケてないのでネタとして</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+<p>でJavaコード(.java)を生成させる方法としてまず思いついたのが、codemodelっていうのを使う。多分これSun Microsystems時代にそこが公式的に作ったのじゃないのかなーって。まぁパッケージ名もそうなってとるしね、そんなことはおいといてアノテーションプロセッサから得られたクラスに対するアノテートを処理させ、その情報を元にcodemodelを使ってコードを生成させる事は出来るのではっていう事</p><p>んまぁグダグダ言ってないでコード書けよハゲっておこられそうなので(ry</p><p>※いろいろとイケてないのでネタとして</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 public class Sample {
     @Attribute
     protected String name;
 }
-</code></pre><p>的な事やれば</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>的な事やれば</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 public class SampleBean extends Sample {
     public String getName() {
         return name;
     }
 }
-</code></pre><p>的なJavaコードを出力できるように。んじゃアノテーションプロセッサーを書く</p><br /><p>簡単に言うと@Attributeのアノテーションがついてるフィールドを走査してcodemodelを使ってメソッドを作り、ソースを生成させる</p><br /><pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>的なJavaコードを出力できるように。んじゃアノテーションプロセッサーを書く</p><p>簡単に言うと@Attributeのアノテーションがついてるフィールドを走査してcodemodelを使ってメソッドを作り、ソースを生成させる</p><pre class="line-numbers"><code class="language-java")>package sample;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -238,7 +238,7 @@ public class SampleAnnotationProcessor extends AbstractProcessor {
         }
     }
 }
-</code></pre><p>ていう感じで、ビルドしてjarに突っ込んでおく。で別プロジェクトでこのjarを参照して利用するんだけど、Eclipseとか使わずに単純にgradleでbuildタスクでAPT処理をお願いする形で使ってみる</p><br /><pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
+</code></pre><p>ていう感じで、ビルドしてjarに突っ込んでおく。で別プロジェクトでこのjarを参照して利用するんだけど、Eclipseとか使わずに単純にgradleでbuildタスクでAPT処理をお願いする形で使ってみる</p><pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
 
 repositories {
     mavenCentral()
@@ -267,7 +267,7 @@ task compileAptJava(type: Compile, group: "build", overwrite: true) {
 
 compileJava.dependsOn compileAptJava
 sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
-</code></pre><p>んな感じ。でやってみて思ったのが、通常アノテーションを処理する際にはアノテーション自体がどこに付与出来るかは@Target等で指定出来る。でもそのチェック処理等の前にアノテーションプロセッサが働いてしまってるので、そのバリデーションを行う前に処理される為にフィールドに付与出来るのをクラスに付与したりしてもソースが生成されちゃう。そこら辺のチェックやる方法がちょっと微妙に分かってない</p><br /><p>んまぁとりあえずはアノテーションプロセッサとcodemodelを使ってソースを生成しちゃったりする的な事は出来なくも無いって模様。ただ、それをやるにはアノテーションプロセッサのかなりな知識が必要になりそう。んまぁこういうの普通にJavaでWebシステム開発とかやってるだけならまず出会わないだろうなぁっと</p><br /><p>んまぁ、良い体験できた気がする</p><br />
+</code></pre><p>んな感じ。でやってみて思ったのが、通常アノテーションを処理する際にはアノテーション自体がどこに付与出来るかは@Target等で指定出来る。でもそのチェック処理等の前にアノテーションプロセッサが働いてしまってるので、そのバリデーションを行う前に処理される為にフィールドに付与出来るのをクラスに付与したりしてもソースが生成されちゃう。そこら辺のチェックやる方法がちょっと微妙に分かってない</p><p>んまぁとりあえずはアノテーションプロセッサとcodemodelを使ってソースを生成しちゃったりする的な事は出来なくも無いって模様。ただ、それをやるにはアノテーションプロセッサのかなりな知識が必要になりそう。んまぁこういうの普通にJavaでWebシステム開発とかやってるだけならまず出会わないだろうなぁっと</p><p>んまぁ、良い体験できた気がする</p>
               </div>
             </div>
           </div>
@@ -306,7 +306,7 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -322,7 +322,7 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -349,7 +349,7 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -357,7 +357,7 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -365,7 +365,7 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -399,14 +399,14 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

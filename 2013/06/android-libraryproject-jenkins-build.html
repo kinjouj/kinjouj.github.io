@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">ライブラリプロジェクトを伴うAndroidアプリをJenkinsでビルド</h3>
+              <h1 class="entry-title">ライブラリプロジェクトを伴うAndroidアプリをJenkinsでビルド</h1>
               <p class="meta">
                 2013-06-13T00:00:00+00:00
                 <span class="categories">
@@ -78,30 +78,30 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>んまぁライブラリプロジェクト自体をJenkinsのビルドプロジェクト(フリースタイル)とかで定義しちゃっても良いとは思いますけど、ActionBarSherlockとかだったりだとか公開されている有用なAndroidライブラリとかを伴うプロジェクトをビルドするとなると定義するかプロジェクト内にぶち込んじゃうかっていう所だと思うのですが、その後者側の「参照するライブラリプロジェクト自体をビルドプロジェクトとして定義せずにアプリプロジェクトにぶち込んでビルド」するっていう方式的なのを検証してみた</p><br />
+                <p>んまぁライブラリプロジェクト自体をJenkinsのビルドプロジェクト(フリースタイル)とかで定義しちゃっても良いとは思いますけど、ActionBarSherlockとかだったりだとか公開されている有用なAndroidライブラリとかを伴うプロジェクトをビルドするとなると定義するかプロジェクト内にぶち込んじゃうかっていう所だと思うのですが、その後者側の「参照するライブラリプロジェクト自体をビルドプロジェクトとして定義せずにアプリプロジェクトにぶち込んでビルド」するっていう方式的なのを検証してみた</p>
 <!--more-->
 
 <h4>Jenkins側の事前設定</h4>
-<p>Jenkins Git Pluginを使う。入れたのは <a href="https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin">https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin</a></p><br />
+<p>Jenkins Git Pluginを使う。入れたのは <a href="https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin">https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin</a></p>
 <h4>アプリプロジェクトの構造</h4>
-<p>ディレクトリ内にアプリプロジェクトディレクトリと参照するライブラリプロジェクトのディレクトリは分けてる。</p><br />
+<p>ディレクトリ内にアプリプロジェクトディレクトリと参照するライブラリプロジェクトのディレクトリは分けてる。</p>
 <pre>
 root:
   - ActionBarSherlock
   - SlidingMenu
   - アプリプロジェクト
 </pre>
-<p>っていう感じなのだけど。ActionBarSherlockとSlidingMenu自体はgithubで提供されているので、git submoduleを使って取得する。でこの構造をgitサーバー辺りにpushしておく</p><br /><p>git submoduleなやつはJenkinsでワークスペースをビルドする際にフェッチされる模様なのでこっちで何かするとかは無い模様。但し、android update [lib-]projectとかは必要</p><br /><p>まぁ構造的なのはそんくらい</p><br />
+<p>っていう感じなのだけど。ActionBarSherlockとSlidingMenu自体はgithubで提供されているので、git submoduleを使って取得する。でこの構造をgitサーバー辺りにpushしておく</p><p>git submoduleなやつはJenkinsでワークスペースをビルドする際にフェッチされる模様なのでこっちで何かするとかは無い模様。但し、android update [lib-]projectとかは必要</p><p>まぁ構造的なのはそんくらい</p>
 <h4>ビルドの設定</h4>
-<p>ソースコード管理からgitを選択して、pushしたgitサーバーのリポジトリを指定する。上記にも書いたけど、これでワークスペースにgitからチェックアウトされて格納される模様</p><br /><p>で上記の注釈でも書いたけど、gitから取ってきてもupdate project関係は必要な模様。なのでビルド手順の追加でantでビルドする前にシェルスクリプトの実行で</p><br /><pre class="line-numbers"><code class="language-none")>android update lib-project -p ActionBarSherlock/actionbarsherlock -t [Android Build Target]
+<p>ソースコード管理からgitを選択して、pushしたgitサーバーのリポジトリを指定する。上記にも書いたけど、これでワークスペースにgitからチェックアウトされて格納される模様</p><p>で上記の注釈でも書いたけど、gitから取ってきてもupdate project関係は必要な模様。なのでビルド手順の追加でantでビルドする前にシェルスクリプトの実行で</p><pre class="line-numbers"><code class="language-none")>android update lib-project -p ActionBarSherlock/actionbarsherlock -t [Android Build Target]
 android update lib-project -p SlidingMenu/library -t [Android Build Target]
 android update project -p sample -l ../ActionBarSherlock/actionbarsherlock
 android update project -p sample -l ../SlidingMenu/library
-</code></pre><p>等ような初期設定が必要。あともうひとつ難点があって、Androidの場合android-support-v4だとかが組み込まれているケースがある。ファイルのハッシュサムがマッチしないとAndroidのビルドがずっこけるっていうのがあるので、アプリプロジェクトにベースとなるandroid-support-v4を入れておいて</p><br /><pre class="line-numbers"><code class="language-none")>cp sample/libs/android-support-v4.jar ActionBarSherlock/actionbarsherlock/libs/
+</code></pre><p>等ような初期設定が必要。あともうひとつ難点があって、Androidの場合android-support-v4だとかが組み込まれているケースがある。ファイルのハッシュサムがマッチしないとAndroidのビルドがずっこけるっていうのがあるので、アプリプロジェクトにベースとなるandroid-support-v4を入れておいて</p><pre class="line-numbers"><code class="language-none")>cp sample/libs/android-support-v4.jar ActionBarSherlock/actionbarsherlock/libs/
 cp sample/libs/android-support-v4.jar SlidingMenu/library/libs/
-</code></pre><p>っていうように同一の物を使うようにする等でビルドするようにする。まぁ上記の2つのビルドスクリプトを合わせれば良い</p><br /><p>でその後にantビルド方式を「clean release」辺りを行うように設定。あとは普通にJenkinsでビルド</p><br />
+</code></pre><p>っていうように同一の物を使うようにする等でビルドするようにする。まぁ上記の2つのビルドスクリプトを合わせれば良い</p><p>でその後にantビルド方式を「clean release」辺りを行うように設定。あとは普通にJenkinsでビルド</p>
 <h4>ビルドログ</h4>
-<p>クソ長いので省略</p><br />
+<p>クソ長いので省略</p>
 <pre>
 コンソール出力
 ビルドします。 ワークスペース: /home/kinjouj/.jenkins/jobs/sample/workspace
@@ -134,7 +134,7 @@ BUILD SUCCESSFUL
 Total time: 1 minute 8 seconds
 Finished: SUCCESS
 </pre>
-<p>という感じか。んまぁ公開されているライブラリとかを使う場合において、Jenkinsでビルドする場合にどうするかって所な件を検証してみただけで、実際にどうやるかはまぁケースバイケースだろうなって所かと</p><br />
+<p>という感じか。んまぁ公開されているライブラリとかを使う場合において、Jenkinsでビルドする場合にどうするかって所な件を検証してみただけで、実際にどうやるかはまぁケースバイケースだろうなって所かと</p>
               </div>
             </div>
           </div>
@@ -173,7 +173,7 @@ Finished: SUCCESS
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -189,7 +189,7 @@ Finished: SUCCESS
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -216,7 +216,7 @@ Finished: SUCCESS
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -224,7 +224,7 @@ Finished: SUCCESS
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -232,7 +232,7 @@ Finished: SUCCESS
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -266,14 +266,14 @@ Finished: SUCCESS
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

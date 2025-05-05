@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">HttpsURLConnection TrustManagerでPublic Key Pinning</h3>
+              <h1 class="entry-title">HttpsURLConnection TrustManagerでPublic Key Pinning</h1>
               <p class="meta">
                 2015-07-07T09:55:21+09:00
                 <span class="categories">
@@ -77,12 +77,12 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>参考1: <a href="http://d.hatena.ne.jp/jovi0608/20140902/1409635279">不正なSSL証明書を見破るPublic Key Pinningを試す</a></p><br /><p>参考2: <a href="https://developer.mozilla.org/ja/docs/Web/Security/Public_Key_Pinning">https://developer.mozilla.org/ja/docs/Web/Security/Public_Key_Pinning</a></p><br /><p>関連エントリー: <a href="/2014/10/httpsurlconnection-trustmanager.html">HttpsURLConnection TrustManager</a></p><br /><p>要はHTTPS通信をする際にサーバーから送られてくる証明書が正当な物であるかをどう検証するべきかっていう所が色々あるのですが、それを検証する手法としてあるのがPublic Key Pinningっていう事っぽい(あってるかは微妙)</p><br /><p>とりあえず色々検証してみた</p><br /><p>※あくまでセキュリティ対策を前提としたネタではない</p><br /><p>※個人的なメモなので上記参考を読むべき</p><br />
+                <p>参考1: <a href="http://d.hatena.ne.jp/jovi0608/20140902/1409635279">不正なSSL証明書を見破るPublic Key Pinningを試す</a></p><p>参考2: https://developer.mozilla.org/ja/docs/Web/Security/Public<em>Key</em>Pinning</p><p>関連エントリー: <a href="/2014/10/httpsurlconnection-trustmanager.html">HttpsURLConnection TrustManager</a></p><p>要はHTTPS通信をする際にサーバーから送られてくる証明書が正当な物であるかをどう検証するべきかっていう所が色々あるのですが、それを検証する手法としてあるのがPublic Key Pinningっていう事っぽい(あってるかは微妙)</p><p>とりあえず色々検証してみた</p><p>※あくまでセキュリティ対策を前提としたネタではない</p><p>※個人的なメモなので上記参考を読むべき</p>
 <!--more-->
 
 <h4>検証の下準備</h4>
-<p>mitmproxyが使える環境とHTTPSなサーバーを用意しておく。んでサーバー側の証明書がある環境下において以下のコマンドを実行して証明書のシグニチャとなるbase64を取得する(※証明書じゃなくても秘密鍵等からも生成可能。詳しくは上記参考2を参照)</p><br /><pre class="line-numbers"><code class="language-sh")>openssl x509 -in server.crt -pubkey -noout | openssl pkey -pubin -outform der| openssl dgst -sha256 -binary | openssl base64
-</code></pre><p>これを実行した値をSSLコンテキストにおいて証明書のチェックを行う際にこの値で検証するような感じかと</p><br />
+<p>mitmproxyが使える環境とHTTPSなサーバーを用意しておく。んでサーバー側の証明書がある環境下において以下のコマンドを実行して証明書のシグニチャとなるbase64を取得する(※証明書じゃなくても秘密鍵等からも生成可能。詳しくは上記参考2を参照)</p><pre class="line-numbers"><code class="language-sh")>openssl x509 -in server.crt -pubkey -noout | openssl pkey -pubin -outform der| openssl dgst -sha256 -binary | openssl base64
+</code></pre><p>これを実行した値をSSLコンテキストにおいて証明書のチェックを行う際にこの値で検証するような感じかと</p>
 <h4>Main.java</h4>
 <pre class="line-numbers"><code class="language-java")>package sample;
 
@@ -187,7 +187,7 @@ public class Main {
         }
     }
 }
-</code></pre><p>っていうようにTrustManagerで証明書のチェックを行う際にサーバー側の証明書で示されたbase64と照らし合わせる事で不正な証明書であるかをチェックするような感じかと。場合によってproxyの引数を入れたり消したりして確認するとproxyを指定している場合にはサーバーが示しているbase64とはマッチしない為に例外が発生する。今回はやってないけど、hostもちゃんと検証するべきかと思われる</p><br /><p>前回の関連エントリーでも示しているような証明書自体をJCEを使って組み込むような方式を使うよりもよりシンプルに実装出来るのではないかと</p><br /><p>あくまでHttpsURLConnectionをグダグダと使う場合はこういうような実装しなければならないけど、okhttpを採用する場合にはCerfificatePinnerっていうクラスでサポートされているので使うクライアントライブラリによってサポートされているか調べる等すれば良いんじゃないかと</p><br />
+</code></pre><p>っていうようにTrustManagerで証明書のチェックを行う際にサーバー側の証明書で示されたbase64と照らし合わせる事で不正な証明書であるかをチェックするような感じかと。場合によってproxyの引数を入れたり消したりして確認するとproxyを指定している場合にはサーバーが示しているbase64とはマッチしない為に例外が発生する。今回はやってないけど、hostもちゃんと検証するべきかと思われる</p><p>前回の関連エントリーでも示しているような証明書自体をJCEを使って組み込むような方式を使うよりもよりシンプルに実装出来るのではないかと</p><p>あくまでHttpsURLConnectionをグダグダと使う場合はこういうような実装しなければならないけど、okhttpを採用する場合にはCerfificatePinnerっていうクラスでサポートされているので使うクライアントライブラリによってサポートされているか調べる等すれば良いんじゃないかと</p>
               </div>
             </div>
           </div>
@@ -226,7 +226,7 @@ public class Main {
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -242,7 +242,7 @@ public class Main {
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -269,7 +269,7 @@ public class Main {
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -277,7 +277,7 @@ public class Main {
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -285,7 +285,7 @@ public class Main {
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -319,14 +319,14 @@ public class Main {
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

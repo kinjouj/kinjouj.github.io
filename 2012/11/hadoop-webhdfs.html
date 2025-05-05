@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">WebHDFSを使ってみる</h3>
+              <h1 class="entry-title">WebHDFSを使ってみる</h1>
               <p class="meta">
                 2012-11-22T00:00:00+00:00
                 <span class="categories">
@@ -77,11 +77,11 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた</p><br /><p>(Hadoopのバージョンは1.0.4です)</p><br />
+                <p>WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた</p><p>(Hadoopのバージョンは1.0.4です)</p>
 <!--more-->
 
 <h4>セットアップ</h4>
-<p>デフォルトでWebHDFSはサポートしてないので設定しないと使えない模様。なのでhdfs-site.xmlに追加する</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0"?&gt;
+<p>デフォルトでWebHDFSはサポートしてないので設定しないと使えない模様。なのでhdfs-site.xmlに追加する</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0"?&gt;
 &lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;
 &lt;configuration&gt;
     &lt;!-- 追加 --&gt;
@@ -90,19 +90,19 @@
         &lt;value&gt;true&lt;/value&gt;
     &lt;/property&gt;
 &lt;/configuration&gt;
-</code></pre><p>設定はこんだけです。あとは</p><br /><pre class="line-numbers"><code class="language-none")>sudo -u hadoop /opt/hadoop/bin/hadoop namenode -format
+</code></pre><p>設定はこんだけです。あとは</p><pre class="line-numbers"><code class="language-none")>sudo -u hadoop /opt/hadoop/bin/hadoop namenode -format
 sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start namenode
 sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
-</code></pre><p>でデータノードが立ち上がったら、初期時は何も無いのでユーザーディレクトリを作っておく。でユーザーディレクトリな所の所有者権限とかも直しておく。それは昨日の記事で書いたので省略</p><br />
+</code></pre><p>でデータノードが立ち上がったら、初期時は何も無いのでユーザーディレクトリを作っておく。でユーザーディレクトリな所の所有者権限とかも直しておく。それは昨日の記事で書いたので省略</p>
 <h4>WebHDFS Rest APIを使って操作する</h4>
-<p>WebHDFS Rest APIのエントリーポイントとなるURLのベースが、「 <a href="http://host:port/webhdfs/v1">http://host:port/webhdfs/v1</a> 」になる。でポートっていうのはネームノードフロントエンドページとなる、恐らくはデフォルトでは50070のポート番号になる。そこにリクエストをぶっ飛ばす</p><br />
+<p>WebHDFS Rest APIのエントリーポイントとなるURLのベースが、「 http://host:port/webhdfs/v1 」になる。でポートっていうのはネームノードフロントエンドページとなる、恐らくはデフォルトでは50070のポート番号になる。そこにリクエストをぶっ飛ばす</p>
 <h4>ユーザーディレクトリ内にdataディレクトリを作る</h4>
 <pre class="line-numbers"><code class="language-none")>curl -i -X PUT "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&user.name=kinjouj"
-</code></pre><p>user.nameっていうのは指定しない場合はデフォルトの「webuser」っていうのが使用されるので、所有者関係上がある場合には指定しておく。この場合は自分のkinjoujアカウント。レスポンスが</p><br /><pre class="line-numbers"><code class="language-json")>{"boolean": true}
-</code></pre><p>な感じでJSONで返ってくる</p><br />
+</code></pre><p>user.nameっていうのは指定しない場合はデフォルトの「webuser」っていうのが使用されるので、所有者関係上がある場合には指定しておく。この場合は自分のkinjoujアカウント。レスポンスが</p><pre class="line-numbers"><code class="language-json")>{"boolean": true}
+</code></pre><p>な感じでJSONで返ってくる</p>
 <h4>作ったディレクトリのステータスを見る</h4>
 <pre class="line-numbers"><code class="language-none")>curl -i "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS"
-</code></pre><p>結果として</p><br /><pre class="line-numbers"><code class="language-json")>{
+</code></pre><p>結果として</p><pre class="line-numbers"><code class="language-json")>{
   "FileStatus": {
     "accessTime":0,
     "blockSize":0,
@@ -116,13 +116,13 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
     "type":"DIRECTORY"
   }
 }
-</code></pre><p>なレスポンスが返ってくる</p><br />
+</code></pre><p>なレスポンスが返ってくる</p>
 <h4>ディレクトリにファイルを突っ込んでみる</h4>
 <pre class="line-numbers"><code class="language-none")>curl -i -X PUT "http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&user.name=kinjouj" -T accesslog.json
-</code></pre><p>ここポートが50075ってなってるのが50070で投げると50075に要求しろみたいにHTTP/307が出る。まぁ実際はそのLocationヘッダーに投げれば良い</p><br />
+</code></pre><p>ここポートが50075ってなってるのが50070で投げると50075に要求しろみたいにHTTP/307が出る。まぁ実際はそのLocationヘッダーに投げれば良い</p>
 <h4>ディレクトリにあるファイルステータスを取る</h4>
 <pre class="line-numbers"><code class="language-none")>curl -i "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus"
-</code></pre><p>レスポンスとして</p><br /><pre class="line-numbers"><code class="language-json")>{
+</code></pre><p>レスポンスとして</p><pre class="line-numbers"><code class="language-json")>{
   "FileStatuses":{
     "FileStatus":[
       {
@@ -152,15 +152,15 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
     ]
   }
 }
-</code></pre><p>な感じで返ってくるくる。そこに更にディレクトリがあったらどうなるのかの検証のためにテストなディレクトリを作ってる</p><br />
+</code></pre><p>な感じで返ってくるくる。そこに更にディレクトリがあったらどうなるのかの検証のためにテストなディレクトリを作ってる</p>
 <h4>ファイルを読み取る</h4>
 <pre class="line-numbers"><code class="language-none")>curl -i "http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open"
-</code></pre><p>こちらも50070なNamenodeな所のポートにぶん投げるとDatanode側にアクセスしろっと要求される。ちょっと気になるのがブロックサイズでチャンクされてるファイルとかどうなるんだっけと。ビッグデータが無いんでそこ未確認</p><br />
+</code></pre><p>こちらも50070なNamenodeな所のポートにぶん投げるとDatanode側にアクセスしろっと要求される。ちょっと気になるのがブロックサイズでチャンクされてるファイルとかどうなるんだっけと。ビッグデータが無いんでそこ未確認</p>
 <h4>ファイル等を消す</h4>
 <pre class="line-numbers"><code class="language-none")>curl -i -X DELETE "http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&user.name=kinjouj"
-</code></pre><p>な感じでファイル・ディレクトリ等を削除可能</p><br /><p>という感じでHTTPリクエストぶん投げるだけでHDFS操作が出来る模様。まぁ詳しい事は <a href="http://hadoop.apache.org/docs/r1.1.0/webhdfs.html">http://hadoop.apache.org/docs/r1.1.0/webhdfs.html</a> 見た方が良いかも</p><br /><p>ちなみにPerlでWebHDFSを利用する場合にNet::Hadoop::WebHDFSっていうモジュールがある模様</p><br />
+</code></pre><p>な感じでファイル・ディレクトリ等を削除可能</p><p>という感じでHTTPリクエストぶん投げるだけでHDFS操作が出来る模様。まぁ詳しい事は <a href="http://hadoop.apache.org/docs/r1.1.0/webhdfs.html">http://hadoop.apache.org/docs/r1.1.0/webhdfs.html</a> 見た方が良いかも</p><p>ちなみにPerlでWebHDFSを利用する場合にNet::Hadoop::WebHDFSっていうモジュールがある模様</p>
 <h4>追記1</h4>
-<p>appendサポートをするにはhdfs-site.xmlに設定が必要な模様</p><br /><pre class="line-numbers"><code class="language-xml")>&lt;property&gt;
+<p>appendサポートをするにはhdfs-site.xmlに設定が必要な模様</p><pre class="line-numbers"><code class="language-xml")>&lt;property&gt;
   &lt;name&gt;dfs.support.append&lt;/name&gt;
   &lt;value&gt;true&lt;/value&gt;
 &lt;/property&gt;
@@ -221,7 +221,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -237,7 +237,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -264,7 +264,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -272,7 +272,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -280,7 +280,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -314,14 +314,14 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 

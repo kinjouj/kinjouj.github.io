@@ -69,7 +69,7 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h3 class="entry-title">Laravel使ってみた (16) - Events -</h3>
+              <h1 class="entry-title">Laravel使ってみた (16) - Events -</h1>
               <p class="meta">
                 2013-07-24T00:00:00+00:00
                 <span class="categories">
@@ -78,9 +78,9 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p><a href="http://laravel.com/docs/events">http://laravel.com/docs/events</a> のドキュメント読み</p><br />
+                <p><a href="http://laravel.com/docs/events">http://laravel.com/docs/events</a> のドキュメント読み</p>
 <!--more-->
-<p>要はイベントというのを作って、そいつをtrigger(公式的にはfire)的な事をする事で処理を行う機能的な所か。Queueとはまた話が違うっぽいので</p><br /><p>でEventの登録方法はEvent::listenを使うんだけど、app/start/global.phpとかで普通に記述するか <a href="http://laravel.com/docs/events#event-subscribers">http://laravel.com/docs/events#event-subscribers</a> セクションのようにクラスを用いてEvent::listenさせるかっていう、とりあえずは2種類がある模様</p><br /><p>まずは前者の普通にクラスを使わずにapp/start/global.phpとかに定義</p><br /><pre class="line-numbers"><code class="language-php")>Event::listen(
+<p>要はイベントというのを作って、そいつをtrigger(公式的にはfire)的な事をする事で処理を行う機能的な所か。Queueとはまた話が違うっぽいので</p><p>でEventの登録方法はEvent::listenを使うんだけど、app/start/global.phpとかで普通に記述するか <a href="http://laravel.com/docs/events#event-subscribers">http://laravel.com/docs/events#event-subscribers</a> セクションのようにクラスを用いてEvent::listenさせるかっていう、とりあえずは2種類がある模様</p><p>まずは前者の普通にクラスを使わずにapp/start/global.phpとかに定義</p><pre class="line-numbers"><code class="language-php")>Event::listen(
     "hoge", // Event name
     function() {
         echo "hoge(1)";
@@ -95,20 +95,20 @@ Event::listen(
     },
     5
 );
-</code></pre><p>っていうような感じなんですが、Priorityな引数が基本的に大きい方から実行されていく模様。で指定しなかった場合のデフォルトのプライオリティは0。でEventをtriggerしちゃう場合には</p><br /><pre class="line-numbers"><code class="language-php")>Event::fire("hoge", [引数]);
-</code></pre><p>引数が１つであれば別に引数な所をArrayで指定する必要はない(Illuminate\Events\Dispatcher.phpの174行目でArrayに内包するようになってる為)</p><br /><p>でちなみにEvent自体はクラスで利用する事も出来る</p><br /><pre class="line-numbers"><code class="language-php")>class HogeEvent {
+</code></pre><p>っていうような感じなんですが、Priorityな引数が基本的に大きい方から実行されていく模様。で指定しなかった場合のデフォルトのプライオリティは0。でEventをtriggerしちゃう場合には</p><pre class="line-numbers"><code class="language-php")>Event::fire("hoge", [引数]);
+</code></pre><p>引数が１つであれば別に引数な所をArrayで指定する必要はない(Illuminate\Events\Dispatcher.phpの174行目でArrayに内包するようになってる為)</p><p>でちなみにEvent自体はクラスで利用する事も出来る</p><pre class="line-numbers"><code class="language-php")>class HogeEvent {
     public function handle() {
         echo "hoge";
     }
 }
-</code></pre><p>デフォルトだとhandleメソッドが動くけど</p><br /><pre class="line-numbers"><code class="language-php")>Event::listen("hoge", "HogeEvent@hoge");
-</code></pre><p>のようにルーティングでアクションに対するコントローラーのメソッドを指定するような形式でEventが発動されるメソッドを指定する事も可能な模様。んまぁ定義から実行はこんな感じな訳で、でEvent::listenクラス上で行わせるsubscriberっていう機能もある</p><br /><pre class="line-numbers"><code class="language-php")>class HogeSubscribe {
+</code></pre><p>デフォルトだとhandleメソッドが動くけど</p><pre class="line-numbers"><code class="language-php")>Event::listen("hoge", "HogeEvent@hoge");
+</code></pre><p>のようにルーティングでアクションに対するコントローラーのメソッドを指定するような形式でEventが発動されるメソッドを指定する事も可能な模様。んまぁ定義から実行はこんな感じな訳で、でEvent::listenクラス上で行わせるsubscriberっていう機能もある</p><pre class="line-numbers"><code class="language-php")>class HogeSubscribe {
     public function subscribe() {
         Event::listen("hoge", "HogeEvent");
     }
 }
-</code></pre><p>でapp/start/global.phpとかで</p><br /><pre class="line-numbers"><code class="language-php")>Event::subscribe(new HogeSubscribe());
-</code></pre><p>的な事やれば良い。subscribeの引数はインスタンスじゃなくても普通にクラス名でもオッケーっぽい感じがする(ソース読んだ所だと)。でイベントにはワイルドカードを使って定義する事も可能</p><br /><pre class="line-numbers"><code class="language-php")>Event::listen("hoge.fuga", function() {
+</code></pre><p>でapp/start/global.phpとかで</p><pre class="line-numbers"><code class="language-php")>Event::subscribe(new HogeSubscribe());
+</code></pre><p>的な事やれば良い。subscribeの引数はインスタンスじゃなくても普通にクラス名でもオッケーっぽい感じがする(ソース読んだ所だと)。でイベントにはワイルドカードを使って定義する事も可能</p><pre class="line-numbers"><code class="language-php")>Event::listen("hoge.fuga", function() {
     echo "fuga";
 });
 
@@ -116,12 +116,12 @@ Event::listen(
 Event::listen("hoge.*", function() {
     var_dump(func_get_args());
 });
-</code></pre><p>っていう感じ。hoge.fugaっていうイベントがEvent::fireされると</p><br />
+</code></pre><p>っていう感じ。hoge.fugaっていうイベントがEvent::fireされると</p>
 <ul>
 <li>hoge.fugaが発動</li>
 <li>hoge.*が発動</li>
 </ul>
-<p>っていうようになる。どうやらこれはプライオリティを指定する事出来ないっぽい(ソース上でsetupWildcardListenで何かPriorityを維持するような構造になってないっぽい)</p><br /><p>でEvent::queueに関して。Queueクラスっていうのがあるけどこれとは関係が無い。単純に引数で指定したイベント名+_queueで定義しておいて、それがfireされたら元のイベント名の処理を実行するような感じ。んーわかりづらい</p><br /><pre class="line-numbers"><code class="language-php")>// この時点ではhoge_queueっていうイベントを作ってるだけなので何も起きない
+<p>っていうようになる。どうやらこれはプライオリティを指定する事出来ないっぽい(ソース上でsetupWildcardListenで何かPriorityを維持するような構造になってないっぽい)</p><p>でEvent::queueに関して。Queueクラスっていうのがあるけどこれとは関係が無い。単純に引数で指定したイベント名+_queueで定義しておいて、それがfireされたら元のイベント名の処理を実行するような感じ。んーわかりづらい</p><pre class="line-numbers"><code class="language-php")>// この時点ではhoge_queueっていうイベントを作ってるだけなので何も起きない
 Event::queue("hoge");
 
 // Event::flushを使う事でqueueなイベントをfire出来る
@@ -129,9 +129,9 @@ Event::flush("hoge");
 
 // 単純にイベント名_queueで定義されるだけなのでfireでも出来る
 Event::fire("hoge_queue", true);
-</code></pre><p>的な感じかなと。個人的に使い所あんのか無いのか微妙。あとflusherっていうメソッドがある的な事をドキュメントに書いてるけど実装されてない模様。もしくはdeprecateで消えたとか?</p><br /><p>とりまぁEventsなドキュメント読み終わりって事で。</p><br /><p>ちなみに以前にUnit TestingでEventをテストするっていうのあったけどまだ今回は手付かずなのでやり次第追記するかも</p><br />
+</code></pre><p>的な感じかなと。個人的に使い所あんのか無いのか微妙。あとflusherっていうメソッドがある的な事をドキュメントに書いてるけど実装されてない模様。もしくはdeprecateで消えたとか?</p><p>とりまぁEventsなドキュメント読み終わりって事で。</p><p>ちなみに以前にUnit TestingでEventをテストするっていうのあったけどまだ今回は手付かずなのでやり次第追記するかも</p>
 <h4>追記1: ワイルドカードなイベントを着火させない方法</h4>
-<p>上記のようにhoge.fugaとhoge.*があってhoge.fugaに着火させるとhoge.*にまで及ぶっていう形にはなるが、hoge.fugaな所からreturn falseしちゃうとStop Propagationされてそこで止まるっぽい</p><br /><p>っていうのを書くの忘れてた</p><br />
+<p>上記のようにhoge.fugaとhoge.*があってhoge.fugaに着火させるとhoge.*にまで及ぶっていう形にはなるが、hoge.fugaな所からreturn falseしちゃうとStop Propagationされてそこで止まるっぽい</p><p>っていうのを書くの忘れてた</p>
               </div>
             </div>
           </div>
@@ -170,7 +170,7 @@ Event::fire("hoge_queue", true);
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (254)</a></li>
+  <li><a href="/category/java.html">Java (260)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
   <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
@@ -186,7 +186,7 @@ Event::fire("hoge_queue", true);
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
   <li><a href="/category/struts2.html">Struts2 (16)</a></li>
   <li><a href="/category/doma.html">doma (5)</a></li>
-  <li><a href="/category/hadoop.html">Hadoop (17)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (25)</a></li>
   <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
   <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
   <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
@@ -213,7 +213,7 @@ Event::fire("hoge_queue", true);
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (63)</a></li>
+  <li><a href="/category/php.html">PHP (64)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
   <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
@@ -221,7 +221,7 @@ Event::fire("hoge_queue", true);
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (49)</a></li>
+  <li><a href="/category/ruby.html">Ruby (51)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rspec.html">rspec (21)</a></li>
   <li><a href="/category/rails.html">Rails (34)</a></li>
@@ -229,7 +229,7 @@ Event::fire("hoge_queue", true);
 
   <li><a href="/category/sonota.html">その他 (12)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (20)</a></li>
+  <li><a href="/category/linux.html">Linux (21)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
@@ -263,14 +263,14 @@ Event::fire("hoge_queue", true);
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/python.html">Python (7)</a></li>
-  <li><a href="/category/c.html">C (6)</a></li>
+  <li><a href="/category/c.html">C (8)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/c-plus-plus.html">C++ (10)</a></li>
+  <li><a href="/category/c-plus-plus.html">C++ (11)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">perl (4)</a></li>
+  <li><a href="/category/perl.html">Perl (7)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
 
