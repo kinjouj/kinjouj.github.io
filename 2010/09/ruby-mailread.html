@@ -11,10 +11,10 @@
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="" />
-    <title>HBase (4) - HBase Cluster - - kinjouj.github.io</title>
-    <link rel="prev" href="/2011/04/hbase-3-hbase-rootdir.html" />
-    <link rel="next" href="/2011/04/mahout-1-loglikelihood.html" />
-    <link rel="canonical" href="https://kinjouj.github.io/2011/04/2011-04-23-hbase-4-cluster.html" />
+    <title>mailread - kinjouj.github.io</title>
+    <link rel="prev" href="/2010/09/druby.html" />
+    <link rel="next" href="/2010/09/capistrano.html" />
+    <link rel="canonical" href="https://kinjouj.github.io/2010/09/ruby-mailread.html" />
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -69,66 +69,32 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h1 class="entry-title">HBase (4) - HBase Cluster -</h1>
+              <h1 class="entry-title">mailread</h1>
               <p class="meta">
-                2011-04-23T00:00:00+00:00
+                2010-09-04T00:00:00+00:00
                 <span class="categories">
+                  <a class="category" href="/category/ruby.html">Ruby</a>
                 </span>
               </p>
               <div class="entry-content">
-                <p>HBaseをクラスタ構成で構築してみる</p>
-<h4>サーバー情報</h4>
-<pre class="line-numbers"><code class="language-none")>Hadoop HDFSサーバー: ホスト名 dfserver (192.168.1.1)
-HBase Master: ホスト名 test1 (192.168.1.2)
-HBase Slave: ホスト名 test2 (192.168.1.3)
-</code></pre><p>上記のホスト名の設定をHBase関連サーバーに行っておく。又、HDFSサーバーは外部からアクセスできるようにバインドするアドレス及びポート開放を行っておく</p>
-<h4>hbase-site.xmlを設定(マスター側)</h4>
-<pre class="line-numbers"><code class="language-xml")>&lt;configuration&gt;
-    &lt;property&gt;
-        &lt;name&gt;hbase.rootdir&lt;/name&gt;
-        &lt;value&gt;hdfs://dfserver:9000/hbase&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property&gt;
-        &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;
-        &lt;value&gt;true&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property&gt;
-        &lt;name&gt;hbase.zookeeper.quorum&lt;/name&gt;
-        &lt;value&gt;192.168.1.2,192.168.1.3&lt;/value&gt;
-    &lt;/property&gt;
-&lt;/configuration&gt;
-</code></pre><p>hbase.zookeeper.quorumを指定しておかないとzookeeperのポートが開放されないので必ず指定する。これにはregionserverで管理するサーバーを指定する</p>
-<h4>regionserverを作成(マスター側)</h4>
-<pre class="line-numbers"><code class="language-none")>192.168.1.2
-192.168.1.3
-</code></pre><p>マスター及びスレーブサーバーのIPを列挙しておく。この設定はマスター側のみで行う</p>
-<h4>hbase-site.xmlを作成(スレーブ側)</h4>
-<pre class="line-numbers"><code class="language-xml")>&lt;configuration&gt;
-    &lt;property&gt;
-        &lt;name&gt;hbase.rootdir&lt;/name&gt;
-        &lt;value&gt;hdfs://dfserver:9000/hbase&lt;/value&gt;
-    &lt;/property&gt;
-    &lt;property&gt;
-        &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;
-        &lt;value&gt;true&lt;/value&gt;
-    &lt;/property&gt;
-&lt;/configuration&gt;
-</code></pre>
-<h4>動作確認</h4>
-<p>マスターサーバー側でHBaseを起動すると指定したHDFSにディレクトリが作成され、マスター・スレーブサーバーに必要なサーバーアプリケーションが起動される。jpsコマンドで確認すると</p>
-<h4>マスター側</h4>
-<pre class="line-numbers"><code class="language-none")>HMaster
-HRegionServer
-HQuorumPeer
-</code></pre>
-<h4>スレーブ側</h4>
-<pre class="line-numbers"><code class="language-none")>HRegionServer
-HQuorumPeer
-</code></pre><p>というようになっているのを確認する。その後、マスターサーバー側でhbase shellで</p><pre class="line-numbers"><code class="language-none")>create "smaples","score"
+                <p>メールヘッダーソースからMailReadインスタンスを生成するメモ</p><pre class="line-numbers"><code class="language-ruby")>require "tempfile"
+require "mailread"
 
-# 表示されるか確認
-list
-</code></pre><p>を実行した後にスレーブサーバー側でlistコマンドを実行するとマスター側で行った操作がスレーブ側でも問題無く反映されている事を確認する</p>
+mail_header = &lt;&lt;MSG
+From: hoge@hoge.com
+Subject: test
+MSG
+
+# メールヘッダーを元に一時ファイルを作成
+f = Tempfile.new "data"
+f.print mail_header
+f.close
+
+# 一時ファイルを元にMailReadのインスタンスを生成
+m = Mail.new f.open
+puts "from: " + m["From"] + "\n"
+puts "title: " + m["Subject"] + "\n"
+</code></pre><p>但し、メールヘッダーのボディ部(メッセージボディ)とSubject関連の部分は改行を一つ余分に入れないとボディ部がとれないっぽい</p>
               </div>
             </div>
           </div>
@@ -167,7 +133,7 @@ list
             <section>
               <h4>Categories</h4>
               <ul class="mx-2 my-1">
-  <li><a href="/category/java.html">Java (266)</a></li>
+  <li><a href="/category/java.html">Java (293)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/android.html">Android (100)</a></li>
   <ul class="mx-2 my-1">
@@ -189,7 +155,7 @@ list
   <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
 </ul>
 
-  <li><a href="/category/javascript.html">JavaScript (164)</a></li>
+  <li><a href="/category/javascript.html">JavaScript (166)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
   <li><a href="/category/chrome-extension.html">Chrome Extension (38)</a></li>
@@ -210,7 +176,7 @@ list
   <li><a href="/category/gulp.html">gulp (1)</a></li>
 </ul>
 
-  <li><a href="/category/php.html">PHP (65)</a></li>
+  <li><a href="/category/php.html">PHP (70)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
   <li><a href="/category/laravel.html">Laravel (20)</a></li>
@@ -218,31 +184,33 @@ list
   <li><a href="/category/smarty.html">Smarty (1)</a></li>
 </ul>
 
-  <li><a href="/category/ruby.html">Ruby (54)</a></li>
+  <li><a href="/category/ruby.html">Ruby (56)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/rails.html">Rails (34)</a></li>
   <li><a href="/category/rspec.html">rspec (21)</a></li>
 </ul>
 
-  <li><a href="/category/sonota.html">その他 (13)</a></li>
+  <li><a href="/category/sonota.html">その他 (14)</a></li>
   <ul class="mx-2 my-1">
-  <li><a href="/category/linux.html">Linux (24)</a></li>
+  <li><a href="/category/linux.html">Linux (27)</a></li>
   <ul class="mx-2 my-1">
+  <li><a href="/category/qmail.html">qmail (7)</a></li>
   <li><a href="/category/varnish.html">varnish (5)</a></li>
+  <li><a href="/category/postfix.html">postfix (4)</a></li>
   <li><a href="/category/supervisord.html">supervisord (4)</a></li>
   <li><a href="/category/squid.html">squid (4)</a></li>
-  <li><a href="/category/postfix.html">postfix (2)</a></li>
   <li><a href="/category/shellscript.html">shellscript (1)</a></li>
 </ul>
 
-  <li><a href="/category/database.html">Database (13)</a></li>
+  <li><a href="/category/database.html">Database (15)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/mongodb.html">MongoDB (15)</a></li>
-  <li><a href="/category/oracle.html">Oracle (11)</a></li>
+  <li><a href="/category/oracle.html">Oracle (13)</a></li>
   <li><a href="/category/cassandra.html">Cassandra (10)</a></li>
-  <li><a href="/category/hbase.html">HBase (6)</a></li>
+  <li><a href="/category/hbase.html">HBase (7)</a></li>
+  <li><a href="/category/mysql.html">MySQL (7)</a></li>
   <li><a href="/category/pl-slash-sql.html">PL/SQL (5)</a></li>
-  <li><a href="/category/mysql.html">MySQL (2)</a></li>
+  <li><a href="/category/postgresql.html">PostgreSQL (1)</a></li>
 </ul>
 
   <li><a href="/category/html5.html">HTML5 (8)</a></li>
@@ -260,13 +228,13 @@ list
   <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
 </ul>
 
-  <li><a href="/category/perl.html">Perl (9)</a></li>
-  <li><a href="/category/c.html">C (9)</a></li>
+  <li><a href="/category/c.html">C (14)</a></li>
   <ul class="mx-2 my-1">
   <li><a href="/category/c-plus-plus.html">C++ (14)</a></li>
   <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
 </ul>
 
+  <li><a href="/category/perl.html">Perl (10)</a></li>
   <li><a href="/category/python.html">Python (7)</a></li>
   <li><a href="/category/she-hui.html">社会 (1)</a></li>
 </ul>
@@ -275,8 +243,8 @@ list
           </div>
         </aside>
         <div class="my-pagination mt-5">
-          <a  style="min-width: 33%" class="next-entry float-start box-link" href="/2011/04/mahout-1-loglikelihood.html">&lt;&lt;&nbsp;Mahout (1) - LogLikelihood -</a>
-          <a style="min-width: 33%" class="prev-entry float-end box-link" href="/2011/04/hbase-3-hbase-rootdir.html">HBase (3) - hbase.rootdir -&nbsp;&gt;&gt;</a>
+          <a  style="min-width: 33%" class="next-entry float-start box-link" href="/2010/09/capistrano.html">&lt;&lt;&nbsp;capistrano</a>
+          <a style="min-width: 33%" class="prev-entry float-end box-link" href="/2010/09/druby.html">druby&nbsp;&gt;&gt;</a>
         </div>
       </div>
     </div>

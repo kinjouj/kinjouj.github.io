@@ -1,0 +1,361 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="" />
+    <title>qmail+vpopmail - kinjouj.github.io</title>
+    <link rel="prev" href="/2009/12/dovecot.html" />
+    <link rel="next" href="/2009/12/qmail-vpopmail-courier-imap.html" />
+    <link rel="canonical" href="https://kinjouj.github.io/2009/12/qmail-vpopmail.html" />
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-56169419-1', 'auto');
+      ga("send", "pageview");
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg p-0">
+      <div class="container-fluid">
+        <nav class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/contact.html">お問い合わせ</a>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav mavbar-right ms-auto">
+            <li class="nav-it
+            em">
+              <form action="https://www.google.com/search" method="GET">
+                <input type="hidden" name="hl" value="ja" />
+                <input type="hidden" name="sitesearch" value="kinjouj.github.io" />
+                <input type="search" name="q" class="form-control" />
+              </form>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div>
+      <header class="logo-header text-center">
+        <h2><a href="/">kinjouj.github.io</a></h2>
+      </header>
+    </div>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-12"></div>
+        <div class="col col-lg-8">
+          <div id="content">
+            <div class="entry" style="width: 100%;margin: 10px">
+              <h1 class="entry-title">qmail+vpopmail</h1>
+              <p class="meta">
+                2009-12-18T00:00:00+00:00
+                <span class="categories">
+                  <a class="category" href="/category/qmail.html">qmail</a>
+                </span>
+              </p>
+              <div class="entry-content">
+                <p>qmail+vpopmailでのメールサーバー(SMTPS、POPS対応)の構築方法をメモ</p><p>※ドメイン名はhoge.comとしてあります</p>
+<h4>必要な物</h4>
+<p>qmail
+<a href="http://www.qmail.org">http://www.qmail.org</a></p><p>qmail-smtp-auth
+<a href="http://members.elysium.pl/brush/qmail-smtpd-auth/">http://members.elysium.pl/brush/qmail-smtpd-auth/</a></p><p>qmail-remote-auth
+<a href="http://tomclegg.net/qmail/&#35;qmail-remote-auth">http://tomclegg.net/qmail/&amp;#35;qmail-remote-auth</a></p><p>vpopmail
+<a href="http://vpopmail.sourceforge.net">http://vpopmail.sourceforge.net</a></p><p>ucspi-tcp(tcpserver)
+<a href="http://cr.yp.to/ucspi-tcp.html">http://cr.yp.to/ucspi-tcp.html</a></p><p>ucspi-tcp-ssl
+<a href="http://www.nrg4u.com/">http://www.nrg4u.com/</a></p>
+<h4>事前設定</h4>
+<pre class="line-numbers"><code class="language-bash")># qmail関連のユーザー・グループを作成groupadd nofiles
+groupadd qmail
+useradd -g nofiles -d /var/qmail -s /bin/false qmaild
+useradd -g nofiles -d /var/qmail -s /bin/false qmaill
+useradd -g nofiles -d /var/qmail -s /bin/false qmailp
+useradd -g nofiles -d /var/qmail/alias -s /bin/false alias
+useradd -g qmail -d /var/qmail -s /bin/false qmailq
+useradd -g qmail -d /var/qmail -s /bin/false qmailr
+useradd -g qmail -d /var/qmail -s /bin/false qmails
+
+# vpopmail関連のユーザー・グループを作成
+groupadd -g 999 vchkpw
+useradd -u 999 -g 999 vpopmail -d /var/vpopmail
+</code></pre>
+<h4>インストール</h4>
+<p>普通にmakeした後、qmailのソース内にあるconfig-fastを以下のように実行</p><pre class="line-numbers"><code class="language-none")>./config-fast hoge.com
+</code></pre>
+<h4>設定1(tcpserver)</h4>
+<p>/etc/tcp.smtpを作成</p><pre class="line-numbers"><code class="language-none")>192.168.3,:allow,RELAYCLIENT=""
+</code></pre><p>作成後、以下を実行</p><pre class="line-numbers"><code class="language-bash")>tcprule /etc/tcp.smtp.cdb /etc/tcp.smtp.tmp &lt; /etc/tcp.smtp
+</code></pre>
+<h4>設定2(vpopmail)</h4>
+<p>最初にvpopmailが認識するドメイン名を設定しないといけないっぽいので、$VPOPMAIL_ROOT/etc/defaultdomainを以下みたいに設定</p><pre class="line-numbers"><code class="language-none")>hoge.com
+</code></pre><p>その後、binディレクトリ内にあるvadddomain、vadduser等でドメイン・ユーザーを追加する</p>
+<h4>設定3(qmailその1)</h4>
+<p>$QMAIL<em>ROOT/boot/hogeを$QMAIL</em>ROOT/rcとかにコピー後、Maildir形式に対応させる為以下みたいに修正</p><pre class="line-numbers"><code class="language-bash")>exec env - PATH="/path/to/qmail/bin:$PATH" \
+qmail-start ./Maildir/ splogger qmail
+</code></pre><p>変えるのは./Maildirにするだけ。んでcontrolにあるファイルを設定</p>
+<h4>ファイル名: me</h4>
+<pre class="line-numbers"><code class="language-none")>hoge.com
+</code></pre>
+<h4>ファイル名: rcpthosts</h4>
+<pre class="line-numbers"><code class="language-none")>localhost
+hoge.com
+</code></pre>
+<h4>設定4(qmailその2)</h4>
+<p>ここでOutBound Port 25 Blockingの対策として$QMAIL_ROOT/control/smtproutesを作成する。事前にプロバイダのサブミッションを調査する必要あり</p><pre class="line-numbers"><code class="language-none")>:プロバイダSMTPサーバーを指定:587
+</code></pre><p>※プロバイダによっては契約IDやパスワードが必要になります</p>
+<h4>設定(qmailその3)</h4>
+<p>んでSMTP over SSL等も使いたいので、以下で証明書を作成</p><pre class="line-numbers"><code class="language-bash")>openssl req -new -nodes -x509 -keyout qmail.pem -out qmail.pem -days 365
+</code></pre>
+<h4>サーバーの起動</h4>
+<p>サーバーの起動は以下のようにする</p><pre class="line-numbers"><code class="language-bash")># SMTP
+tcpserver \
+    -RH \
+    -u 999 \
+    -g 999 \
+    -x /etc/tcp.smtp.cdb 0 smtp \
+    /var/qmail/bin/qmail-smtpd hoge.com \
+    /var/vpopmail/bin/vchkpw /bin/true 2&gt;&1 \
+    | /var/qmail/bin/splogger smtp 3 &
+
+# SMTPS
+tcpserver \
+    -RH \
+    -u 999 \
+    -g 999 \
+    -s -n /var/qmail/control/qmail.pem \
+    -x /etc/tcp.smtp.cdb 0 smtp /var/qmail/bin/qmail-smtpd hoge.com \
+    /var/vpopmail/bin/vchkpw /bin/true 2&gt;&1 \
+    | /var/qmail/bin/splogger smtp 3 &
+
+# POP3
+tcpserver \
+    -v -RH \
+    0 pop3 \
+    /var/qmail/bin/qmail-popup hoge.com \
+    /var/vpopmail/bin/vchkpw \
+    /var/qmail/bin/qmail-pop3d Maildir 2&gt;&1 \
+    | /var/qmail/bin/splogger pop3 3 &
+
+# POP3S
+tcpserver \
+    -v -RH \
+    -s -n /var/qmail/control/qmail.pem \
+    0 pop3s \
+    /var/qmail/bin/qmail-popup hoge.com \
+    /var/vpopmail/bin/vchkpw \
+    /var/qmail/bin/qmail-pop3d Maildir 2&gt;&1 \
+    | /var/qmail/bin/splogger pop3s 3 &
+</code></pre><p>ちなみにalias関連は$VPOPMAIL_ROOT/domains/ドメイン名の場所になるっぽい</p>
+<h4>補足1</h4>
+<p>qmail+vpopmailでSMTP認証を行う際にCRAM-MD5で認証させる場合には、vpopmailのvchkpw.cに以下のような修正が必要らしい</p><pre class="line-numbers"><code class="language-c")>int authcram(unsigned char *response, 以下省略) {
+    hmac_md5(
+        challenge,
+        strlen(challenge),
+        password,
+        strlen(password),
+        digest
+    );
+    return(strcmp(digascii, response));;
+}
+</code></pre><p>を</p><pre class="line-numbers"><code class="language-c")>int authcram(unsigned char *response, 以下省略) {
+    hmac_md5(
+        response,
+        strlen(response),
+        password,
+        strlen(password),
+        digest
+    );
+    return(strcmp(digascii, challenge));
+}
+</code></pre><p>のように修正しないとCRAM-MD5での認証に失敗する模様</p>
+<h4>補足2</h4>
+<p>qmailで携帯にメールしようとするとエラーになり返ってくるので、/path/to/qmail/control/smtproutesを以下のように設定</p><pre class="line-numbers"><code class="language-none")>docomo.ne.jp:中継メールサーバー
+ezweb.ne.jp:中継メールサーバー
+softbank.ne.jp:中継メールサーバー
+</code></pre><p>プロバイダがOP25Bを適応している場合は中継メールサーバーにはサブミッションポートも指定しないといけない模様</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="col col-lg-4 px-5">
+          <section>
+            <h4>Recent Posts</h4>
+            <ul id="recent_posts">
+              <li class="post">
+                <a href="/2025/05/ruby-array-values-object-convert.html">Rubyで配列内をオブジェクトに変換する方法</a>
+              </li>
+              <li class="post">
+                <a href="/2025/04/ffmpeg-capture-window.html">ffmpegを使って画面上のウィンドウをキャプチャーする方法</a>
+              </li>
+              <li class="post">
+                <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
+              </li>
+              <li class="post">
+                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
+              </li>
+              <li class="post">
+                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
+              </li>
+              <li class="post">
+                <a href="/2018/07/graphql-graphqljs-3-mutation.html">GraphQL.jsでMutation</a>
+              </li>
+              <li class="post">
+                <a href="/2018/07/graphql-graphqljs-2-graphql-schema.html">GraphQLスキーマを定義して利用する方法</a>
+              </li>
+              <li class="post">
+                <a href="/2018/07/jwt-authentication-rails.html">RailsでJWT認証</a>
+              </li>
+            </ul>
+          </section>
+          <div id="categories">
+            <section>
+              <h4>Categories</h4>
+              <ul class="mx-2 my-1">
+  <li><a href="/category/java.html">Java (293)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/android.html">Android (100)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/robolectric.html">robolectric (10)</a></li>
+</ul>
+
+  <li><a href="/category/gradle.html">gradle (32)</a></li>
+  <li><a href="/category/hadoop.html">Hadoop (28)</a></li>
+  <li><a href="/category/spring-framework.html">Spring Framework (26)</a></li>
+  <li><a href="/category/jax-rs.html">JAX-RS (22)</a></li>
+  <li><a href="/category/struts2.html">Struts2 (16)</a></li>
+  <li><a href="/category/sastruts.html">SAStruts (9)</a></li>
+  <li><a href="/category/google-app-engine.html">Google App Engine (9)</a></li>
+  <li><a href="/category/mahout.html">Mahout (8)</a></li>
+  <li><a href="/category/eclipse-birt.html">Eclipse BIRT (7)</a></li>
+  <li><a href="/category/doma.html">doma (5)</a></li>
+  <li><a href="/category/rxjava.html">RxJava (3)</a></li>
+  <li><a href="/category/java-ee.html">Java EE (2)</a></li>
+  <li><a href="/category/kotlin.html">Kotlin (1)</a></li>
+</ul>
+
+  <li><a href="/category/javascript.html">JavaScript (166)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/angular-dot-js.html">angular.js (40)</a></li>
+  <li><a href="/category/chrome-extension.html">Chrome Extension (38)</a></li>
+  <li><a href="/category/node-dot-js.html">Node.js (17)</a></li>
+  <li><a href="/category/native-client.html">Native Client (8)</a></li>
+  <li><a href="/category/react-dot-js.html">React.js (7)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/redux.html">redux (1)</a></li>
+  <li><a href="/category/almin.html">almin (1)</a></li>
+</ul>
+
+  <li><a href="/category/backbone-dot-js.html">Backbone.js (6)</a></li>
+  <li><a href="/category/jquery.html">jQuery (6)</a></li>
+  <li><a href="/category/npapi.html">NPAPI (4)</a></li>
+  <li><a href="/category/webpack.html">webpack (2)</a></li>
+  <li><a href="/category/grunt.html">grunt (1)</a></li>
+  <li><a href="/category/typescript.html">TypeScript (1)</a></li>
+  <li><a href="/category/gulp.html">gulp (1)</a></li>
+</ul>
+
+  <li><a href="/category/php.html">PHP (70)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/fuelphp.html">FuelPHP (33)</a></li>
+  <li><a href="/category/laravel.html">Laravel (20)</a></li>
+  <li><a href="/category/phpunit.html">PHPUnit (3)</a></li>
+  <li><a href="/category/smarty.html">Smarty (1)</a></li>
+</ul>
+
+  <li><a href="/category/ruby.html">Ruby (56)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/rails.html">Rails (34)</a></li>
+  <li><a href="/category/rspec.html">rspec (21)</a></li>
+</ul>
+
+  <li><a href="/category/sonota.html">その他 (14)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/linux.html">Linux (27)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/qmail.html">qmail (7)</a></li>
+  <li><a href="/category/varnish.html">varnish (5)</a></li>
+  <li><a href="/category/postfix.html">postfix (4)</a></li>
+  <li><a href="/category/supervisord.html">supervisord (4)</a></li>
+  <li><a href="/category/squid.html">squid (4)</a></li>
+  <li><a href="/category/shellscript.html">shellscript (1)</a></li>
+</ul>
+
+  <li><a href="/category/database.html">Database (15)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/mongodb.html">MongoDB (15)</a></li>
+  <li><a href="/category/oracle.html">Oracle (13)</a></li>
+  <li><a href="/category/cassandra.html">Cassandra (10)</a></li>
+  <li><a href="/category/hbase.html">HBase (7)</a></li>
+  <li><a href="/category/mysql.html">MySQL (7)</a></li>
+  <li><a href="/category/pl-slash-sql.html">PL/SQL (5)</a></li>
+  <li><a href="/category/postgresql.html">PostgreSQL (1)</a></li>
+</ul>
+
+  <li><a href="/category/html5.html">HTML5 (8)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/css.html">CSS (6)</a></li>
+</ul>
+
+  <li><a href="/category/eclipse.html">Eclipse (6)</a></li>
+  <li><a href="/category/fluentd.html">fluentd (4)</a></li>
+  <li><a href="/category/nginx.html">nginx (4)</a></li>
+  <li><a href="/category/jenkins.html">Jenkins (3)</a></li>
+  <li><a href="/category/graphql.html">GraphQL (3)</a></li>
+  <li><a href="/category/beanstalk.html">beanstalk (1)</a></li>
+  <li><a href="/category/git.html">git (1)</a></li>
+  <li><a href="/category/zookeeper.html">zookeeper (1)</a></li>
+</ul>
+
+  <li><a href="/category/c.html">C (14)</a></li>
+  <ul class="mx-2 my-1">
+  <li><a href="/category/c-plus-plus.html">C++ (14)</a></li>
+  <li><a href="/category/objective-c.html">Objective-C (1)</a></li>
+</ul>
+
+  <li><a href="/category/perl.html">Perl (10)</a></li>
+  <li><a href="/category/python.html">Python (7)</a></li>
+  <li><a href="/category/she-hui.html">社会 (1)</a></li>
+</ul>
+
+            </section>
+          </div>
+        </aside>
+        <div class="my-pagination mt-5">
+          <a  style="min-width: 33%" class="next-entry float-start box-link" href="/2009/12/qmail-vpopmail-courier-imap.html">&lt;&lt;&nbsp;qmail+vpopmail+courier-imap</a>
+          <a style="min-width: 33%" class="prev-entry float-end box-link" href="/2009/12/dovecot.html">dovecot&nbsp;&gt;&gt;</a>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="footer-content">
+        Powered by gress(octopress like site generator)
+      </div>
+    </footer>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061"
+     crossorigin="anonymous"></script>
+  </body>
+</html>
