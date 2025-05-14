@@ -11,10 +11,9 @@
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="" />
-    <title>Espressoを使ったUIテスト - kinjouj.github.io</title>
-    <link rel="prev" href="/2014/04/mysql-client-connection-trouble.html" />
-    <link rel="next" href="/2014/04/gradle-android-test-plugin-robolectric-espresso.html" />
-    <link rel="canonical" href="https://kinjouj.github.io/2014/04/android-espresso-ui-testing.html" />
+    <title>RubyでYAMLをロードする際にキーをSymbolにする方法 - kinjouj.github.io</title>
+    <link rel="prev" href="/2025/05/ruby-array-values-object-convert.html" />
+    <link rel="canonical" href="https://kinjouj.github.io/2025/05/ruby-yaml-parse-keys-symbolized.html" />
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -69,144 +68,37 @@
         <div class="col col-lg-8">
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
-              <h1 class="entry-title">Espressoを使ったUIテスト</h1>
+              <h1 class="entry-title">RubyでYAMLをロードする際にキーをSymbolにする方法</h1>
               <p class="meta">
-                2014-04-27T00:00:00+00:00
+                2025-05-15T09:00:00+09:00
                 <span class="categories">
-                  <a class="category" href="/category/android.html">Android</a>
-                  <a class="category" href="/category/java.html">Java</a>
+                  <a class="category" href="/category/ruby.html">Ruby</a>
                 </span>
               </p>
               <div class="entry-content">
-                <p>公式: <a href="https://code.google.com/p/android-test-kit/wiki/Espresso">https://code.google.com/p/android-test-kit/wiki/Espresso</a></p><p>APIリファレンス: <a href="https://android-test-kit.googlecode.com/git-history/master/docs/javadocs/apidocs/index.html?r=master">https://android-test-kit.googlecode.com/git-history/master/docs/javadocs/apidocs/index.html?r=master</a></p><p>タイトル通り、EspressoのUIテストキットなライブラリを使ってUIテストをするっていうのをやってみた。まぁ導入周りとかそっち系の単純な話だけなので(ry</p>
-<h4>アプリ構造</h4>
+                <p>RubyでYAMLのデータをロードする際にキーをStringじゃなくてSymbolにしてほしい場合は<span style="color: red">symbolize_names</span>を設定すればいいっぽい(デフォルトはfalseな模様)</p><pre class="line-numbers"><code class="language-ruby")>require "yaml"
 
-<pre>
-├── app
-│   ├── build.gradle
-│   ├── lib
-│   │   └── espresso-1.1-bundled.jar
-│   └── src
-│       ├── androidTest
-│       │   └── java
-│       │       └── sample
-│       │           └── test
-│       │               └── espresso
-│       │                   └── MainActivityTest.java
-│       └── main
-│       　   ├── AndroidManifest.xml
-│       　   ├── assets
-│       　   ├── java
-│       　   │   └── sample
-│       　   │       └── test
-│       　   │           └── MainActivity.java
-│       　   └── res (省略)
-│
-├── build.gradle
-├── libraries
-│   └── sample_library
-│       ├── build.gradle
-│       ├── sample_library.iml
-│       └── src
-│           └── main
-│               ├── AndroidManifest.xml
-│               ├── java
-│               │   └── sample
-│               │       └── test
-│               │           └── library
-│               │               └── SampleDialogFragment.java
-│               └── res (省略)
-└── settings.gradle
-</pre>
-<p>てな感じでDialogFragmentなSampleDialogFragmentを利用してダイアログを出してテキストを入力してOKするとToastが出るっていうだけ。んまぁEspressoを使ってテキスト入力させてクリックしても問題ないか的な所周りをテストしてみる</p>
-<h4>app/build.gradle</h4>
-<pre class="line-numbers"><code class="language-groovy")>apply plugin: "android"
+data =&lt;&lt;EOS
+a: A
+date: 2000-01-01 00:00:00
+persons:
+  - name: a
+    age: 21
+EOS
 
-dependencies {
-    compile project(":libraries:sample_library")
-    compile "com.actionbarsherlock:actionbarsherlock:4.4.0@aar"
-    androidTestCompile files("lib/espresso-1.1-bundled.jar")
+
+a = YAML.load(data, permitted_classes: [Time], symbolize_names: true)
+p a
+</code></pre><p>実行すると以下のような結果が得られる</p><pre class="line-numbers"><code class="language-json")>{
+    a: "A",
+    date: 2000-01-01 09:00:00 +0900,
+    persons: [
+        {name: "a", age: 21}
+    ]
 }
-
-android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.3"
-
-    defaultConfig {
-        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
-    }
-}
-</code></pre><p>特にJUnit周りなライブラリとか使ってないので依存性には入れてない。hamcrestに関してはespresso-1.1-bundled.jarに入ってるのでそれを使える(今回はそれも使ってない)</p><p>あとAndroidのgradleサポートにおいて0.9.xくらい辺りからinstrumentTestっていうのがandroidTestっていうのに変わった模様。</p><p>あとデフォルトのinstrumentationRunnerではなくandroid-test-kitなinstrumentationRunnerに変更しておく必要ありと</p><p>んまぁあとはテスト書くだけ</p>
-<h4>MainActivityTest.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.test.espresso;
-
-import android.test.ActivityInstrumentationTestCase2;
-import sample.test.MainActivity;
-import sample.test.R;
-
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.closeSoftKeyboard;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-
-public class MainActivityTest extends ActivityInstrumentationTestCase2&lt;MainActivity&gt; {
-
-    public MainActivityTest() {
-        super(MainActivity.class);
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        getActivity();
-    }
-
-    public void test() {
-        onView(withId(R.id.dialog_text)).perform(typeText("hoge"));
-
-        /* 実機等でテストする場合においてIMがデフォルトのAndroidキーボード
-           ではないのを使っているような場合(Google IMEも同様)だとtypeText
-           する際にあたっては一度スリープ等をした方が良い模様
-        */
-        // sleep(3000);
-
-        /* ダイアログ等を出している場合においてはソフトウェアキーボードで
-           隠れてしまって以降でのボタンが正常に取得できずにエラーになるので
-           入力が終わったらcloseSoftKeyboardをしてソフトウェアキーボードを
-           閉じる必要あり
-        */
-        onView(withId(R.id.dialog_text)).perform(closeSoftKeyboard());
-
-        // わざとテストをfailさせる
-        onView(withId(R.id.dialog_text)).check(matches(withText("fuga")));
-
-        onView(withId(android.R.id.button1)).perform(click());
-
-        /* 恐らくはpostDelayed等が行われる前にプロセスが終了する模様なので
-           onClick等においてpostDelayedをしているようなケースな場合において
-           は一度スリープを行なわないとそのままプロセスが終了してしまい
-           postDelayedに及ぶ処理まで発生しない(かも)
-        */
-        sleep(5000);
-    }
-
-    public void sleep(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-}
-</code></pre><p>大体なことはコメントで書いてるので(ry んまぁ公式読んだ方が単純に良いと思うので</p>
-<h4>テストを実行</h4>
-<pre class="line-numbers"><code class="language-none")>gradle connectedAndroidTest
-</code></pre><p>をやると動く。ちなみにこれも0.9.xくらい辺りからはconnectedInstrumentTestからconnectedAndroidTestに変わっているので</p><p>んまぁなんやかんやで動かすと</p><p><img src="/images/2014/04/201404271618.jpg" loading="lazy" /></p><p>っていう感じ</p>
-<h4>追記</h4>
-<p><a href="https://github.com/JakeWharton/double-espresso">https://github.com/JakeWharton/double-espresso</a> っていうのもある</p>
+</code></pre><p>※見やすいように整形してます</p>
+<h4>余談</h4>
+<p>RailsとかにはActiveSupport?symbolize_keysとかいうのがあるらしい(未検証)</p>
               </div>
             </div>
           </div>
@@ -345,8 +237,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2&lt;MainAc
           </div>
         </aside>
         <div class="my-pagination mt-5">
-          <a  style="min-width: 33%" class="next-entry float-start box-link" href="/2014/04/gradle-android-test-plugin-robolectric-espresso.html">&lt;&lt;&nbsp;gradle-android-test-plugin+robolectric+espresso</a>
-          <a style="min-width: 33%" class="prev-entry float-end box-link" href="/2014/04/mysql-client-connection-trouble.html">「Can&#8217;t connect to local MySQL server through socket」について&nbsp;&gt;&gt;</a>
+          <a style="min-width: 33%" class="prev-entry float-end box-link" href="/2025/05/ruby-array-values-object-convert.html">Rubyで配列内をオブジェクトに変換する方法&nbsp;&gt;&gt;</a>
         </div>
       </div>
     </div>
