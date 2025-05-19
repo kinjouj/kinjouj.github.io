@@ -11,10 +11,9 @@
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="" />
-    <title>MapFragmentを使ってみた - kinjouj.github.io</title>
-    <link rel="prev" href="/2013/03/yuidoc-underscore-trouble.html" />
-    <link rel="next" href="/2013/03/slim3-datastore-attribute.html" />
-    <link rel="canonical" href="https://kinjouj.github.io/2013/03/android-mapfragment.html" />
+    <title>RubyGems開発でSimpleCovによるカバレッジが出力されない問題に関して - kinjouj.github.io</title>
+    <link rel="prev" href="/2025/05/dot-rake.html" />
+    <link rel="canonical" href="https://kinjouj.github.io/2025/05/no-coverage-output-simplecov.html" />
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -69,207 +68,40 @@
           <div id="content">
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
-                <time datetime="2013-03-24T00:00:00+00:00">
-                  <a href="/archives/2013/03">
-                  <span class="entry-date-year">2013</span>
+                <time datetime="2025-05-20 03:00:00 +0900">
+                  <a href="/archives/2025/05">
+                  <span class="entry-date-year">2025</span>
                   <span class="hyphen">-</span>
-                  <span class="entry-date-month">3</span>
+                  <span class="entry-date-month">5</span>
                   <span classs="hyphen">-</span>
-                  <span class="entry-date-day">24</span>
+                  <span class="entry-date-day">20</span>
                   </a>
                 </time>
               </div>
-              <h1 class="entry-title">MapFragmentを使ってみた</h1>
+              <h1 class="entry-title">RubyGems開発でSimpleCovによるカバレッジが出力されない問題に関して</h1>
               <hr />
               <p class="meta">
                 <span class="categories">
-                  <a class="category" href="/archives/category/android.html">Android</a>
-                  <a class="category" href="/archives/category/java.html">Java</a>
+                  <a class="category" href="/archives/category/ruby.html">Ruby</a>
                 </span>
               </p>
               <div class="entry-content">
-                <p>タイトル通り。今更ながらMapFragmentを使ってGoogle MapsをAndroidアプリ上に表示させてみた</p>
-<!--more-->
+                <p>Rubyでライブラリとかを作ってるときとかにSimpleCovが正常に作動してくれない場合がある原因が判明した(おそらくは)のでメモ</p><pre class="line-numbers"><code class="language-ruby")># frozen_string_literal: true
 
-<h4>インストール</h4>
-<p>Google Play Serviceが必要になる。Android Package Manager?で入れておく。で自分の場合はAndroid SDKが/opt/androidにあるので/opt/android/extras/google/google_play_services/libproject/google-play-services_libをEclipseのライブラリプロジェクトとしてインポートする</p><p>これがどうも「ファイル」-&gt;「インポート」で出来なかったので、「ファイル」-&gt;「新規」から「Android Project from Existing Code」からインポート処理をする。でどうやらこれが必要な理由としてcom.google.android.gcm.Rっていうクラスが必要なのだけど、これがこのプロジェクトしか入ってないので必要っぽい</p>
-<h4>Google Maps APIのAPI Keyを取得する</h4>
-<p><a href="https://code.google.com/apis/console">https://code.google.com/apis/console</a> から</p>
-<ul>
-<li>Servicesで「Google Maps Android API v2」をonにする</li>
-<li>API Accessにて「Create new Android Key」でAPI Keyを取得する</li>
-</ul>
-<p>1は問題無いけど2ではキーストアのフィンガープリントが必要なので</p><pre class="line-numbers"><code class="language-none")>keytool -list -v -keystore debug.keystore
-</code></pre><p>で出力されたSHA1なフィンガープリントをコピーして「フィンガープリント内容;パッケージ名」<br>
-でAPI Access時に指定して取得。ちなみにデバッグ用(Eclipseでやる場合)のキーストアは$HOME/.android/debug.keystoreっぽい。Windowsは知らん</p><p>これで準備完了、あとはコードを書くだけ</p>
-<h4>AndroidManifest.xml</h4>
-<pre class="line-numbers"><code class="language-xml")>&lt;manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="sample.test"
-    android:versionCode="1"
-    android:versionName="1.0"&gt;
+source "https://rubygems.org"
 
-    &lt;uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" /&gt;
+#これが原因っぽい
+#gemspec
 
-    &lt;permission android:name="sample.test.permission.MAPS_RECEIVE" android:protectionLevel="signature" /&gt;
-    &lt;uses-permission android:name="sample.test.permission.MAPS_RECEIVE" /&gt;
+gem "rake", "~&gt; 13.0"
 
-    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
-    &lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
-    &lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/&gt;
-    &lt;uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" /&gt;
-    &lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /&gt;
-    &lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
+group :test do
+  gem "rspec"
+  gem "simplecov", require: false
+  gem "simplecov-tailwindcss", require: false
+end
 
-    &lt;uses-feature android:glEsVersion="0x00020000" android:required="true" /&gt;
-
-    &lt;application
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme"&gt;
-
-        &lt;meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="Google Maps APIのAPI Key" /&gt;
-
-        &lt;activity android:name=".MainActivity"&gt;
-            &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.MAIN" /&gt;
-                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
-            &lt;/intent-filter&gt;
-        &lt;/activity&gt;
-    &lt;/application&gt;
-&lt;/manifest&gt;
-</code></pre><p>com.google.android.maps.v2.API_KEYが必要なくらいであとはパーミッションとかちょこちょこな事が必要なくらい</p>
-<h4>res/layout/main.xml</h4>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
-&lt;fragment
-    class="com.google.android.gms.maps.SupportMapFragment"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/map"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" /&gt;
-</code></pre><p>古い端末で実検証したのでcom.google.android.gms.maps.SupportMapFragmentを使ってますが、新しめな場合はcom.google.android.gms.maps.MapFragmentでいいのかも</p>
-<h4>MainActivity.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-
-import android.app.AlertDialog;
-import android.graphics.Color;
-import android.location.Location;
-import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-
-public class MainActivity extends FragmentActivity {
-
-    private static final String TAG = "MainActivity";
-
-    private GoogleMap map;
-
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        setContentView(R.layout.main);
-
-        map = ((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        map.setMyLocationEnabled(true);
-        map.setTrafficEnabled(true);
-
-        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-            @Override
-            public void onInfoWindowClick(Marker marker) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-                builder
-                    .setMessage(marker.getTitle())
-                    .create()
-                    .show();
-            }
-        });
-
-        map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location loc) {
-                LatLng pos1 = new LatLng(loc.getLatitude(), loc.getLongitude());
-
-                // 東京スカイツリー
-                LatLng pos2 = new LatLng(35.7105827, 139.81148759999996);
-
-                MarkerOptions marker1 = new MarkerOptions();
-                marker1
-                    .position(pos2)
-                    .title("タイトル")
-                    .snippet("スニペット");
-
-                map.addMarker(marker1);
-
-                PolylineOptions marker2 = new PolylineOptions();
-                marker2
-                    .add(pos1, pos2)
-                    .color(Color.argb(80, 255, 0, 0))
-                    .geodesic(true);
-
-                map.addPolyline(marker2);
-
-                int blueColor = Color.argb(80, 0, 0, 255);
-
-                CircleOptions marker3 = new CircleOptions();
-                marker3
-                    .fillColor(blueColor)
-                    .strokeWidth(0)
-                    .center(pos2)
-                    .radius(100);
-
-                // 以下のmarker4と位置がかぶる。一応見え無くもないけど
-                map.addCircle(marker3);
-
-                // GeoHashを使って近傍エリアを取得するだけ (APIはAndroidパッケージには含まれてない)
-                String geoCode = GeoHash.encode(pos2.latitude, pos2.longitude, 5);
-                List&lt;String&gt; geoCodes = GeoHash.neighbor(geoCode);
-                List&lt;LatLng&gt; positions = new ArrayList&lt;LatLng&gt;(geoCodes.size());
-
-                for (String code : geoCodes) {
-                    double[] latlng = GeoHash.decode(code);
-
-                    positions.add(new LatLng(latlng[0], latlng[1]));
-                }
-
-                PolygonOptions marker4 = new PolygonOptions();
-                marker4
-                    .addAll(positions)
-                    .strokeWidth(0)
-                    .fillColor(blueColor);
-
-                map.addPolygon(marker4);
-
-                map.moveCamera(
-                    CameraUpdateFactory.newCameraPosition(
-                        new CameraPosition.Builder()
-                            .target(pos2)
-                            .zoom(10f)
-                            .build()
-                    )
-                );
-
-                map.setOnMyLocationChangeListener(null);
-            }
-        });
-    }
-}
-</code></pre><p>でおおまかな動作概要</p><p><img src="/images/2013/03/20130324011541.png" loading="lazy" /></p><p>ソースに書いてる通り現在地と東京スカイツリーをPolylineで線を繋ぐ。で東京スカイツリーにマーカーを設置している</p><p>でちょいとズームしてマーカーをタップする</p><p><img src="/images/2013/03/20130324011755.png" loading="lazy" /></p><p>で出た吹き出しもタップすると</p><p><img src="/images/2013/03/20130324011820.png" loading="lazy" /></p><p>これがGoogleMap.OnInfoWindowClickListenerな模様。まぁ上で出てるけど、円なマーカーも付けてる。で最後にPolygonなマーカー</p><p><img src="/images/2013/03/20130324012033.png" loading="lazy" /></p><p>な感じでマーカーをつけれたりする</p><p>んまぁあとは以下に記載している参考サイトを見る+公式ドキュメントに書いているのでそれ読めば良いかと</p><p>参考: <a href="http://dev.classmethod.jp/smartphone/android/android-tips-25-google-maps-android-api-v2">http://dev.classmethod.jp/smartphone/android/android-tips-25-google-maps-android-api-v2</a></p>
+</code></pre><p>gemspecを使うと.gemspecで指定してある依存性やらをgemspec側で解決してくれるらしいのだけどこれ使うとテストする際の描いたライブラリとかがロードされてしまってSimpleCov.startをする前にロードされてしまっているからというのが理由らしい</p><p>gemspecなところのGemfileを修正すると問題無く動くっぽい</p>
               </div>
             </div>
           </div>
@@ -563,13 +395,9 @@ public class MainActivity extends FragmentActivity {
           </div>
         </aside>
         <div class="my-pagination mt-5">
-          <!-- next entry -->
-          <a class="float-start box-link" href="/2013/03/slim3-datastore-attribute.html">
-            &lt;&nbsp;Slim3のDatastore Attribute
-          </a>
           <!-- prev entry -->
-          <a class="float-end box-link" href="/2013/03/yuidoc-underscore-trouble.html">
-            yuidocでアンダースコア(アンダーバー)を使うと消える件&nbsp;&gt;
+          <a class="float-end box-link" href="/2025/05/dot-rake.html">
+            $HOME/.rake&nbsp;&gt;
           </a>
         </div>
       </div>
