@@ -102,6 +102,11 @@
 <p>Dockerのsystemdで</p><pre class="line-numbers"><code class="language-none")>[Service]
 ExecStart=/usr/bin/dockerd -H "tcp://192.168.1.100:2375" -H fd:// --containerd=/run/containerd/containerd.sock
 </code></pre><p>みたいに-HオプションつければDocker Daemonのポート開けれる（絶対やるなよｗ）</p>
+<h4>追記</h4>
+<p><a href="https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket">https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket</a></p><p>TLS接続もできるので上記サイト通りに証明書生成してサーバー側のdockerd起動オプションの書き換えを設定したら問題なくTLS接続できる模様。その際Docker Contextを作ってやる場合</p><pre class="line-numbers"><code class="language-bash")>docker context create \
+    --docker "host=tcp://192.168.1.100:2376,ca=/path/to/.docker/ca.pem,cert=/path/to/.docker/cert.pem,key=/path/to/.docker/key.pem" \
+    my-remote-server
+</code></pre><p>やって作らないといけないっぽい？</p>
               </div>
             </div>
           </div>
