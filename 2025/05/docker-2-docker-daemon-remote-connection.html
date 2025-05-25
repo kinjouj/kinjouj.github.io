@@ -87,7 +87,7 @@
               </p>
               <div class="entry-content">
                 <p>別サーバー上にあるDockerにイメージをデプロイしたりコンテナを起動したりの操作をしたい時</p><pre class="line-numbers"><code class="language-bash")>export DOCKER_HOST=192.168.1.100
-</code></pre><p>とやったりすることで別サーバー上にあるDockerを操作できたりとかできるんですがこれ公式上でも既に推奨されておらず実際にやると警告が出たりする</p><p>じゃあどうやるのかと。docker contextを使えとのこと</p>
+</code></pre><p>とやったりすることで別サーバー上にあるDockerを操作できたりとかできるんですが既に推奨されておらず実際にやると警告が出たりする</p><p>じゃあどうやるのかと。docker contextを使えとのこと</p>
 <h4>contextを登録</h4>
 <pre class="line-numbers"><code class="language-bash")>docker context create \
     --docker host=ssh://192.168.1.100 \
@@ -101,7 +101,7 @@
 <h4>ちなみに</h4>
 <p>Dockerのsystemdで</p><pre class="line-numbers"><code class="language-none")>[Service]
 ExecStart=/usr/bin/dockerd -H "tcp://192.168.1.100:2375" -H fd:// --containerd=/run/containerd/containerd.sock
-</code></pre><p>みたいに-HオプションつければDocker Daemonのポート開けれる（絶対やるなよｗ）</p>
+</code></pre><p>みたいに-HオプションつければDocker Daemonのポート開けれる</p>
 <h4>追記</h4>
 <p><a href="https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket">https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket</a></p><p>TLS接続もできるので上記サイト通りに証明書生成してサーバー側のdockerd起動オプションの書き換えを設定したら問題なくTLS接続できる模様。その際Docker Contextを作ってやる場合</p><pre class="line-numbers"><code class="language-bash")>docker context create \
     --docker "host=tcp://192.168.1.100:2376,ca=/path/to/.docker/ca.pem,cert=/path/to/.docker/cert.pem,key=/path/to/.docker/key.pem" \

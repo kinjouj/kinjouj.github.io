@@ -94,7 +94,7 @@
 <!--more-->
 
 <h4>概要</h4>
-<p>Google App EngineにはOAuthServiceっていうAPIがあるのでOAuth2認証を利用する事も出来る。OAuth1.0aの場合はOAuthServiceでgetCurrentUserメソッドを使う場合等にはクエリーストリングにOAuth認証に必要なパラメーターを設置する必要があるがOAuth2の場合にはAuthorizationヘッダーに取得したアクセストークンを指定するような形式になる。又、OAuth1.0aの時とは違いクライアント側で取得のトークンは有効期限は自前でトークンを削除しない限りは問題無いが、OAuth2の場合には一定時間でトークンの有効期限が設定されているので定期的にチェックしつつ再取得する必要性がある</p><p>でOAuth2を利用するにあたって <a href="https://console.developers.google.com">https://console.developers.google.com</a> からプロジェクトのクライアントID及びクライアントシークレットを取得する必要がある。今回のはInstalled Applicationを使うのでクライアントのタイプはそっちで登録する</p><p><img src="/images/2015/04/201504222145-1.jpg" loading="lazy" /></p><p>まぁ下準備はこれくらい</p>
+<p>Google App EngineにはOAuthServiceっていうAPIがあるのでOAuth2認証を利用する事も出来る。OAuth1.0aの場合はOAuthServiceでgetCurrentUserメソッドを使う場合等にはクエリーストリングにOAuth認証に必要なパラメーターを設置する必要があるがOAuth2の場合にはAuthorizationヘッダーに取得したアクセストークンを指定するような形式になる。又、OAuth1.0aの時とは違いクライアント側で取得のトークンは有効期限は自前でトークンを削除しない限りは問題無いが、OAuth2の場合には一定時間でトークンの有効期限が設定されているので定期的にチェックしつつ再取得する必要性がある</p><p>でOAuth2を利用するにあたって <a href="https://console.developers.google.com">https://console.developers.google.com</a> からプロジェクトのクライアントID及びクライアントシークレットを取得する必要がある。今回のはInstalled Applicationを使うのでクライアントのタイプはそっちで登録する</p><p><img src="/images/2015/04/201504222145-1.jpg" alt="image" /></p><p>まぁ下準備はこれくらい</p>
 <h4>サーバー側のOAuth2への対応修正</h4>
 <p>確証は無いけどOAuthService.getCurrentUserやisUserAdmin等のメソッドの引数にscopeを指定しないと正常にUserインスタンスを取得できない模様なので</p><pre class="line-numbers"><code class="language-java")>OAuthService service = OAuthServiceFactory.getOAuthService();
 User user = null;
@@ -239,7 +239,7 @@ function start_authorization() {
 <li>上記を実行後、OAuth2で保護されてるリソースへAuthorization: Bearerを用いてリクエストする(※アクセストークンの取得の際にtoken_type?かなんかで識別可能。Bearerの場合はBearerを使う)。その前にアクセストークンが有効かどうかをチェックした後に行う</li>
 <li>アクセストークンが有効切れになっているような場合(check<em>tokenにてのリクエストで400エラーが返ってくる場合等)にはrefresh</em>access_tokenを行ってアクセストークンの更新を行う。</li>
 </ul>
-<p>で動き的なのとしては</p><p><img src="/images/2015/04/201504222145-2.jpg" loading="lazy" /></p><p>みたいに許可しますか的なウィンドウが出るので許可すると</p><p><img src="/images/2015/04/201504222145-3.jpg" loading="lazy" /></p><p>みたいに認証コードが出るのでそのウィンドウを消すと</p><p><img src="/images/2015/04/201504222145-4.jpg" loading="lazy" /></p><p>というダイアログが出るので先ほどの認証コードをコピペする。でOKを押すとアクセストークンの取得が行われてそのトークンを用いてプロテクトリソースにアクセスする(console.logしてるので)</p><p>っていう感じでfetch apiを使ってやってるので色々とPromise関係でフローがややこしくなってるので上記コードでも若干バグる事があると思うので慎重利用しなきゃならんとは思うのですが…</p><p>んまぁそんな感じでGoogle App EngineのOAuthServiceを用いてOAuth2認証リソースを利用したいような感じをchrome.identity APIを使ってやる実験はとりあえず出来るっていう事で</p>
+<p>で動き的なのとしては</p><p><img src="/images/2015/04/201504222145-2.jpg" alt="image" /></p><p>みたいに許可しますか的なウィンドウが出るので許可すると</p><p><img src="/images/2015/04/201504222145-3.jpg" alt="image" /></p><p>みたいに認証コードが出るのでそのウィンドウを消すと</p><p><img src="/images/2015/04/201504222145-4.jpg" alt="image" /></p><p>というダイアログが出るので先ほどの認証コードをコピペする。でOKを押すとアクセストークンの取得が行われてそのトークンを用いてプロテクトリソースにアクセスする(console.logしてるので)</p><p>っていう感じでfetch apiを使ってやってるので色々とPromise関係でフローがややこしくなってるので上記コードでも若干バグる事があると思うので慎重利用しなきゃならんとは思うのですが…</p><p>んまぁそんな感じでGoogle App EngineのOAuthServiceを用いてOAuth2認証リソースを利用したいような感じをchrome.identity APIを使ってやる実験はとりあえず出来るっていう事で</p>
               </div>
             </div>
           </div>

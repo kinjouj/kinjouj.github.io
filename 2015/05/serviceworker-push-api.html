@@ -182,7 +182,7 @@ self.addEventListener("push", function(event) {
     )
   );
 }, false);
-</code></pre><p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p><p>でとりあえず今までの流れを確認すると</p><p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p><p><img src="/images/2015/05/201505171800_1.jpg" loading="lazy" /></p><p>んな感じになってる。でregisterボタンを押すと</p><p><img src="/images/2015/05/201505171800_2.jpg" loading="lazy" /></p><p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p><p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p><p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p>
+</code></pre><p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p><p>でとりあえず今までの流れを確認すると</p><p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p><p><img src="/images/2015/05/201505171800_1.jpg" alt="image" /></p><p>んな感じになってる。でregisterボタンを押すと</p><p><img src="/images/2015/05/201505171800_2.jpg" alt="image" /></p><p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p><p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p><p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p>
 <h4>send.sh</h4>
 <pre class="line-numbers"><code class="language-sh")>#!/bin/sh
 
@@ -195,7 +195,7 @@ curl \
     -H "Authorization: key=$KEY" \
     -d "{ \"registration_ids\": [\"$ID\"] }" \
     https://android.googleapis.com/gcm/send
-</code></pre><p>を実行すると</p><p><img src="/images/2015/05/201505171800_3.jpg" loading="lazy" /></p><p>みたいにデスクトップ通知が出るようになる。何やら通知をクリックした時のイベントがどうたらとかもあるらしい</p><p>まぁざっくり書きましたが現状でもまだ策定中な所もあるようだし実装もまだできてなくて制限が一部あるんですが</p>
+</code></pre><p>を実行すると</p><p><img src="/images/2015/05/201505171800_3.jpg" alt="image" /></p><p>みたいにデスクトップ通知が出るようになる。何やら通知をクリックした時のイベントがどうたらとかもあるらしい</p><p>まぁざっくり書きましたが現状でもまだ策定中な所もあるようだし実装もまだできてなくて制限が一部あるんですが</p>
 <ul>
 <li>pushを受信したらshowNotificationしないといけないらしい</li>
 <li>データを現時点では受信出来ない(Chrome拡張のchrome.gcmはデータを受信することは可能)</li>
