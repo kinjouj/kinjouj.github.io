@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2012-04-07 00:00:00 +0900">
-                  <a href="/archives/2012/04">
+                  <a href="/archives/2012/04.html">
                   <span class="entry-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">4</span>
@@ -101,13 +101,13 @@ foobar
 hoge
 hoge
 </pre>
-<p>なデータ(data/data.txt)をinputとしてプッシュしておく</p><pre class="line-numbers"><code class="language-sh")>hadoop fs -put data input
+<p>なデータ(data/data.txt)をinputとしてプッシュしておく</p><pre class="line-numbers"><code class="language-sh">hadoop fs -put data input
 </code></pre>
 <h4>Cassandra側の設定</h4>
-<p>Outputする側のColumn Familyを作っておく</p><pre class="line-numbers"><code class="language-none")>create column family Outputs with default_validation_class = UTF8Type and key_validation_class = UTF8Type and comparator = UTF8Type
+<p>Outputする側のColumn Familyを作っておく</p><pre class="line-numbers"><code class="language-">create column family Outputs with default_validation_class = UTF8Type and key_validation_class = UTF8Type and comparator = UTF8Type
 </code></pre>
 <h4>HadoopClient2.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -169,7 +169,7 @@ public class HadoopClient2 extends Configured implements Tool {
 }
 </code></pre><p>今回はCassandraのデータを読み込まないで、アウトプット先がCassandraなのでConfigHelper.setOutputColumnFamilyで設定。でsetPartitionerは設定しておく必要がある(TokenRing関係っぽい) 。あとsetOutputFormatClass(ColumnFamilyOutputFormat.class)も</p><p>であとはSampleMapperとSampleCassandraReducerを作る</p>
 <h4>SampleMapper.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.mapreduce;
+<pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
 
@@ -187,7 +187,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
 }
 </code></pre>
 <h4>SampleCassandraReducer.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.mapreduce;
+<pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -224,7 +224,7 @@ public class SampleCassandraReducer extends Reducer&lt;Text, IntWritable, ByteBu
         ctx.write(ByteBufferUtil.bytes("count"),Collections.singletonList(m));
     }
 }
-</code></pre><p>って感じ。実行したらcassandra-cliで</p><pre class="line-numbers"><code class="language-none")>use Keyspace1;
+</code></pre><p>って感じ。実行したらcassandra-cliで</p><pre class="line-numbers"><code class="language-">use Keyspace1;
 
 list Outputs; # MapReduceで処理された結果一覧が出る
 </code></pre>
@@ -259,12 +259,6 @@ list Outputs; # MapReduceで処理された結果一覧が出る
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

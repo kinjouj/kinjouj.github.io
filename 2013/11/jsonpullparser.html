@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-11-14 09:00:00 +0900">
-                  <a href="/archives/2013/11">
+                  <a href="/archives/2013/11.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">11</span>
@@ -91,7 +91,7 @@
 <!--more-->
 
 <h4>検証環境の構築</h4>
-<p>jsonpullparser-coreとjsonpullparser-aptが最低限必要。但しapt側は実際動かす場合には必要なくあくまでアノテーションプロセッサーによるソースコードの生成を利用する</p><pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
+<p>jsonpullparser-coreとjsonpullparser-aptが最低限必要。但しapt側は実際動かす場合には必要なくあくまでアノテーションプロセッサーによるソースコードの生成を利用する</p><pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
 apply plugin: "eclipse"
 
 repositories {
@@ -111,7 +111,7 @@ compileJava {
 }
 </code></pre><p>な感じでcompileタスクプロセス上でjsonpullparser-aptが処理されれば良いんじゃないかと。あとEclipseとかでやる場合には注釈処理・ファクトリーパス等の設定しておくだけで良い</p><p>で利用するJSONデータ自体は <a href="https://api.github.com/users/kinjouj/repos">https://api.github.com/users/kinjouj/repos</a> なGithub APIを利用する。これが手っ取り早いので</p>
 <h4>Repository.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.model;
+<pre class="line-numbers"><code class="language-java">package sample.model;
 
 import net.vvakame.util.jsonpullparser.annotation.JsonKey;
 import net.vvakame.util.jsonpullparser.annotation.JsonModel;
@@ -161,7 +161,7 @@ public class Repository {
 </ul>
 <p>っていうように怒られる</p>
 <h4>User.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.model;
+<pre class="line-numbers"><code class="language-java">package sample.model;
 
 import java.net.URL;
 
@@ -207,7 +207,7 @@ public class User {
 }
 </code></pre><p>書いてあるとおりjava.net.URLは型変換がデフォルトでサポートされていないのでTokenConverterを利用してサポートされていない型への変換を行わないとマッピング出来ない</p><p>でまぁ@JsonModelなクラスを定義するとアノテーションプロセッサーによって、デフォルトではGenなサフィックスが付与されたJavaクラスソースが生成される</p>
 <h4>URLTokenConverter.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.model;
+<pre class="line-numbers"><code class="language-java">package sample.model;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -247,7 +247,7 @@ public class URLTokenConverter extends TokenConverter&lt;url&gt; {
 }
 </code></pre>
 <h4>RepositoryTest.java</h4>
-<pre class="line-numbers"><code class="language-java")>import java.net.URL;
+<pre class="line-numbers"><code class="language-java">import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
@@ -293,7 +293,7 @@ public class RepositoryTest {
 }
 </code></pre><p>コメントで書いてるように最後でテストがfailする。理由としてUser.javaが参照するのは <a href="https://api.github.com/users/kinjouj">https://api.github.com/users/kinjouj</a> で参照できるのと <a href="https://api.github.com/users/kinjouj/repos">https://api.github.com/users/kinjouj/repos</a> で参照できるownerに互換性が無い。今回はパースする対象が前者のURLの方なので、ownerなJSONにnameが無いので</p><p>でアノテーションプロセッサーによって生成されたクラスのgetメソッドのオーバーライドメソッドに色々あるので引数がStringとかのメソッドもあるのでそういうのを利用する事でJSONリクエストをパースしたりとかも出来る</p>
 <h4>余談: ハッシュ(オブジェクト)形式をTokenConverterでパースする</h4>
-<p>例えば上記のUserクラスが@JsonModelでは無いケースを利用する場合にはデフォルトで型変換な方式が行われないので、@JsonKeyで参照する事自体がコンパイルすら出来ない。そういう場合は上記でも書いたようにTokenConverterを作れば良い</p><pre class="line-numbers"><code class="language-java")>package sample.model;
+<p>例えば上記のUserクラスが@JsonModelでは無いケースを利用する場合にはデフォルトで型変換な方式が行われないので、@JsonKeyで参照する事自体がコンパイルすら出来ない。そういう場合は上記でも書いたようにTokenConverterを作れば良い</p><pre class="line-numbers"><code class="language-java">package sample.model;
 
 import java.io.IOException;
 import java.net.URL;
@@ -392,12 +392,6 @@ public class UserTypeConverter extends TokenConverter&lt;user&gt; {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

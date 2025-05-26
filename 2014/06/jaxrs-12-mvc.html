@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2014-06-25T00:00:00+00:00">
-                  <a href="/archives/2014/06">
+                  <a href="/archives/2014/06.html">
                   <span class="entry-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">6</span>
@@ -94,7 +94,7 @@
 <h4>その前に</h4>
 <p>jersey-mvc-jspなJSPをレンダリングする仕組みを使う場合にテスト書くとエラーを引き起こす。※freemarkerとmustacheでは起きない(HttpServletRequest等をマッピングしない為かと)</p><p>っていう事でthymeleafを使ってテンプレートエンジンによりレスポンスを送信する仕組みのTemplateProcessorを作りながらやる</p>
 <h4>依存性</h4>
-<pre class="line-numbers"><code class="language-groovy")>apply plugin: "java"
+<pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
 apply plugin: "jetty"
 apply plugin: "eclipse"
 
@@ -120,7 +120,7 @@ dependencies {
 }
 </code></pre><p>んでまずThymeleafなテンプレートエンジンを使ってレスポンスを処理するのを作る</p>
 <h4>ThymeleafFeature.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ConstrainedTo;
 import javax.ws.rs.RuntimeType;
@@ -152,7 +152,7 @@ public class ThymeleafFeature implements Feature {
 }
 </code></pre>
 <h4>ThymeleafTemplateProcessor.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -238,7 +238,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
 }
 </code></pre><p>@Injectで注入するのが正しいかは微妙。mvc-jspな奴はProvider&lt;Ref&lt;HttpServletRequest&gt;&gt;的な感じなのを注入しているが、これだとどうもテスト時の注入でAbstractBinder使っても上手く作用してくれないので</p><p>んまぁてな感じでThymeleafを使ってテンプレートエンジンによるレスポンスの処理なところはこれだけ。設定しないと使えませんが</p>
 <h4>web.xml</h4>
-<p>MVCによる処理を利用する場合においてはweb.xmlでfilter周りを設定しないといけないみたいな制約がある模様なので</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<p>MVCによる処理を利用する場合においてはweb.xmlでfilter周りを設定しないといけないみたいな制約がある模様なので</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;web-app
     xmlns="http://java.sun.com/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -262,7 +262,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
 &lt;/web-app&gt;
 </code></pre><p>な感じで</p>
 <h4>beans.xml</h4>
-<p>glassfishとかで動かす場合に</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
+<p>glassfishとかで動かす場合に</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;beans
     xmlns="http://xmlns.jcp.org/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -272,7 +272,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
 &lt;/beans&gt;
 </code></pre><p>となっているとデプロイエラーを起こすので、<span style="color: red">bean-discovery-mode=&quot;annotated&quot;</span>にしておく</p>
 <h4>SampleApplication.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -294,7 +294,7 @@ public class SampleApplication extends ResourceConfig {
 }
 </code></pre><p>あとはリソースで使うだけ。</p>
 <h4>Home.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.controller;
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -380,7 +380,7 @@ public class Home {
 }
 </code></pre><p>んまぁという感じで大体どういうレスポンスになるかは想像出来るのはないかと</p>
 <h4>HomeTest.java</h4>
-<p>テストする際にHttpServletRequest等の@Injectは行われないのでエラーになる。なのでSpring Framework Testingに入ってるMockHttpServletRequest等をAbstractBinderを使って差し込む的な事をする事で対処出来る模様</p><pre class="line-numbers"><code class="language-java")>package sample.controller;
+<p>テストする際にHttpServletRequest等の@Injectは行われないのでエラーになる。なのでSpring Framework Testingに入ってるMockHttpServletRequest等をAbstractBinderを使って差し込む的な事をする事で対処出来る模様</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -472,12 +472,6 @@ public class HomeTest extends JerseyTest {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

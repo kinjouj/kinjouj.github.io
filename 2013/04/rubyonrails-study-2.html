@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-04-24T00:00:00+00:00">
-                  <a href="/archives/2013/04">
+                  <a href="/archives/2013/04.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">4</span>
@@ -90,8 +90,8 @@
               <div class="entry-content">
                 <p>前回のあかん事が発覚。まぁほとんどあかんと思うんだけど</p>
 <!--more-->
-<p>前回のだと、config/routes.rbの最後に定義されている</p><pre class="line-numbers"><code class="language-rb")>match ":controller(/:action(/:id))(.:format)"
-</code></pre><p>なやつを使ってて、今時なRailsではこれあかん系らしい。resourcesを使いましょうという事らしい。という事で直して見ることに。という事でconfig/routes.rbに</p><pre class="line-numbers"><code class="language-rb")>resources :entry
+<p>前回のだと、config/routes.rbの最後に定義されている</p><pre class="line-numbers"><code class="language-rb">match ":controller(/:action(/:id))(.:format)"
+</code></pre><p>なやつを使ってて、今時なRailsではこれあかん系らしい。resourcesを使いましょうという事らしい。という事で直して見ることに。という事でconfig/routes.rbに</p><pre class="line-numbers"><code class="language-rb">resources :entry
 </code></pre><p>な感じで定義。URL的には</p>
 <ul>
 <li>  /entry -&gt; method:index (HTTP: GET)</li>
@@ -102,7 +102,7 @@
 </ul>
 <p>な感じでRestfulな方式なURL方式が生成される模様。でこれに沿ってコントローラーとビューをいじる</p>
 <h4>app/controllers/entry_controller.rb</h4>
-<pre class="line-numbers"><code class="language-rb")>class EntryController &lt; ApplicationController
+<pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
 
   def index
     @entries = Entry.all(:limit =&gt; 10)
@@ -152,7 +152,7 @@
 end
 </code></pre><p>メソッド名とかが前回とちょっと異なる程度。あとちょっとだけバリデーションなコードが含まれてるけど、今回もノータッチで</p>
 <h4>app/views/entry/index.erb</h4>
-<pre class="line-numbers"><code class="language-erb")>&lt;div id="container"&gt;
+<pre class="line-numbers"><code class="language-erb">&lt;div id="container"&gt;
   &lt;div id="menu"&gt;
     &lt;a href="/entry/new"&gt;New&lt;/a&gt;
   &lt;/div&gt;
@@ -172,9 +172,9 @@ end
   &lt;/div&gt;
   &lt;% end %&gt;
 &lt;/div&gt;
-</code></pre><p>destroyな処理をするにはDELETEメソッドでリクエストされるようにしないといけないのだけど、普通にlink_toをするとGETメソッドな方式になる模様なので:method =&gt; :deleteにしてDELETEメソッドで処理するようにJavaScriptでごにょごにょされるようになるらしい。</p><pre class="line-numbers"><code class="language-html")>&lt;a href="/entry/[id]" data-confirm="OK?" data-method="delete"&gt;Delete&lt;/a&gt;
-</code></pre><p>みたいな感じで出力されていれば処理出来る模様。で昨日はまったのが、上記のように出力されずに?method=deleteみたいにクエリーについちゃうのはlink_toの引数が「ラベル, モデル?, オプション」な形式で指定しないとその方式で出力されない模様</p><p>でnewとeditに関してはHTTPメソッドが異なる訳なのだけど、</p><pre class="line-numbers"><code class="language-erb")>form_for(@entry, :method =&gt; :put)
-</code></pre><p>な感じでやっても<form>のmethodはpostになってるけど、</p><pre class="line-numbers"><code class="language-html")>&lt;input type="hidden" name="_method" value="put" /&gt;
+</code></pre><p>destroyな処理をするにはDELETEメソッドでリクエストされるようにしないといけないのだけど、普通にlink_toをするとGETメソッドな方式になる模様なので:method =&gt; :deleteにしてDELETEメソッドで処理するようにJavaScriptでごにょごにょされるようになるらしい。</p><pre class="line-numbers"><code class="language-html">&lt;a href="/entry/[id]" data-confirm="OK?" data-method="delete"&gt;Delete&lt;/a&gt;
+</code></pre><p>みたいな感じで出力されていれば処理出来る模様。で昨日はまったのが、上記のように出力されずに?method=deleteみたいにクエリーについちゃうのはlink_toの引数が「ラベル, モデル?, オプション」な形式で指定しないとその方式で出力されない模様</p><p>でnewとeditに関してはHTTPメソッドが異なる訳なのだけど、</p><pre class="line-numbers"><code class="language-erb">form_for(@entry, :method =&gt; :put)
+</code></pre><p>な感じでやっても<form>のmethodはpostになってるけど、</p><pre class="line-numbers"><code class="language-html">&lt;input type="hidden" name="_method" value="put" /&gt;
 </code></pre><p>なるのが埋め込まれている。これがX-Method-Override的な扱いされるのかどうかは不明</p><p>とりまぁこんな所かなー。とにかく旧式なルーティング方式は採用するべきでは無いっていう所で</p>
               </div>
             </div>
@@ -207,12 +207,6 @@ end
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-06-08T00:00:00+00:00">
-                  <a href="/archives/2013/06">
+                  <a href="/archives/2013/06.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">6</span>
@@ -94,7 +94,7 @@
 <h4>インストール</h4>
 <p><a href="http://laravel.com">http://laravel.com</a> からダウンロード。でこっちの環境がApache+mod_phpじゃないっていうかApache自体入ってない(nginx)ので、php-fpmとnginxなfastcgi環境?で利用できるにように設定。</p><p>んまぁセットアップ関係はこんくらいかな</p>
 <h4>ルーティングの定義</h4>
-<p>LARAVEL_HOME/app/routes.phpに定義していく模様</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>LARAVEL_HOME/app/routes.phpに定義していく模様</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 Route::get("", "HomeController@index");
 Route::get("sample/{id}", "SampleController@index");
@@ -102,7 +102,7 @@ Route::get("sample/{id}", "SampleController@index");
 Route::get("test", function() {
     return "test";
 });
-</code></pre><p>Route::なんちゃらで定義していくんだけど、第2引数にはfunctionなの渡せる模様。まぁちょっとした場合なら良いかも。他の場合にはコントローラークラス@メソッドで定義みたいな感じかと。まだRoutingなドキュメントの所読んでないので</p><p>で今回は書かないけど、2つ目のSampleControllerでplaceholderでパラメーターを指定出来るようになってるけど、app/controllers/SampleController.phpでは</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>Route::なんちゃらで定義していくんだけど、第2引数にはfunctionなの渡せる模様。まぁちょっとした場合なら良いかも。他の場合にはコントローラークラス@メソッドで定義みたいな感じかと。まだRoutingなドキュメントの所読んでないので</p><p>で今回は書かないけど、2つ目のSampleControllerでplaceholderでパラメーターを指定出来るようになってるけど、app/controllers/SampleController.phpでは</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class SampleController extends BaseController {
     public function index($id) {
@@ -111,8 +111,8 @@ class SampleController extends BaseController {
 }
 </code></pre><p>っていうように引数でパラメーターを受け取れる模様。んまぁ今回はとりあえずそこら辺すっとばす</p><p>でDBでORM使ってなんかやってみる的な感じなので先に奨める</p>
 <h4>Database Migrationを作成</h4>
-<pre class="line-numbers"><code class="language-php")>php artisan migrate:make create_samples_table
-</code></pre><p>やると、app/database/migrationsディレクトリ内にMigrationなクラスが定義されたPHPファイルが生成されるので</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">php artisan migrate:make create_samples_table
+</code></pre><p>やると、app/database/migrationsディレクトリ内にMigrationなクラスが定義されたPHPファイルが生成されるので</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 use Illuminate\Database\Migrations\Migration;
 
@@ -133,20 +133,20 @@ class CreateSamplesTable extends Migration {
         Schema::drop("samples");
     }
 }
-</code></pre><p>な感じで定義</p><pre class="line-numbers"><code class="language-none")>php artisan migrate
-</code></pre><p>でup出来る。</p><pre class="line-numbers"><code class="language-none")>php artisan migrate:rolback
+</code></pre><p>な感じで定義</p><pre class="line-numbers"><code class="language-">php artisan migrate
+</code></pre><p>でup出来る。</p><pre class="line-numbers"><code class="language-">php artisan migrate:rolback
 </code></pre><p>するとdownされる模様</p>
 <h4>モデルを作る</h4>
-<p>app/models/Sample.phpを作る</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>app/models/Sample.phpを作る</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Sample extends Eloquent {
 }
-</code></pre><p>まー、なんも無いっす。LaravelではORMなモデル定義はEloquentっていうのを使うらしい。でまぁ</p><pre class="line-numbers"><code class="language-php")>Sample::find(1)
-</code></pre><p>とかみたいに使う模様。ちなみにメソッドに「OrFail」っていう接尾辞がつくメソッド系とかは「検索してマッチしなかったらModelNotFoundExceptionをスロー」的な感じで例外が発生する模様</p><p>でちなみにLaravelでREPL的なのはtinkerっていうので使えるらしい</p><pre class="line-numbers"><code class="language-none")>php artisan tinker
+</code></pre><p>まー、なんも無いっす。LaravelではORMなモデル定義はEloquentっていうのを使うらしい。でまぁ</p><pre class="line-numbers"><code class="language-php">Sample::find(1)
+</code></pre><p>とかみたいに使う模様。ちなみにメソッドに「OrFail」っていう接尾辞がつくメソッド系とかは「検索してマッチしなかったらModelNotFoundExceptionをスロー」的な感じで例外が発生する模様</p><p>でちなみにLaravelでREPL的なのはtinkerっていうので使えるらしい</p><pre class="line-numbers"><code class="language-">php artisan tinker
 </code></pre>
 <h4>コントローラーを使う</h4>
-<p>上記で</p><pre class="line-numbers"><code class="language-php")>Routes::get("", "HomeController@index");
-</code></pre><p>って定義したのでapp/controllers/HomeController.phpを作る</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>上記で</p><pre class="line-numbers"><code class="language-php">Routes::get("", "HomeController@index");
+</code></pre><p>って定義したのでapp/controllers/HomeController.phpを作る</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class HomeController extends BaseController {
     public function index() {
@@ -155,14 +155,14 @@ class HomeController extends BaseController {
 }
 </code></pre><p>な感じ。まぁ大体な事は何やってるのか分かるので(ry</p>
 <h4>ビューを作る</h4>
-<p>まぁ良く一般的にレイアウト定義があってコンテンツ部だけなビューテンプレートを書くっていうのが多いと思うので、app/views/layout.blade.phpを作る</p><pre class="line-numbers"><code class="language-html")>&lt;html&gt;
+<p>まぁ良く一般的にレイアウト定義があってコンテンツ部だけなビューテンプレートを書くっていうのが多いと思うので、app/views/layout.blade.phpを作る</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
     &lt;body&gt;
         &lt;h1&gt;Laravel Quickstart&lt;/h1&gt;
 
         @yield("content")
     &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>@yield(&quot;content&quot;)な所に作成したビューの内容を突っ込まれるっていう感じっすね。でコントローラーではView::make(&quot;home&quot;)したのでapp/views/home.blade.phpを作る</p><pre class="line-numbers"><code class="language-html")>@extends("layout")
+</code></pre><p>@yield(&quot;content&quot;)な所に作成したビューの内容を突っ込まれるっていう感じっすね。でコントローラーではView::make(&quot;home&quot;)したのでapp/views/home.blade.phpを作る</p><pre class="line-numbers"><code class="language-html">@extends("layout")
 @section("content")
     @foreach($samples as $sample)
         &lt;h4&gt;{{ $sample-&gt;name }}&lt;/h4&gt;
@@ -202,12 +202,6 @@ class HomeController extends BaseController {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

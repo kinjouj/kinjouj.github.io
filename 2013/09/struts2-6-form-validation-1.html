@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-09-19T00:00:00+00:00">
-                  <a href="/archives/2013/09">
+                  <a href="/archives/2013/09.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">9</span>
@@ -94,7 +94,7 @@
 <h4>画面転移仕様</h4>
 <p><img src="/images/2013/09/201309191345_1.png" alt="image" /></p><p>っていうような感じ</p>
 <h4>WEB-INF/jsp/index.jsp</h4>
-<pre class="line-numbers"><code class="language-jsp")>&lt;%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="utf-8" %&gt;
+<pre class="line-numbers"><code class="language-jsp">&lt;%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="utf-8" %&gt;
 &lt;%@ taglib prefix="s" uri="/struts-tags" %&gt;
 &lt;html&gt;
   &lt;head&gt;
@@ -111,7 +111,7 @@
 &lt;/html&gt;
 </code></pre><p>&lt;s:textfield&gt;に<span style="color: red">errorPosition=&quot;false&quot;</span>をしているが、これを指定しなかった場合</p><p><img src="/images/2013/09/201309191345_2.jpg" alt="image" /></p><p>というように&lt;s:fielderror&gt;でエラー表示の場所を指定したい場合にはこれを指定しないとフレームワークレベルで行われるエラー表示が出てしまう</p><p>んまぁあとは上記処理フローで書いているようにindex.actionでこれがレンダリングされてサブミットした際にsay.actionが発生、その際にバリデーションを行いエラー発生時にはこのビュー側に移動してエラーを表示するという事を行う</p>
 <h4>IndexAction.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.action;
+<pre class="line-numbers"><code class="language-java">package sample.action;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -154,10 +154,10 @@ public class IndexAction extends ActionSupport {
         this.name = name;
     }
 }
-</code></pre><p>addFieldErrorを使ってエラー情報を格納する。でgetTextっていうメソッドを使っているけど、src/main/resources/クラスパッケージ/クラス名.properties辺りに</p><pre class="line-numbers"><code class="language-ini")>name=名前
+</code></pre><p>addFieldErrorを使ってエラー情報を格納する。でgetTextっていうメソッドを使っているけど、src/main/resources/クラスパッケージ/クラス名.properties辺りに</p><pre class="line-numbers"><code class="language-ini">name=名前
 </code></pre><p>的なのを作っておけば取得出来るようになる模様</p><p>でsayの時点でバリデーションがずっこけたら、inputなresultに向かう模様なのでそれをもろもろ設定を行う</p>
 <h4>struts.xml</h4>
-<p>でここでとある問題として上記の処理フロー的な所としては</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<p>でここでとある問題として上記の処理フロー的な所としては</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
 &lt;struts&gt;
     &lt;constant name="struts.devMode" value="true" /&gt;
@@ -175,7 +175,7 @@ public class IndexAction extends ActionSupport {
 
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre><p>っていうような設定を行った場合には、index.actionからsay.actionへPOSTした場合にバリデーションがずっこけたらindex.jspが普通にforward(RequestDispatcher#forward)的な事が行われると思われるのだけど、これやるとリロード時にPOSTの状態が維持されたままなので所々問題になる場合もあるとは思う</p><p>そこでsay.actionからのinputなresultを&lt;result name=&quot;input&quot; type=&quot;redirectAction&quot;&gt;を利用してアクションへリダイレクトされるようにした場合だとエラー情報をセッションなどに格納しない限りはバリデーションを行ったエラー情報が保持されない。でそれを解決する為にinterceptorを利用する事で可能らしいので上記のstruts.xmlではなく</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</code></pre><p>っていうような設定を行った場合には、index.actionからsay.actionへPOSTした場合にバリデーションがずっこけたらindex.jspが普通にforward(RequestDispatcher#forward)的な事が行われると思われるのだけど、これやるとリロード時にPOSTの状態が維持されたままなので所々問題になる場合もあるとは思う</p><p>そこでsay.actionからのinputなresultを&lt;result name=&quot;input&quot; type=&quot;redirectAction&quot;&gt;を利用してアクションへリダイレクトされるようにした場合だとエラー情報をセッションなどに格納しない限りはバリデーションを行ったエラー情報が保持されない。でそれを解決する為にinterceptorを利用する事で可能らしいので上記のstruts.xmlではなく</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
 &lt;struts&gt;
     &lt;constant name="struts.devMode" value="true" /&gt;
@@ -235,12 +235,6 @@ public class IndexAction extends ActionSupport {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

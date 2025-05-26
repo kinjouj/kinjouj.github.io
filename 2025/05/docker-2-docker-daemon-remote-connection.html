@@ -69,7 +69,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2025-05-23 03:00:00 +0900">
-                  <a href="/archives/2025/05">
+                  <a href="/archives/2025/05.html">
                   <span class="entry-date-year">2025</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">5</span>
@@ -86,24 +86,24 @@
                 </span>
               </p>
               <div class="entry-content">
-                <p>別サーバー上にあるDockerにイメージをデプロイしたりコンテナを起動したりの操作をしたい時</p><pre class="line-numbers"><code class="language-bash")>export DOCKER_HOST=192.168.1.100
+                <p>別サーバー上にあるDockerにイメージをデプロイしたりコンテナを起動したりの操作をしたい時</p><pre class="line-numbers"><code class="language-bash">export DOCKER_HOST=192.168.1.100
 </code></pre><p>とやったりすることで別サーバー上にあるDockerを操作できたりとかできるんですが既に推奨されておらず実際にやると警告が出たりする</p><p>じゃあどうやるのかと。docker contextを使えとのこと</p>
 <h4>contextを登録</h4>
-<pre class="line-numbers"><code class="language-bash")>docker context create \
+<pre class="line-numbers"><code class="language-bash">docker context create \
     --docker host=ssh://192.168.1.100 \
     --description="remote sevrer" \
     my-remote-server
 </code></pre><p>でcontextを作る。もちろんsshって書いてるのでSSH Serverが必要</p>
 <h4>登録したcontextを使用するように設定</h4>
-<pre class="line-numbers"><code class="language-bash")>docker context use my-remote-server
-</code></pre><p>これでdocker infoとかやると別サーバー上のDockerが使用されているかを確認。ちなみに元に戻す場合は</p><pre class="line-numbers"><code class="language-bash")>docker context use default
+<pre class="line-numbers"><code class="language-bash">docker context use my-remote-server
+</code></pre><p>これでdocker infoとかやると別サーバー上のDockerが使用されているかを確認。ちなみに元に戻す場合は</p><pre class="line-numbers"><code class="language-bash">docker context use default
 </code></pre><p>でオッケーっぽい</p><p>参考: <a href="https://docs.docker.com/engine/security/protect-access">https://docs.docker.com/engine/security/protect-access</a></p>
 <h4>ちなみに</h4>
-<p>Dockerのsystemdで</p><pre class="line-numbers"><code class="language-none")>[Service]
+<p>Dockerのsystemdで</p><pre class="line-numbers"><code class="language-">[Service]
 ExecStart=/usr/bin/dockerd -H "tcp://192.168.1.100:2375" -H fd:// --containerd=/run/containerd/containerd.sock
 </code></pre><p>みたいに-HオプションつければDocker Daemonのポート開けれる</p>
 <h4>追記</h4>
-<p><a href="https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket">https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket</a></p><p>TLS接続もできるので上記サイト通りに証明書生成してサーバー側のdockerd起動オプションの書き換えを設定したら問題なくTLS接続できる模様。その際Docker Contextを作ってやる場合</p><pre class="line-numbers"><code class="language-bash")>docker context create \
+<p><a href="https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket">https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket</a></p><p>TLS接続もできるので上記サイト通りに証明書生成してサーバー側のdockerd起動オプションの書き換えを設定したら問題なくTLS接続できる模様。その際Docker Contextを作ってやる場合</p><pre class="line-numbers"><code class="language-bash">docker context create \
     --docker "host=tcp://192.168.1.100:2376,ca=/path/to/.docker/ca.pem,cert=/path/to/.docker/cert.pem,key=/path/to/.docker/key.pem" \
     my-remote-server
 </code></pre><p>やって作らないといけないっぽい？</p>
@@ -138,12 +138,6 @@ ExecStart=/usr/bin/dockerd -H "tcp://192.168.1.100:2375" -H fd:// --containerd=/
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

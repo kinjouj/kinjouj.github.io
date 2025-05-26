@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2012-12-01T00:00:00+00:00">
-                  <a href="/archives/2012/12">
+                  <a href="/archives/2012/12.html">
                   <span class="entry-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">12</span>
@@ -92,7 +92,7 @@
 <!--more-->
 
 <h4>データベーステーブル仕様</h4>
-<pre class="line-numbers"><code class="language-sql")>CREATE TABLE `user` (
+<pre class="line-numbers"><code class="language-sql">CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(80) NOT NULL,
   `password` varchar(50) NOT NULL,
@@ -105,7 +105,7 @@
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 </code></pre><p>というようなテーブルを作る。で前回はやらなかったけど、指定したページのアクセス権限となる機能(Authパッケージで言うとGroupとかAclとか)を組み込む為にpermissionカラムに権限的なのを付ける</p><p>でまずはAuthドライバーパッケージは後回しで機能そういう機能的な所をコントローラー等に実装する</p>
 <h4>fuel/app/classess/controller/home.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
 
@@ -130,7 +130,7 @@ class Controller_Home extends Controller {
 }
 </code></pre><p>まぁ前回同様ですが、今回はアクセス権限があるかまでチェックしたいのでそこら辺を使う。has_accessでログインユーザーが持つ権限でアクセス可能かをチェックする</p><p>でログインフォームだとかログイン処理を行うauthコントローラーを作る</p>
 <h4>fuel/app/classess/controller/auth.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Auth extends Controller {
 
@@ -168,7 +168,7 @@ auth
 └── login
 └── lite.php
 </pre>
-<p>っていうのが必要になるような感じで。んで認証ドライバを設定しなきゃならんのでfuel/app/config/auth.phpを</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>っていうのが必要になるような感じで。んで認証ドライバを設定しなきゃならんのでfuel/app/config/auth.phpを</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(
     "driver" =&gt; "Lite",
@@ -177,7 +177,7 @@ return array(
 );
 </code></pre><p>な感じで以降で作るAuthドライバを指定しておく</p>
 <h4>fuel/app/classes/auth/login/lite.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Auth_Login_Lite extends Auth\Auth_Login_Driver {
 
@@ -307,7 +307,7 @@ class Auth_Login_Lite extends Auth\Auth_Login_Driver {
 }
 </code></pre><p>コメント書かなくても何してるかは大体は分かると思うのですが、でどうやらhas_accessでもAuth::checkか何やらが走る模様なので、このクラスのperform_checkが数回走るので既にログインチェック済みかを検証して行った方が良いかと(そうしないとDBアクセスが数回走るという微妙な事になる)</p><p>んでhas_accessでアクセス権限チェックするのはGroupとAclの方になるのでそこを実装する</p>
 <h4>fuel/app/classes/auth/group/lite.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Auth_Group_Lite extends Auth\Auth_Group_Driver {
 
@@ -330,7 +330,7 @@ class Auth_Group_Lite extends Auth\Auth_Group_Driver {
 }
 </code></pre><p>で実際に権限チェックを行う側はAclになる(Authのmemberメソッドでも呼び出せる)。memberメソッドはAclから呼び出すので</p>
 <h4>fuel/app/classes/auth/acl/lite.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
     public function has_access($condition, Array $entity) {
@@ -377,12 +377,6 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

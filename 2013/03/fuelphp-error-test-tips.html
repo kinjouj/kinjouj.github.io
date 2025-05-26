@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-03-10T00:00:00+00:00">
-                  <a href="/archives/2013/03">
+                  <a href="/archives/2013/03.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">3</span>
@@ -90,7 +90,7 @@
               <div class="entry-content">
                 <p>久々にFuelPHPを使ってて思う所がいろいろあったのでメモ</p>
 <!--more-->
-<p>まずFuelPHPのhttpexceptions.php。PHPの例外クラスが定義されていて、それで且つresponseメソッドを使う事でエラービューなどを表示したりなどの事が出来ている訳なんだが。個人的には例外出しても良いんだろうけど、前にも書いたがFuel\CoreRequestとかを使ってテストを書いたりする際には例外ではなくHttpNotFoundExceptionであれば404、HttpServerErrorExceptionであれば500を取得できるようにしてテストしたいって思う所があるんだけど。で思ったのが「throw new HttpNotFoundException」ではなく「return new HttpNotFoundException」をしつつafterでそれを処理するっていうのはどうだろうと。という事で色々やってみた</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>まずFuelPHPのhttpexceptions.php。PHPの例外クラスが定義されていて、それで且つresponseメソッドを使う事でエラービューなどを表示したりなどの事が出来ている訳なんだが。個人的には例外出しても良いんだろうけど、前にも書いたがFuel\CoreRequestとかを使ってテストを書いたりする際には例外ではなくHttpNotFoundExceptionであれば404、HttpServerErrorExceptionであれば500を取得できるようにしてテストしたいって思う所があるんだけど。で思ったのが「throw new HttpNotFoundException」ではなく「return new HttpNotFoundException」をしつつafterでそれを処理するっていうのはどうだろうと。という事で色々やってみた</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller_Rest {
 
@@ -121,7 +121,7 @@ class Controller_Home extends Controller_Rest {
         return parent::after($res);
     }
 }
-</code></pre><p>でこれをテストする場合</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>でこれをテストする場合</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class SampleTestCase extends PHPUnit_Framework_TestCase {
 
@@ -156,7 +156,7 @@ class SampleTestCase extends PHPUnit_Framework_TestCase {
         }
     }
 }
-</code></pre><p>とするとどうなるか。まだ例外が出る。理由としてfuel/core/classes/request/curl.php(178行目辺り)では</p><pre class="line-numbers"><code class="language-php")>elseif ($this-&gt;response-&gt;status &gt;= 400) {
+</code></pre><p>とするとどうなるか。まだ例外が出る。理由としてfuel/core/classes/request/curl.php(178行目辺り)では</p><pre class="line-numbers"><code class="language-php">elseif ($this-&gt;response-&gt;status &gt;= 400) {
     throw new RequestStatusException($body, $this-&gt;response-&gt;status);
 
     // スローしない場合は普通に$thisを返せばエラーでもレスポンス(404とか500)を取るのは可能
@@ -219,12 +219,6 @@ Tests: 1, Assertions: 1, Failures: 1.
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

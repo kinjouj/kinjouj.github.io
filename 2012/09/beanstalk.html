@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2012-09-13T00:00:00+00:00">
-                  <a href="/archives/2012/09">
+                  <a href="/archives/2012/09.html">
                   <span class="entry-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">9</span>
@@ -91,13 +91,13 @@
 <!--more-->
 
 <h4>インストール</h4>
-<pre class="line-numbers"><code class="language-sh")>sudo apt-get install beanstalkd
+<pre class="line-numbers"><code class="language-sh">sudo apt-get install beanstalkd
 </code></pre><p>でインストール出来る。 もちディストリビューションによって違うと思うので、そこら辺はドキュメント参照するかapt-getなりyumなりで検索して探してインストールする</p><p>んでその後起動しておく。デフォルト推奨ポート番号は11300な模様</p>
 <h4>Rubyのライブラリをインストール</h4>
-<pre class="line-numbers"><code class="language-sh")>gem install beanstalk-client
+<pre class="line-numbers"><code class="language-sh">gem install beanstalk-client
 </code></pre><p>まぁ色々クライアントライブラリはあるみたいですが、とりあえずbeanstalk-clientってのを使う</p>
 <h4>worker.rb</h4>
-<pre class="line-numbers"><code class="language-rb")>require "beanstalk-client"
+<pre class="line-numbers"><code class="language-rb">require "beanstalk-client"
 
 beanstalk = Beanstalk::Pool.new(["127.0.0.1:11300"])
 beanstalk.watch("sample")
@@ -111,7 +111,7 @@ loop do
 
   job.delete
 end
-</code></pre><p>watchでキュー名(beanstalk的にはtubeというべきなのかも)を指定出来る。デフォルトは&quot;default&quot;な模様。でworker側でクライアント側から来たキュー名を特定するにはstatsで参照可能な模様</p><p>んでソース上で</p><pre class="line-numbers"><code class="language-rb")>class Beanstalk::Job
+</code></pre><p>watchでキュー名(beanstalk的にはtubeというべきなのかも)を指定出来る。デフォルトは&quot;default&quot;な模様。でworker側でクライアント側から来たキュー名を特定するにはstatsで参照可能な模様</p><p>んでソース上で</p><pre class="line-numbers"><code class="language-rb">class Beanstalk::Job
 
   def [](name)
     ybody[name]
@@ -125,14 +125,14 @@ end
 end
 </code></pre><p>っていうふうになってるので普通にjob[name]で参照可能。だけどこれyputされた際に限るものだと思われるので、普通の文字列なようなのがputでぶっこんで来られた場合にはjob.bodyで取得できる</p>
 <h4>client.rb</h4>
-<pre class="line-numbers"><code class="language-rb")>require "beanstalk-client"
+<pre class="line-numbers"><code class="language-rb">require "beanstalk-client"
 
 beanstalk = Beanstalk::Pool.new(["127.0.0.1:11300"])
 beanstalk.use("sample")
 beanstalk.yput({ :name =&gt; "hoge" })
 </code></pre><p>まぁ上でも書いたようにyputを使えばHashとかでも流せる。一応シリアライザー的なのはYAMLな模様。まぁだから接頭辞にyが付いてるんだと思うけど</p>
 <h4>追記</h4>
-<p>beanstalkのEM(EventMachine)なライブラリもある模様で</p><p>worker.rbが</p><pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
+<p>beanstalkのEM(EventMachine)なライブラリもある模様で</p><p>worker.rbが</p><pre class="line-numbers"><code class="language-rb">require "em-beanstalk"
 
 EM.run do
   beanstalk = EM::Beanstalk.new
@@ -153,7 +153,7 @@ EM.run do
     end
   end
 end
-</code></pre><p>な感じで、client.rbが</p><pre class="line-numbers"><code class="language-rb")>require "em-beanstalk"
+</code></pre><p>な感じで、client.rbが</p><pre class="line-numbers"><code class="language-rb">require "em-beanstalk"
 
 EM.run do
   beanstalk = EM::Beanstalk.new
@@ -195,12 +195,6 @@ end
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

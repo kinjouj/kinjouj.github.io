@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2014-08-22T00:00:00+00:00">
-                  <a href="/archives/2014/08">
+                  <a href="/archives/2014/08.html">
                   <span class="entry-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">8</span>
@@ -93,7 +93,7 @@
 <!--more-->
 
 <h4>基本的な使い方</h4>
-<pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<pre class="line-numbers"><code class="language-rb">require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :name, presence: true
@@ -123,7 +123,7 @@ describe Entry do
 end
 </code></pre><p>っていうような感じになる。valid等を動かさなくてもsaveやupdate等のメソッドを実行すると検証エラーな場合はfalseが返り、破壊的メソッドとして実行するとActiveRecord::RecordInvalidがスローされる模様</p><p>っていう感じで、基本的な事は終わり。presence等のValidation Helpersな所を進める</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#presence">presence</a></h4>
-<p>.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :name, presence: { message: "can`t be empty" }
@@ -147,7 +147,7 @@ describe Entry do
 end
 </code></pre><p>っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#acceptance">acceptance</a></h4>
-<p>「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: true
@@ -163,10 +163,10 @@ describe Entry do
     expect(Entry.new.valid?).to eq true
   end
 end
-</code></pre><p>このテストは通る。2つ目のテストでterms_of_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので</p><pre class="line-numbers"><code class="language-rb")>class Entry &lt; ActiveRecord::Base
+</code></pre><p>このテストは通る。2つ目のテストでterms_of_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので</p><pre class="line-numbers"><code class="language-rb">class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: true, allow_nil: false
 end
-</code></pre><p>とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+</code></pre><p>とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: { accept: "yes" }, allow_nil: false
@@ -184,7 +184,7 @@ describe Entry do
 end
 </code></pre><p>っていうような感じでacceptanceオプションを修正することで&quot;1&#8243;以外で作用させる事も可能</p><p>んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#confirmation">confirmation</a></h4>
-<pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<pre class="line-numbers"><code class="language-rb">require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :email, confirmation: true
@@ -216,7 +216,7 @@ describe Entry do
 end
 </code></pre><p>ってな感じでconfirmation validation helperを使っているのに対して、_confirmationな仮想的属性の値を比較して同一かをチェック出来る。但しその仮想的属性がnilでは無い場合にのみチェックされる模様なので、2つ目のテストではemail_confirmationを指定してない為にバリデーションが作用しない為trueが返るような感じかと</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#exclusion">exclusion</a></h4>
-<p>指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :subdomain, exclusion: { in: %w(www blog) }
@@ -231,7 +231,7 @@ describe Entry do
 end
 </code></pre><p>inで指定したリストに該当するのが入るとバリデーションとしては不整合という形になる模様。恐らくはnilな場合だと検証が作用しないんかと思われる</p>
 <h4><a href="http://guides.rubyonrails.org/active_record_validations.html#inclusion">inclusion</a></h4>
-<p>上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :subdomain, inclusion: { in: %w(www blog) }
@@ -246,7 +246,7 @@ describe Entry do
 end
 </code></pre><p>inで指定してあるのみ許容される。</p>
 <h4><a href="http://edgeguides.rubyonrails.org/active_record_validations.html#format">format</a></h4>
-<p>正規表現とかで値の検証を行うようなパターンの場合に使う</p><pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<p>正規表現とかで値の検証を行うようなパターンの場合に使う</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
 
 class Entry &lt; ActiveRecord::Base
   validates :postal_code, format: { with: /\A[\d]{3}\-[\d]{4}\z/ }
@@ -303,12 +303,6 @@ end
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2014-12-28T00:00:00+00:00">
-                  <a href="/archives/2014/12">
+                  <a href="/archives/2014/12.html">
                   <span class="entry-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">12</span>
@@ -92,7 +92,7 @@
 <!--more-->
 <p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p>
 <h4>SampleItemReader.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.batch.api.chunk.ItemReader;
 import javax.batch.api.chunk.AbstractItemReader;
@@ -109,7 +109,7 @@ public class SampleItemReader extends AbstractItemReader {
         return count &lt; 10 ? "hoge" : null;
     }
 }
-</code></pre><p>上記のjBatch参考に書いてけど、後々設定ファイルで参照するクラスは@Namedで指定した名前でも参照させる事が可能な模様。あと公式ではItemReaderっていうインターフェースを実装しているけど、今回はそれの抽象クラスにあたると思われるAbstractItemReaderを継承して実装</p><p>おそらくはここでnullを返す事をすればバッチチャンク終了となり、すでにあるバッチチャンクをItemWriterに流して終了的な感じになるのではと</p><p>**** SampleItemProcessor.java</p><pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>上記のjBatch参考に書いてけど、後々設定ファイルで参照するクラスは@Namedで指定した名前でも参照させる事が可能な模様。あと公式ではItemReaderっていうインターフェースを実装しているけど、今回はそれの抽象クラスにあたると思われるAbstractItemReaderを継承して実装</p><p>おそらくはここでnullを返す事をすればバッチチャンク終了となり、すでにあるバッチチャンクをItemWriterに流して終了的な感じになるのではと</p><p>**** SampleItemProcessor.java</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.batch.api.chunk.ItemProcessor;
 
@@ -121,7 +121,7 @@ public class SampleItemProcessor implements ItemProcessor {
 }
 </code></pre><p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p>
 <h4>SampleItemWriter.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample;
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 import javax.batch.api.chunk.AbstractItemWriter;
@@ -134,7 +134,7 @@ public class SampleItemWriter extends AbstractItemWriter {
 }
 </code></pre><p>とまぁBatch Processingを動かすのに必要なのは書いたので</p>
 <h4>Main.java</h4>
-<pre class="line-numbers"><code class="language-java")>import javax.batch.operations.JobOperator;
+<pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 
 public class Main {
@@ -145,7 +145,7 @@ public class Main {
 }
 </code></pre><p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p>
 <h4>META-INF/batch-jobs/sample.xml</h4>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;job id="sample" xmlns="http://xmlns.jcp.org/xml/ns/javaee"  version="1.0"&gt;
     &lt;step id="sample-chunk"&gt;
         &lt;chunk item-count="5"&gt;
@@ -159,7 +159,7 @@ public class Main {
 &lt;/job&gt;
 </code></pre><p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p><p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p>
 <h4>baseContext.xml</h4>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:p="http://www.springframework.org/schema/p"
     xmlns:context="http://www.springframework.org/schema/context"
@@ -194,7 +194,7 @@ public class Main {
         p:isolationLevelForCreate="ISOLATION_SERIALIZABLE" /&gt;
 
 &lt;/beans&gt;
-</code></pre><p>database.xmlは</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
+</code></pre><p>database.xmlは</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;beans
     xmlns="http://www.springframework.org/schema/beans"
     xmlns:jdbc="http://www.springframework.org/schema/jdbc"
@@ -304,12 +304,6 @@ public class Main {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

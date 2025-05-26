@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2015-04-22 00:00:00 +0900">
-                  <a href="/archives/2015/04">
+                  <a href="/archives/2015/04.html">
                   <span class="entry-date-year">2015</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">4</span>
@@ -96,7 +96,7 @@
 <h4>概要</h4>
 <p>Google App EngineにはOAuthServiceっていうAPIがあるのでOAuth2認証を利用する事も出来る。OAuth1.0aの場合はOAuthServiceでgetCurrentUserメソッドを使う場合等にはクエリーストリングにOAuth認証に必要なパラメーターを設置する必要があるがOAuth2の場合にはAuthorizationヘッダーに取得したアクセストークンを指定するような形式になる。又、OAuth1.0aの時とは違いクライアント側で取得のトークンは有効期限は自前でトークンを削除しない限りは問題無いが、OAuth2の場合には一定時間でトークンの有効期限が設定されているので定期的にチェックしつつ再取得する必要性がある</p><p>でOAuth2を利用するにあたって <a href="https://console.developers.google.com">https://console.developers.google.com</a> からプロジェクトのクライアントID及びクライアントシークレットを取得する必要がある。今回のはInstalled Applicationを使うのでクライアントのタイプはそっちで登録する</p><p><img src="/images/2015/04/201504222145-1.jpg" alt="image" /></p><p>まぁ下準備はこれくらい</p>
 <h4>サーバー側のOAuth2への対応修正</h4>
-<p>確証は無いけどOAuthService.getCurrentUserやisUserAdmin等のメソッドの引数にscopeを指定しないと正常にUserインスタンスを取得できない模様なので</p><pre class="line-numbers"><code class="language-java")>OAuthService service = OAuthServiceFactory.getOAuthService();
+<p>確証は無いけどOAuthService.getCurrentUserやisUserAdmin等のメソッドの引数にscopeを指定しないと正常にUserインスタンスを取得できない模様なので</p><pre class="line-numbers"><code class="language-java">OAuthService service = OAuthServiceFactory.getOAuthService();
 User user = null;
 
 try {
@@ -106,7 +106,7 @@ try {
 }
 </code></pre><p>っていう感じで取得したりするような処理に書き換える必要がある模様。これを行わないでクライアント側で取得したトークンを使ってリクエストを投げるとInvalidOAuthTokenException等の例外が送出されてしまう模様。但し、これを修正してしまうとOAuth1.0aの際に指定していたscopeと一致しないような場合とかだとOAuth1.0aがすぐに通らなくなるので</p><p>んまぁサーバー側のGoogle App Engineの修正はこれだけ。修正してコンパイル後に修正版をデプロイしておく</p>
 <h4>chrome.identity APIを使ったクライアント側を実装</h4>
-<p>Chrome Extensionにはidentityパーミッションを付与すればchrome.identityが使えるようになる。chrome.identityを使うとGoogle Accountやそれ以外のOAuth2フローによるアクセストークンなどの取得が出来るようになる。但し、chrome.identity.getAuthTokenを使う場合だとChrome Syncの有効が必要になるっぽい気がするのでchrome.identity.launchWebAuthFlowのAPIを使ってGoogle Account認証を行ってそれからアクセストークンを取得して、その取得したアクセストークンを利用してサーバー側のGoogle App Engine側にAuthorizationヘッダーを付与してリクエストしてOAuth2によるユーザー処理を行えるようにする</p><p>※微妙と長いので</p><pre class="line-numbers"><code class="language-js")>var client_id     = "console.developers.google.comから取得したクライアントID";
+<p>Chrome Extensionにはidentityパーミッションを付与すればchrome.identityが使えるようになる。chrome.identityを使うとGoogle Accountやそれ以外のOAuth2フローによるアクセストークンなどの取得が出来るようになる。但し、chrome.identity.getAuthTokenを使う場合だとChrome Syncの有効が必要になるっぽい気がするのでchrome.identity.launchWebAuthFlowのAPIを使ってGoogle Account認証を行ってそれからアクセストークンを取得して、その取得したアクセストークンを利用してサーバー側のGoogle App Engine側にAuthorizationヘッダーを付与してリクエストしてOAuth2によるユーザー処理を行えるようにする</p><p>※微妙と長いので</p><pre class="line-numbers"><code class="language-js">var client_id     = "console.developers.google.comから取得したクライアントID";
 var client_secret = "console.developers.google.comから取得したクライアンシークレット";
 
 var access_token  = localStorage["access_token"];
@@ -271,12 +271,6 @@ function start_authorization() {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

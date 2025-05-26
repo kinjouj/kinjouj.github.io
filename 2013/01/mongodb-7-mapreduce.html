@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-01-17T00:00:00+00:00">
-                  <a href="/archives/2013/01">
+                  <a href="/archives/2013/01.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">1</span>
@@ -98,8 +98,8 @@
 <!--more-->
 
 <h4>fluentd側のセットアップ</h4>
-<pre class="line-numbers"><code class="language-none")>sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
-</code></pre><p>でとりあえずfluent-plugin-mongoを入れる。んで</p><pre class="line-numbers"><code class="language-none")>&lt;source&gt;
+<pre class="line-numbers"><code class="language-">sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
+</code></pre><p>でとりあえずfluent-plugin-mongoを入れる。んで</p><pre class="line-numbers"><code class="language-">&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -111,10 +111,10 @@
     database fluent
     collection accesslog
 &lt;/match&gt;
-</code></pre><p>なtd-agent.confを作って</p><pre class="line-numbers"><code class="language-none")>/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
+</code></pre><p>なtd-agent.confを作って</p><pre class="line-numbers"><code class="language-">/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
 </code></pre><p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p>
 <h4>MongoDB側を確認</h4>
-<p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
+<p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f6647c8cdabd1739000004"), "path" : "/" }
 { "_id" : ObjectId("50f6647c8cdabd1739000005"), "path" : "/favicon.ico" }
@@ -146,12 +146,12 @@
 { "_id" : ObjectId("50f712708cdabd1739000023"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f712708cdabd1739000024"), "path" : "/home/index" }
 { "_id" : ObjectId("50f712708cdabd1739000025"), "path" : "/favicon.ico" }
-</code></pre><p>という風にずどどどどとぶっこまれるのが確認できる。ただこれフィルターしているので、あれなんすけど</p><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
+</code></pre><p>という風にずどどどどとぶっこまれるのが確認できる。ただこれフィルターしているので、あれなんすけど</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f664408cdabd1739000003") }
 </code></pre><p>という風にpath属性が無いのもあるので</p>
 <h4>MongoDBでMapReduce APIを使うJavaScriptを書く</h4>
-<pre class="line-numbers"><code class="language-js")>var res = db.accesslog.mapReduce(
+<pre class="line-numbers"><code class="language-js">var res = db.accesslog.mapReduce(
   // Map
   function() {
     // fluentからmongoへプッシュされたログの行毎のデータはthisからアクセス出来る模様
@@ -181,7 +181,7 @@
 );
 
 printjson(res)
-</code></pre><p>な感じで実行すると</p><pre class="line-numbers"><code class="language-json")>{
+</code></pre><p>な感じで実行すると</p><pre class="line-numbers"><code class="language-json">{
     "results" : [
         {
             "_id" : "/",
@@ -216,7 +216,7 @@ printjson(res)
 }
 </code></pre><p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p>
 <h4>コレクション名</h4>
-<pre class="line-numbers"><code class="language-json")>{ out: "コレクション名" }
+<pre class="line-numbers"><code class="language-json">{ out: "コレクション名" }
 </code></pre><p>で指定すると指定したコレクション名にぶち込まれる</p>
 <h4>mergeとreplace</h4>
 
@@ -256,12 +256,6 @@ printjson(res)
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

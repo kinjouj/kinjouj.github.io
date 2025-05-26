@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-07-24T00:00:00+00:00">
-                  <a href="/archives/2013/07">
+                  <a href="/archives/2013/07.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">7</span>
@@ -90,7 +90,7 @@
               <div class="entry-content">
                 <p><a href="http://laravel.com/docs/events">http://laravel.com/docs/events</a> のドキュメント読み</p>
 <!--more-->
-<p>要はイベントというのを作って、そいつをtrigger(公式的にはfire)的な事をする事で処理を行う機能的な所か。Queueとはまた話が違うっぽいので</p><p>でEventの登録方法はEvent::listenを使うんだけど、app/start/global.phpとかで普通に記述するか <a href="http://laravel.com/docs/events#event-subscribers">http://laravel.com/docs/events#event-subscribers</a> セクションのようにクラスを用いてEvent::listenさせるかっていう、とりあえずは2種類がある模様</p><p>まずは前者の普通にクラスを使わずにapp/start/global.phpとかに定義</p><pre class="line-numbers"><code class="language-php")>Event::listen(
+<p>要はイベントというのを作って、そいつをtrigger(公式的にはfire)的な事をする事で処理を行う機能的な所か。Queueとはまた話が違うっぽいので</p><p>でEventの登録方法はEvent::listenを使うんだけど、app/start/global.phpとかで普通に記述するか <a href="http://laravel.com/docs/events#event-subscribers">http://laravel.com/docs/events#event-subscribers</a> セクションのようにクラスを用いてEvent::listenさせるかっていう、とりあえずは2種類がある模様</p><p>まずは前者の普通にクラスを使わずにapp/start/global.phpとかに定義</p><pre class="line-numbers"><code class="language-php">Event::listen(
     "hoge", // Event name
     function() {
         echo "hoge(1)";
@@ -105,20 +105,20 @@ Event::listen(
     },
     5
 );
-</code></pre><p>っていうような感じなんですが、Priorityな引数が基本的に大きい方から実行されていく模様。で指定しなかった場合のデフォルトのプライオリティは0。でEventをtriggerしちゃう場合には</p><pre class="line-numbers"><code class="language-php")>Event::fire("hoge", [引数]);
-</code></pre><p>引数が１つであれば別に引数な所をArrayで指定する必要はない(Illuminate\Events\Dispatcher.phpの174行目でArrayに内包するようになってる為)</p><p>でちなみにEvent自体はクラスで利用する事も出来る</p><pre class="line-numbers"><code class="language-php")>class HogeEvent {
+</code></pre><p>っていうような感じなんですが、Priorityな引数が基本的に大きい方から実行されていく模様。で指定しなかった場合のデフォルトのプライオリティは0。でEventをtriggerしちゃう場合には</p><pre class="line-numbers"><code class="language-php">Event::fire("hoge", [引数]);
+</code></pre><p>引数が１つであれば別に引数な所をArrayで指定する必要はない(Illuminate\Events\Dispatcher.phpの174行目でArrayに内包するようになってる為)</p><p>でちなみにEvent自体はクラスで利用する事も出来る</p><pre class="line-numbers"><code class="language-php">class HogeEvent {
     public function handle() {
         echo "hoge";
     }
 }
-</code></pre><p>デフォルトだとhandleメソッドが動くけど</p><pre class="line-numbers"><code class="language-php")>Event::listen("hoge", "HogeEvent@hoge");
-</code></pre><p>のようにルーティングでアクションに対するコントローラーのメソッドを指定するような形式でEventが発動されるメソッドを指定する事も可能な模様。んまぁ定義から実行はこんな感じな訳で、でEvent::listenクラス上で行わせるsubscriberっていう機能もある</p><pre class="line-numbers"><code class="language-php")>class HogeSubscribe {
+</code></pre><p>デフォルトだとhandleメソッドが動くけど</p><pre class="line-numbers"><code class="language-php">Event::listen("hoge", "HogeEvent@hoge");
+</code></pre><p>のようにルーティングでアクションに対するコントローラーのメソッドを指定するような形式でEventが発動されるメソッドを指定する事も可能な模様。んまぁ定義から実行はこんな感じな訳で、でEvent::listenクラス上で行わせるsubscriberっていう機能もある</p><pre class="line-numbers"><code class="language-php">class HogeSubscribe {
     public function subscribe() {
         Event::listen("hoge", "HogeEvent");
     }
 }
-</code></pre><p>でapp/start/global.phpとかで</p><pre class="line-numbers"><code class="language-php")>Event::subscribe(new HogeSubscribe());
-</code></pre><p>的な事やれば良い。subscribeの引数はインスタンスじゃなくても普通にクラス名でもオッケーっぽい感じがする(ソース読んだ所だと)。でイベントにはワイルドカードを使って定義する事も可能</p><pre class="line-numbers"><code class="language-php")>Event::listen("hoge.fuga", function() {
+</code></pre><p>でapp/start/global.phpとかで</p><pre class="line-numbers"><code class="language-php">Event::subscribe(new HogeSubscribe());
+</code></pre><p>的な事やれば良い。subscribeの引数はインスタンスじゃなくても普通にクラス名でもオッケーっぽい感じがする(ソース読んだ所だと)。でイベントにはワイルドカードを使って定義する事も可能</p><pre class="line-numbers"><code class="language-php">Event::listen("hoge.fuga", function() {
     echo "fuga";
 });
 
@@ -131,7 +131,7 @@ Event::listen("hoge.*", function() {
 <li>hoge.fugaが発動</li>
 <li>hoge.*が発動</li>
 </ul>
-<p>っていうようになる。どうやらこれはプライオリティを指定する事出来ないっぽい(ソース上でsetupWildcardListenで何かPriorityを維持するような構造になってないっぽい)</p><p>でEvent::queueに関して。Queueクラスっていうのがあるけどこれとは関係が無い。単純に引数で指定したイベント名+_queueで定義しておいて、それがfireされたら元のイベント名の処理を実行するような感じ。んーわかりづらい</p><pre class="line-numbers"><code class="language-php")>// この時点ではhoge_queueっていうイベントを作ってるだけなので何も起きない
+<p>っていうようになる。どうやらこれはプライオリティを指定する事出来ないっぽい(ソース上でsetupWildcardListenで何かPriorityを維持するような構造になってないっぽい)</p><p>でEvent::queueに関して。Queueクラスっていうのがあるけどこれとは関係が無い。単純に引数で指定したイベント名+_queueで定義しておいて、それがfireされたら元のイベント名の処理を実行するような感じ。んーわかりづらい</p><pre class="line-numbers"><code class="language-php">// この時点ではhoge_queueっていうイベントを作ってるだけなので何も起きない
 Event::queue("hoge");
 
 // Event::flushを使う事でqueueなイベントをfire出来る
@@ -173,12 +173,6 @@ Event::fire("hoge_queue", true);
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

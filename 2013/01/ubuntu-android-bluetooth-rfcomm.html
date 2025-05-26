@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-01-21T00:00:00+00:00">
-                  <a href="/archives/2013/01">
+                  <a href="/archives/2013/01.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">1</span>
@@ -90,7 +90,7 @@
               <div class="entry-content">
                 <p>まぁAndroid公式にBluetoothChatっていうのはありますけど。一応Android側はそれのソース読んでやってみたって話。ただこれはAndroidとPC(Ubuntu)をbluetooth RFCOMMを使って通信するというところになる</p>
 <!--more-->
-<p>一応前持って行っておきますが、以下のソースはクソですので... (Threadの扱いとかダメ)。あくまでAndroidとRFCOMMにおける通信方法の手段にしかすぎないかと</p><p>でソースですけど、AndroidManifest.xmlとかはBLUETOOTH/BLUETOOTH_ADMINのpermissionが必要なくらいなので端折る。という事でActivityだけ書く</p><pre class="line-numbers"><code class="language-java")>package net.kinjouj.test;
+<p>一応前持って行っておきますが、以下のソースはクソですので... (Threadの扱いとかダメ)。あくまでAndroidとRFCOMMにおける通信方法の手段にしかすぎないかと</p><p>でソースですけど、AndroidManifest.xmlとかはBLUETOOTH/BLUETOOTH_ADMINのpermissionが必要なくらいなので端折る。という事でActivityだけ書く</p><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -421,7 +421,7 @@ public class SampleActivity extends Activity {
         }
     }
 }
-</code></pre><p>簡単に言うと起動するとAcceptThreadが走って、そこでBluetooth RFCOMMをリッスンする。でPC側のクライアントを使って接続するとConnectedThreadが走って、クライアントから受け取ったデータを取得してそれをListViewのアダプターにバインドする。まぁそんな感じ</p><p>でPCからデータを送るクライアントは以前書いたネタにも書いてあるけど、python-bluezを使う</p><pre class="line-numbers"><code class="language-py")>from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
+</code></pre><p>簡単に言うと起動するとAcceptThreadが走って、そこでBluetooth RFCOMMをリッスンする。でPC側のクライアントを使って接続するとConnectedThreadが走って、クライアントから受け取ったデータを取得してそれをListViewのアダプターにバインドする。まぁそんな感じ</p><p>でPCからデータを送るクライアントは以前書いたネタにも書いてあるけど、python-bluezを使う</p><pre class="line-numbers"><code class="language-py">from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
 
 host = None
 port = 0
@@ -445,8 +445,8 @@ if host is not None:
                 sock.send("%sn" % data)
             except:
                 break;
-</code></pre><p>まぁこれを実行してデータを送ったりするとスマフォ側にデータが表示される。でその動画を撮影しました</p><p>{% youtube 9FjwF3B0rqo %}</p><p>というような感じ。で問題はここからで逆にスマフォ側からPC側にデータをどうやって送るのかって話なんですが。上記のJavaソース上だとcreateRfcommSocketToServiceRecordのメソッドを使ってPC側デバイスのRFCOMMと接続してごにょごにょしているのですが、そもそもPC側のbluetoothにRFCOMMがバインドされてるかって所なんですが、基本的にはRFCOMMは自分でやらないとバインドされないはずなので</p><pre class="line-numbers"><code class="language-none")>sudo sdptool browse local
-</code></pre><p>をやったあとに。Serial Port通信なRFCOMMがあるかどうかを確認しなきゃならん。多分、デフォルトでは無いはずなので</p><pre class="line-numbers"><code class="language-none")>sudo sdptool add --channel=15 SP
+</code></pre><p>まぁこれを実行してデータを送ったりするとスマフォ側にデータが表示される。でその動画を撮影しました</p><p>{% youtube 9FjwF3B0rqo %}</p><p>というような感じ。で問題はここからで逆にスマフォ側からPC側にデータをどうやって送るのかって話なんですが。上記のJavaソース上だとcreateRfcommSocketToServiceRecordのメソッドを使ってPC側デバイスのRFCOMMと接続してごにょごにょしているのですが、そもそもPC側のbluetoothにRFCOMMがバインドされてるかって所なんですが、基本的にはRFCOMMは自分でやらないとバインドされないはずなので</p><pre class="line-numbers"><code class="language-">sudo sdptool browse local
+</code></pre><p>をやったあとに。Serial Port通信なRFCOMMがあるかどうかを確認しなきゃならん。多分、デフォルトでは無いはずなので</p><pre class="line-numbers"><code class="language-">sudo sdptool add --channel=15 SP
 </code></pre><p>で登録しておく。でもっかい見ると</p>
 <pre>
 Service Name: Serial Port
@@ -460,7 +460,7 @@ Protocol Descriptor List:
   "RFCOMM" (0x0003)
     Channel: 15
 </pre>
-<p>な感じで出てるかと。あとはこっちもサーバープログラムを作って、スマフォから送られてきたデータを取得して表示したりするなりだけ。だが、上記のJavaソースだと一度PC側からクライアント接続しないと送信なフォームが出ないようになってるので、それと事前にPC側のRFCOMMレシーバーなプログラムを起動しておかないとスマフォ側からデータ送信出来ない。理由としてスマフォからPC側のサーバーへのコネクションは一度処理した一回のみだけ接続処理を行うので</p><p>でそのRFCOMMサーバープログラムも書く。ここもPython</p><pre class="line-numbers"><code class="language-py")>from bluetooth import BluetoothSocket,RFCOMM
+<p>な感じで出てるかと。あとはこっちもサーバープログラムを作って、スマフォから送られてきたデータを取得して表示したりするなりだけ。だが、上記のJavaソースだと一度PC側からクライアント接続しないと送信なフォームが出ないようになってるので、それと事前にPC側のRFCOMMレシーバーなプログラムを起動しておかないとスマフォ側からデータ送信出来ない。理由としてスマフォからPC側のサーバーへのコネクションは一度処理した一回のみだけ接続処理を行うので</p><p>でそのRFCOMMサーバープログラムも書く。ここもPython</p><pre class="line-numbers"><code class="language-py">from bluetooth import BluetoothSocket,RFCOMM
 import notify2
 
 port = 15
@@ -517,12 +517,6 @@ while True:
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

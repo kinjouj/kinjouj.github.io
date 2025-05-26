@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2017-11-07 08:00:00 +0900">
-                  <a href="/archives/2017/11">
+                  <a href="/archives/2017/11.html">
                   <span class="entry-date-year">2017</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">11</span>
@@ -91,12 +91,12 @@
 <!--more-->
 
 <h4>前提条件</h4>
-<p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p><pre class="line-numbers"><code class="language-js")>navigator.serviceWorker.register("sw.js").then(() =&gt; {
+<p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p><pre class="line-numbers"><code class="language-js">navigator.serviceWorker.register("sw.js").then(() =&gt; {
   fetch("省略");
 });
 </code></pre><p>みたいにやっても初回アクセス時はコントロール化に置かれるまではthenからのfetchがコントロール化になってない場合にはキャッシュなどの処理が行われないと思われる。よってfetch処理などはコントロール化に置かれてから処理する必要があるのでそこも考慮する</p><p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p><p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p>
 <h4>index.html</h4>
-<pre class="line-numbers"><code class="language-html")>&lt;!doctype html&gt;
+<pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;body&gt;
     &lt;div id="msg"&gt;&lt;/div&gt;
@@ -105,7 +105,7 @@
 &lt;/html&gt;
 </code></pre>
 <h4>app.js</h4>
-<pre class="line-numbers"><code class="language-js")>"use strict";
+<pre class="line-numbers"><code class="language-js">"use strict";
 
 if ("serviceWorker" in navigator) {
   let controller = new Promise((resolve, reject) =&gt; {
@@ -142,7 +142,7 @@ if ("serviceWorker" in navigator) {
 }
 </code></pre><p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p>
 <h4>service-worker.js</h4>
-<pre class="line-numbers"><code class="language-js")>let cacheName = "sample-pwa-cache-v1";
+<pre class="line-numbers"><code class="language-js">let cacheName = "sample-pwa-cache-v1";
 let cacheDataName = "sample-pwa-data-cache-v1";
 let filesToCache = [ "/", "/index.html", "/app.js" ];
 
@@ -234,12 +234,6 @@ self.addEventListener("fetch", event =&gt; {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2012-08-02T00:00:00+00:00">
-                  <a href="/archives/2012/08">
+                  <a href="/archives/2012/08.html">
                   <span class="entry-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">8</span>
@@ -94,7 +94,7 @@
 <h4>概要</h4>
 <p>ブラウザアクションをクリックした際に出るポップアップにホームタイムラインを表示する。その際に認証されてなかったらOAuthで認証を要求させてAccess Tokenを取得する。あくまでAccess Token自体をソース内にコピペはしない。sha1.js、oauth.js、jquery.jsは別途でダウンロードしてくる</p><p>で今回はChrome ExtensionなのでTwitter OAuthのCallback URLは空にしてPINを画面上に出るようにする。その際にそのPINをコピペしなくてもそこはコンテントスクリプトを使って自動で処理出来るようにする</p>
 <h4>twitter.js</h4>
-<p>oauth.jsを使ってTwitter APIを云々するJavaScriptを作る</p><pre class="line-numbers"><code class="language-js")>const CONSUMER_KEY = "省略";
+<p>oauth.jsを使ってTwitter APIを云々するJavaScriptを作る</p><pre class="line-numbers"><code class="language-js">const CONSUMER_KEY = "省略";
 const CONSUMER_SECRET = "省略";
 
 const OAUTH_SIGNATURE_METHOD = "HMAC-SHA1";
@@ -244,7 +244,7 @@ Twitter.prototype.fetchTimelines = function(cb) {
 };
 </code></pre><p>チェック系をまったくしてないですけど、ざっくり書くとこんな感じで。まぁ認証してアクセストークンを取得して、そこからホームタイムラインを取得するAPIにリクエストを投げるという処理</p><p>んじゃこれからChrome Extensionの開発をする</p>
 <h4>manifest.json</h4>
-<pre class="line-numbers"><code class="language-json")>{
+<pre class="line-numbers"><code class="language-json">{
   "name": "test",
   "version": "0.1",
   "content_scripts": [
@@ -266,7 +266,7 @@ Twitter.prototype.fetchTimelines = function(cb) {
 }
 </code></pre><p>今回はContent Scriptを使ってPINコードを自動でコピペして処理するが、その処理自体は主にBackground Pageに促すようにする。でBrowser Action側も主な処理は同様にBackground Pageを介して行う(getBackgroundPageを使うだけ)</p>
 <h4>background.js</h4>
-<pre class="line-numbers"><code class="language-js")>var api = new Twitter();
+<pre class="line-numbers"><code class="language-js">var api = new Twitter();
 
 chrome.extension.onRequest.addListener(function(req, sender) {
   // Content Scriptから来たPINコードを処理する
@@ -278,7 +278,7 @@ function getTwitterAPI() {
 }
 </code></pre>
 <h4>popup.html</h4>
-<pre class="line-numbers"><code class="language-html")>&lt;html&gt;
+<pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
     &lt;link rel="stylesheet" type="text/css" href="popup.css" /&gt;
@@ -295,7 +295,7 @@ function getTwitterAPI() {
 &lt;/html&gt;
 </code></pre>
 <h4>popup.js</h4>
-<pre class="line-numbers"><code class="language-js")>// Background Pageを取得する
+<pre class="line-numbers"><code class="language-js">// Background Pageを取得する
 var bgPage = chrome.extension.getBackgroundPage();
 
 // Background Pageで初期化されているTwitter APIなクラスを取得する
@@ -331,7 +331,7 @@ function login() {
 })();
 </code></pre>
 <h4>content_script.js</h4>
-<pre class="line-numbers"><code class="language-js")>var pin = document.querySelector("div#oauth_pin &gt; p &gt; kbd &gt; code");
+<pre class="line-numbers"><code class="language-js">var pin = document.querySelector("div#oauth_pin &gt; p &gt; kbd &gt; code");
 
 if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   // Background PageでonRequestさせて処理させる
@@ -371,12 +371,6 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

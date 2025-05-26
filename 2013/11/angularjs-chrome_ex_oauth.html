@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-11-18T00:00:00+00:00">
-                  <a href="/archives/2013/11">
+                  <a href="/archives/2013/11.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">11</span>
@@ -93,7 +93,7 @@
 <!--more-->
 
 <h4>manifest.json</h4>
-<pre class="line-numbers"><code class="language-json")>{
+<pre class="line-numbers"><code class="language-json">{
   "name": "sample",
   "version": "0.1",
   "manifest_version": 2,
@@ -122,7 +122,7 @@
 }
 </code></pre><p>Twitter APIだとoauth_callback?でchrome-extension://な方式が使えない以前に、通常のアプリケーション方式だとリクエストトークンを取得する時点でoauth_callbackパラメーターが許容されない為、authorizeからのアクセストークンを取得する流れをコントロールする必要がある。そこはコンテントスクリプトを使ってアクセストークンを取得して保管する</p>
 <h4>popup.html</h4>
-<pre class="line-numbers"><code class="language-html")>&lt;html ng-app&gt;
+<pre class="line-numbers"><code class="language-html">&lt;html ng-app&gt;
   &lt;head&gt;
     &lt;script src="js/angular.js"&gt;&lt;/script&gt;
     &lt;script src="js/chrome_ex_oauth.js"&gt;&lt;/script&gt;
@@ -145,7 +145,7 @@
 &lt;/html&gt;
 </code></pre><p>まぁ特にangular.js特有なの以外は無いので(ry</p>
 <h4>popup.js</h4>
-<pre class="line-numbers"><code class="language-js")>var TwitterController = (function() {
+<pre class="line-numbers"><code class="language-js">var TwitterController = (function() {
 
   function TwitterController($scope, $http) {
     var bgPage = chrome.extension.getBackgroundPage();
@@ -167,7 +167,7 @@
 })();
 </code></pre><p>angular.jsなコントローラーにchrome API依存するのもどうかとは思いますけど...</p><p>要は認証されていればTwitter APIからタイムラインを取得する。認証されてなければChromeExOAuth方式の認証フローに入るっていう感じ</p>
 <h4>background.js</h4>
-<pre class="line-numbers"><code class="language-js")>var oauth = ChromeExOAuth.initBackgroundPage({
+<pre class="line-numbers"><code class="language-js">var oauth = ChromeExOAuth.initBackgroundPage({
   consumer_key: CONSUMER_KEY,
   consumer_secret: CONSUMER_SECRET,
   request_url: "https://api.twitter.com/oauth/request_token",
@@ -195,7 +195,7 @@ chrome.runtime.onMessage.addListener(function(req, sender, res) {
 });
 </code></pre><p>コンテントスクリプトから来たauthorizeをverifyするPINコードを受け取ったらそれを利用してアクセストークンを取得する</p>
 <h4>callback.html</h4>
-<pre class="line-numbers"><code class="language-html")>&lt;html&gt;
+<pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;script src="js/chrome_ex_oauth.js"&gt;&lt;/script&gt;
     &lt;script src="js/chrome_ex_oauthsimple.js"&gt;&lt;/script&gt;
@@ -206,10 +206,10 @@ chrome.runtime.onMessage.addListener(function(req, sender, res) {
 &lt;/html&gt;
 </code></pre>
 <h4>callback.js</h4>
-<pre class="line-numbers"><code class="language-js")>ChromeExOAuth.initCallbackPage();
+<pre class="line-numbers"><code class="language-js">ChromeExOAuth.initCallbackPage();
 </code></pre><p>ただのChromeExOAuthによる認証フロー開始するだけなので(ry</p>
 <h4>content_script.js</h4>
-<pre class="line-numbers"><code class="language-js")>var pin = prompt("Enter the PIN displayed by Twitter");
+<pre class="line-numbers"><code class="language-js">var pin = prompt("Enter the PIN displayed by Twitter");
 chrome.runtime.sendMessage({ "verifier": pin }, function(isSuccess) {
   if (isSuccess === true) {
     alert("Authorized, woot!");
@@ -217,12 +217,12 @@ chrome.runtime.sendMessage({ "verifier": pin }, function(isSuccess) {
 });
 </code></pre><p>とここまでがChrome拡張になる訳。あとはビルド(crx生成)するなりで使う訳ですが、そのままでは動かない。chrome_ex_oauth.jsに所々問題があって動かない箇所があるので修正する必要がある</p>
 <h4>chrome_ex_oauth.jsの修正</h4>
-<p>487行目辺り</p><pre class="line-numbers"><code class="language-js")>parameters: {
+<p>487行目辺り</p><pre class="line-numbers"><code class="language-js">parameters: {
   "xoauth_displayname" : this.app_name,
   "scope" : this.oauth_scope,
   // "oauth_callback" : url_callback
 }
-</code></pre><p>oauth_callbackが入ってるとリクエストトークンを取得する時点でエラー起こすのでoauth_callbackをパラメーターとして入れないように</p><p>514行目辺り</p><pre class="line-numbers"><code class="language-js")>var token = params["oauth_token"];
+</code></pre><p>oauth_callbackが入ってるとリクエストトークンを取得する時点でエラー起こすのでoauth_callbackをパラメーターとして入れないように</p><p>514行目辺り</p><pre class="line-numbers"><code class="language-js">var token = params["oauth_token"];
 this.setToken(token);
 </code></pre><p>コンテントスクリプトからバックグランドページにsendMessageを行なってアクセストークンを取得するフローにおいてトークンが必要となるがトークン鍵はlocalStorageに保管されているが、トークン自体は保管されていないのでフロー上でundefinedになってしまう。なのでトークンもlocalStorageに保管しておく</p><p>但し、認証状態がtrueになるのはlocalStorageにトークンとトークン鍵があるかがチェックされるので、認証フローが途中で失敗した場合等にはChromeExOAuth#clearTokensを利用して取得しているリクエストトークンを保管しておかない等の工夫が若干必要になる</p><p>あくまでこの修正が必要なのはchrome_ex_oauthでTwitter APIを使う場合にのみ限られるのでは無いかと(もしかしたらDropboxも)</p><p>以上を行なって拡張機能をインストールして認証すると</p><p><img src="/images/2013/11/201311172300.jpg" alt="image" /></p><p>っていうようにchrome_ex_oauthでOAuthを利用したREST API等をChrome Extensionでangular.jsを使いつつ出来るっていう感じで</p>
               </div>
@@ -256,12 +256,6 @@ this.setToken(token);
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

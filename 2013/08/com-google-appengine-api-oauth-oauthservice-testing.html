@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-08-26T00:00:00+00:00">
-                  <a href="/archives/2013/08">
+                  <a href="/archives/2013/08.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">8</span>
@@ -89,7 +89,7 @@
               <div class="entry-content">
                 <p>Slim3にて、com.google.appengine.api.oauth.OAuthServiceを使ってOAuthリクエストで認証されているかをチェックしているようなケースをコントローラーでチェックしているような場合においてテストをどうやるのかと</p>
 <!--more-->
-<p>例えば/readっていうのに対してReadControllerが発生するような場合</p><pre class="line-numbers"><code class="language-java")>public abstract class ShareController extends Controller {
+<p>例えば/readっていうのに対してReadControllerが発生するような場合</p><pre class="line-numbers"><code class="language-java">public abstract class ShareController extends Controller {
 
     protected ShareService service = new ShareService();
 
@@ -101,7 +101,7 @@
         }
     }
 }
-</code></pre><p>というような基底抽象コントローラークラスがあってこれを継承してコントローラーを作る。で作った/readに対するReadControllerなテストをする場合</p><pre class="line-numbers"><code class="language-java")>package shareroid.controller.test;
+</code></pre><p>というような基底抽象コントローラークラスがあってこれを継承してコントローラーを作る。で作った/readに対するReadControllerなテストをする場合</p><pre class="line-numbers"><code class="language-java">package shareroid.controller.test;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -124,7 +124,7 @@ public class ReadControllerTest extends AbstractControllerTestCase {
 }
 </code></pre><p>というようなテストをぶち込んだらどうなるか。もちろんテストはずっこける、OAuthService#isUserAdminでは無いので例外が発生して、handleErrorでキャッチ?されレスポンスが500で送出されるようになっている。そうなると普通にリクエストしてテストを実行してもテストずっこけるよねっていう事</p><p>でこういう場合ってどうやってテストすんのって所なんですが、Google App Engine/Javaの場合大概のService APIなパッケージには末尾に.devがついてるパッケージにおいてLocalなんちゃらService的なローカルでテストするためのヘルパーAPI的ながついてると思うんだけど、OAuthServiceなそれが無いっぽい。んじゃこれどうやってテストすんのかって思ってとりあえず「モック差し込んじゃば良いんじゃね?」って思ったのでやってみる。前おきが長かったねww</p>
 <h4>OAuthServiceを実装したMockOAuthServiceクラスを作る</h4>
-<p>※あくまでテスト側に作る。デプロイはしないように</p><pre class="line-numbers"><code class="language-java")>package shareroid.controller.test;
+<p>※あくまでテスト側に作る。デプロイはしないように</p><pre class="line-numbers"><code class="language-java">package shareroid.controller.test;
 
 import com.google.appengine.api.oauth.OAuthRequestException;
 import com.google.appengine.api.oauth.OAuthService;
@@ -165,7 +165,7 @@ public class MockOAuthService implements OAuthService {
 }
 </code></pre><p>まー、返す値とかは個人で調整すれば良いんじゃないのかと。今回isUserAdminメソッドくらいしか使ってないので微妙な所なんですが</p>
 <h4>テストを修正する</h4>
-<p>で何でモックを差し込むのか。まぁjmockitでという事で (めんどくさいので導入方法はググれ)</p><pre class="line-numbers"><code class="language-java")>package shareroid.controller.test;
+<p>で何でモックを差し込むのか。まぁjmockitでという事で (めんどくさいので導入方法はググれ)</p><pre class="line-numbers"><code class="language-java">package shareroid.controller.test;
 
 import mockit.Expectations;
 import mockit.Mocked;
@@ -237,12 +237,6 @@ public class ReadControllerTest extends AbstractControllerTestCase {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

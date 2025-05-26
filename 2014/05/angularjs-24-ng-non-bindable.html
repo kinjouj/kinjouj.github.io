@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2014-05-12T00:00:00+00:00">
-                  <a href="/archives/2014/05">
+                  <a href="/archives/2014/05.html">
                   <span class="entry-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">5</span>
@@ -94,7 +94,7 @@
 <!--more-->
 
 <h4>app/assets/javascripts/app.js</h4>
-<pre class="line-numbers"><code class="language-js")>angular.module("app", [])
+<pre class="line-numbers"><code class="language-js">angular.module("app", [])
   .controller("SampleController", function($scope) {
     $scope.onClick = function() {
       alert("click");
@@ -102,17 +102,17 @@
   });
 </code></pre><p>んまぁ適当に$scopeに関数を打ち込む。で例えばこのコントローラーの内部にサーバーサイドなテンプレートエンジンを利用してクエリーで指定したデータで<span style="color: red">&quot;{% raw %}{{onClick()}}{% endraw %}&quot;</span>がそのまま参照されたらどうなるのかっていう</p>
 <h4>app/controllers/sample_controller.rb</h4>
-<pre class="line-numbers"><code class="language-rb")>class SamplesController &lt; ApplicationController
+<pre class="line-numbers"><code class="language-rb">class SamplesController &lt; ApplicationController
   def show
     @query = params[:query]
   end
 end
 </code></pre><p>単純に<http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}>のようなクエリーを送れるような形で、そのデータをビューにバインドする</p>
 <h4>app/views/sample/show.erb</h4>
-<pre class="line-numbers"><code class="language-erb")>&lt;div ng-controller="SampleController"&gt;
+<pre class="line-numbers"><code class="language-erb">&lt;div ng-controller="SampleController"&gt;
     &lt;h2&gt;&lt;%= @query %&gt;&lt;/h2&gt;
 &lt;/div&gt;
-</code></pre><p>終わり。でこのまま動かしてコントローラーのところに書いてるURL( <http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}> ) にアクセスしてみると$scopeに突っ込んだ関数な処理が発生してしまう。つまりalertが出るっていうオチになる</p><p>っていうことでサーバーサイドからテンプレートエンジンを用いてレンダリングされる部分において、angular.jsで評価される可能性のあるのはng-non-bindableを指定すればいい模様。なので上記のビューを</p><pre class="line-numbers"><code class="language-erb")>&lt;div ng-controller="SampleController"&gt;
+</code></pre><p>終わり。でこのまま動かしてコントローラーのところに書いてるURL( <http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}> ) にアクセスしてみると$scopeに突っ込んだ関数な処理が発生してしまう。つまりalertが出るっていうオチになる</p><p>っていうことでサーバーサイドからテンプレートエンジンを用いてレンダリングされる部分において、angular.jsで評価される可能性のあるのはng-non-bindableを指定すればいい模様。なので上記のビューを</p><pre class="line-numbers"><code class="language-erb">&lt;div ng-controller="SampleController"&gt;
     &lt;h2 ng-non-bindable&gt;&lt;%= @query %&gt;&lt;/h2&gt;
 &lt;/div&gt;
 </code></pre><p>っていうように修正する。というようにすることでサーバーサイドでテンプレートエンジンを介してレンダリングされる場合でもangular.jsとして評価しないようにすることで対処することは可能らしい</p><p>ただしなんらかの形としてangular.js内部に影響を与えるような攻撃が今後も出てきてしまうっていうのも否定し難いので、こういうデータをレンダリングされる場合においては$interpolateProviderのstartSymbolとendSymbol(デフォルトはダブルカーリーブラケット)をエスケープするような対策が必要になるのではないかと</p><p>んまぁとりあえず読んでやってみただけなのですが一応メモっておく</p>
@@ -147,12 +147,6 @@ end
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

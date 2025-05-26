@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2012-03-21T00:00:00+00:00">
-                  <a href="/archives/2012/03">
+                  <a href="/archives/2012/03.html">
                   <span class="entry-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">3</span>
@@ -94,11 +94,11 @@
 <h4>インストール</h4>
 <p><a href="http://cassandra.apache.org">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p>
 <h4>起動とその他もろもろ</h4>
-<p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p><pre class="line-numbers"><code class="language-sh")>mkdir -p /var/{log,lib}/cassandra
+<p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p><pre class="line-numbers"><code class="language-sh">mkdir -p /var/{log,lib}/cassandra
 
 # ※各ディレクトリの所有者関係も設定する
-</code></pre><p>まずサーバーを起動。</p><pre class="line-numbers"><code class="language-sh")>cassandra -f
-</code></pre><p>で起動出来る。-fは-foregroundの略称っぽい、指定しなかった場合にはCassandraDaemonがバックグランド動作になる模様。で起動すると、サーバーが9160なポートを開放する。これはAPI通信を行う際に利用するThriftサーバーのポートな模様。詳しくはログを嫁ということにしときます</p><p>んでクライアントから</p><pre class="line-numbers"><code class="language-sh")>cassandra-cli -h localhost```
+</code></pre><p>まずサーバーを起動。</p><pre class="line-numbers"><code class="language-sh">cassandra -f
+</code></pre><p>で起動出来る。-fは-foregroundの略称っぽい、指定しなかった場合にはCassandraDaemonがバックグランド動作になる模様。で起動すると、サーバーが9160なポートを開放する。これはAPI通信を行う際に利用するThriftサーバーのポートな模様。詳しくはログを嫁ということにしときます</p><p>んでクライアントから</p><pre class="line-numbers"><code class="language-sh">cassandra-cli -h localhost```
 
 
 な感じでcassandra-cliを使って接続する。でデータモデルを理解しないといけないが今回は詳細をぶっ飛ばして、とりあえずこんな感じになるっぽい↓
@@ -145,15 +145,15 @@ ColumnFamily: Sample
   Key cache size / save period in seconds: 200000.0/14400
   GC grace seconds: 864000  Compaction min/max thresholds: 4/32  Read repair chance: 1.0  Replicate on write: true  Bloom Filter FP chance: default  Built indexes: []  Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
 </pre>
-<p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p><pre class="line-numbers"><code class="language-none")>use Keyspace1;
+<p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p><pre class="line-numbers"><code class="language-">use Keyspace1;
 set Sample[test1][name] = "hoge";
-</code></pre><p>で突っ込んだので</p><pre class="line-numbers"><code class="language-none")>use Keyspace1;
+</code></pre><p>で突っ込んだので</p><pre class="line-numbers"><code class="language-">use Keyspace1;
 get Sample[test1];
 
 # 出力 =&gt; (column=name, value=hoge, timestamp=省略)
 </code></pre><p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p>
 <h4>pom.xml</h4>
-<pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" ?&gt;
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;project
     xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -196,7 +196,7 @@ get Sample[test1];
 &lt;/project&gt;
 </code></pre><p>んじゃJava側のClientクラスを書く</p>
 <h4>Client.java</h4>
-<pre class="line-numbers"><code class="language-java")>import java.nio.ByteBuffer;
+<pre class="line-numbers"><code class="language-java">import java.nio.ByteBuffer;
 import java.io.UnsupportedEncodingException;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -305,12 +305,6 @@ public class Client {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

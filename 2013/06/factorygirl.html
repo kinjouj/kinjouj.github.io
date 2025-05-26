@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-06-21T00:00:00+00:00">
-                  <a href="/archives/2013/06">
+                  <a href="/archives/2013/06.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">6</span>
@@ -93,9 +93,9 @@
 <!--more-->
 <p>ActiveRecordにもfixtureな機能自体はあるけど、こっちはyamlとかで定義したりすると思うのだけど、事細かいリレーション構造とかだとテストデータをどう表現するのかはちょっと謎。っていうかそこまで使いこなせてないっていうオチな気もするけど</p><p>とりまぁ使ってみる</p>
 <h4>導入</h4>
-<p>Gemfileに</p><pre class="line-numbers"><code class="language-rb")>gem "factory_girl_rails", :group =&gt; [:development, :test]
-</code></pre><p>を記述して、bundle installしておく。んで</p><pre class="line-numbers"><code class="language-none")>rails g factory_girl:model モデル
-</code></pre><p>な感じでファイルを生成する。RSpecとかの場合にはspec/factoriesディレクトリ内にファイルが生成される模様(RSpecじゃない場合にはtest/factories)</p><p>んでもって、ドキュメント通りにテストで使用する環境によってFactoryGirlなメソッドをincludeしちゃったりする(しなくてもFactoryGirlクラスのメソッドを使う事で出来るのかも、それは未検証)。今回はRSpecを使ってるんでspec_helper.rbに</p><pre class="line-numbers"><code class="language-rb")>RSpec.configure do |config|
+<p>Gemfileに</p><pre class="line-numbers"><code class="language-rb">gem "factory_girl_rails", :group =&gt; [:development, :test]
+</code></pre><p>を記述して、bundle installしておく。んで</p><pre class="line-numbers"><code class="language-">rails g factory_girl:model モデル
+</code></pre><p>な感じでファイルを生成する。RSpecとかの場合にはspec/factoriesディレクトリ内にファイルが生成される模様(RSpecじゃない場合にはtest/factories)</p><p>んでもって、ドキュメント通りにテストで使用する環境によってFactoryGirlなメソッドをincludeしちゃったりする(しなくてもFactoryGirlクラスのメソッドを使う事で出来るのかも、それは未検証)。今回はRSpecを使ってるんでspec_helper.rbに</p><pre class="line-numbers"><code class="language-rb">RSpec.configure do |config|
   # 追加
   config.include FactoryGirl::Syntax::Methods
 end
@@ -110,8 +110,8 @@ end
 </ul>
 <p>っていうような仕様がぶち込まれている。それをやってるのがhas_and_belongs_to_many辺り</p><p>んまぁ仕様的なはこんなもんかなと。あとはspec/factories等やモデルテストを書く</p>
 <h4>spec/factories/categories.rb</h4>
-<pre class="line-numbers"><code class="language-none")>rails g factory_girl:model category
-</code></pre><p>で生成したFactoryGirlの定義を書く</p><pre class="line-numbers"><code class="language-rb")># Read about factories at https://github.com/thoughtbot/factory_girl
+<pre class="line-numbers"><code class="language-">rails g factory_girl:model category
+</code></pre><p>で生成したFactoryGirlの定義を書く</p><pre class="line-numbers"><code class="language-rb"># Read about factories at https://github.com/thoughtbot/factory_girl
 
 FactoryGirl.define do
   factory :category1, :class =&gt; Category do
@@ -125,8 +125,8 @@ FactoryGirl.define do
 end
 </code></pre><p>2つのカテゴリーを定義するけど、カテゴリーBはカテゴリーAの子カテゴリーとなりCategoryクラスのparent_categoryを参照する事で親カテゴリーなカテゴリーAを取得できるっていうような形になっているので、associationでカテゴリーAなfactoryを指定する</p>
 <h4>spec/factories/entries.rb</h4>
-<pre class="line-numbers"><code class="language-none")>rails g factory_girl:model entry
-</code></pre><p>で生成したFactoryGirlの定義を書いていく</p><pre class="line-numbers"><code class="language-rb")># Read about factories at https://github.com/thoughtbot/factory_girl
+<pre class="line-numbers"><code class="language-">rails g factory_girl:model entry
+</code></pre><p>で生成したFactoryGirlの定義を書いていく</p><pre class="line-numbers"><code class="language-rb"># Read about factories at https://github.com/thoughtbot/factory_girl
 
 FactoryGirl.define do
   factory :entry, :class =&gt; Entry do
@@ -148,7 +148,7 @@ end
 <li>  取得した親カテゴリーから子カテゴリー参照を取得。結果は1件のみで上記で書いてる category2なCategoryのインスタンスが入る (hashは異なる)</li>
 <li>  親カテゴリーから取得した子カテゴリー自体が参照するentryが最初に取得したEntryなインスタンスと同等なオブジェクトであるかをチェック</li>
 </ul>
-<pre class="line-numbers"><code class="language-rb")>require "spec_helper"
+<pre class="line-numbers"><code class="language-rb">require "spec_helper"
 
 describe Entry do
   it "factory_girl test" do
@@ -224,12 +224,6 @@ end
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

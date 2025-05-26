@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-10-01T00:00:00+00:00">
-                  <a href="/archives/2013/10">
+                  <a href="/archives/2013/10.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">10</span>
@@ -100,7 +100,7 @@
 </ul>
 <p>全てやり方的なのは紹介するけど、2と3の違いに関しては「型で指定するか」「変数名的な感じで指定するか」って所なのではと</p>
 <h4>struts.xml</h4>
-<p><a href="http://localhost:8080/struts2/top/page/1">http://localhost:8080/struts2/top/page/1</a> 的なURLを表現するにはどうすれば良いのかって所としては</p><pre class="line-numbers"><code class="language-xml")>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<p><a href="http://localhost:8080/struts2/top/page/1">http://localhost:8080/struts2/top/page/1</a> 的なURLを表現するにはどうすれば良いのかって所としては</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
 &lt;struts&gt;
     &lt;package name="sample" extends="struts-default"&gt;
@@ -127,7 +127,7 @@
 &lt;/struts&gt;
 </code></pre><p>/topと/top/page/(.*)的なののマッピングが2つ必要になるだろうと思ってやってるけど、これをひとまとめに出来ないものかと。んまぁそれはおいといて</p><p>通常だと&lt;action&gt;で指定出来るname属性にスラッシュを組み込む事は出来ない模様だけど、<span style="color: red">struts.enable.SlashesInActionNames</span>な設定をtrueにしておくと認識させる事が出来る模様</p>
 <h4>Page.java</h4>
-<p>上記でパラメーターとして認識するpageパラメーターは元はStringになってるはず。それをもとにPageオブジェクトで変換してアクションにマッピングする。でそのクラス</p><pre class="line-numbers"><code class="language-java")>package sample;
+<p>上記でパラメーターとして認識するpageパラメーターは元はStringになってるはず。それをもとにPageオブジェクトで変換してアクションにマッピングする。でそのクラス</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.Serializable;
 
@@ -150,7 +150,7 @@ public class Page implements Serializable {
 }
 </code></pre><p>(ry</p>
 <h4>TopAction.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.controllers.sample;
+<pre class="line-numbers"><code class="language-java">package sample.controllers.sample;
 
 import java.util.Date;
 import java.util.List;
@@ -228,7 +228,7 @@ public class TopAction extends ActionSupport {
 }
 </code></pre><p>っていう感じで上記で説明したようにPageオブジェクトで受け取るという形なので、それに伴うセッターメソッドを定義。あと他にも書いてるけどそれは公式ドキュメント上の「Built in Type Conversion Support」セクションに書いてあるようにデフォルトでサポートされている型変換っていうのもちょっと利用してみる的な感じで書いておいた</p><p>でこのアクションでPageオブジェクトを変換する仕組みのコンバータークラスを作ってないので作る</p>
 <h4>PageConverter.java</h4>
-<p>適当に書いたのでorz (ていうかテストすら書いてない)</p><pre class="line-numbers"><code class="language-java")>package sample.converters;
+<p>適当に書いたのでorz (ていうかテストすら書いてない)</p><pre class="line-numbers"><code class="language-java">package sample.converters;
 
 import java.lang.reflect.Member;
 import java.util.Map;
@@ -282,10 +282,10 @@ public class PageConverter implements TypeConverter {
 }
 </code></pre><p>公式ドキュメントではStrutsTypeConverterっていうのを継承する形でやってますけど、これ実体はTypeConverterインターフェースを実装したものなので、それを使ってやってる</p><p>で上記のアクションでアノテーション方式でのをコメントアウトしていたのでプロパティファイルを使って処理する</p>
 <h4>src/main/resources/sample/controllers/samppe/TopAction-conversion.properties</h4>
-<pre class="line-numbers"><code class="language-ini")>page = sample.converters.PageConverter
+<pre class="line-numbers"><code class="language-ini">page = sample.converters.PageConverter
 </code></pre><p>的な感じで作れば良い。方式は&lt;propertyName&gt;=&lt;Converter Class&gt;ってドキュメント書いてるので</p>
 <h4>src/main/resources/xwork-conversion.properties</h4>
-<p>アノテーションで指定するか上記のプロパティファイルを利用するなら良い。型で指定するのであれば</p><pre class="line-numbers"><code class="language-ini")>sample.Page = sample.converters.PageConverter
+<p>アノテーションで指定するか上記のプロパティファイルを利用するなら良い。型で指定するのであれば</p><pre class="line-numbers"><code class="language-ini">sample.Page = sample.converters.PageConverter
 </code></pre><p>的な感じで書けば良い。</p><p>以上で必要な</p>
 <ul>
 <li>  Action: TopAction</li>
@@ -294,7 +294,7 @@ public class PageConverter implements TypeConverter {
 </ul>
 <p>あと上記のプロパティファイルを作成が終わったので検証してみる。まぁテスト書いた方が楽なので</p>
 <h4>TopActionTestCase.java</h4>
-<pre class="line-numbers"><code class="language-java")>package sample.actions;
+<pre class="line-numbers"><code class="language-java">package sample.actions;
 
 import com.opensymphony.xwork2.ActionProxy;
 import com.opensymphony.xwork2.ActionSupport;
@@ -370,12 +370,6 @@ public class TopActionTestCase extends StrutsSpringTestCase {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

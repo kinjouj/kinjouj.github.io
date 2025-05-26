@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2014-07-18T00:00:00+00:00">
-                  <a href="/archives/2014/07">
+                  <a href="/archives/2014/07.html">
                   <span class="entry-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">7</span>
@@ -95,7 +95,7 @@
 <h4>facebook APIの設定</h4>
 <p><a href="https://developers.facebook.com">https://developers.facebook.com</a> からアプリケーションを作成しアプリケーションIDとシークレットキーをコピーする。でValid OAuth Redirect URIsっていう所に認証後にリダイレクト先を指定しておかないとOAuth failureするので設定しておく</p><p>とりあえずはfacebook側の設定はこんだけ</p>
 <h4>Gemfile</h4>
-<pre class="line-numbers"><code class="language-rb")>source "https://rubygems.org"
+<pre class="line-numbers"><code class="language-rb">source "https://rubygems.org"
 
 gem "omniauth-facebook"
 
@@ -104,7 +104,7 @@ gem "rspec-rails", group: :test
 gem "capybara-rails", group: :test
 </code></pre><p>まぁ設定したらbundle install</p>
 <h4>config/initializers/omniauth.rb</h4>
-<p>ドキュメント(README.md)通りにconfig/initializers/omniauth.rbを作る</p><pre class="line-numbers"><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
+<p>ドキュメント(README.md)通りにconfig/initializers/omniauth.rbを作る</p><pre class="line-numbers"><code class="language-rb">Rails.application.config.middleware.use OmniAuth::Builder do
   provider :facebook,
     "[APP ID]",
     "[APP SECRET KEY]",
@@ -124,7 +124,7 @@ auth_facebook_callback GET    /auth/facebook/callback(.:format) sessions#callbac
           auth_failure GET    /auth/failure(.:format)           sessions#failure
               accounts GET    /accounts(.:format)               accounts#index
 </pre>
-<p>っていうようなルーティングを作るので</p><pre class="line-numbers"><code class="language-rb")>Rails.application.routes.draw do
+<p>っていうようなルーティングを作るので</p><pre class="line-numbers"><code class="language-rb">Rails.application.routes.draw do
   get "/auth/facebook/callback" =&gt; "sessions#callback"
   get "/auth/failure" =&gt; "sessions#failure"
 
@@ -132,7 +132,7 @@ auth_facebook_callback GET    /auth/facebook/callback(.:format) sessions#callbac
 end
 </code></pre><p>ってな感じでSessionsControllerとAccountsControllerが必要なので(ry</p>
 <h4>app/controllers/sessions_controller.rb</h4>
-<pre class="line-numbers"><code class="language-rb")>class SessionsController &lt; ApplicationController
+<pre class="line-numbers"><code class="language-rb">class SessionsController &lt; ApplicationController
   def callback
     session[:auth] = auth_hash
     redirect_to :controller =&gt; :accounts
@@ -150,7 +150,7 @@ end
 end
 </code></pre><p>んな感じで</p>
 <h4>app/controllers/accounts_controller.rb</h4>
-<pre class="line-numbers"><code class="language-rb")>class AccountsController &lt; ApplicationController
+<pre class="line-numbers"><code class="language-rb">class AccountsController &lt; ApplicationController
   def index
     auth = session[:auth]
     return redirect_to "/auth/failure" if auth.nil?
@@ -162,10 +162,10 @@ end
     @user = auth
   end
 end
-</code></pre><p>な感じでapp/views/accounts/index.erbで</p><pre class="line-numbers"><code class="language-erb")>name = &lt;%= @user["info"]["nickname"] %&gt;
+</code></pre><p>な感じでapp/views/accounts/index.erbで</p><pre class="line-numbers"><code class="language-erb">name = &lt;%= @user["info"]["nickname"] %&gt;
 </code></pre><p>な感じでnicknameを出力しているだけ。</p><p>まぁ要は/auth/facebookにアクセスしアクセス許可を承認されると /auth/facebook/callbackに行って、セッションデータにログイン時のユーザー情報を格納後/accountsにリダイレクト、そこで最終的に情報が表示されるような感じ</p>
 <h4>spec/rails_helper.rb</h4>
-<p>RSpec3(+Rails)辺りからはspec/rails_helper.rbにRailsに特有される設定等を行う模様げっぽいので</p><pre class="line-numbers"><code class="language-rb")># ここから追加
+<p>RSpec3(+Rails)辺りからはspec/rails_helper.rbにRailsに特有される設定等を行う模様げっぽいので</p><pre class="line-numbers"><code class="language-rb"># ここから追加
 OmniAuth.config.test_mode = true
 OmniAuth.config.mock_auth[:facebook] = OmniAuth::AuthHash.new({
   :provider =&gt; "facebook",
@@ -186,7 +186,7 @@ RSpec.configure do |config|
 end
 </code></pre><p>な感じでOmniAuth.config.test_modeを使用する事でテスト時には/auth/facebook等にリクエストした場合は問答無用でコールバック先にリダイレクトされる模様。でその際のomniauth.authなのはOmniAuth.config.mock_authで設定する事が可能。んまぁこういうところはテストを実行する前にbefore :each等で設定するべきなんじゃないのかなって思う</p>
 <h4>spec/requests/auth_spec.rb</h4>
-<pre class="line-numbers"><code class="language-rb")>require "rails_helper"
+<pre class="line-numbers"><code class="language-rb">require "rails_helper"
 
 describe "oauth callback test", :js =&gt; false do
 
@@ -236,7 +236,7 @@ describe "oauth callback test", :js =&gt; false do
 end
 </code></pre><p>終わり。っていう事で若干適当感がハンパないけどomniauthとomniauth strategyを使えば簡単にソーシャルログイン等を使ってデータを取得したり出来るんじゃないかと</p><p>余談としてomniauthで使えるstrategyは <a href="https://github.com/intridea/omniauth/wiki/List-of-Strategies">https://github.com/intridea/omniauth/wiki/List-of-Strategies</a> に載ってるので使いたいサービスとかに対応するのを使えば良いっぽい</p>
 <h4>追記1: omniauthのURL prefixを変える方法</h4>
-<p>参考: <a href="http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider">http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider</a></p><p>デフォルトだと/authになっていて、それがStrategyを含むと/auth/:providerっていう感じになるわけなんだけど、それのprefixを変えたい場合</p><pre class="line-numbers"><code class="language-rb")>Rails.application.config.middleware.use OmniAuth::Builder do
+<p>参考: <a href="http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider">http://stackoverflow.com/questions/10033413/how-to-change-route-of-omniauth-from-auth-provider-to-myapp-auth-provider</a></p><p>デフォルトだと/authになっていて、それがStrategyを含むと/auth/:providerっていう感じになるわけなんだけど、それのprefixを変えたい場合</p><pre class="line-numbers"><code class="language-rb">Rails.application.config.middleware.use OmniAuth::Builder do
   configure do |config|
     config.path_prefix = "/user/auth"
   end
@@ -275,12 +275,6 @@ end
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

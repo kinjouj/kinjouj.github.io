@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-10-16T00:00:00+00:00">
-                  <a href="/archives/2013/10">
+                  <a href="/archives/2013/10.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">10</span>
@@ -89,14 +89,14 @@
               <div class="entry-content">
                 <p><a href="/mockito-mocked-final-class.html">Mockitoでfinalクラスをモック化</a>の続き</p>
 <!--more-->
-<p>例えば</p><pre class="line-numbers"><code class="language-java")>package sample;
+<p>例えば</p><pre class="line-numbers"><code class="language-java">package sample;
 
 public final class Sample {
     public String say() {
         return "hoge fuga foobar";
     }
 }
-</code></pre><p>なんていうfinalクラスがあったとして</p><pre class="line-numbers"><code class="language-java")>package sample;
+</code></pre><p>なんていうfinalクラスがあったとして</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -123,13 +123,13 @@ Mockito cannot mock/spy following:
   - anonymous classes
   - primitive types
 </pre>
-<p>っていうようにfinalクラスはモック化出来ねーよって怒られる訳ですが。で前回だと独自のクラスローダーを利用してjavassistを使ってfinal modifierを消したクラスバイトコードを動的にロードするっていう方式だったんですが、これだとこのクラスローダーからロードしないといけないとかめんどくさいよねっていう事で色々調べつつやってみた。無論上記のコードでテストは一切書き換えないっていう条件付き</p><p>その前に「このクラスはfinalクラスでモック出来るようにするよ」っていうのを識別させる為にアノテーションを利用</p><pre class="line-numbers"><code class="language-java")>package sample;
+<p>っていうようにfinalクラスはモック化出来ねーよって怒られる訳ですが。で前回だと独自のクラスローダーを利用してjavassistを使ってfinal modifierを消したクラスバイトコードを動的にロードするっていう方式だったんですが、これだとこのクラスローダーからロードしないといけないとかめんどくさいよねっていう事で色々調べつつやってみた。無論上記のコードでテストは一切書き換えないっていう条件付き</p><p>その前に「このクラスはfinalクラスでモック出来るようにするよ」っていうのを識別させる為にアノテーションを利用</p><pre class="line-numbers"><code class="language-java">package sample;
 
 public @interface FinalMock {
 }
 </code></pre><p>なアノテーションインターフェースを作ってSampleクラスにこのアノテーションを付与しておく</p><p>あとはクラスロードな仕組み辺りでこのアノテーションが付与されてるのだけfinal modifierを消して動的にロードするっていう方式を採用する</p>
 <h4>ClassFileTransformerを実装したクラスを作る</h4>
-<p>簡単に言うと-javaagentな仕組みを使ってクラスからfinal modifierを消してロードするっていう仕組みを作るだけ</p><pre class="line-numbers"><code class="language-java")>import java.io.IOException;
+<p>簡単に言うと-javaagentな仕組みを使ってクラスからfinal modifierを消してロードするっていう仕組みを作るだけ</p><pre class="line-numbers"><code class="language-java">import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.reflect.Modifier;
@@ -179,14 +179,14 @@ public class SampleClassTransformer implements ClassFileTransformer {
         return b;
     }
 }
-</code></pre><p>で-javaagentな仕組みを使うので</p><pre class="line-numbers"><code class="language-java")>import java.lang.instrument.Instrumentation;
+</code></pre><p>で-javaagentな仕組みを使うので</p><pre class="line-numbers"><code class="language-java">import java.lang.instrument.Instrumentation;
 
 public class JavaAgent {
     public static void premain(String args, Instrumentation inst) {
         inst.addTransformer(new SampleClassTransformer(), inst.isRetransformClassesSupported());
     }
 }
-</code></pre><p>っていうようなクラスを作る。んでMETA-INF/MANIFEST.MFで</p><pre class="line-numbers"><code class="language-mf")>Manifest-Version: 1.0
+</code></pre><p>っていうようなクラスを作る。んでMETA-INF/MANIFEST.MFで</p><pre class="line-numbers"><code class="language-mf">Manifest-Version: 1.0
 Premain-Class: JavaAgent
 </code></pre><p>を定義して、上記のJavaAgentクラスとSampleClassTransformerクラスをぶち込んでjar化する</p><p>終わり。あとは実行時に-javaagent:sample.jar(作成したjarファイル)でテストを実行すると</p>
 <pre>
@@ -226,12 +226,6 @@ Expected: is "hoge fuga foobar"
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

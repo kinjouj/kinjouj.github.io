@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2015-11-10 19:59:35 +0900">
-                  <a href="/archives/2015/11">
+                  <a href="/archives/2015/11.html">
                   <span class="entry-date-year">2015</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">11</span>
@@ -93,7 +93,7 @@
 <!--more-->
 
 <h3>src/components/TodoInput.jsx</h3>
-<pre class="line-numbers"><code class="language-javascript")>import React, { Component, PropTypes } from "react";
+<pre class="line-numbers"><code class="language-javascript">import React, { Component, PropTypes } from "react";
 import LinkedStateMixin from "react-addons-linked-state-mixin";
 import { connect } from "react-redux";
 
@@ -122,7 +122,7 @@ class TodoInput extends Component {
 export default connect()(TodoInput);
 </code></pre><p>あくまでReactの事はおいといてreduxのconnectを使ってるコンポーネントをテストする</p>
 <h4>test/components/TodoInput-test.js</h4>
-<pre class="line-numbers"><code class="language-javascript")>import React from "react";
+<pre class="line-numbers"><code class="language-javascript">import React from "react";
 import ReactDOM from "react-dom";
 import ReactTestUtils from "react-addons-test-utils";
 //import { createStore } from "redux";
@@ -149,21 +149,21 @@ describe("TodoInput", () =&gt; {
     // output: &lt;input type="text" data-reactid=".0.0"&gt;&lt;button data-reactid=".0.1"&gt;add&lt;/button&gt;
   });
 });
-</code></pre><p>っていうようにconnectを使ってるComponentをテストする場合、そのコンポーネント自身にstoreを指定する必要がある模様</p><p>又、テストを開始する際にdocument等の依存が解決出来ないのでtest/setup.jsを</p><pre class="line-numbers"><code class="language-javascript")>import { jsdom } from 'jsdom'
+</code></pre><p>っていうようにconnectを使ってるComponentをテストする場合、そのコンポーネント自身にstoreを指定する必要がある模様</p><p>又、テストを開始する際にdocument等の依存が解決出来ないのでtest/setup.jsを</p><pre class="line-numbers"><code class="language-javascript">import { jsdom } from 'jsdom'
 
 global.document = jsdom('&lt;!doctype html&gt;&lt;html&gt;&lt;body&gt;&lt;/body&gt;&lt;/html&gt;')
 global.window = document.defaultView
 global.navigator = global.window.navigator
 </code></pre><p>を作っておく必要がある</p><p>てな感じでreduxを使うReact Componentのテストを行う際にはstoreを指定する必要があるって事で終わり。一応、まだテストに関するドキュメントを制覇してないので読みつつ色々まとめる予定</p><p>参考: <a href="http://redux.js.org/docs/recipes/WritingTests.html">http://redux.js.org/docs/recipes/WritingTests.html</a></p>
 <h4>余談: React Componentのstateをテストする場合</h4>
-<p>上記のReact ComponentではlinkStateを使ってstateに状態を持つ事をやってる。そこがただしく作用しているかっていう所までチェックしたい場合、上記のテストコードの末尾に</p><pre class="line-numbers"><code class="language-javascript")>expect(todo.state.text).toEqual("hoge");
+<p>上記のReact ComponentではlinkStateを使ってstateに状態を持つ事をやってる。そこがただしく作用しているかっていう所までチェックしたい場合、上記のテストコードの末尾に</p><pre class="line-numbers"><code class="language-javascript">expect(todo.state.text).toEqual("hoge");
 </code></pre><p>とやっても出来ない。なぜかというとconnectされたReact Componentはreact-reduxのconnectのConnectコンポーネントに内包される形になるので上記のtodo変数自体はTodoInputではなくConnectになる。もちろんTodoInput内でのsetStateはTodoInput上で作用するので問題無いがテスト上ではそのstateにアクセスする事が出来ない。それをやるには</p>
 <ul>
 <li>connectを使うコンポーネントのオプションにwithRef: trueを設定する</li>
 <li>一定の処理後にgetWrappedInstanceメソッドで内包されているComponentのインスタンスを取る</li>
 <li>stateを検証する</li>
 </ul>
-<p>っていうのが必要になる。以下に例を示す</p><pre class="line-numbers"><code class="language-javascript")>import React, { Component, PropTypes } from "react";
+<p>っていうのが必要になる。以下に例を示す</p><pre class="line-numbers"><code class="language-javascript">import React, { Component, PropTypes } from "react";
 import LinkedStateMixin from "react-addons-linked-state-mixin";
 import { connect } from "react-redux";
 
@@ -202,7 +202,7 @@ export default connect(
   // これが必要
   { withRef: true }
 )(TodoInput);
-</code></pre><p>んでテストする際には上記で書いたように普通に使ってもこれはConnectクラスに内包されてしまうのでgetWrappedInstanceで取得してからstateをテストする</p><pre class="line-numbers"><code class="language-javascript")>import expect from "expect";
+</code></pre><p>んでテストする際には上記で書いたように普通に使ってもこれはConnectクラスに内包されてしまうのでgetWrappedInstanceで取得してからstateをテストする</p><pre class="line-numbers"><code class="language-javascript">import expect from "expect";
 import React from "react";
 import ReactDOM from "react-dom";
 import ReactTestUtils from "react-addons-test-utils";
@@ -265,12 +265,6 @@ describe("TodoInput", () =&gt; {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

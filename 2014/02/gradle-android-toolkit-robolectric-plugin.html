@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2014-02-18T00:00:00+00:00">
-                  <a href="/archives/2014/02">
+                  <a href="/archives/2014/02.html">
                   <span class="entry-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">2</span>
@@ -106,7 +106,7 @@
 <h4>公式のrobolectric-pluginが動かない</h4>
 <p>どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 <a href="http://qiita.com/turugina/items/972f46b40bb972c180f0">http://qiita.com/turugina/items/972f46b40bb972c180f0</a> にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど</p><p>まぁ <a href="https://github.com/turugina/robolectric-plugin">https://github.com/turugina/robolectric-plugin</a> からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る</p>
 <h4>build.gradle</h4>
-<pre class="line-numbers"><code class="language-groovy")>buildscript {
+<pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
         mavenLocal()
@@ -134,7 +134,7 @@ allprojects {
 }
 </code></pre>
 <h4>app/build.gradle</h4>
-<pre class="line-numbers"><code class="language-groovy")>apply plugin: "android"
+<pre class="line-numbers"><code class="language-groovy">apply plugin: "android"
 // robolectric-pluginをロード
 apply plugin: "robolectric"
 
@@ -158,7 +158,7 @@ tasks.withType(Test) {
 }
 </code></pre><p>あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない</p>
 <h4>android.content.res.Resources$NotFoundException が出る</h4>
-<p>まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る</p><p>で記事トップに書いてる<a href="http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments%E3%80%80">robolectric-pluginを使うサンプル</a>は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと</p><p>んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で</p><pre class="line-numbers"><code class="language-java")>package sample.test;
+<p>まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る</p><p>で記事トップに書いてる<a href="http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments%E3%80%80">robolectric-pluginを使うサンプル</a>は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと</p><p>んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import org.junit.runners.model.InitializationError;
 import org.robolectric.AndroidManifest;
@@ -229,12 +229,6 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

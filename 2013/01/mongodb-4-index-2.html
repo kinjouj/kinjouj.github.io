@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-01-15T00:00:00+00:00">
-                  <a href="/archives/2013/01">
+                  <a href="/archives/2013/01.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">1</span>
@@ -94,7 +94,7 @@
 <li>db.createCollectionで事前にコレクションは作っておく</li>
 <li>db.コレクション名.ensureIndexでUNIQUEインデックス作っておく</li>
 </ul>
-<p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p><pre class="line-numbers"><code class="language-js")>// samplesコレクションを作る
+<p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p><pre class="line-numbers"><code class="language-js">// samplesコレクションを作る
 db.createCollection("samples")
 
 // nameに対してUNIQUEインデックスを作っておく
@@ -112,22 +112,22 @@ db.samples.find()
 
 db.samples.save({ name: "hoge", type: 1 })
 // E11000 duplicate key error index: sample.samples.$name_1  dup key: { : "hoge" } なエラーになる
-</code></pre><p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p><p>でdropDupsも一応検証してみますかという事で</p><pre class="line-numbers"><code class="language-js")>db.samples.save({ name: "hoge", type: 1 })
+</code></pre><p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p><p>でdropDupsも一応検証してみますかという事で</p><pre class="line-numbers"><code class="language-js">db.samples.save({ name: "hoge", type: 1 })
 db.samples.save({ name: "hoge", type: 1 })
 db.samples.find()
-</code></pre><p>出力が</p><pre class="line-numbers"><code class="language-json")>{ "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
+</code></pre><p>出力が</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
 { "_id" : ObjectId("50f4e5a2bc3d8a4279742236"), "name" : "hoge", "type" : 1 }
 </code></pre><p>同じデータを突っ込んでおく。でこの状態でnameにUNIQUEインデックスをつけると</p>
 <blockquote>
 E11000 duplicate key error index: sample.samples.$name_1 dup key: { : "hoge" }
 </blockquote>
-<p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p><pre class="line-numbers"><code class="language-js")>db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
+<p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p><pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
 db.samples.find()
 // { "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
 </code></pre><p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p><p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p>
 <h4>追記</h4>
-<p>DBに存在するインデックスを確認したい場合は</p><pre class="line-numbers"><code class="language-js")>db.system.indexes.find()
-</code></pre><p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p><pre class="line-numbers"><code class="language-js")>// sampleデータベース中のsamplesコレクション -&gt; sample.samples
+<p>DBに存在するインデックスを確認したい場合は</p><pre class="line-numbers"><code class="language-js">db.system.indexes.find()
+</code></pre><p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p><pre class="line-numbers"><code class="language-js">// sampleデータベース中のsamplesコレクション -&gt; sample.samples
 db.system.indexes.find({ ns: "sample.samples" })
 </code></pre>
               </div>
@@ -161,12 +161,6 @@ db.system.indexes.find({ ns: "sample.samples" })
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

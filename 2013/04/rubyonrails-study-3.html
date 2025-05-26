@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-04-25T00:00:00+00:00">
-                  <a href="/archives/2013/04">
+                  <a href="/archives/2013/04.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">4</span>
@@ -92,12 +92,12 @@
 <!--more-->
 
 <h4>ページングなライブラリ</h4>
-<p>昔Rails使ってた時とかはwill_paginateとか使ってたような記憶があるのだけど、kaminariっていうライブラリがあるらしいのでそれを使う事にする</p><p>Gemfileに</p><pre class="line-numbers"><code class="language-rb")>gem "kaminari"
-</code></pre><p>を記述。</p><pre class="line-numbers"><code class="language-none")>rails g kaminari:views [THEME]
-</code></pre><p>でkaminariが使うページングなUIなテンプレートを出力できる。別に出さなくても出来るんだけど、色々修正したいだとかTwitter Bootstrap方式なページングで出したいっていうのであれば</p><pre class="line-numbers"><code class="language-none")>rails g kaminari:views bootstrap
+<p>昔Rails使ってた時とかはwill_paginateとか使ってたような記憶があるのだけど、kaminariっていうライブラリがあるらしいのでそれを使う事にする</p><p>Gemfileに</p><pre class="line-numbers"><code class="language-rb">gem "kaminari"
+</code></pre><p>を記述。</p><pre class="line-numbers"><code class="language-">rails g kaminari:views [THEME]
+</code></pre><p>でkaminariが使うページングなUIなテンプレートを出力できる。別に出さなくても出来るんだけど、色々修正したいだとかTwitter Bootstrap方式なページングで出したいっていうのであれば</p><pre class="line-numbers"><code class="language-">rails g kaminari:views bootstrap
 </code></pre><p>等で出せる。app/views/kaminariに出力されるのでそれをいじればページングなUIを修正出来るっていう感じ。んまぁkaminariに関してはドキュメント読んだ方が良さそうなんで以降はある程度省略</p>
 <h4>app/controllers/entry_controller.rb</h4>
-<p>サイドバー的なところにカテゴリーをネストして出力出来るようにする為に、特定のアクションが起きる前に事前にカテゴリーデータを取得をおこなっておく。それはbefore_filterとかで良いと思う。利用されるアクションが1特定であれば普通にそのアクションでも良いとは思うけど、そうじゃないケースがあると思うので</p><pre class="line-numbers"><code class="language-rb")>class EntryController &lt; ApplicationController
+<p>サイドバー的なところにカテゴリーをネストして出力出来るようにする為に、特定のアクションが起きる前に事前にカテゴリーデータを取得をおこなっておく。それはbefore_filterとかで良いと思う。利用されるアクションが1特定であれば普通にそのアクションでも良いとは思うけど、そうじゃないケースがあると思うので</p><pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
   before_filter :load_sidebar, :only =&gt; :index
 
   def load_sidebar
@@ -110,7 +110,7 @@
 end
 </code></pre><p>とりあえず関係無い所なアクションは省略。load_sidebarでparentカラムが0(ルートカテゴリー)なデータを取得。それはrender :partialで利用する</p>
 <h4>app/views/entry/index.erb</h4>
-<pre class="line-numbers"><code class="language-erb")>&lt;div class="row"&gt;
+<pre class="line-numbers"><code class="language-erb">&lt;div class="row"&gt;
   &lt;div class="span4"&gt;
     &lt;!-- app/views/sidebar/_index.erbな部分テンプレートを読み込み --&gt;
     &lt;%= render :partial =&gt; "sidebar/index" %&gt;
@@ -130,12 +130,12 @@ end
 &lt;/div&gt;
 </code></pre><p>今回関係ない所は省略。paginateなView Helperでページングなビューを表示。恐らくはapp/views/kaminari/_paginator.html.erbがレンダリングされるんだと</p>
 <h4>app/views/sidebar/_index.erb</h4>
-<pre class="line-numbers"><code class="language-erb")>&lt;% @categories.each do |category| %&gt;
+<pre class="line-numbers"><code class="language-erb">&lt;% @categories.each do |category| %&gt;
   &lt;%= render :partial =&gt; "sidebar/category", :locals =&gt; { :category =&gt; category } %&gt;
 &lt;% end %&gt;
 </code></pre><p>load_sidebarで取得したカテゴリーなデータをレンダリングする。ここから更にapp/views/sidebar_category.erbに部分レンダリングされる</p>
 <h4>app/views/sidebar/_category.erb</h4>
-<pre class="line-numbers"><code class="language-erb")>&lt;!-- エントリー数が無いカテゴリーもあるけど、そのカテゴリーがサブカテゴリーを持ってないとは限らない --&gt;
+<pre class="line-numbers"><code class="language-erb">&lt;!-- エントリー数が無いカテゴリーもあるけど、そのカテゴリーがサブカテゴリーを持ってないとは限らない --&gt;
 &lt;% if category.entry.size &gt; 0 || category.sub_category.size &gt; 0 %&gt;
 &lt;ul&gt;
   &lt;li style="list-style: none;padding: 3px"&gt;
@@ -178,12 +178,6 @@ end
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

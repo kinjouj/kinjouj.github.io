@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2012-11-15T00:00:00+00:00">
-                  <a href="/archives/2012/11">
+                  <a href="/archives/2012/11.html">
                   <span class="entry-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">11</span>
@@ -92,7 +92,7 @@
 <!--more-->
 
 <h4>fuel/app/classes/controller/sample.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Sample extends Controller_Rest {
 
@@ -142,7 +142,7 @@ class Controller_Sample extends Controller_Rest {
         throw new HttpNotFoundException();
     }
 }
-</code></pre><p>indexアクションでResponse::forgeしないといけない(View::forgeだけではダメ)な理由として、fuel/core/classes/controller/rest.phpで</p><pre class="line-numbers"><code class="language-php")>public function after($response) {
+</code></pre><p>indexアクションでResponse::forgeしないといけない(View::forgeだけではダメ)な理由として、fuel/core/classes/controller/rest.phpで</p><pre class="line-numbers"><code class="language-php">public function after($response) {
 if (is_array($response)) {
     $response = $this-&gt;response($response);
 }
@@ -155,7 +155,7 @@ return parent::after($response);
 }
 </code></pre><p>となっているけど、アクションから返した値がResponse型じゃない場合には$this-&gt;responseをレスポンスとして置き換えて返すような仕組みになっている。でもし、return View::forgeしたとしても$this-&gt;responseは(恐らくは)nullにしかならない。なのでもしHTMLなビューを返す場合にはView::forgeした値をResponse::forgeしておく必要があるんじゃないかと</p>
 <h4>fuel/app/views/sample/index.php</h4>
-<pre class="line-numbers"><code class="language-html")>&lt;html&gt;
+<pre class="line-numbers"><code class="language-html">&lt;html&gt;
 &lt;body&gt;
 &lt;script type="text/javascript"&gt;
 var xhr = new XMLHttpRequest();
@@ -177,7 +177,7 @@ xhr.send();
 &lt;/html&gt;
 </code></pre><p>今回の場合get_listが発生するURLに直接アクセスしても、HTMLフォーマットは許容しない(HttpNotFoundExceptionをスローするようにしている)ので、XMLHttpRequest等でも同様にAcceptヘッダーを設定しないと404にしかならない。実際的にはHTMLも許容するけど、JSONを要求する場合とはレスポンス形式を変えるっていうのが良いのも知れないですけど</p><p>まぁという感じで、Ajax等で利用するデータ等を自動でエンコードしてくれたりする。んで出てくるのがこれどうやってテストやるのかって話</p>
 <h4>fuel/app/tests/controller/sample_test.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Controller_Sample extends TestCase {
     public function test_list() {
@@ -200,7 +200,7 @@ class Test_Controller_Sample extends TestCase {
 }
 </code></pre><p>indexな所のテストは省略。Request_Curlドライバを使ってテストをする。でresponse_infoメソッドを使えばレスポンスヘッダー類なデータが取得できるので、それを利用してレスポンスヘッダーが正しいかを検証する事も可能</p><p>あとset_mime_typeで取得するフォーマット方式を変えたり出来るのでそれを用いてテストする。今回の場合指定しなかったら404になるのでこのテストはfailする</p><p>っていう感じっぽいっすね。微妙に雑に書きましたけど</p>
 <h4>追記</h4>
-<p>書くの忘れてましたが、fuel/app/config/rest.phpに</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>書くの忘れてましたが、fuel/app/config/rest.phpに</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(
     "default_format" =&gt; "html",
@@ -242,12 +242,6 @@ return array(
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

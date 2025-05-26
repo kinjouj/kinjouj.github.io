@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-01-16T00:00:00+00:00">
-                  <a href="/archives/2013/01">
+                  <a href="/archives/2013/01.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">1</span>
@@ -89,12 +89,12 @@
               <div class="entry-content">
                 <p>更にドキュメントよみを進めてみる。今回はDBRefに関して</p>
 <!--more-->
-<p>例えばドキュメントから別のドキュメントのデータを参照したい場合にどうするかって話なんですが、DBRefを使えば一応そういった事も出来る模様。言うよりやれ論でとりあえずやってみる</p><pre class="line-numbers"><code class="language-js")>db.samples.tags.save({ name: "テスト" })
-</code></pre><p>っていうのをやると_idが自動で付く。でその値は<span style="color: red">50f5370e85ac77daf3dd4bfb</span>っていう感じになってるとする。でそれを別のデータから参照したい場合には</p><pre class="line-numbers"><code class="language-js")>db.samples.entry.save({
+<p>例えばドキュメントから別のドキュメントのデータを参照したい場合にどうするかって話なんですが、DBRefを使えば一応そういった事も出来る模様。言うよりやれ論でとりあえずやってみる</p><pre class="line-numbers"><code class="language-js">db.samples.tags.save({ name: "テスト" })
+</code></pre><p>っていうのをやると_idが自動で付く。でその値は<span style="color: red">50f5370e85ac77daf3dd4bfb</span>っていう感じになってるとする。でそれを別のデータから参照したい場合には</p><pre class="line-numbers"><code class="language-js">db.samples.entry.save({
   name: "Test",
   tag: new DBRef("samples.tags", ObjectId("50f5370e85ac77daf3dd4bfb"))
 })
-</code></pre><p>という感じでsaveする。んじゃとりあえずfindしてみると</p><pre class="line-numbers"><code class="language-json")>{
+</code></pre><p>という感じでsaveする。んじゃとりあえずfindしてみると</p><pre class="line-numbers"><code class="language-json">{
   "_id" : ObjectId("50f5379785ac77daf3dd4bfd"),
   "name" : "Test",
   "tag" : {
@@ -102,13 +102,13 @@
     "$id" : ObjectId("50f5370e85ac77daf3dd4bfb")
   }
 }
-</code></pre><p>っていう結果になる。まぁDBRefとしてsaveしなくても上記のように$refと$idを持つ連想配列型を作れば参照できる模様。で$ref自体はあくまでコレクションからの名前なので、今回<span style="color: red">db.samples.tags</span>っていうのを参照したいのでsamples.tagsで指定しなければならないような感じ。$idは言わなくてもわかるとおもうので(ry</p><p>んでもって</p><pre class="line-numbers"><code class="language-js")>db.samples.entry.findOne().tag
+</code></pre><p>っていう結果になる。まぁDBRefとしてsaveしなくても上記のように$refと$idを持つ連想配列型を作れば参照できる模様。で$ref自体はあくまでコレクションからの名前なので、今回<span style="color: red">db.samples.tags</span>っていうのを参照したいのでsamples.tagsで指定しなければならないような感じ。$idは言わなくてもわかるとおもうので(ry</p><p>んでもって</p><pre class="line-numbers"><code class="language-js">db.samples.entry.findOne().tag
 // 出力: { "$ref" : "samples.tags", "$id" : ObjectId("50f5370e85ac77daf3dd4bfb") }
 
 db.samples.entry.findOne().tag.fetch()
 // 出力: { "_id" : ObjectId("50f5370e85ac77daf3dd4bfb"), "name" : "テスト" }
-</code></pre><p>という感じで、データが参照しているデータを紐づけてフェッチする事が出来る模様。</p><p>でDBRefじゃなくてDBPointerっていうのもある模様</p><pre class="line-numbers"><code class="language-js")>db.samples.entry.save({ name: "Test", tag: new DBPointer("samples.tags", ObjectId("50f5370e85ac77daf3dd4bfb") })
-</code></pre><p>DBPointerってのを使うと</p><pre class="line-numbers"><code class="language-json")>{
+</code></pre><p>という感じで、データが参照しているデータを紐づけてフェッチする事が出来る模様。</p><p>でDBRefじゃなくてDBPointerっていうのもある模様</p><pre class="line-numbers"><code class="language-js">db.samples.entry.save({ name: "Test", tag: new DBPointer("samples.tags", ObjectId("50f5370e85ac77daf3dd4bfb") })
+</code></pre><p>DBPointerってのを使うと</p><pre class="line-numbers"><code class="language-json">{
   "ns": "samples.tags",
   "id": ObjectId("50f5370e85ac77daf3dd4bfb")
 }
@@ -144,12 +144,6 @@ db.samples.entry.findOne().tag.fetch()
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

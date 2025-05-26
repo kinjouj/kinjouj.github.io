@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2013-07-26T00:00:00+00:00">
-                  <a href="/archives/2013/07">
+                  <a href="/archives/2013/07.html">
                   <span class="entry-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">7</span>
@@ -91,7 +91,7 @@
               <div class="entry-content">
                 <p><a href="http://laravel.com/docs/queues">http://laravel.com/docs/queues</a> のドキュメント読みなんですが、一部IronMQっていうのに依存する機能がある模様げで、そのIronMQを使ってないのでそこは(ry</p><p>でMQサーバー何使うのって所として、んまぁ手軽だしBeanstalkで良いんじゃないかって事で。</p>
 <!--more-->
-<pre class="line-numbers"><code class="language-none")>apt-get install beanstalkd
+<pre class="line-numbers"><code class="language-">apt-get install beanstalkd
 </code></pre><p>Ubuntuとかだったら提供されているっぽいのでサクッと入れられますって事で。でLaravel側はこっから</p><p>でLaravelのQueueを動かすには</p>
 <ul>
 <li>beanstalkd等を起動</li>
@@ -101,7 +101,7 @@
 </ul>
 <p>な感じ</p>
 <h4>app/config/development/queue.phpを作成</h4>
-<p>とりあえず今回は環境名をdevelopmentにしておく。んでデフォルトはapp/config/queue.phpにある(はず)のでコピーして修正</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>とりあえず今回は環境名をdevelopmentにしておく。んでデフォルトはapp/config/queue.phpにある(はず)のでコピーして修正</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(
     "default" =&gt; "beanstalkd",
@@ -115,18 +115,18 @@ return array(
 );
 </code></pre><p>んまぁdefaultとconnections.beanstalkd.queueの値を変えただけ</p>
 <h4>キューとして処理されるクラスを作成</h4>
-<p>Closure型でQueue::pushを指定する事も出来る模様</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+<p>Closure型でQueue::pushを指定する事も出来る模様</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class HogeQueue {
     public function fire($job, $data) {
         $job-&gt;delete();
     }
 }
-</code></pre><p>デフォルトで動くメソッド名はfireな模様だけどQueue::pushの引数でルーティング同様な形式でメソッドを指定する事も出来るっぽい</p><p>又、ジョブキュー自体は自動的には消えない(はず)。$jobのdeleteメソッドを使う事で明示的にキューを削除する事が出来る。又、release(秒?)を使う事で遅延リトライ的な事も出来る模様</p><p>恐らくは$jobの型は使ってるMQによって変わるんだと。Beanstalkの場合には<a href="http://laravel.com/api/class-Illuminate.Queue.Jobs.BeanstalkdJob.html">Illuminate\Queue\Jobs\BeanstalkdJob</a>になるかも。んまぁ使えるAPIとかは左のリンクを参照</p><p>あとは上記でも書いたように</p><pre class="line-numbers"><code class="language-none")>artisan queue:listen
-</code></pre><p>をする。ちなみに-timeoutでジョブのタイムアウト値。-envで環境名とかを指定したりも出来る模様。んで</p><pre class="line-numbers"><code class="language-php")>Queue::push("HogeQueue", $id);
+</code></pre><p>デフォルトで動くメソッド名はfireな模様だけどQueue::pushの引数でルーティング同様な形式でメソッドを指定する事も出来るっぽい</p><p>又、ジョブキュー自体は自動的には消えない(はず)。$jobのdeleteメソッドを使う事で明示的にキューを削除する事が出来る。又、release(秒?)を使う事で遅延リトライ的な事も出来る模様</p><p>恐らくは$jobの型は使ってるMQによって変わるんだと。Beanstalkの場合には<a href="http://laravel.com/api/class-Illuminate.Queue.Jobs.BeanstalkdJob.html">Illuminate\Queue\Jobs\BeanstalkdJob</a>になるかも。んまぁ使えるAPIとかは左のリンクを参照</p><p>あとは上記でも書いたように</p><pre class="line-numbers"><code class="language-">artisan queue:listen
+</code></pre><p>をする。ちなみに-timeoutでジョブのタイムアウト値。-envで環境名とかを指定したりも出来る模様。んで</p><pre class="line-numbers"><code class="language-php">Queue::push("HogeQueue", $id);
 </code></pre><p>とかで使うっていう感じかと</p><p>Queueで処理されるクラスの単体テストとかはあとで追記する</p>
 <h4>追記1</h4>
-<p>書くの忘れてた。beanstalkdが入っててもPHP用のクライアントライブラリ入ってないといけないと思うのでだけど、ドキュメント的には</p><pre class="line-numbers"><code class="language-none")>Beanstalkd: pda/pheanstalk
+<p>書くの忘れてた。beanstalkdが入っててもPHP用のクライアントライブラリ入ってないといけないと思うのでだけど、ドキュメント的には</p><pre class="line-numbers"><code class="language-">Beanstalkd: pda/pheanstalk
 </code></pre><p>って書かれているので、composer.json辺りに追加してcomposer updateすりゃいいかと</p>
               </div>
             </div>
@@ -159,12 +159,6 @@ class HogeQueue {
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>

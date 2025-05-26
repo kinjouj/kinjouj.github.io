@@ -70,7 +70,7 @@
             <div class="entry" style="width: 100%;margin: 10px">
               <div class="entry-date">
                 <time datetime="2012-11-09T00:00:00+00:00">
-                  <a href="/archives/2012/11">
+                  <a href="/archives/2012/11.html">
                   <span class="entry-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="entry-date-month">11</span>
@@ -92,7 +92,7 @@
 <!--more-->
 
 <h4>fuel/app/classes/controller/home.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
     public function get_index() {
@@ -107,7 +107,7 @@ class Controller_Home extends Controller {
 }
 </code></pre><p>メソッドがget_indexになっているので、このリクエスト自体はHTTP/GETしか容認しないと思うのですが。で前にも書いたけど、このコントローラーテストする場合</p>
 <h4>fuel/app/tests/controller/test_home.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Controller_Home extends TestCase {
     public function test_action_index() {
@@ -116,7 +116,7 @@ class Test_Controller_Home extends TestCase {
 }
 </code></pre><p>としてもexecuteの時点でHttpNotFoundExceptionが発生する(本来は403エラーになるべきだと思うのだけど)。こっちが要求したいのは例外を起こさせる事ではなく例外が起きてもFurlCoreResponseが返ってきて欲しい場合。</p><p>で更にproduction環境上はExceptionを例外を発生させた場合にはHTTP/500エラーになる。そこら辺をテストするには現状のRequestクラスでは出来ないはず。恐らくはcurlドライバーでテストしても変わらない。本質はFuelCoreRequest#executeにあるはずなので。</p><p>という事でこれの例外をすべてラップしちゃってレスポンスを取るRequestクラスをでっち上げる</p>
 <h4>fuel/app/classes/http_request.php</h4>
-<pre class="line-numbers"><code class="language-php")>&lt;?php
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class HttpRequest extends Request {
     public function execute($method_params = null) {
@@ -135,7 +135,7 @@ class HttpRequest extends Request {
         return $this;
     }
 }
-</code></pre><p>ようはRequest#executeで実行する際に例外を処理しないから例外スローされちゃう訳だからそれをラップして例外をチェック。fuel/core/classes/httpexceptions.phpに定義されている例外クラスを確認すると</p><pre class="line-numbers"><code class="language-php")>&lt;?php
+</code></pre><p>ようはRequest#executeで実行する際に例外を処理しないから例外スローされちゃう訳だからそれをラップして例外をチェック。fuel/core/classes/httpexceptions.phpに定義されている例外クラスを確認すると</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 namespace Fuel\Core;
 
@@ -187,12 +187,6 @@ class HttpServerErrorException extends HttpException
               </li>
               <li class="post">
                 <a href="/2025/04/ruby-hash-delete-keyvalue-recursive.html">Rubyで再帰的にHashから値(キー)を取り除く方法</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/プログラミング教育はただの利権.html">プログラミング教育はただの利権</a>
-              </li>
-              <li class="post">
-                <a href="/2025/04/zorinos-laptop-power-management.html">ZorinOSでラップトップを閉じるとサスペンドする件</a>
               </li>
             </ul>
           </section>
