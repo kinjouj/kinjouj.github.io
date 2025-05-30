@@ -108,7 +108,7 @@ server b
 <pre class="line-numbers"><code class="language-bash">docker network create --subnet 172.16.0.0/16 --attachable mynet
 </code></pre><p>mynetっていう名前でDocker Networkを作成する。どうやらDockerでコンテナを作成した際に使用されるDocker Networkはおそらく最初からあるbridgeを使用するらしいのだがこのbridgeネットワークどうやらDNSによる名前解決を行わないらしい</p><p>なので新しくDocker Networkを作成して以下で作るコンテナで同一のネットワークを使用するように起動する</p>
 <h4>Server Bの起動</h4>
-<pre class="line-numbers"><code class="language-bash">docker run --name server-b -d --expose 8080 --net mynet -t server-b
+<pre class="line-numbers"><code class="language-bash">docker run --name server-b -d --expose=8080 --net=mynet -t server-b
 </code></pre><p>--nameでコンテナに名前をつける。これはServer Aでproxy_passを指定する際にコンテナ名で指定できるようになるのでそれを利用するためにコンテナ名を指定しておく。-pではなく--exposeでコンテナポートを開放、んで--netでそのコンテナが所属するネットワークを指定</p>
 <h4>Server A側のnginx.conf</h4>
 <pre class="line-numbers"><code class="language-nginx">listen 80;
@@ -119,7 +119,7 @@ location / {
 }
 </code></pre><p>上記で指定したコンテナ名をproxy_passに指定することができる。ただし同一のDocker Networkに所属してないとhost not found in upstreamって言われるので注意</p>
 <h4>Server Aを起動</h4>
-<pre class="line-numbers"><code class="language-bash">docker run -p 80:80 --net mynet -t server-a
+<pre class="line-numbers"><code class="language-bash">docker run -p 80:80 --net=mynet -t server-a
 </code></pre><p>接続できるかやってみる</p><pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
 server b
 kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100:8080
@@ -140,6 +140,12 @@ curl: (28) Connection timed out after 1001 milliseconds
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
               <li class="recent-post">
+                <a href="/2025/05/docker-6-docker-daemon-configuration.html">Docker (6) - Dockerdの起動オプション設定に関して</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/05/docker-5-use-docker-postgresql.html">Docker (5) - DockerでPostgreSQL -</a>
+              </li>
+              <li class="recent-post">
                 <a href="/2025/05/docker-4-docker-nginx-proxy-setting.html">Docker (4) - Docker nginx reverse proxy環境下でアクセスログを正しく取得する設定をするメモ</a>
               </li>
               <li class="recent-post">
@@ -147,12 +153,6 @@ curl: (28) Connection timed out after 1001 milliseconds
               </li>
               <li class="recent-post">
                 <a href="/2025/05/docker-3-using-expose-networking.html">Docker (3) - expose -</a>
-              </li>
-              <li class="recent-post">
-                <a href="/2025/05/docker-2-docker-daemon-remote-connection.html">Docker (2) - 別サーバーのDockerを利用する -</a>
-              </li>
-              <li class="recent-post">
-                <a href="/2025/05/docker-1.html">Docker (1)</a>
               </li>
             </ul>
           </section>
@@ -378,7 +378,7 @@ curl: (28) Connection timed out after 1001 milliseconds
     <a href="/archives/category/zookeeper.html">zookeeper (1)</a>
   </li>
   <li>
-    <a href="/archives/category/docker.html">Docker (4)</a>
+    <a href="/archives/category/docker.html">Docker (6)</a>
   </li>
 </ul>
 
