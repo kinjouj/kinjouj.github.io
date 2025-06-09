@@ -94,16 +94,34 @@ saslauthdの設定
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#saslauthd">saslauthdの設定</a>
+</li>
+<li>
+<a href="#part-3e3ae462565438e0">証明書設定</a>
+</li>
+<li>
+<a href="#part-1fdef45f7c9f7dd7">プロトコルタイプを設定</a>
+</li>
+<li>
+<a href="#op25b">OP25Bの設定</a>
+</li>
+<li>
+<a href="#postfix">postfix本体の設定</a>
+</li>
+</ul>
+-->
                 <p>PostfixでSMTP/SMTPSを構築してみる。認証システムはsaslauthdを使用する</p>
-<h4>saslauthdの設定</h4>
+<h4 id="saslauthd">saslauthdの設定</h4>
 <p>/usr/lib/sasl2/smtpd.confを設定</p><pre class="line-numbers"><code class="language-conf">pwcheck_method: auxprop
 auxprop_plugin: sasldb
 mech_list: cram-md5 plain login
 </code></pre><p>設定後、saslauthdのサービスを起動</p>
-<h4>証明書設定</h4>
+<h4 id="part-3e3ae462565438e0">証明書設定</h4>
 <p>SMTP over SSLで使用する証明書を生成する</p><pre class="line-numbers"><code class="language-bash">openssl req -new -nodes -x509 -keyout server.key -out server.crt -days 365
 </code></pre>
-<h4>プロトコルタイプを設定</h4>
+<h4 id="part-1fdef45f7c9f7dd7">プロトコルタイプを設定</h4>
 <p>/etc/postfix/master.cfに以下のように設定を行う</p><pre class="line-numbers"><code class="language-"># SMTPのタイプ設定
 smtp     inet  n       -       n       -       -       smtpd
 
@@ -112,12 +130,12 @@ smtps    inet  n       -       n       -       -       smtpd
     -o smtpd_tls_wrappermode=yes
     -o smtpd_sasl_auth_enable=yes
 </code></pre><p>※smtpsの部分がコメントされているのでコメントを削除する</p>
-<h4>OP25Bの設定</h4>
+<h4 id="op25b">OP25Bの設定</h4>
 <p>プロバイダがOP25Bを適応している場合は設定をしてないと外部送信が許可されないので、/etc/postfix/authinfoにプ
 ロバイダのサブミッションポートを設定する</p><pre class="line-numbers"><code class="language-">[プロバイダのサーバー名]:587
 </code></pre><p>場合によっては契約IDが必要になる。その場合は以下のように</p><pre class="line-numbers"><code class="language-">[プロバイダのサーバー名]:587 契約ID:パスワード
 </code></pre><p>更にmain.cfにもrelayhostを設定する</p>
-<h4>postfix本体の設定</h4>
+<h4 id="postfix">postfix本体の設定</h4>
 <p>/etc/postfix/main.cfを設定。基本設定するもののみ記述</p><pre class="line-numbers"><code class="language-postfix"># ドメイン名関連の設定
 myhostname = hoge.com
 mydomain = hoge.com

@@ -94,10 +94,25 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#sampleapplication-java">SampleApplication.java</a>
+</li>
+<li>
+<a href="#oauth-java">OAuth.java</a>
+</li>
+<li>
+<a href="#api-java">API.java</a>
+</li>
+<li>
+<a href="#ruby">余談: Rubyでクライアント書いてアクセスしてみる</a>
+</li>
+</ul>
+-->
                 <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/security.html#d0e11010">https://jersey.java.net/documentation/latest/security.html#d0e11010</a></p><p>参考: <a href="https://github.com/jersey/jersey/blob/master/tests/e2e/src/test/java/org/glassfish/jersey/tests/e2e/oauth/OAuthClientServerTest.java">https://github.com/jersey/jersey/blob/master/tests/e2e/src/test/java/org/glassfish/jersey/tests/e2e/oauth/OAuthClientServerTest.java</a></p><p>※暫定なので大幅修正する可能性あり</p><p>org.glassfish.jersey.securityのoaut1-serverパッケージを使えばOAuth1Providerが使えるようになる模様。っていう事でやってみた</p>
 <!--more-->
 <p>※事前にorg.glassfish.jersey.security:oauth1-serverな依存性参照をしておく</p><p>※基本的に上記のサンプルコードを参考にしているので実用的では無いと思われる</p>
-<h4>SampleApplication.java</h4>
+<h4 id="sampleapplication-java">SampleApplication.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -158,7 +173,7 @@ public class SampleApplication extends ResourceConfig {
 <li>/access_tokenにてAPIにアクセスするのに必要なアクセストークンを取得</li>
 </ul>
 <p>というようなフローが必要なのだけど、上記のOAuth1ServerFeatureのコンストラクタで指定している引数で、そのURLのパスを指定出来る。なのでリクエストトークンを取得する場合には/[コンテキストルート]/resources/oauth/reuqest_tokenっていうような形になる。authorizeに関しては自身で実装する必要があるので(これは後記するので)</p>
-<h4>OAuth.java</h4>
+<h4 id="oauth-java">OAuth.java</h4>
 <p>/authorizeでリクエストトークンから認可する際に当たる検証コードを出力するだけのリソースアクションを定義する</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
@@ -207,7 +222,7 @@ public class OAuth {
     }
 }
 </code></pre><p>authorizeする際にユーザーを特定するには、そこをsecurity-constraint等によって保護してアクセスする人を特定した後にauthorizeする必要がある。あとはコメントで書いてる通り</p>
-<h4>API.java</h4>
+<h4 id="api-java">API.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.annotation.security.RolesAllowed;
@@ -227,7 +242,7 @@ public class API {
     }
 }
 </code></pre><p>っていう感じでやれば、OAuthリクエストを認可されアクセストークンを使ってRolesAllowedされたリソースにもアクセスする事が可能になる。</p><p>上記のOAuth.javaにはちょろっと書いてるけど、@TokenResourceっていうアノテーションを使うとOAuth1ServerFilterによってOAuthアクセストークンを利用した保護領域へのアクセスに対してユーザー処理等が行われない。その為、このリソースクラスのメソッドに@TokenResourceを使ってしまうとOAuthによるユーザー処理されずに認証できない状態になるのでHTTP/403エラーとなる</p><p>まぁざっくりとした使い方はこんな感じなんだけど、DefaultOAuth1Providerの実装自体がアクセストークンをインスタンスによる管理が行われる為にサーバーを再起動したりすると既に発行されているアクセストークンを利用してもアクセス出来なくなると思われる。なのでがっつりやるのであればOAuth1Providerインターフェースを実装したクラスでもって処理する必要があるのではないかと</p><p>んまぁテストケースに関しては一番上の参考のリンク先がテストケースになっているのでテスト書いたりする際にはそれを参考にすれば良いのではないかと</p>
-<h4>余談: Rubyでクライアント書いてアクセスしてみる</h4>
+<h4 id="ruby">余談: Rubyでクライアント書いてアクセスしてみる</h4>
 <pre class="line-numbers"><code class="language-ruby">require 'oauth'
 
 consumer = OAuth::Consumer.new(

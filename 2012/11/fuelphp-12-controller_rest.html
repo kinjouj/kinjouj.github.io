@@ -99,10 +99,25 @@ class" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#fuel-app-classes-controller-sample-php">fuel/app/classes/controller/sample.php</a>
+</li>
+<li>
+<a href="#fuel-app-views-sample-index-php">fuel/app/views/sample/index.php</a>
+</li>
+<li>
+<a href="#fuel-app-tests-controller-sample_test-php">fuel/app/tests/controller/sample_test.php</a>
+</li>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+</ul>
+-->
                 <p>Restfulサポートなコントローラー機構なController_Restを使ってみる。</p>
 <!--more-->
 
-<h4>fuel/app/classes/controller/sample.php</h4>
+<h4 id="fuel-app-classes-controller-sample-php">fuel/app/classes/controller/sample.php</h4>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Sample extends Controller_Rest {
@@ -165,7 +180,7 @@ if ( ! $response instanceof Response) {
 return parent::after($response);
 }
 </code></pre><p>となっているけど、アクションから返した値がResponse型じゃない場合には$this-&gt;responseをレスポンスとして置き換えて返すような仕組みになっている。でもし、return View::forgeしたとしても$this-&gt;responseは(恐らくは)nullにしかならない。なのでもしHTMLなビューを返す場合にはView::forgeした値をResponse::forgeしておく必要があるんじゃないかと</p>
-<h4>fuel/app/views/sample/index.php</h4>
+<h4 id="fuel-app-views-sample-index-php">fuel/app/views/sample/index.php</h4>
 <pre class="line-numbers"><code class="language-html">&lt;html&gt;
 &lt;body&gt;
 &lt;script type="text/javascript"&gt;
@@ -187,7 +202,7 @@ xhr.send();
 &lt;/body&gt;
 &lt;/html&gt;
 </code></pre><p>今回の場合get_listが発生するURLに直接アクセスしても、HTMLフォーマットは許容しない(HttpNotFoundExceptionをスローするようにしている)ので、XMLHttpRequest等でも同様にAcceptヘッダーを設定しないと404にしかならない。実際的にはHTMLも許容するけど、JSONを要求する場合とはレスポンス形式を変えるっていうのが良いのも知れないですけど</p><p>まぁという感じで、Ajax等で利用するデータ等を自動でエンコードしてくれたりする。んで出てくるのがこれどうやってテストやるのかって話</p>
-<h4>fuel/app/tests/controller/sample_test.php</h4>
+<h4 id="fuel-app-tests-controller-sample_test-php">fuel/app/tests/controller/sample_test.php</h4>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Controller_Sample extends TestCase {
@@ -210,7 +225,7 @@ class Test_Controller_Sample extends TestCase {
     }
 }
 </code></pre><p>indexな所のテストは省略。Request_Curlドライバを使ってテストをする。でresponse_infoメソッドを使えばレスポンスヘッダー類なデータが取得できるので、それを利用してレスポンスヘッダーが正しいかを検証する事も可能</p><p>あとset_mime_typeで取得するフォーマット方式を変えたり出来るのでそれを用いてテストする。今回の場合指定しなかったら404になるのでこのテストはfailする</p><p>っていう感じっぽいっすね。微妙に雑に書きましたけど</p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 <p>書くの忘れてましたが、fuel/app/config/rest.phpに</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(

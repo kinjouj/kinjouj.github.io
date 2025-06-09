@@ -93,10 +93,25 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#sampleview-java">SampleView.java</a>
+</li>
+<li>
+<a href="#spring-web-servlet-xml">spring-web-servlet.xml</a>
+</li>
+<li>
+<a href="#web-inf-views-xml">/WEB-INF/views.xml</a>
+</li>
+<li>
+<a href="#samplecontrollertest-java">SampleControllerTest.java</a>
+</li>
+</ul>
+-->
                 <p>前回の<a href="/spring-webmvc-3-result-reponse-type.html">Spring WebMVCをやってみる (3) – 返せるレスポンスタイプに関して -</a>でも書いたように、レスポンスを返す型としてView型を返す事も出来る。又、ModelAndViewにsetViewNameを利用する事でも独自のViewを使ってレスポンスを返却させる事が出来る。という事で使ってみた</p>
 <!--more-->
 
-<h4>SampleView.java</h4>
+<h4 id="sampleview-java">SampleView.java</h4>
 <p>jsonpullparserを使ってJSONを出力するだけな事やってみる</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Map;
@@ -165,7 +180,7 @@ public class SampleController {
     }
 }
 </code></pre><p>上記でも書いたようにModelAndView#setViewNameを利用してレスポンスを返却するのに使うビューを指定する事も出来る。但しこれを利用するには別途な設定が必要になる</p>
-<h4>spring-web-servlet.xml</h4>
+<h4 id="spring-web-servlet-xml">spring-web-servlet.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -208,7 +223,7 @@ public class SampleController {
 Note: When chaining ViewResolvers, an InternalResourceViewResolver always needs to be last, as it will attempt to resolve any view name, no matter whether the underlying resource actually exists.
 </blockquote>
 <p>というようにInternalResourceViewResolverを使うのであれば必ず最後に定義する事?的な感じなんじゃないのかなーと。でそれを意識せずに設定を行った場合だと、InternalResourceViewResolverでsetViewNameしてもそこで処理されて実際に要求しているViewResolverには作用しない事になる模様</p><p>んまぁそこは注意っすねって事で。んでXmlViewResolverな設定ファイル(/WEB-INF/views.xml)が必要なのでこれも作る</p>
-<h4>/WEB-INF/views.xml</h4>
+<h4 id="web-inf-views-xml">/WEB-INF/views.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;beans
     xmlns="http://www.springframework.org/schema/beans"
@@ -219,7 +234,7 @@ Note: When chaining ViewResolvers, an InternalResourceViewResolver always needs 
 
 &lt;/beans&gt;
 </code></pre><p>&lt;bean name=&quot;&quot;&gt;で指定してやりゃ良い。そこに指定されたのがViewNameになる模様</p><p>んまぁあとはテスト書けば良いか</p>
-<h4>SampleControllerTest.java</h4>
+<h4 id="samplecontrollertest-java">SampleControllerTest.java</h4>
 <pre class="line-numbers"><code class="language-java">package swmvc;
 
 import org.junit.Test;

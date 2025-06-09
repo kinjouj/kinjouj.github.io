@@ -96,10 +96,28 @@ pom." />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#pom-xml">pom.xml</a>
+</li>
+<li>
+<a href="#src-main-java-sample-samplemapper-java">src/main/java/sample/SampleMapper.java</a>
+</li>
+<li>
+<a href="#src-main-java-sample-samplereducer-java">src/main/java/sample/SampleReducer.java</a>
+</li>
+<li>
+<a href="#src-test-java-samplehadooptestcase-java">src/test/java/SampleHadoopTestCase.java</a>
+</li>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+</ul>
+-->
                 <p>Hadoop MapReduceのテストを書く方法としてMRUnitっていうのがあるのを以前から知ってて、だけどまったく検証する気配が無いのでやってみた。但し、相変わらずMaven2を使う</p>
 <!--more-->
 
-<h4>pom.xml</h4>
+<h4 id="pom-xml">pom.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;project
     xmlns="http://maven.apache.org/POM/4.0.0"
@@ -141,7 +159,7 @@ pom." />
     &lt;/dependencies&gt;
 &lt;/project&gt;
 </code></pre><p>なぜかmvnrepositoryにはMRUnitの0.9.0-incubatingが上がってる模様げなのに、それを指定すると取得できないという罠に若干ハマったのでバージョンをひとつ下げました</p><p>これに書いてある通り使用するHadoopのバージョンは0.20.205</p>
-<h4>src/main/java/sample/SampleMapper.java</h4>
+<h4 id="src-main-java-sample-samplemapper-java">src/main/java/sample/SampleMapper.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
@@ -173,7 +191,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
     }
 }
 </code></pre>
-<h4>src/main/java/sample/SampleReducer.java</h4>
+<h4 id="src-main-java-sample-samplereducer-java">src/main/java/sample/SampleReducer.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
@@ -201,7 +219,7 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, Text, IntWritab
     }
 }
 </code></pre>
-<h4>src/test/java/SampleHadoopTestCase.java</h4>
+<h4 id="src-test-java-samplehadooptestcase-java">src/test/java/SampleHadoopTestCase.java</h4>
 <p>で上記で書いたMapperとReducerを単一でもテストしつつMapReduceで処理した場合のテストを行なってみる</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
@@ -275,7 +293,7 @@ public class SampleHadoopTestCase {
 }
 </code></pre><p>ってな感じで、MapperをテストするならMapDriver、ReducerをテストするならReduceDriver、MapperとReducerを流してMapReduceとして?テストするならMapReduceDriver(他にもPipelineMapReduceDriverとかもあるらしい)</p><p>でそれに対して、withInputで入力データをやってあげて、withOutputでそれのContext.writeなどから流れるのをテスト出来るっていう仕組みっぽい。であとは</p><pre class="line-numbers"><code class="language-sh">mvn test
 </code></pre><p>参考: <a href="https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial">https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial</a></p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 <p>MavenでMRUnit-0.9.0-incubatingを使う場合には</p><pre class="line-numbers"><code class="language-xml">&lt;dependency&gt;
   &lt;groupId&gt;org.apache.mrunit&lt;/groupId&gt;
   &lt;artifactId&gt;mrunit&lt;/artifactId&gt;

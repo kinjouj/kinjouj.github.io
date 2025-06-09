@@ -95,13 +95,37 @@ HBase Master: ホスト名 test1 (192" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-e7a07b10da8bbb7d">サーバー情報</a>
+</li>
+<li>
+<a href="#hbase-site-xml">hbase-site.xmlを設定(マスター側)</a>
+</li>
+<li>
+<a href="#regionserver">regionserverを作成(マスター側)</a>
+</li>
+<li>
+<a href="#hbase-site-xml">hbase-site.xmlを作成(スレーブ側)</a>
+</li>
+<li>
+<a href="#part-2b9f928720731e29">動作確認</a>
+</li>
+<li>
+<a href="#part-cdf09cff8a2dc207">マスター側</a>
+</li>
+<li>
+<a href="#part-4312b531040527cd">スレーブ側</a>
+</li>
+</ul>
+-->
                 <p>HBaseをクラスタ構成で構築してみる</p>
-<h4>サーバー情報</h4>
+<h4 id="part-e7a07b10da8bbb7d">サーバー情報</h4>
 <pre class="line-numbers"><code class="language-">Hadoop HDFSサーバー: ホスト名 dfserver (192.168.1.1)
 HBase Master: ホスト名 test1 (192.168.1.2)
 HBase Slave: ホスト名 test2 (192.168.1.3)
 </code></pre><p>上記のホスト名の設定をHBase関連サーバーに行っておく。又、HDFSサーバーは外部からアクセスできるようにバインドするアドレス及びポート開放を行っておく</p>
-<h4>hbase-site.xmlを設定(マスター側)</h4>
+<h4 id="hbase-site-xml">hbase-site.xmlを設定(マスター側)</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;configuration&gt;
     &lt;property&gt;
         &lt;name&gt;hbase.rootdir&lt;/name&gt;
@@ -117,11 +141,11 @@ HBase Slave: ホスト名 test2 (192.168.1.3)
     &lt;/property&gt;
 &lt;/configuration&gt;
 </code></pre><p>hbase.zookeeper.quorumを指定しておかないとzookeeperのポートが開放されないので必ず指定する。これにはregionserverで管理するサーバーを指定する</p>
-<h4>regionserverを作成(マスター側)</h4>
+<h4 id="regionserver">regionserverを作成(マスター側)</h4>
 <pre class="line-numbers"><code class="language-">192.168.1.2
 192.168.1.3
 </code></pre><p>マスター及びスレーブサーバーのIPを列挙しておく。この設定はマスター側のみで行う</p>
-<h4>hbase-site.xmlを作成(スレーブ側)</h4>
+<h4 id="hbase-site-xml">hbase-site.xmlを作成(スレーブ側)</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;configuration&gt;
     &lt;property&gt;
         &lt;name&gt;hbase.rootdir&lt;/name&gt;
@@ -133,14 +157,14 @@ HBase Slave: ホスト名 test2 (192.168.1.3)
     &lt;/property&gt;
 &lt;/configuration&gt;
 </code></pre>
-<h4>動作確認</h4>
+<h4 id="part-2b9f928720731e29">動作確認</h4>
 <p>マスターサーバー側でHBaseを起動すると指定したHDFSにディレクトリが作成され、マスター・スレーブサーバーに必要なサーバーアプリケーションが起動される。jpsコマンドで確認すると</p>
-<h4>マスター側</h4>
+<h4 id="part-cdf09cff8a2dc207">マスター側</h4>
 <pre class="line-numbers"><code class="language-">HMaster
 HRegionServer
 HQuorumPeer
 </code></pre>
-<h4>スレーブ側</h4>
+<h4 id="part-4312b531040527cd">スレーブ側</h4>
 <pre class="line-numbers"><code class="language-">HRegionServer
 HQuorumPeer
 </code></pre><p>というようになっているのを確認する。その後、マスターサーバー側でhbase shellで</p><pre class="line-numbers"><code class="language-">create "smaples","score"

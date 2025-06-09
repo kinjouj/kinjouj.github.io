@@ -93,10 +93,25 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-6542c7faa86">構造</a>
+</li>
+<li>
+<a href="#res-layout-list_fragment_layout-xml">res/layout/list_fragment_layout.xml</a>
+</li>
+<li>
+<a href="#mainlistfragment-java">MainListFragment.java</a>
+</li>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+</ul>
+-->
                 <p>まぁ要はListViewの末尾に達したら新しいデータをロードする等の仕組みを提供する機能的なやつ。Android PullToRefreshにはそういう機能があったけど、何回かふれているけどActionBar PullToRefreshを使うべきという形になっているので、それっぽい機能をどうするかって所なんですが</p><p>調べた所によると、<a href="https://github.com/shontauro/android-pulltorefresh-and-loadmore">LoadMoreListView</a>っていうのを利用する事で出来るっぽい。という事で使ってみた</p>
 <!--more-->
 
-<h4>構造</h4>
+<h4 id="part-6542c7faa86">構造</h4>
 
 <pre>
 ├── app
@@ -126,7 +141,7 @@
 └── settings.gradle
 </pre>
 <p>pulltorefresh-and-loadmoreなやつは内容を省略してますが、要はgradle-android-toolkitベースなプロジェクトで利用する。恐らくはEclipseなプロジェクトだとライブラリプロジェクトをインポートすりゃ良さそうな気がする</p><p>まぁ見て分かるようにListFragmentがあるんだけれども、pulltorefresh-and-loadmoreのListView実装を使う必要があるのでレイアウトを定義しなきゃならん。activity_mainなレイアウトはただ<fragment>しているだけなので(ry</p>
-<h4>res/layout/list_fragment_layout.xml</h4>
+<h4 id="res-layout-list_fragment_layout-xml">res/layout/list_fragment_layout.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -140,7 +155,7 @@
 
 &lt;/LinearLayout&gt;
 </code></pre><p>android:id/emptyは省略してますが(ry android.R.id.listで参照できるやつをLoadMoreListViewを使うようにするだけ</p>
-<h4>MainListFragment.java</h4>
+<h4 id="mainlistfragment-java">MainListFragment.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.os.Bundle;
@@ -204,7 +219,7 @@ public class MainListFragment extends SherlockListFragment {
     }
 }
 </code></pre><p>っていう感じで、ListViewのデータ終端に達したらLoadMoreListView.OnLoadMoreListener#onLoadMoreが発生するのでそこでデータをロードする処理を実装すりゃ良いってだけ</p><p>でお馴染み動作動画用意しました</p><p>{% youtube Zl-hlqMvdig %}</p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 <p>LoadMoreListViewが生成するフッターなProgressなレイアウトを修正したりしたいのであれば、res/layout/load_more_footer.xmlを作って修正なりすれば良い模様。ちなみにデフォルトでは以下のようになっている模様</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/load_more_footer"

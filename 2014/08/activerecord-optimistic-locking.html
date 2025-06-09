@@ -93,10 +93,31 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#app-controllers-entries_controller-rb">app/controllers/entries_controller.rb</a>
+</li>
+<li>
+<a href="#app-views-entries-show-erb">app/views/entries/show.erb</a>
+</li>
+<li>
+<a href="#app-views-entries-edit-erb">app/views/entries/edit.erb</a>
+</li>
+<li>
+<a href="#entry">Entryモデルのマイグレーションを修正</a>
+</li>
+<li>
+<a href="#app-controllers-entries_controller-rb">app/controllers/entries_controller.rbを修正</a>
+</li>
+<li>
+<a href="#app-views-entries-edit-erb">app/views/entries/edit.erbを修正</a>
+</li>
+</ul>
+-->
                 <p>参考: <a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html">http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html</a></p><p>Rails(っていうかActiveRecord)での楽観的ロックを使う場合のドキュメント見ながらやってみた</p><p>とりあえず実検証でのアプリケーションを作る必要があるので(ry</p>
 <!--more-->
 
-<h4>app/controllers/entries_controller.rb</h4>
+<h4 id="app-controllers-entries_controller-rb">app/controllers/entries_controller.rb</h4>
 <pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
   def show
     @entries = Entry.all
@@ -115,19 +136,19 @@
   end
 end
 </code></pre>
-<h4>app/views/entries/show.erb</h4>
+<h4 id="app-views-entries-show-erb">app/views/entries/show.erb</h4>
 <pre class="line-numbers"><code class="language-erb">&lt;% @entries.each do |sample| %&gt;
     &lt;%= link_to sample.name, { :action =&gt; "edit", :id =&gt; sample.id } %&gt;
 &lt;% end %&gt;
 </code></pre>
-<h4>app/views/entries/edit.erb</h4>
+<h4 id="app-views-entries-edit-erb">app/views/entries/edit.erb</h4>
 <pre class="line-numbers"><code class="language-erb">&lt;%= form_for @entry do |f| %&gt;
   &lt;%= f.hidden_field :id %&gt;
   &lt;%= f.text_field :name  %&gt;
   &lt;%= f.submit "update" %&gt;
 &lt;% end %&gt;
 </code></pre><p>な感じで作ったとして、/entry/editに複数からアクセスしてアップデート処理を行った場合、一方が処理したのを他でアップデートされてデータが破壊されるっていうオチになる</p><p>でそういう風にならないようにデータをロックするなりで一方がアップデートして他が同時にアップデートしようとしたような場合にはエラーが起こるように出来る</p>
-<h4>Entryモデルのマイグレーションを修正</h4>
+<h4 id="entry">Entryモデルのマイグレーションを修正</h4>
 <pre class="line-numbers"><code class="language-rb">class CreateEntries &lt; ActiveRecord::Migration
   def change
     create_table :entries do |t|
@@ -141,7 +162,7 @@ end
   self.locking_column = "lock_entry"
 end
 </code></pre><p>のようにlocking_columnでロックに使用するカラムを指定出来る。だから別にlock_versionじゃなきゃダメっていうわけでもない模様</p><p>これやれば良いだけのとちょっとアプリケーション自体を修正する必要もある</p>
-<h4>app/controllers/entries_controller.rbを修正</h4>
+<h4 id="app-controllers-entries_controller-rb">app/controllers/entries_controller.rbを修正</h4>
 <pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
   def show
     @entries = Entry.all
@@ -161,7 +182,7 @@ end
   end
 end
 </code></pre>
-<h4>app/views/entries/edit.erbを修正</h4>
+<h4 id="app-views-entries-edit-erb">app/views/entries/edit.erbを修正</h4>
 <pre class="line-numbers"><code class="language-erb">&lt;%= form_for @entry do |f| %&gt;
   &lt;%= f.hidden_field :id %&gt;
 

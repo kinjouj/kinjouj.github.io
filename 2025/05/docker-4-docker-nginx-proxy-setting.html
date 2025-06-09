@@ -98,8 +98,26 @@ ht" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#server-a-nginx-conf">Server A(nginx.conf)</a>
+</li>
+<li>
+<a href="#server-b-nginx-conf">Server B(nginx.conf)</a>
+</li>
+<li>
+<a href="#part-1b83cd93fdd5bfa6">アクセスログ</a>
+</li>
+<li>
+<a href="#server-a-nginx-conf">Server A/nginx.conf</a>
+</li>
+<li>
+<a href="#server-b-nginx-conf">Server B/nginx.conf</a>
+</li>
+</ul>
+-->
                 <p>Docker環境下でフロント部のリバースプロキシサーバーとコンテンツなどを配信するサーバーの構築した場合とする。設定は以下のように</p>
-<h4>Server A(nginx.conf)</h4>
+<h4 id="server-a-nginx-conf">Server A(nginx.conf)</h4>
 <pre class="line-numbers"><code class="language-nginx">events {
 }
 
@@ -113,7 +131,7 @@ http {
     }
 }
 </code></pre>
-<h4>Server B(nginx.conf)</h4>
+<h4 id="server-b-nginx-conf">Server B(nginx.conf)</h4>
 <pre class="line-numbers"><code class="language-nginx">events {}
 
 http {
@@ -125,7 +143,7 @@ http {
     }
 }
 </code></pre><p>Dockerfileはほぼ共通でnginx.confを各サーバーに設定するだけなので省略。ではこれでアクセスしてみると</p>
-<h4>アクセスログ</h4>
+<h4 id="part-1b83cd93fdd5bfa6">アクセスログ</h4>
 <pre class="line-numbers"><code class="language-">192.168.1.10 - - [28/May/2025:15:27:24 +0000] "GET / HTTP/1.1" 200 2 "-" "curl/8.5.0"
 </code></pre><p>※192.168.1.10はクライアント側のIP</p><p>Server Aはフロントのリバースプロキシサーバー側なので問題無いがServer B側では</p><pre class="line-numbers"><code class="language-">172.16.0.3 - - [28/May/2025:15:27:24 +0000] "GET / HTTP/1.0" 200 2 "-" "curl/8.5.0"
 </code></pre><p>※172.16.0.3はServer A側のIP</p><p>Server B側でも正しくクライアント側のIPのアクセスログが欲しいはずなので以下のような設定を行う</p>
@@ -134,7 +152,7 @@ http {
 <li><p>set<em>real</em>ip<em>from/real</em>ip_headerの設定を行う</p></li>
 </ol>
 
-<h4>Server A/nginx.conf</h4>
+<h4 id="server-a-nginx-conf">Server A/nginx.conf</h4>
 <pre class="line-numbers"><code class="language-nginx">events {
 }
 
@@ -149,7 +167,7 @@ http {
     }
 }
 </code></pre>
-<h4>Server B/nginx.conf</h4>
+<h4 id="server-b-nginx-conf">Server B/nginx.conf</h4>
 <pre class="line-numbers"><code class="language-nginx">events {}
 
 http {

@@ -99,10 +99,28 @@ manifest.json
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#manifest-json">manifest.json</a>
+</li>
+<li>
+<a href="#background-html">background.html</a>
+</li>
+<li>
+<a href="#popup-html">popup.html</a>
+</li>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+<li>
+<a href="#part-4ef300216763881f">追記 (訂正に関して)</a>
+</li>
+</ul>
+-->
                 <p>chrome.extension.onRequestとchrome.extension.sendRequestを使って見る</p>
 <!--more-->
 
-<h4>manifest.json</h4>
+<h4 id="manifest-json">manifest.json</h4>
 <pre class="line-numbers"><code class="language-json">{
   "name": "test",
   "description": "test",
@@ -115,7 +133,7 @@ manifest.json
   }
 }
 </code></pre>
-<h4>background.html</h4>
+<h4 id="background-html">background.html</h4>
 <pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
     &lt;script type="text/javascript"&gt;
@@ -136,7 +154,7 @@ manifest.json
 <li>  resはsendRequestで指定した第3引数のコールバックが指定されるっぽい。sendRequestで指定しなかったらundefinedになる模様 (追記にて訂正)</li>
 </ul>
 
-<h4>popup.html</h4>
+<h4 id="popup-html">popup.html</h4>
 <pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
     &lt;button onclick="send()"&gt;send&lt;/button&gt;
@@ -150,9 +168,9 @@ function send() {
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre><p>backgroud.html部でも書いた通りだけど、エクステンションIDな引数は省略している。なので今回のは同一の拡張でのやり取りになる模様</p><p>でコールバックな引数を指定しているのでbackground.htmlでのresな部分はこのコールバックが渡される。なのでこれボタンをクリックするとbackground.html側ではtoUpperCaseをされた結果がこのコールバックに返ってくる。それをalertしてるだけ</p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 <p>若干気になったのはBackground Page側でsetTimeoutしといて、その間にBrowser Actionなpopupを閉じているとBackground PageからsendRequest元へのコールバックによる返還がfailしているような気がする。なんかWebWorkerが云々な感じがするんだけれども</p>
-<h4>追記 (訂正に関して)</h4>
+<h4 id="part-4ef300216763881f">追記 (訂正に関して)</h4>
 <p>chrome.extension.onRequest等の第3引数はコールバックと明記しましたが、実際にはコールバックはPortを介してコールバックされるようです</p><p><a href="https://groups.google.com/group/chrome-api-developers-jp/browse_thread/thread/80b45919bb86f9a0">https://groups.google.com/group/chrome-api-developers-jp/browse_thread/thread/80b45919bb86f9a0</a></p><p>にて議論がありますが、恐らくはonRequestでも同様かと思われる。でMLでも言われてますが、setTimeoutをする場合にはreturn trueをしないとPortな部分は開放されている為に、そのまま実行しようとするとエラーになる模様です</p>
               </div>
             </div>

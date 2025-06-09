@@ -97,6 +97,31 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#app-models-category-rb">app/models/category.rb</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#category-id-15-name-parent-0-sort-8>">&lt;Category id: 15, name: "その他", parent: 0, sort: 8></a>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<a href="#app-models-entry-rb">app/models/entry.rb</a>
+</li>
+<li>
+<a href="#app-controllers-entry_controller-rb">app/controllers/entry_controller.rb</a>
+</li>
+</ul>
+-->
                 <p>色々演習的な事やってみようかと、とりあえずCSRFだとかヴァリデーターとかは今回はノータッチで</p>
 <!--more-->
 <p>仕様は</p><p><img src="/images/2012/01/20120531134010.png" alt="image" /></p><p>な感じなのを作成したり削除したり更新したり等をやってみるのだけど、チェックポイントとして</p>
@@ -105,7 +130,7 @@
 <li>更新時に中間参照を再構築する</li>
 </ul>
 <p>ビュー的な所はかかないけど</p><p><img src="/images/2013/04/20130423111524.jpg" alt="image" /></p><p>んな感じで</p>
-<h4>app/models/category.rb</h4>
+<h4 id="app-models-category-rb">app/models/category.rb</h4>
 <pre class="line-numbers"><code class="language-rb">class Category &lt; ActiveRecord::Base
   has_and_belongs_to_many :entry, :join_table =&gt; "entry_category"
   has_many :sub_category, :class_name =&gt; "Category", :foreign_key =&gt; "parent"
@@ -131,7 +156,7 @@ end
 #&lt;Category id: 15, name: "その他", parent: 0, sort: 8>
 </pre>
 <p>というように親カテゴリの参照が取れる。無ければnil</p><p>まぁ今回そこまったく使ってないのであくまで余談的なネタとして</p>
-<h4>app/models/entry.rb</h4>
+<h4 id="app-models-entry-rb">app/models/entry.rb</h4>
 <pre class="line-numbers"><code class="language-rb">class Entry &lt; ActiveRecord::Base
   has_and_belongs_to_many :category, :join_table =&gt; "entry_category"
   default_scope :order =&gt; "created_at DESC"
@@ -158,7 +183,7 @@ end
     end
 end
 </code></pre><p>categoryに代入な辺りで文字列をカンマ区切りでスプリットして、それからCategoryな参照を取得する処理を突っ込む。で更新する際に再構築しないと重複する部分が出てきてしまうので、clearする事で中間参照なデータを消せる模様。それを利用して、削除する際にも中間参照なデータをclearで消すっていう感じかと</p>
-<h4>app/controllers/entry_controller.rb</h4>
+<h4 id="app-controllers-entry_controller-rb">app/controllers/entry_controller.rb</h4>
 <pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
 
   def index

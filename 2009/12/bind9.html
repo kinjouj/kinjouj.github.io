@@ -95,8 +95,35 @@ options {
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#etc-named-conf">/etc/named.confを作成</a>
+</li>
+<li>
+<a href="#rndc-key">rndc.keyを作成</a>
+</li>
+<li>
+<a href="#named-ca">named.caを作成</a>
+</li>
+<li>
+<a href="#localhost-zone">localhost.zoneを作成</a>
+</li>
+<li>
+<a href="#localhost-rev-zone">localhost-rev.zoneを作成</a>
+</li>
+<li>
+<a href="#3brains-zone">3brains.zone</a>
+</li>
+<li>
+<a href="#3brains-rev-zone">3brains-rev.zoneを作成</a>
+</li>
+<li>
+<a href="#etc-resolv-conf">/etc/resolv.confを設定</a>
+</li>
+</ul>
+-->
                 <p>bind9(+chroot)でDNSサーバーを構築してみる</p><p>※サーバーのIPは192.168.1.10と定義</p>
-<h4>/etc/named.confを作成</h4>
+<h4 id="etc-named-conf">/etc/named.confを作成</h4>
 <pre class="line-numbers"><code class="language-conf">options {
     directory "/var/named";
     dump-file "/var/named/data/cache.db";
@@ -143,13 +170,13 @@ zone "1.168.192.in-addr.arpa" IN {
 
 include "rndc.key";
 </code></pre><p>以上のファイルを作成していく</p>
-<h4>rndc.keyを作成</h4>
+<h4 id="rndc-key">rndc.keyを作成</h4>
 <pre class="line-numbers"><code class="language-">rndc-confgen &gt; /etc/rndc.key
 </code></pre>
-<h4>named.caを作成</h4>
+<h4 id="named-ca">named.caを作成</h4>
 <pre class="line-numbers"><code class="language-">dig @a.root-servers.net . ns &gt; /var/named/named.ca
 </code></pre>
-<h4>localhost.zoneを作成</h4>
+<h4 id="localhost-zone">localhost.zoneを作成</h4>
 <p>ローカルネットワーク?の正引きゾーン</p><pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    localhost.    postmaster.3brains.net. (
     20080720 ;
@@ -161,7 +188,7 @@ include "rndc.key";
     IN    NS    @
     IN    A      127.0.0.1
 </code></pre>
-<h4>localhost-rev.zoneを作成</h4>
+<h4 id="localhost-rev-zone">localhost-rev.zoneを作成</h4>
 <p>ローカルネットワークの逆引きゾーン</p><pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    localhost.    postmaster.3brains.net. (
     20080720 ;
@@ -173,7 +200,7 @@ include "rndc.key";
     IN    NS    localhost.
 1   IN    PTR   localhost.
 </code></pre>
-<h4>3brains.zone</h4>
+<h4 id="3brains-zone">3brains.zone</h4>
 <p>3brains.netドメインの正引きゾーン</p><pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    3brains.net.    postmaster.3brains.net. (
     20080720 ;
@@ -187,7 +214,7 @@ include "rndc.key";
 ns1      IN    A      192.168.1.10
          IN    MX    10    mail.3brains.net.
 </code></pre><p>サブドメインを利用する場合はAレコードとして定義しておくこと</p>
-<h4>3brains-rev.zoneを作成</h4>
+<h4 id="3brains-rev-zone">3brains-rev.zoneを作成</h4>
 <p>3brains.netの逆引きゾーン</p><pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    3brains.net.    postmaster.3brains.net. (
     20080720 ;
@@ -199,7 +226,7 @@ ns1      IN    A      192.168.1.10
       IN    NS    3brains.net.
 10    IN    PTR    3brains.net.
 </code></pre>
-<h4>/etc/resolv.confを設定</h4>
+<h4 id="etc-resolv-conf">/etc/resolv.confを設定</h4>
 <pre class="line-numbers"><code class="language-">nameserver 192.168.1.10
 </code></pre><p>終わり。サーバーを起動しエラーが出ていない事をチェック。その後外部からドメインがちゃんと引けるかチェック</p>
               </div>

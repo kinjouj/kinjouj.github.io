@@ -93,6 +93,18 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#lib-sample-rb">lib/sample.rb</a>
+</li>
+<li>
+<a href="#spec_helper-rb">spec_helper.rb</a>
+</li>
+<li>
+<a href="#sample_spec-rb">sample_spec.rb</a>
+</li>
+</ul>
+-->
                 <p>テストする時とかに、サーバーを必要とするAPIのテストする前にそのサーバーをテストランナーから起動しテストが終わったらシャットダウンするっていう工程をやったりする事があると思うのですが、それをRSpecっていうかRubyでやる方法的な事として、サーバープロセスをspawnしちゃってテスト終了時にプロセスを終了させちゃうとかっていうのを利用する事で出来る模様。という事でやってみた</p>
 <!--more-->
 <p>例題的にはMongoDBとかが分かりやすそう。んまぁ工程的には</p>
@@ -102,7 +114,7 @@
 <li>afterでmongodなプロセスを落とす</li>
 </ul>
 <p>的な感じなんなんですが、MongoDB自体のデフォルトなポート辺りは27017辺りだと思うんですが、もしかしたらこれ使っちゃってるかも知れないっていう可能性もあるので使ってないポート辺りを使って動的にサーバーを起動する。んまぁPerlで言うとTest::TCP:empty_port辺りかなと。という事も踏まえつつやるって事で</p>
-<h4>lib/sample.rb</h4>
+<h4 id="lib-sample-rb">lib/sample.rb</h4>
 <pre class="line-numbers"><code class="language-rb">require "mongo"
 
 class Sample
@@ -118,7 +130,7 @@ class Sample
   end
 end
 </code></pre><p>適当にMongoDBのコレクションからfind_oneした結果だけを取る。で接続するサーバーはENVで突っ込んだ情報を元に利用できるような感じ。以下のspec_helperでも補足しているので(ry</p>
-<h4>spec_helper.rb</h4>
+<h4 id="spec_helper-rb">spec_helper.rb</h4>
 <pre class="line-numbers"><code class="language-rb">require "socket"
 require "sample"
 
@@ -161,7 +173,7 @@ RSpec.configure do |config|
   end
 end
 </code></pre>
-<h4>sample_spec.rb</h4>
+<h4 id="sample_spec-rb">sample_spec.rb</h4>
 <pre class="line-numbers"><code class="language-rb">require "spec_helper"
 
 describe Sample do

@@ -93,10 +93,28 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-2d313cb99cd5b922">環境設定</a>
+</li>
+<li>
+<a href="#js-app-js">js/app.js</a>
+</li>
+<li>
+<a href="#js-components-echo-js">js/components/Echo.js</a>
+</li>
+<li>
+<a href="#js-components-_tests_-echo-test-js">js/components/_<em>tests</em>_/Echo-test.js</a>
+</li>
+<li>
+<a href="#part-654296b22d9">余談</a>
+</li>
+</ul>
+-->
                 <p>公式ドキュメント: <a href="https://facebook.github.io/jest/docs/tutorial-react.html">https://facebook.github.io/jest/docs/tutorial-react.html</a></p><p>参考: <a href="http://qiita.com/koba04/items/2f97904b3ca247fc1917">http://qiita.com/koba04/items/2f97904b3ca247fc1917</a></p><p>参考資料1: <a href="https://facebook.github.io/react/docs/test-utils.html">https://facebook.github.io/react/docs/test-utils.html</a></p><p>参考資料2: <a href="https://facebook.github.io/jest/docs/mock-functions.html">https://facebook.github.io/jest/docs/mock-functions.html</a></p><p>React.jsで書かれたコンポーネントをjestを使ってテストしてみる。ただそれだけ</p>
 <!--more-->
 
-<h4>環境設定</h4>
+<h4 id="part-2d313cb99cd5b922">環境設定</h4>
 <p>jest自体がnode0.8系か0.10系でしか動かない模様(node0.12系でやるとSEGVする)のでnodeのバージョンは0.10系を使う</p><p>で例のごとくpackage.jsonを設定する</p><pre class="line-numbers"><code class="language-json">{
   "name": "sample",
   "version": "0.0.1",
@@ -139,13 +157,13 @@ module.exports = {
   }
 };
 </code></pre><p>公式ドキュメントにも同様に書いてたはずなのでそのまま使う。ちなみにbabel.jsを使ってES6で書いてるようなケースの場合は普通にscriptProcessorにbabel-nodeを指定すれば良い模様(詳しくは上記参考のkoba04さんが書いてるreact-boilerplateを参照)</p><p>でunmockedModulePathPatternsはjestでテストする際にあたって読み込まれるスクリプトがまるごとモック化される模様。React.jsをモック化されても困るのでそういうのを除外する対象とするのがこの設定っぽい(自動でそういうふうにされないようにするにはjest.autoMockOffなりをテスト上でやればイケるっぽいらしい)</p><p>でこれからReactを使ったアプリケーションを作っていく</p>
-<h4>js/app.js</h4>
+<h4 id="js-app-js">js/app.js</h4>
 <pre class="line-numbers"><code class="language-js">var React = require("react"),
     Echo  = require("./components/Echo.js");
 
 React.render(&lt;Echo /&gt;, document.body);
 </code></pre><p>んまぁここは今回関係無いので省略</p>
-<h4>js/components/Echo.js</h4>
+<h4 id="js-components-echo-js">js/components/Echo.js</h4>
 <pre class="line-numbers"><code class="language-js">// AppActionCreators.sayは引数をtoUpperCaseされるだけのメソッドが定義されたオブジェクト
 
 var React             = require("react/addons"),
@@ -187,7 +205,7 @@ module.exports = Echo;
 <li>&lt;button&gt;でAppActionCreators.sayした結果をmsgに突っ込む</li>
 </ul>
 <p>的な要件なだけなのだけど、これが意図した動作になるかどうかをテストする</p>
-<h4>js/components/_<em>tests</em>_/Echo-test.js</h4>
+<h4 id="js-components-_tests_-echo-test-js">js/components/_<em>tests</em>_/Echo-test.js</h4>
 <pre class="line-numbers"><code class="language-js">"use strict";
 
 jest.dontMock("../Echo");
@@ -276,7 +294,7 @@ describe("Echo", function() {
   });
 });
 </code></pre><p>button click event testだけはテストがfailする。&lt;input&gt;にchange eventでfireしているのにも関わらず&lt;button&gt;をクリックした場合に発生するAppActionCreators.sayがモックされてAしか返さないようになっているので</p><p>んまぁjasmineベースなテストを書く事で出来る。ただ上記でも書いてるけど特定していないスクリプト等のオブジェクトは全てモック化されるので呼び出されるメソッド等に適切にreturnValue等を返すか、特定の処理をするようにする(mockImplementationとか)ような感じな事しなければならない(現在モック化されたメソッドのオリジナルをコールする方法は判明してない)</p><p>結構長ったらしく書いたけどこれでもReact.js+jestでのテストのほんの一部にしかすぎないので色々今後も使って分かった事とか色々書くと思う</p>
-<h4>余談</h4>
+<h4 id="part-654296b22d9">余談</h4>
 
 <blockquote class="twitter-tweet" lang="ja" data-twttr-rendered="true"><p>ほう &gt; モジュールの実装をテスト時に常に差し替えておきたい場合は、__mocks__を作りその中にmoduleの実装を置いておくことで可能</p>— kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/586492732924760065">2015, 4月 10</a></blockquote>
 <p>っていう事らしい。詳しくはやってみてから書く</p>

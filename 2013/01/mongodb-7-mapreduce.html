@@ -96,6 +96,24 @@ fluentdでパースされたアクセスロ" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#fluentd">fluentd側のセットアップ</a>
+</li>
+<li>
+<a href="#mongodb">MongoDB側を確認</a>
+</li>
+<li>
+<a href="#mongodb-mapreduce-api-javascript">MongoDBでMapReduce APIを使うJavaScriptを書く</a>
+</li>
+<li>
+<a href="#part-4108a8c1b1383ea7">コレクション名</a>
+</li>
+<li>
+<a href="#merge-replace">mergeとreplace</a>
+</li>
+</ul>
+-->
                 <p>MongoDBにもれなく付いてくる(笑)MapReduceを使ってみる。ただ使っても面白くないので</p>
 <ul>
 <li>fluentdを使ってnginxのアクセスログをtailする</li>
@@ -105,7 +123,7 @@ fluentdでパースされたアクセスロ" />
 <p>という流れで</p>
 <!--more-->
 
-<h4>fluentd側のセットアップ</h4>
+<h4 id="fluentd">fluentd側のセットアップ</h4>
 <pre class="line-numbers"><code class="language-">sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
 </code></pre><p>でとりあえずfluent-plugin-mongoを入れる。んで</p><pre class="line-numbers"><code class="language-">&lt;source&gt;
     type tail
@@ -121,7 +139,7 @@ fluentdでパースされたアクセスロ" />
 &lt;/match&gt;
 </code></pre><p>なtd-agent.confを作って</p><pre class="line-numbers"><code class="language-">/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
 </code></pre><p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p>
-<h4>MongoDB側を確認</h4>
+<h4 id="mongodb">MongoDB側を確認</h4>
 <p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f6647c8cdabd1739000004"), "path" : "/" }
@@ -158,7 +176,7 @@ fluentdでパースされたアクセスロ" />
 { "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
 { "_id" : ObjectId("50f664408cdabd1739000003") }
 </code></pre><p>という風にpath属性が無いのもあるので</p>
-<h4>MongoDBでMapReduce APIを使うJavaScriptを書く</h4>
+<h4 id="mongodb-mapreduce-api-javascript">MongoDBでMapReduce APIを使うJavaScriptを書く</h4>
 <pre class="line-numbers"><code class="language-js">var res = db.accesslog.mapReduce(
   // Map
   function() {
@@ -223,10 +241,10 @@ printjson(res)
     "ok" : 1,
 }
 </code></pre><p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p>
-<h4>コレクション名</h4>
+<h4 id="part-4108a8c1b1383ea7">コレクション名</h4>
 <pre class="line-numbers"><code class="language-json">{ out: "コレクション名" }
 </code></pre><p>で指定すると指定したコレクション名にぶち込まれる</p>
-<h4>mergeとreplace</h4>
+<h4 id="merge-replace">mergeとreplace</h4>
 
 <ul>
 <li>  既存するデータをぶち消して、新しい結果をぶち込むのがreplace</li>

@@ -95,10 +95,31 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#sample-java">Sample.java</a>
+</li>
+<li>
+<a href="#mainactivity-java">MainActivity.java</a>
+</li>
+<li>
+<a href="#root_project-build-gradle">root_project/build.gradle</a>
+</li>
+<li>
+<a href="#root_project-app-build-gradle">root_project/app/build.gradle</a>
+</li>
+<li>
+<a href="#sampletestcase-java">SampleTestCase.java</a>
+</li>
+<li>
+<a href="#runwith-powermockrunner-class-robolectric">追記: @RunWith(PowerMockRunner.class)を維持したままRobolectricを使う場合</a>
+</li>
+</ul>
+-->
                 <p>今まで何度か検証してみましたが、情報が2013年度と古く今で実際使えるのが微妙だったので2017年度版としてチャラい調査をしてみました</p>
 <!--more-->
 <p>※コードのベースは<a href="/2013/10/android-testing-robolectric-powermockito.html">Robolectric+powermock</a>のを利用しています。あくまで検証用なので</p>
-<h4>Sample.java</h4>
+<h4 id="sample-java">Sample.java</h4>
 <p>Powermockでmockする為にわざとstaticメソッドななんかをでっち上げる</p><pre class="line-numbers"><code class="language-java">package kinjouj.app;
 
 import android.util.Base64;
@@ -112,7 +133,7 @@ public class Sample {
     }
 }
 </code></pre><p>上記に書いた以前の検証コードのまま</p>
-<h4>MainActivity.java</h4>
+<h4 id="mainactivity-java">MainActivity.java</h4>
 <p>上記のSampleを使って画面に出すだけなActivity UIを作る</p><pre class="line-numbers"><code class="language-java">package kinjouj.app;
 
 import android.app.Activity;
@@ -138,7 +159,7 @@ public class MainActivity extends Activity {
     }
 }
 </code></pre><p>これも前回のまま。でSample.encodeB64メソッドをmockStaticしてごにょごにょした結果のtextViewからのテキストを検証するのをRobolectricを使って行う</p>
-<h4>root_project/build.gradle</h4>
+<h4 id="root_project-build-gradle">root_project/build.gradle</h4>
 <pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         jcenter()
@@ -158,7 +179,7 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 </code></pre><p>多分、Android Studioを使ってプロジェクトを生成したままのコード</p>
-<h4>root_project/app/build.gradle</h4>
+<h4 id="root_project-app-build-gradle">root_project/app/build.gradle</h4>
 <pre class="line-numbers"><code class="language-groovy">apply plugin: 'com.android.application'
 
 android {
@@ -197,7 +218,7 @@ dependencies {
     testCompile 'org.powermock:powermock-classloading-xstream:1.7.3'
 }
 </code></pre><p>※注意 powermock-api-mockitoではなくpowermock-api-mockito2です</p><p>これでテストできる環境が整ったんでテスト書く</p>
-<h4>SampleTestCase.java</h4>
+<h4 id="sampletestcase-java">SampleTestCase.java</h4>
 <pre class="line-numbers"><code class="language-java">package kinjouj.app;
 
 import org.junit.Rule;
@@ -263,7 +284,7 @@ public class SampleTestCase {
     }
 }
 </code></pre><p>まぁテストを実行してレポートを見ると</p><p><img src="/images/2017/09/robolectric-powermock-2017.jpg" alt="image" /></p><p>まぁMainActivity#buildTextで指定してる「Sample.encodeB64(&quot;hoge&quot;)」としているのにもかかわらずmockしたメソッドで&quot;ABC&quot;しか返さないようになってるので</p><p>まぁめんどくさいのでアプリを作って実際にケースとして紹介するというところまでの気力は無かったので(ry</p><p>以上。とりあえずは現時点でのRobolectric3.4.2+powermock1.7.3を使ってテストするケースは終わり</p>
-<h4>追記: @RunWith(PowerMockRunner.class)を維持したままRobolectricを使う場合</h4>
+<h4 id="runwith-powermockrunner-class-robolectric">追記: @RunWith(PowerMockRunner.class)を維持したままRobolectricを使う場合</h4>
 <p>PowerMockRunnerDelegateを使えばできるっぽい。てか公式に書いてた</p><pre class="line-numbers"><code class="language-java">package kinjouj.app;
 
 import org.junit.Rule;

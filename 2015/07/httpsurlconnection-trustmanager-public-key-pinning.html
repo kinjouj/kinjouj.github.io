@@ -92,13 +92,22 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-9f309047c9e2f846">検証の下準備</a>
+</li>
+<li>
+<a href="#main-java">Main.java</a>
+</li>
+</ul>
+-->
                 <p>参考1: <a href="http://d.hatena.ne.jp/jovi0608/20140902/1409635279">不正なSSL証明書を見破るPublic Key Pinningを試す</a></p><p>参考2: <a href="https://developer.mozilla.org/ja/docs/Web/Security/Public_Key_Pinning">https://developer.mozilla.org/ja/docs/Web/Security/Public_Key_Pinning</a></p><p>関連エントリー: <a href="/2014/10/httpsurlconnection-trustmanager.html">HttpsURLConnection TrustManager</a></p><p>要はHTTPS通信をする際にサーバーから送られてくる証明書が正当な物であるかをどう検証するべきかっていう所が色々あるのですが、それを検証する手法としてあるのがPublic Key Pinningっていう事っぽい(あってるかは微妙)</p><p>とりあえず色々検証してみた</p><p>※あくまでセキュリティ対策を前提としたネタではない</p><p>※個人的なメモなので上記参考を読むべき</p>
 <!--more-->
 
-<h4>検証の下準備</h4>
+<h4 id="part-9f309047c9e2f846">検証の下準備</h4>
 <p>mitmproxyが使える環境とHTTPSなサーバーを用意しておく。んでサーバー側の証明書がある環境下において以下のコマンドを実行して証明書のシグニチャとなるbase64を取得する(※証明書じゃなくても秘密鍵等からも生成可能。詳しくは上記参考2を参照)</p><pre class="line-numbers"><code class="language-sh">openssl x509 -in server.crt -pubkey -noout | openssl pkey -pubin -outform der| openssl dgst -sha256 -binary | openssl base64
 </code></pre><p>これを実行した値をSSLコンテキストにおいて証明書のチェックを行う際にこの値で検証するような感じかと</p>
-<h4>Main.java</h4>
+<h4 id="main-java">Main.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;

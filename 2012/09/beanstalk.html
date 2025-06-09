@@ -96,16 +96,34 @@ sudo apt-" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-bdf5c55b74bb686">インストール</a>
+</li>
+<li>
+<a href="#ruby">Rubyのライブラリをインストール</a>
+</li>
+<li>
+<a href="#worker-rb">worker.rb</a>
+</li>
+<li>
+<a href="#client-rb">client.rb</a>
+</li>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+</ul>
+-->
                 <p>※Amazon Elastic Beanstalkは関係ありません</p><p><a href="http://kr.github.com/beanstalkd">http://kr.github.com/beanstalkd</a> がちょっと気になったので使ってみた</p>
 <!--more-->
 
-<h4>インストール</h4>
+<h4 id="part-bdf5c55b74bb686">インストール</h4>
 <pre class="line-numbers"><code class="language-sh">sudo apt-get install beanstalkd
 </code></pre><p>でインストール出来る。 もちディストリビューションによって違うと思うので、そこら辺はドキュメント参照するかapt-getなりyumなりで検索して探してインストールする</p><p>んでその後起動しておく。デフォルト推奨ポート番号は11300な模様</p>
-<h4>Rubyのライブラリをインストール</h4>
+<h4 id="ruby">Rubyのライブラリをインストール</h4>
 <pre class="line-numbers"><code class="language-sh">gem install beanstalk-client
 </code></pre><p>まぁ色々クライアントライブラリはあるみたいですが、とりあえずbeanstalk-clientってのを使う</p>
-<h4>worker.rb</h4>
+<h4 id="worker-rb">worker.rb</h4>
 <pre class="line-numbers"><code class="language-rb">require "beanstalk-client"
 
 beanstalk = Beanstalk::Pool.new(["127.0.0.1:11300"])
@@ -133,14 +151,14 @@ end
   # 以下省略
 end
 </code></pre><p>っていうふうになってるので普通にjob[name]で参照可能。だけどこれyputされた際に限るものだと思われるので、普通の文字列なようなのがputでぶっこんで来られた場合にはjob.bodyで取得できる</p>
-<h4>client.rb</h4>
+<h4 id="client-rb">client.rb</h4>
 <pre class="line-numbers"><code class="language-rb">require "beanstalk-client"
 
 beanstalk = Beanstalk::Pool.new(["127.0.0.1:11300"])
 beanstalk.use("sample")
 beanstalk.yput({ :name =&gt; "hoge" })
 </code></pre><p>まぁ上でも書いたようにyputを使えばHashとかでも流せる。一応シリアライザー的なのはYAMLな模様。まぁだから接頭辞にyが付いてるんだと思うけど</p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 <p>beanstalkのEM(EventMachine)なライブラリもある模様で</p><p>worker.rbが</p><pre class="line-numbers"><code class="language-rb">require "em-beanstalk"
 
 EM.run do

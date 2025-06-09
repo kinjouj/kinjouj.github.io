@@ -98,13 +98,31 @@ https://developers.google.com/native-clien" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-2d313cb99806b30f">環境構築</a>
+</li>
+<li>
+<a href="#makefile">Makefileを作る</a>
+</li>
+<li>
+<a href="#hoge-c">hoge.c</a>
+</li>
+<li>
+<a href="#hoge-nmf">hoge.nmf</a>
+</li>
+<li>
+<a href="#index-html">index.html</a>
+</li>
+</ul>
+-->
                 <p>Native Clientを使ってC(又はC++)で書いたコードをChromeブラウザ上で動かしてみた</p>
 <!--more-->
 
-<h4>環境構築</h4>
+<h4 id="part-2d313cb99806b30f">環境構築</h4>
 <p><a href="https://developers.google.com/native-client">https://developers.google.com/native-client</a>から辿ってSDKをダウンロード。んでその後、zipを展開したディレクトリをどっかに配置(今回は/opt/nacl)</p><p>んで.bashrc辺りにPATHを設定しておく。設定する場所はNaCL SDKのルートディレクトリ(naclsdkってコマンドがある所)。で.bashrcを読みなおした後に</p><pre class="line-numbers"><code class="language-sh">naclsdk update
 </code></pre><p>を実行する。するとpepper_20っていうのがダウンロードされてインストールされる。これChromeのバージョンによって変わると思われるのですが、Chromeのバージョンが20ならpepper_20でChromeが19だとpepper_19っていうように変わるんだと思われる。んまぁ今提供されているのはChrome-20.0なので。とりあえずはこれで環境は完了。あとChromiumでは出来ませんでしたので(なんでかは知らない。多分Developer Buildだからなのか</p><p>あとChromeでabout:flagsでNative Clientを動かせれるようにしておく</p>
-<h4>Makefileを作る</h4>
+<h4 id="makefile">Makefileを作る</h4>
 <p>っていうか$NACL_SDK_ROOT/pepper_[d{2}]/examples/hello_world_newlibからMakefile取ってきた方が早いかも。とりあえずコピってちょっと修正</p><pre class="line-numbers"><code class="language-makefile"># Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -162,7 +180,7 @@ x86_32.nexe : hoge.c $(THIS_MAKE)
 x86_64.nexe : hoge.c $(THIS_MAKE)
     $(CC) -o hoge_x86_64.nexe $&lt; -m64 -O0 -g $(CFLAGS) -lppapi
 </code></pre><p>な感じで。あとはオプションとかちらほら変えるとか</p>
-<h4>hoge.c</h4>
+<h4 id="hoge-c">hoge.c</h4>
 <pre class="line-numbers"><code class="language-c">#include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
 
@@ -237,14 +255,14 @@ PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
 PP_EXPORT void PPP_ShutdownModule() {
 }
 </code></pre><p>んまぁほぼまるコピペですけどww 今回は動かす事前提なので(ry</p>
-<h4>hoge.nmf</h4>
+<h4 id="hoge-nmf">hoge.nmf</h4>
 <p>.nmfっていう定義ファイルを書かないといけないので</p><pre class="line-numbers"><code class="language-json">{
   "program": {
     "x86-32": { "url": "hoge_x86_32.nexe" }
   }
 }
 </code></pre><p>x86_64なのは省略してます。多分archtype自体がx86_32なので</p><p>んまぁ見ての通りJSONファイルで定義する。でここまでやったら、もうHTMLを書くだけです</p>
-<h4>index.html</h4>
+<h4 id="index-html">index.html</h4>
 <pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
     &lt;div id="message"&gt;&lt;/div&gt;

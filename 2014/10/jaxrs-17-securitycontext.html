@@ -93,10 +93,28 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#web-xml">web.xml</a>
+</li>
+<li>
+<a href="#jetty">検証で使うjettyな設定ファイルを作る</a>
+</li>
+<li>
+<a href="#sampleapplication-java">SampleApplication.java</a>
+</li>
+<li>
+<a href="#sample-java">Sample.java</a>
+</li>
+<li>
+<a href="#part-7ece01e05a703440">テストを書く</a>
+</li>
+</ul>
+-->
                 <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/security.html">https://jersey.java.net/documentation/latest/security.html</a></p><p>サーブレットシステムとかで使われるようなPrincipalを使ったセキュリティロールをアノテーションで補助する機能を持つような感じかと。言ってる事わかりづらいと思うのでさっさと本題に入る</p>
 <!--more-->
 
-<h4>web.xml</h4>
+<h4 id="web-xml">web.xml</h4>
 <p>※jettyで確認</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;web-app
     xmlns="http://java.sun.com/xml/ns/javaee"
@@ -135,7 +153,7 @@
 
 &lt;/web-app&gt;
 </code></pre><p>ってな感じで&lt;security-constraint&gt;周りを設定。</p>
-<h4>検証で使うjettyな設定ファイルを作る</h4>
+<h4 id="jetty">検証で使うjettyな設定ファイルを作る</h4>
 <p>jetty-env.xmlを作る</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0"?&gt;
 &lt;!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd"&gt;
 &lt;Configure class="org.mortbay.jetty.webapp.WebAppContext"&gt;
@@ -151,7 +169,7 @@
 </code></pre><p>realm.propertiesで指定しているので</p><pre class="line-numbers"><code class="language-properties">hoge:hoge,a
 fuga:fuga,a,b
 </code></pre><p>な感じで「ユーザー名:パスワード,ロール名」みたいに指定する</p>
-<h4>SampleApplication.java</h4>
+<h4 id="sampleapplication-java">SampleApplication.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
@@ -167,7 +185,7 @@ public class SampleApplication extends ResourceConfig {
     }
 }
 </code></pre><p>RolesAllowedDynamicFeatureに関しては後ほど</p>
-<h4>Sample.java</h4>
+<h4 id="sample-java">Sample.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.annotation.security.RolesAllowed;
@@ -199,7 +217,7 @@ public class Sample {
     }
 }
 </code></pre><p>っていうような感じでリソースアクションとなる部分などに@RolesAllowedアノテーションを使ってリソースにアクセス出来るロールを持つユーザーを限定する事が出来る。この機能自体は上記のRolesAllowedDynamicFeatureで提供されるので、それが有効になっている状態で特定のロールを持たないユーザーがアクセスしようとするとHTTP/403エラーになる。つまりaリソースは上記で設定したユーザーロールだとhogeとfugaユーザー両方でアクセス出来るけど、bリソースに関してはhogeユーザーでアクセスすると403エラーになる、理由は書いた通り特定のロールを持たないユーザーでアクセスは出来ない</p><p>あと@PermitAllっていうのもある。又、引数などにSecurityContextを持つ事が出来るがログイン処理がされていない場合などにはgetUserPrincipalはnullが返ってくる</p>
-<h4>テストを書く</h4>
+<h4 id="part-7ece01e05a703440">テストを書く</h4>
 <p>SecurityContextを伴う場合のテストはContainerRequestFilterを使ってContainerRequestContextにsetSecurityContextを使ってやれば良いらしい(公式のgithubになるテストによると)</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;

@@ -97,10 +97,31 @@ Spr" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-f3bcb87b2ef6e59e">必要なライブラリ</a>
+</li>
+<li>
+<a href="#sampleform-java">SampleForm.java</a>
+</li>
+<li>
+<a href="#validationmessages_ja-properties">ValidationMessages_ja.properties</a>
+</li>
+<li>
+<a href="#samplecontroller-java">SampleController.java</a>
+</li>
+<li>
+<a href="#samplecontrollertest-java">SampleControllerTest.java</a>
+</li>
+<li>
+<a href="#javax-validation-spring">余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</a>
+</li>
+</ul>
+-->
                 <p>簡単に入力検証なのを実現したいのであれば@ValidとBindingResultを利用する事で出来るらしい。色々突っかかる所があるのであくまで暫定的ではあるけどメモっておく</p>
 <!--more-->
 
-<h4>必要なライブラリ</h4>
+<h4 id="part-f3bcb87b2ef6e59e">必要なライブラリ</h4>
 <p>Spring Frameworkには@Validではなく、@Validatedっていうアノテーションがある。今回やるのは前者な方で後者に関しては今後やる可能性もあるのでとりあえずは「<a href="http://d.hatena.ne.jp/tatsu-no-toshigo/20131006/1381031027">アノテーション「@Validated」と「@Valid」</a>」を参考されたしという事で(ry</p><p>で本題の必要なライブラリに関して、javax.validationとその実装であるライブラリが必要。んまぁ後者のその実装に関してはHibernate Validatorがサポートされているのでそれを使う。という事でそのライブラリ参照を追加する</p><pre class="line-numbers"><code class="language-groovy">repositories {
     mavenCentral()
 }
@@ -117,7 +138,7 @@ dependencies {
     testCompile "org.springframework:spring-test:3.2.5.RELEASE"
 }
 </code></pre>
-<h4>SampleForm.java</h4>
+<h4 id="sampleform-java">SampleForm.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.Serializable;
@@ -152,12 +173,12 @@ public class SampleForm implements Serializable {
     }
 }
 </code></pre><p>@NotEmptyで引数を指定しているが、引数を指定しない場合には<span style="color: red">org.hibernate.validator.constraints.NotEmpty.message</span>というメッセージリソースなプロパティが参照される。これに関しては後術するので(ry</p>
-<h4>ValidationMessages_ja.properties</h4>
+<h4 id="validationmessages_ja-properties">ValidationMessages_ja.properties</h4>
 <pre class="line-numbers"><code class="language-ini">#org.hibernate.validator.constraints.NotEmpty.message={sample_form.name}が未入力です
 error.empty.sample_form.name="{sample_form.name}"が入力されてません
 sample_form.name=名前
 </code></pre>
-<h4>SampleController.java</h4>
+<h4 id="samplecontroller-java">SampleController.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Map;
@@ -228,7 +249,7 @@ public class SampleController {
 <li>  &lt;form:errors path=&quot;&quot;/&gt;で表示させる</li>
 </ul>
 <p>というような方法がある模様。まぁテストも書きましょうって事で</p>
-<h4>SampleControllerTest.java</h4>
+<h4 id="samplecontrollertest-java">SampleControllerTest.java</h4>
 <pre class="line-numbers"><code class="language-java">package swmvc;
 
 import org.junit.Test;
@@ -260,7 +281,7 @@ public class SampleControllerTest extends AbstractTestCase {
     }
 }
 </code></pre><p>終わり。ただ書いたやり方だと、フォーム検証でエラーが発生したらindexビューをレンダリングするようになっているのでリロードするとPOSTなデータを再送信するような方式になってしまうのでそこら辺の対処法は後日書く</p>
-<h4>余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</h4>
+<h4 id="javax-validation-spring">余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</h4>
 <p>上記でも書いたように検証エラーメッセージ等はValidationMessages_[locale].properties等から読まれる訳ですけど、Springが使うMessageSourceと共通化する形で</p><pre class="line-numbers"><code class="language-xml">&lt;bean
     id="messageSource"
     class="org.springframework.context.support.ReloadableResourceBundleMessageSource"

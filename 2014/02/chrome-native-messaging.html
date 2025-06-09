@@ -96,10 +96,25 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#etc-opt-chrome-native-messaging-hosts-kinjouj-test-json">/etc/opt/chrome/native-messaging-hosts/kinjouj.test.json</a>
+</li>
+<li>
+<a href="#kinjouj-test-cc">kinjouj.test.cc</a>
+</li>
+<li>
+<a href="#manifest-json">manifest.json</a>
+</li>
+<li>
+<a href="#bg-js">bg.js</a>
+</li>
+</ul>
+-->
                 <p><a href="https://developer.chrome.com/extensions/messaging.html#native-messaging">https://developer.chrome.com/extensions/messaging.html#native-messaging</a> っていうのがある模様なので色々やってみた</p>
 <!--more-->
 <p>参考1: <a href="http://laiso.hatenablog.com/entry/2013/12/15/Google_Chrome%E3%81%A7%E3%83%88%E3%83%AC%E3%82%A4%E3%81%8B%E3%82%89CD%E3%82%92%E6%8E%92%E5%87%BA%E3%81%A7%E3%81%8D%E3%82%8B%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E6%8B%A1%E5%BC%B5%E3%82%92%E3%81%A4%E3%81%8F">Google ChromeでトレイからCDを排出できるブラウザ拡張をつくりました(Native messaging版)</a></p><p>参考2: <a href="http://stackoverflow.com/questions/20220668/communication-between-native-app-and-chrome-extension">communication between native-app and chrome-extension</a></p>
-<h4>/etc/opt/chrome/native-messaging-hosts/kinjouj.test.json</h4>
+<h4 id="etc-opt-chrome-native-messaging-hosts-kinjouj-test-json">/etc/opt/chrome/native-messaging-hosts/kinjouj.test.json</h4>
 <pre class="line-numbers"><code class="language-json">{
   "name": "kinjouj.test",
   "description": "my app",
@@ -108,7 +123,7 @@
   "allowed_origins": ["chrome-extension://gaegbpbojjgpmjkihclmjelhbopfflmp/"]
 }
 </code></pre><p>公式ドキュメントにも書いてるけど、これを置く場所はOSによって異なる。上記の見出しのファイル場所はLinuxの置き場である/etc/opt/chrome/native-messaging-hosts/[name].jsonで定義している</p><p>で今回の/etc/opt/chrome/native-messaging-hosts/kinjouj.testっていうプログラム自体はC++で作ってある</p>
-<h4>kinjouj.test.cc</h4>
+<h4 id="kinjouj-test-cc">kinjouj.test.cc</h4>
 <pre class="line-numbers"><code class="language-cpp">#include &lt;stdio.h&gt;
 #include &lt;iostream&gt;
 
@@ -144,7 +159,7 @@ int main(int argc, char* argv[]) {
 <li>で生データを出力</li>
 </ul>
 <p>的な感じなのではないかと(多分)</p>
-<h4>manifest.json</h4>
+<h4 id="manifest-json">manifest.json</h4>
 <pre class="line-numbers"><code class="language-json">{
   "name": "test",
   "version": "1.0",
@@ -158,7 +173,7 @@ int main(int argc, char* argv[]) {
   "permissions": ["nativeMessaging"]
 }
 </code></pre><p>permissionsにnativeMessagingが必要な模様</p>
-<h4>bg.js</h4>
+<h4 id="bg-js">bg.js</h4>
 <pre class="line-numbers"><code class="language-js">(function(undefined) {
   chrome.browserAction.onClicked.addListener(function() {
     var port = chrome.runtime.connectNative("kinjouj.test");

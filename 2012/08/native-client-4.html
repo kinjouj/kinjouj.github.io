@@ -94,10 +94,28 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#test-h">test.h</a>
+</li>
+<li>
+<a href="#test-c">test.c</a>
+</li>
+<li>
+<a href="#hoge-c-native-client">hoge.c (Native Clientのモジュール)</a>
+</li>
+<li>
+<a href="#part-b832a88e56023ec7">コンパイル</a>
+</li>
+<li>
+<a href="#index-html">index.html</a>
+</li>
+</ul>
+-->
                 <p>Native Clientのデモにはdlopenっていうのが入ってるのですが、これを単純にやってみる。っていってもこれをそのまま動かすんじゃなくて、作ったtest.cをlibtest.soにして、それをNative Clientから使う(恐らくはNative Client環境のコンパイラを使わないと動かせれないんだと思われる。検証してないけど)</p>
 <!--more-->
 
-<h4>test.h</h4>
+<h4 id="test-h">test.h</h4>
 <pre class="line-numbers"><code class="language-c">#ifndef TEST_H
 #define TEST_H
 
@@ -105,7 +123,7 @@ char* say();
 
 #endif
 </code></pre>
-<h4>test.c</h4>
+<h4 id="test-c">test.c</h4>
 <pre class="line-numbers"><code class="language-c">#include "test.h"
 
 char* say() {
@@ -115,7 +133,7 @@ char* say() {
     return s;
 }
 </code></pre><p>でこれをlibtest.soにする。方法は後述参考</p>
-<h4>hoge.c (Native Clientのモジュール)</h4>
+<h4 id="hoge-c-native-client">hoge.c (Native Clientのモジュール)</h4>
 <pre class="line-numbers"><code class="language-c">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
@@ -232,7 +250,7 @@ PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
 PP_EXPORT void PPP_ShutdownModule() {
 }
 </code></pre><p>でNative Clientでdlopenを使用する際にメインスレッドでdlopenしてもNULLしか返ってこない模様。という事でpthreadで別スレッド内でdlopenする必要があるみたい</p>
-<h4>コンパイル</h4>
+<h4 id="part-b832a88e56023ec7">コンパイル</h4>
 <pre class="line-numbers"><code class="language-sh">rm -fr glibc
 python /opt/nacl/pepper_21/tools/oshelpers.py mkdir glibc
 
@@ -289,7 +307,7 @@ python /opt/nacl/pepper_21/tools/create_nmf.py
     -s glibc
     -n libtest_x86_32.so,libtest.so
 </code></pre><p>glibcディレクトリにもろもろなファイルが生成される。んでNative Clientを使う際に.nmfなファイルもglibcに入るのでHTML側からはapplication/x-naclでそれを参照する</p>
-<h4>index.html</h4>
+<h4 id="index-html">index.html</h4>
 <pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
     &lt;div id="message"&gt;&lt;/div&gt;

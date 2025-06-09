@@ -99,17 +99,38 @@ Hadoop(1.2" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-8811212a92a05889">セットアップ</a>
+</li>
+<li>
+<a href="#samplemapper-java">SampleMapper.java</a>
+</li>
+<li>
+<a href="#samplereducer-java">SampleReducer.java</a>
+</li>
+<li>
+<a href="#sampletaskrunner-java">SampleTaskRunner.java</a>
+</li>
+<li>
+<a href="#client-java">Client.java</a>
+</li>
+<li>
+<a href="#build-gradle">build.gradle</a>
+</li>
+</ul>
+-->
                 <p>タイトル通り、Hadoop MapReduce上でReducer側から処理したデータをHBaseにぶっこむ為にTableReducerを使う事が出来る。やってみた</p>
 <!--more-->
 
-<h4>セットアップ</h4>
+<h4 id="part-8811212a92a05889">セットアップ</h4>
 <p>Hadoop(1.2.1)は既にあるのでHBase(0.94.11)を構築する。んまぁ特筆する事も無いけど</p>
 <pre>
 [/bin/sh] hbase shell
 hbase(main) > create "output", "score"
 </pre>
 <p>的な事を行なってHadoopで処理したデータをHBaseに突っ込む為の所を作っておく。あとHDFS上にデータ突っ込んでおくのも忘れずに。んまぁこんかいは「hoge fuga foobar」が含まれるテキストを適当に書いて突っ込んだけ</p><p>あとはクラスをだらだらと書く</p>
-<h4>SampleMapper.java</h4>
+<h4 id="samplemapper-java">SampleMapper.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
@@ -134,7 +155,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
     }
 }
 </code></pre><p>とりあえずスルー</p>
-<h4>SampleReducer.java</h4>
+<h4 id="samplereducer-java">SampleReducer.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
@@ -174,7 +195,7 @@ public class SampleReducer extends TableReducer&lt;Text, IntWritable, NullWritab
     }
 }
 </code></pre><p>ReducerクラスじゃなくてHBaseのTableReducerを継承する。公式ではwriteの第1引数の型がImmutableByteWritable的なのになってるけど、まぁnullしか指定してないならNullWritableでええんじゃないのかという事で</p>
-<h4>SampleTaskRunner.java</h4>
+<h4 id="sampletaskrunner-java">SampleTaskRunner.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configuration;
@@ -212,7 +233,7 @@ public class SampleTaskRunner {
 }
 </code></pre><p>っていう感じで。あとはjar化して</p><pre class="line-numbers"><code class="language-">hadoop jar sample.jar sample.SampleTaskRunner
 </code></pre><p>辺りすれば良いんだけど依存性関係でめんどくさい。という事でgradleのJavaExecを使いつつのProgramDriverで処理する方向で</p>
-<h4>Client.java</h4>
+<h4 id="client-java">Client.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.util.ProgramDriver;
@@ -233,7 +254,7 @@ public class Client {
 }
 </code></pre><p>つまりは</p><pre class="line-numbers"><code class="language-">java sample.Client sample
 </code></pre><p>っていう感じでやれば動かせられますよっていう事で</p>
-<h4>build.gradle</h4>
+<h4 id="build-gradle">build.gradle</h4>
 <pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
 apply plugin: "eclipse"
 

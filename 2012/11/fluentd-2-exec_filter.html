@@ -97,10 +97,22 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#etc-td-agent-td-agent-conf">/etc/td-agent/td-agent.conf</a>
+</li>
+<li>
+<a href="#var-lib-fluentd-accesslog_filter-pl">/var/lib/fluentd/accesslog_filter.pl</a>
+</li>
+<li>
+<a href="#part-6542fd4df31">結果</a>
+</li>
+</ul>
+-->
                 <p>exec_filterを使えば指定したコマンドでフィルタリング(っていうか中継?)したり出来る模様</p>
 <!--more-->
 
-<h4>/etc/td-agent/td-agent.conf</h4>
+<h4 id="etc-td-agent-td-agent-conf">/etc/td-agent/td-agent.conf</h4>
 <pre class="line-numbers"><code class="language-">&lt;source&gt;
     type tail
     format apache
@@ -123,7 +135,7 @@
     path /var/log/td-agent/accesslog
 &lt;/match&gt;
 </code></pre><p>/var/log/nginx/access.logをtailした結果をexec_filterで/var/lib/fluentd/accesslog_filter.plをかましてから/var/log/td-agent/accesslogへ持っていく</p>
-<h4>/var/lib/fluentd/accesslog_filter.pl</h4>
+<h4 id="var-lib-fluentd-accesslog_filter-pl">/var/lib/fluentd/accesslog_filter.pl</h4>
 <pre class="line-numbers"><code class="language-pl">#!/usr/bin/env perl
 
 use strict;
@@ -160,7 +172,7 @@ while (my $data = &lt;STDIN&gt;) {
     });
 }
 </code></pre><p>/var/log/nginx/access.logをtailして、キャッチされた時点で標準入力にin_formatで指定した形式で入ってくる(んだと思われる)。なので、それをdecode_jsonでデコードしてそこからホストとパスだけを取って、MessagePack形式で出力する</p>
-<h4>結果</h4>
+<h4 id="part-6542fd4df31">結果</h4>
 
 <pre>
 2012-11-17T18:34:01+09:00   accesslog.filter.output {"host":"127.0.0.1","path":"/"}

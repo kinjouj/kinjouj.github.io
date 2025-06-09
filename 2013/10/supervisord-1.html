@@ -96,10 +96,25 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-654311259e9">要件</a>
+</li>
+<li>
+<a href="#part-bdf5c55b74bb686">インストール</a>
+</li>
+<li>
+<a href="#rails-unicorn">RailsプロジェクトをUnicornで動かす設定</a>
+</li>
+<li>
+<a href="#supervisord-conf">supervisord.conf</a>
+</li>
+</ul>
+-->
                 <p>前から勉強する予定に入ってた<a href="http://supervisord.org/">supervisord</a>を使ってみる事に。とりあえずGetting Started的に使うのが今回なセクションとして今後はドキュメント読みつつ色々やってみる的な感じで</p>
 <!--more-->
 
-<h4>要件</h4>
+<h4 id="part-654311259e9">要件</h4>
 <p>普通にRubyOnRailsで作ったプロジェクトとRedmineなパッケージをunicorn(_rails)で起動。それをsupervisordを行う</p><p>っていう事だけ。上記を/var/wwwに格納</p>
 <pre>
 .
@@ -107,11 +122,11 @@
 └── sample
 </pre>
 <p>な感じ</p>
-<h4>インストール</h4>
+<h4 id="part-bdf5c55b74bb686">インストール</h4>
 <pre class="line-numbers"><code class="language-">sudo pip install supervisor
 </code></pre><p>でインストール出来る。あとはsupervisord.conf的な設定ファイルを書けば良い。ちなみに</p><pre class="line-numbers"><code class="language-">echo_supervisord_conf
 </code></pre><p>をやればデフォルトのテンプレート的な設定を出力出来る模様</p>
-<h4>RailsプロジェクトをUnicornで動かす設定</h4>
+<h4 id="rails-unicorn">RailsプロジェクトをUnicornで動かす設定</h4>
 <p>unicorn的なインストールは普通に上記要件なプロジェクト中にあるGemfileに</p><pre class="line-numbers"><code class="language-rb">source "https://rubygems.org"
 
 # 追加
@@ -125,7 +140,7 @@ pid APP_PATH + "/tmp/pids/unicorn.pid"
 preload_app true
 </code></pre><p>でunicornが開放するデフォルトのポートが8080番になるので、2つのプロジェクトで別々なポートを指定しておく。あとAPP_PATHな所も要所で修正</p><p>とりあえず動かすだけならこれだけで良いっぽい。プラスアルファな設定辺りは後術する参考を</p><pre class="line-numbers"><code class="language-">unicorn_rails -c config/unicorn.rb -E production
 </code></pre><p>辺りで起動してみて無難にアクセス出来るかを確認しておく (一応念の為)</p>
-<h4>supervisord.conf</h4>
+<h4 id="supervisord-conf">supervisord.conf</h4>
 <pre class="line-numbers"><code class="language-ini">[inet_http_server]
 port=127.0.0.1:9001
 

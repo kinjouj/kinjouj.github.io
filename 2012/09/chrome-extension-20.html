@@ -93,10 +93,22 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#manifest-json">manifest.json</a>
+</li>
+<li>
+<a href="#background-html">background.html</a>
+</li>
+<li>
+<a href="#background-js">background.js</a>
+</li>
+</ul>
+-->
                 <p>chrome.experimental.identityを使う事でGoogle APIsを使う際にアクセストークンを取得したり出来るらしい。っていうかそもそもがmanifest_versionが2からは外部URLのスクリプトをロードするのですらCSPにより制限されているので(ry</p>
 <!--more-->
 <p>でChrome自体にChrome Syncっていうのが組み込まれているので、それの接続アカウントを利用してトークン取得出来る模様。なのでこれを使うとChrome Syncな設定が有効になる(同期するデータに関する件がいろいろあるので、そこは注意しないといけない)</p><p>更に現在では <a href="https://developers.google.com/console">https://developers.google.com/console</a> でクライアントID等を発行する事が出来ない。あくまでGoogle側の承認が必要な模様で、Dev Consoleから作ったクライアントIDをGoogle宛に送る事でidentity APIが使えるクライアントIDかなんかを送付してくれる模様</p><p>今回検証ではGoogleが検証で使ってると思われるクライアントID等を利用させてもらって検証してみた。Chrome Syncで接続されているGoogleサービスアカウントを利用してアクセストークンを取得して、それを利用しGmailのフィードを取得してみる</p>
-<h4>manifest.json</h4>
+<h4 id="manifest-json">manifest.json</h4>
 <pre class="line-numbers"><code class="language-json">{
   "name": "test",
   "version": "0.1",
@@ -111,14 +123,14 @@
   }
 }
 </code></pre>
-<h4>background.html</h4>
+<h4 id="background-html">background.html</h4>
 <pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
     &lt;script type="text/javascript" src="background.js"&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
-<h4>background.js</h4>
+<h4 id="background-js">background.js</h4>
 <pre class="line-numbers"><code class="language-js">(function(undefined) {
   // アクセストークンを取得する (同期コネクトが確立してない場合は取得できない)
   chrome.experimental.identity.getAuthToken(

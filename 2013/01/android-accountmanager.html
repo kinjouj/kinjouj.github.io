@@ -93,12 +93,48 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-2e61a25dc5d6a055">認証方式</a>
+</li>
+<li>
+<a href="#androidmanifest-xml">AndroidManifest.xml</a>
+</li>
+<li>
+<a href="#res-values-strings-xml">res/values/strings.xml</a>
+</li>
+<li>
+<a href="#res-xml-authenticator-xml">res/xml/authenticator.xml</a>
+</li>
+<li>
+<a href="#res-xml-prefs-xml">res/xml/prefs.xml</a>
+</li>
+<li>
+<a href="#authenticatorpreferenceactivity-java">AuthenticatorPreferenceActivity.java</a>
+</li>
+<li>
+<a href="#res-xml-pref-xml">res/xml/pref.xml</a>
+</li>
+<li>
+<a href="#mainactivity-java">MainActivity.java</a>
+</li>
+<li>
+<a href="#authenticatorservice-java">AuthenticatorService.java</a>
+</li>
+<li>
+<a href="#sampleaccountauthenticator-java">SampleAccountAuthenticator.java</a>
+</li>
+<li>
+<a href="#authenticatoractivity-java">AuthenticatorActivity.java</a>
+</li>
+</ul>
+-->
                 <p>んまぁAndroid端末使ってる人とかだと見た事あるし、触った事もある人もいるだろう</p><p><img src="/images/2013/01/20130119095120.png" alt="image" /></p><p>まぁWebサービスとかのアカウントを端末内に保管して、認証要求だとかをAccountManagerな機能を通じて行えたり出来るAPIが存在する訳ですが、これの独自のを作る方法。まぁ結構書く量が多いので</p>
 <!--more-->
 
-<h4>認証方式</h4>
+<h4 id="part-2e61a25dc5d6a055">認証方式</h4>
 <p>OAuthとか使って権限管理の元で色々出来たりするのが一番良いんですが、今回は適当にトークン取得リクエストしたらトークン返して、でAPIを実行する際にトークンをヘッダーにぶち込んでリクエストしたら結果が返ってくる的な感じ</p><p>まぁ良くあるかどうかは定かじゃないけど、RailsとかだとDeviseとかそういうのがあったりもする訳で。これもとりあえずおいといて</p><p>という事で本題な所のAndroidの方を実装する。もっかいいうけどクソ長いんでww</p>
-<h4>AndroidManifest.xml</h4>
+<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -143,7 +179,7 @@
     &lt;/application&gt;
 &lt;/manifest&gt;
 </code></pre><p>な感じ。で必要な設定リソースから作る</p>
-<h4>res/values/strings.xml</h4>
+<h4 id="res-values-strings-xml">res/values/strings.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;resources&gt;
     &lt;string name="app_name"&gt;Sample&lt;/string&gt;
@@ -159,7 +195,7 @@
     &lt;string name="preference_category_extra_nickname_summary"&gt;ニックネームを設定&lt;/string&gt;
 &lt;/resources&gt;
 </code></pre><p>でAccountAuthenticatorを使う際に必要となる設定リソース(AndroidManifest.xmlだとres/xml/authenticator.xml)を作る</p>
-<h4>res/xml/authenticator.xml</h4>
+<h4 id="res-xml-authenticator-xml">res/xml/authenticator.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;account-authenticator
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -169,7 +205,7 @@
     android:label="@string/account_label"
     android:accountPreferences="@xml/prefs" /&gt;
 </code></pre><p>でアカウント設定でオプションで設定出来るPreferenceな設定ファイルも必要</p>
-<h4>res/xml/prefs.xml</h4>
+<h4 id="res-xml-prefs-xml">res/xml/prefs.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"&gt;
     &lt;PreferenceCategory android:title="設定" /&gt;
@@ -180,7 +216,7 @@
     &lt;/PreferenceScreen&gt;
 &lt;/PreferenceScreen&gt;
 </code></pre><p>な感じ。設定画面はAuthenticatorPreferenceActivityにintentする方向で</p><p>んでPreferenceな所からちょっと作っておく</p>
-<h4>AuthenticatorPreferenceActivity.java</h4>
+<h4 id="authenticatorpreferenceactivity-java">AuthenticatorPreferenceActivity.java</h4>
 <pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.preference.PreferenceActivity;
@@ -204,7 +240,7 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
     }
 }
 </code></pre><p>でPreferenceで参照するリソースが必要</p>
-<h4>res/xml/pref.xml</h4>
+<h4 id="res-xml-pref-xml">res/xml/pref.xml</h4>
 <p>prefs.xmlでは無いので注意</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"&gt;
     &lt;PreferenceCategory android:title="@string/preference_category_extra_title"&gt;
@@ -216,7 +252,7 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
     &lt;/PreferenceCategory&gt;
 &lt;/PreferenceScreen&gt;
 </code></pre><p>まぁニックネームを設定出来るようにするだけ</p><p>あとはアプリのActivity(MainActivity)とか認証要求を行うActivity(AuthenticatorActivity)とService(AuthenticatorService)とかをもろもろ作る</p>
-<h4>MainActivity.java</h4>
+<h4 id="mainactivity-java">MainActivity.java</h4>
 <pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import org.apache.http.HttpResponse;
@@ -362,7 +398,7 @@ public class MainActivity extends Activity {
     }
 }
 </code></pre><p>アカウントがあれば、そのアカウントでgetAuthTokenしてそのトークンを使ってWeb APIにヘッダーをつけてリクエストしレスポンスをパースしてListViewにバインド</p><p>アカウントがなければAndroidのアカウント設定画面にintentしてアカウントを作るように要求</p><p>でアカウントを追加する際に今回の独自のアカウントを選択した場合にはAuthenticatorServiceが作用するのでそれを作る</p>
-<h4>AuthenticatorService.java</h4>
+<h4 id="authenticatorservice-java">AuthenticatorService.java</h4>
 <pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.accounts.AccountManager;
@@ -382,7 +418,7 @@ public class AuthenticatorService extends Service {
     }
 }
 </code></pre><p>でonBindでAbstractAccountAuthenticatorを継承したクラスをnewしでgetIBinderを返す</p>
-<h4>SampleAccountAuthenticator.java</h4>
+<h4 id="sampleaccountauthenticator-java">SampleAccountAuthenticator.java</h4>
 <pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.util.ArrayList;
@@ -521,7 +557,7 @@ class SampleAccountAuthenticator extends AbstractAccountAuthenticator {
     }
 }
 </code></pre><p>AccountManager.getAuthTokenをするとコールバックでAccountManagerFuture<Bundle>.getResultsでgetAuthTokenから返したBundleを取得できる。</p><p>でアカウント追加から来た時にはaddAccountが呼び出されて、そこからAuthenticatorActivity.ACTION(AuthenticatorActivityを発生させるアクションintent)が投げられて、登録に伴う認証開始が行われるという感じ</p><p>でそのAuthenticatorActivityを作る</p>
-<h4>AuthenticatorActivity.java</h4>
+<h4 id="authenticatoractivity-java">AuthenticatorActivity.java</h4>
 <pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.math.BigInteger;

@@ -97,10 +97,40 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-654280cb0a5">前提</a>
+</li>
+<li>
+<a href="#applicationtestcase">ApplicationTestCase</a>
+</li>
+<li>
+<a href="#androidtestcase">AndroidTestCase</a>
+</li>
+<li>
+<a href="#servicetestcase">ServiceTestCase</a>
+</li>
+<li>
+<a href="#providertestcase2">ProviderTestCase2</a>
+</li>
+<li>
+<a href="#loadertestcase">LoaderTestCase</a>
+</li>
+<li>
+<a href="#activityunittestcase">ActivityUnitTestCase</a>
+</li>
+<li>
+<a href="#activityinstrumentationtestcase2">ActivityInstrumentationTestCase2</a>
+</li>
+<li>
+<a href="#singlelaunchactivitytestcase">SingleLaunchActivityTestCase</a>
+</li>
+</ul>
+-->
                 <p>色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く</p>
 <!--more-->
 
-<h4>前提</h4>
+<h4 id="part-654280cb0a5">前提</h4>
 <p>アプリとテストはプロジェクトを分ける。テストプロジェクトはアプリプロジェクトを参照として設定する(普通にADT使えば特にやる必要ない。テストプロジェクト作成段階で設定される)</p><p>で以下もテストプロジェクト作成段階で設定されるので必要ないけど</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="sample.test.test"
@@ -117,7 +147,7 @@
 
 &lt;/manifest&gt;
 </code></pre><p>な感じで&lt;instrumentation&gt;と&lt;uses-library&gt;とかの設定が必要</p><p>あとはクラス書きつつテストケースを書く感じ。でテストを対象とするクラスはアプリプロジェクト、テストケースはテストプロジェクトに書く。でテストケースの方式はJUnit4方式じゃなくてJUnit3方式</p><p>あとテストプロジェクトのアプリもしっかり端末に入るので(ry</p>
-<h4>ApplicationTestCase</h4>
+<h4 id="applicationtestcase">ApplicationTestCase</h4>
 <p>android.app.Applicationを拡張して使用する場合、ApplicationTestCaseを使えばAndroid JUnitでテスト出来る。例えば以下のようなApplicationクラスを継承したクラスがあった場合</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
@@ -154,7 +184,7 @@ public class MainApplicationTestCase extends ApplicationTestCase&lt;MainApplicat
     }
 }
 </code></pre><p>な感じでテスト出来る</p>
-<h4>AndroidTestCase</h4>
+<h4 id="androidtestcase">AndroidTestCase</h4>
 <p>AndroidのContextに依存するようなクラスをテストするケースにおいてはAndroidTestCaseを使えば良い模様。</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.test.AndroidTestCase;
@@ -167,7 +197,7 @@ public class MainAndroidTestCase extends AndroidTestCase {
     }
 }
 </code></pre><p>で、同様な例としてBroadcastReceiverをテストする場合等でもAndroidTestCaseを使えば出来なくもない。それは<a href="/2012/01/android-broadcastreceiver-testing-androidtestcase.html">以前に書いた</a>ので省略</p>
-<h4>ServiceTestCase</h4>
+<h4 id="servicetestcase">ServiceTestCase</h4>
 <p>android.app.Serviceをテストする目的で使用。とりあえずてきとーに</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import java.util.ArrayList;
@@ -254,7 +284,7 @@ public class SampleServiceTestCase extends ServiceTestCase&lt;SampleService&gt; 
     }
 }
 </code></pre><p>テストする場合にはアプリ側に&lt;service&gt;で設定しておかなくても良い模様。又、タイミング処理をする場合にはフラグ等を持たせておいて完了するまで処理をThread.sleepさせておく、んでデータをチェックしたりすれば良いんじゃないかなーっと</p><p>例えば一定時間で変わるLive Wallpaperのような場合だとサービスをstartさせてから一定時間変わったら表示されている現在のandroid.graphics.Bitmap?とかをチェックするとか。んまぁ要件によりきりかなと</p>
-<h4>ProviderTestCase2</h4>
+<h4 id="providertestcase2">ProviderTestCase2</h4>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.content.ContentProvider;
@@ -342,9 +372,9 @@ public class SampleProviderTestCase extends ProviderTestCase2&lt;SampleProvider&
     }
 }
 </code></pre><p>な感じでProviderTestCase2を継承してgetProviderでProviderクラスの実体クラスが取得できてテスト出来る模様。ただ気になるのがコンストラクタの第2引数のプロバイダーのAuthorityがなぜ必要なのかっていう所。空にしてもテストコケないし... 謎なので分かり次第追記する</p>
-<h4>LoaderTestCase</h4>
+<h4 id="loadertestcase">LoaderTestCase</h4>
 <p><a href="/2011/12/android-loader-testing-loadertestcase.html">以前に検証した</a>ので省略</p>
-<h4>ActivityUnitTestCase</h4>
+<h4 id="activityunittestcase">ActivityUnitTestCase</h4>
 <p>アクティビティ操作をテスト出来るクラスな模様</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 
@@ -465,7 +495,7 @@ public class MainActivityTestCase extends ActivityUnitTestCase&lt;MainActivity&g
     }
 }
 </code></pre><p>アクティビティは自動自動等しない模様なのでstartActivityで起動。んでsetApplicationで使用するApplicationクラスを指定出来る。でcallAcvitityOnStartでOnStartを発生させて、runOnUiThreadを使ってボタンをクリックしたり等の操作を行い、waitForIdelSyncで操作が完了するのを待つっていう感じかと</p>
-<h4>ActivityInstrumentationTestCase2</h4>
+<h4 id="activityinstrumentationtestcase2">ActivityInstrumentationTestCase2</h4>
 <p>ActivityUnitTestCaseを使わずにAndroidManifest.xmlに沿った形式でAcvitityテストを行うにはこれでも出来る。ActivityUnitTestCaseで使ったAcvitityをそのままAcitvityInstrumentationTestCase2に移行させる場合には以下のような感じ</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
@@ -522,7 +552,7 @@ public class MainActivityTestCase extends ActivityInstrumentationTestCase2&lt;Ma
     }
 }
 </code></pre>
-<h4>SingleLaunchActivityTestCase</h4>
+<h4 id="singlelaunchactivitytestcase">SingleLaunchActivityTestCase</h4>
 <p>恐らくは上記のActivityテストの場合であるとテスト毎にActivityが初期化される。でテストで実行したアクティビティの状態を維持させたい場合には一度しか初期化されない模様</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;

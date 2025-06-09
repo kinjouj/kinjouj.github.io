@@ -92,12 +92,36 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-2a03577238684a62">その前に</a>
+</li>
+<li>
+<a href="#part-6fc833aab655ef08">必要なのを揃える</a>
+</li>
+<li>
+<a href="#manifest-json">manifest.json</a>
+</li>
+<li>
+<a href="#index-html">index.html</a>
+</li>
+<li>
+<a href="#main-js">main.js</a>
+</li>
+<li>
+<a href="#push-js">push.js</a>
+</li>
+<li>
+<a href="#send-sh">send.sh</a>
+</li>
+</ul>
+-->
                 <p>公式ドラフトドキュメント?: <a href="http://www.w3.org/TR/push-api/">http://www.w3.org/TR/push-api/</a></p><p>参考1: <a href="http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web">http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web</a></p><p>参考2: <a href="http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d">http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d</a></p><p>前から気になってたServiceWorkerを使ってPush APIを実装するっていうのが話題になってた気がするので、ざっくりと参考を読みつつやってみた</p>
 <!--more-->
 
-<h4>その前に</h4>
+<h4 id="part-2a03577238684a62">その前に</h4>
 <p>以前にChrome Extensionで使えるchrome.gcmっていうのがあるネタを書いたけど、今回はこれをChrome Extensionではなく普通のWebアプリケーションから使える基盤的な仕組みみたいなのっぽい</p>
-<h4>必要なのを揃える</h4>
+<h4 id="part-6fc833aab655ef08">必要なのを揃える</h4>
 <p>GoogleのPush Messagingサービスを使うので、まず必要なのが</p>
 <ul>
 <li>Cloud Messaging for Chromeを有効にする</li>
@@ -106,7 +130,7 @@
 <li>Google APIsのプロジェクト識別番号</li>
 </ul>
 <p>の4つが最低限でも必要っぽいので取得しておく。上記で書いたchrome.gcmのネタ中にも多分書いてるはずなので省略(APIへのアクセス権の設定項目)</p>
-<h4>manifest.json</h4>
+<h4 id="manifest-json">manifest.json</h4>
 <p>※Chrome Extensionのmanifest.jsonでは無い</p><p>Push Notification APIを使う際に必要となる情報を定義したJSONファイル</p><pre class="line-numbers"><code class="language-json">{
   "name": "sample",
   "short_name": "sample",
@@ -116,7 +140,7 @@
   "gcm_user_visible_only": true
 }
 </code></pre><p>これに関するリファレンスがちょっとどこにあるのか分かってないので省略</p>
-<h4>index.html</h4>
+<h4 id="index-html">index.html</h4>
 <pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
@@ -129,7 +153,7 @@
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre><p>上記で書いたmanifest.jsonを&lt;link rel=“manifest”&gt;で読み込む。んまぁあとはJSをダラっと書くだけ</p>
-<h4>main.js</h4>
+<h4 id="main-js">main.js</h4>
 <pre class="line-numbers"><code class="language-js">window.addEventListener("load", function() {
   var el = document.querySelector(".js-push-button");
   el.addEventListener("click", function() {
@@ -172,7 +196,7 @@ function renderSubscription(subscription) {
   document.querySelector('#subscription').innerHTML = subscription.subscriptionId;
 }
 </code></pre>
-<h4>push.js</h4>
+<h4 id="push-js">push.js</h4>
 <pre class="line-numbers"><code class="language-js">self.addEventListener("install", function() {
   console.log("install");
 }, false);
@@ -188,7 +212,7 @@ self.addEventListener("push", function(event) {
   );
 }, false);
 </code></pre><p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p><p>でとりあえず今までの流れを確認すると</p><p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p><p><img src="/images/2015/05/201505171800_1.jpg" alt="image" /></p><p>んな感じになってる。でregisterボタンを押すと</p><p><img src="/images/2015/05/201505171800_2.jpg" alt="image" /></p><p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p><p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p><p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p>
-<h4>send.sh</h4>
+<h4 id="send-sh">send.sh</h4>
 <pre class="line-numbers"><code class="language-sh">#!/bin/sh
 
 ID="上記のSubscription ID"

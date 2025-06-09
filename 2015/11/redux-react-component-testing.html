@@ -98,10 +98,24 @@ import React, { Comp" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#src-components-todoinput-jsx">src/components/TodoInput.jsx</a>
+<ul>
+<li>
+<a href="#test-components-todoinput-test-js">test/components/TodoInput-test.js</a>
+</li>
+<li>
+<a href="#react-component-state">余談: React Componentのstateをテストする場合</a>
+</li>
+</ul>
+</li>
+</ul>
+-->
                 <p>ドハマりしてたけど結局ドキュメントに書いてるっていうオチなメモ</p><p>※詳しい事は記事末尾にある参考を参照</p>
 <!--more-->
 
-<h3>src/components/TodoInput.jsx</h3>
+<h3 id="src-components-todoinput-jsx">src/components/TodoInput.jsx</h3>
 <pre class="line-numbers"><code class="language-javascript">import React, { Component, PropTypes } from "react";
 import LinkedStateMixin from "react-addons-linked-state-mixin";
 import { connect } from "react-redux";
@@ -130,7 +144,7 @@ class TodoInput extends Component {
 
 export default connect()(TodoInput);
 </code></pre><p>あくまでReactの事はおいといてreduxのconnectを使ってるコンポーネントをテストする</p>
-<h4>test/components/TodoInput-test.js</h4>
+<h4 id="test-components-todoinput-test-js">test/components/TodoInput-test.js</h4>
 <pre class="line-numbers"><code class="language-javascript">import React from "react";
 import ReactDOM from "react-dom";
 import ReactTestUtils from "react-addons-test-utils";
@@ -164,7 +178,7 @@ global.document = jsdom('&lt;!doctype html&gt;&lt;html&gt;&lt;body&gt;&lt;/body&
 global.window = document.defaultView
 global.navigator = global.window.navigator
 </code></pre><p>を作っておく必要がある</p><p>てな感じでreduxを使うReact Componentのテストを行う際にはstoreを指定する必要があるって事で終わり。一応、まだテストに関するドキュメントを制覇してないので読みつつ色々まとめる予定</p><p>参考: <a href="http://redux.js.org/docs/recipes/WritingTests.html">http://redux.js.org/docs/recipes/WritingTests.html</a></p>
-<h4>余談: React Componentのstateをテストする場合</h4>
+<h4 id="react-component-state">余談: React Componentのstateをテストする場合</h4>
 <p>上記のReact ComponentではlinkStateを使ってstateに状態を持つ事をやってる。そこがただしく作用しているかっていう所までチェックしたい場合、上記のテストコードの末尾に</p><pre class="line-numbers"><code class="language-javascript">expect(todo.state.text).toEqual("hoge");
 </code></pre><p>とやっても出来ない。なぜかというとconnectされたReact Componentはreact-reduxのconnectのConnectコンポーネントに内包される形になるので上記のtodo変数自体はTodoInputではなくConnectになる。もちろんTodoInput内でのsetStateはTodoInput上で作用するので問題無いがテスト上ではそのstateにアクセスする事が出来ない。それをやるには</p>
 <ul>

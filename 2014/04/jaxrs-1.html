@@ -93,10 +93,40 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-8811212a92a05889">セットアップ</a>
+</li>
+<li>
+<a href="#web-xml">web.xml</a>
+</li>
+<li>
+<a href="#part-fb8a0ec973877c7c">コントローラーを作成</a>
+</li>
+<li>
+<a href="#part-f821d88d3f791077">コントローラーのテストを書く</a>
+</li>
+<li>
+<a href="#queryparam">@QueryParamアノテーション</a>
+</li>
+<li>
+<a href="#pathparam">@PathParamアノテーション</a>
+</li>
+<li>
+<a href="#matrixparam">@MatrixParamアノテーション</a>
+</li>
+<li>
+<a href="#formparam">@FormParam</a>
+</li>
+<li>
+<a href="#encoded">追記: @Encodedアノテーションについて</a>
+</li>
+</ul>
+-->
                 <p>Jerseyドキュメント: <a href="https://jersey.java.net/documentation/latest/index.html">https://jersey.java.net/documentation/latest/index.html</a>  </p><p>参考: <a href="http://backpaper0.github.io/2013/05/02/jaxrs.html">http://backpaper0.github.io/2013/05/02/jaxrs.html</a></p><p>JavaでRESTfulなWebアプリケーションを作るっていう場合とかだとJAX-RSを使えば何かと便利っぽそうなのでいろいろ勉強してみたのでちょっとだけまとめる</p><p>※JAX-RSのバージョンは2.x系をターゲットにしてます。又、以下で書くのはあくまでサーバーを起動して利用する前提ではなくテストを書いて実行しているだけなのでサーバー関係に伴ってくる部分に関しては今後に書く予定</p>
 <!--more-->
 
-<h4>セットアップ</h4>
+<h4 id="part-8811212a92a05889">セットアップ</h4>
 <pre class="line-numbers"><code class="language-groovy">// javaプラグインじゃなくてwarプラグインを利用するべきかも
 apply plugin: "java"
 apply plugin: "jetty"
@@ -114,7 +144,7 @@ dependencies {
     testCompile "org.hamcrest:hamcrest-all:+"
 }
 </code></pre><p>バージョン指定周りは適当ですけど、実際にこっちで使ってるバージョンは2.9.x系な模様なので</p><p>まぁこれでデプロイ出来るwar作ってアプリケーションサーバーにデプロイしたらなんらかの問題出そうだけど</p>
-<h4>web.xml</h4>
+<h4 id="web-xml">web.xml</h4>
 <p><a href="https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet">https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet</a>にも書いてあるけど、javax.ws.rs.Applicationに該当するクラスを作るか、アノテーションを探索するパッケージを指定するかの2つを指定出来る</p><p>例えば前者のjavax.ws.rs.Applicationに該当するようなクラスを作る場合とかだと</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
@@ -159,7 +189,7 @@ public class SampleApplication extends ResourceConfig {
 
 &lt;/web-app&gt;
 </code></pre><p>んまぁここまでが開発環境構築的な所。ちなみに上記のjavax.ws.rs.Applicationに該当するクラスにある@ApplicationPathはJAX-RSに準拠しているアプリケーションサーバー以外では作用しないのではないかと(あくまで&lt;servlet-mapping&gt;によるパスをオーバーライドする目的な模様。詳しくないのでggrks)</p>
-<h4>コントローラーを作成</h4>
+<h4 id="part-fb8a0ec973877c7c">コントローラーを作成</h4>
 <p>JAX-RSアプリケーションのコントローラーは特に何かを継承したりはしない。ほとんどがアノテーションを利用してマッピングなどを利用する為アノテーションを使ったコードを書けば良いだけ</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
@@ -195,7 +225,7 @@ public class Home {
     }
 }
 </code></pre><p>んまぁ@Pathだとか@GETは単純に名称だけでどういう役割を持つかわかると思うので省略するが、@Producesやここには書いてないけど@Consumesっていうのもある(以降で記述しているのでここでは避ける)</p><p>@Producesや@ConsumesはSpring WebMVCにもあるけど受け手や出し手に対するメディアタイプを指定するような物だと思うので、上記の場合indexListToJsonで返されたListはJSONとしてレンダリングするように出来る。だけど、それのメディアタイプのコンバーターが無いと返す値によってはレンダリングは出来ない。Listやオブジェクトなどの場合においては上記のbuild.gradleで書いてるjersey-media-moxyっていうのを使えば出来る模様</p><p>んまぁコントローラーはざっくりとこんなもんで。他のアノテーションも以降で記述するので(ry</p>
-<h4>コントローラーのテストを書く</h4>
+<h4 id="part-f821d88d3f791077">コントローラーのテストを書く</h4>
 <p>んまぁJerseyTestを使えば簡単に出来る</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.List;
@@ -251,7 +281,7 @@ public class HomeTest extends JerseyTest {
     }
 }
 </code></pre><p>てな感じでテスト書いて実行</p><p>んまぁそんな感じでJAX-RSを使ってアノテーションベースでRESTful Webアプリケーションを作る事が出来るっていう感じで。んまぁ今後もドキュメントなり読みつつ勉強する予定なのでその都度色々ネタ書く予定って事で、おさわり的な所はこんなもんで</p><p>※以降がその他のアノテーションの紹介</p>
-<h4>@QueryParamアノテーション</h4>
+<h4 id="queryparam">@QueryParamアノテーション</h4>
 <p>@QueryParamを使えばクエリパラメータをメソッドの引数等(フィールド等に定義したりする事も可能)に指定する事で値を引数にマッピングしたり出来る。又、@DefualtValueを使えばデフォルト値の設定なども出来る</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.DefaultValue;
@@ -339,7 +369,7 @@ public class HomeTest extends JerseyTest {
     }
 }
 </code></pre><p>又、引数にInteger等を指定した場合にInteger型ではないデータを指定しているような場合だと、javax.ws.rs.NotFoundExceptionになる模様</p>
-<h4>@PathParamアノテーション</h4>
+<h4 id="pathparam">@PathParamアノテーション</h4>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.Path;
@@ -361,7 +391,7 @@ public class Home {
     }
 }
 </code></pre><p>URLパスの一部をマッピングするアノテーションで、正規表現によるパターンマッチングも可能な模様。テストする場合には普通にパス指定すれば良いだけなのでこの件に関しては省略</p>
-<h4>@MatrixParamアノテーション</h4>
+<h4 id="matrixparam">@MatrixParamアノテーション</h4>
 <p>参考サイトによるとセミコロンで区切った形式の値をマッピング出来る模様</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
@@ -429,7 +459,7 @@ public class HomeTest extends JerseyTest {
     }
 }
 </code></pre><p>っていう感じで、martixParamを用いてパラメーターを設定してリクエストしてテスト出来る</p>
-<h4>@FormParam</h4>
+<h4 id="formparam">@FormParam</h4>
 <p>@FormParamを用いるとフォーム送信(application/x-www-form-urlencoded?)によるパラメーターの取得が可能になる。又、@BeanParamを使う事でフォームから送信されたデータをオブジェクトにマッピングしたりも出来る。その場合はオブジェクトに@FormParamアノテーションを付与する</p><pre class="line-numbers"><code class="language-java">package sample.bean;
 
 import java.io.Serializable;
@@ -544,7 +574,7 @@ public class HomeTest extends JerseyTest {
     }
 }
 </code></pre><p>っていうようにEntity.entityでやれば良い模様</p><p>以上でアノテーションの紹介は終わりだけど、まだまだアノテーションたくさんあると思われるので状況次第でネタを書く</p>
-<h4>追記: @Encodedアノテーションについて</h4>
+<h4 id="encoded">追記: @Encodedアノテーションについて</h4>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.Encoded;

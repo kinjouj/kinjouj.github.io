@@ -95,10 +95,22 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#app-assets-javascripts-app-js">app/assets/javascripts/app.js</a>
+</li>
+<li>
+<a href="#app-controllers-sample_controller-rb">app/controllers/sample_controller.rb</a>
+</li>
+<li>
+<a href="#app-views-sample-show-erb">app/views/sample/show.erb</a>
+</li>
+</ul>
+-->
                 <p>参考: <a href="http://havelog.ayumusato.com/develop/security/e593-mixins_server_template_and_angular.html">AngularJSとサーバーサイドテンプレートの混在とngNonBindable</a></p><p>※上記の参考を必読することをオススメ</p><p>上記参考にも書いてるのですが、例えばクエリーなどにおいてangular.jsが処理されるような記法なクエリーが含まれているとXSSになるっていう話があるのですが、実際自分でやってみた。</p><p>※実検証はRails4を使ってやった</p>
 <!--more-->
 
-<h4>app/assets/javascripts/app.js</h4>
+<h4 id="app-assets-javascripts-app-js">app/assets/javascripts/app.js</h4>
 <pre class="line-numbers"><code class="language-js">angular.module("app", [])
   .controller("SampleController", function($scope) {
     $scope.onClick = function() {
@@ -106,14 +118,14 @@
     };
   });
 </code></pre><p>んまぁ適当に$scopeに関数を打ち込む。で例えばこのコントローラーの内部にサーバーサイドなテンプレートエンジンを利用してクエリーで指定したデータで<span style="color: red">&quot;{% raw %}{{onClick()}}{% endraw %}&quot;</span>がそのまま参照されたらどうなるのかっていう</p>
-<h4>app/controllers/sample_controller.rb</h4>
+<h4 id="app-controllers-sample_controller-rb">app/controllers/sample_controller.rb</h4>
 <pre class="line-numbers"><code class="language-rb">class SamplesController &lt; ApplicationController
   def show
     @query = params[:query]
   end
 end
 </code></pre><p>単純に<http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}>のようなクエリーを送れるような形で、そのデータをビューにバインドする</p>
-<h4>app/views/sample/show.erb</h4>
+<h4 id="app-views-sample-show-erb">app/views/sample/show.erb</h4>
 <pre class="line-numbers"><code class="language-erb">&lt;div ng-controller="SampleController"&gt;
     &lt;h2&gt;&lt;%= @query %&gt;&lt;/h2&gt;
 &lt;/div&gt;

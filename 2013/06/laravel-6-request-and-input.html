@@ -97,12 +97,27 @@ getメソ" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#input-get-input-except-input-only">Input::get Input::except Input::only</a>
+</li>
+<li>
+<a href="#cookie">Cookie</a>
+</li>
+<li>
+<a href="#session">Session</a>
+</li>
+<li>
+<a href="#input-file">追記: Input::file</a>
+</li>
+</ul>
+-->
                 <p>まぁドキュメント通り、Inputクラス(Requestクラスのエイリアス?)だとかのドキュメント読みを進めてみる</p>
 <!--more-->
 
-<h4>Input::get Input::except Input::only</h4>
+<h4 id="input-get-input-except-input-only">Input::get Input::except Input::only</h4>
 <p>getメソッドでは引数で指定したキーの値を取得できる。又、第2引数にデフォルト値を指定出来る。でexceptメソッドは引数に指定したキー名以外のパラメーターの一覧を取る、onlyが逆というか指定したのだけを配列で取るっていうメソッドな模様</p><p>とりあえず突っ込みどころは特に無さそうなのでこの件はパス</p><p>ちなみにこのInputってクラスは<a href="http://laravel.com/api/class-Illuminate.Http.Request.html">IlluminateHttpRequest</a>クラスのエイリアスなのでは無いかと</p>
-<h4>Cookie</h4>
+<h4 id="cookie">Cookie</h4>
 <p>クッキーを扱うにはCookieクラスを使う。でこのクラスを使って送出されるクッキー自体は平文で送出されない模様。で基本的にはmakeメソッドを使う、特に有効期限が無いのであれば、foreverメソッドを使えば良い。だけどforeverメソッドを使っても永久に有効って訳じゃなくて、2628000分という数値がぶち込まれている。まぁ特にきにしなくても良いかも知れないけど、そこら辺は上手くテストすれば良いだけな話なのかも。あとforeverメソッドとmakeメソッドの違いを言うと前者はminutesっていうオプションが存在しないだけで、内部的にはmakeメソッドを使ってる。使うには</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 $response = Response::make(
@@ -112,7 +127,7 @@ $response = Response::make(
 $cookie = Cookie::forever("name", "value");
 $response-&gt;withCookie($cookie);
 </code></pre><p>な感じで一度Responseを作ってからwithCookieメソッドでレスポンスにクッキーを盛り込むような感じっぽい。で利用する際はInputと同様にgetメソッドを使うが、第2引数にデフォルト値を指定する事も出来る模様</p>
-<h4>Session</h4>
+<h4 id="session">Session</h4>
 <p>Session::putしてSession::getで取る的な感じなのはまぁ大体どんなものも同じかと。でSession::pushっていうのもあるけど、これはSession::putされているのに大して配列で新しい値をぶち込めるっていう感じかと</p><p>でSession::flashを使う事で、Inputで取得出来るデータをフラッシュオブジェクト(取得したら次回リクエスト時には参照できなくなるセッションオブジェクト)を利用する事が出来る</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 $id = Session::get("id");
@@ -136,7 +151,7 @@ var_dump(Request::secure());
 // ヘッダーにX-Requested-With: XMLHttpRequestかどうかをチェックした結果の真偽値
 var_dump(Request::ajax());
 </code></pre><p>Request::ajaxに関しては普通にXMLHttpRequestを使っただけではtrueにならない。setRequestHeader(&quot;X-Requested-With&quot;, &quot;XMLHttpRequest&quot;)とかされてない限りはtrueにはならない模様</p><p>以上。ファイルアップロード関係のInput::fileはまだやってないのでやり次第追記する</p>
-<h4>追記: Input::file</h4>
+<h4 id="input-file">追記: Input::file</h4>
 <p>んまぁ使い方は単純にInput::getだとかと同じ。で取得される内部型は<a href="http://api.symfony.com/2.0/Symfony/Component/HttpFoundation/File/UploadedFile.html">Symfony\Component\HttpFoundation\File\UploadedFile</a>となる模様</p>
 <ul>
 <li>  &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt; と指定したらUploadedFile型</li>

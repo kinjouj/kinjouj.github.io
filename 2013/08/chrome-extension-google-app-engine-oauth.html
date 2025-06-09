@@ -93,10 +93,25 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#manifest-json">manifest.json</a>
+</li>
+<li>
+<a href="#bg-js">bg.js</a>
+</li>
+<li>
+<a href="#chrome_ex_oauth-html">chrome_ex_oauth.html</a>
+</li>
+<li>
+<a href="#part-654296b22d9">余談</a>
+</li>
+</ul>
+-->
                 <p><a href="http://blogs.dion.ne.jp/kotemaru/archives/10093611.html">http://blogs.dion.ne.jp/kotemaru/archives/10093611.html</a></p><p>を参考にすれば良い。でサーバー側はOAuthServiceクラスを使ってOAuth利用による通信であるかっていうのを検知するような方式を利用する</p><p>で問題はそれをどうやってChrome Extensionで行うかって所だと思いますけど、一応公式的には<a href="http://developer.chrome.com/extensions/tut_oauth.html">chrome_ex_oauth</a>っていうのを使って利用可能な模様</p><p>という事でやってみた</p>
 <!--more-->
 
-<h4>manifest.json</h4>
+<h4 id="manifest-json">manifest.json</h4>
 <pre class="line-numbers"><code class="language-json">{
   "name": "test",
   "version": "0.1",
@@ -112,7 +127,7 @@
   "permissions": ["https://*/*"]
 }
 </code></pre><p>const.jsはOAUTH_CONSUMER_KEY及びOAUTH_CONSUMER_SECRETなconstを定義しているだけなので省略する</p>
-<h4>bg.js</h4>
+<h4 id="bg-js">bg.js</h4>
 <pre class="line-numbers"><code class="language-js">(function(undefined) {
   var oauth = ChromeExOAuth.initBackgroundPage({
     "request_url": "https://shareroid.appspot.com/_ah/OAuthGetRequestToken",
@@ -133,7 +148,7 @@
   });
 })();
 </code></pre><p>でauthorize時に認証していない場合においてはchrome_ex_oauth.htmlがオープンされる</p>
-<h4>chrome_ex_oauth.html</h4>
+<h4 id="chrome_ex_oauth-html">chrome_ex_oauth.html</h4>
 <pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
@@ -149,7 +164,7 @@
   ChromeExOAuth.initCallbackPage();
 })();
 </code></pre><p>を行ってるだけ。で認証されてない場合には認証要求なページへリダイレクトされる。でその後にauthorizeな引数に指定したコールバックが作用する</p><p>っていう感じで使えばGoogle App EngineでOAuthServiceより保護されるアクション等をChrome Extensionからアクセスする事は可能な模様</p>
-<h4>余談</h4>
+<h4 id="part-654296b22d9">余談</h4>
 <p>上記で呼ばれるchrome_ex_oauth.html自体はChromeExOAuthなインスタンスでcallback_pageなプロパティを設定する事で変える事自体は可能</p>
               </div>
             </div>

@@ -94,6 +94,12 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+</ul>
+-->
                 <p>引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる</p>
 <!--more-->
 <p>で大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在するという事でやってみた</p><p>まずその前に、MongoDBとかそういう系のKVSっていうのは基本的にスキーマレスである前提が存在すると思うのですが、UNIQUEインデックスを後で付けたら付けたで問題になるんじゃねーかなって思う所なので。でそれをサポートする為にdropDupsっていうオプションがあり、UNIQUEインデックスを保証させる際に既に重複している部分は削除するような仕組みがある模様。でもデータ消されたらたまったもんじゃねーってオチにならないかなーって思うので、とりあえず自分の無い頭で考えた所</p>
@@ -132,7 +138,7 @@ E11000 duplicate key error index: sample.samples.$name_1 dup key: { : "hoge" }
 db.samples.find()
 // { "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
 </code></pre><p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p><p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 <p>DBに存在するインデックスを確認したい場合は</p><pre class="line-numbers"><code class="language-js">db.system.indexes.find()
 </code></pre><p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p><pre class="line-numbers"><code class="language-js">// sampleデータベース中のsamplesコレクション -&gt; sample.samples
 db.system.indexes.find({ ns: "sample.samples" })

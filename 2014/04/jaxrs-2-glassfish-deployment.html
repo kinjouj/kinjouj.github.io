@@ -93,14 +93,29 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#glassfish">glassfishの環境構築</a>
+</li>
+<li>
+<a href="#web-xml">web.xml</a>
+</li>
+<li>
+<a href="#sampleapplication-java">SampleApplication.java</a>
+</li>
+<li>
+<a href="#glassfish-json">余談: glassfishでJSONをレンダリングするにあたって</a>
+</li>
+</ul>
+-->
                 <p>参考: <a href="https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3">https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3</a></p><p>JAX-RSに準拠しているアプリケーションサーバー(glassfish等)ではデプロイ時の設定が若干異なる模様。またJAX-RSに準拠しているアプリケーションサーバーであれば特にデプロイメントデスクリプタ(web.xml)を定義しなくても@ApplicationPathを使う事で引数に指定したパスを&lt;servlet-mapping&gt;のベースとして利用できるようになるっぽい。微妙にややこしいけど</p><p>※記述している内容が正しいかは微妙なのであくまで個人的なメモとして</p>
 <!--more-->
 
-<h4>glassfishの環境構築</h4>
+<h4 id="glassfish">glassfishの環境構築</h4>
 <p>glassfishのオープンソース版をダウンロードしてきてインストールする。でglassfishはTomcat等とは違い?ドメインっていう形でアプリケーションをデプロイする。で初期状態でもドメインが存在するのだけど、適当に別なドメインを作るので</p><pre class="line-numbers"><code class="language-">/path/to/glassfish/bin/asadmin create-domain --profile developer --adminport 14848 --instanceport 10080 devDomain
 </code></pre><p>な感じでWebアプリケーション側のポートを10080で、(Web)管理コンソールのポートを14848でdevDomainっていう名前で作成みたいな感じで。あとは</p><pre class="line-numbers"><code class="language-">/path/to/glassfish/bin/startserv devDomain
 </code></pre><p>あたりをやって作ったドメインなサーバーを起動する。でglassfishではアプリケーションをデプロイするには/path/to/glassfish/domains/ドメイン名/autodeployにwarファイルなり打ち込めばデプロイしてくれる模様なので</p><p>とりあえずはglassfishな環境構築はこんなもんで</p>
-<h4>web.xml</h4>
+<h4 id="web-xml">web.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;web-app
     xmlns="http://java.sun.com/xml/ns/javaee"
@@ -121,7 +136,7 @@
 
 &lt;/web-app&gt;
 </code></pre><p>@ApplicationPathを使ってJAX-RSアプリケーションなリソースパスをマッピングするので特に記述する必要性は無いけど、もし上記のようにweb.xmlで指定する場合には&lt;servlet-name&gt;にApplicationクラス(又はResourceConfig?)を指定すれば良い(&lt;serlet-class&gt;は必要ないっぽい)。又、特にApplicationクラスを拡張しないで使うようなケースであれば、<span style="color: red">javax.ws.rs.core.Application</span>を指定すれば良い模様</p>
-<h4>SampleApplication.java</h4>
+<h4 id="sampleapplication-java">SampleApplication.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
@@ -136,7 +151,7 @@ public class SampleApplication extends ResourceConfig {
 }
 </code></pre><p>っていう感じで@ApplicationPathでresourcesを引数で指定すると、その指定された引数がベースなリソースパスになる模様なので <a href="http://localhost:10080/context_name/resource_path/@Path">http://localhost:10080/context_name/resource_path/@Path</a> 等で指定されているメソッドなりのハンドラ的な感じで実行できる</p><p>っていうわけで上記なプロジェクトをコンパイル後warにパッケージングして</p><pre class="line-numbers"><code class="language-">mv jaxrs.war /path/to/glassfish/domains/devDomain/autodeploy
 </code></pre><p>にぶん投げる。で@ApplicationPathで指定したリソースパスでアクセス出来るかを確認してみりゃ良い。</p>
-<h4>余談: glassfishでJSONをレンダリングするにあたって</h4>
+<h4 id="glassfish-json">余談: glassfishでJSONをレンダリングするにあたって</h4>
 <p>※GlassFish4だと問題が発生しない模様</p><p>JSONとしてレンダリングする場合であってもオブジェクトに@XmlRootElementが無い場合とかだとWebApplicationExceptionが発生する模様。又、アクション側において</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;

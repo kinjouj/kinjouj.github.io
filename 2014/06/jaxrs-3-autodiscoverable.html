@@ -93,14 +93,44 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#glassfish">備考: glassfishのバージョンに関して</a>
+</li>
+<li>
+<a href="#part-6542c68a322">概要</a>
+</li>
+<li>
+<a href="#sampleautodiscoverable-java">SampleAutoDiscoverable.java</a>
+</li>
+<li>
+<a href="#samplefeature-java">SampleFeature.java</a>
+</li>
+<li>
+<a href="#gsonprovider-java">GsonProvider.java</a>
+</li>
+<li>
+<a href="#meta-inf-services-org-glassfish-jersey-internal-spi-autodiscoverable">META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverableを作成</a>
+</li>
+<li>
+<a href="#sampleapplication-java">SampleApplication.java</a>
+</li>
+<li>
+<a href="#home-java">Home.java</a>
+</li>
+<li>
+<a href="#hometest-java">HomeTest.java</a>
+</li>
+</ul>
+-->
                 <p>JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。</p><p>という事でやってみた</p>
 <!--more-->
 
-<h4>備考: glassfishのバージョンに関して</h4>
+<h4 id="glassfish">備考: glassfishのバージョンに関して</h4>
 <p>(記事投稿時の)glasshfish4では組み込まれているJAX-RS(Jersey2)のバージョンが古い模様なので、実装側とAPIのバージョンの整合性が合わないが為にエラーが起きる模様。なのでglassfishに同梱されているライブラリをアップデートするか、glassfish4.0.1(現時点では正式版は出ていない)を使う事で解決出来る模様</p><p>参考: <a href="http://qiita.com/opengl-8080/items/cfdde684b36efec50477">GlassFish4.0でJAX-RSのクラスにCDIでインジェクションしようとしたらUnsatisfiedDependencyExceptionが発生するバグ？</a></p>
-<h4>概要</h4>
+<h4 id="part-6542c68a322">概要</h4>
 <p>gsonを使って返された値をJSONにエンコードするだけのMessageBodyWriterをAutoDiscoverableを使って別パッケージにしてロード出来るようにする</p>
-<h4>SampleAutoDiscoverable.java</h4>
+<h4 id="sampleautodiscoverable-java">SampleAutoDiscoverable.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.internal;
 
 import javax.annotation.Priority;
@@ -119,7 +149,7 @@ public class SampleAutoDiscoverable implements AutoDiscoverable {
     }
 }
 </code></pre>
-<h4>SampleFeature.java</h4>
+<h4 id="samplefeature-java">SampleFeature.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.internal;
 
 import javax.ws.rs.core.Configuration;
@@ -169,7 +199,7 @@ public class SampleFeature implements Feature {
     }
 }
 </code></pre>
-<h4>GsonProvider.java</h4>
+<h4 id="gsonprovider-java">GsonProvider.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.provider;
 
 import java.io.IOException;
@@ -222,10 +252,10 @@ public class GsonProvider implements MessageBodyWriter&lt;Object&gt; {
     }
 }
 </code></pre>
-<h4>META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverableを作成</h4>
+<h4 id="meta-inf-services-org-glassfish-jersey-internal-spi-autodiscoverable">META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverableを作成</h4>
 <p>AutoDiscoverableを使う場合にはServiceLoader周りを設定しとけば良い</p><pre class="line-numbers"><code class="language-">sample.internal.SampleAutoDiscoverable
 </code></pre><p>中身はAutoDiscoverableのパッケージ名を含むクラス名を指定するだけ</p><p>あとはこのプロジェクトをjar化してJAX-RSアプリケーションに含めるだけ</p>
-<h4>SampleApplication.java</h4>
+<h4 id="sampleapplication-java">SampleApplication.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
@@ -242,7 +272,7 @@ public class SampleApplication extends ResourceConfig {
     }
 }
 </code></pre><p>デフォでMOXyなJSONシリアライザ的なので処理されちゃって上記のFeatureでJSON_FEATUREによりGsonProviderでの処理がスキップされちゃうので、そこら辺の使えるようにするように設定しとかなあかんっぽい</p>
-<h4>Home.java</h4>
+<h4 id="home-java">Home.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
@@ -282,7 +312,7 @@ public class Home {
     }
 }
 </code></pre>
-<h4>HomeTest.java</h4>
+<h4 id="hometest-java">HomeTest.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.List;

@@ -97,9 +97,27 @@ class SampleController &lt; ApplicationController
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#app-controllers-sample_controller-rb">app/controllers/sample_controller.rb</a>
+</li>
+<li>
+<a href="#app-helpers-sample_helper-rb">app/helpers/sample_helper.rb</a>
+</li>
+<li>
+<a href="#spec-controllers-sample_controller_spec-rb">spec/controllers/sample_controller_spec.rb</a>
+</li>
+<li>
+<a href="#spec-helpers-sample_helper_spec-rb">spec/helpers/sample_helper_spec.rb</a>
+</li>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+</ul>
+-->
                 <!--more-->
 
-<h4>app/controllers/sample_controller.rb</h4>
+<h4 id="app-controllers-sample_controller-rb">app/controllers/sample_controller.rb</h4>
 <pre class="line-numbers"><code class="language-rb">class SampleController &lt; ApplicationController
   def index
     if request.post?
@@ -110,14 +128,14 @@ class SampleController &lt; ApplicationController
   end
 end
 </code></pre><p>単純にPOSTメソッドでぶち込むと404になるようにする。</p>
-<h4>app/helpers/sample_helper.rb</h4>
+<h4 id="app-helpers-sample_helper-rb">app/helpers/sample_helper.rb</h4>
 <pre class="line-numbers"><code class="language-rb">module SampleHelper
   def say
     return content_tag(:h1, "hoge")
   end
 end
 </code></pre><p>まぁ機能自体使ってないけど。あくまでRSpecでテストする事だけが目的なので</p>
-<h4>spec/controllers/sample_controller_spec.rb</h4>
+<h4 id="spec-controllers-sample_controller_spec-rb">spec/controllers/sample_controller_spec.rb</h4>
 <pre class="line-numbers"><code class="language-rb">require "spec_helper"
 
 describe SampleController do
@@ -138,14 +156,14 @@ describe SampleController do
   end
 end
 </code></pre><p>コントローラーなテストな部分。GETで成功して、POSTで失敗するかだけをチェック</p>
-<h4>spec/helpers/sample_helper_spec.rb</h4>
+<h4 id="spec-helpers-sample_helper_spec-rb">spec/helpers/sample_helper_spec.rb</h4>
 <pre class="line-numbers"><code class="language-rb">describe SampleHelper do
   it "helper.say test" do
     helper.say().should == "&lt;h1&gt;hoge&lt;/h1&gt;"
   end
 end
 </code></pre><p>,例えば、ApplicationHelperとSampleHelperに一つづつ機能付けて、RSpecでヘルパーをテストしようとすると両方helperで参照可能なのはなぜなんだろうと分からないのですが</p><p>まぁとりあえずこの件はほっとく</p><p>あとは普通どおりテストするコマンド投げれば良い</p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 <p>コントローラーテストでcontrollerで参照できるはずなので、コントローラーにメソッド生やした場合はそれを介して出来るのはと思ったのだけど、例えば(あんまりやるべきでは無いとは思うのですが)コントローラーからViewHelperを参照して使った場合のテストってどうするんだろうと思ってたら、上記のままそんままSampleHelperをSampleControllerでincludeしちゃっても出来ない事が判明</p><pre class="line-numbers"><code class="language-rb">class SampleController &lt; ApplicationController
   include ActionView::Helpers::TagHelper
   include SampleHelper

@@ -93,12 +93,42 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-2a03577238684a62">その前に</a>
+</li>
+<li>
+<a href="#part-3786c956203953b">依存性</a>
+</li>
+<li>
+<a href="#thymeleaffeature-java">ThymeleafFeature.java</a>
+</li>
+<li>
+<a href="#thymeleaftemplateprocessor-java">ThymeleafTemplateProcessor.java</a>
+</li>
+<li>
+<a href="#web-xml">web.xml</a>
+</li>
+<li>
+<a href="#beans-xml">beans.xml</a>
+</li>
+<li>
+<a href="#sampleapplication-java">SampleApplication.java</a>
+</li>
+<li>
+<a href="#home-java">Home.java</a>
+</li>
+<li>
+<a href="#hometest-java">HomeTest.java</a>
+</li>
+</ul>
+-->
                 <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#mvc">https://jersey.java.net/documentation/latest/user-guide.html#mvc</a></p><p>参考: <a href="http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743">http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743</a></p><p>jersey-mvcなAPIを使えばViewableをぶん投げたりする事によりテンプレートエンジンによりレスポンスを出したりする事も出来る。※現時点で公式でサポートされているテンプレートエンジンがfreemarkerとmustacheとjsp</p><p>っていう事でやってみる</p>
 <!--more-->
 
-<h4>その前に</h4>
+<h4 id="part-2a03577238684a62">その前に</h4>
 <p>jersey-mvc-jspなJSPをレンダリングする仕組みを使う場合にテスト書くとエラーを引き起こす。※freemarkerとmustacheでは起きない(HttpServletRequest等をマッピングしない為かと)</p><p>っていう事でthymeleafを使ってテンプレートエンジンによりレスポンスを送信する仕組みのTemplateProcessorを作りながらやる</p>
-<h4>依存性</h4>
+<h4 id="part-3786c956203953b">依存性</h4>
 <pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
 apply plugin: "jetty"
 apply plugin: "eclipse"
@@ -124,7 +154,7 @@ dependencies {
     testCompile "org.hamcrest:hamcrest-all:+"
 }
 </code></pre><p>んでまずThymeleafなテンプレートエンジンを使ってレスポンスを処理するのを作る</p>
-<h4>ThymeleafFeature.java</h4>
+<h4 id="thymeleaffeature-java">ThymeleafFeature.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ConstrainedTo;
@@ -156,7 +186,7 @@ public class ThymeleafFeature implements Feature {
     }
 }
 </code></pre>
-<h4>ThymeleafTemplateProcessor.java</h4>
+<h4 id="thymeleaftemplateprocessor-java">ThymeleafTemplateProcessor.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
@@ -242,7 +272,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
     }
 }
 </code></pre><p>@Injectで注入するのが正しいかは微妙。mvc-jspな奴はProvider&lt;Ref&lt;HttpServletRequest&gt;&gt;的な感じなのを注入しているが、これだとどうもテスト時の注入でAbstractBinder使っても上手く作用してくれないので</p><p>んまぁてな感じでThymeleafを使ってテンプレートエンジンによるレスポンスの処理なところはこれだけ。設定しないと使えませんが</p>
-<h4>web.xml</h4>
+<h4 id="web-xml">web.xml</h4>
 <p>MVCによる処理を利用する場合においてはweb.xmlでfilter周りを設定しないといけないみたいな制約がある模様なので</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;web-app
     xmlns="http://java.sun.com/xml/ns/javaee"
@@ -266,7 +296,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
     &lt;/filter-mapping&gt;
 &lt;/web-app&gt;
 </code></pre><p>な感じで</p>
-<h4>beans.xml</h4>
+<h4 id="beans-xml">beans.xml</h4>
 <p>glassfishとかで動かす場合に</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;beans
     xmlns="http://xmlns.jcp.org/xml/ns/javaee"
@@ -276,7 +306,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
     bean-discovery-mode="all"&gt;
 &lt;/beans&gt;
 </code></pre><p>となっているとデプロイエラーを起こすので、<span style="color: red">bean-discovery-mode=&quot;annotated&quot;</span>にしておく</p>
-<h4>SampleApplication.java</h4>
+<h4 id="sampleapplication-java">SampleApplication.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
@@ -298,7 +328,7 @@ public class SampleApplication extends ResourceConfig {
     }
 }
 </code></pre><p>あとはリソースで使うだけ。</p>
-<h4>Home.java</h4>
+<h4 id="home-java">Home.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.HashMap;
@@ -384,7 +414,7 @@ public class Home {
     }
 }
 </code></pre><p>んまぁという感じで大体どういうレスポンスになるかは想像出来るのはないかと</p>
-<h4>HomeTest.java</h4>
+<h4 id="hometest-java">HomeTest.java</h4>
 <p>テストする際にHttpServletRequest等の@Injectは行われないのでエラーになる。なのでSpring Framework Testingに入ってるMockHttpServletRequest等をAbstractBinderを使って差し込む的な事をする事で対処出来る模様</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.servlet.ServletContext;

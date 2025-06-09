@@ -93,10 +93,37 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#androidmanifest-xml">AndroidManifest.xml</a>
+</li>
+<li>
+<a href="#res-xml-accessibility_service-xml">res/xml/accessibility_service.xml</a>
+</li>
+<li>
+<a href="#mainactivity-java">MainActivity.java</a>
+</li>
+<li>
+<a href="#res-layout-notify-xml">res/layout/notify.xml</a>
+</li>
+<li>
+<a href="#sampleaccessibilityservice-java">SampleAccessibilityService.java</a>
+</li>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+<li>
+<a href="#2">追記2</a>
+</li>
+<li>
+<a href="#3">追記3</a>
+</li>
+</ul>
+-->
                 <p>ちょっと前にDeskNotifierっていうスマフォの通知をPCにプッシュするというアプリがあったのを見て思ったのですけど、(Android)スマフォのNotificationって監視して取得したり出来る物なのかっていう所が不明だったので色々と調査</p><p>で調査結果としてAccessibilityServiceを使う事で可能な模様、という事でやってみた。まぁ詳しい事は公式ドキュメントに書いてあるんですけど</p>
 <!--more-->
 
-<h4>AndroidManifest.xml</h4>
+<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="sample.test"
@@ -135,7 +162,7 @@
     &lt;/application&gt;
 &lt;/manifest&gt;
 </code></pre><p>Activityはテスト名目でただNotificationを送るだけのActivity。でAccessibilityServiceを継承したクラスに&lt;service&gt;に設定しておく。んでそのサービスの設定が必要になるのでそれを&lt;meta-data&gt;で設定しておく</p>
-<h4>res/xml/accessibility_service.xml</h4>
+<h4 id="res-xml-accessibility_service-xml">res/xml/accessibility_service.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
 &lt;accessibility-service
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -144,7 +171,7 @@
     android:accessibilityFlags="flagDefault"
     android:canRetrieveWindowContent="true" /&gt;
 </code></pre><p>こいつも公式ドキュメントに書いてあるので詳しい事は省略しますが、<span style="color: red">android:packageNames</span>を定義すると対象とするパッケージを限定出来る模様。今回それを定義していないのでグローバルになる模様(確証は無い)</p><p>でこれを設定してインストールした場合にAndroid端末の設定画面のユーザー補助な所にサービスとして表示されるようになる。デフォルトではOFFになっているのでこれを使う場合はONにしておく</p>
-<h4>MainActivity.java</h4>
+<h4 id="mainactivity-java">MainActivity.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Activity;
@@ -326,7 +353,7 @@ http://www.apache.org/licenses/LICENSE-2.0
     &lt;/LinearLayout&gt;
 &lt;/FrameLayout&gt;
 </code></pre><p>これでR.id.titleが定義されているので、パッケージを含めるとandroid.R.id.titleになるんだと思われる。なのでカスタムViewのレイアウトでも<span style="color: red">android:id</span>な部分はandroidプレフィックスで指定する事でカスタムViewを使った場合にでもグローバルと差を無くして取得出来る(はず。これも確証無し)</p>
-<h4>res/layout/notify.xml</h4>
+<h4 id="res-layout-notify-xml">res/layout/notify.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
 &lt;FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -340,7 +367,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 &lt;/FrameLayout&gt;
 </code></pre><p>上で言った通りなので詳しい事は省略。だけど、AndroidコアのNotificationのレイアウトだとFrameLayoutになってた気がするので、レイアウトベースはFrameLayoutを使用する</p>
-<h4>SampleAccessibilityService.java</h4>
+<h4 id="sampleaccessibilityservice-java">SampleAccessibilityService.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.accessibilityservice.AccessibilityService;
@@ -391,11 +418,11 @@ public class SampleAccessibilityService extends AccessibilityService {
     }
 }
 </code></pre><p>AccessibilityServiceを継承したクラスを作る。で検証はしてないんだけど、onServiceConnectedをオーバーライドして、setServiceInfo(AccessibilityServiceInfo)を設定する事で、上記で設定したaccessibility_service.xmlを使わずにサービスクラス側でコントロールする事も可能な模様(ってどっかのサイトに書いてた)</p><p>それとToastもNotificationとして認識されるのでそこ注意しておく。でToastの実体?っぽいのがandroid.widget.Toast$TNってなってるのでstartsWithでそこら辺チェックしておく。あとは取得されたNotificationからRemoteViewsを取得してそこのビューを取得してandroid.R.id.titleなUIコンポーネントにアクセスしてテキストを取得する事が可能な模様</p><p>ちなみにaccessibility_service.xmlの<span style="color:red">accessibilityEventTypes</span>によってはAccessibilityEventで取得出来る情報は限られている模様。そこも公式ドキュメントにしっかり書かれているので参照</p><p>公式ドキュメント: <a href="http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html">http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html</a></p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 <p>Android4.3からはNotificationListenerServiceを用いる事で容易に実現可能っぽい。既に<a href="/android43-notificationlistenerservice.html">検証済み</a></p>
-<h4>追記2</h4>
+<h4 id="2">追記2</h4>
 <p>古いAndroidのバージョンに関しては<a href="/android-accessibilityservice-legacy-firmware.html">AccessibilityServiceを古いAndroidバージョンで動かす</a>にて補足済み</p>
-<h4>追記3</h4>
+<h4 id="3">追記3</h4>
 <p>追記2のリンク先にも書いてますが</p>
 <blockquote class="twitter-tweet" lang="ja">
   <p>

@@ -93,12 +93,27 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#jenkins">Jenkins側の事前設定</a>
+</li>
+<li>
+<a href="#part-d2bfece8a53d3a7">アプリプロジェクトの構造</a>
+</li>
+<li>
+<a href="#part-1229aee965e7cc9a">ビルドの設定</a>
+</li>
+<li>
+<a href="#part-cf56df891d51e106">ビルドログ</a>
+</li>
+</ul>
+-->
                 <p>んまぁライブラリプロジェクト自体をJenkinsのビルドプロジェクト(フリースタイル)とかで定義しちゃっても良いとは思いますけど、ActionBarSherlockとかだったりだとか公開されている有用なAndroidライブラリとかを伴うプロジェクトをビルドするとなると定義するかプロジェクト内にぶち込んじゃうかっていう所だと思うのですが、その後者側の「参照するライブラリプロジェクト自体をビルドプロジェクトとして定義せずにアプリプロジェクトにぶち込んでビルド」するっていう方式的なのを検証してみた</p>
 <!--more-->
 
-<h4>Jenkins側の事前設定</h4>
+<h4 id="jenkins">Jenkins側の事前設定</h4>
 <p>Jenkins Git Pluginを使う。入れたのは <a href="https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin">https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin</a></p>
-<h4>アプリプロジェクトの構造</h4>
+<h4 id="part-d2bfece8a53d3a7">アプリプロジェクトの構造</h4>
 <p>ディレクトリ内にアプリプロジェクトディレクトリと参照するライブラリプロジェクトのディレクトリは分けてる。</p>
 <pre>
 root:
@@ -107,7 +122,7 @@ root:
   - アプリプロジェクト
 </pre>
 <p>っていう感じなのだけど。ActionBarSherlockとSlidingMenu自体はgithubで提供されているので、git submoduleを使って取得する。でこの構造をgitサーバー辺りにpushしておく</p><p>git submoduleなやつはJenkinsでワークスペースをビルドする際にフェッチされる模様なのでこっちで何かするとかは無い模様。但し、android update [lib-]projectとかは必要</p><p>まぁ構造的なのはそんくらい</p>
-<h4>ビルドの設定</h4>
+<h4 id="part-1229aee965e7cc9a">ビルドの設定</h4>
 <p>ソースコード管理からgitを選択して、pushしたgitサーバーのリポジトリを指定する。上記にも書いたけど、これでワークスペースにgitからチェックアウトされて格納される模様</p><p>で上記の注釈でも書いたけど、gitから取ってきてもupdate project関係は必要な模様。なのでビルド手順の追加でantでビルドする前にシェルスクリプトの実行で</p><pre class="line-numbers"><code class="language-">android update lib-project -p ActionBarSherlock/actionbarsherlock -t [Android Build Target]
 android update lib-project -p SlidingMenu/library -t [Android Build Target]
 android update project -p sample -l ../ActionBarSherlock/actionbarsherlock
@@ -115,7 +130,7 @@ android update project -p sample -l ../SlidingMenu/library
 </code></pre><p>等ような初期設定が必要。あともうひとつ難点があって、Androidの場合android-support-v4だとかが組み込まれているケースがある。ファイルのハッシュサムがマッチしないとAndroidのビルドがずっこけるっていうのがあるので、アプリプロジェクトにベースとなるandroid-support-v4を入れておいて</p><pre class="line-numbers"><code class="language-">cp sample/libs/android-support-v4.jar ActionBarSherlock/actionbarsherlock/libs/
 cp sample/libs/android-support-v4.jar SlidingMenu/library/libs/
 </code></pre><p>っていうように同一の物を使うようにする等でビルドするようにする。まぁ上記の2つのビルドスクリプトを合わせれば良い</p><p>でその後にantビルド方式を「clean release」辺りを行うように設定。あとは普通にJenkinsでビルド</p>
-<h4>ビルドログ</h4>
+<h4 id="part-cf56df891d51e106">ビルドログ</h4>
 <p>クソ長いので省略</p>
 <pre>
 コンソール出力

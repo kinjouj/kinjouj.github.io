@@ -100,10 +100,37 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-6542c7faa86">構造</a>
+</li>
+<li>
+<a href="#build-gradle">build.gradle</a>
+</li>
+<li>
+<a href="#appconfig-java">AppConfig.java</a>
+</li>
+<li>
+<a href="#sample-java">Sample.java</a>
+</li>
+<li>
+<a href="#sampledao-java">SampleDao.java</a>
+</li>
+<li>
+<a href="#resources-meta-inf-sample-dao-sampledao-findall-sql">resources/META-INF/sample/dao/SampleDao/findAll.sql</a>
+</li>
+<li>
+<a href="#resources-meta-inf-sample-dao-sampledao-find-sql">resources/META-INF/sample/dao/SampleDao/find.sql</a>
+</li>
+<li>
+<a href="#sampledaotest-java">SampleDaoTest.java</a>
+</li>
+</ul>
+-->
                 <p><a href="http://doma.readthedocs.org/ja/latest/getting-started">http://doma.readthedocs.org/ja/latest/getting-started</a> を見ながらやってみた</p><p>※ターゲットバージョンは2.x</p>
 <!--more-->
 
-<h4>構造</h4>
+<h4 id="part-6542c7faa86">構造</h4>
 
 <pre>
 .
@@ -131,7 +158,7 @@
                     └── SampleDaoTest.java
 </pre>
 
-<h4>build.gradle</h4>
+<h4 id="build-gradle">build.gradle</h4>
 <pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
 
 processResources.destinationDir = compileJava.destinationDir
@@ -148,7 +175,7 @@ dependencies {
     testCompile "org.hamcrest:hamcrest-all:+"
 }
 </code></pre><p>公式ドキュメントにはEclipseを使う際の設定なりが記述されてるけど、使わないのですこは全面的にスキップで(詳しくは <a href="https://github.com/domaframework/simple-boilerplate">https://github.com/domaframework/simple-boilerplate</a> を読めばいい)</p><p>でdomaの方式としてはDAO(インターフェース)とSQLを書いてそのソースから実装をアノテーションプロセッサー周りを使ってクラスを生成する仕組みになっている模様</p><p>で実行環境はこんなもんで、DAO(とエンティティクラスを含む)とSQLとデータソースなり回りなAppConfigクラスを作成する</p>
-<h4>AppConfig.java</h4>
+<h4 id="appconfig-java">AppConfig.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.sql.DataSource;
@@ -196,7 +223,7 @@ public class AppConfig implements Config {
     }
 }
 </code></pre><p>大体な所を <a href="http://doma.readthedocs.org/ja/latest/config/#id20">http://doma.readthedocs.org/ja/latest/config/#id20</a> を参考にして作成。DIコンテナ依存するような場合のケースは今後検証するので今回はパス</p>
-<h4>Sample.java</h4>
+<h4 id="sample-java">Sample.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.entity;
 
 import java.util.Date;
@@ -240,7 +267,7 @@ public class Sample {
     }
 }
 </code></pre><p>変数名がそのままカラム名になるのでマッピングする際にあたって名称によって問題なる場合には@Columnアノテーションで紐付けするカラム名をマッピングするようにすれば良い。あとテーブル名もデフォルトではクラス名同等の名前になる模様。そういう問題が出るような場合(insert等のSQLを自動生成して実行するような場合)にはnamingパラメーターでクラス内で実行するSQLを生成する際に参照するテーブル名などの方式を設定すれば良い。上記だとクラス名をlowercaseした値でSQLを実行する</p><p>※@Tableアノテーションで指定した名前で利用することも可能っぽい</p>
-<h4>SampleDao.java</h4>
+<h4 id="sampledao-java">SampleDao.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
@@ -267,14 +294,14 @@ public interface SampleDao {
     int save(Sample s);
 }
 </code></pre><p>で@Selectアノテーションで使うSQLファイルを定義する必要がある。resources/META-INF/DAOパッケージ名/メソッド名.sqlで定義すれば良い模様</p>
-<h4>resources/META-INF/sample/dao/SampleDao/findAll.sql</h4>
+<h4 id="resources-meta-inf-sample-dao-sampledao-findall-sql">resources/META-INF/sample/dao/SampleDao/findAll.sql</h4>
 <pre class="line-numbers"><code class="language-sql">select
     /*%expand*/*
 from
     sample
 order by id
 </code></pre><p>/<em>%expand</em>/っていう形として、オブジェクトが持つカラムを展開してくれる</p>
-<h4>resources/META-INF/sample/dao/SampleDao/find.sql</h4>
+<h4 id="resources-meta-inf-sample-dao-sampledao-find-sql">resources/META-INF/sample/dao/SampleDao/find.sql</h4>
 <pre class="line-numbers"><code class="language-sql">SELECT
     /*%expand*/*
 FROM
@@ -282,7 +309,7 @@ FROM
 WHERE
     id = /* id */0
 </code></pre><p>/* id */の箇所にメソッドの引数で指定した値が展開される</p><p>っていう感じでこれで実装終わりなので、テスト書いて実際にデータベースの問い合わせをテストしてみる</p>
-<h4>SampleDaoTest.java</h4>
+<h4 id="sampledaotest-java">SampleDaoTest.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;

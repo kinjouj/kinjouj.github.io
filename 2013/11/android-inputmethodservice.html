@@ -93,12 +93,36 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-6542b653a0a">方式</a>
+</li>
+<li>
+<a href="#androidmanifest-xml">AndroidManifest.xml</a>
+</li>
+<li>
+<a href="#res-layout-input-xml">res/layout/input.xml</a>
+</li>
+<li>
+<a href="#res-xml-inputmethod-xml">res/xml/inputmethod.xml</a>
+</li>
+<li>
+<a href="#res-xml-keyboard-xml">res/xml/keyboard.xml</a>
+</li>
+<li>
+<a href="#bluetoothkeyboardservice-java">BluetoothKeyboardService.java</a>
+</li>
+<li>
+<a href="#part-753fcb6e4692b251">動かしてみる</a>
+</li>
+</ul>
+-->
                 <p>ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをやってた。とりあえず書いておこうかと</p>
 <!--more-->
 
-<h4>方式</h4>
+<h4 id="part-6542b653a0a">方式</h4>
 <p>bluetooth RFCOMMなプロファイルを利用してPC側からスマフォ側にbluetooth経由でテキストを送信。それをアクティブなIMで受け取って入力を反映させるっていうだけ</p>
-<h4>AndroidManifest.xml</h4>
+<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -120,7 +144,7 @@
     &lt;/application&gt;
 &lt;/manifest&gt;
 </code></pre>
-<h4>res/layout/input.xml</h4>
+<h4 id="res-layout-input-xml">res/layout/input.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;android.inputmethodservice.KeyboardView
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -129,12 +153,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content" /&gt;
 </code></pre><p>後々必要になるので</p>
-<h4>res/xml/inputmethod.xml</h4>
+<h4 id="res-xml-inputmethod-xml">res/xml/inputmethod.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;input-method
     xmlns:android="http://schemas.android.com/apk/res/android" /&gt;
 </code></pre><p>設定要件は<a href="http://developer.android.com/reference/android/R.styleable.html#InputMethod">R.styleable#InputMethod</a>を参照</p>
-<h4>res/xml/keyboard.xml</h4>
+<h4 id="res-xml-keyboard-xml">res/xml/keyboard.xml</h4>
 <p>ソフトウェアキーボードなレイアウトを定義</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;Keyboard xmlns:android="http://schemas.android.com/apk/res/android"&gt;
     &lt;Row android:rowEdgeFlags="top" android:keyHeight="100px"&gt;
@@ -154,7 +178,7 @@
     &lt;/Row&gt;
 &lt;/Keyboard&gt;
 </code></pre><p>codesで指定されたコードはキーをタッチしたい等な場合に引数に指定される(primaryCodeとか)。又、設定要件は　<a href="http://developer.android.com/reference/android/inputmethodservice/Keyboard.html">http://developer.android.com/reference/android/inputmethodservice/Keyboard.html</a> を参照</p><p>まぁ設定ファイル系はこれだけ。あとはサービスクラスを書いたりとか</p>
-<h4>BluetoothKeyboardService.java</h4>
+<h4 id="bluetoothkeyboardservice-java">BluetoothKeyboardService.java</h4>
 <pre class="line-numbers"><code class="language-java">package net.kinjouj.app.bluetooth_keyboard;
 
 import java.io.BufferedReader;
@@ -347,7 +371,7 @@ public class BluetoothKeyboardService extends InputMethodService implements Keyb
     }
 }
 </code></pre><p>キーボード入力が開始される(ソフトウェアキーボードが起動される?)際にbluetoothの接続を行なってRFCOMMプロファイルで要求を待ち受ける。でテキストな要求が来た際にはソフトウェアキーボードに対してテキストをコミットする。まぁそんだけ</p>
-<h4>動かしてみる</h4>
+<h4 id="part-753fcb6e4692b251">動かしてみる</h4>
 <p>アプリを入れるとキーボード設定で</p><p><img src="/images/2013/11/201311061735_1.png" alt="image" /></p><p>っていうように表示されるようになる。でチェックを入れておかないと使えるようにならないのでチェックしておく</p><p>あとはテキストを入力するフォーカスで入力方式でBluetoothKeyboardを選択すると</p><p><img src="/images/2013/11/201311061735_2.png" alt="image" /></p><p>って言うように出る。あとはPC側から入力を反映させる適当なスクリプトを書く</p><pre class="line-numbers"><code class="language-py">from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
 
 host = None

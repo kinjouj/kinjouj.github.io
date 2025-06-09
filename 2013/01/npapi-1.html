@@ -99,12 +99,36 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-65422d00549">お題</a>
+</li>
+<li>
+<a href="#manifest-json">manifest.json</a>
+</li>
+<li>
+<a href="#background-js">background.js</a>
+</li>
+<li>
+<a href="#npapi">NPAPIを作るにあたって必要な物</a>
+</li>
+<li>
+<a href="#plugin-h">plugin.h</a>
+</li>
+<li>
+<a href="#plugin-cc">plugin.cc</a>
+</li>
+<li>
+<a href="#part-b832a88e56023ec7">コンパイル</a>
+</li>
+</ul>
+-->
                 <p>多分続編はあると思います。まだ色々やってない事も沢山あるので</p>
 <!--more-->
 
-<h4>お題</h4>
+<h4 id="part-65422d00549">お題</h4>
 <p>最近色んな界隈で賑わっている、APIを使ってCDドライブを開くってやつをNPAPIを使ってChrome拡張でブラウザアクションをクリックしたら開くような感じな事やってみる</p><p>一応、これ環境によっては動かないはずなので。ちなみに検証はUbuntu12.04とChrome(v23)</p>
-<h4>manifest.json</h4>
+<h4 id="manifest-json">manifest.json</h4>
 <pre class="line-numbers"><code class="language-json">{
   "name": "test",
   "version": "0.1",
@@ -122,7 +146,7 @@
   ]
 }
 </code></pre><p>background.htmlはembedでプラグイン読み込みとそれに伴うJavaScriptを読み込むだけなので省略します。JavaScriptの方は書きますけど</p>
-<h4>background.js</h4>
+<h4 id="background-js">background.js</h4>
 <pre class="line-numbers"><code class="language-js">(function(undefined) {
   chrome.browserAction.onClicked.addListener(function() {
     var plugin = document.getElementById("plugin");
@@ -130,9 +154,9 @@
   });
 })();
 </code></pre><p>まぁブラウザアクションをクリックしたらプラグインのejectメソッドを呼び出すって感じ。あとはNPAPIなプラグインを作るだけとなる</p>
-<h4>NPAPIを作るにあたって必要な物</h4>
+<h4 id="npapi">NPAPIを作るにあたって必要な物</h4>
 <p>NPAPIのヘッダーファイルが必要になるんですが、 <a href="http://code.google.com/p/npapi-sdk">http://code.google.com/p/npapi-sdk</a> でチェックアウトする事が出来るのでチェックアウトしておく。でこのnpapi-sdkを/opt/npapiとして移動させておく。あとは-I/opt/npapi/headersで参照可能</p><p>で作成するのはプラグインのヘッダーとプラグインのソースとなるC++を書くだけ</p>
-<h4>plugin.h</h4>
+<h4 id="plugin-h">plugin.h</h4>
 <pre class="line-numbers"><code class="language-c">#include "npfunctions.h"
 #include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
@@ -142,7 +166,7 @@
 
 NPNetscapeFuncs* ppFuncs;
 </code></pre>
-<h4>plugin.cc</h4>
+<h4 id="plugin-cc">plugin.cc</h4>
 <pre class="line-numbers"><code class="language-cpp">#include &lt;iostream&gt;
 #include "plugin.h"
 
@@ -276,7 +300,7 @@ NPError NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc
   return NPERR_NO_ERROR;
 }
 </code></pre><p>&lt;embed&gt;とかで読み込んだプラグインをJavaScriptから参照してメソッドを実行する場合、NPClassで指定されているHasMethodが働く。でそこからtrueが返されたらInvokeが動く模様。メソッド実行から値を返したい場合とかにはNPVariantな引数(result)とかに値ぶち込んでやれば良い模様。まだそこら辺はやってない</p>
-<h4>コンパイル</h4>
+<h4 id="part-b832a88e56023ec7">コンパイル</h4>
 <pre class="line-numbers"><code class="language-">g++ -g -I/opt/npapi/headers -I. -Wall -DXP_UNIX=1 -fPIC -c plugin.cc -o plugin.o
 g++ -shared plugin.o -o plugin/libhoge.so
 </code></pre><p>な感じでコンパイルする。で問題なければおっけーかと</p><p>あとは拡張機能のcrx作るとか、開発プロジェクト読み込むかでインストールした後にブラウザアクションにあるアイコンをクリックするとCDドライブが開く</p>

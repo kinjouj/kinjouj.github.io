@@ -98,10 +98,25 @@ fuel/app/views/home.php
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#fuel-app-views-home-php">fuel/app/views/home.php</a>
+</li>
+<li>
+<a href="#fuel-app-classes-controller-home-php">fuel/app/classes/controller/home.php</a>
+</li>
+<li>
+<a href="#fuel-app-tests-controller-home_test-php">fuel/app/tests/controller/home_test.php</a>
+</li>
+<li>
+<a href="#1-javascript-csrf">備考1: JavaScript用のCSRFトークン機能に関して</a>
+</li>
+</ul>
+-->
                 <p>CSRF関係のAPIも存在するのでそれを利用すれば良い模様。あくまでFuelPHP APIの話なだけですので</p>
 <!--more-->
 
-<h4>fuel/app/views/home.php</h4>
+<h4 id="fuel-app-views-home-php">fuel/app/views/home.php</h4>
 <pre class="line-numbers"><code class="language-php">&lt;html&gt;
   &lt;body&gt;
     &lt;form action="/" method="POST"&gt;
@@ -111,7 +126,7 @@ fuel/app/views/home.php
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre><p>Security::fetch_tokenを使ってCSRFに使うワンタイムトークンのような物を生成出来る模様。んでCSRFチェックを行う際にSecurityクラスで使うメソッドがConfig::get(&quot;security.csrf_token_key&quot;)を参照してポストされたトークンを取得すると思われるのでそれを確認しておく(デフォルトはfuel_csrf_token)。まぁ要はキー名ってだけなんだけど</p>
-<h4>fuel/app/classes/controller/home.php</h4>
+<h4 id="fuel-app-classes-controller-home-php">fuel/app/classes/controller/home.php</h4>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
@@ -128,7 +143,7 @@ class Controller_Home extends Controller {
     }
 }
 </code></pre><p>CSRFチェックを行うにはSecurity::check_tokenを使用する。本来であれば、CSRFがfailした際には正常リクエストな場合で出すステータスとは別にした方が良いかと思われる(そうじゃないとコントローラーテストで識別しにくいのではと)</p><p>一回普通にポストしてリダイレクト等をせずリロードした場合には、既にセッション内に確保されている(と思われる)CSRFトークンは削除されている(ワンタイムである為)。なのでリロードしてもその時点でセッション内トークンは削除されているのでCSRFチェックはfailすると思われる</p><p>でhiddenを設定しない、もしくは別の領域からポストされている場合には送信元認証がされてない事によりCSRFチェックはfailする</p><p>っていう感じでしょうかね。んじゃこのコントローラーのテストケースを書くには</p>
-<h4>fuel/app/tests/controller/home_test.php</h4>
+<h4 id="fuel-app-tests-controller-home_test-php">fuel/app/tests/controller/home_test.php</h4>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Controller_Home extends TestCase {
@@ -152,7 +167,7 @@ class Test_Controller_Home extends TestCase {
     }
 }
 </code></pre><p>っていう感じじゃないですかね。CurlドライバーなRequestクラスを使い、クッキーにfetch_tokenした結果をぶち込んでおく。んでPOSTする際にも同じトークンをぶち込む(ここの値を変えるとCSRFチェックがfailする)</p><p>な感じですかねと。ぶっちゃけこれ気休め程度にしかならないんじゃないのかっていう疑問もちょっとあるんですが</p>
-<h4>備考1: JavaScript用のCSRFトークン機能に関して</h4>
+<h4 id="1-javascript-csrf">備考1: JavaScript用のCSRFトークン機能に関して</h4>
 <p>Security::js_fetch_tokenを使うとJavaScriptで利用する用のCSRFトークンを取得する関数が定義されるのですが、これを使うと</p><pre class="line-numbers"><code class="language-js">function fuel_csrf_token() {
     if (document.cookie.length &gt; 0) {
         var c_name = "fuel_csrf_token";

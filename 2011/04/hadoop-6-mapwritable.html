@@ -95,8 +95,23 @@ packa" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#samplemapper-java">SampleMapper.javaを作成</a>
+</li>
+<li>
+<a href="#samplereducer-java">SampleReducer.java</a>
+</li>
+<li>
+<a href="#testoutputformat-java">TestOutputFormat.javaを作成</a>
+</li>
+<li>
+<a href="#1-mapwritable">備考1 MapWritableをジェネリックスで利用する場合の注意点</a>
+</li>
+</ul>
+-->
                 <p>MapReduceの対象がテキストと数値以外の他に多数ある場合にはMapWritableを利用する事でMapインターフェースの型も使用する事ができる</p>
-<h4>SampleMapper.javaを作成</h4>
+<h4 id="samplemapper-java">SampleMapper.javaを作成</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.text.MessageFormat;
@@ -132,7 +147,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, MapWritabl
     }
 }
 </code></pre><p>MapWritableはキーもバリューも両方Writableなので注意する。又、containsKey等のメソッドもあるが、対象がWritableな為通常どおりStringのような文字列を指定してもマッチしない</p>
-<h4>SampleReducer.java</h4>
+<h4 id="samplereducer-java">SampleReducer.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
@@ -194,7 +209,7 @@ public class SampleReducer extends Reducer&lt;Text, MapWritable, Text, MapWritab
     }
 }
 </code></pre><p>というようにする事で使用する事ができるがMapWritable自体を通常のようにTextOutputFormat等を使用して書き込んでもキーバリューを出力したり等はしないので別途OutputFormatを拡張しておく必要がある</p>
-<h4>TestOutputFormat.javaを作成</h4>
+<h4 id="testoutputformat-java">TestOutputFormat.javaを作成</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataOutputStream;
@@ -263,7 +278,7 @@ public class TestOutputFormat extends TextOutputFormat&lt;Text, MapWritable&gt; 
     }
 }
 </code></pre><p>あとはClientクラスでsetOutputKeyClassでMapWritableを使用すれば良い</p>
-<h4>備考1 MapWritableをジェネリックスで利用する場合の注意点</h4>
+<h4 id="1-mapwritable">備考1 MapWritableをジェネリックスで利用する場合の注意点</h4>
 <p>MapperやReducerでMapWritable等をpushする場合においてはMapperとReducer間で型が違う場合には正常に渡されない。つまりOutputValueClassはIntWritableになっているのにMapWritableを渡すとおかしくなる。又、Mapperが&lt;Text,IntWritable&gt;なのに対し、Reducerでは&lt;Text,MapWritable&gt;をpushすると正常に処理されない。なのでそういう場合にはMapperからReducerに渡されるデータ型を設定しておく必要がある</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configuration;

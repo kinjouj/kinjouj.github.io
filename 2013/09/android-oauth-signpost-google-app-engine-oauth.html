@@ -98,10 +98,31 @@ Androidのブラウザ等から共有機能を使ってURLをGoogle App Engine�
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-654311259e9">要件</a>
+</li>
+<li>
+<a href="#part-8811212a92a05889">セットアップ</a>
+</li>
+<li>
+<a href="#androidmanifest-xml">AndroidManifest.xml</a>
+</li>
+<li>
+<a href="#shareroidactivity-java">ShareroidActivity.java</a>
+</li>
+<li>
+<a href="#oauthactivity-java">OAuthActivity.java</a>
+</li>
+<li>
+<a href="#oauthcallbackactivity-java">OAuthCallbackActivity.java</a>
+</li>
+</ul>
+-->
                 <p>タイトル通り。要件は以下</p>
 <!--more-->
 <p>※但し以下のソースがプロトタイプ段階な為、めちゃくちゃすぎるので注意</p>
-<h4>要件</h4>
+<h4 id="part-654311259e9">要件</h4>
 <p>Androidのブラウザ等から共有機能を使ってURLをGoogle App Engine向けに送信する。でその際にGoogle App Engine側はOAuthServiceによりOAuth認可が必要な為、oauth-signpostを利用して共有機能から得られたURLを送出する</p><p>でActivityな流れ的には</p>
 <ul>
 <li>共有機能からURLをシェアする</li>
@@ -111,14 +132,14 @@ Androidのブラウザ等から共有機能を使ってURLをGoogle App Engine�
 <li>上記のコールバック先に認証前に取得しておいたURLなクエリーを付与しておいて、認証後にそれを処理する</li>
 </ul>
 <p>っていう事。あくまで3以降なのは3に特有する。から1や2の状態で4や5な所を意識する必要は無い(かも)</p><p>Androidでoauth-signpostを使ってゴニョゴニョ利用するにはどうするかって所をやってみる</p>
-<h4>セットアップ</h4>
+<h4 id="part-8811212a92a05889">セットアップ</h4>
 <p>oauth-signpostなライブラリが必要なので <a href="https://code.google.com/p/oauth-signpost">https://code.google.com/p/oauth-signpost</a> からダウンロードしてくる。ダウンロードしてくるファイルは</p>
 <ul>
 <li>  signpost-core-バージョン.jar</li>
 <li>  signpost-commonshttp4-バージョン.jar</li>
 </ul>
 <p>の2つだけで良い。でAndroidアプリプロジェクトのlibsディレクトリに突っ込んでおく</p>
-<h4>AndroidManifest.xml</h4>
+<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="shareroid.app"
@@ -163,7 +184,7 @@ Androidのブラウザ等から共有機能を使ってURLをGoogle App Engine�
     &lt;/application&gt;
 &lt;/manifest&gt;
 </code></pre>
-<h4>ShareroidActivity.java</h4>
+<h4 id="shareroidactivity-java">ShareroidActivity.java</h4>
 <pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import oauth.signpost.exception.OAuthCommunicationException;
@@ -239,7 +260,7 @@ public class ShareroidActivity extends OAuthActivity {
     }
 }
 </code></pre><p>共有機能(android.intent.action.SEND)からぶっ飛んでくるActviity。でその共有から送信されたデータ(URL)を取得、んでサーバーに投げる前に認可状態をチェックして認可してればそのままぶん投げる、認可してなければoauth-signpostな機能を使ってぶん投げる。でそのAPI自体はOAuthActivityっていう基底Activityクラスでメソッド定義してある。それは後術</p>
-<h4>OAuthActivity.java</h4>
+<h4 id="oauthactivity-java">OAuthActivity.java</h4>
 <p>上記で書いた基底Activityクラス</p><pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import java.io.IOException;
@@ -351,7 +372,7 @@ public abstract class OAuthActivity extends Activity {
     }
 }
 </code></pre>
-<h4>OAuthCallbackActivity.java</h4>
+<h4 id="oauthcallbackactivity-java">OAuthCallbackActivity.java</h4>
 <pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import oauth.signpost.exception.OAuthCommunicationException;

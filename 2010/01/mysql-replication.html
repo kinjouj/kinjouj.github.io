@@ -96,19 +96,34 @@ serv" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#my-cnf">my.cnfを設定 (レプリケーション元)</a>
+</li>
+<li>
+<a href="#my-cnf">my.cnfを設定 (レプリケーション先)</a>
+</li>
+<li>
+<a href="#part-dde40973d7f4137e">レプリケーション元の情報を設定 (レプリケーション先)</a>
+</li>
+<li>
+<a href="#ssh">SSHトンネリング側の設定 (レプリケーション先)</a>
+</li>
+</ul>
+-->
                 <p>MySQLでデータベースをレプリケーションさせてみる</p>
-<h4>my.cnfを設定 (レプリケーション元)</h4>
+<h4 id="my-cnf">my.cnfを設定 (レプリケーション元)</h4>
 <pre class="line-numbers"><code class="language-conf">[mysqld]
 log_bin = /var/log/mysql/mysql-bin.log
 server-id = 1
 </code></pre><p>上を追加しておく。ついでにMySQL上のレプリケーションを行うユーザーを作っておいた方が良い</p><pre class="line-numbers"><code class="language-sql">GRANT REPLICATION SLAVE,REPLICATION CLIENT ON *.* TO repl@'%' IDENTIFIED BY 'pass';
 </code></pre><p>あと</p><pre class="line-numbers"><code class="language-sql">SHOW MASTER STATUS
 </code></pre><p>を実行した結果のPositionとログファイル名は記憶しておく</p>
-<h4>my.cnfを設定 (レプリケーション先)</h4>
+<h4 id="my-cnf">my.cnfを設定 (レプリケーション先)</h4>
 <pre class="line-numbers"><code class="language-conf">[mysqld]
 server-id = 2
 </code></pre>
-<h4>レプリケーション元の情報を設定 (レプリケーション先)</h4>
+<h4 id="part-dde40973d7f4137e">レプリケーション元の情報を設定 (レプリケーション先)</h4>
 <pre class="line-numbers"><code class="language-sql">CHANGE MASTER TO
   MASTER_HOST='localhost',
   MASTER_PORT=13306,
@@ -117,7 +132,7 @@ server-id = 2
   MASTER_LOG_FILE='mysql-bin.000001',
   MASTER_LOG_POS=106;
 </code></pre><p>MASTER<em>LOG</em>FILEとMASTER<em>LOG</em>POSはレプリケーション元側で取得したスレーブログ情報を指定する</p>
-<h4>SSHトンネリング側の設定 (レプリケーション先)</h4>
+<h4 id="ssh">SSHトンネリング側の設定 (レプリケーション先)</h4>
 <p>んでマスターサーバー側のMySQLポートのファイアウォール設定を変えるのはまずいので、とりあえずSSHトンネリングを設定する</p><pre class="line-numbers"><code class="language-bash">ssh -f -N -N 13306:192.168.3.1:3306 kinjouj@192.168.3.1
 </code></pre><p>レプリケーション元でSSHサーバーを起動しておき、このSSHポートフォワーディングを利用する事でマスターサーバーのSSHを利用してレプリケーションを実行する事ができるようになる</p>
               </div>

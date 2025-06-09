@@ -97,12 +97,43 @@ http://cassandra.apache.org からダウンロード。一応、この記事の�
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-bdf5c55b74bb686">インストール</a>
+</li>
+<li>
+<a href="#part-e6869ed7a7542be4">起動とその他もろもろ</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#keyspace-create-keyspace-keyspace1-keyspace">Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</a>
+</li>
+<li>
+<a href="#column-family">Column Familyを作る</a>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<a href="#pom-xml">pom.xml</a>
+</li>
+<li>
+<a href="#client-java">Client.java</a>
+</li>
+</ul>
+-->
                 <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p>
 <!--more-->
 
-<h4>インストール</h4>
+<h4 id="part-bdf5c55b74bb686">インストール</h4>
 <p><a href="http://cassandra.apache.org">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p>
-<h4>起動とその他もろもろ</h4>
+<h4 id="part-e6869ed7a7542be4">起動とその他もろもろ</h4>
 <p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p><pre class="line-numbers"><code class="language-sh">mkdir -p /var/{log,lib}/cassandra
 
 # ※各ディレクトリの所有者関係も設定する
@@ -123,9 +154,9 @@ http://cassandra.apache.org からダウンロード。一応、この記事の�
 
 
 </code></pre>
-<h1>Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</h1>
+<h1 id="keyspace-create-keyspace-keyspace1-keyspace">Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</h1>
 <p>use Keyspace1;</p>
-<h1>Column Familyを作る</h1>
+<h1 id="column-family">Column Familyを作る</h1>
 <p>create column family Sample with comparator = UTF8Type and key<em>validation</em>class = UTF8Type and default<em>validation</em>class = UTF8Type
 ```</p><p>まぁこんな感じで作る。で最後の所ですが、作ったColumn Familyをdescribeしてみると</p>
 <pre>
@@ -161,7 +192,7 @@ get Sample[test1];
 
 # 出力 =&gt; (column=name, value=hoge, timestamp=省略)
 </code></pre><p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p>
-<h4>pom.xml</h4>
+<h4 id="pom-xml">pom.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;project
     xmlns="http://maven.apache.org/POM/4.0.0"
@@ -204,7 +235,7 @@ get Sample[test1];
     &lt;/dependencies&gt;
 &lt;/project&gt;
 </code></pre><p>んじゃJava側のClientクラスを書く</p>
-<h4>Client.java</h4>
+<h4 id="client-java">Client.java</h4>
 <pre class="line-numbers"><code class="language-java">import java.nio.ByteBuffer;
 import java.io.UnsupportedEncodingException;
 import org.apache.cassandra.thrift.Cassandra;

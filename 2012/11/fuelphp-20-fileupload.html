@@ -97,10 +97,25 @@ fuel/core/config/upload.phpからコピーするなりで作成&" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#fuel-app-config-upload-php">fuel/app/config/upload.php</a>
+</li>
+<li>
+<a href="#fuel-app-classes-controller-home-php">fuel/app/classes/controller/home.php</a>
+</li>
+<li>
+<a href="#fuel-app-views-home-php">fuel/app/views/home.php</a>
+</li>
+<li>
+<a href="#url">追記 ファイルをURLから直接参照できない場合</a>
+</li>
+</ul>
+-->
                 <p>タイトル通り。Uploadクラスを使えばサラっとできちゃう模様</p>
 <!--more-->
 
-<h4>fuel/app/config/upload.php</h4>
+<h4 id="fuel-app-config-upload-php">fuel/app/config/upload.php</h4>
 <p>fuel/core/config/upload.phpからコピーするなりで作成</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(
@@ -127,7 +142,7 @@ return array(
     "max_length" =&gt; 0
 );
 </code></pre><p>デフォルトからはpathとrandomizeを変更。アップロード先を指定するのに毎回指定するのもどうかと思うので、設定に記述してそれを再利用する形式を使う。今回DB等は使わない(そもそもModelクラス等にblobサポートが無いかも)</p>
-<h4>fuel/app/classes/controller/home.php</h4>
+<h4 id="fuel-app-classes-controller-home-php">fuel/app/classes/controller/home.php</h4>
 <pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
@@ -170,7 +185,7 @@ class Controller_Home extends Controller {
     }
 }
 </code></pre>
-<h4>fuel/app/views/home.php</h4>
+<h4 id="fuel-app-views-home-php">fuel/app/views/home.php</h4>
 <pre class="line-numbers"><code class="language-php">&lt;html&gt;
   &lt;body&gt;
     &lt;form action="/upload" method="post" enctype="multipart/form-data"&gt;
@@ -186,7 +201,7 @@ class Controller_Home extends Controller {
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre><p>な感じかなと。今回はDOCROOTのuploadsディレクトリに作ってるので普通に参照できる</p><p>DBとか使う場合にはUpload::get_files()なメソッドで返ってくる情報をDBに格納しておいて処理するとかで良いんじゃないかと</p><p>一応、これから普通にURLからアクセス出来ないところにアップロードした場合のケースをやるので検証次第追記します</p>
-<h4>追記 ファイルをURLから直接参照できない場合</h4>
+<h4 id="url">追記 ファイルをURLから直接参照できない場合</h4>
 <p>publicなディレクトリ内にありゃ普通に参照できるけど、そうじゃない場合にはアクション作って読み取るような処理が必要になる訳ですが。で問題がFuelPHPのルーティング上で「拡張子は無視される」っていうのがあると思うのですが。今回はUpload::get_files等から情報をDBなどに格納したりしてないので、リクエストされたファイル名から拡張子抜いた値から推定しなきゃならんので、とりあえずは拡張子はjpgに限定</p><p>なのでfuel/app/config/upload.phpをちょっと修正</p><pre class="line-numbers"><code class="language-php">return array(
     "path" =&gt; DOCROOT."../uploads",
     "ext_whitelist" =&gt; array("jpg")

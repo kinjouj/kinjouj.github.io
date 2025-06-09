@@ -101,10 +101,36 @@ gradleプラグインの構造について
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#gradle">gradleプラグインの構造について</a>
+</li>
+<li>
+<a href="#build-gradle">build.gradle (プラグイン側)</a>
+</li>
+<li>
+<a href="#src-main-resources-meta-inf-gradle-plugins-helloworld-properties">src/main/resources/META-INF/gradle-plugins/helloworld.properties</a>
+</li>
+<li>
+<a href="#src-main-groovy-kinjouj-gradle-plugin-helloworldplugin-groovy">src/main/groovy/kinjouj/gradle/plugin/HelloWorldPlugin.groovy</a>
+</li>
+<li>
+<a href="#src-main-groovy-kinjouj-gradle-plugin-helloworldtask-groovy">src/main/groovy/kinjouj/gradle/plugin/HelloWorldTask.groovy</a>
+</li>
+<li>
+<a href="#build-gradle">build.gradle</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#other-tasks">Other tasks</a>
+-->
                 <p>gradleプラグイン開発な辺りを勉強してみた</p>
 <!--more-->
 
-<h4>gradleプラグインの構造について</h4>
+<h4 id="gradle">gradleプラグインの構造について</h4>
 
 <pre>
 ├── build.gradle
@@ -134,7 +160,7 @@ gradleプラグインの構造について
             └── HelloWorldTask.class
 </pre>
 <p>的な感じで作る。META-INF/gradle-plugins/プラグイン名.propertiesで定義したのがプラグインとして利用できるようになるっぽい。つまり上記の場合にはプラグイン名はhelloworldになる</p><p>まぁプラグインのソースを一つづつ書いていく</p>
-<h4>build.gradle (プラグイン側)</h4>
+<h4 id="build-gradle">build.gradle (プラグイン側)</h4>
 <pre class="line-numbers"><code class="language-groovy">apply plugin: "groovy"
 apply plugin: "maven"
 
@@ -145,10 +171,10 @@ dependencies {
     compile gradleApi()
 }
 </code></pre><p>groovyとgradleなAPIの依存性が必要なのでlocalGroovyとgradleApiを利用する</p>
-<h4>src/main/resources/META-INF/gradle-plugins/helloworld.properties</h4>
+<h4 id="src-main-resources-meta-inf-gradle-plugins-helloworld-properties">src/main/resources/META-INF/gradle-plugins/helloworld.properties</h4>
 <pre class="line-numbers"><code class="language-ini">implementation-class=kinjouj.gradle.plugin.HelloWorldPlugin
 </code></pre><p>implementation-classにプラグインクラスを指定するだけ</p>
-<h4>src/main/groovy/kinjouj/gradle/plugin/HelloWorldPlugin.groovy</h4>
+<h4 id="src-main-groovy-kinjouj-gradle-plugin-helloworldplugin-groovy">src/main/groovy/kinjouj/gradle/plugin/HelloWorldPlugin.groovy</h4>
 <pre class="line-numbers"><code class="language-groovy">package kinjouj.gradle.plugin
 
 import org.gradle.api.Plugin
@@ -164,7 +190,7 @@ class HelloWorldPlugin implements Plugin&lt;project&gt; {
     }
 }
 </code></pre><p>helloタスクを動かす際にHelloWorldTaskクラスを利用するようにする等</p>
-<h4>src/main/groovy/kinjouj/gradle/plugin/HelloWorldTask.groovy</h4>
+<h4 id="src-main-groovy-kinjouj-gradle-plugin-helloworldtask-groovy">src/main/groovy/kinjouj/gradle/plugin/HelloWorldTask.groovy</h4>
 <pre class="line-numbers"><code class="language-java">package kinjouj.gradle.plugin
 
 import org.gradle.api.DefaultTask
@@ -184,7 +210,7 @@ class HelloWorldTask extends DefaultTask {
     }
 }
 </code></pre><p>DefaultTaskを継承しつつ、@TaskActionアノテーションを付与したメソッドが動作する模様。で.gradleファイル上でタスクを動かすにあたってパラメーターとかを利用する場合には、セッターメソッドを定義しとけば良いっぽい</p><p>んまぁここまでがプラグインのソース辺りなのでビルドしてinstallしておけば使えるようになる</p>
-<h4>build.gradle</h4>
+<h4 id="build-gradle">build.gradle</h4>
 <pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenLocal()

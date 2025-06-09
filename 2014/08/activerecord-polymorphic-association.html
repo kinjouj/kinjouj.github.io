@@ -94,20 +94,47 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#lib-product-rb">lib/product.rb</a>
+</li>
+<li>
+<a href="#lib-employee-rb">lib/employee.rb</a>
+</li>
+<li>
+<a href="#lib-picture-rb">lib/picture.rb</a>
+</li>
+<li>
+<a href="#spec-spec_helper-rb">spec/spec_helper.rb</a>
+</li>
+<li>
+<a href="#spec-factories-fixture-rb">spec/factories/fixture.rb</a>
+</li>
+<li>
+<a href="#spec-models-product_spec-rb">spec/models/product_spec.rb</a>
+</li>
+<li>
+<a href="#spec-models-employee_spec-rb">spec/models/employee_spec.rb</a>
+</li>
+<li>
+<a href="#sql">ログに出力したSQL</a>
+</li>
+</ul>
+-->
                 <p>公式ドキュメント(Guide): <a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations">http://guides.rubyonrails.org/association_basics.html#polymorphic-associations</a></p><p>公式ドキュメントの日本語翻訳: <a href="http://wiki.usagee.co.jp/ruby/rails/RailsGuides%E3%82%92%E3%82%86%E3%81%A3%E3%81%8F%E3%82%8A%E5%92%8C%E8%A8%B3%E3%81%97%E3%81%A6%E3%81%BF%E3%81%9F%E3%82%88/Active%20Record%20Associations#t758e640">ruby/rails/RailsGuidesをゆっくり和訳してみたよ/Active Record Associations</a></p><p>ちょいちょい公式ドキュメントをざっくり見ながらやってみてる。今回はActiveRecordのpolymorphic association</p>
 <!--more-->
 <p>公式的なのをそのまま使うと、ProductとEmployeeとPictureモデルがあるけど、ProductとEmployee両方がPictureモデルを使うような場合になるとPictureモデル側が所有するデータ自体がどこのモデルに所属する物か判別する目的としてpolymorphicを使用する事で、アソシエーション名_typeのカラムによってどこに所属するのかっていう識別を出来るようになる。まぁそんな感じで一つのモデル(テーブル)で複数のモデル等でレコードを参照するような多様性を持つモデルとして機能させる事が出来る仕様みたいな感じかな</p><p>やってみた結果を見た方が分かりやすいような気がするので(※プロジェクト自体はRailsプロジェクトじゃない方で検証)</p>
-<h4>lib/product.rb</h4>
+<h4 id="lib-product-rb">lib/product.rb</h4>
 <pre class="line-numbers"><code class="language-rb">class Product &lt; ActiveRecord::Base
   has_many :pictures, :as =&gt; :imageable
 end
 </code></pre>
-<h4>lib/employee.rb</h4>
+<h4 id="lib-employee-rb">lib/employee.rb</h4>
 <pre class="line-numbers"><code class="language-rb">class Employee &lt; ActiveRecord::Base
   has_many :pictures, :as =&gt; :imageable
 end
 </code></pre>
-<h4>lib/picture.rb</h4>
+<h4 id="lib-picture-rb">lib/picture.rb</h4>
 <p><code>rbclass Picture &lt; ActiveRecord::Base
   belongs_to :imageable, polymorphic: true
 end
@@ -128,7 +155,7 @@ CREATE TABLE employees(id integer primary key, name varchar(30) not null);
   end
 end
 </code></pre><p>な感じで作れる模様</p><p>んじゃ必要なのは定義したんでテストなり書いてる方向で検証</p>
-<h4>spec/spec_helper.rb</h4>
+<h4 id="spec-spec_helper-rb">spec/spec_helper.rb</h4>
 <pre class="line-numbers"><code class="language-rb">require "logger"
 require "database_cleaner"
 require "active_record"
@@ -166,7 +193,7 @@ RSpec.configure do |config|
   # 以降省略
 end
 </code></pre><p>な感じでActiveRecord及びFactoryGirl、あとテスト時に処理したデータベースのクリーンアップ関係を設定しておく</p>
-<h4>spec/factories/fixture.rb</h4>
+<h4 id="spec-factories-fixture-rb">spec/factories/fixture.rb</h4>
 <pre class="line-numbers"><code class="language-rb">FactoryGirl.define do
   factory :product, :class =&gt; Product do
     name "hoge"
@@ -188,7 +215,7 @@ end
   end
 end
 </code></pre><p>な感じで、ProductとEmployeeなレコードを一つづつ定義。そしてPictureにそれぞれの参照するレコードを定義(この場合はPictureには2つのレコードが入る)</p>
-<h4>spec/models/product_spec.rb</h4>
+<h4 id="spec-models-product_spec-rb">spec/models/product_spec.rb</h4>
 <pre class="line-numbers"><code class="language-rb">require "spec_helper"
 
 describe Product do
@@ -207,7 +234,7 @@ describe Product do
   end
 end
 </code></pre><p>というようにProductを取って、そのpicturesなアソシエーションからPictureの参照(has_manyなので配列)を取る。で上記でPictureには2つ突っ込んだけど参照されてるのは1つというのはimageable_typeによってモデルの型により取れるレコードが限られるので</p>
-<h4>spec/models/employee_spec.rb</h4>
+<h4 id="spec-models-employee_spec-rb">spec/models/employee_spec.rb</h4>
 <pre class="line-numbers"><code class="language-rb">describe Employee do
   it "employee test" do
     create(:employee)
@@ -224,7 +251,7 @@ end
   end
 end
 </code></pre><p>Productの時と同様なので説明不要</p>
-<h4>ログに出力したSQL</h4>
+<h4 id="sql">ログに出力したSQL</h4>
 <p>※説明不明なログは省略(部分的な値は埋め込みで記載)</p><pre class="line-numbers"><code class="language-sql">[Employeeのfixture投入]
 begin transaction
   INSERT INTO "employees" ("name") VALUES (?)  [["name", "fuga"]]

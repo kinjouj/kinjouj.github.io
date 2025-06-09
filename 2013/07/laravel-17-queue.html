@@ -94,6 +94,18 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#app-config-development-queue-php">app/config/development/queue.phpを作成</a>
+</li>
+<li>
+<a href="#part-52efceb93db521f1">キューとして処理されるクラスを作成</a>
+</li>
+<li>
+<a href="#1">追記1</a>
+</li>
+</ul>
+-->
                 <p><a href="http://laravel.com/docs/queues">http://laravel.com/docs/queues</a> のドキュメント読みなんですが、一部IronMQっていうのに依存する機能がある模様げで、そのIronMQを使ってないのでそこは(ry</p><p>でMQサーバー何使うのって所として、んまぁ手軽だしBeanstalkで良いんじゃないかって事で。</p>
 <!--more-->
 <pre class="line-numbers"><code class="language-">apt-get install beanstalkd
@@ -105,7 +117,7 @@
 <li>Queue::pushを使う</li>
 </ul>
 <p>な感じ</p>
-<h4>app/config/development/queue.phpを作成</h4>
+<h4 id="app-config-development-queue-php">app/config/development/queue.phpを作成</h4>
 <p>とりあえず今回は環境名をdevelopmentにしておく。んでデフォルトはapp/config/queue.phpにある(はず)のでコピーして修正</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(
@@ -119,7 +131,7 @@ return array(
     )
 );
 </code></pre><p>んまぁdefaultとconnections.beanstalkd.queueの値を変えただけ</p>
-<h4>キューとして処理されるクラスを作成</h4>
+<h4 id="part-52efceb93db521f1">キューとして処理されるクラスを作成</h4>
 <p>Closure型でQueue::pushを指定する事も出来る模様</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class HogeQueue {
@@ -130,7 +142,7 @@ class HogeQueue {
 </code></pre><p>デフォルトで動くメソッド名はfireな模様だけどQueue::pushの引数でルーティング同様な形式でメソッドを指定する事も出来るっぽい</p><p>又、ジョブキュー自体は自動的には消えない(はず)。$jobのdeleteメソッドを使う事で明示的にキューを削除する事が出来る。又、release(秒?)を使う事で遅延リトライ的な事も出来る模様</p><p>恐らくは$jobの型は使ってるMQによって変わるんだと。Beanstalkの場合には<a href="http://laravel.com/api/class-Illuminate.Queue.Jobs.BeanstalkdJob.html">Illuminate\Queue\Jobs\BeanstalkdJob</a>になるかも。んまぁ使えるAPIとかは左のリンクを参照</p><p>あとは上記でも書いたように</p><pre class="line-numbers"><code class="language-">artisan queue:listen
 </code></pre><p>をする。ちなみに-timeoutでジョブのタイムアウト値。-envで環境名とかを指定したりも出来る模様。んで</p><pre class="line-numbers"><code class="language-php">Queue::push("HogeQueue", $id);
 </code></pre><p>とかで使うっていう感じかと</p><p>Queueで処理されるクラスの単体テストとかはあとで追記する</p>
-<h4>追記1</h4>
+<h4 id="1">追記1</h4>
 <p>書くの忘れてた。beanstalkdが入っててもPHP用のクライアントライブラリ入ってないといけないと思うのでだけど、ドキュメント的には</p><pre class="line-numbers"><code class="language-">Beanstalkd: pda/pheanstalk
 </code></pre><p>って書かれているので、composer.json辺りに追加してcomposer updateすりゃいいかと</p>
               </div>

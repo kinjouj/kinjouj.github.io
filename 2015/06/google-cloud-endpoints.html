@@ -94,10 +94,40 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-2d313cb99806b30f">環境構築</a>
+</li>
+<li>
+<a href="#webapi-java">WebApi.java</a>
+</li>
+<li>
+<a href="#hogeapi-java">HogeApi.java</a>
+</li>
+<li>
+<a href="#sampleapi-java">SampleApi.java</a>
+</li>
+<li>
+<a href="#web-xml">web.xml</a>
+</li>
+<li>
+<a href="#google-api-clieng-library-for-javascript-api">Google API Clieng Library for JavaScriptを使ってAPIをコールする</a>
+</li>
+<li>
+<a href="#1">余談1: 例外について</a>
+</li>
+<li>
+<a href="#2-apiresourceproperty">余談2: ApiResourcePropertyに関して</a>
+</li>
+<li>
+<a href="#3-apitransformer">余談3: @ApiTransformerについて</a>
+</li>
+</ul>
+-->
                 <p>公式ドキュメント: <a href="https://cloud.google.com/appengine/docs/java/endpoints">https://cloud.google.com/appengine/docs/java/endpoints</a></p><p>今までGoogle App Engineを使ってWeb API的なのを定義する際、Slim3を使ってOAuthServiceで認証情報を取得してJSONでレスポンス返す的な事を一から実装してたりとかしてたけど、今時そんな事しなくてもGoogle Cloud Endpointsを使う事で同等な事をさらっと出来るようになってるらしい</p><p>っていう事でドキュメントを読みつつやってみた</p>
 <!--more-->
 
-<h4>環境構築</h4>
+<h4 id="part-2d313cb99806b30f">環境構築</h4>
 <pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
@@ -145,7 +175,7 @@ test {
     dependsOn += ['appengineRun']
 }
 </code></pre><p>んまぁこれだけ。テストする際に実際にサーバーを動かしてURLFetchServiceを使って結果をテストするので</p>
-<h4>WebApi.java</h4>
+<h4 id="webapi-java">WebApi.java</h4>
 <p>基本的には@Apiと@ApiMethodを使うのだけど、@Apiで共通項目だけを設定したクラスを用意しておいて、一部実際のAPI実装クラス上で特有する設定部分は@ApiClassで定義するのがよろしい模様。っていうか複数の@Apiを持つクラスを定義して同一のnameを持つ場合に設定項目が異なるとエラーになるので</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import com.google.api.server.spi.config.Api;
@@ -154,7 +184,7 @@ import com.google.api.server.spi.config.Api;
 public class WebApi {
 }
 </code></pre><p>っていうように@Apiを使ったクラスをベースとしたのを定義しておいて、クラスを継承するか@ApiReferenceでこのクラスを指定するなどの方式を取れば基底となる@Apiを継承して定義出来るような感じっぽい</p>
-<h4>HogeApi.java</h4>
+<h4 id="hogeapi-java">HogeApi.java</h4>
 <pre class="line-numbers"><code class="language-java">{% raw %}
 package sample;
 
@@ -197,7 +227,7 @@ public class HogeApi {
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 <p>てな感じで定義する事でAPI定義することが出来る。まだ設定が足りないので動かす事は出来ないけど、実際サーバーを動かすと [<a href="http://localhost:8080/_ah/api/explorer">http://localhost:8080/_ah/api/explorer</a>] っていうようなURLにアクセスしてAPI定義上から上記のgetSayを動かすと</p><p><img src="/images/2015/06/201506242115_1.jpg" alt="image" /></p><p>っていうようなレスポンス結果が得られるようになる</p>
-<h4>SampleApi.java</h4>
+<h4 id="sampleapi-java">SampleApi.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Arrays;
@@ -241,7 +271,7 @@ public class SampleApi extends WebApi {
   }
 }
 </code></pre><p>っていうようなレスポンス結果が得られるようになる</p><p>んまぁここまでがざっくりとしたAPI実装部分。動かすには設定(web.xml)が必要</p>
-<h4>web.xml</h4>
+<h4 id="web-xml">web.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd"&gt;
 &lt;web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5"&gt;
@@ -262,7 +292,7 @@ public class SampleApi extends WebApi {
 
 &lt;/web-app&gt;
 </code></pre><p>っていうようにservicesに@Api及び@ApiClassで定義しているAPI実装クラスを指定する必要がある模様で</p><p>んまぁここまで設定を行った上でサーバーを起動して <a href="http://localhost:8080/_ah/api/explorer">http://localhost:8080/_ah/api/explorer</a> にアクセスすると</p><p><img src="/images/2015/06/201506242115_2.jpg" alt="image" /></p><p>ていうようなAPIが定義されそれぞれ適切なリクエストを行う事で結果をJSON等で取得出来るようになる</p>
-<h4>Google API Clieng Library for JavaScriptを使ってAPIをコールする</h4>
+<h4 id="google-api-clieng-library-for-javascript-api">Google API Clieng Library for JavaScriptを使ってAPIをコールする</h4>
 <pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;script src="app.js"&gt;&lt;/script&gt;
@@ -294,7 +324,7 @@ function init() {
   gapi.client.load('sample', 'v1', callback, "//" + window.location.host + "/_ah/api");
 }
 </code></pre><p>のような感じでgapiを使ってAPI定義をインポートして利用する事も出来る模様(ちなみに <a href="https://kinjouj-test.appspot.com">https://kinjouj-test.appspot.com</a> にてこの記事投稿時点では見れるので)</p><p>っていうような感じで使う事が出来る</p><p>んまぁそんな感じで今時のGoogle App Engineを使ってWeb APIを実装するような場合であればGoogle Cloud Endpointsを利用する事も出来るって事で</p>
-<h4>余談1: 例外について</h4>
+<h4 id="1">余談1: 例外について</h4>
 
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr"><a href="https://t.co/g6lOKpa5PF">https://t.co/g6lOKpa5PF</a> に書いてるけど、API側で例外ぶん投げた場合はその後にServiceUnavailableになると思うのでそれによるサービスの例外エラーが503になるとか</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612666965790887937">2015, 6月 21</a></blockquote>
 
@@ -316,7 +346,7 @@ function init() {
 <li>自前の例外を実装する場合にはcom.google.api.server.spi.ServiceExceptionを継承したクラスを定義する事でその例外を送出した場合に対応するレスポンスを送出する事が可能</li>
 </ul>
 <p>っていうような感じになる</p>
-<h4>余談2: ApiResourcePropertyに関して</h4>
+<h4 id="2-apiresourceproperty">余談2: ApiResourcePropertyに関して</h4>
 <p>APIのレスポンスを出す際にオブジェクトのこのプロパティは出したくないとかそういうような制御をする事も出来る</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.Serializable;
@@ -347,7 +377,7 @@ public class Sample implements Serializable {
     }
 }
 </code></pre><p>っていうような@ApiResourcePropertyでignoredを指定する事でこのプロパティを出力しない等の設定を定義する事が出来る。又、nameパラメーターでこのプロパティを出力する際の名前等も変更する事が可能っぽい</p>
-<h4>余談3: @ApiTransformerについて</h4>
+<h4 id="3-apitransformer">余談3: @ApiTransformerについて</h4>
 <p>ようなオブジェクトとかをJSONとかに変換や解析するような仕組み等をオブジェクトに組み込む機能かと。まったく検証してないので詳しくは書かないけど、デフォルトとかだとjacksonを使ってJSONをエンコード/デコードしているんじゃないかと</p><p>んまぁ詳しくは<a href="https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer">ドキュメント</a>読めって事で</p>
               </div>
             </div>

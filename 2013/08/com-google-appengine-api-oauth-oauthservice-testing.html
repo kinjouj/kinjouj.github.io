@@ -92,6 +92,15 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#oauthservice-mockoauthservice">OAuthServiceを実装したMockOAuthServiceクラスを作る</a>
+</li>
+<li>
+<a href="#part-510cc2ffcf5b40c8">テストを修正する</a>
+</li>
+</ul>
+-->
                 <p>Slim3にて、com.google.appengine.api.oauth.OAuthServiceを使ってOAuthリクエストで認証されているかをチェックしているようなケースをコントローラーでチェックしているような場合においてテストをどうやるのかと</p>
 <!--more-->
 <p>例えば/readっていうのに対してReadControllerが発生するような場合</p><pre class="line-numbers"><code class="language-java">public abstract class ShareController extends Controller {
@@ -128,7 +137,7 @@ public class ReadControllerTest extends AbstractControllerTestCase {
     }
 }
 </code></pre><p>というようなテストをぶち込んだらどうなるか。もちろんテストはずっこける、OAuthService#isUserAdminでは無いので例外が発生して、handleErrorでキャッチ?されレスポンスが500で送出されるようになっている。そうなると普通にリクエストしてテストを実行してもテストずっこけるよねっていう事</p><p>でこういう場合ってどうやってテストすんのって所なんですが、Google App Engine/Javaの場合大概のService APIなパッケージには末尾に.devがついてるパッケージにおいてLocalなんちゃらService的なローカルでテストするためのヘルパーAPI的ながついてると思うんだけど、OAuthServiceなそれが無いっぽい。んじゃこれどうやってテストすんのかって思ってとりあえず「モック差し込んじゃば良いんじゃね?」って思ったのでやってみる。前おきが長かったねww</p>
-<h4>OAuthServiceを実装したMockOAuthServiceクラスを作る</h4>
+<h4 id="oauthservice-mockoauthservice">OAuthServiceを実装したMockOAuthServiceクラスを作る</h4>
 <p>※あくまでテスト側に作る。デプロイはしないように</p><pre class="line-numbers"><code class="language-java">package shareroid.controller.test;
 
 import com.google.appengine.api.oauth.OAuthRequestException;
@@ -169,7 +178,7 @@ public class MockOAuthService implements OAuthService {
     }
 }
 </code></pre><p>まー、返す値とかは個人で調整すれば良いんじゃないのかと。今回isUserAdminメソッドくらいしか使ってないので微妙な所なんですが</p>
-<h4>テストを修正する</h4>
+<h4 id="part-510cc2ffcf5b40c8">テストを修正する</h4>
 <p>で何でモックを差し込むのか。まぁjmockitでという事で (めんどくさいので導入方法はググれ)</p><pre class="line-numbers"><code class="language-java">package shareroid.controller.test;
 
 import mockit.Expectations;

@@ -94,39 +94,66 @@ http://cr.yp.to/daemontools/install.htmlからダウンロードす" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-bdf5c55b74bb686">インストール</a>
+</li>
+<li>
+<a href="#part-b4c6c6d450466814">管理するサービスの設定</a>
+</li>
+<li>
+<a href="#qmail_home-service-run">qmail_home/service/runの作成</a>
+</li>
+<li>
+<a href="#qmail-home-service-log-run">qmail-home/service/log/run</a>
+</li>
+<li>
+<a href="#part-9b3d5ce4ee18470a">権限の設定</a>
+</li>
+<li>
+<a href="#part-9e94d0198af7c491">リンクを生成</a>
+</li>
+<li>
+<a href="#part-8c7bca85c8b9a749">起動・停止できるかテスト</a>
+</li>
+<li>
+<a href="#part-f86fc3391e48e74">小メモ: サービスを自動起動させないようにする</a>
+</li>
+</ul>
+-->
                 <p>daemontoolsを使用して、/etc/rc.dとは違う方法でサービスを管理してみる</p>
-<h4>インストール</h4>
+<h4 id="part-bdf5c55b74bb686">インストール</h4>
 <p><a href="http://cr.yp.to/daemontools/install.html%E3%81%8B%E3%82%89%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E3%81%99%E3%82%8B%E3%80%82%E4%BD%86%E3%81%97%E3%80%81daemontools%E3%81%AF%E8%A7%A3%E5%87%8D%E5%BE%8C%E3%81%AE%E3%82%A2%E3%83%BC%E3%82%AB%E3%82%A4%E3%83%96%E3%82%92%E5%88%A9%E7%94%A8%E3%81%99%E3%82%8B%E3%81%AE%E3%81%A7%E5%89%8A%E9%99%A4%E3%81%97%E3%81%AA%E3%81%84%E4%BA%8B%E3%80%82%E6%9B%B4%E3%81%ABqmail%E5%90%8C%E6%A7%98%E3%81%ABerror.h%E3%81%AF%E4%BF%AE%E6%AD%A3%E3%81%99%E3%82%8B%E4%BA%8B">http://cr.yp.to/daemontools/install.htmlからダウンロードする。但し、daemontoolsは解凍後のアーカイブを利用するので削除しない事。更にqmail同様にerror.hは修正する事</a></p><pre class="line-numbers"><code class="language-bash">tar zxvf daemontools-VERSION.tar.gz
 mv admin /opt/daemontools
 cd /opt/daemontools/daemontools-VERSION
 package/install
 </code></pre><p>これが終わると/etc/inittabの末尾にsvscanbootが追加される</p>
-<h4>管理するサービスの設定</h4>
+<h4 id="part-b4c6c6d450466814">管理するサービスの設定</h4>
 <p>とりあえずqmailを追加してみる。以下のようなディレクトリ構造を作成</p><pre class="line-numbers"><code class="language-">- qmail_home [DIR]
   - service [DIR]
     - run [FILE]
     - log [DIR]
       - run [FILE]
 </code></pre><p>上のrunを作成していく</p>
-<h4>qmail_home/service/runの作成</h4>
+<h4 id="qmail_home-service-run">qmail_home/service/runの作成</h4>
 <pre class="line-numbers"><code class="language-bash">#!/bin/sh
 
 exec /path/to/qmail/rc &
 </code></pre><p>この際に注意として、rc内にqmailサーバー関連を起動させている場合のsploggerを使っている場合は削除する事</p>
-<h4>qmail-home/service/log/run</h4>
+<h4 id="qmail-home-service-log-run">qmail-home/service/log/run</h4>
 <pre class="line-numbers"><code class="language-bash">#!/bin/sh
 
 exec /usr/local/bin/setuidgid qmail /usr/local/bin/multilog t /var/log/qmail
 </code></pre>
-<h4>権限の設定</h4>
+<h4 id="part-9b3d5ce4ee18470a">権限の設定</h4>
 <pre class="line-numbers"><code class="language-bash">chmod +t /path/to/qmail/service/qmail
 chmod +x /path/to/qmail/service/qmail/run
 chmod +x /path/to/qmail/service/qmail/log/run
 </code></pre>
-<h4>リンクを生成</h4>
+<h4 id="part-9e94d0198af7c491">リンクを生成</h4>
 <p>作成したサービス設定をdaemontoolsが使用する/serviceにリンクさせる</p><pre class="line-numbers"><code class="language-bash">ln -s /path/to/qmail/service/qmail /service/qmail
 </code></pre>
-<h4>起動・停止できるかテスト</h4>
+<h4 id="part-8c7bca85c8b9a749">起動・停止できるかテスト</h4>
 <pre class="line-numbers"><code class="language-bash"># 起動
 svc -u /service/qmail
 
@@ -136,7 +163,7 @@ svc -d /service/qmail
 # 状態を表示
 svstat /service/qmail
 </code></pre>
-<h4>小メモ: サービスを自動起動させないようにする</h4>
+<h4 id="part-f86fc3391e48e74">小メモ: サービスを自動起動させないようにする</h4>
 <p>/service/サービス名/downというファイルがあると、再起動時に自動で起動しなくなる</p>
               </div>
             </div>

@@ -94,13 +94,37 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-6542d6d0dd8">環境</a>
+</li>
+<li>
+<a href="#hadoop">Hadoop側の設定</a>
+</li>
+<li>
+<a href="#cassandra">Cassandra側の設定</a>
+</li>
+<li>
+<a href="#hadoopclient1-java">HadoopClient1.java</a>
+</li>
+<li>
+<a href="#samplecassandramapper-java">SampleCassandraMapper.java</a>
+</li>
+<li>
+<a href="#samplereducer-java">SampleReducer.java</a>
+</li>
+<li>
+<a href="#pom-xml">pom.xml</a>
+</li>
+</ul>
+-->
                 <p>HadoopからCassandraのColumn Familyを読んで云々してみる。とりあえずまったく意味の無いことで書くので、あくまでHadoopからCassandraを使う場合の設定例とか</p><p>(基礎的なHadoopのセットアップは省略します)</p>
 <!--more-->
 
-<h4>環境</h4>
+<h4 id="part-6542d6d0dd8">環境</h4>
 <p>Hadoopのバージョンは0.20.205.0
 Cassandraのバージョンは1.0.8辺り</p><p>(CassandraがサポートしているHadoopバージョンは0.20.x系らしいので)</p>
-<h4>Hadoop側の設定</h4>
+<h4 id="hadoop">Hadoop側の設定</h4>
 <p>特に設定する項目無いんですが、HadoopからCassandraのライブラリを参照出来ないといけないので</p>
 <ul>
 <li>apache-cassandra-バージョン.jar</li>
@@ -108,7 +132,7 @@ Cassandraのバージョンは1.0.8辺り</p><p>(Cassandraがサポートして�
 <li>guava-バージョン.jar</li>
 </ul>
 <p>を参照できるようにしないといけないので$HADOOP_HOME/conf/hadoop-env.shのHADOOP_CLASSPATH辺りに設定しとく。でCassandraに伴う設定はmapred-site.xmlでも設定しておくことが可能みたいだけど、それはとりあえずやらない((JobConfにぶっこむ))。とりあえずここまでやったらHadoopのMapReduce JobTrackerあたりを起動するまでをやっておく(start-dfs.shとstart-mapred.shとか)</p>
-<h4>Cassandra側の設定</h4>
+<h4 id="cassandra">Cassandra側の設定</h4>
 <p>Cassandra側に以下を実行して、Column Familyなどを作っておく</p><pre class="line-numbers"><code class="language-">create keyspace Keyspace1;
 use Keyspace1;
 
@@ -121,7 +145,7 @@ set Sample[2][name] = "foobar";
 set Sample[3][name] = "hoge";
 set Sample[4][name] = "hoge";
 </code></pre>
-<h4>HadoopClient1.java</h4>
+<h4 id="hadoopclient1-java">HadoopClient1.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Arrays;
@@ -177,7 +201,7 @@ public class HadoopClient1 extends Configured implements Tool {
     }
 }
 </code></pre>
-<h4>SampleCassandraMapper.java</h4>
+<h4 id="samplecassandramapper-java">SampleCassandraMapper.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
@@ -205,7 +229,7 @@ public class SampleCassandraMapper extends Mapper&lt;ByteBuffer, SortedMap&lt;By
     }
 }
 </code></pre>
-<h4>SampleReducer.java</h4>
+<h4 id="samplereducer-java">SampleReducer.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
@@ -227,7 +251,7 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, Text, IntWritab
     }
 }
 </code></pre>
-<h4>pom.xml</h4>
+<h4 id="pom-xml">pom.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;project
     xmlns="http://maven.apache.org/POM/4.0.0"

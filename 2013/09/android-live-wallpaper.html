@@ -93,12 +93,27 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-6542944b75e">仕様</a>
+</li>
+<li>
+<a href="#androidmanifest-xml">AndroidManifest.xml</a>
+</li>
+<li>
+<a href="#res-xml-wallpaper-xml">res/xml/wallpaper.xml</a>
+</li>
+<li>
+<a href="#bijinclocklivewallpaperservice-java">BijinClockLiveWallpaperService.java</a>
+</li>
+</ul>
+-->
                 <p>いわゆるライブ壁紙っていう機能。SurfaceView的な感じで壁紙に動的にレンダリングしたりとか出来る</p><p>まぁ自宅のメモ用ブログには書いてたけどこっちに書いてなかったので、美人時計サービスを利用して1分毎に動的に壁紙をレンダリングするっていうのをやってみる。ただ、結構雑に作ってあるので(ry</p><p>※あくまでLive Wallpaperってどんな感じで作るのかっていう</p>
 <!--more-->
 
-<h4>仕様</h4>
+<h4 id="part-6542944b75e">仕様</h4>
 <p>Live Wallpaperの仕様じゃなくて美人時計の仕様として <a href="http://www.bijint.com/jp/tokei_images/%02d%02d.jpg">http://www.bijint.com/jp/tokei_images/%02d%02d.jpg</a> というような方式でリクエストすれば画像が取れるらしい。これ検証したのが結構前な話になるのだけど、現状でもそれは変わってはいないが昔はリファラーな辺りをチェックされていて美人時計内部からのリクエストだと模倣させないといけなかったような気がするけど現在そういう仕様は存在しない模様</p><p>んまぁちょっと余談がありましたが、結局は一分おきに上記のURLにリクエスト飛ばして画像取ってレンダリングするだけ</p>
-<h4>AndroidManifest.xml</h4>
+<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -131,14 +146,14 @@
     &lt;/application&gt;
 &lt;/manifest&gt;
 </code></pre><p>Live Wallpaperなレンダリングを行うのはサービスなのでそれを定義する。ActivityはPreferenceActivityなやつで今回は使わないので省略</p>
-<h4>res/xml/wallpaper.xml</h4>
+<h4 id="res-xml-wallpaper-xml">res/xml/wallpaper.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8" ?&gt;
 &lt;wallpaper
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:thumbnail="@drawable/downloading"
     android:settingsActivity="net.kinjouj.app.bijin_clock_wallpaper.BijinClockLiveWallpaperPreferenceActivity" /&gt;
 </code></pre><p>android:thumbnailでライブ壁紙一覧で表示される部分に画像を出せる模様。あくまでプレビューとは違うのかも</p><p>android:settingsActivityを設定しておく事でライブ壁紙を設置する際に設定を行う事が出来る。その設定は上記で省略したPreferenceActivityを用いる</p><p>んまぁあとはWallpaperServiceな実体なサービスクラスを作る</p>
-<h4>BijinClockLiveWallpaperService.java</h4>
+<h4 id="bijinclocklivewallpaperservice-java">BijinClockLiveWallpaperService.java</h4>
 <pre class="line-numbers"><code class="language-java">package net.kinjouj.app.bijin_clock_wallpaper;
 
 import java.io.IOException;

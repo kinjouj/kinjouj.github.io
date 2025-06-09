@@ -94,12 +94,42 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-e01ae37468b819db">データベースを作る</a>
+</li>
+<li>
+<a href="#consumer-java">Consumer.java</a>
+</li>
+<li>
+<a href="#token-java">Token.java</a>
+</li>
+<li>
+<a href="#oauthservice-java">OAuthService.java</a>
+</li>
+<li>
+<a href="#sampleoauth1provider-java">SampleOAuth1Provider.java</a>
+</li>
+<li>
+<a href="#sampleapplication-java">SampleApplication.java</a>
+</li>
+<li>
+<a href="#oauth-java">OAuth.java</a>
+</li>
+<li>
+<a href="#api-java">API.java</a>
+</li>
+<li>
+<a href="#client-rb">client.rb</a>
+</li>
+</ul>
+-->
                 <p>以前やった「<a href="/2014/10/jaxrs-18-oauth1provider.html">JAX-RSをやってみる (18) – OAuth1Provider -</a>」のだと、jersey-oauthに含まれているDefaultOAuth1Providerを使ってるので、アクセストークンなどはインスタンス上で管理されるはずなのでサーバーダウンしたりするとアクセストークンなどが失効するのではないかと思われる。まぁ要はDefaultOAuth1Providerのようなのをつくればいいだけなので、OAuth1Providerを実装することでできるのでやってみた</p><p>※前回の「<a href="/2014/10/gradle-jetty-jdbcrealm.html">gradle jettyでJDBCRealm</a>」の設定が別途で必要になるのでそれも前提となる</p>
 <!--more-->
 
-<h4>データベースを作る</h4>
+<h4 id="part-e01ae37468b819db">データベースを作る</h4>
 <p>jetty JDBCRealmでusersとrolesとuser_rolesに関わる部分は前回で作ってるのをそのまま使うのでいいとして、コンシュマーキーなどを格納するconsumerテーブル及び発行済みアクセストークンを格納するtokenテーブルを作っておく</p><p>下準備が出来たのであとはOAuth1Providerを実装するだけ</p>
-<h4>Consumer.java</h4>
+<h4 id="consumer-java">Consumer.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
@@ -138,7 +168,7 @@ public class Consumer implements OAuth1Consumer {
     }
 }
 </code></pre><p>まぁ単純にOAuth1Consumerを実装したクラスを作る</p>
-<h4>Token.java</h4>
+<h4 id="token-java">Token.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
@@ -210,7 +240,7 @@ public class Token implements OAuth1Token {
     }
 }
 </code></pre><p>リクエストトークンだったりアクセストークンだったりで使うクラス、これも同様にOAuth1Tokenを実装するだけ。ただisInRoleメソッドは内部から(RolesAllowed等を利用することで)呼ばれるので、アクセストークンを生成する際のインスタンスにそのトークンを持つユーザーのロール権限を持っておく必要がある</p>
-<h4>OAuthService.java</h4>
+<h4 id="oauthservice-java">OAuthService.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
@@ -242,7 +272,7 @@ public class OAuthService {
     }
 }
 </code></pre><p>まぁSpring JDBCを使ってデータベースからデータを引くだけのクラス。残りはOAuth1Providerを実装したクラスだけ</p>
-<h4>SampleOAuth1Provider.java</h4>
+<h4 id="sampleoauth1provider-java">SampleOAuth1Provider.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
@@ -371,7 +401,7 @@ sample.SampleOAuth1Provider - getConsumer
 sample.SampleOAuth1Provider - getAccessToken
 </pre>
 <p>てな感じな処理フローになる模様(若干の誤差はある、ちょっと前のログなのでクラス内からメソッド呼び出しでログ取ってるものもあるはずなので)</p><p>終わり。てな感じでやれば以降は前回と変わらない(OAuth.java以外は)</p>
-<h4>SampleApplication.java</h4>
+<h4 id="sampleapplication-java">SampleApplication.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import org.glassfish.jersey.server.ResourceConfig;
@@ -392,7 +422,7 @@ public class SampleApplication extends ResourceConfig {
     }
 }
 </code></pre>
-<h4>OAuth.java</h4>
+<h4 id="oauth-java">OAuth.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
@@ -431,7 +461,7 @@ public class OAuth {
     }
 }
 </code></pre>
-<h4>API.java</h4>
+<h4 id="api-java">API.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.annotation.security.RolesAllowed;
@@ -450,7 +480,7 @@ public class API {
     }
 }
 </code></pre>
-<h4>client.rb</h4>
+<h4 id="client-rb">client.rb</h4>
 <pre class="line-numbers"><code class="language-ruby">require 'oauth'
 
 consumer = OAuth::Consumer.new(

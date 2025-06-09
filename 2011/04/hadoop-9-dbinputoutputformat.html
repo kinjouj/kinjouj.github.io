@@ -93,8 +93,26 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#testwritable-java">TestWritable.javaを作成</a>
+</li>
+<li>
+<a href="#samplewritable-java">SampleWritable.javaを作成</a>
+</li>
+<li>
+<a href="#samplemapper-java">SampleMapper.javaを作成</a>
+</li>
+<li>
+<a href="#samplereducer-java">SampleReducer.javaを作成</a>
+</li>
+<li>
+<a href="#client-java">Client.javaを作成</a>
+</li>
+</ul>
+-->
                 <p>MySQLのデータをHadoopで利用するにはDBInputFormat及びDBOutputFormatを使用すれば良い</p><p>DBOutputFormatだけを使う前提であればJDBCドライバー自体はHDFSに格納しDistributedCacheを利用する事ができるが、InputFormatでは依存性の解決ができない。なのでJDBCドライバーはHadoopコンテナに事前にコピーしておく</p>
-<h4>TestWritable.javaを作成</h4>
+<h4 id="testwritable-java">TestWritable.javaを作成</h4>
 <p>DBInputFormatでテーブルから読み込んでMapperで利用する為、別途Writable実装が必要になる</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataInput;
@@ -143,7 +161,7 @@ public class TestWritable implements Writable, DBWritable {
     }
 }
 </code></pre><p>InputFormat側から動的にインスタンスが作られる為に空コンストラクタは必ず必要になる。又、今回はファイルから読み込む訳ではないので、引数がDataInput/DataOutputの物はサポートしないようにする</p>
-<h4>SampleWritable.javaを作成</h4>
+<h4 id="samplewritable-java">SampleWritable.javaを作成</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataInput;
@@ -189,7 +207,7 @@ public class SampleWritable implements Writable, DBWritable {
     }
 }
 </code></pre><p>ReducerからOutputFormat側に明示的に流す為、空引数なコンストラクタは必要ない</p>
-<h4>SampleMapper.javaを作成</h4>
+<h4 id="samplemapper-java">SampleMapper.javaを作成</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
@@ -220,7 +238,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, TestWritable, Text, In
     }
 }
 </code></pre><p>DBInputFormatで行を読み込んで、TestWritableのreadFieldsが呼び出され引数に渡されるので、ジェネリックスの2番目はTestWritableを指定しなければならない</p>
-<h4>SampleReducer.javaを作成</h4>
+<h4 id="samplereducer-java">SampleReducer.javaを作成</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
@@ -250,7 +268,7 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, SampleWritable,
     }
 }
 </code></pre><p>OutputFormatにはSampleWritableを流す為、値部の型はNullWritableにしておく。ジェネリックスの型もキー部はSampleWritableにする</p>
-<h4>Client.javaを作成</h4>
+<h4 id="client-java">Client.javaを作成</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configuration;

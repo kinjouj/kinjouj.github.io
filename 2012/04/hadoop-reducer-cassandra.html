@@ -94,10 +94,28 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#hadoop">Hadoop側の設定</a>
+</li>
+<li>
+<a href="#cassandra">Cassandra側の設定</a>
+</li>
+<li>
+<a href="#hadoopclient2-java">HadoopClient2.java</a>
+</li>
+<li>
+<a href="#samplemapper-java">SampleMapper.java</a>
+</li>
+<li>
+<a href="#samplecassandrareducer-java">SampleCassandraReducer.java</a>
+</li>
+</ul>
+-->
                 <p>前回はCassandraなデータを使うMapperを作って、HDFS上にMapReduce結果を出したので今回はその逆をやってみる。HDFSにインプットデータを用意して、それをMapReduceで処理後CassandraのColumn Familyにプッシュしてみる</p>
 <!--more-->
 
-<h4>Hadoop側の設定</h4>
+<h4 id="hadoop">Hadoop側の設定</h4>
 <p>適当に</p>
 <pre>
 hoge
@@ -108,10 +126,10 @@ hoge
 </pre>
 <p>なデータ(data/data.txt)をinputとしてプッシュしておく</p><pre class="line-numbers"><code class="language-sh">hadoop fs -put data input
 </code></pre>
-<h4>Cassandra側の設定</h4>
+<h4 id="cassandra">Cassandra側の設定</h4>
 <p>Outputする側のColumn Familyを作っておく</p><pre class="line-numbers"><code class="language-">create column family Outputs with default_validation_class = UTF8Type and key_validation_class = UTF8Type and comparator = UTF8Type
 </code></pre>
-<h4>HadoopClient2.java</h4>
+<h4 id="hadoopclient2-java">HadoopClient2.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.nio.ByteBuffer;
@@ -173,7 +191,7 @@ public class HadoopClient2 extends Configured implements Tool {
     }
 }
 </code></pre><p>今回はCassandraのデータを読み込まないで、アウトプット先がCassandraなのでConfigHelper.setOutputColumnFamilyで設定。でsetPartitionerは設定しておく必要がある(TokenRing関係っぽい) 。あとsetOutputFormatClass(ColumnFamilyOutputFormat.class)も</p><p>であとはSampleMapperとSampleCassandraReducerを作る</p>
-<h4>SampleMapper.java</h4>
+<h4 id="samplemapper-java">SampleMapper.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
@@ -191,7 +209,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
     }
 }
 </code></pre>
-<h4>SampleCassandraReducer.java</h4>
+<h4 id="samplecassandrareducer-java">SampleCassandraReducer.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;

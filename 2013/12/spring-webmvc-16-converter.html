@@ -96,10 +96,28 @@ Sample" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#samplecontroller-java">SampleController.java</a>
+</li>
+<li>
+<a href="#stringtosampleformconverter-java">StringToSampleFormConverter.java</a>
+</li>
+<li>
+<a href="#spring-web-servlet-xml">spring-web-servlet.xml</a>
+</li>
+<li>
+<a href="#1-conversionservice-autowired">余談1: ConversionServiceを@Autowiredしてやる場合</a>
+</li>
+<li>
+<a href="#2-string-convert">余談2: オブジェクト等からString等へconvertする場合</a>
+</li>
+</ul>
+-->
                 <p>以前にも引数にDateを使う場合だとかはConversionServiceな設定が必要だって件を書いたけど、そういう所を自分で作って利用したい場合どうすれば良いのかって所を検証してみた</p>
 <!--more-->
 
-<h4>SampleController.java</h4>
+<h4 id="samplecontroller-java">SampleController.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.stereotype.Controller;
@@ -117,7 +135,7 @@ public class SampleController {
     }
 }
 </code></pre><p>っていうようにidパラメーターを取ってそこからSampleFormなインスタンスを引数で利用したい場合とかを普通にやると<span style="color: red">org.springframework.beans.ConversionNotSupportedException</span>になる訳だけど、上記でも書いたように以前だとDateを利用する引数な場合には@DateTimeFormatなアノテーションを付与する事で利用できるがConversionServiceの設定をしておかないといけない。でこの場合においてidパラメーターからSampleFormに変換するConversionServiceのconverterを用意する事で対処できる</p>
-<h4>StringToSampleFormConverter.java</h4>
+<h4 id="stringtosampleformconverter-java">StringToSampleFormConverter.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.core.convert.converter.Converter;
@@ -137,7 +155,7 @@ public class StringToSampleFormConverter implements Converter&lt;String, SampleF
     }
 }
 </code></pre><p>Converterインターフェースを実装すれば良い。</p><p>まぁ定義しただけじゃなくて設定したいと作用しないので</p>
-<h4>spring-web-servlet.xml</h4>
+<h4 id="spring-web-servlet-xml">spring-web-servlet.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -175,7 +193,7 @@ public class StringToSampleFormConverter implements Converter&lt;String, SampleF
 
 &lt;/beans&gt;
 </code></pre><p>っていう感じで作ったConverterな実装をConversionSerivceのconvertersに入れてやれば良い模様で</p>
-<h4>余談1: ConversionServiceを@Autowiredしてやる場合</h4>
+<h4 id="1-conversionservice-autowired">余談1: ConversionServiceを@Autowiredしてやる場合</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Date;
@@ -205,7 +223,7 @@ public class SampleController {
     }
 }
 </code></pre><p>っていう感じにやっても出来る模様ではあるけれどもまぁ普通ならXMLに定義するなりでしておいた方がいいのかも</p><p>ちなみに@InitBinderの引数で使用されるWebDataBinderでもConversionServiceなインスタンスは取れる</p>
-<h4>余談2: オブジェクト等からString等へconvertする場合</h4>
+<h4 id="2-string-convert">余談2: オブジェクト等からString等へconvertする場合</h4>
 <p>Stringからオブジェクトへ変換する方式は上記でやってるけど、その逆の場合どういう動作によって行われるのか</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.core.convert.converter.Converter;

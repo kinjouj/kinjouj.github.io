@@ -95,10 +95,28 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#syncadapter">SyncAdapterを使う手順</a>
+</li>
+<li>
+<a href="#androidmanifest-xml">AndroidManifest.xmlを修正する</a>
+</li>
+<li>
+<a href="#res-xml-sync-xml">res/xml/sync.xmlを作成</a>
+</li>
+<li>
+<a href="#samplesyncservice-java">SampleSyncService.java</a>
+</li>
+<li>
+<a href="#samplesyncadapter-java">SampleSyncAdapter.java</a>
+</li>
+</ul>
+-->
                 <p>以前Android AccountManagerで使えるアカウントを開発する方法を書きましたが同期的な機能のSyncAdapterをすっぽかしてたのでやってみた</p>
 <!--more-->
 <p>その前に現状だとSyncAdapterを使える仕様じゃないので、そこら辺をまず修正しなければならない。SyncAdapterを使う為にはContent Providerが必要な模様、なのでアクティビティ等のアプリに関わる部分(AccountAuthenticator以外)からサーバーに通信してデータを取る部分を全てContent Provider経由で取る。でバックグラウンドで同期が行われる際に、サーバー側から取得したデータをSQLiteデータベースに保管しておいて、それをContent Providerでやり取りをする</p><p>という感じな仕様に変えないといけない。んまぁそこら辺はちゃちゃっと修正して、SyncAdapterの本体辺りな所だけ書く</p>
-<h4>SyncAdapterを使う手順</h4>
+<h4 id="syncadapter">SyncAdapterを使う手順</h4>
 
 <ul>
 <li>  AndroidManifest.xmlにandroid.content.SyncAdapterを持つ<service>を定義。さらにSyncAdapterから使うContent Providerの定義(<provider>)も必要</li>
@@ -118,7 +136,7 @@
 <li>  android.permission.WRITE_SYNC_SETTINGS</li>
 </ul>
 <p>っていう権限が必要になる模様</p>
-<h4>AndroidManifest.xmlを修正する</h4>
+<h4 id="androidmanifest-xml">AndroidManifest.xmlを修正する</h4>
 <p>SyncAdapterな所を追加する。上記でも書いてるようにパーミッションな所はすっ飛ばす</p><pre class="line-numbers"><code class="language-xml">&lt;service android:name=".SampleSyncService" android:exported="true"&gt;
     &lt;intent-filter&gt;
         &lt;action android:name="android.content.SyncAdapter" /&gt;
@@ -135,14 +153,14 @@
     android:exported="false"
     android:permission="sample.provider.permission" /&gt;
 </code></pre>
-<h4>res/xml/sync.xmlを作成</h4>
+<h4 id="res-xml-sync-xml">res/xml/sync.xmlを作成</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;sync-adapter
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:accountType="@string/account_type"
     android:contentAuthority="@string/provider_name" /&gt;
 </code></pre><p><a href="http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html">http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html</a> に書いてるのでそれ参考に</p>
-<h4>SampleSyncService.java</h4>
+<h4 id="samplesyncservice-java">SampleSyncService.java</h4>
 <pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
 
 import android.app.Service;
@@ -169,7 +187,7 @@ public class SampleSyncService extends Service {
     }
 }
 </code></pre><p>AbstractThreadedSyncAdapter#getSyncAdapterBinderを返すだけ</p>
-<h4>SampleSyncAdapter.java</h4>
+<h4 id="samplesyncadapter-java">SampleSyncAdapter.java</h4>
 <pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
 
 import java.io.IOException;

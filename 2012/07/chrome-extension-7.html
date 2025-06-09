@@ -97,10 +97,37 @@ http://code.google.com/p/nixysa っていうのを使うとNPAPIによるプラ�
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-6542ddd737b">準備</a>
+</li>
+<li>
+<a href="#hoge-h">hoge.h</a>
+</li>
+<li>
+<a href="#hoge-cc">hoge.cc</a>
+</li>
+<li>
+<a href="#hoge-idl">hoge.idl</a>
+</li>
+<li>
+<a href="#plugin-cc">plugin.cc</a>
+</li>
+<li>
+<a href="#sconstruct">SConstruct</a>
+</li>
+<li>
+<a href="#manifest-json">manifest.json</a>
+</li>
+<li>
+<a href="#background-html">background.html</a>
+</li>
+</ul>
+-->
                 <p>nixysaを使ってNPAPIのC++なコードを拡張で使えるようにしてみる</p>
-<h4>準備</h4>
+<h4 id="part-6542ddd737b">準備</h4>
 <p><a href="http://code.google.com/p/nixysa">http://code.google.com/p/nixysa</a> っていうのを使うとNPAPIによるプラグイン開発が非常に楽になるので、これをチェックアウトしておく。んでとりあえずどっかに置いとく(今回は/opt内に配置)</p>
-<h4>hoge.h</h4>
+<h4 id="hoge-h">hoge.h</h4>
 <pre class="line-numbers"><code class="language-cpp">#ifndef HOGE_H
 #define HOGE_H
 
@@ -114,7 +141,7 @@ class Hoge {
 
 #endif
 </code></pre>
-<h4>hoge.cc</h4>
+<h4 id="hoge-cc">hoge.cc</h4>
 <pre class="line-numbers"><code class="language-cpp">#include &lt;string&gt;
 #include "hoge.h"
 
@@ -125,14 +152,14 @@ std::string Hoge::say() {
     return s;
 }
 </code></pre><p>な感じで。まぁとりあえず適当に文字列を返すだけのメソッド定義するだけにしときます</p>
-<h4>hoge.idl</h4>
+<h4 id="hoge-idl">hoge.idl</h4>
 <pre class="line-numbers"><code class="language-idl">[binding_model=by_value, include="hoge.h"]
 class Hoge {
     Hoge();
     std::string say();
 };
 </code></pre><p>IDLファイルとか久々に見たので書き方こんなだっけ的なのを忘れてるのですが(ry どうでも良いのでさっと</p>
-<h4>plugin.cc</h4>
+<h4 id="plugin-cc">plugin.cc</h4>
 <pre class="line-numbers"><code class="language-cpp">#include &lt;npapi.h&gt;
 
 extern "C" {
@@ -160,7 +187,7 @@ extern "C" {
     }
 }
 </code></pre><p>ただプラグイン名とかの情報を定義するだけなようで。でこれで下準備完了。これにより少なくても拡張機能でNPAPIを使うのであれば、4つくらいはファイル必要になるような感じっぽい。でビルドしないといけないのですが、それをやるのにsconsを使います</p>
-<h4>SConstruct</h4>
+<h4 id="sconstruct">SConstruct</h4>
 <pre class="line-numbers"><code class="language-py">import os
 import sys
 
@@ -205,7 +232,7 @@ AUTOGEN_CC_FILES = [f for f in AUTOGEN_OUTPUT if f.suffix == ".cc"]
 env.SharedLibrary("hoge", AUTOGEN_CC_FILES + SOURCES +
                   ["$STATIC_GLUE_DIR/" + f for f in STATIC_GLUE_SOURCES])
 </code></pre><p>書き換える所は、<span style="color: red">IDL_SOURCES</span>と<span style="color: red">SOURCES</span>と最後の行の<span style="color: red">env.SharedLibrary</span>の第1引数を変える。んでROOTっていう所もチェックアウトしたnixysaのディレクトリを指定する。あとは普通にsconsを実行したら、ディレクトリにlibhoge.soが出来る。でこれからChrome開発的な事をする</p>
-<h4>manifest.json</h4>
+<h4 id="manifest-json">manifest.json</h4>
 <pre class="line-numbers"><code class="language-json">{
   "name": "test",
   "version": "0.1",
@@ -215,7 +242,7 @@ env.SharedLibrary("hoge", AUTOGEN_CC_FILES + SOURCES +
   ],
 }
 </code></pre><p><span style="color:red ">plugins</span>で指定出来る。pathの他にpublicを設定するとどっからでもプラグインが使えるようになっちゃうらしいのでそれは止めておく</p>
-<h4>background.html</h4>
+<h4 id="background-html">background.html</h4>
 <pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;script type="text/javascript"&gt;

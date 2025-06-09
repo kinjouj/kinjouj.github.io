@@ -93,12 +93,39 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-654311259e9">要件</a>
+</li>
+<li>
+<a href="#androidmanifest-xml">AndroidManifest.xml</a>
+</li>
+<li>
+<a href="#res-xml-widget-xml">res/xml/widget.xml</a>
+</li>
+<li>
+<a href="#res-layout-widget_layout-xml">res/layout/widget_layout.xml</a>
+</li>
+<li>
+<a href="#res-layout-widget_listview_row-xml">res/layout/widget_listview_row.xml</a>
+</li>
+<li>
+<a href="#samplewidgetprovider-java">SampleWidgetProvider.java</a>
+</li>
+<li>
+<a href="#samplewidgetservice-java">SampleWidgetService.java</a>
+</li>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+</ul>
+-->
                 <p>検証したのいつかは覚えてないんですが、ネタとして書いておく</p><p>Android API Level 11(Android3.x)くらいから(RemoteViews.setRemoteAdapter辺りがAPI Level14が必要なのでAndroid4.0以降)だと思うんですが、AppWidgetにListViewが使えるようになってる。それを検証したという件</p>
 <!--more-->
 
-<h4>要件</h4>
+<h4 id="part-654311259e9">要件</h4>
 <p>AppWidgetで自分のTwitterのTLの10件を取得してそれをListViewとして表示する。OAuth使いません、まだ普通にリクエストしても取得できる模様なので(正確にはTwitter API 1.1を使う場合には認証が必須かと)</p><p>あとAndroid4.2(Emulator)で検証</p>
-<h4>AndroidManifest.xml</h4>
+<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -132,7 +159,7 @@
 
 &lt;/manifest&gt;
 </code></pre><p>API Level 11以上なんですが、RemoteViews.setRemoteAdapterのメソッドがAPI Level 14以上じゃないといけないのでminSdkVersionは14で良いんじゃないかと</p><p>んでAppWidgetの定義ファイルを作る</p>
-<h4>res/xml/widget.xml</h4>
+<h4 id="res-xml-widget-xml">res/xml/widget.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;appwidget-provider
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -140,7 +167,7 @@
     android:minHeight="294dp"
     android:initialLayout="@layout/widget_layout" /&gt;
 </code></pre><p>確かAppWidgetのWidth/Heightの計算式が「74 * セル数 - 2」なので、今回4面を使うので「74 * 4 - 2 = 294」になるような感じかと</p><p>でinitialLayoutで指定されているレイアウト定義を使うのでそれを作る</p>
-<h4>res/layout/widget_layout.xml</h4>
+<h4 id="res-layout-widget_layout-xml">res/layout/widget_layout.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -175,7 +202,7 @@
 
 &lt;/RelativeLayout&gt;
 </code></pre><p>reload_btn_labelは適当にres/values/strings.xmlに設定しとく。まぁただのレイアウトなんだが、ListViewを使ってるっていう所。でListViewを使うのにデータをレンダリングする際に使うレイアウトファイルも必要なのでそれも作る</p>
-<h4>res/layout/widget_listview_row.xml</h4>
+<h4 id="res-layout-widget_listview_row-xml">res/layout/widget_listview_row.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -197,7 +224,7 @@
 
 &lt;/LinearLayout&gt;
 </code></pre><p>プロフィール画像とツイートだけを表示するだけ</p><p>でここからAppWidgetのプログラミングを書く</p>
-<h4>SampleWidgetProvider.java</h4>
+<h4 id="samplewidgetprovider-java">SampleWidgetProvider.java</h4>
 <pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
 
 import android.app.PendingIntent;
@@ -281,7 +308,7 @@ public class SampleWidgetProvider extends AppWidgetProvider {
     }
 }
 </code></pre><p>まぁ定期更新処理はしてません。ボタンを押してリロードする感じ。そこまでは今回の要件じゃないので</p><p>まぁやりたいならAlarmManagerとか使ってやる方で良いかと</p><p>でRemoteViews自体の画面処理自体はSampleWidgetServiceに要求している?ので作る</p>
-<h4>SampleWidgetService.java</h4>
+<h4 id="samplewidgetservice-java">SampleWidgetService.java</h4>
 <pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
 
 import java.io.IOException;
@@ -441,7 +468,7 @@ public class SampleWidgetService extends RemoteViewsService {
     }
 }
 </code></pre><p>以上。で実際に動かしてみると</p><p><img src="/images/2013/01/20130118104310.png" alt="image" /></p><p>っつー感じでAppWidgetでListView使えるみたいな感じ</p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 <p>AndoidAnnotations使われているけど、一応上記同様なソースは <a href="https://github.com/kinjouj/android_appwidget_listview_demo">https://github.com/kinjouj/android_appwidget_listview_demo</a> にて公開してます</p>
               </div>
             </div>

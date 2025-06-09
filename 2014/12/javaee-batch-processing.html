@@ -93,10 +93,31 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#sampleitemreader-java">SampleItemReader.java</a>
+</li>
+<li>
+<a href="#sampleitemwriter-java">SampleItemWriter.java</a>
+</li>
+<li>
+<a href="#main-java">Main.java</a>
+</li>
+<li>
+<a href="#meta-inf-batch-jobs-sample-xml">META-INF/batch-jobs/sample.xml</a>
+</li>
+<li>
+<a href="#basecontext-xml">baseContext.xml</a>
+</li>
+<li>
+<a href="#part-6542ab424ec">実行</a>
+</li>
+</ul>
+-->
                 <p>公式リファレンス: <a href="http://www.oracle.com/technetwork/articles/java/batch-1965499.html">http://www.oracle.com/technetwork/articles/java/batch-1965499.html</a></p><p>参考(jBatch): <a href="http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf">http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf</a></p><p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p>
 <!--more-->
 <p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p>
-<h4>SampleItemReader.java</h4>
+<h4 id="sampleitemreader-java">SampleItemReader.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.batch.api.chunk.ItemReader;
@@ -125,7 +146,7 @@ public class SampleItemProcessor implements ItemProcessor {
     }
 }
 </code></pre><p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p>
-<h4>SampleItemWriter.java</h4>
+<h4 id="sampleitemwriter-java">SampleItemWriter.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
@@ -138,7 +159,7 @@ public class SampleItemWriter extends AbstractItemWriter {
     }
 }
 </code></pre><p>とまぁBatch Processingを動かすのに必要なのは書いたので</p>
-<h4>Main.java</h4>
+<h4 id="main-java">Main.java</h4>
 <pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 
@@ -149,7 +170,7 @@ public class Main {
     }
 }
 </code></pre><p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p>
-<h4>META-INF/batch-jobs/sample.xml</h4>
+<h4 id="meta-inf-batch-jobs-sample-xml">META-INF/batch-jobs/sample.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;job id="sample" xmlns="http://xmlns.jcp.org/xml/ns/javaee"  version="1.0"&gt;
     &lt;step id="sample-chunk"&gt;
@@ -163,7 +184,7 @@ public class Main {
     &lt;/step&gt;
 &lt;/job&gt;
 </code></pre><p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p><p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p>
-<h4>baseContext.xml</h4>
+<h4 id="basecontext-xml">baseContext.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:p="http://www.springframework.org/schema/p"
@@ -228,7 +249,7 @@ public class Main {
     &lt;/jdbc:initialize-database&gt;
 &lt;/beans&gt;
 </code></pre><p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p>
-<h4>実行</h4>
+<h4 id="part-6542ab424ec">実行</h4>
 <p>実装して処理の流れなログとってみると</p>
 <pre>
 情報: Executing step: [sample-chunk]

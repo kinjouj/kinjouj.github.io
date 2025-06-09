@@ -93,6 +93,21 @@
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#src-main-resources-sample-controllers-sampleaction-validation-xml">src/main/resources/sample/controllers/SampleAction-validation.xml</a>
+</li>
+<li>
+<a href="#sampleaction-java">SampleAction.java</a>
+</li>
+<li>
+<a href="#struts-xml">struts.xml</a>
+</li>
+<li>
+<a href="#part-65432f7b3b1">追記</a>
+</li>
+</ul>
+-->
                 <p><a href="/struts2-6-form-validation-1.html">validateメソッドによる入力検証</a>だったり、<a href="/struts2-7-form-validation-2.html">XML定義による入力検証</a>っていうような方式がある。でこういう処理はフレームワークレベルで判断される訳だけど、これを抑制して自動で処理せずに自分でコントロールしたい場合とかの方法も用意されているようで</p><p>ちなみにStruts2のバリデーションインターセプターの実体はcom.opensymphony.xwork2.validator.ValidationInterceptorとなっている模様。でこちらで色々オプションなパラメーターがある模様</p>
 <!--more-->
 
@@ -101,7 +116,7 @@
 <li>  declarative: XML定義によるバリデーションフローをサポートしない</li>
 </ul>
 <p>的な感じじゃないかなと。ってな訳で自分でコントロールする方式をやってみた</p>
-<h4>src/main/resources/sample/controllers/SampleAction-validation.xml</h4>
+<h4 id="src-main-resources-sample-controllers-sampleaction-validation-xml">src/main/resources/sample/controllers/SampleAction-validation.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
 &lt;!DOCTYPE validators PUBLIC "-//Apache Struts//XWork Validator 1.0.3//EN" "http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd"&gt;
 &lt;validators&gt;
@@ -111,7 +126,7 @@
     &lt;/validator&gt;
 &lt;/validators&gt;
 </code></pre><p>これも作用しないけどとりあえず書いておく</p>
-<h4>SampleAction.java</h4>
+<h4 id="sampleaction-java">SampleAction.java</h4>
 <pre class="line-numbers"><code class="language-java">package sample.controllers;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -158,7 +173,7 @@ public class SampleAction extends ActionSupport {
     }
 }
 </code></pre><p>という感じで。でvalidateメソッドもフォローせずXML定義もフォローしない設定を行いこれをサポートさせる設定を行う</p>
-<h4>struts.xml</h4>
+<h4 id="struts-xml">struts.xml</h4>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
 &lt;struts&gt;
@@ -183,7 +198,7 @@ public class SampleAction extends ActionSupport {
     &lt;/package&gt;
 &lt;/struts&gt;
 </code></pre><p>んまぁデフォルトなインターセプターのスタックにvalidationが入ってるのでそれのパラメーターをいじる感じでprogrammaticとdeclarativeをfalseにする。後者のdeclarativeをfalseにする事でXML定義なのはフォローされない模様。programmaticは別にvalidateメソッド実装していなければ良いんじゃないかと思うので</p><p>という感じでオプションパラメーターを使う事でデフォルトなバリデーションインターセプターが行う検証機構なフローをすっ飛ばして自分でコントロールする事も可能な模様</p>
-<h4>追記</h4>
+<h4 id="part-65432f7b3b1">追記</h4>
 
 <blockquote class="twitter-tweet" lang="ja">
   <p>

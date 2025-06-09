@@ -94,11 +94,43 @@ docker run -d -p 80:80" />
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#server-a">Server A(リバースプロキシ側)</a>
+<ul>
+<li>
+<a href="#server-b">Server B(バックエンド側)</a>
+</li>
+<li>
+<a href="#docker-network-docker-network">docker networkでDocker Networkを作成</a>
+</li>
+<li>
+<a href="#server-b">Server Bの起動</a>
+</li>
+<li>
+<a href="#server-a-nginx-conf">Server A側のnginx.conf</a>
+</li>
+<li>
+<a href="#server-a">Server Aを起動</a>
+</li>
+<li>
+<a href="#part-37868fa865b7179">まとめ</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#p">安易に-pを使用しない</a>
+</li>
+<li>
+<a href="#docker-network">コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</a>
+</li>
+</ul>
+-->
                 <p>まず前提として２つのnginxサーバーをDockerコンテナを使って起動する。あえてnginxの設定とかは省略するが</p>
-<h3>Server A(リバースプロキシ側)</h3>
+<h3 id="server-a">Server A(リバースプロキシ側)</h3>
 <pre class="line-numbers"><code class="language-bash">docker run -d -p 80:80 -t server-a
 </code></pre>
-<h4>Server B(バックエンド側)</h4>
+<h4 id="server-b">Server B(バックエンド側)</h4>
 <pre class="line-numbers"><code class="language-bash">docker run -d -p 8080:80 -t server-b
 </code></pre><p>というようにServer AからServer Bにリバースプロキシをするように設定した場合、通常であればバックエンド側は外部からはアクセスできないはずだ。しかし</p><pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
 server b
@@ -107,13 +139,13 @@ server b
 kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100:8080
 server b
 </code></pre><p>まあリバースプロキシでポート指定無しなところでアクセスできるのはそれはわかるがなんでバックエンドまで普通に外部からアクセスできるのかっていうこと</p><p>-pを使ってコンテナポートとホストポートだけをマッピングしてしまうとそれが全面公開設定になってしまう模様なので上記のようにServer B側で8080をホストでマッピングしてると外部からでも普通にアクセスできちゃうっていうらしい</p><p>でそれを解決する方法としてコンテナポートのみを開放する方法があるのでそれをやってみる</p>
-<h4>docker networkでDocker Networkを作成</h4>
+<h4 id="docker-network-docker-network">docker networkでDocker Networkを作成</h4>
 <pre class="line-numbers"><code class="language-bash">docker network create --subnet 172.16.0.0/16 --attachable mynet
 </code></pre><p>mynetっていう名前でDocker Networkを作成する。どうやらDockerでコンテナを作成した際に使用されるDocker Networkはおそらく最初からあるbridgeを使用するらしいのだがこのbridgeネットワークどうやらDNSによる名前解決を行わないらしい</p><p>なので新しくDocker Networkを作成して以下で作るコンテナで同一のネットワークを使用するように起動する</p>
-<h4>Server Bの起動</h4>
+<h4 id="server-b">Server Bの起動</h4>
 <pre class="line-numbers"><code class="language-bash">docker run --name server-b -d --expose=8080 --net=mynet -t server-b
 </code></pre><p>--nameでコンテナに名前をつける。これはServer Aでproxy_passを指定する際にコンテナ名で指定できるようになるのでそれを利用するためにコンテナ名を指定しておく。-pではなく--exposeでコンテナポートを開放、んで--netでそのコンテナが所属するネットワークを指定</p>
-<h4>Server A側のnginx.conf</h4>
+<h4 id="server-a-nginx-conf">Server A側のnginx.conf</h4>
 <pre class="line-numbers"><code class="language-nginx">listen 80;
 server_name localhost;
 location / {
@@ -121,18 +153,18 @@ location / {
     proxy_redirect off;
 }
 </code></pre><p>上記で指定したコンテナ名をproxy_passに指定することができる。ただし同一のDocker Networkに所属してないとhost not found in upstreamって言われるので注意</p>
-<h4>Server Aを起動</h4>
+<h4 id="server-a">Server Aを起動</h4>
 <pre class="line-numbers"><code class="language-bash">docker run -p 80:80 --net=mynet -t server-a
 </code></pre><p>接続できるかやってみる</p><pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
 server b
 kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100:8080
 curl: (28) Connection timed out after 1001 milliseconds
 </code></pre><p>以上！長い！ややこしい！</p><p>んまあ安直に-pオプションでポートオープンにするのは止めようねっていうオチなんかなと</p>
-<h4>まとめ</h4>
+<h4 id="part-37868fa865b7179">まとめ</h4>
 
-<h3>安易に-pを使用しない</h3>
+<h3 id="p">安易に-pを使用しない</h3>
 
-<h3>コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</h3>
+<h3 id="docker-network">コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</h3>
 <p>てな感じかな</p>
               </div>
             </div>

@@ -94,16 +94,31 @@ Postfixのインストールは省略。SPFのフィルタークライアント�
                 </span>
               </p>
               <div class="post-content">
+                <!--<ul>
+<li>
+<a href="#part-bdf5c55b74bb686">インストール</a>
+</li>
+<li>
+<a href="#dns-txt">DNSレコードにTXTを登録</a>
+</li>
+<li>
+<a href="#etc-postfix-master-cf">/etc/postfix/master.cfを設定</a>
+</li>
+<li>
+<a href="#etc-postfix-main-cf">/etc/postfix/main.cfを設定</a>
+</li>
+</ul>
+-->
                 <p>PostfixでSPFを利用するメモ</p>
-<h4>インストール</h4>
+<h4 id="part-bdf5c55b74bb686">インストール</h4>
 <p>Postfixのインストールは省略。SPFのフィルタークライアントが<a href="http://cri.univ-tlse1.fr/documentations/spam/outils/spf.pl">http://cri.univ-tlse1.fr/documentations/spam/outils/spf.pl</a>。これをダウンロード</p><p>※PerlのMail::SPF::Query等が必要になる。どっかに配置して実行権限を与えておく</p>
-<h4>DNSレコードにTXTを登録</h4>
+<h4 id="dns-txt">DNSレコードにTXTを登録</h4>
 <pre class="line-numbers"><code class="language-dns">hoge.com.    IN    TXT    "v=spf1 +a:hoge.com ~all"
 </code></pre><p>を追加してbindを再起動</p>
-<h4>/etc/postfix/master.cfを設定</h4>
+<h4 id="etc-postfix-master-cf">/etc/postfix/master.cfを設定</h4>
 <p>以下をmaster.cfに追加する</p><pre class="line-numbers"><code class="language-">policy unix - n n - - spawn user=nobody argv=/usr/bin/perl /path/to/spf.pl
 </code></pre>
-<h4>/etc/postfix/main.cfを設定</h4>
+<h4 id="etc-postfix-main-cf">/etc/postfix/main.cfを設定</h4>
 <p>smtpd<em>recipient</em>restrictionsを以下のように設定する</p><pre class="line-numbers"><code class="language-ini">smtpd_recipient_restrictions = \
     permit_mynetworks, \
     permit_sasl_authenticated, \
