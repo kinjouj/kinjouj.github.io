@@ -98,14 +98,14 @@ ga("send", "pageview");
                 <!---->
                 <p>普通にドキュメントに書いてるのでそれを参考にしつつやってみた</p>
 <!--more-->
-<p><a href="http://wiki.apache.org/solr/SolrTomcat">http://wiki.apache.org/solr/SolrTomcat</a> を参考にして環境構築</p><p>とりあえずTomcatにデプロイしてやるのでTomcatを用意。んでSolrをダウンロードしてきてdistディレクトリに入ってるwarファイルをTomcatにデプロイ(/path/to/tomcat/webapps/solr.warな感じで)</p><p>で動かしても動かない。設定ファイル等がもろもろ無いので、solrのパッケージにあるexample/solrっていうディレクトリをデプロイ先にコピーする。でその前にsolr/homeっていうのの設定が必要な模様なので/path/to/tomcat/conf/Catalina/localhost/solr.xmlを作成</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+<p><a href="http://wiki.apache.org/solr/SolrTomcat" target="_blank" rel="noopener noreferrer">http://wiki.apache.org/solr/SolrTomcat</a> を参考にして環境構築</p><p>とりあえずTomcatにデプロイしてやるのでTomcatを用意。んでSolrをダウンロードしてきてdistディレクトリに入ってるwarファイルをTomcatにデプロイ(/path/to/tomcat/webapps/solr.warな感じで)</p><p>で動かしても動かない。設定ファイル等がもろもろ無いので、solrのパッケージにあるexample/solrっていうディレクトリをデプロイ先にコピーする。でその前にsolr/homeっていうのの設定が必要な模様なので/path/to/tomcat/conf/Catalina/localhost/solr.xmlを作成</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;Context docBase="/opt/tomcat/webapps/solr/solr.war" debug="0" crossContext="true"&gt;
   &lt;Environment name="solr/home" type="java.lang.String" value="/opt/tomcat/webapps/solr/solr" override="true"/&gt;
 &lt;/Context&gt;
 </code></pre><p>んまぁドキュメントに書いてますんでそれをそのまま参考にして作成ってな感じ。でまだ動かない。正確には動くんだけどPDFとかを処理してくれるRequestHandlerなやつが動かない。なのでsolrconfig.xmlを修正。場所は/path/to/tomcat/webapps/solr/solr/collections/conf/solrconfig.xmlにあるはず、上記の設定だと</p><pre class="line-numbers"><code class="language-xml">&lt;lib dir="/opt/tomcat/webapps/solr/contrib/extraction/lib" regex=".*.jar" /&gt;
 &lt;lib dir="/opt/tomcat/webapps/solr/dist/" regex="solr-cell-d.*.jar" /&gt;
-</code></pre><p>この2つに直せば良いかと。でこのcontribとdistはsolrパッケージ内にある同名のディレクトリを上記の設定通りにコピーする</p><p>多分これでオッケー。サーバーを起動してstartupエラーが出てない事を確認。あとはインデックスに載せたいPDFファイルをcurlでぶん投げるだけ。ぶん投げ先は <a href="http://localhost:8080/solr/update/extract">http://localhost:8080/solr/update/extract</a></p><p>そのドキュメントは <a href="http://wiki.apache.org/solr/ExtractingRequestHandler">http://wiki.apache.org/solr/ExtractingRequestHandler</a> にある</p><pre class="line-numbers"><code class="language-">curl "http://localhost:8080/solr/update/extract?literal.id=test1&captureAttr=true" --data-binary @test.pdf -H "Content-Type:application/pdf
-</code></pre><p>な感じで。で <a href="http://localhost:8080/solr">http://localhost:8080/solr</a> なDashboardを見てみると</p><p><img src="/images/2013/03/20130316204634.jpg" alt="image" /></p><p>な感じで(他にもやっちゃったんで2つインデックスがありますけど)</p><p>んじゃ検索を実行してみるのでインデックスに入れたPDFがFuelPHP関係のやつだったので <a href="http://localhost:8080/solr/query?q=fuelphp">http://localhost:8080/solr/query?q=fuelphp</a> な感じでアクセスすると</p><p><img src="/images/2013/03/20130316204817.jpg" alt="image" /></p><p>な感じでPDFの内容が解析されてインデックスに載せれたり出来る模様(解析される方式はApache Tikaを使ってる模様)</p><p>まぁそんな感じでPDFだとかWord等のデータをインデックスに載せちゃう事もできちゃうっていうオチで</p>
+</code></pre><p>この2つに直せば良いかと。でこのcontribとdistはsolrパッケージ内にある同名のディレクトリを上記の設定通りにコピーする</p><p>多分これでオッケー。サーバーを起動してstartupエラーが出てない事を確認。あとはインデックスに載せたいPDFファイルをcurlでぶん投げるだけ。ぶん投げ先は <a href="http://localhost:8080/solr/update/extract" target="_blank" rel="noopener noreferrer">http://localhost:8080/solr/update/extract</a></p><p>そのドキュメントは <a href="http://wiki.apache.org/solr/ExtractingRequestHandler" target="_blank" rel="noopener noreferrer">http://wiki.apache.org/solr/ExtractingRequestHandler</a> にある</p><pre class="line-numbers"><code class="language-">curl "http://localhost:8080/solr/update/extract?literal.id=test1&captureAttr=true" --data-binary @test.pdf -H "Content-Type:application/pdf
+</code></pre><p>な感じで。で <a href="http://localhost:8080/solr" target="_blank" rel="noopener noreferrer">http://localhost:8080/solr</a> なDashboardを見てみると</p><p><img src="/images/2013/03/20130316204634.jpg" alt="image" /></p><p>な感じで(他にもやっちゃったんで2つインデックスがありますけど)</p><p>んじゃ検索を実行してみるのでインデックスに入れたPDFがFuelPHP関係のやつだったので <a href="http://localhost:8080/solr/query?q=fuelphp" target="_blank" rel="noopener noreferrer">http://localhost:8080/solr/query?q=fuelphp</a> な感じでアクセスすると</p><p><img src="/images/2013/03/20130316204817.jpg" alt="image" /></p><p>な感じでPDFの内容が解析されてインデックスに載せれたり出来る模様(解析される方式はApache Tikaを使ってる模様)</p><p>まぁそんな感じでPDFだとかWord等のデータをインデックスに載せちゃう事もできちゃうっていうオチで</p>
               </div>
             </div>
           </div>
@@ -120,6 +120,9 @@ ga("send", "pageview");
           <div id="recent_posts">
             <h4>Recent Posts</h4>
 <ul id="recent_posts">
+  <li class="recent-post">
+    <a href="/2025/06/ruby-stdout-to-logger.html">Rubyで標準出力を標準的に出しつつログを取る方法</a>
+  </li>
   <li class="recent-post">
     <a href="/2025/06/docker-9-docker-compose.html">Docker (9) - Docker Composeを使う -</a>
   </li>
@@ -140,9 +143,6 @@ ga("send", "pageview");
   </li>
   <li class="recent-post">
     <a href="/2025/05/docker-4-docker-nginx-proxy-setting.html">Docker (4) - Docker nginx reverse proxy環境下でアクセスログを正しく取得する設定をするメモ</a>
-  </li>
-  <li class="recent-post">
-    <a href="/2025/05/ruby-serialize-object-to-json.html">RubyでオブジェクトをJSONにシリアライズするメモ</a>
   </li>
 </ul>
 
@@ -271,7 +271,7 @@ ga("send", "pageview");
 </ul>
 
   <li>
-    <a href="/archives/category/ruby">Ruby (60)</a>
+    <a href="/archives/category/ruby">Ruby (61)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -414,7 +414,5 @@ ga("send", "pageview");
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061"
      crossorigin="anonymous"></script>
-    <style type="text/css">.box-link { min-width: 33%; }</style>
-    <script async src="https://fundingchoicesmessages.google.com/i/pub-3593764998780061?ers=1"></script><script>(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
   </body>
 </html>

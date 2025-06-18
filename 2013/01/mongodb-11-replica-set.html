@@ -118,7 +118,7 @@ mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --rep
     { _id: 3, host: "localhost:10003" }
   ]
 })
-</code></pre><p>な感じで設定を行う。で <a href="http://localhost:11001/_replSet">http://localhost:11001/_replSet</a> でレプリカセットの状態が見れるのでアクセスすると</p><p><img src="/images/2013/01/20130123213000.jpg" alt="image" /></p><p>っていう感じっすね。PRIMARYとSECONDARYの2つに分かれてる。でマスターを落とすと</p><p><img src="/images/2013/01/20130123213117.jpg" alt="image" /></p><p>てな感じで10001がDOWNになって10003がSECONDARYからPRIMARYになってる(10001は落ちてるので上のWebコンソールは別のサーバーのやつでアクセスする)。でこの状態で現在は10003がPRIMARYなのでこれも落としてみると</p><p><img src="/images/2013/01/20130123213344.jpg" alt="image" /></p><p>でそこら辺を柔軟に管理してPRIMARY/SECONDARYを監査してくれる?のがArbiterな模様なので、もう1個MongoDBを起動する</p><pre class="line-numbers"><code class="language-">mongod --replSet repltest --dbpath /tmp/mongo4 --logpath /tmp/mongo4/mongdb.log --port 10004 --rest
+</code></pre><p>な感じで設定を行う。で <a href="http://localhost:11001/_replSet" target="_blank" rel="noopener noreferrer">http://localhost:11001/_replSet</a> でレプリカセットの状態が見れるのでアクセスすると</p><p><img src="/images/2013/01/20130123213000.jpg" alt="image" /></p><p>っていう感じっすね。PRIMARYとSECONDARYの2つに分かれてる。でマスターを落とすと</p><p><img src="/images/2013/01/20130123213117.jpg" alt="image" /></p><p>てな感じで10001がDOWNになって10003がSECONDARYからPRIMARYになってる(10001は落ちてるので上のWebコンソールは別のサーバーのやつでアクセスする)。でこの状態で現在は10003がPRIMARYなのでこれも落としてみると</p><p><img src="/images/2013/01/20130123213344.jpg" alt="image" /></p><p>でそこら辺を柔軟に管理してPRIMARY/SECONDARYを監査してくれる?のがArbiterな模様なので、もう1個MongoDBを起動する</p><pre class="line-numbers"><code class="language-">mongod --replSet repltest --dbpath /tmp/mongo4 --logpath /tmp/mongo4/mongdb.log --port 10004 --rest
 </code></pre><p>この状態でもう一度上記の3つのサーバー起動しておく。でWebコンソールからPRIMARYに入って</p><pre class="line-numbers"><code class="language-js">db.addArb("localhost:10004")
 </code></pre><p>でArbiterサーバーを設定しておく。で再度Webコンソールを見ると</p><p><img src="/images/2013/01/20130123213948.jpg" alt="image" /></p><p>な感じARBITERな項目が増える。でちょっと停止させておいて、既に3つのサーバーをレプリカセットとして認識させているけど、10003だけ起動せずに停止したままにしてみると</p><p><img src="/images/2013/01/20130123215449.jpg" alt="image" /></p><p>という風に10003が起動してないのでPRIMARYが決まってない。こういう状況になった場合にArbiterがPRIMARYを監査してくれる模様という事で停止しておいたArbiterを起動すると</p><p><img src="/images/2013/01/20130123221002.jpg" alt="image" /></p><p>っていう感じ。まぁPRIMARYかSECONDARYか判断されてないようなケースだとArbiterにそれを委譲するっていう感じなんすかね。はっきりとした理論は無いんですけど</p><p>んまぁレプリカセットな概要的なのはこんな感じかと</p><p>で問題はデータとかどうなんの的な話になると思うんですが、PRIMARYが停止してSECONDARYがPRIMARYに昇格する際にPRIMARYが持ってたデータをsyncする模様。元々SECONDARYの状態で既に持ってるけどSECONDARYだからfind出来ないsave出来ない状態なので確認できないんですが、んまぁロックされててPRIMARYに昇格したらロック解除されて参照できるようになるっていう感じかなーっと</p><p>でクライアントとかだとレプリカセットに指定されているサーバーを指定すれば良い模様。PRIMARYになってる所にデータが行くっていう感じかと。Perlだと</p><pre class="line-numbers"><code class="language-pl">use MongoDB;
 
@@ -145,6 +145,9 @@ $coll-&gt;save(+{ time =&gt; time() });
             <h4>Recent Posts</h4>
 <ul id="recent_posts">
   <li class="recent-post">
+    <a href="/2025/06/ruby-stdout-to-logger.html">Rubyで標準出力を標準的に出しつつログを取る方法</a>
+  </li>
+  <li class="recent-post">
     <a href="/2025/06/docker-9-docker-compose.html">Docker (9) - Docker Composeを使う -</a>
   </li>
   <li class="recent-post">
@@ -164,9 +167,6 @@ $coll-&gt;save(+{ time =&gt; time() });
   </li>
   <li class="recent-post">
     <a href="/2025/05/docker-4-docker-nginx-proxy-setting.html">Docker (4) - Docker nginx reverse proxy環境下でアクセスログを正しく取得する設定をするメモ</a>
-  </li>
-  <li class="recent-post">
-    <a href="/2025/05/ruby-serialize-object-to-json.html">RubyでオブジェクトをJSONにシリアライズするメモ</a>
   </li>
 </ul>
 
@@ -295,7 +295,7 @@ $coll-&gt;save(+{ time =&gt; time() });
 </ul>
 
   <li>
-    <a href="/archives/category/ruby">Ruby (60)</a>
+    <a href="/archives/category/ruby">Ruby (61)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -438,7 +438,5 @@ $coll-&gt;save(+{ time =&gt; time() });
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061"
      crossorigin="anonymous"></script>
-    <style type="text/css">.box-link { min-width: 33%; }</style>
-    <script async src="https://fundingchoicesmessages.google.com/i/pub-3593764998780061?ers=1"></script><script>(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
   </body>
 </html>
