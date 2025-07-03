@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2015-03-14 00:00:00 +0900">
+                <time datetime="2015-03-14T00:00:00+09:00">
                   <a href="/archives/2015/03">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -97,38 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#build-gradle">build.gradle</a>
-</li>
-<li>
-<a href="#applicationcontext-xml">applicationContext.xml</a>
-</li>
-<li>
-<a href="#appconfig-java">AppConfig.java</a>
-</li>
-<li>
-<a href="#domarepository-java">DomaRepository.java</a>
-</li>
-<li>
-<a href="#sampledao-java">SampleDao.java</a>
-</li>
-<li>
-<a href="#sampleservice-java">SampleService.java</a>
-</li>
-<li>
-<a href="#sampledaotest-java">SampleDaoTest.java</a>
-</li>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>公式ドキュメント: <a href="http://doma.readthedocs.org/ja/latest/config/#id21" target="_blank" rel="noopener noreferrer">http://doma.readthedocs.org/ja/latest/config/#id21</a></p><p>参考: <a href="http://qiita.com/nyasba/items/1e22c2401f3849f9071d" target="_blank" rel="noopener noreferrer">http://qiita.com/nyasba/items/1e22c2401f3849f9071d</a></p><p>前回にも記述した通り前回ではdomaで使うConfig実装なAppConfig上でDataSource等の設定をそのまま埋め込んでる。でそういう所をDI Containerに設定されているDataSource等を依存性注入して使うような形の場合には設定がいろいろ異なるっていうことでやってみた(使うDI ContainerはSpring Framework)</p>
-<!--more-->
-
-<h4 id="build-gradle">build.gradle</h4>
-<pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
+                <!--[[1, "build.gradle"], [2, "applicationContext.xml"], [3, "AppConfig.java"], [4, "DomaRepository.java"], [5, "SampleDao.java"], [6, "SampleService.java"], [7, "SampleDaoTest.java"], [8, "追記"]]-->
+                <p>公式ドキュメント: <a href="http://doma.readthedocs.org/ja/latest/config/#id21" target="_blank" rel="noopener noreferrer">http://doma.readthedocs.org/ja/latest/config/#id21</a></p><p>参考: <a href="http://qiita.com/nyasba/items/1e22c2401f3849f9071d" target="_blank" rel="noopener noreferrer">http://qiita.com/nyasba/items/1e22c2401f3849f9071d</a></p><p>前回にも記述した通り前回ではdomaで使うConfig実装なAppConfig上でDataSource等の設定をそのまま埋め込んでる。でそういう所をDI Containerに設定されているDataSource等を依存性注入して使うような形の場合には設定がいろいろ異なるっていうことでやってみた(使うDI ContainerはSpring Framework)</p><h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 
 processResources.destinationDir = compileJava.destinationDir
 compileJava.dependsOn processResources
@@ -138,31 +107,29 @@ repositories {
 }
 
 dependencies {
-    runtime "mysql:mysql-connector-java:+"
-    runtime "org.springframework:spring-jdbc:+"
+    runtime &quot;mysql:mysql-connector-java:+&quot;
+    runtime &quot;org.springframework:spring-jdbc:+&quot;
     // AOPでトランザクション情報をaspectする場合は必要
     // あとspring-aopは依存性に入れてないけど結局入るので使うなら入れてた方が良いのかと
-    runtime "org.aspectj:aspectjweaver:+"
+    runtime &quot;org.aspectj:aspectjweaver:+&quot;
 
-    compile "org.seasar.doma:doma:2.1.0"
-    compile "org.springframework:spring-beans:+"
-    compile "org.springframework:spring-context:+"
-    compile "org.springframework:spring-tx:+"
+    compile &quot;org.seasar.doma:doma:2.1.0&quot;
+    compile &quot;org.springframework:spring-beans:+&quot;
+    compile &quot;org.springframework:spring-context:+&quot;
+    compile &quot;org.springframework:spring-tx:+&quot;
 
-    testCompile "org.springframework:spring-test:+"
-    testCompile "junit:junit:+"
-    testCompile "org.hamcrest:hamcrest-all:+"
+    testCompile &quot;org.springframework:spring-test:+&quot;
+    testCompile &quot;junit:junit:+&quot;
+    testCompile &quot;org.hamcrest:hamcrest-all:+&quot;
 }
-</code></pre><p>Spring Frameworkを使うのとそれとSpring JDBCな設定を使うのとSpring Transactionを使うのでそれに必要な依存性を追加するだけ</p>
-<h4 id="applicationcontext-xml">applicationContext.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+</code></pre><p>Spring Frameworkを使うのとそれとSpring JDBCな設定を使うのとSpring Transactionを使うのでそれに必要な依存性を追加するだけ</p><h4>applicationContext.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
-    xmlns="http://www.springframework.org/schema/beans"
-    xmlns:aop="http://www.springframework.org/schema/aop"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:tx ="http://www.springframework.org/schema/tx"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="
+    xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:tx =&quot;http://www.springframework.org/schema/tx&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/aop
@@ -170,43 +137,41 @@ dependencies {
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/tx
-        http://www.springframework.org/schema/tx/spring-tx.xsd"&gt;
+        http://www.springframework.org/schema/tx/spring-tx.xsd&quot;&gt;
 
     &lt;context:annotation-config /&gt;
-    &lt;context:component-scan base-package="sample" /&gt;
+    &lt;context:component-scan base-package=&quot;sample&quot; /&gt;
 
-    &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy"&gt;
+    &lt;bean id=&quot;dataSource&quot; class=&quot;org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy&quot;&gt;
         &lt;constructor-arg&gt;
-            &lt;bean class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
-                &lt;property name="driverClassName" value="com.mysql.jdbc.Driver" /&gt;
-                &lt;property name="url" value="jdbc:mysql://localhost:3306/sample" /&gt;
-                &lt;property name="username" value="user" /&gt;
-                &lt;property name="password" value="pass" /&gt;
+            &lt;bean class=&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot;&gt;
+                &lt;property name=&quot;driverClassName&quot; value=&quot;com.mysql.jdbc.Driver&quot; /&gt;
+                &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://localhost:3306/sample&quot; /&gt;
+                &lt;property name=&quot;username&quot; value=&quot;user&quot; /&gt;
+                &lt;property name=&quot;password&quot; value=&quot;pass&quot; /&gt;
             &lt;/bean&gt;
         &lt;/constructor-arg&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
-        &lt;property name="dataSource" ref="dataSource" /&gt;
+    &lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&gt;
+        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&gt;
     &lt;/bean&gt;
 
     &lt;tx:annotation-driven /&gt;
 
     &lt;!-- AOPでトランザクション情報を設定しない場合には以降は恐らく必要ない --&gt;
-    &lt;tx:advice id="txDefault" transaction-manager="transactionManager"&gt;
+    &lt;tx:advice id=&quot;txDefault&quot; transaction-manager=&quot;transactionManager&quot;&gt;
         &lt;tx:attributes&gt;
-            &lt;tx:method name="*" propagation="REQUIRED" rollback-for="Exception" /&gt;
+            &lt;tx:method name=&quot;*&quot; propagation=&quot;REQUIRED&quot; rollback-for=&quot;Exception&quot; /&gt;
         &lt;/tx:attributes&gt;
     &lt;/tx:advice&gt;
 
     &lt;aop:config&gt;
-        &lt;aop:advisor advice-ref="txDefault" pointcut="execution(* sample.service.*Service.*(..))" /&gt;
+        &lt;aop:advisor advice-ref=&quot;txDefault&quot; pointcut=&quot;execution(* sample.service.*Service.*(..))&quot; /&gt;
     &lt;/aop:config&gt;
 
 &lt;/beans&gt;
-</code></pre><p>まぁDataSource関連とTransaction関連の設定をやっておく</p>
-<h4 id="appconfig-java">AppConfig.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>まぁDataSource関連とTransaction関連の設定をやっておく</p><h4>AppConfig.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.sql.DataSource;
 
@@ -239,9 +204,7 @@ public class AppConfig {
         };
     }
 }
-</code></pre><p>な感じで@AutowiredでDataSourceなインスタンスを引っ張ってきてBean登録したConfigの実装でそれを返すようにするような感じ。上記参考ではgetSqlFileRepositoryとかも実装しているけど、デフォルト実装を使えば良いんだと思われるのであえてオーバーライドはしてないけど必要なら実装しておくと良いんじゃないかと。あんま事細かくチェックしてないので何か問題起きそうな気もしなくもないんだけど</p>
-<h4 id="domarepository-java">DomaRepository.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.dao;
+</code></pre><p>な感じで@AutowiredでDataSourceなインスタンスを引っ張ってきてBean登録したConfigの実装でそれを返すようにするような感じ。上記参考ではgetSqlFileRepositoryとかも実装しているけど、デフォルト実装を使えば良いんだと思われるのであえてオーバーライドはしてないけど必要なら実装しておくと良いんじゃないかと。あんま事細かくチェックしてないので何か問題起きそうな気もしなくもないんだけど</p><h4>DomaRepository.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import org.seasar.doma.AnnotateWith;
 import org.seasar.doma.Annotation;
@@ -258,9 +221,7 @@ import org.springframework.stereotype.Component;
 })
 public @interface DomaRepository {
 }
-</code></pre><p>簡単に言うとDAOオブジェクトなのがSpringでAutowired出来るようにするにはそれに応じたアノテーションなりを実装するか自前で登録するかのどっちかをしなきゃならないんだけど、DAO実装クラスは自動生成されるのでそれに応じたアノテーションを付与するようにしなきゃならない。でDAO毎にこの設定が必要になるのだけど、毎回毎回DAOに設定するのもめんどいと思うのでこういうアノテーションインターフェースを書いておいてDAOインターフェースでアノテーション定義しておけば良い。それは以下に書くので</p><p>ちなみに今回はSpring Frameworkを使ってるからこうなってるけど、javax.injectなのを使うのならtype属性で指定するクラスを変える必要があるかと</p>
-<h4 id="sampledao-java">SampleDao.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.dao;
+</code></pre><p>簡単に言うとDAOオブジェクトなのがSpringでAutowired出来るようにするにはそれに応じたアノテーションなりを実装するか自前で登録するかのどっちかをしなきゃならないんだけど、DAO実装クラスは自動生成されるのでそれに応じたアノテーションを付与するようにしなきゃならない。でDAO毎にこの設定が必要になるのだけど、毎回毎回DAOに設定するのもめんどいと思うのでこういうアノテーションインターフェースを書いておいてDAOインターフェースでアノテーション定義しておけば良い。それは以下に書くので</p><p>ちなみに今回はSpring Frameworkを使ってるからこうなってるけど、javax.injectなのを使うのならtype属性で指定するクラスを変える必要があるかと</p><h4>SampleDao.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 
@@ -284,9 +245,7 @@ public interface SampleDao {
     @Insert
     int save(Sample s);
 }
-</code></pre><p>先ほど書いた@DomaRepositoryを追加するだけ。@Daoのconfig属性は実装クラスのコンストラクタで@Autowiredされるので必要無いんじゃないかと</p>
-<h4 id="sampleservice-java">SampleService.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.service;
+</code></pre><p>先ほど書いた@DomaRepositoryを追加するだけ。@Daoのconfig属性は実装クラスのコンストラクタで@Autowiredされるので必要無いんじゃないかと</p><h4>SampleService.java</h4><pre class="line-numbers"><code class="language-java">package sample.service;
 
 import java.util.List;
 
@@ -317,9 +276,7 @@ public class SampleService {
         return dao.save(sample);
     }
 }
-</code></pre><p>んまぁ@AutowiredでDAOを注入して使うオブジェクトなだけ(@Repositoryでも良かったんじゃないのかって思ったけど、そこ詳しくないので今回はパス)。@Transactionalをつけたメソッドをコールする場合にはトランザクション処理が行われるけど、applicationContext.xmlで指定したようにトランザクション情報に関わるAOPをしていない場合にはアノテーションの属性で指定すれば良い</p>
-<h4 id="sampledaotest-java">SampleDaoTest.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.dao;
+</code></pre><p>んまぁ@AutowiredでDAOを注入して使うオブジェクトなだけ(@Repositoryでも良かったんじゃないのかって思ったけど、そこ詳しくないので今回はパス)。@Transactionalをつけたメソッドをコールする場合にはトランザクション処理が行われるけど、applicationContext.xmlで指定したようにトランザクション情報に関わるAOPをしていない場合にはアノテーションの属性で指定すれば良い</p><h4>SampleDaoTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 
@@ -338,7 +295,7 @@ import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations="classpath:applicationContext.xml")
+@ContextConfiguration(locations=&quot;classpath:applicationContext.xml&quot;)
 public class SampleDaoTest {
 
     @Autowired
@@ -352,27 +309,25 @@ public class SampleDaoTest {
         Sample sample = samples.get(0);
         assertThat(sample, notNullValue());
         assertThat(sample.getId(), is(1));
-        assertThat(sample.getName(), is("hoge"));
+        assertThat(sample.getName(), is(&quot;hoge&quot;));
     }
 
     @Test
     public void test_find() {
         Sample sample = service.find(1);
         assertThat(sample, notNullValue());
-        assertThat(sample.getName(), is("hoge"));
+        assertThat(sample.getName(), is(&quot;hoge&quot;));
     }
 
     @Test
     public void test_save() throws Exception {
         Sample sample = new Sample();
-        sample.setName("hoge fuga foobar");
+        sample.setName(&quot;hoge fuga foobar&quot;);
 
         service.save(sample);
     }
 }
-</code></pre><p>ってな感じでテスト書けば良いんだけど、SampleServiceのsaveメソッドでDAO側のsaveをコールしたあとに例外等が送出された場合、@Transactionalによるトランザクション情報に応じてトランザクションがロールバックされる</p><p>まぁざっくりとざらーっと書いたけど、domaとSpring Frameworkを連携するような感じでやる場合はこんな所かと</p><p>んまぁSpring Bootを使う場合な要件においては上記参考先がSpring Bootを使う場合のテクになってるのでそれ参考にすれば良いかと</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p>上記で&lt;tx:annotation-driven /&gt;と&lt;aop:advice&gt;を利用した場合に@Repositoryを使うと問題が起きる。その件は近い内に記事書く</p>
+</code></pre><p>ってな感じでテスト書けば良いんだけど、SampleServiceのsaveメソッドでDAO側のsaveをコールしたあとに例外等が送出された場合、@Transactionalによるトランザクション情報に応じてトランザクションがロールバックされる</p><p>まぁざっくりとざらーっと書いたけど、domaとSpring Frameworkを連携するような感じでやる場合はこんな所かと</p><p>んまぁSpring Bootを使う場合な要件においては上記参考先がSpring Bootを使う場合のテクになってるのでそれ参考にすれば良いかと</p><h4>追記</h4><p>上記で&lt;tx:annotation-driven /&gt;と&lt;aop:advice&gt;を利用した場合に@Repositoryを使うと問題が起きる。その件は近い内に記事書く</p>
               </div>
             </div>
           </div>
@@ -422,53 +377,67 @@ public class SampleDaoTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -476,17 +445,21 @@ public class SampleDaoTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -494,32 +467,41 @@ public class SampleDaoTest {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -527,14 +509,17 @@ public class SampleDaoTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -542,11 +527,13 @@ public class SampleDaoTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -554,20 +541,25 @@ public class SampleDaoTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -575,47 +567,43 @@ public class SampleDaoTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -623,20 +611,41 @@ public class SampleDaoTest {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -646,17 +655,21 @@ public class SampleDaoTest {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2012-08-26 09:00:00 +0900">
+                <time datetime="2012-08-26T09:00:00+09:00">
                   <a href="/archives/2012/08">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -98,65 +97,40 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#test-h">test.h</a>
-</li>
-<li>
-<a href="#test-c">test.c</a>
-</li>
-<li>
-<a href="#hoge-c-native-client">hoge.c (Native Clientのモジュール)</a>
-</li>
-<li>
-<a href="#part-b832a88e56023ec7">コンパイル</a>
-</li>
-<li>
-<a href="#index-html">index.html</a>
-</li>
-</ul>
--->
-                <p>Native Clientのデモにはdlopenっていうのが入ってるのですが、これを単純にやってみる。っていってもこれをそのまま動かすんじゃなくて、作ったtest.cをlibtest.soにして、それをNative Clientから使う(恐らくはNative Client環境のコンパイラを使わないと動かせれないんだと思われる。検証してないけど)</p>
-<!--more-->
-
-<h4 id="test-h">test.h</h4>
-<pre class="line-numbers"><code class="language-c">#ifndef TEST_H
+                <!--[[1, "test.h"], [2, "test.c"], [3, "hoge.c (Native Clientのモジュール)"], [4, "コンパイル"], [5, "index.html"]]-->
+                <p>Native Clientのデモにはdlopenっていうのが入ってるのですが、これを単純にやってみる。っていってもこれをそのまま動かすんじゃなくて、作ったtest.cをlibtest.soにして、それをNative Clientから使う(恐らくはNative Client環境のコンパイラを使わないと動かせれないんだと思われる。検証してないけど)</p><h4>test.h</h4><pre class="line-numbers"><code class="language-c">#ifndef TEST_H
 #define TEST_H
 
 char* say();
 
 #endif
-</code></pre>
-<h4 id="test-c">test.c</h4>
-<pre class="line-numbers"><code class="language-c">#include "test.h"
+</code></pre><h4>test.c</h4><pre class="line-numbers"><code class="language-c">#include &quot;test.h&quot;
 
 char* say() {
     char* s;
-    s = "abcdef";
+    s = &quot;abcdef&quot;;
 
     return s;
 }
-</code></pre><p>でこれをlibtest.soにする。方法は後述参考</p>
-<h4 id="hoge-c-native-client">hoge.c (Native Clientのモジュール)</h4>
-<pre class="line-numbers"><code class="language-c">#include &lt;stdio.h&gt;
+</code></pre><p>でこれをlibtest.soにする。方法は後述参考</p><h4>hoge.c (Native Clientのモジュール)</h4><pre class="line-numbers"><code class="language-c">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
 #include &lt;inttypes.h&gt;
 #include &lt;dlfcn.h&gt;
 #include &lt;pthread.h&gt;
 
-#include "ppapi/c/pp_errors.h"
-#include "ppapi/c/pp_module.h"
-#include "ppapi/c/pp_var.h"
-#include "ppapi/c/ppb.h"
-#include "ppapi/c/ppb_instance.h"
-#include "ppapi/c/ppb_messaging.h"
-#include "ppapi/c/ppb_var.h"
-#include "ppapi/c/ppp.h"
-#include "ppapi/c/ppp_instance.h"
-#include "ppapi/c/ppp_messaging.h"
+#include &quot;ppapi/c/pp_errors.h&quot;
+#include &quot;ppapi/c/pp_module.h&quot;
+#include &quot;ppapi/c/pp_var.h&quot;
+#include &quot;ppapi/c/ppb.h&quot;
+#include &quot;ppapi/c/ppb_instance.h&quot;
+#include &quot;ppapi/c/ppb_messaging.h&quot;
+#include &quot;ppapi/c/ppb_var.h&quot;
+#include &quot;ppapi/c/ppp.h&quot;
+#include &quot;ppapi/c/ppp_instance.h&quot;
+#include &quot;ppapi/c/ppp_messaging.h&quot;
 
-#include "test.h"
+#include &quot;test.h&quot;
 
 static PPB_Messaging* ppb_messaging_interface = NULL;
 static PPB_Var* ppb_var_interface = NULL;
@@ -173,15 +147,15 @@ static struct PP_Var StrToVar(const char* str) {
 }
 
 static void* LoadLibrary() {
-    handle = dlopen("libtest.so", RTLD_LAZY);
+    handle = dlopen(&quot;libtest.so&quot;, RTLD_LAZY);
 
     return NULL;
 }
 
 static PP_Bool Instance_DidCreate(PP_Instance instance, uint32_t argc, const char* argn[], const char* argv[]) {
     if (ppb_var_interface != NULL) {
-        if (pthread_create(&t_id, NULL, LoadLibrary, NULL)) {
-            printf("pthread_create failedn");
+        if (pthread_create(&amp;t_id, NULL, LoadLibrary, NULL)) {
+            printf(&quot;pthread_create failedn&quot;);
         }
 
         return PP_TRUE;
@@ -211,7 +185,7 @@ static void HandleMessage(PP_Instance instance, struct PP_Var message) {
             }
 
             char* (*say)();
-            *(void **)(&say) = dlsym(handle, "say");
+            *(void **)(&amp;say) = dlsym(handle, &quot;say&quot;);
 
             char* s = (*say)();
 
@@ -228,24 +202,24 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module a_module_id, PPB_GetInterface g
 }
 
 PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
-    printf("Interface: %sn", interface_name);
+    printf(&quot;Interface: %sn&quot;, interface_name);
 
     if (strcmp(interface_name, PPP_INSTANCE_INTERFACE) == 0) {
         static PPP_Instance instance_interface = {
-            &Instance_DidCreate,
-            &Instance_DidDestroy,
-            &Instance_DidChangeView,
-            &Instance_DidChangeFocus,
-            &Instance_HandleDocumentLoad
+            &amp;Instance_DidCreate,
+            &amp;Instance_DidDestroy,
+            &amp;Instance_DidChangeView,
+            &amp;Instance_DidChangeFocus,
+            &amp;Instance_HandleDocumentLoad
         };
 
-        return &instance_interface;
+        return &amp;instance_interface;
     }
 
     if (strcmp(interface_name, PPP_MESSAGING_INTERFACE) == 0) {
-        static PPP_Messaging messaging_interface = { &HandleMessage };
+        static PPP_Messaging messaging_interface = { &amp;HandleMessage };
 
-        return &messaging_interface;
+        return &amp;messaging_interface;
     }
 
     return NULL;
@@ -253,9 +227,7 @@ PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
 
 PP_EXPORT void PPP_ShutdownModule() {
 }
-</code></pre><p>でNative Clientでdlopenを使用する際にメインスレッドでdlopenしてもNULLしか返ってこない模様。という事でpthreadで別スレッド内でdlopenする必要があるみたい</p>
-<h4 id="part-b832a88e56023ec7">コンパイル</h4>
-<pre class="line-numbers"><code class="language-sh">rm -fr glibc
+</code></pre><p>でNative Clientでdlopenを使用する際にメインスレッドでdlopenしてもNULLしか返ってこない模様。という事でpthreadで別スレッド内でdlopenする必要があるみたい</p><h4>コンパイル</h4><pre class="line-numbers"><code class="language-sh">rm -fr glibc
 python /opt/nacl/pepper_21/tools/oshelpers.py mkdir glibc
 
 /opt/nacl/pepper_21/toolchain/linux_x86_glibc/bin/i686-nacl-gcc
@@ -310,31 +282,29 @@ python /opt/nacl/pepper_21/tools/create_nmf.py
     -t glibc
     -s glibc
     -n libtest_x86_32.so,libtest.so
-</code></pre><p>glibcディレクトリにもろもろなファイルが生成される。んでNative Clientを使う際に.nmfなファイルもglibcに入るのでHTML側からはapplication/x-naclでそれを参照する</p>
-<h4 id="index-html">index.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><p>glibcディレクトリにもろもろなファイルが生成される。んでNative Clientを使う際に.nmfなファイルもglibcに入るのでHTML側からはapplication/x-naclでそれを参照する</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
-    &lt;div id="message"&gt;&lt;/div&gt;
-    &lt;script type="text/javascript"&gt;
+    &lt;div id=&quot;message&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
 (function(undefined) {
-  window.addEventListener("message", function(e) {
+  window.addEventListener(&quot;message&quot;, function(e) {
     console.log(e);
 
-    var h2 = document.createElement("h2");
+    var h2 = document.createElement(&quot;h2&quot;);
     h2.innerText = e.data;
 
-    document.getElementById("message").appendChild(h2);
+    document.getElementById(&quot;message&quot;).appendChild(h2);
   }, true);
 })();
 
 function send() {
-  document.getElementById("module").postMessage(null);
+  document.getElementById(&quot;module&quot;).postMessage(null);
 }
     &lt;/script&gt;
 
-    &lt;button onclick="send()"&gt;send&lt;/button&gt;
+    &lt;button onclick=&quot;send()&quot;&gt;send&lt;/button&gt;
 
-    &lt;embed name="nacl_module" id="module" width="0" height="0" src="/glibc/hoge.nmf" type="application/x-nacl" /&gt;
+    &lt;embed name=&quot;nacl_module&quot; id=&quot;module&quot; width=&quot;0&quot; height=&quot;0&quot; src=&quot;/glibc/hoge.nmf&quot; type=&quot;application/x-nacl&quot; /&gt;
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
@@ -387,53 +357,67 @@ function send() {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -441,17 +425,21 @@ function send() {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -459,32 +447,41 @@ function send() {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -492,14 +489,17 @@ function send() {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -507,11 +507,13 @@ function send() {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -519,20 +521,25 @@ function send() {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -540,47 +547,43 @@ function send() {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -588,20 +591,41 @@ function send() {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -611,17 +635,21 @@ function send() {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

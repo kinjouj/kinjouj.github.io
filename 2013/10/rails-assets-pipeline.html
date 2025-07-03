@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,21 +97,9 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#angular-js">angular.jsなプロジェクトを作る</a>
-</li>
-<li>
-<a href="#rails">Railsプロジェクトを作る</a>
-</li>
-</ul>
--->
-                <p>何やらRailsを使っててJavaScriptとかをgemとかで配布してRailsプロジェクトに組み込んだりするっていうのがあったりするわけで。例えばTwitter BootstrapのCSSとかJSとかをGemfileにそういうgemを定義する事でサクッと出来るっつー訳。でその仕組み的なのがRails assets pipelineっていうのかなと、これCoffeeScriptとかならコンパイルして使えるようにする事も出来るらしいとの事(今回はやらないけど)</p><p>とりあえずこの仕組みを使ってangular.jsなプロジェクトを別にしてRailsプロジェクトに組み込むっていう事をしてみる</p>
-<!--more-->
-
-<h4 id="angular-js">angular.jsなプロジェクトを作る</h4>
-<pre class="line-numbers"><code class="language-">bundle gem sample-ui-rails
-</code></pre><p>的な感じでプロジェクトを作る。やると何やらsample-ui-rails.gemspecなりが作られる訳で。でlib/sample/ui/rails.rbがあるので</p><pre class="line-numbers"><code class="language-rb">require "sample/ui/rails/version"
+                <!--[[1, "angular.jsなプロジェクトを作る"], [2, "Railsプロジェクトを作る"]]-->
+                <p>何やらRailsを使っててJavaScriptとかをgemとかで配布してRailsプロジェクトに組み込んだりするっていうのがあったりするわけで。例えばTwitter BootstrapのCSSとかJSとかをGemfileにそういうgemを定義する事でサクッと出来るっつー訳。でその仕組み的なのがRails assets pipelineっていうのかなと、これCoffeeScriptとかならコンパイルして使えるようにする事も出来るらしいとの事(今回はやらないけど)</p><p>とりあえずこの仕組みを使ってangular.jsなプロジェクトを別にしてRailsプロジェクトに組み込むっていう事をしてみる</p><h4>angular.jsなプロジェクトを作る</h4><pre class="line-numbers"><code class="language-">bundle gem sample-ui-rails
+</code></pre><p>的な感じでプロジェクトを作る。やると何やらsample-ui-rails.gemspecなりが作られる訳で。でlib/sample/ui/rails.rbがあるので</p><pre class="line-numbers"><code class="language-rb">require &quot;sample/ui/rails/version&quot;
 
 module Sample
   module Ui
@@ -129,7 +116,7 @@ end
 <li>  CSS: vendor/assets/stylesheets</li>
 </ul>
 <p>におけば良い。という事でangular.jsなコントローラーなJSを書いて上記のルールに沿った方式な所は配置する</p><pre class="line-numbers"><code class="language-js">var SampleController = function($scope, $http) {
-  $http.get("/sample/index")
+  $http.get(&quot;/sample/index&quot;)
     .success(function(data) {
       $scope.samples = data;
     });
@@ -141,18 +128,18 @@ module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: "",
+    basePath: &quot;&quot;,
 
 
     // frameworks to use
-    frameworks: ["jasmine", "ng-scenario"],
+    frameworks: [&quot;jasmine&quot;, &quot;ng-scenario&quot;],
 
 
     // list of files / patterns to load in the browser
     files: [
-      "tests/angular-mocks.js", // angular.js mock library
-      "vendor/assets/javascripts/*.js", // source
-      "tests/*_spec.js" // tests
+      &quot;tests/angular-mocks.js&quot;, // angular.js mock library
+      &quot;vendor/assets/javascripts/*.js&quot;, // source
+      &quot;tests/*_spec.js&quot; // tests
     ],
 
 
@@ -162,8 +149,8 @@ module.exports = function(config) {
 
 
     // test results reporter to use
-    // possible values: "dots", "progress", "junit", "growl", "coverage"
-    reporters: ["progress"],
+    // possible values: &quot;dots&quot;, &quot;progress&quot;, &quot;junit&quot;, &quot;growl&quot;, &quot;coverage&quot;
+    reporters: [&quot;progress&quot;],
 
 
     // web server port
@@ -191,7 +178,7 @@ module.exports = function(config) {
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: ["Chrome"],
+    browsers: [&quot;Chrome&quot;],
 
 
     // If browser does not capture in given timeout [ms], kill it
@@ -203,25 +190,25 @@ module.exports = function(config) {
     singleRun: false
   });
 };
-</code></pre><p>angular-mocks.jsはangular.js公式なやつに入ってるのでコピペして持ってくる。んでテスト書く</p><pre class="line-numbers"><code class="language-js">describe("SampleController", function() {
+</code></pre><p>angular-mocks.jsはangular.js公式なやつに入ってるのでコピペして持ってくる。んでテスト書く</p><pre class="line-numbers"><code class="language-js">describe(&quot;SampleController&quot;, function() {
 
   var $_httpBackend, scope, controller;
 
   beforeEach(function() {
     inject(function($controller, $rootScope, $httpBackend) {
       $_httpBackend = $httpBackend;
-      $_httpBackend.when("GET", "/sample/index").respond([{},{}]);
+      $_httpBackend.when(&quot;GET&quot;, &quot;/sample/index&quot;).respond([{},{}]);
 
       scope = $rootScope.$new();
 
       // こうしないと$_httpBackend.flushをやると、「No pending request to flush」的なエラーが出る
       scope.$apply(function() {
-        controller = $controller("SampleController", { $scope: scope });
+        controller = $controller(&quot;SampleController&quot;, { $scope: scope });
       });
     });
   });
 
-  it("#construcor", function() {
+  it(&quot;#construcor&quot;, function() {
     expect(scope.samples).toBeUndefined();
     $_httpBackend.flush();
     expect(scope.samples).not.toBeUndefined();
@@ -230,11 +217,9 @@ module.exports = function(config) {
     expect(scope.samples.length).toEqual(1);
   });
 });
-</code></pre><p>karma startなりで起動してテスト実行。あとはこのプロジェクトをRailsプロジェクトで参照してコピペとかする事無く利用できるようにと</p>
-<h4 id="rails">Railsプロジェクトを作る</h4>
-<pre class="line-numbers"><code class="language-">rails new sample
-</code></pre><p>で、Gemfileにangularjs-railsと上記で作ったプロジェクトの参照を追加する</p><pre class="line-numbers"><code class="language-rb">gem "angularjs-rails"
-gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
+</code></pre><p>karma startなりで起動してテスト実行。あとはこのプロジェクトをRailsプロジェクトで参照してコピペとかする事無く利用できるようにと</p><h4>Railsプロジェクトを作る</h4><pre class="line-numbers"><code class="language-">rails new sample
+</code></pre><p>で、Gemfileにangularjs-railsと上記で作ったプロジェクトの参照を追加する</p><pre class="line-numbers"><code class="language-rb">gem &quot;angularjs-rails&quot;
+gem &quot;sample-ui-rails&quot;, :path =&gt; &quot;/path/to/sample-ui-rails-project&quot;
 </code></pre><p>でこれだけじゃスクリプトとか参照してくれないので、app/assets/javascripts/application.jsに追加する</p><pre class="line-numbers"><code class="language-">//= require jquery
 //= require jquery_ujs
 //= require_tree .
@@ -299,53 +284,67 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -353,17 +352,21 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -371,32 +374,41 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -404,14 +416,17 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -419,11 +434,13 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -431,20 +448,25 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -452,47 +474,43 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -500,20 +518,41 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -523,17 +562,21 @@ gem "sample-ui-rails", :path =&gt; "/path/to/sample-ui-rails-project"
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

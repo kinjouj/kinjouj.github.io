@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="以前AndroidAccountManagerで使えるアカウントを開発する方法を書きましたが同期的な機能のSyncAdapterをすっぽかしてたのでやってみたその前に現状だとSyncAdapte" />
+    <meta name="description" content="以前AndroidAccountManagerで使えるアカウントを開発する方法を書きましたが同期的な機能のSyncAdapterをすっぽかしてたのでやってみたその前に現状だとSyncAdapterを" />
     <title>Android AccountManager+SyncAdapter - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/06/rubyonrails-doorkeeper-oauth-android-syncadapter.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/06/rubyonrails-doorkeeper-grant_type-password.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,29 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#syncadapter">SyncAdapterを使う手順</a>
-</li>
-<li>
-<a href="#androidmanifest-xml">AndroidManifest.xmlを修正する</a>
-</li>
-<li>
-<a href="#res-xml-sync-xml">res/xml/sync.xmlを作成</a>
-</li>
-<li>
-<a href="#samplesyncservice-java">SampleSyncService.java</a>
-</li>
-<li>
-<a href="#samplesyncadapter-java">SampleSyncAdapter.java</a>
-</li>
-</ul>
--->
-                <p>以前Android AccountManagerで使えるアカウントを開発する方法を書きましたが同期的な機能のSyncAdapterをすっぽかしてたのでやってみた</p>
-<!--more-->
-<p>その前に現状だとSyncAdapterを使える仕様じゃないので、そこら辺をまず修正しなければならない。SyncAdapterを使う為にはContent Providerが必要な模様、なのでアクティビティ等のアプリに関わる部分(AccountAuthenticator以外)からサーバーに通信してデータを取る部分を全てContent Provider経由で取る。でバックグラウンドで同期が行われる際に、サーバー側から取得したデータをSQLiteデータベースに保管しておいて、それをContent Providerでやり取りをする</p><p>という感じな仕様に変えないといけない。んまぁそこら辺はちゃちゃっと修正して、SyncAdapterの本体辺りな所だけ書く</p>
-<h4 id="syncadapter">SyncAdapterを使う手順</h4>
-
+                <!--[[1, "SyncAdapterを使う手順"], [2, "AndroidManifest.xmlを修正する"], [3, "res/xml/sync.xmlを作成"], [4, "SampleSyncService.java"], [5, "SampleSyncAdapter.java"]]-->
+                <p>以前Android AccountManagerで使えるアカウントを開発する方法を書きましたが同期的な機能のSyncAdapterをすっぽかしてたのでやってみた</p><p>その前に現状だとSyncAdapterを使える仕様じゃないので、そこら辺をまず修正しなければならない。SyncAdapterを使う為にはContent Providerが必要な模様、なのでアクティビティ等のアプリに関わる部分(AccountAuthenticator以外)からサーバーに通信してデータを取る部分を全てContent Provider経由で取る。でバックグラウンドで同期が行われる際に、サーバー側から取得したデータをSQLiteデータベースに保管しておいて、それをContent Providerでやり取りをする</p><p>という感じな仕様に変えないといけない。んまぁそこら辺はちゃちゃっと修正して、SyncAdapterの本体辺りな所だけ書く</p><h4>SyncAdapterを使う手順</h4>
 <ul>
 <li>  AndroidManifest.xmlにandroid.content.SyncAdapterを持つ<service>を定義。さらにSyncAdapterから使うContent Providerの定義(<provider>)も必要</li>
 <li>  SyncAdapterなXMLリソース定義を作成</li>
@@ -137,33 +115,27 @@ ga("send", "pageview");
 <li>  android.permission.READ_SYNC_SETTINGS</li>
 <li>  android.permission.WRITE_SYNC_SETTINGS</li>
 </ul>
-<p>っていう権限が必要になる模様</p>
-<h4 id="androidmanifest-xml">AndroidManifest.xmlを修正する</h4>
-<p>SyncAdapterな所を追加する。上記でも書いてるようにパーミッションな所はすっ飛ばす</p><pre class="line-numbers"><code class="language-xml">&lt;service android:name=".SampleSyncService" android:exported="true"&gt;
+<p>っていう権限が必要になる模様</p><h4>AndroidManifest.xmlを修正する</h4><p>SyncAdapterな所を追加する。上記でも書いてるようにパーミッションな所はすっ飛ばす</p><pre class="line-numbers"><code class="language-xml">&lt;service android:name=&quot;.SampleSyncService&quot; android:exported=&quot;true&quot;&gt;
     &lt;intent-filter&gt;
-        &lt;action android:name="android.content.SyncAdapter" /&gt;
+        &lt;action android:name=&quot;android.content.SyncAdapter&quot; /&gt;
     &lt;/intent-filter&gt;
     &lt;meta-data
-        android:name="android.content.SyncAdapter"
-        android:resource="@xml/sync" /&gt;
+        android:name=&quot;android.content.SyncAdapter&quot;
+        android:resource=&quot;@xml/sync&quot; /&gt;
 &lt;/service&gt;
 
 &lt;provider
-    android:name=".SampleContentProvider"
-    android:authorities="@string/provider_name"
-    android:label="@string/provider_name"
-    android:exported="false"
-    android:permission="sample.provider.permission" /&gt;
-</code></pre>
-<h4 id="res-xml-sync-xml">res/xml/sync.xmlを作成</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+    android:name=&quot;.SampleContentProvider&quot;
+    android:authorities=&quot;@string/provider_name&quot;
+    android:label=&quot;@string/provider_name&quot;
+    android:exported=&quot;false&quot;
+    android:permission=&quot;sample.provider.permission&quot; /&gt;
+</code></pre><h4>res/xml/sync.xmlを作成</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;sync-adapter
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accountType="@string/account_type"
-    android:contentAuthority="@string/provider_name" /&gt;
-</code></pre><p><a href="http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html" target="_blank" rel="noopener noreferrer">http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html</a> に書いてるのでそれ参考に</p>
-<h4 id="samplesyncservice-java">SampleSyncService.java</h4>
-<pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:accountType=&quot;@string/account_type&quot;
+    android:contentAuthority=&quot;@string/provider_name&quot; /&gt;
+</code></pre><p><a href="http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html" target="_blank" rel="noopener noreferrer">http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html</a> に書いてるのでそれ参考に</p><h4>SampleSyncService.java</h4><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
 
 import android.app.Service;
 import android.content.Intent;
@@ -183,14 +155,12 @@ public class SampleSyncService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.v(TAG, "onBind");
+        Log.v(TAG, &quot;onBind&quot;);
 
         return mSyncAdadter.getSyncAdapterBinder();
     }
 }
-</code></pre><p>AbstractThreadedSyncAdapter#getSyncAdapterBinderを返すだけ</p>
-<h4 id="samplesyncadapter-java">SampleSyncAdapter.java</h4>
-<pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
+</code></pre><p>AbstractThreadedSyncAdapter#getSyncAdapterBinderを返すだけ</p><h4>SampleSyncAdapter.java</h4><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
 
 import java.io.IOException;
 import java.util.Date;
@@ -219,8 +189,8 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
         ContentProviderClient provider, SyncResult result) {
-        Log.v(TAG, "onPerformSync");
-        Log.v("sync", "sync: " + new Date());
+        Log.v(TAG, &quot;onPerformSync&quot;);
+        Log.v(&quot;sync&quot;, &quot;sync: &quot; + new Date());
 
         String authToken = getAuthToken(account);
 
@@ -294,53 +264,67 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -348,17 +332,21 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -366,32 +354,41 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -399,14 +396,17 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -414,11 +414,13 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -426,20 +428,25 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -447,47 +454,43 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -495,20 +498,41 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -518,17 +542,21 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

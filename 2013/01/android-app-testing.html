@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="色々まとめてみようかと思う。以前勉強したのをAndroidv4.1ベースで検証して書く前提アプリとテストはプロジェクトを分ける。テストプロジェクトはアプリプロジェクトを参照として設定する(普" />
+    <meta name="description" content="色々まとめてみようかと思う。以前勉強したのをAndroidv4.1ベースで検証して書く前提アプリとテストはプロジェクトを分ける。テストプロジェクトはアプリプロジェクトを参照として設定する(普通にAD" />
     <title>Androidアプリのテスト関係な件 - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/01/nginx-root-alias.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/zombiejs.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,58 +96,23 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654280cb0a5">前提</a>
-</li>
-<li>
-<a href="#applicationtestcase">ApplicationTestCase</a>
-</li>
-<li>
-<a href="#androidtestcase">AndroidTestCase</a>
-</li>
-<li>
-<a href="#servicetestcase">ServiceTestCase</a>
-</li>
-<li>
-<a href="#providertestcase2">ProviderTestCase2</a>
-</li>
-<li>
-<a href="#loadertestcase">LoaderTestCase</a>
-</li>
-<li>
-<a href="#activityunittestcase">ActivityUnitTestCase</a>
-</li>
-<li>
-<a href="#activityinstrumentationtestcase2">ActivityInstrumentationTestCase2</a>
-</li>
-<li>
-<a href="#singlelaunchactivitytestcase">SingleLaunchActivityTestCase</a>
-</li>
-</ul>
--->
-                <p>色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く</p>
-<!--more-->
+                <!--[[1, "前提"], [2, "ApplicationTestCase"], [3, "AndroidTestCase"], [4, "ServiceTestCase"], [5, "ProviderTestCase2"], [6, "LoaderTestCase"], [7, "ActivityUnitTestCase"], [8, "ActivityInstrumentationTestCase2"], [9, "SingleLaunchActivityTestCase"]]-->
+                <p>色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く</p><h4>前提</h4><p>アプリとテストはプロジェクトを分ける。テストプロジェクトはアプリプロジェクトを参照として設定する(普通にADT使えば特にやる必要ない。テストプロジェクト作成段階で設定される)</p><p>で以下もテストプロジェクト作成段階で設定されるので必要ないけど</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;sample.test.test&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot; &gt;
 
-<h4 id="part-654280cb0a5">前提</h4>
-<p>アプリとテストはプロジェクトを分ける。テストプロジェクトはアプリプロジェクトを参照として設定する(普通にADT使えば特にやる必要ない。テストプロジェクト作成段階で設定される)</p><p>で以下もテストプロジェクト作成段階で設定されるので必要ないけど</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="sample.test.test"
-    android:versionCode="1"
-    android:versionName="1.0" &gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;16&quot; android:maxSdkVersion=&quot;16&quot; android:targetSdkVersion=&quot;16&quot; /&gt;
 
-    &lt;uses-sdk android:minSdkVersion="16" android:maxSdkVersion="16" android:targetSdkVersion="16" /&gt;
+    &lt;instrumentation android:name=&quot;android.test.InstrumentationTestRunner&quot; android:targetPackage=&quot;sample.test&quot; /&gt;
 
-    &lt;instrumentation android:name="android.test.InstrumentationTestRunner" android:targetPackage="sample.test" /&gt;
-
-    &lt;application android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:allowBackup="false"&gt;
-        &lt;uses-library android:name="android.test.runner" /&gt;
+    &lt;application android:icon=&quot;@drawable/ic_launcher&quot; android:label=&quot;@string/app_name&quot; android:allowBackup=&quot;false&quot;&gt;
+        &lt;uses-library android:name=&quot;android.test.runner&quot; /&gt;
     &lt;/application&gt;
 
 &lt;/manifest&gt;
-</code></pre><p>な感じで&lt;instrumentation&gt;と&lt;uses-library&gt;とかの設定が必要</p><p>あとはクラス書きつつテストケースを書く感じ。でテストを対象とするクラスはアプリプロジェクト、テストケースはテストプロジェクトに書く。でテストケースの方式はJUnit4方式じゃなくてJUnit3方式</p><p>あとテストプロジェクトのアプリもしっかり端末に入るので(ry</p>
-<h4 id="applicationtestcase">ApplicationTestCase</h4>
-<p>android.app.Applicationを拡張して使用する場合、ApplicationTestCaseを使えばAndroid JUnitでテスト出来る。例えば以下のようなApplicationクラスを継承したクラスがあった場合</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><p>な感じで&lt;instrumentation&gt;と&lt;uses-library&gt;とかの設定が必要</p><p>あとはクラス書きつつテストケースを書く感じ。でテストを対象とするクラスはアプリプロジェクト、テストケースはテストプロジェクトに書く。でテストケースの方式はJUnit4方式じゃなくてJUnit3方式</p><p>あとテストプロジェクトのアプリもしっかり端末に入るので(ry</p><h4>ApplicationTestCase</h4><p>android.app.Applicationを拡張して使用する場合、ApplicationTestCaseを使えばAndroid JUnitでテスト出来る。例えば以下のようなApplicationクラスを継承したクラスがあった場合</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
 
@@ -180,12 +144,10 @@ public class MainApplicationTestCase extends ApplicationTestCase&lt;MainApplicat
         assertNotNull(app);
         assertTrue(app instanceof MainApplication);
 
-        assertEquals("sample", ((MainApplication)app).getAppName());
+        assertEquals(&quot;sample&quot;, ((MainApplication)app).getAppName());
     }
 }
-</code></pre><p>な感じでテスト出来る</p>
-<h4 id="androidtestcase">AndroidTestCase</h4>
-<p>AndroidのContextに依存するようなクラスをテストするケースにおいてはAndroidTestCaseを使えば良い模様。</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><p>な感じでテスト出来る</p><h4>AndroidTestCase</h4><p>AndroidのContextに依存するようなクラスをテストするケースにおいてはAndroidTestCaseを使えば良い模様。</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.test.AndroidTestCase;
 
@@ -193,12 +155,10 @@ public class MainAndroidTestCase extends AndroidTestCase {
     public void test_getAppName() {
         String appName = getContext().getString(R.string.app_name);
         assertNotNull(appName);
-        assertEquals("sample", appName);
+        assertEquals(&quot;sample&quot;, appName);
     }
 }
-</code></pre><p>で、同様な例としてBroadcastReceiverをテストする場合等でもAndroidTestCaseを使えば出来なくもない。それは<a href="/2012/01/android-broadcastreceiver-testing-androidtestcase.html">以前に書いた</a>ので省略</p>
-<h4 id="servicetestcase">ServiceTestCase</h4>
-<p>android.app.Serviceをテストする目的で使用。とりあえずてきとーに</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><p>で、同様な例としてBroadcastReceiverをテストする場合等でもAndroidTestCaseを使えば出来なくもない。それは<a href="/2012/01/android-broadcastreceiver-testing-androidtestcase.html">以前に書いた</a>ので省略</p><h4>ServiceTestCase</h4><p>android.app.Serviceをテストする目的で使用。とりあえずてきとーに</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -226,9 +186,9 @@ public class SampleService extends Service {
         new Thread() {
             @Override
             public void run() {
-                names.add("hoge");
-                names.add("fuga");
-                names.add("foobar");
+                names.add(&quot;hoge&quot;);
+                names.add(&quot;fuga&quot;);
+                names.add(&quot;foobar&quot;);
 
                 completed = true;
             }
@@ -283,9 +243,7 @@ public class SampleServiceTestCase extends ServiceTestCase&lt;SampleService&gt; 
         assertEquals(3, names.size());
     }
 }
-</code></pre><p>テストする場合にはアプリ側に&lt;service&gt;で設定しておかなくても良い模様。又、タイミング処理をする場合にはフラグ等を持たせておいて完了するまで処理をThread.sleepさせておく、んでデータをチェックしたりすれば良いんじゃないかなーっと</p><p>例えば一定時間で変わるLive Wallpaperのような場合だとサービスをstartさせてから一定時間変わったら表示されている現在のandroid.graphics.Bitmap?とかをチェックするとか。んまぁ要件によりきりかなと</p>
-<h4 id="providertestcase2">ProviderTestCase2</h4>
-<pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><p>テストする場合にはアプリ側に&lt;service&gt;で設定しておかなくても良い模様。又、タイミング処理をする場合にはフラグ等を持たせておいて完了するまで処理をThread.sleepさせておく、んでデータをチェックしたりすれば良いんじゃないかなーっと</p><p>例えば一定時間で変わるLive Wallpaperのような場合だとサービスをstartさせてから一定時間変わったら表示されている現在のandroid.graphics.Bitmap?とかをチェックするとか。んまぁ要件によりきりかなと</p><h4>ProviderTestCase2</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -297,15 +255,15 @@ import android.net.Uri;
 public class SampleProvider extends ContentProvider {
 
     private static UriMatcher matcher;
-    private static final String AUTHORITIES = "sample.test.provider";
+    private static final String AUTHORITIES = &quot;sample.test.provider&quot;;
     private static final int SAMPLES = 0;
 
-    public static final String CONTENT_URI_STRING = "content://" + AUTHORITIES + "/samples";
+    public static final String CONTENT_URI_STRING = &quot;content://&quot; + AUTHORITIES + &quot;/samples&quot;;
     public static final Uri CONTENT_URI = Uri.parse(CONTENT_URI_STRING);
 
     static {
         matcher = new UriMatcher(UriMatcher.NO_MATCH);
-        matcher.addURI(AUTHORITIES, "samples", SAMPLES);
+        matcher.addURI(AUTHORITIES, &quot;samples&quot;, SAMPLES);
     }
 
     @Override
@@ -316,7 +274,7 @@ public class SampleProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         if (matcher.match(uri) == SAMPLES) {
-            return "vnd.android.cursor.dir/" + AUTHORITIES;
+            return &quot;vnd.android.cursor.dir/&quot; + AUTHORITIES;
         }
 
         return null;
@@ -324,10 +282,10 @@ public class SampleProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        MatrixCursor csr = new MatrixCursor(new String[]{ "ID", "NAME" });
+        MatrixCursor csr = new MatrixCursor(new String[]{ &quot;ID&quot;, &quot;NAME&quot; });
 
         for (int i = 0;i &lt; 10;i++) {
-            csr.addRow(new Object[]{ i, "hoge" + (i + 1) });
+            csr.addRow(new Object[]{ i, &quot;hoge&quot; + (i + 1) });
         }
 
         return csr;
@@ -371,11 +329,7 @@ public class SampleProviderTestCase extends ProviderTestCase2&lt;SampleProvider&
         assertEquals(10, csr.getCount());
     }
 }
-</code></pre><p>な感じでProviderTestCase2を継承してgetProviderでProviderクラスの実体クラスが取得できてテスト出来る模様。ただ気になるのがコンストラクタの第2引数のプロバイダーのAuthorityがなぜ必要なのかっていう所。空にしてもテストコケないし... 謎なので分かり次第追記する</p>
-<h4 id="loadertestcase">LoaderTestCase</h4>
-<p><a href="/2011/12/android-loader-testing-loadertestcase.html">以前に検証した</a>ので省略</p>
-<h4 id="activityunittestcase">ActivityUnitTestCase</h4>
-<p>アクティビティ操作をテスト出来るクラスな模様</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><p>な感じでProviderTestCase2を継承してgetProviderでProviderクラスの実体クラスが取得できてテスト出来る模様。ただ気になるのがコンストラクタの第2引数のプロバイダーのAuthorityがなぜ必要なのかっていう所。空にしてもテストコケないし... 謎なので分かり次第追記する</p><h4>LoaderTestCase</h4><p><a href="/2011/12/android-loader-testing-loadertestcase.html">以前に検証した</a>ので省略</p><h4>ActivityUnitTestCase</h4><p>アクティビティ操作をテスト出来るクラスな模様</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 
 import android.app.Activity;
@@ -417,7 +371,7 @@ public class MainActivity extends Activity {
     public void fetchSamples() {
         if (adapter != null) {
             for (int i = 0;i &lt; 10;i++) {
-                adapter.add("test" + (i + 1));
+                adapter.add(&quot;test&quot; + (i + 1));
             }
         }
     }
@@ -494,9 +448,7 @@ public class MainActivityTestCase extends ActivityUnitTestCase&lt;MainActivity&g
         assertEquals(0, adapter.getCount());
     }
 }
-</code></pre><p>アクティビティは自動自動等しない模様なのでstartActivityで起動。んでsetApplicationで使用するApplicationクラスを指定出来る。でcallAcvitityOnStartでOnStartを発生させて、runOnUiThreadを使ってボタンをクリックしたり等の操作を行い、waitForIdelSyncで操作が完了するのを待つっていう感じかと</p>
-<h4 id="activityinstrumentationtestcase2">ActivityInstrumentationTestCase2</h4>
-<p>ActivityUnitTestCaseを使わずにAndroidManifest.xmlに沿った形式でAcvitityテストを行うにはこれでも出来る。ActivityUnitTestCaseで使ったAcvitityをそのままAcitvityInstrumentationTestCase2に移行させる場合には以下のような感じ</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><p>アクティビティは自動自動等しない模様なのでstartActivityで起動。んでsetApplicationで使用するApplicationクラスを指定出来る。でcallAcvitityOnStartでOnStartを発生させて、runOnUiThreadを使ってボタンをクリックしたり等の操作を行い、waitForIdelSyncで操作が完了するのを待つっていう感じかと</p><h4>ActivityInstrumentationTestCase2</h4><p>ActivityUnitTestCaseを使わずにAndroidManifest.xmlに沿った形式でAcvitityテストを行うにはこれでも出来る。ActivityUnitTestCaseで使ったAcvitityをそのままAcitvityInstrumentationTestCase2に移行させる場合には以下のような感じ</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
 import android.test.ActivityInstrumentationTestCase2;
@@ -551,9 +503,7 @@ public class MainActivityTestCase extends ActivityInstrumentationTestCase2&lt;Ma
         assertEquals(0, adapter.getCount());
     }
 }
-</code></pre>
-<h4 id="singlelaunchactivitytestcase">SingleLaunchActivityTestCase</h4>
-<p>恐らくは上記のActivityテストの場合であるとテスト毎にActivityが初期化される。でテストで実行したアクティビティの状態を維持させたい場合には一度しか初期化されない模様</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><h4>SingleLaunchActivityTestCase</h4><p>恐らくは上記のActivityテストの場合であるとテスト毎にActivityが初期化される。でテストで実行したアクティビティの状態を維持させたい場合には一度しか初期化されない模様</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
 import android.test.SingleLaunchActivityTestCase;
@@ -564,7 +514,7 @@ import android.widget.ListView;
 public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainActivity&gt; {
 
     public MainActivityTestCase() {
-        super("sample.test", MainActivity.class);
+        super(&quot;sample.test&quot;, MainActivity.class);
     }
 
     public void testActivity() {
@@ -674,53 +624,67 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -728,17 +692,21 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -746,32 +714,41 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -779,14 +756,17 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -794,11 +774,13 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -806,20 +788,25 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -827,47 +814,43 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -875,20 +858,41 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -898,17 +902,21 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="ちょいとインデックスの使い方な感じでやってみるdb.samples.save({name:"hoge",tags:["A"]})db.samples.save({name:"fug" />
+    <meta name="description" content="ちょいとインデックスの使い方な感じでやってみるdb.samples.save({name:&quot;hoge&quot;,tags:[&quot;A&quot;]})db.samples" />
     <title>mongodbを使ってみる (3) - インデックスに関して - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-4-index-2.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-6-findandmodify.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,67 +95,58 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>ちょいとインデックスの使い方な感じでやってみる</p>
-<!--more-->
-<pre class="line-numbers"><code class="language-js">db.samples.save({ name: "hoge", tags: ["A"] })
-db.samples.save({ name: "fuga", tags: ["A", "B"] })
-db.samples.save({ name: "foobar", tags: ["B", "C"] })
-</code></pre><p>な感じで突っ込んでおいて、普通にキーに対する値の型が配列型でも</p><pre class="line-numbers"><code class="language-js">db.samples.find({ tags: "A" })
-</code></pre><p>っていう感じで検索は出来る。出力が</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f475453f2dbe87db25fd00"), "name" : "hoge", "tags" : [ "A" ] }
-{ "_id" : ObjectId("50f475533f2dbe87db25fd01"), "name" : "fuga", "tags" : [ "A", "B" ] }
-</code></pre><p>でどういうインデックスが使われてるかとかexplainで見れるらしいので</p><pre class="line-numbers"><code class="language-js">db.samples.find({ tags: "A" }).explain()
+                <!--[[1, "追記"]]-->
+                <p>ちょいとインデックスの使い方な感じでやってみる</p><pre class="line-numbers"><code class="language-js">db.samples.save({ name: &quot;hoge&quot;, tags: [&quot;A&quot;] })
+db.samples.save({ name: &quot;fuga&quot;, tags: [&quot;A&quot;, &quot;B&quot;] })
+db.samples.save({ name: &quot;foobar&quot;, tags: [&quot;B&quot;, &quot;C&quot;] })
+</code></pre><p>な感じで突っ込んでおいて、普通にキーに対する値の型が配列型でも</p><pre class="line-numbers"><code class="language-js">db.samples.find({ tags: &quot;A&quot; })
+</code></pre><p>っていう感じで検索は出来る。出力が</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f475453f2dbe87db25fd00&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;tags&quot; : [ &quot;A&quot; ] }
+{ &quot;_id&quot; : ObjectId(&quot;50f475533f2dbe87db25fd01&quot;), &quot;name&quot; : &quot;fuga&quot;, &quot;tags&quot; : [ &quot;A&quot;, &quot;B&quot; ] }
+</code></pre><p>でどういうインデックスが使われてるかとかexplainで見れるらしいので</p><pre class="line-numbers"><code class="language-js">db.samples.find({ tags: &quot;A&quot; }).explain()
 </code></pre><p>でやると</p><pre class="line-numbers"><code class="language-json">{
-        "cursor" : "BasicCursor",
-        "nscanned" : 3,
-        "nscannedObjects" : 3,
-        "n" : 2,
-        "millis" : 17,
-        "nYields" : 0,
-        "nChunkSkips" : 0,
-        "isMultiKey" : false,
-        "indexOnly" : false,
-        "indexBounds" : {
+        &quot;cursor&quot; : &quot;BasicCursor&quot;,
+        &quot;nscanned&quot; : 3,
+        &quot;nscannedObjects&quot; : 3,
+        &quot;n&quot; : 2,
+        &quot;millis&quot; : 17,
+        &quot;nYields&quot; : 0,
+        &quot;nChunkSkips&quot; : 0,
+        &quot;isMultiKey&quot; : false,
+        &quot;indexOnly&quot; : false,
+        &quot;indexBounds&quot; : {
 
         }
 }
 </code></pre><p>多分、indexBoundsが無いっていう事でインデックスが使われてない。っていうかそもそもインデックス自体作ってない</p><pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ tags: 1 })
 </code></pre><p>でtagsキーに対してインデックスを作る。何やらドキュメントによるとensureIndexが同期型であり、インデックス作成が完了するまでは操作をブロックする模様(db.currentOp で見れるとか)。その場合には第2引数で、<span style="color: red">{ background: true }</span>な感じで作ればインデックスをバックグラウンドで作成するようになる模様。但し、マスター/スレーブな構成とかで使ってる場合にはこれを指定した所でもスレーブ側は完了するまで操作ブロックされるみたい。検証してないから微妙だけど</p><p>という感じでもう一回explainしてみると</p><pre class="line-numbers"><code class="language-json">{
-        "cursor" : "BtreeCursor tags_1",
-        "nscanned" : 2,
-        "nscannedObjects" : 2,
-        "n" : 2,
-        "millis" : 0,
-        "nYields" : 0,
-        "nChunkSkips" : 0,
-        "isMultiKey" : true,
-        "indexOnly" : false,
-        "indexBounds" : {
-                "tags" : [
+        &quot;cursor&quot; : &quot;BtreeCursor tags_1&quot;,
+        &quot;nscanned&quot; : 2,
+        &quot;nscannedObjects&quot; : 2,
+        &quot;n&quot; : 2,
+        &quot;millis&quot; : 0,
+        &quot;nYields&quot; : 0,
+        &quot;nChunkSkips&quot; : 0,
+        &quot;isMultiKey&quot; : true,
+        &quot;indexOnly&quot; : false,
+        &quot;indexBounds&quot; : {
+                &quot;tags&quot; : [
                         [
-                                "B",
-                                "B"
+                                &quot;B&quot;,
+                                &quot;B&quot;
                         ]
                 ]
         }
 }
-</code></pre><p>な感じの結果になる。配列型にインデックスをつけるとmultikeysタイプになる模様なのでisMultiKeyがtrueになる的な感じかと</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p>ensureIndexに指定出来るキーと値についてドキュメントによると、キーはインデックスを適応するキー名であり、値が1であれば昇順、-1であれは降順になる模様</p><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: "hoge", type: 1 })
-db.samples.insert({ name: "fuga", type: 1 })
-db.samples.insert({ name: "foobar", type: 1 })
+</code></pre><p>な感じの結果になる。配列型にインデックスをつけるとmultikeysタイプになる模様なのでisMultiKeyがtrueになる的な感じかと</p><h4>追記</h4><p>ensureIndexに指定出来るキーと値についてドキュメントによると、キーはインデックスを適応するキー名であり、値が1であれば昇順、-1であれは降順になる模様</p><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot;, type: 1 })
+db.samples.insert({ name: &quot;fuga&quot;, type: 1 })
+db.samples.insert({ name: &quot;foobar&quot;, type: 1 })
 </code></pre><p>というデータつっこんどいて</p><pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ type: 1, name: 1 })
-</code></pre><p>っていうインデックスを突っ込んで、find({ type: 1 })すると</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f4c6fe65d2c24c46dd38a9"), "name" : "foobar", "type" : 1 }
-{ "_id" : ObjectId("50f4c6f465d2c24c46dd38a8"), "name" : "fuga", "type" : 1 }
-{ "_id" : ObjectId("50f4c6eb65d2c24c46dd38a7"), "name" : "hoge", "type" : 1 }
-</code></pre><p>という結果になる。もし、nameにインデックス適応させなかったら</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f4c6eb65d2c24c46dd38a7"), "name" : "hoge", "type" : 1 }
-{ "_id" : ObjectId("50f4c6f465d2c24c46dd38a8"), "name" : "fuga", "type" : 1 }
-{ "_id" : ObjectId("50f4c6fe65d2c24c46dd38a9"), "name" : "foobar", "type" : 1 }
+</code></pre><p>っていうインデックスを突っ込んで、find({ type: 1 })すると</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f4c6fe65d2c24c46dd38a9&quot;), &quot;name&quot; : &quot;foobar&quot;, &quot;type&quot; : 1 }
+{ &quot;_id&quot; : ObjectId(&quot;50f4c6f465d2c24c46dd38a8&quot;), &quot;name&quot; : &quot;fuga&quot;, &quot;type&quot; : 1 }
+{ &quot;_id&quot; : ObjectId(&quot;50f4c6eb65d2c24c46dd38a7&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
+</code></pre><p>という結果になる。もし、nameにインデックス適応させなかったら</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f4c6eb65d2c24c46dd38a7&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
+{ &quot;_id&quot; : ObjectId(&quot;50f4c6f465d2c24c46dd38a8&quot;), &quot;name&quot; : &quot;fuga&quot;, &quot;type&quot; : 1 }
+{ &quot;_id&quot; : ObjectId(&quot;50f4c6fe65d2c24c46dd38a9&quot;), &quot;name&quot; : &quot;foobar&quot;, &quot;type&quot; : 1 }
 </code></pre><p>というようにインデックスによるソートが反映されない。自前でsortすれば良いって話にもなるかも知らないけど</p>
               </div>
             </div>
@@ -207,53 +197,67 @@ db.samples.insert({ name: "foobar", type: 1 })
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -261,17 +265,21 @@ db.samples.insert({ name: "foobar", type: 1 })
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -279,32 +287,41 @@ db.samples.insert({ name: "foobar", type: 1 })
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -312,14 +329,17 @@ db.samples.insert({ name: "foobar", type: 1 })
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -327,11 +347,13 @@ db.samples.insert({ name: "foobar", type: 1 })
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -339,20 +361,25 @@ db.samples.insert({ name: "foobar", type: 1 })
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -360,47 +387,43 @@ db.samples.insert({ name: "foobar", type: 1 })
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -408,20 +431,41 @@ db.samples.insert({ name: "foobar", type: 1 })
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -431,17 +475,21 @@ db.samples.insert({ name: "foobar", type: 1 })
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

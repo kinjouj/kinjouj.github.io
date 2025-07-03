@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,15 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>org.eclipse.birt.report.engine.api.script.eventhandler.IReportEventHandlerっていうのを使うと、ラベルを動的に変えちゃったり出来る模様</p>
-<!--more-->
-<pre class="line-numbers"><code class="language-java">import java.util.Map;
+                <!--[[1, "追記"]]-->
+                <p>org.eclipse.birt.report.engine.api.script.eventhandler.IReportEventHandlerっていうのを使うと、ラベルを動的に変えちゃったり出来る模様</p><pre class="line-numbers"><code class="language-java">import java.util.Map;
 import java.util.logging.Logger;
 
 import org.eclipse.birt.report.engine.api.script.IReportContext;
@@ -120,29 +112,29 @@ import org.eclipse.birt.report.model.api.activity.SemanticException;
 public class SampleLabelEventAdapter implements IReportEventHandler {
 
     private static final Logger logger = Logger.getLogger(SampleLabelEventAdapter.class.getName());
-    private static final String CONTEXT_KEY = "test";
+    private static final String CONTEXT_KEY = &quot;test&quot;;
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(&quot;unchecked&quot;)
     public void initialize(IReportContext context) throws ScriptException {
-        logger.info("initialize");
+        logger.info(&quot;initialize&quot;);
 
         // 実行クライアント側から設定したAppContextなMapを取得してパラメータを取る
         Map&lt;String, Object&gt; appContext = context.getAppContext();
 
         if (appContext.containsKey(CONTEXT_KEY)) {
-            logger.info("initialize: " + appContext.get(CONTEXT_KEY));
+            logger.info(&quot;initialize: &quot; + appContext.get(CONTEXT_KEY));
         }
     }
 
     @Override
     public void onPrepare(IReportContext context) throws ScriptException {
-        logger.info("onPrepare");
+        logger.info(&quot;onPrepare&quot;);
 
-        DesignElementHandle label = context.getDesignHandle().findElement("label1");
+        DesignElementHandle label = context.getDesignHandle().findElement(&quot;label1&quot;);
 
         try {
-            label.setProperty("text", "hoge");
+            label.setProperty(&quot;text&quot;, &quot;hoge&quot;);
         } catch (SemanticException e) {
             e.printStackTrace();
         }
@@ -150,37 +142,37 @@ public class SampleLabelEventAdapter implements IReportEventHandler {
 
     @Override
     public void beforeFactory(IReportDesign design, IReportContext context) throws ScriptException {
-        logger.info("beforeFactory");
+        logger.info(&quot;beforeFactory&quot;);
     }
 
     @Override
     public void beforeRender(IReportContext context) throws ScriptException {
-        logger.info("beforeRender");
+        logger.info(&quot;beforeRender&quot;);
     }
 
     @Override
     public void onPageStart(IPageInstance page, IReportContext context) throws ScriptException {
-        logger.info("onPageStart");
+        logger.info(&quot;onPageStart&quot;);
     }
 
     @Override
     public void onPageEnd(IPageInstance page, IReportContext context) throws ScriptException {
-        logger.info("onPageEnd");
+        logger.info(&quot;onPageEnd&quot;);
     }
 
     @Override
     public void afterFactory(IReportContext context) throws ScriptException {
-        logger.info("afterFactory");
+        logger.info(&quot;afterFactory&quot;);
     }
 
     @Override
     public void afterRender(IReportContext context) throws ScriptException {
-        logger.info("afterRender");
+        logger.info(&quot;afterRender&quot;);
     }
 }
-</code></pre><p>でこれどうやって使うのっていうのを説明すると</p><p><img src="/images/2013/04/20130426152204.jpg" alt="image" /></p><p>ってな感じで設定するか、rptdesignファイルに</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</code></pre><p>でこれどうやって使うのっていうのを説明すると</p><p><img src="/images/2013/04/20130426152204.jpg" alt="image" /></p><p>ってな感じで設定するか、rptdesignファイルに</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;report&gt;
-    &lt;property name="eventHandlerClass"&gt;SampleLabelEventAdapter&lt;/property&gt;
+    &lt;property name=&quot;eventHandlerClass&quot;&gt;SampleLabelEventAdapter&lt;/property&gt;
 </code></pre><p>な感じでレポートプロパティをして設定すれば良い模様(ソースでそうなってるのを見ただけなのでEclipse上で設定しなくても出来るかは不明)</p><p>でinitializeメソッド上でやってるAppContextな件に関しては実行クライアント上から</p><pre class="line-numbers"><code class="language-java">import java.util.Map;
 
 import org.eclipse.birt.report.engine.api.EXCELRenderOption;
@@ -191,26 +183,26 @@ import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.birt.report.engine.api.ReportEngine;
 
 public class Client {
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(&quot;unchecked&quot;)
     public static void main(String[] args){
         EngineConfig config = new EngineConfig();
 
         Map&lt;String, Object&gt; appContext = config.getAppContext();
-        appContext.put("test", "hoge fuga foobar");
+        appContext.put(&quot;test&quot;, &quot;hoge fuga foobar&quot;);
 
         ReportEngine engine = new ReportEngine(config);
         IRunAndRenderTask task = null;
 
         try {
             IReportRunnable design = engine.openReportDesign(
-                ClassLoader.getSystemResourceAsStream("sample.rptdesign")
+                ClassLoader.getSystemResourceAsStream(&quot;sample.rptdesign&quot;)
             );
 
             task = engine.createRunAndRenderTask(design);
 
             EXCELRenderOption options = new EXCELRenderOption();
-            options.setOutputFormat("xls");
-            options.setEmitterID("org.eclipse.birt.report.engine.emitter.nativexls");
+            options.setOutputFormat(&quot;xls&quot;);
+            options.setEmitterID(&quot;org.eclipse.birt.report.engine.emitter.nativexls&quot;);
 
             task.setRenderOption(options);
             task.run();
@@ -223,9 +215,7 @@ public class Client {
         }
     }
 }
-</code></pre><p>な感じでパラメーターなりぶち込んでおけば、IReportEventHandler上でもIReportContextを介して参照する事が出来る模様</p><p>んまぁテンプレを読み込みでレポート変数とか作らなくても動的に値を変えちゃうとかも出来るんじゃないかと</p><p>ちなみに上記でHandlerと書くべきがAdapterってなってるのはこっちのミスなので...orz</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p>レポートにイベントハンドラーを設定せずに実行側のJavaでそれを制御するには</p><pre class="line-numbers"><code class="language-java">import java.util.Map;
+</code></pre><p>な感じでパラメーターなりぶち込んでおけば、IReportEventHandler上でもIReportContextを介して参照する事が出来る模様</p><p>んまぁテンプレを読み込みでレポート変数とか作らなくても動的に値を変えちゃうとかも出来るんじゃないかと</p><p>ちなみに上記でHandlerと書くべきがAdapterってなってるのはこっちのミスなので...orz</p><h4>追記</h4><p>レポートにイベントハンドラーを設定せずに実行側のJavaでそれを制御するには</p><pre class="line-numbers"><code class="language-java">import java.util.Map;
 
 import org.eclipse.birt.report.engine.api.EXCELRenderOption;
 import org.eclipse.birt.report.engine.api.EngineConfig;
@@ -236,12 +226,12 @@ import org.eclipse.birt.report.engine.api.ReportEngine;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 
 public class Client2 {
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(&quot;unchecked&quot;)
     public static void main(String[] args){
         EngineConfig config = new EngineConfig();
 
         Map&lt;String, Object&gt; appContext = config.getAppContext();
-        appContext.put("test", "hoge fuga foobar");
+        appContext.put(&quot;test&quot;, &quot;hoge fuga foobar&quot;);
 
         ReportEngine engine = new ReportEngine(config);
 
@@ -249,17 +239,17 @@ public class Client2 {
 
         try {
             IReportRunnable design = engine.openReportDesign(
-                ClassLoader.getSystemResourceAsStream("sample.rptdesign")
+                ClassLoader.getSystemResourceAsStream(&quot;sample.rptdesign&quot;)
             );
 
            // 追加
-           design.getDesignHandle().setProperty("eventHandlerClass", "SampleLabelEventAdapter");
+           design.getDesignHandle().setProperty(&quot;eventHandlerClass&quot;, &quot;SampleLabelEventAdapter&quot;);
 
             task = engine.createRunAndRenderTask(design);
 
             EXCELRenderOption options = new EXCELRenderOption();
-            options.setOutputFormat("xls");
-            options.setEmitterID("org.eclipse.birt.report.engine.emitter.nativexls");
+            options.setOutputFormat(&quot;xls&quot;);
+            options.setEmitterID(&quot;org.eclipse.birt.report.engine.emitter.nativexls&quot;);
 
             task.setRenderOption(options);
             task.run();
@@ -324,53 +314,67 @@ public class Client2 {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -378,17 +382,21 @@ public class Client2 {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -396,32 +404,41 @@ public class Client2 {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -429,14 +446,17 @@ public class Client2 {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -444,11 +464,13 @@ public class Client2 {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -456,20 +478,25 @@ public class Client2 {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -477,47 +504,43 @@ public class Client2 {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -525,20 +548,41 @@ public class Client2 {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -548,17 +592,21 @@ public class Client2 {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

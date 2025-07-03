@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="ページング及びカテゴリーの親子関係のネスト構造をrender:partial等を用いて出力出来るようにしてみたページングなライブラリ昔Rails使ってた時とかはwill_paginateとか" />
+    <meta name="description" content="ページング及びカテゴリーの親子関係のネスト構造をrender:partial等を用いて出力出来るようにしてみたページングなライブラリ昔Rails使ってた時とかはwill_paginateとか使ってた" />
     <title>RubyOnRails演習 (3) - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/04/rubyonrails-study-2.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/04/gradle-local-repository.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,54 +96,29 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-60f0dada05c47833">ページングなライブラリ</a>
-</li>
-<li>
-<a href="#app-controllers-entry_controller-rb">app/controllers/entry_controller.rb</a>
-</li>
-<li>
-<a href="#app-views-entry-index-erb">app/views/entry/index.erb</a>
-</li>
-<li>
-<a href="#app-views-sidebar-_index-erb">app/views/sidebar/_index.erb</a>
-</li>
-<li>
-<a href="#app-views-sidebar-_category-erb">app/views/sidebar/_category.erb</a>
-</li>
-</ul>
--->
-                <p>ページング及びカテゴリーの親子関係のネスト構造をrender :partial等を用いて出力出来るようにしてみた</p>
-<!--more-->
-
-<h4 id="part-60f0dada05c47833">ページングなライブラリ</h4>
-<p>昔Rails使ってた時とかはwill_paginateとか使ってたような記憶があるのだけど、kaminariっていうライブラリがあるらしいのでそれを使う事にする</p><p>Gemfileに</p><pre class="line-numbers"><code class="language-rb">gem "kaminari"
+                <!--[[1, "ページングなライブラリ"], [2, "app/controllers/entry_controller.rb"], [3, "app/views/entry/index.erb"], [4, "app/views/sidebar/_index.erb"], [5, "app/views/sidebar/_category.erb"]]-->
+                <p>ページング及びカテゴリーの親子関係のネスト構造をrender :partial等を用いて出力出来るようにしてみた</p><h4>ページングなライブラリ</h4><p>昔Rails使ってた時とかはwill_paginateとか使ってたような記憶があるのだけど、kaminariっていうライブラリがあるらしいのでそれを使う事にする</p><p>Gemfileに</p><pre class="line-numbers"><code class="language-rb">gem &quot;kaminari&quot;
 </code></pre><p>を記述。</p><pre class="line-numbers"><code class="language-">rails g kaminari:views [THEME]
 </code></pre><p>でkaminariが使うページングなUIなテンプレートを出力できる。別に出さなくても出来るんだけど、色々修正したいだとかTwitter Bootstrap方式なページングで出したいっていうのであれば</p><pre class="line-numbers"><code class="language-">rails g kaminari:views bootstrap
-</code></pre><p>等で出せる。app/views/kaminariに出力されるのでそれをいじればページングなUIを修正出来るっていう感じ。んまぁkaminariに関してはドキュメント読んだ方が良さそうなんで以降はある程度省略</p>
-<h4 id="app-controllers-entry_controller-rb">app/controllers/entry_controller.rb</h4>
-<p>サイドバー的なところにカテゴリーをネストして出力出来るようにする為に、特定のアクションが起きる前に事前にカテゴリーデータを取得をおこなっておく。それはbefore_filterとかで良いと思う。利用されるアクションが1特定であれば普通にそのアクションでも良いとは思うけど、そうじゃないケースがあると思うので</p><pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
+</code></pre><p>等で出せる。app/views/kaminariに出力されるのでそれをいじればページングなUIを修正出来るっていう感じ。んまぁkaminariに関してはドキュメント読んだ方が良さそうなんで以降はある程度省略</p><h4>app/controllers/entry_controller.rb</h4><p>サイドバー的なところにカテゴリーをネストして出力出来るようにする為に、特定のアクションが起きる前に事前にカテゴリーデータを取得をおこなっておく。それはbefore_filterとかで良いと思う。利用されるアクションが1特定であれば普通にそのアクションでも良いとは思うけど、そうじゃないケースがあると思うので</p><pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
   before_filter :load_sidebar, :only =&gt; :index
 
   def load_sidebar
-    @categories = Category.find_all_by_parent(0, :order =&gt; "sort ASC")
+    @categories = Category.find_all_by_parent(0, :order =&gt; &quot;sort ASC&quot;)
   end
 
   def index
     @entries = Entry.page(params[:page])
   end
 end
-</code></pre><p>とりあえず関係無い所なアクションは省略。load_sidebarでparentカラムが0(ルートカテゴリー)なデータを取得。それはrender :partialで利用する</p>
-<h4 id="app-views-entry-index-erb">app/views/entry/index.erb</h4>
-<pre class="line-numbers"><code class="language-erb">&lt;div class="row"&gt;
-  &lt;div class="span4"&gt;
+</code></pre><p>とりあえず関係無い所なアクションは省略。load_sidebarでparentカラムが0(ルートカテゴリー)なデータを取得。それはrender :partialで利用する</p><h4>app/views/entry/index.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;div class=&quot;row&quot;&gt;
+  &lt;div class=&quot;span4&quot;&gt;
     &lt;!-- app/views/sidebar/_index.erbな部分テンプレートを読み込み --&gt;
-    &lt;%= render :partial =&gt; "sidebar/index" %&gt;
+    &lt;%= render :partial =&gt; &quot;sidebar/index&quot; %&gt;
   &lt;/div&gt;
-  &lt;div class="span8"&gt;
+  &lt;div class=&quot;span8&quot;&gt;
     &lt;% @entries.each do |entry| %&gt;
-    &lt;div class="entry"&gt;
+    &lt;div class=&quot;entry&quot;&gt;
       &lt;% entry.category.each do |category| %&gt;[&lt;%= category.name %&gt;]&lt;% end %&gt;
       &lt;%= entry.title %&gt;
     &lt;/div&gt;
@@ -155,20 +129,16 @@ end
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;
-</code></pre><p>今回関係ない所は省略。paginateなView Helperでページングなビューを表示。恐らくはapp/views/kaminari/_paginator.html.erbがレンダリングされるんだと</p>
-<h4 id="app-views-sidebar-_index-erb">app/views/sidebar/_index.erb</h4>
-<pre class="line-numbers"><code class="language-erb">&lt;% @categories.each do |category| %&gt;
-  &lt;%= render :partial =&gt; "sidebar/category", :locals =&gt; { :category =&gt; category } %&gt;
+</code></pre><p>今回関係ない所は省略。paginateなView Helperでページングなビューを表示。恐らくはapp/views/kaminari/_paginator.html.erbがレンダリングされるんだと</p><h4>app/views/sidebar/_index.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;% @categories.each do |category| %&gt;
+  &lt;%= render :partial =&gt; &quot;sidebar/category&quot;, :locals =&gt; { :category =&gt; category } %&gt;
 &lt;% end %&gt;
-</code></pre><p>load_sidebarで取得したカテゴリーなデータをレンダリングする。ここから更にapp/views/sidebar_category.erbに部分レンダリングされる</p>
-<h4 id="app-views-sidebar-_category-erb">app/views/sidebar/_category.erb</h4>
-<pre class="line-numbers"><code class="language-erb">&lt;!-- エントリー数が無いカテゴリーもあるけど、そのカテゴリーがサブカテゴリーを持ってないとは限らない --&gt;
+</code></pre><p>load_sidebarで取得したカテゴリーなデータをレンダリングする。ここから更にapp/views/sidebar_category.erbに部分レンダリングされる</p><h4>app/views/sidebar/_category.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;!-- エントリー数が無いカテゴリーもあるけど、そのカテゴリーがサブカテゴリーを持ってないとは限らない --&gt;
 &lt;% if category.entry.size &gt; 0 || category.sub_category.size &gt; 0 %&gt;
 &lt;ul&gt;
-  &lt;li style="list-style: none;padding: 3px"&gt;
+  &lt;li style=&quot;list-style: none;padding: 3px&quot;&gt;
     &lt;%= category.name %&gt;
     &lt;% category.sub_category.each do |sub_category| %&gt;
-    &lt;%= render :partial =&gt; "sidebar/category", :locals =&gt; { :category =&gt; sub_category } %&gt;
+    &lt;%= render :partial =&gt; &quot;sidebar/category&quot;, :locals =&gt; { :category =&gt; sub_category } %&gt;
     &lt;% end %&gt;
   &lt;/li&gt;
 &lt;/ul&gt;
@@ -223,53 +193,67 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -277,17 +261,21 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -295,32 +283,41 @@ end
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -328,14 +325,17 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -343,11 +343,13 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -355,20 +357,25 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -376,47 +383,43 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -424,20 +427,41 @@ end
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -447,17 +471,21 @@ end
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

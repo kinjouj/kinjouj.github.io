@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,36 +96,19 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#fuel-app-classes-controller-home-php">検証対象コントローラー (fuel/app/classes/controller/home.php)</a>
-</li>
-<li>
-<a href="#fuel-app-classes-test_logger-php">fuel/app/classes/test_logger.php</a>
-</li>
-<li>
-<a href="#fuel-app-test-controller-home-php">fuel/app/test/controller/home.php</a>
-</li>
-</ul>
--->
+                <!--[[1, "検証対象コントローラー (fuel/app/classes/controller/home.php)"], [2, "fuel/app/classes/test_logger.php"], [3, "fuel/app/test/controller/home.php"]]-->
                 <p>FuelPHPにLogクラスがありますけど、これを使う場合のログ出力をテストケースでテストしたい場合どうするのかって所。とりあえず手法として、</p><p>ログが出力される前と後でログをdiffする<br>
-ファイルポインタで出力前に末尾にカーソルを移しておいて出力後にログ取得メソッドで更新された分のカーソルを取得する</p><p>っていう手法を思いついた。とりあえず前者なパターンをやってみた(どっちがいいかと言われたら後者の方が良いんじゃないかと思う所)</p>
-<!--more-->
-
-<h4 id="fuel-app-classes-controller-home-php">検証対象コントローラー (fuel/app/classes/controller/home.php)</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+ファイルポインタで出力前に末尾にカーソルを移しておいて出力後にログ取得メソッドで更新された分のカーソルを取得する</p><p>っていう手法を思いついた。とりあえず前者なパターンをやってみた(どっちがいいかと言われたら後者の方が良いんじゃないかと思う所)</p><h4>検証対象コントローラー (fuel/app/classes/controller/home.php)</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
     public function get_index() {
-        Log::debug("hoge");
-        Log::warning("fuga");
+        Log::debug(&quot;hoge&quot;);
+        Log::warning(&quot;fuga&quot;);
 
-        return Response::forge("OK");
+        return Response::forge(&quot;OK&quot;);
     }
 }
-</code></pre><p>Logクラスを出力される結果をテストケースで取得する(log_thresholdでwarningとdebugに限定しておく)。とりあえずそれを扱うクラスを作る</p>
-<h4 id="fuel-app-classes-test_logger-php">fuel/app/classes/test_logger.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>Logクラスを出力される結果をテストケースで取得する(log_thresholdでwarningとdebugに限定しておく)。とりあえずそれを扱うクラスを作る</p><h4>fuel/app/classes/test_logger.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Logger {
 
@@ -147,22 +129,20 @@ class Test_Logger {
     }
 
     private function getLogFilename() {
-        $log_path = Config::get("log_path");
+        $log_path = Config::get(&quot;log_path&quot;);
 
         if (is_null($log_path)) {
-            throw new RuntimeException("missing "log_path" configuration");
+            throw new RuntimeException(&quot;missing &quot;log_path&quot; configuration&quot;);
         }
 
         return sprintf(
-            "%s/%s.php",
-            rtrim($log_path, "/"), // 最後にスラッシュがついてるのがキモい
-            date("Y/m/d")
+            &quot;%s/%s.php&quot;,
+            rtrim($log_path, &quot;/&quot;), // 最後にスラッシュがついてるのがキモい
+            date(&quot;Y/m/d&quot;)
         );
     }
 }
-</code></pre><p>あとはテストケースで使う</p>
-<h4 id="fuel-app-test-controller-home-php">fuel/app/test/controller/home.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>あとはテストケースで使う</p><h4>fuel/app/test/controller/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Controller_Home extends TestCase {
 
@@ -173,14 +153,14 @@ class Test_Controller_Home extends TestCase {
     }
 
     public function test_get_index() {
-        $res = Request::forge("home/index")-&gt;execute()-&gt;response();
+        $res = Request::forge(&quot;home/index&quot;)-&gt;execute()-&gt;response();
         $this-&gt;assertThat($res, $this-&gt;logicalNot($this-&gt;isNull()));
 
         Debug::dump($this-&gt;logger-&gt;fetchLogs());
     }
 
     public function test_dummy() {
-        Log::debug("test");
+        Log::debug(&quot;test&quot;);
 
         Debug::dump($this-&gt;logger-&gt;fetchLogs());
     }
@@ -251,53 +231,67 @@ Time: 0 seconds, Memory: 2.75Mb
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -305,17 +299,21 @@ Time: 0 seconds, Memory: 2.75Mb
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -323,32 +321,41 @@ Time: 0 seconds, Memory: 2.75Mb
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -356,14 +363,17 @@ Time: 0 seconds, Memory: 2.75Mb
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -371,11 +381,13 @@ Time: 0 seconds, Memory: 2.75Mb
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -383,20 +395,25 @@ Time: 0 seconds, Memory: 2.75Mb
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -404,47 +421,43 @@ Time: 0 seconds, Memory: 2.75Mb
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -452,20 +465,41 @@ Time: 0 seconds, Memory: 2.75Mb
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -475,17 +509,21 @@ Time: 0 seconds, Memory: 2.75Mb
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

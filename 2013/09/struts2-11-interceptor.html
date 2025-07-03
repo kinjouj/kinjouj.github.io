@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="Interceptorの利用法は今まで何度と無く書いてきたので(ryとりあえず自分でInterceptorを作って利用してみる要件としてpackagesample.service;publi" />
+    <meta name="description" content="Interceptorの利用法は今まで何度と無く書いてきたので(ryとりあえず自分でInterceptorを作って利用してみる要件としてpackagesample.service;public" />
     <title>Struts2をやってみる (11) - Interceptor - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/09/struts2-12-spring-framework.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/09/eclipse-java-project-classes-change-output-directory.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,21 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#sampleinterceptor-java">SampleInterceptor.java</a>
-</li>
-<li>
-<a href="#struts-xml">struts.xml</a>
-</li>
-<li>
-<a href="#part-62486ecb70a8113f">インターセプターをテスト</a>
-</li>
-</ul>
--->
-                <p>Interceptorの利用法は今まで何度と無く書いてきたので(ry</p><p>とりあえず自分でInterceptorを作って利用してみる</p>
-<!--more-->
-<p>要件として</p><pre class="line-numbers"><code class="language-java">package sample.service;
+                <!--[[1, "SampleInterceptor.java"], [2, "struts.xml"], [3, "インターセプターをテスト"]]-->
+                <p>Interceptorの利用法は今まで何度と無く書いてきたので(ry</p><p>とりあえず自分でInterceptorを作って利用してみる</p><p>要件として</p><pre class="line-numbers"><code class="language-java">package sample.service;
 
 public interface ServiceAware&lt;T&gt; {
     public void setService(T service);
@@ -136,9 +122,7 @@ public class IndexAction extends ActionSupport implements ServiceAware&lt;Sample
         return service;
     }
 }
-</code></pre><p>的な感じでインターセプターからsetServiceを通じてアクションが発生する前に注入してやる的な事をやってみる</p>
-<h4 id="sampleinterceptor-java">SampleInterceptor.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.interceptor;
+</code></pre><p>的な感じでインターセプターからsetServiceを通じてアクションが発生する前に注入してやる的な事をやってみる</p><h4>SampleInterceptor.java</h4><pre class="line-numbers"><code class="language-java">package sample.interceptor;
 
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionInvocation;
@@ -151,7 +135,7 @@ public class SampleInterceptor extends AbstractInterceptor {
 
     private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(&quot;unchecked&quot;)
     @Override
     public String intercept(ActionInvocation invocation) throws Exception {
         Action action = (Action)invocation.getAction();
@@ -160,40 +144,36 @@ public class SampleInterceptor extends AbstractInterceptor {
             ((ServiceAware&lt;sampleService&gt;)action).setService(new SampleService());
         }
 
-        System.out.println("before: " + action.toString());
+        System.out.println(&quot;before: &quot; + action.toString());
 
         // ActionInvocation#invokeActionOnlyをすると他のインターセプターを無視してアクション実行されるっぽい
         String result = invocation.invoke();
 
-        System.out.println("after: " + action.toString());
+        System.out.println(&quot;after: &quot; + action.toString());
 
         return result;
     }
 }
-</code></pre><p>セッターメソッドを定義しておけばstruts.xmlで&lt;param name=&quot;&quot;&gt;を利用して値を設定したりとかも出来る</p>
-<h4 id="struts-xml">struts.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.3.dtd"&gt;
+</code></pre><p>セッターメソッドを定義しておけばstruts.xmlで&lt;param name=&quot;&quot;&gt;を利用して値を設定したりとかも出来る</p><h4>struts.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.3.dtd&quot;&gt;
 &lt;struts&gt;
-    &lt;constant name="struts.devMode" value="true" /&gt;
+    &lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
 
-    &lt;package name="sample" extends="struts-default" namespace="/sample"&gt;
+    &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot; namespace=&quot;/sample&quot;&gt;
 
         &lt;!-- 作ったインターセプターを定義 --&gt;
         &lt;interceptors&gt;
-            &lt;interceptor name="sample" class="sample.interceptor.SampleInterceptor" /&gt;
+            &lt;interceptor name=&quot;sample&quot; class=&quot;sample.interceptor.SampleInterceptor&quot; /&gt;
         &lt;/interceptors&gt;
 
-        &lt;action name="index" class="sample.action.IndexAction" method="input"&gt;
-            &lt;interceptor-ref name="sample" /&gt;
-            &lt;result name="input"&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
+        &lt;action name=&quot;index&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;input&quot;&gt;
+            &lt;interceptor-ref name=&quot;sample&quot; /&gt;
+            &lt;result name=&quot;input&quot;&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
         &lt;/action&gt;
 
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre><p>以上。特にややこしい事をやってる訳でもないので</p>
-<h4 id="part-62486ecb70a8113f">インターセプターをテスト</h4>
-<p>普通にActionProxy#executeをするとインターセプターも通る。でインターセプターなクラスを単体でテストしたい時とか</p><pre class="line-numbers"><code class="language-java">package sample.interceptor;
+</code></pre><p>以上。特にややこしい事をやってる訳でもないので</p><h4>インターセプターをテスト</h4><p>普通にActionProxy#executeをするとインターセプターも通る。でインターセプターなクラスを単体でテストしたい時とか</p><pre class="line-numbers"><code class="language-java">package sample.interceptor;
 
 import org.apache.struts2.StrutsTestCase;
 import org.junit.Test;
@@ -216,7 +196,7 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        ActionProxy proxy = getActionProxy("/sample/index.action");
+        ActionProxy proxy = getActionProxy(&quot;/sample/index.action&quot;);
         invocation = proxy.getInvocation();
         action = (IndexAction)proxy.getAction();
     }
@@ -279,53 +259,67 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -333,17 +327,21 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -351,32 +349,41 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -384,14 +391,17 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -399,11 +409,13 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -411,20 +423,25 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -432,47 +449,43 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -480,20 +493,41 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -503,17 +537,21 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

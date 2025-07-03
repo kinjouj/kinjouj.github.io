@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="タイトル通り。今更ながらMapFragmentを使ってGoogleMapsをAndroidアプリ上に表示させてみたインストールGooglePlayServiceが必要になる。Androi" />
+    <meta name="description" content="タイトル通り。今更ながらMapFragmentを使ってGoogleMapsをAndroidアプリ上に表示させてみたインストールGooglePlayServiceが必要になる。AndroidPa" />
     <title>MapFragmentを使ってみた - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/03/yuidoc-underscore-trouble.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/03/slim3-datastore-attribute.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,87 +96,58 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-bdf5c55b74bb686">インストール</a>
-</li>
-<li>
-<a href="#google-maps-api-api-key">Google Maps APIのAPI Keyを取得する</a>
-</li>
-<li>
-<a href="#androidmanifest-xml">AndroidManifest.xml</a>
-</li>
-<li>
-<a href="#res-layout-main-xml">res/layout/main.xml</a>
-</li>
-<li>
-<a href="#mainactivity-java">MainActivity.java</a>
-</li>
-</ul>
--->
-                <p>タイトル通り。今更ながらMapFragmentを使ってGoogle MapsをAndroidアプリ上に表示させてみた</p>
-<!--more-->
-
-<h4 id="part-bdf5c55b74bb686">インストール</h4>
-<p>Google Play Serviceが必要になる。Android Package Manager?で入れておく。で自分の場合はAndroid SDKが/opt/androidにあるので/opt/android/extras/google/google_play_services/libproject/google-play-services_libをEclipseのライブラリプロジェクトとしてインポートする</p><p>これがどうも「ファイル」-&gt;「インポート」で出来なかったので、「ファイル」-&gt;「新規」から「Android Project from Existing Code」からインポート処理をする。でどうやらこれが必要な理由としてcom.google.android.gcm.Rっていうクラスが必要なのだけど、これがこのプロジェクトしか入ってないので必要っぽい</p>
-<h4 id="google-maps-api-api-key">Google Maps APIのAPI Keyを取得する</h4>
-<p><a href="https://code.google.com/apis/console" target="_blank" rel="noopener noreferrer">https://code.google.com/apis/console</a> から</p>
+                <!--[[1, "インストール"], [2, "Google Maps APIのAPI Keyを取得する"], [3, "AndroidManifest.xml"], [4, "res/layout/main.xml"], [5, "MainActivity.java"]]-->
+                <p>タイトル通り。今更ながらMapFragmentを使ってGoogle MapsをAndroidアプリ上に表示させてみた</p><h4>インストール</h4><p>Google Play Serviceが必要になる。Android Package Manager?で入れておく。で自分の場合はAndroid SDKが/opt/androidにあるので/opt/android/extras/google/google_play_services/libproject/google-play-services_libをEclipseのライブラリプロジェクトとしてインポートする</p><p>これがどうも「ファイル」-&gt;「インポート」で出来なかったので、「ファイル」-&gt;「新規」から「Android Project from Existing Code」からインポート処理をする。でどうやらこれが必要な理由としてcom.google.android.gcm.Rっていうクラスが必要なのだけど、これがこのプロジェクトしか入ってないので必要っぽい</p><h4>Google Maps APIのAPI Keyを取得する</h4><p><a href="https://code.google.com/apis/console" target="_blank" rel="noopener noreferrer">https://code.google.com/apis/console</a> から</p>
 <ul>
 <li>Servicesで「Google Maps Android API v2」をonにする</li>
 <li>API Accessにて「Create new Android Key」でAPI Keyを取得する</li>
 </ul>
 <p>1は問題無いけど2ではキーストアのフィンガープリントが必要なので</p><pre class="line-numbers"><code class="language-">keytool -list -v -keystore debug.keystore
 </code></pre><p>で出力されたSHA1なフィンガープリントをコピーして「フィンガープリント内容;パッケージ名」<br>
-でAPI Access時に指定して取得。ちなみにデバッグ用(Eclipseでやる場合)のキーストアは$HOME/.android/debug.keystoreっぽい。Windowsは知らん</p><p>これで準備完了、あとはコードを書くだけ</p>
-<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="sample.test"
-    android:versionCode="1"
-    android:versionName="1.0"&gt;
+でAPI Access時に指定して取得。ちなみにデバッグ用(Eclipseでやる場合)のキーストアは$HOME/.android/debug.keystoreっぽい。Windowsは知らん</p><p>これで準備完了、あとはコードを書くだけ</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;sample.test&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot;&gt;
 
-    &lt;uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" /&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;8&quot; android:targetSdkVersion=&quot;17&quot; /&gt;
 
-    &lt;permission android:name="sample.test.permission.MAPS_RECEIVE" android:protectionLevel="signature" /&gt;
-    &lt;uses-permission android:name="sample.test.permission.MAPS_RECEIVE" /&gt;
+    &lt;permission android:name=&quot;sample.test.permission.MAPS_RECEIVE&quot; android:protectionLevel=&quot;signature&quot; /&gt;
+    &lt;uses-permission android:name=&quot;sample.test.permission.MAPS_RECEIVE&quot; /&gt;
 
-    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
-    &lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
-    &lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/&gt;
-    &lt;uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" /&gt;
-    &lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /&gt;
-    &lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.ACCESS_NETWORK_STATE&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;/&gt;
+    &lt;uses-permission android:name=&quot;com.google.android.providers.gsf.permission.READ_GSERVICES&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
 
-    &lt;uses-feature android:glEsVersion="0x00020000" android:required="true" /&gt;
+    &lt;uses-feature android:glEsVersion=&quot;0x00020000&quot; android:required=&quot;true&quot; /&gt;
 
     &lt;application
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme"&gt;
+        android:allowBackup=&quot;true&quot;
+        android:icon=&quot;@drawable/ic_launcher&quot;
+        android:label=&quot;@string/app_name&quot;
+        android:theme=&quot;@style/AppTheme&quot;&gt;
 
-        &lt;meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="Google Maps APIのAPI Key" /&gt;
+        &lt;meta-data android:name=&quot;com.google.android.maps.v2.API_KEY&quot; android:value=&quot;Google Maps APIのAPI Key&quot; /&gt;
 
-        &lt;activity android:name=".MainActivity"&gt;
+        &lt;activity android:name=&quot;.MainActivity&quot;&gt;
             &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.MAIN" /&gt;
-                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
             &lt;/intent-filter&gt;
         &lt;/activity&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><p>com.google.android.maps.v2.API_KEYが必要なくらいであとはパーミッションとかちょこちょこな事が必要なくらい</p>
-<h4 id="res-layout-main-xml">res/layout/main.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+</code></pre><p>com.google.android.maps.v2.API_KEYが必要なくらいであとはパーミッションとかちょこちょこな事が必要なくらい</p><h4>res/layout/main.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;fragment
-    class="com.google.android.gms.maps.SupportMapFragment"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/map"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" /&gt;
-</code></pre><p>古い端末で実検証したのでcom.google.android.gms.maps.SupportMapFragmentを使ってますが、新しめな場合はcom.google.android.gms.maps.MapFragmentでいいのかも</p>
-<h4 id="mainactivity-java">MainActivity.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.test;
+    class=&quot;com.google.android.gms.maps.SupportMapFragment&quot;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:id=&quot;@+id/map&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; /&gt;
+</code></pre><p>古い端末で実検証したのでcom.google.android.gms.maps.SupportMapFragmentを使ってますが、新しめな場合はcom.google.android.gms.maps.MapFragmentでいいのかも</p><h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -201,7 +171,7 @@ import android.support.v4.app.FragmentActivity;
 
 public class MainActivity extends FragmentActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = &quot;MainActivity&quot;;
 
     private GoogleMap map;
 
@@ -238,8 +208,8 @@ public class MainActivity extends FragmentActivity {
                 MarkerOptions marker1 = new MarkerOptions();
                 marker1
                     .position(pos2)
-                    .title("タイトル")
-                    .snippet("スニペット");
+                    .title(&quot;タイトル&quot;)
+                    .snippet(&quot;スニペット&quot;);
 
                 map.addMarker(marker1);
 
@@ -346,53 +316,67 @@ public class MainActivity extends FragmentActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -400,17 +384,21 @@ public class MainActivity extends FragmentActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -418,32 +406,41 @@ public class MainActivity extends FragmentActivity {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -451,14 +448,17 @@ public class MainActivity extends FragmentActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -466,11 +466,13 @@ public class MainActivity extends FragmentActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -478,20 +480,25 @@ public class MainActivity extends FragmentActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -499,47 +506,43 @@ public class MainActivity extends FragmentActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -547,20 +550,41 @@ public class MainActivity extends FragmentActivity {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -570,17 +594,21 @@ public class MainActivity extends FragmentActivity {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

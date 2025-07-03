@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="struts.xmlにて&lt;actionname="..."class="..."&gt;&lt;resultname="success"&gt;/WEB-INF/jsp/inde" />
+    <meta name="description" content="struts.xmlにて&lt;actionname=&quot;...&quot;class=&quot;...&quot;&gt;&lt;resultname=&quot;succ" />
     <title>Struts2をやってみる (3) - &lt;result&gt;のtypeに関して - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/09/struts2-2-action-testing.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/09/struts2-4-custom-strutsresultsupport.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,23 +96,9 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#plaintext">plainText</a>
-</li>
-<li>
-<a href="#redirect">redirect</a>
-</li>
-<li>
-<a href="#stream">stream</a>
-</li>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>struts.xmlにて</p><pre class="line-numbers"><code class="language-xml">&lt;action name="..." class="..."&gt;
-    &lt;result name="success"&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
+                <!--[[1, "plainText"], [2, "redirect"], [3, "stream"], [4, "追記"]]-->
+                <p>struts.xmlにて</p><pre class="line-numbers"><code class="language-xml">&lt;action name=&quot;...&quot; class=&quot;...&quot;&gt;
+    &lt;result name=&quot;success&quot;&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
 &lt;/action&gt;
 </code></pre><p>っていうような記述を行う訳ですが、そこのtypeに指定する値でレスポンス方式を変えたり出来る模様。んまぁまだアノテーション利用な部分まで進んでないので(ry</p><p>で結構たくさんある模様なのだけど</p>
 <ul>
@@ -122,22 +107,18 @@ ga("send", "pageview");
 <li>  plainText</li>
 <li>  stream</li>
 </ul>
-<p>等を利用してみる</p>
-<!--more-->
-
-<h4 id="plaintext">plainText</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
+<p>等を利用してみる</p><h4>plainText</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
-    &lt;constant name="struts.devMode" value="true" /&gt;
+    &lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
 
-    &lt;package name="sample" extends="struts-default" namespace="/sample"&gt;
+    &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot; namespace=&quot;/sample&quot;&gt;
 
-        &lt;action name="test1" class="sample.action.IndexAction" method="test1"&gt;
+        &lt;action name=&quot;test1&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;test1&quot;&gt;
             &lt;!-- 実体はorg.apache.struts2.dispatcher.PlainTextResult --&gt;
-            &lt;result name="success" type="plainText"&gt;
+            &lt;result name=&quot;success&quot; type=&quot;plainText&quot;&gt;
                 &lt;!-- 指定しないとNPE --&gt;
-                &lt;param name="charSet"&gt;utf-8&lt;/param&gt;
+                &lt;param name=&quot;charSet&quot;&gt;utf-8&lt;/param&gt;
             &lt;/result&gt;
         &lt;/action&gt;
 
@@ -157,30 +138,28 @@ public class IndexAction extends ActionSupport {
 
     public String test1() throws IOException {
         HttpServletResponse response = ServletActionContext.getResponse();
-        response.setContentType("text/plain; charset=utf-8");
+        response.setContentType(&quot;text/plain; charset=utf-8&quot;);
 
         PrintWriter out = response.getWriter();
-        out.println("ほげ");
+        out.println(&quot;ほげ&quot;);
         out.flush();
         out.close();
 
         return SUCCESS;
     }
 }
-</code></pre>
-<h4 id="redirect">redirect</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
+</code></pre><h4>redirect</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
-    &lt;constant name="struts.devMode" value="true" /&gt;
+    &lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
 
-    &lt;package name="sample" extends="struts-default" namespace="/sample"&gt;
+    &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot; namespace=&quot;/sample&quot;&gt;
 
-        &lt;action name="test2" class="sample.action.IndexAction" method="doDefault"&gt;
+        &lt;action name=&quot;test2&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;doDefault&quot;&gt;
             &lt;!-- org.apache.struts2.dispatcher.ServletRedirectResult --&gt;
-            &lt;result name="success" type="redirect"&gt;
+            &lt;result name=&quot;success&quot; type=&quot;redirect&quot;&gt;
                 &lt;!-- 指定しないとNPE --&gt;
-                &lt;param name="location"&gt;/sample/index.action&lt;/param&gt;
+                &lt;param name=&quot;location&quot;&gt;/sample/index.action&lt;/param&gt;
             &lt;/result&gt;
         &lt;/action&gt;
 
@@ -191,25 +170,23 @@ public class IndexAction extends ActionSupport {
 <li>  doDeafult -&gt; ActionSupport.SUCCESSを返すだけ</li>
 <li>  input -&gt; ActionSupport.INPUTを返すだけ</li>
 </ul>
-<p>的なメソッドが定義されているので、必要であるならばこれらを使えばリダイレクトする目的な所をわざわざクラスにメソッドを定義してSUCCESSを返させるようにしなくても良いっぽい</p>
-<h4 id="stream">stream</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
+<p>的なメソッドが定義されているので、必要であるならばこれらを使えばリダイレクトする目的な所をわざわざクラスにメソッドを定義してSUCCESSを返させるようにしなくても良いっぽい</p><h4>stream</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
-    &lt;constant name="struts.devMode" value="true" /&gt;
+    &lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
 
-    &lt;package name="sample" extends="struts-default" namespace="/sample"&gt;
+    &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot; namespace=&quot;/sample&quot;&gt;
 
-        &lt;action name="test3" class="sample.action.IndexAction" method="test3"&gt;
+        &lt;action name=&quot;test3&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;test3&quot;&gt;
             &lt;!-- org.apache.struts2.dispatcher.StreamResult --&gt;
-            &lt;result name="success" type="stream"&gt;
+            &lt;result name=&quot;success&quot; type=&quot;stream&quot;&gt;
                 &lt;!--
                 参照するInputStreamの変数名を設定出来るっぽい。デフォルトはinputStream
-                &lt;param name="inputName"&gt;inputStream&lt;/param&gt;
+                &lt;param name=&quot;inputName&quot;&gt;inputStream&lt;/param&gt;
                  --&gt;
             &lt;/result&gt;
         &lt;/action&gt;
-        &lt;action name="sample" class="sample.action.SampleAction"&gt;
+        &lt;action name=&quot;sample&quot; class=&quot;sample.action.SampleAction&quot;&gt;
             &lt;result&gt;/index.jsp&lt;/result&gt;
         &lt;/action&gt;
 
@@ -234,7 +211,7 @@ public class IndexAction extends ActionSupport {
 
     public String test3() throws FileNotFoundException {
         ServletContext context = ServletActionContext.getServletContext();
-        File file = new File(context.getRealPath("/path/to/image.jpg"));
+        File file = new File(context.getRealPath(&quot;/path/to/image.jpg&quot;));
         inputStream = new BufferedInputStream(new FileInputStream(file));
 
         return SUCCESS;
@@ -244,10 +221,8 @@ public class IndexAction extends ActionSupport {
         return inputStream;
     }
 }
-</code></pre><p>的な感じでInputStreamを作ってやるだけで良い模様</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p>PlainTextResultに関しては主に静的なファイルをレンダリングしたい目的として使うのが妥当な模様。そういう場合にPrintWriterで処理してレスポンスを出したい場合には</p><pre class="line-numbers"><code class="language-xml">&lt;action name="..." class="..."&gt;
-    &lt;result name="none" /&gt;
+</code></pre><p>的な感じでInputStreamを作ってやるだけで良い模様</p><h4>追記</h4><p>PlainTextResultに関しては主に静的なファイルをレンダリングしたい目的として使うのが妥当な模様。そういう場合にPrintWriterで処理してレスポンスを出したい場合には</p><pre class="line-numbers"><code class="language-xml">&lt;action name=&quot;...&quot; class=&quot;...&quot;&gt;
+    &lt;result name=&quot;none&quot; /&gt;
 &lt;/action&gt;
 </code></pre><p>という風にNONEなレスポンスを返せば良い模様。これが正しいのかは微妙</p>
               </div>
@@ -299,53 +274,67 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -353,17 +342,21 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -371,32 +364,41 @@ public class IndexAction extends ActionSupport {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -404,14 +406,17 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -419,11 +424,13 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -431,20 +438,25 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -452,47 +464,43 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -500,20 +508,41 @@ public class IndexAction extends ActionSupport {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -523,17 +552,21 @@ public class IndexAction extends ActionSupport {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2013-03-17 12:00:00 +0900">
+                <time datetime="2013-03-17T12:00:00+09:00">
                   <a href="/archives/2013/03">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -97,63 +96,44 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654280cb0a5">前提</a>
-</li>
-<li>
-<a href="#package-json">package.json</a>
-</li>
-<li>
-<a href="#gruntfile-js">Gruntfile.js</a>
-</li>
-</ul>
--->
+                <!--[[1, "前提"], [2, "package.json"], [3, "Gruntfile.js"]]-->
                 <p>今までは</p><pre class="line-numbers"><code class="language-">jscoverage lib
 mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
-</code></pre><p>な感じなのを普通に実行してカバレッジを出力していた。こういうのもどうかと思うので、最近というかちょっと前だと思うけどGruntっていうNode.jsベースなビルドタスクツールな感じなので移植してみた</p>
-<!--more-->
-
-<h4 id="part-654280cb0a5">前提</h4>
-<p>以下が出来るタスクを定義する</p>
+</code></pre><p>な感じなのを普通に実行してカバレッジを出力していた。こういうのもどうかと思うので、最近というかちょっと前だと思うけどGruntっていうNode.jsベースなビルドタスクツールな感じなので移植してみた</p><h4>前提</h4><p>以下が出来るタスクを定義する</p>
 <ul>
 <li>jscoverageタスクでjscoverageを実行</li>
 <li>testタスクでmocha-phantomjsを実行 (但しカバレッジは出力されない)</li>
 <li>coverageタスクでmocha-phantomjs -R json-covをしつつのjson2htmlcovでカバレッジを出力</li>
 <li>yuidocタスクでyuidocを生成</li>
 </ul>
-<p>な感じ。でその前に問題があってjson2htmlcovが何やらおかしい。<a href="https://github.com/metaskills/mocha-phantomjs/issues/10#issuecomment-11702761">mocha-phantomjsのissue</a>によるとjson2htmlcovが/dev/stdin使ってるのはよくないっていう話なんだと思いますが、まさに合致していてそれが原因で正常に出力が出来なかった。なのでこのhtml-cov.jsをマージしておく</p><p>あとはディレクトリにpackage.jsonとGruntfile.jsを書く</p>
-<h4 id="package-json">package.json</h4>
-<pre class="line-numbers"><code class="language-json">{
-  "name": "twitter4chrome",
-  "version": "0.0.1",
-  "devDependencies": {
-    "grunt": "0.4.0",
-    "grunt-contrib-yuidoc": "0.4.0"
+<p>な感じ。でその前に問題があってjson2htmlcovが何やらおかしい。<a href="https://github.com/metaskills/mocha-phantomjs/issues/10#issuecomment-11702761">mocha-phantomjsのissue</a>によるとjson2htmlcovが/dev/stdin使ってるのはよくないっていう話なんだと思いますが、まさに合致していてそれが原因で正常に出力が出来なかった。なのでこのhtml-cov.jsをマージしておく</p><p>あとはディレクトリにpackage.jsonとGruntfile.jsを書く</p><h4>package.json</h4><pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;twitter4chrome&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
+  &quot;devDependencies&quot;: {
+    &quot;grunt&quot;: &quot;0.4.0&quot;,
+    &quot;grunt-contrib-yuidoc&quot;: &quot;0.4.0&quot;
   }
 }
-</code></pre><p>yuidocタスクはgrunt-contrib-yuidocを使う事で可能らしいのでそれを使う。それ以外は自前で書く。そういうのがあるみたいだけど(ry</p>
-<h4 id="gruntfile-js">Gruntfile.js</h4>
-<pre class="line-numbers"><code class="language-js">module.exports = function(grunt) {
+</code></pre><p>yuidocタスクはgrunt-contrib-yuidocを使う事で可能らしいのでそれを使う。それ以外は自前で書く。そういうのがあるみたいだけど(ry</p><h4>Gruntfile.js</h4><pre class="line-numbers"><code class="language-js">module.exports = function(grunt) {
   grunt.initConfig({
-    pkg: grunt.file.readJSON("package.json"),
+    pkg: grunt.file.readJSON(&quot;package.json&quot;),
     yuidoc: {
       compile: {
         options: {
-          paths: "lib", // libディレクトリにあるファイルのyuidocする
-          outdir: "doc" // docディレクトリに出力
+          paths: &quot;lib&quot;, // libディレクトリにあるファイルのyuidocする
+          outdir: &quot;doc&quot; // docディレクトリに出力
         }
       }
     }
   });
 
   // yuidocのタスクをロード?
-  grunt.loadNpmTasks("grunt-contrib-yuidoc");
+  grunt.loadNpmTasks(&quot;grunt-contrib-yuidoc&quot;);
 
   var mochaRun = function(args, cb) {
     var mocha = grunt.util.spawn(
       {
-        cmd: "mocha-phantomjs",
+        cmd: &quot;mocha-phantomjs&quot;,
         args: args
       },
       cb
@@ -166,13 +146,13 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
 
   // testタスクで使う
   grunt.registerTask(
-    "test-mocha-phantomjs",
-    "Run mocha-phantomjs",
+    &quot;test-mocha-phantomjs&quot;,
+    &quot;Run mocha-phantomjs&quot;,
     function() {
       var done = this.async();
 
       mochaRun(
-        ["test/runner.html"],
+        [&quot;test/runner.html&quot;],
         function(err, result, code) {
           console.log(result.stdout);
 
@@ -184,30 +164,30 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
 
   // coverageタスクで使う
   grunt.registerTask(
-    "test-mocha-phantomjs-coverage",
-    "Run mocha-phantomjs -R json-cov",
+    &quot;test-mocha-phantomjs-coverage&quot;,
+    &quot;Run mocha-phantomjs -R json-cov&quot;,
     function() {
       var done = this.async();
 
       /* child_processを使ってやる場合
-      var spawn = require("child_process").spawn;
+      var spawn = require(&quot;child_process&quot;).spawn;
 
-      var mocha = spawn("mocha-phantomjs", ["-R", "json-cov", "test/runner.html"]);
+      var mocha = spawn(&quot;mocha-phantomjs&quot;, [&quot;-R&quot;, &quot;json-cov&quot;, &quot;test/runner.html&quot;]);
       var covdata =[];
 
-      mocha.stdout.on("data", function(data) {
+      mocha.stdout.on(&quot;data&quot;, function(data) {
         covdata.push(data.toString());
       });
 
-      mocha.stderr.on("data", function(data) {
-        console.log("ERR: " + data);
+      mocha.stderr.on(&quot;data&quot;, function(data) {
+        console.log(&quot;ERR: &quot; + data);
       });
 
-      mocha.on("exit", function() {
-        var cov = spawn("json2htmlcov");
-        cov.stdin.write(covdata.join(""));
+      mocha.on(&quot;exit&quot;, function() {
+        var cov = spawn(&quot;json2htmlcov&quot;);
+        cov.stdin.write(covdata.join(&quot;&quot;));
         cov.stdin.end();
-        cov.stdout.on("data", function(data) {
+        cov.stdout.on(&quot;data&quot;, function(data) {
           console.log(data.toString());
         });
       });
@@ -215,16 +195,16 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
 
       // json-covなカバレッジレポートを生成
       var mocha = mochaRun(
-        ["-R", "json-cov", "test/runner.html" ],
+        [&quot;-R&quot;, &quot;json-cov&quot;, &quot;test/runner.html&quot; ],
         function(err, result, code) {
 
           // 生成されたjson-covなカバレッジレポートにjson2htmlcovをかます
 
           var cov = grunt.util.spawn(
-            { cmd: "json2htmlcov" },
+            { cmd: &quot;json2htmlcov&quot; },
             function(err, result, code) {
               if (code === 0) {
-                grunt.file.write("coverage.html", result.stdout);
+                grunt.file.write(&quot;coverage.html&quot;, result.stdout);
               }
 
               done();
@@ -243,14 +223,14 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
 
   // jscoverageタスク
   grunt.registerTask(
-    "jscoverage",
-    "Run jscoverage",
+    &quot;jscoverage&quot;,
+    &quot;Run jscoverage&quot;,
     function() {
       var done = this.async();
       var jsc = grunt.util.spawn(
         {
-          cmd: "jscoverage",
-          args: ["lib"]
+          cmd: &quot;jscoverage&quot;,
+          args: [&quot;lib&quot;]
         },
         function(err, result, code) {
           done();
@@ -262,10 +242,10 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   );
 
   // testタスクを定義。jscoverage及びtest-mocha-phantomjsタスクを実行する
-  grunt.registerTask("test", ["jscoverage", "test-mocha-phantomjs"]);
+  grunt.registerTask(&quot;test&quot;, [&quot;jscoverage&quot;, &quot;test-mocha-phantomjs&quot;]);
 
   // coverageタスクを定義。jscoverage及びtest-mocha-phantomjs-coverageタスクを実行
-  grunt.registerTask("coverage", ["jscoverage", "test-mocha-phantomjs-coverage"]);
+  grunt.registerTask(&quot;coverage&quot;, [&quot;jscoverage&quot;, &quot;test-mocha-phantomjs-coverage&quot;]);
 
 };
 </code></pre>
@@ -318,53 +298,67 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -372,17 +366,21 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -390,32 +388,41 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -423,14 +430,17 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -438,11 +448,13 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -450,20 +462,25 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -471,47 +488,43 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -519,20 +532,41 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -542,17 +576,21 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,29 +97,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#anonymous-controller">Anonymous Controller</a>
-</li>
-<li>
-<a href="#bypass_rescue">bypass_rescue</a>
-</li>
-<li>
-<a href="#capybara-webkit">Capybara-WebKitを使う</a>
-</li>
-<li>
-<a href="#part-4713f61358857477">ヘルパーのテスト</a>
-</li>
-<li>
-<a href="#part-a7c06e0762e7c015">モデルのテスト</a>
-</li>
-</ul>
--->
-                <p>以前から何度かはRailsとRSpecに関する事書いてるけど、ちゃんとドキュメント読みましょうって事で、 <a href="https://www.relishapp.com/rspec/rspec-rails/docs" target="_blank" rel="noopener noreferrer">https://www.relishapp.com/rspec/rspec-rails/docs</a> を読み進めてみる</p>
-<!--more-->
-
-<h4 id="anonymous-controller">Anonymous Controller</h4>
-<p>Anonymous Controllerは要はコントローラーにメソッド定義しちゃったりしてテストするって感じなのかと。例えばapplication_controller.rbが</p><pre class="line-numbers"><code class="language-rb">class AccessDenied &lt; StandardError; end
+                <!--[[1, "Anonymous Controller"], [2, "bypass_rescue"], [3, "Capybara-WebKitを使う"], [4, "ヘルパーのテスト"], [5, "モデルのテスト"]]-->
+                <p>以前から何度かはRailsとRSpecに関する事書いてるけど、ちゃんとドキュメント読みましょうって事で、 <a href="https://www.relishapp.com/rspec/rspec-rails/docs" target="_blank" rel="noopener noreferrer">https://www.relishapp.com/rspec/rspec-rails/docs</a> を読み進めてみる</p><h4>Anonymous Controller</h4><p>Anonymous Controllerは要はコントローラーにメソッド定義しちゃったりしてテストするって感じなのかと。例えばapplication_controller.rbが</p><pre class="line-numbers"><code class="language-rb">class AccessDenied &lt; StandardError; end
 
 class ApplicationController &lt; ActionController::Base
   protect_from_forgery
@@ -131,7 +109,7 @@ class ApplicationController &lt; ActionController::Base
       render :status =&gt; :forbidden, :nothing =&gt; true
     end
 end
-</code></pre><p>まぁAccessDeniedがraiseされたらHTTP403を出すような感じ。でテストを</p><pre class="line-numbers"><code class="language-rb">require "spec_helper"
+</code></pre><p>まぁAccessDeniedがraiseされたらHTTP403を出すような感じ。でテストを</p><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 describe ApplicationController do
   controller do
@@ -140,13 +118,13 @@ describe ApplicationController do
     end
   end
 
-  it "GET #index" do
+  it &quot;GET #index&quot; do
     get :index
     expect(response).not_to be_success
     expect(response.status).to be(403)
   end
 end
-</code></pre><p>っていう感じでコントローラーにアクションぶち込んでそれにアクセスしてテストする。ちなみに</p><pre class="line-numbers"><code class="language-rb">it "GET #index" do
+</code></pre><p>っていう感じでコントローラーにアクションぶち込んでそれにアクセスしてテストする。ちなみに</p><pre class="line-numbers"><code class="language-rb">it &quot;GET #index&quot; do
   def controller.index
     render :status =&gt; :not_found, :nothing =&gt; true
   end
@@ -155,9 +133,7 @@ end
   expect(response).not_to be_success
   expect(response.status).to be(404)
 end
-</code></pre><p>っていう風に書く事も可能っぽい</p>
-<h4 id="bypass_rescue">bypass_rescue</h4>
-<p>んでbypass_rescueはrescue_fromを無視しちゃう感じな表現でええんやろか。んまぁそんな感じだろうとは思うんですが、要はrescue_fromで指定した:withに飛ばさずに例外を発生させられるっていう所なんだと思われる。実体をソースを読んだ所だと</p><pre class="line-numbers"><code class="language-rb">module ByPassRescue
+</code></pre><p>っていう風に書く事も可能っぽい</p><h4>bypass_rescue</h4><p>んでbypass_rescueはrescue_fromを無視しちゃう感じな表現でええんやろか。んまぁそんな感じだろうとは思うんですが、要はrescue_fromで指定した:withに飛ばさずに例外を発生させられるっていう所なんだと思われる。実体をソースを読んだ所だと</p><pre class="line-numbers"><code class="language-rb">module ByPassRescue
   def rescue_with_handler(exception)
     raise exception
   end
@@ -166,7 +142,7 @@ end
 def bypass_rescue
   controller.extend(ByPassRescue)
 end
-</code></pre><p>みたいな感じになってた。</p><pre class="line-numbers"><code class="language-rb">require "spec_helper"
+</code></pre><p>みたいな感じになってた。</p><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 describe ApplicationController do
   controller do
@@ -175,18 +151,12 @@ describe ApplicationController do
     end
   end
 
-  it "GET #index" do
+  it &quot;GET #index&quot; do
     bypass_rescue
     expect { get :index }.to raise_error(AccessDenied)
   end
 end
-</code></pre><p>みたいにbypass_rescueをしない場合だと、rescue_fromで指定されたように403エラーになる。bypass_rescueをした場合だとraiseされたエラーがそのまま送出されるっていう感じかと</p>
-<h4 id="capybara-webkit">Capybara-WebKitを使う</h4>
-<p><a href="/2012/09/rails3-rspec-testing-3.html">Rails3+RSpecでのテストを勉強してみる (3) – capybara-webkitを使ってみる -</a>で書いてるので(ry</p>
-<h4 id="part-4713f61358857477">ヘルパーのテスト</h4>
-<p><a href="/2012/09/rails3-rspec-testing-4.html">Rails3+RSpecでのテストを勉強してみる (4) – コントローラー及びヘルパーのテスト -</a>を参照</p>
-<h4 id="part-a7c06e0762e7c015">モデルのテスト</h4>
-<p><a href="/2012/09/rails3-rspec-testing-1.html">Rails3+RSpecでのテストを勉強してみる (1)</a>で書いてるので(ry</p><p>以上。とりまぁまだActionMailerとかまで進んでないので部分的な所は省略。まだ読んでない所もあるので逐一追記したりする予定</p>
+</code></pre><p>みたいにbypass_rescueをしない場合だと、rescue_fromで指定されたように403エラーになる。bypass_rescueをした場合だとraiseされたエラーがそのまま送出されるっていう感じかと</p><h4>Capybara-WebKitを使う</h4><p><a href="/2012/09/rails3-rspec-testing-3.html">Rails3+RSpecでのテストを勉強してみる (3) – capybara-webkitを使ってみる -</a>で書いてるので(ry</p><h4>ヘルパーのテスト</h4><p><a href="/2012/09/rails3-rspec-testing-4.html">Rails3+RSpecでのテストを勉強してみる (4) – コントローラー及びヘルパーのテスト -</a>を参照</p><h4>モデルのテスト</h4><p><a href="/2012/09/rails3-rspec-testing-1.html">Rails3+RSpecでのテストを勉強してみる (1)</a>で書いてるので(ry</p><p>以上。とりまぁまだActionMailerとかまで進んでないので部分的な所は省略。まだ読んでない所もあるので逐一追記したりする予定</p>
               </div>
             </div>
           </div>
@@ -236,53 +206,67 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -290,17 +274,21 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -308,32 +296,41 @@ end
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -341,14 +338,17 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -356,11 +356,13 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -368,20 +370,25 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -389,47 +396,43 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -437,20 +440,41 @@ end
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -460,17 +484,21 @@ end
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

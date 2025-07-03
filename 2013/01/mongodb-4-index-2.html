@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいるで大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在す" />
+    <meta name="description" content="引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいるで大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在すると" />
     <title>mongodbを使ってみる (4) - インデックスに関して (2) - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-2-operators.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-3-index.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,21 +95,14 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる</p>
-<!--more-->
-<p>で大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在するという事でやってみた</p><p>まずその前に、MongoDBとかそういう系のKVSっていうのは基本的にスキーマレスである前提が存在すると思うのですが、UNIQUEインデックスを後で付けたら付けたで問題になるんじゃねーかなって思う所なので。でそれをサポートする為にdropDupsっていうオプションがあり、UNIQUEインデックスを保証させる際に既に重複している部分は削除するような仕組みがある模様。でもデータ消されたらたまったもんじゃねーってオチにならないかなーって思うので、とりあえず自分の無い頭で考えた所</p>
+                <!--[[1, "追記"]]-->
+                <p>引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる</p><p>で大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在するという事でやってみた</p><p>まずその前に、MongoDBとかそういう系のKVSっていうのは基本的にスキーマレスである前提が存在すると思うのですが、UNIQUEインデックスを後で付けたら付けたで問題になるんじゃねーかなって思う所なので。でそれをサポートする為にdropDupsっていうオプションがあり、UNIQUEインデックスを保証させる際に既に重複している部分は削除するような仕組みがある模様。でもデータ消されたらたまったもんじゃねーってオチにならないかなーって思うので、とりあえず自分の無い頭で考えた所</p>
 <ul>
 <li>db.createCollectionで事前にコレクションは作っておく</li>
 <li>db.コレクション名.ensureIndexでUNIQUEインデックス作っておく</li>
 </ul>
 <p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p><pre class="line-numbers"><code class="language-js">// samplesコレクションを作る
-db.createCollection("samples")
+db.createCollection(&quot;samples&quot;)
 
 // nameに対してUNIQUEインデックスを作っておく
 db.samples.ensureIndex({ name: 1 }, { unique: true })
@@ -119,31 +111,29 @@ db.samples.ensureIndex({ name: 1 }, { unique: true })
 db.samples.ensureIndex({ type: 1 })
 
 // データを突っ込む
-db.samples.save({ name: "hoge", type: 1 })
-db.samples.save({ name: "fuga", type: 1 })
+db.samples.save({ name: &quot;hoge&quot;, type: 1 })
+db.samples.save({ name: &quot;fuga&quot;, type: 1 })
 
 // ここまではオッケー
 db.samples.find()
 
-db.samples.save({ name: "hoge", type: 1 })
-// E11000 duplicate key error index: sample.samples.$name_1  dup key: { : "hoge" } なエラーになる
-</code></pre><p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p><p>でdropDupsも一応検証してみますかという事で</p><pre class="line-numbers"><code class="language-js">db.samples.save({ name: "hoge", type: 1 })
-db.samples.save({ name: "hoge", type: 1 })
+db.samples.save({ name: &quot;hoge&quot;, type: 1 })
+// E11000 duplicate key error index: sample.samples.$name_1  dup key: { : &quot;hoge&quot; } なエラーになる
+</code></pre><p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p><p>でdropDupsも一応検証してみますかという事で</p><pre class="line-numbers"><code class="language-js">db.samples.save({ name: &quot;hoge&quot;, type: 1 })
+db.samples.save({ name: &quot;hoge&quot;, type: 1 })
 db.samples.find()
-</code></pre><p>出力が</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
-{ "_id" : ObjectId("50f4e5a2bc3d8a4279742236"), "name" : "hoge", "type" : 1 }
+</code></pre><p>出力が</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f4e59abc3d8a4279742235&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
+{ &quot;_id&quot; : ObjectId(&quot;50f4e5a2bc3d8a4279742236&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
 </code></pre><p>同じデータを突っ込んでおく。でこの状態でnameにUNIQUEインデックスをつけると</p>
 <blockquote>
 E11000 duplicate key error index: sample.samples.$name_1 dup key: { : "hoge" }
 </blockquote>
 <p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p><pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
 db.samples.find()
-// { "_id" : ObjectId("50f4e59abc3d8a4279742235"), "name" : "hoge", "type" : 1 }
-</code></pre><p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p><p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p>DBに存在するインデックスを確認したい場合は</p><pre class="line-numbers"><code class="language-js">db.system.indexes.find()
+// { &quot;_id&quot; : ObjectId(&quot;50f4e59abc3d8a4279742235&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
+</code></pre><p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p><p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p><h4>追記</h4><p>DBに存在するインデックスを確認したい場合は</p><pre class="line-numbers"><code class="language-js">db.system.indexes.find()
 </code></pre><p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p><pre class="line-numbers"><code class="language-js">// sampleデータベース中のsamplesコレクション -&gt; sample.samples
-db.system.indexes.find({ ns: "sample.samples" })
+db.system.indexes.find({ ns: &quot;sample.samples&quot; })
 </code></pre>
               </div>
             </div>
@@ -194,53 +184,67 @@ db.system.indexes.find({ ns: "sample.samples" })
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -248,17 +252,21 @@ db.system.indexes.find({ ns: "sample.samples" })
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -266,32 +274,41 @@ db.system.indexes.find({ ns: "sample.samples" })
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -299,14 +316,17 @@ db.system.indexes.find({ ns: "sample.samples" })
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -314,11 +334,13 @@ db.system.indexes.find({ ns: "sample.samples" })
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -326,20 +348,25 @@ db.system.indexes.find({ ns: "sample.samples" })
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -347,47 +374,43 @@ db.system.indexes.find({ ns: "sample.samples" })
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -395,20 +418,41 @@ db.system.indexes.find({ ns: "sample.samples" })
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -418,17 +462,21 @@ db.system.indexes.find({ ns: "sample.samples" })
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

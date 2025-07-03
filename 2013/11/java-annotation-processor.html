@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成とかでもやってるけど、色々思う所があったのでやってみたpackagesample.annotation;pub" />
+    <meta name="description" content="codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成とかでもやってるけど、色々思う所があったのでやってみたpackagesample.annotation;publi" />
     <title>Annotation Processorの基本的な所 - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/11/fuelphp-30-model_nestedset.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/11/gradle-fatjar.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,10 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!---->
-                <p><a href="/codemodel-annotation-processing-java-sourcecode-generation.html">codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成</a>とかでもやってるけど、色々思う所があったのでやってみた</p>
-<!--more-->
-<pre class="line-numbers"><code class="language-java">package sample.annotation;
+                <!--[]-->
+                <p><a href="/codemodel-annotation-processing-java-sourcecode-generation.html">codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成</a>とかでもやってるけど、色々思う所があったのでやってみた</p><pre class="line-numbers"><code class="language-java">package sample.annotation;
 
 public @interface Bean {
 }
@@ -146,7 +143,7 @@ import org.apache.commons.lang3.ClassUtils;
 import sample.annotation.Bean;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
-@SupportedAnnotationTypes("sample.annotation.*")
+@SupportedAnnotationTypes(&quot;sample.annotation.*&quot;)
 public class BeanAnnotationProcessor extends AbstractProcessor {
 
     private Messager messager;
@@ -172,7 +169,7 @@ public class BeanAnnotationProcessor extends AbstractProcessor {
 
             try {
                 JDefinedClass clazz = pkg._class(
-                    ClassUtils.getShortClassName(name) + "Bean"
+                    ClassUtils.getShortClassName(name) + &quot;Bean&quot;
                 );
                 clazz._extends(codeModel.directClass(name));
 
@@ -202,7 +199,7 @@ public class BeanAnnotationProcessor extends AbstractProcessor {
         return true;
     }
 }
-</code></pre><p>的な感じになる訳だけど。問題はこれをどうやって実行するかっていう所かと。今までとかだとgradleで</p><pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
+</code></pre><p>的な感じになる訳だけど。問題はこれをどうやって実行するかっていう所かと。今までとかだとgradleで</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 
 configurations {
     apt
@@ -210,7 +207,7 @@ configurations {
 
 sourceSets {
     apt {
-        output.resourcesDir = "apt_generated"
+        output.resourcesDir = &quot;apt_generated&quot;
     }
 }
 
@@ -219,21 +216,21 @@ repositories {
 }
 
 dependencies {
-    compile "org.apache.commons:commons-lang3:3.1"
-    compile "com.sun.codemodel:codemodel:2.6"
+    compile &quot;org.apache.commons:commons-lang3:3.1&quot;
+    compile &quot;com.sun.codemodel:codemodel:2.6&quot;
 
-    apt files("lib/apt.jar")
+    apt files(&quot;lib/apt.jar&quot;)
 }
 
 // ※Gradle2.0からCompileタスクタイプが無くなりJavaCompileを使えとの事らしいので
-task compileAptJava(type: JavaCompile, group: "build", overwrite: true) {
+task compileAptJava(type: JavaCompile, group: &quot;build&quot;, overwrite: true) {
     source = sourceSets.main.java
     classpath = configurations.compile + configurations.apt
     dependencyCacheDir = compileJava.dependencyCacheDir
     options.compilerArgs = [
-        "-proc:only",
-        "-processor",
-        "sample.processor.BeanAnnotationProcessor"
+        &quot;-proc:only&quot;,
+        &quot;-processor&quot;,
+        &quot;sample.processor.BeanAnnotationProcessor&quot;
     ]
     destinationDir = sourceSets.apt.output.resourcesDir
 }
@@ -241,19 +238,19 @@ task compileAptJava(type: JavaCompile, group: "build", overwrite: true) {
 compileJava.dependsOn compileAptJava
 sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
 </code></pre><p>っていう感じでアノテーションプロセッサーを指定してcompileJavaが行われる前にcompileAptJavaを処理する事が出来る訳だけど、これをしなくてもアノテーションプロセッサーなライブラリに<span style="color: red">META-INF/services/javax.annotation.processing.Processor</span>を定義する事でコンパイルプロセス上で勝手にやってくれる模様。で中身には</p><pre class="line-numbers"><code class="language-">sample.processor.BeanAnnotationProcessor
-</code></pre><p>っていう感じでアノテーションプロセッサーなクラスを指定する。それを行なってjarでパッケージ化した場合には</p><pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
-apply plugin: "eclipse"
+</code></pre><p>っていう感じでアノテーションプロセッサーなクラスを指定する。それを行なってjarでパッケージ化した場合には</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+apply plugin: &quot;eclipse&quot;
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile files("lib/apt.jar")
+    compile files(&quot;lib/apt.jar&quot;)
 }
 
 compileJava {
-    options.compilerArgs = ["-s", "apt_generated"]
+    options.compilerArgs = [&quot;-s&quot;, &quot;apt_generated&quot;]
 }
 </code></pre><p>な感じで特にcompileAptJavaなあれをしなくても良い。又、この場合デフォルトではクラスをコンパイルした先の所にソースが出力されるようになるが、-sオプションで指定しておけば良い模様</p><p>んまぁこんな所かとは思うんだけど、Eclipseとかで利用する場合には注釈処理とファクトリーパスを設定するだけで良いんだが、アノテーションプロセッサーの処理段階だとクラスパスが何かと認識してくれないのでアノテーションプロセッサーなjarに関してはfat jar(依存性を組み込んだ?jar)を作れば良い</p>
               </div>
@@ -305,53 +302,67 @@ compileJava {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -359,17 +370,21 @@ compileJava {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -377,32 +392,41 @@ compileJava {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -410,14 +434,17 @@ compileJava {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -425,11 +452,13 @@ compileJava {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -437,20 +466,25 @@ compileJava {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -458,47 +492,43 @@ compileJava {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -506,20 +536,41 @@ compileJava {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -529,17 +580,21 @@ compileJava {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

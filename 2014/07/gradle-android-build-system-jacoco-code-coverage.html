@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,24 +96,12 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#app-build-gradle">app/build.gradle</a>
-</li>
-<li>
-<a href="#robolectric-gradle-android-test-plugin">余談: robolectricによるgradle-android-test-pluginの現状に関して</a>
-</li>
-</ul>
--->
-                <p>参考: <a href="http://ksoichiro.blogspot.jp/2014/05/androidgradle-jacoco.html" target="_blank" rel="noopener noreferrer">http://ksoichiro.blogspot.jp/2014/05/androidgradle-jacoco.html</a></p><p>gradle-android-plugin辺りで0.9.x辺りからサポートされてた気がするけどやってなかったのでやってみた</p>
-<!--more-->
-
-<h4 id="app-build-gradle">app/build.gradle</h4>
-<pre class="line-numbers"><code class="language-groovy">apply plugin: "android"
+                <!--[[1, "app/build.gradle"], [2, "余談: robolectricによるgradle-android-test-pluginの現状に関して"]]-->
+                <p>参考: <a href="http://ksoichiro.blogspot.jp/2014/05/androidgradle-jacoco.html" target="_blank" rel="noopener noreferrer">http://ksoichiro.blogspot.jp/2014/05/androidgradle-jacoco.html</a></p><p>gradle-android-plugin辺りで0.9.x辺りからサポートされてた気がするけどやってなかったのでやってみた</p><h4>app/build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;android&quot;
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.1"
+    buildToolsVersion &quot;19.1&quot;
 
     buildTypes {
         debug {
@@ -124,12 +111,10 @@ android {
 
     jacoco {
         // バージョンはhttp://search.maven.orgとかでjacocoで検索して調べれば良い
-        version = "0.7.1.201405082137"
+        version = &quot;0.7.1.201405082137&quot;
     }
 }
-</code></pre><p>終わり。<span style="color: red">testCoverageEnabled = true</span>にしてjacocoのバージョンを設定すりゃ良いだけ。あとはテストを実行すると<span style="color: blue">build/outputs/reports/coverage</span>辺りにカバレッジ測定結果が出力されている</p><p><img src="/images/2014/07/201407010050.jpg"" alt="image" /></p>
-<h4 id="robolectric-gradle-android-test-plugin">余談: robolectricによるgradle-android-test-pluginの現状に関して</h4>
-<p>色々と変わったみたい</p>
+</code></pre><p>終わり。<span style="color: red">testCoverageEnabled = true</span>にしてjacocoのバージョンを設定すりゃ良いだけ。あとはテストを実行すると<span style="color: blue">build/outputs/reports/coverage</span>辺りにカバレッジ測定結果が出力されている</p><p><img src="/images/2014/07/201407010050.jpg"" alt="image" /></p><h4>余談: robolectricによるgradle-android-test-pluginの現状に関して</h4><p>色々と変わったみたい</p>
 <ul>
 <li>gradle-android-test-pluginからrobolectric-gradle-pluginに名称が変更</li>
 <li>プラグイン名がandroid-testからrobolectricに変更</li>
@@ -143,9 +128,9 @@ android {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:0.11.+"
+        classpath &quot;com.android.tools.build:gradle:0.11.+&quot;
         // gradle-android-test-pluginからrobolectric-gradle-pluginに修正
-        classpath "org.robolectric:robolectric-gradle-plugin:0.11.+"
+        classpath &quot;org.robolectric:robolectric-gradle-plugin:0.11.+&quot;
     }
 }
 
@@ -154,45 +139,45 @@ allprojects {
         mavenCentral()
     }
 }
-</code></pre><p>がプロジェクトルートなbuild.gradleでapp/build.gradleで</p><pre class="line-numbers"><code class="language-groovy">apply plugin: "android"
+</code></pre><p>がプロジェクトルートなbuild.gradleでapp/build.gradleで</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;android&quot;
 // android-testからrobolectricに修正
-apply plugin: "robolectric"
+apply plugin: &quot;robolectric&quot;
 
 dependencies {
-    compile project(":libraries:sample_library")
-    compile "com.actionbarsherlock:actionbarsherlock:4.4.0@aar"
+    compile project(&quot;:libraries:sample_library&quot;)
+    compile &quot;com.actionbarsherlock:actionbarsherlock:4.4.0@aar&quot;
 
-    androidTestCompile files("lib/espresso-1.1-bundled.jar")
+    androidTestCompile files(&quot;lib/espresso-1.1-bundled.jar&quot;)
 
-    testCompile("junit:junit:4.11") {
-        exclude module: "hamcrest-core"
+    testCompile(&quot;junit:junit:4.11&quot;) {
+        exclude module: &quot;hamcrest-core&quot;
     }
 
     // robolectric2.3正式版を使うように修正
-    testCompile("org.robolectric:robolectric:2.3") {
-        exclude module: "classworlds"
-        exclude module: "maven-artifact"
-        exclude module: "maven-artifact-manager"
-        exclude module: "maven-error-diagnostics"
-        exclude module: "maven-model"
-        exclude module: "maven-plugin-registry"
-        exclude module: "maven-profile"
-        exclude module: "maven-project"
-        exclude module: "maven-settings"
-        exclude module: "nekohtml"
-        exclude module: "plexus-container-default"
-        exclude module: "plexus-interpolation"
-        exclude module: "plexus-utils"
-        exclude module: "wagon-file"
-        exclude module: "wagon-http-lightweight"
-        exclude module: "wagon-http-shared"
-        exclude module: "wagon-provider-api"
+    testCompile(&quot;org.robolectric:robolectric:2.3&quot;) {
+        exclude module: &quot;classworlds&quot;
+        exclude module: &quot;maven-artifact&quot;
+        exclude module: &quot;maven-artifact-manager&quot;
+        exclude module: &quot;maven-error-diagnostics&quot;
+        exclude module: &quot;maven-model&quot;
+        exclude module: &quot;maven-plugin-registry&quot;
+        exclude module: &quot;maven-profile&quot;
+        exclude module: &quot;maven-project&quot;
+        exclude module: &quot;maven-settings&quot;
+        exclude module: &quot;nekohtml&quot;
+        exclude module: &quot;plexus-container-default&quot;
+        exclude module: &quot;plexus-interpolation&quot;
+        exclude module: &quot;plexus-utils&quot;
+        exclude module: &quot;wagon-file&quot;
+        exclude module: &quot;wagon-http-lightweight&quot;
+        exclude module: &quot;wagon-http-shared&quot;
+        exclude module: &quot;wagon-provider-api&quot;
     }
 }
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.1"
+    buildToolsVersion &quot;19.1&quot;
 
     buildTypes {
         debug {
@@ -201,26 +186,26 @@ android {
     }
 
     jacoco {
-        version = "0.7.1.201405082137"
+        version = &quot;0.7.1.201405082137&quot;
     }
 
 
     packagingOptions {
-        exclude "LICENSE.txt"
-        exclude "META-INF/LICENSE"
-        exclude "META-INF/LICENSE.txt"
-        exclude "META-INF/NOTICE"
+        exclude &quot;LICENSE.txt&quot;
+        exclude &quot;META-INF/LICENSE&quot;
+        exclude &quot;META-INF/LICENSE.txt&quot;
+        exclude &quot;META-INF/NOTICE&quot;
     }
 
     defaultConfig {
-        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+        testInstrumentationRunner &quot;com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner&quot;
     }
 }
 
 // androidTestからrobolectricに修正
 robolectric {
-    include "**/*Test.class"
-    exclude "**/espresso/*.class"
+    include &quot;**/*Test.class&quot;
+    exclude &quot;**/espresso/*.class&quot;
 }
 </code></pre>
               </div>
@@ -272,53 +257,67 @@ robolectric {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -326,17 +325,21 @@ robolectric {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -344,32 +347,41 @@ robolectric {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -377,14 +389,17 @@ robolectric {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -392,11 +407,13 @@ robolectric {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -404,20 +421,25 @@ robolectric {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -425,47 +447,43 @@ robolectric {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -473,20 +491,41 @@ robolectric {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -496,17 +535,21 @@ robolectric {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

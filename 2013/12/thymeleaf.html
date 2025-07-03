@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,20 +95,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#src-main-java-main-java">src/main/java/Main.java</a>
-</li>
-<li>
-<a href="#src-main-resources-test-html">src/main/resources/test.html</a>
-</li>
-</ul>
--->
-                <p>Javaなテンプレートエンジンらしい。<a href="http://www.thymeleaf.org/doc/html/Using-Thymeleaf.html">ドキュメント</a>読みつつちょっとやってみた。とりあえずは暫定的なメモ</p><p>※日本語情報的には<a href="http://tech.nulab.co.jp/2012/02/thymeleaf/" target="_blank" rel="noopener noreferrer">http://tech.nulab.co.jp/2012/02/thymeleaf/</a>が良いかと</p>
-<!--more-->
-
-<h4 id="src-main-java-main-java">src/main/java/Main.java</h4>
-<pre class="line-numbers"><code class="language-java">import java.util.Arrays;
+                <!--[[1, "src/main/java/Main.java"], [2, "src/main/resources/test.html"]]-->
+                <p>Javaなテンプレートエンジンらしい。<a href="http://www.thymeleaf.org/doc/html/Using-Thymeleaf.html">ドキュメント</a>読みつつちょっとやってみた。とりあえずは暫定的なメモ</p><p>※日本語情報的には<a href="http://tech.nulab.co.jp/2012/02/thymeleaf/" target="_blank" rel="noopener noreferrer">http://tech.nulab.co.jp/2012/02/thymeleaf/</a>が良いかと</p><h4>src/main/java/Main.java</h4><pre class="line-numbers"><code class="language-java">import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -122,26 +109,24 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         TemplateResolver resolver = new ClassLoaderTemplateResolver();
-        resolver.setSuffix(".html");
+        resolver.setSuffix(&quot;.html&quot;);
 
         TemplateEngine engine = new TemplateEngine();
         engine.setTemplateResolver(resolver);
 
         Context context = new Context();
-        context.setVariable("welcome", "&lt;script&gt;alert("hoge");&lt;/script&gt;");
-        context.setVariable("now", new Date());
-        context.setVariable("cal", Calendar.getInstance());
-        context.setVariable("sample", new Sample("foobar"));
-        context.setVariable("samples", Arrays.asList(new Sample("a"), new Sample("b")));
-        context.setVariable("ok", true);
+        context.setVariable(&quot;welcome&quot;, &quot;&lt;script&gt;alert(&quot;hoge&quot;);&lt;/script&gt;&quot;);
+        context.setVariable(&quot;now&quot;, new Date());
+        context.setVariable(&quot;cal&quot;, Calendar.getInstance());
+        context.setVariable(&quot;sample&quot;, new Sample(&quot;foobar&quot;));
+        context.setVariable(&quot;samples&quot;, Arrays.asList(new Sample(&quot;a&quot;), new Sample(&quot;b&quot;)));
+        context.setVariable(&quot;ok&quot;, true);
 
-        System.out.println(engine.process("test", context));
+        System.out.println(engine.process(&quot;test&quot;, context));
     }
 }
-</code></pre><p>Sampleクラスに関してはただのnameフィールドを持ちゲッターメソッドなりがあるクラス</p>
-<h4 id="src-main-resources-test-html">src/main/resources/test.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html xmlns:th="http://www.thymeleaf.org"&gt;
+</code></pre><p>Sampleクラスに関してはただのnameフィールドを持ちゲッターメソッドなりがあるクラス</p><h4>src/main/resources/test.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;
 &lt;body&gt;
 &lt;!--
 変数を評価するのであればth:text等を使う事で可能。utextを使うとエスケープされない
@@ -152,16 +137,16 @@ public class Main {
 又、th:textのような形式はHTML5 Friendlyなdata-[prefix]-[name]な形式でも
 指定することが可能。そこは以下のループなところを参照
 --&gt;
-&lt;p th:utext="|ok: ${welcome}|"&gt;&lt;/p&gt;
-&lt;p th:text="#{welcome}"&gt;&lt;/p&gt;
+&lt;p th:utext=&quot;|ok: ${welcome}|&quot;&gt;&lt;/p&gt;
+&lt;p th:text=&quot;#{welcome}&quot;&gt;&lt;/p&gt;
 
 &lt;!--
 *{}な変数評価を使えばゲッターメソッドで値を取ってきたり出来る。${sample.name}のように
 でも出来るけど、*{}を使うことでコンテキストスタックをth:objectで指定されたのを使用する事
 が出来る?
 --&gt;
-&lt;div th:object="${sample}"&gt;
-    &lt;p th:text="*{name}" /&gt;
+&lt;div th:object=&quot;${sample}&quot;&gt;
+    &lt;p th:text=&quot;*{name}&quot; /&gt;
 &lt;/div&gt;
 
 &lt;!--
@@ -171,8 +156,8 @@ http://www.thymeleaf.org/doc/html/Using-Thymeleaf.html#expression-utility-object
 
 ちなみに#datesユーティリティの実体はhttp://www.thymeleaf.org/apidocs/thymeleaf/2.0.2/org/thymeleaf/expression/Dates.html
 --&gt;
-&lt;p th:text="${#dates.year(now)}"&gt;&lt;/p&gt;
-&lt;p th:text="${#calendars.format(cal, "yyyy/MM/dd")}"/&gt;
+&lt;p th:text=&quot;${#dates.year(now)}&quot;&gt;&lt;/p&gt;
+&lt;p th:text=&quot;${#calendars.format(cal, &quot;yyyy/MM/dd&quot;)}&quot;/&gt;
 
 &lt;!--
 th:ifで評価することも可能。以下のように特定の属性をbooleanでサポートするのもある
@@ -181,16 +166,16 @@ http://www.thymeleaf.org/doc/html/Using-Thymeleaf.html#fixed-value-boolean-attri
 
 を参照
 --&gt;
-&lt;div th:if="${ok} == true"&gt;OK&lt;/div&gt;
-&lt;input type="checkbox" th:checked="${ok}" /&gt;
+&lt;div th:if=&quot;${ok} == true&quot;&gt;OK&lt;/div&gt;
+&lt;input type=&quot;checkbox&quot; th:checked=&quot;${ok}&quot; /&gt;
 
 &lt;!--
 ループを使いたいならth:eachで出来る。又、そのループ内状態変数を「ループ内変数+Stat」
 で利用する事が出来る
 --&gt;
 &lt;ul&gt;
-&lt;li th:each="sample : ${samples}"&gt;
-    &lt;span th:attr="id=|sample_${sampleStat.count}|" data-th-text="${sample.name}" /&gt;
+&lt;li th:each=&quot;sample : ${samples}&quot;&gt;
+    &lt;span th:attr=&quot;id=|sample_${sampleStat.count}|&quot; data-th-text=&quot;${sample.name}&quot; /&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 
@@ -198,7 +183,7 @@ http://www.thymeleaf.org/doc/html/Using-Thymeleaf.html#fixed-value-boolean-attri
 別のテンプレートの部分的なのを評価する事も出来る
 th:withを使えば
 --&gt;
-&lt;div th:include="footer :: footer" th:with="message=${welcome}"&gt;&lt;/div&gt;
+&lt;div th:include=&quot;footer :: footer&quot; th:with=&quot;message=${welcome}&quot;&gt;&lt;/div&gt;
 &lt;/body&gt;
 &lt;/html&gt;
 </code></pre><p>んまぁざっくりとしてますけど、他にもth:switch/th:caseを使ったswitch/case文とかもサポートされていたりとかで非常に使いやすいのではという印象</p><p>とりあえず今後調査予定として</p>
@@ -257,53 +242,67 @@ th:withを使えば
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -311,17 +310,21 @@ th:withを使えば
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -329,32 +332,41 @@ th:withを使えば
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -362,14 +374,17 @@ th:withを使えば
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -377,11 +392,13 @@ th:withを使えば
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -389,20 +406,25 @@ th:withを使えば
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -410,47 +432,43 @@ th:withを使えば
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -458,20 +476,41 @@ th:withを使えば
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -481,17 +520,21 @@ th:withを使えば
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

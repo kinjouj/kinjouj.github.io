@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,36 +96,16 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-ca3fc2a903f2e3b3">フォーム認証な辺りに関して</a>
-</li>
-<li>
-<a href="#auth">Authを使う為の使用準備</a>
-</li>
-<li>
-<a href="#part-11d89440172122c">ルーティングを定義</a>
-</li>
-<li>
-<a href="#auth">余談: authフィルターのコントローラーテストをする</a>
-</li>
-</ul>
--->
-                <p><a href="http://laravel.com/docs/security" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/security</a> のドキュメント読み。なんだがユーザー認証的な所だけを書く。っていう事でフォーム認証な所をやってみる。パスワードリマインダー的な所は次回に書く。まとめて書くとわけわかめになるので</p><p>あとめんどくさいのでクラス作らずにroutes.phpにClosureでダラ書き</p>
-<!--more-->
-
-<h4 id="part-ca3fc2a903f2e3b3">フォーム認証な辺りに関して</h4>
-<p>単純にルーティングフィルターでauthっていうのが提供されている。んまぁコード的には</p><pre class="line-numbers"><code class="language-php">Route::filter("auth", function() {
-    if (Auth::guest()) return Redirect::guest("login");
+                <!--[[1, "フォーム認証な辺りに関して"], [2, "Authを使う為の使用準備"], [3, "ルーティングを定義"], [4, "余談: authフィルターのコントローラーテストをする"]]-->
+                <p><a href="http://laravel.com/docs/security" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/security</a> のドキュメント読み。なんだがユーザー認証的な所だけを書く。っていう事でフォーム認証な所をやってみる。パスワードリマインダー的な所は次回に書く。まとめて書くとわけわかめになるので</p><p>あとめんどくさいのでクラス作らずにroutes.phpにClosureでダラ書き</p><h4>フォーム認証な辺りに関して</h4><p>単純にルーティングフィルターでauthっていうのが提供されている。んまぁコード的には</p><pre class="line-numbers"><code class="language-php">Route::filter(&quot;auth&quot;, function() {
+    if (Auth::guest()) return Redirect::guest(&quot;login&quot;);
 });
 </code></pre><p>的な感じになっててログインしてなきゃログインフォームなページにリダイレクトな感じな事しているっぽい訳で。でログインを行わせるには</p>
 <ul>
 <li>Auth::attemptで認証処理を行う</li>
 <li>Auth::login(User)で認証処理を行う</li>
 </ul>
-<p>とか。Auth::loginUsingIdっていうAPIがあって、引数にユーザーのID(int?)辺りを指定する事でもログイン出来るらしいけど、これはこれでどうなのっていう所なので特に使わない</p><p>まぁという感じな概要になってる訳で。とにかくやってみる</p>
-<h4 id="auth">Authを使う為の使用準備</h4>
-<p>まぁUserっていうモデルが必要。まぁデフォルトで入ってる気がするけどマイグレーションが無いっていう訳で</p>
+<p>とか。Auth::loginUsingIdっていうAPIがあって、引数にユーザーのID(int?)辺りを指定する事でもログイン出来るらしいけど、これはこれでどうなのっていう所なので特に使わない</p><p>まぁという感じな概要になってる訳で。とにかくやってみる</p><h4>Authを使う為の使用準備</h4><p>まぁUserっていうモデルが必要。まぁデフォルトで入ってる気がするけどマイグレーションが無いっていう訳で</p>
 <ul>
 <li>usernameカラムを持つ</li>
 <li>passwordカラムを持つ</li>
@@ -134,43 +113,41 @@ ga("send", "pageview");
 <li>created_atカラムを持つ</li>
 <li>updated_atカラムを持つ</li>
 </ul>
-<p>なテーブルを作る。んまぁセットアップな感じはこんなもんかと。</p>
-<h4 id="part-11d89440172122c">ルーティングを定義</h4>
-<pre class="line-numbers"><code class="language-php">// /dashboardと/logoutはログインしてないとダメって事でフィルターを付ける
-Route::group(["before" =&gt; "auth"], function() {
+<p>なテーブルを作る。んまぁセットアップな感じはこんなもんかと。</p><h4>ルーティングを定義</h4><pre class="line-numbers"><code class="language-php">// /dashboardと/logoutはログインしてないとダメって事でフィルターを付ける
+Route::group([&quot;before&quot; =&gt; &quot;auth&quot;], function() {
 
-    Route::resource("/dashboard", "DashboardController");
+    Route::resource(&quot;/dashboard&quot;, &quot;DashboardController&quot;);
 
-    Route::get("/logout", function() {
+    Route::get(&quot;/logout&quot;, function() {
         // ログアウト処理
         Auth::logout();
 
-        return Redirect::to("/login");
+        return Redirect::to(&quot;/login&quot;);
     });
 });
 
 // 認証フォームなビューをレンダリング
-Route::get("/login", function() {
-    return View::make("login");
+Route::get(&quot;/login&quot;, function() {
+    return View::make(&quot;login&quot;);
 });
 
 // 認証処理
 Route::post(
-    "/login",
+    &quot;/login&quot;,
     array(
-        "before" =&gt; "csrf",
+        &quot;before&quot; =&gt; &quot;csrf&quot;,
         function() {
-            $username = Input::get("username", null);
-            $password = Input::get("password", null);
+            $username = Input::get(&quot;username&quot;, null);
+            $password = Input::get(&quot;password&quot;, null);
             $credentials = array(
-                "username" =&gt; $username,
-                "password" =&gt; $password
+                &quot;username&quot; =&gt; $username,
+                &quot;password&quot; =&gt; $password
             );
 
             // ログイン処理。多分、attemptメソッドの返り値はbool
             Auth::attempt($credentials);
 
-            return Redirect::to("/dashboard");
+            return Redirect::to(&quot;/dashboard&quot;);
         }
     )
 );
@@ -179,9 +156,7 @@ Route::post(
 <li>  Auth::attemptを使うとauth.attemptなイベントが発生</li>
 <li>  ログインされたら?auth.loginなイベントが発生</li>
 </ul>
-<p>っていうのがあるのでEvent::listenとかで拾う事が出来る模様</p>
-<h4 id="auth">余談: authフィルターのコントローラーテストをする</h4>
-<p>何やら普通にコントローラーテストとかで</p><pre class="line-numbers"><code class="language-php">$this-&gt;call("GET", "/dashboard");
+<p>っていうのがあるのでEvent::listenとかで拾う事が出来る模様</p><h4>余談: authフィルターのコントローラーテストをする</h4><p>何やら普通にコントローラーテストとかで</p><pre class="line-numbers"><code class="language-php">$this-&gt;call(&quot;GET&quot;, &quot;/dashboard&quot;);
 </code></pre><p>とかやってもフィルターが作用しないっぽい? Route::enableFiltersを明示的に呼ぶ必要性があるっぽい事をとあるフォーラムに書かれてたので</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class DashboardControllerTest extends TestCase {
@@ -192,9 +167,9 @@ class DashboardControllerTest extends TestCase {
     }
 
     public function test_authed_index() {
-        Auth::once([ "username" =&gt; "demo", "password" =&gt; "demo" ]);
+        Auth::once([ &quot;username&quot; =&gt; &quot;demo&quot;, &quot;password&quot; =&gt; &quot;demo&quot; ]);
 
-        $this-&gt;call("GET", "/dashboard");
+        $this-&gt;call(&quot;GET&quot;, &quot;/dashboard&quot;);
         $this-&gt;assertResponseStatus(200);
     }
 }
@@ -248,53 +223,67 @@ class DashboardControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -302,17 +291,21 @@ class DashboardControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -320,32 +313,41 @@ class DashboardControllerTest extends TestCase {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -353,14 +355,17 @@ class DashboardControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -368,11 +373,13 @@ class DashboardControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -380,20 +387,25 @@ class DashboardControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -401,47 +413,43 @@ class DashboardControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -449,20 +457,41 @@ class DashboardControllerTest extends TestCase {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -472,17 +501,21 @@ class DashboardControllerTest extends TestCase {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

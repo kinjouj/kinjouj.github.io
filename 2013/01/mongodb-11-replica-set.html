@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="マスターがあってスレーブがいくつかある、でマスターが落ちてもどっかのスレーブがマスターに昇格して運用を継続できるようにする的な事をやりたいのであれば、レプリカセットな機能を使えば良い模様サーバー" />
+    <meta name="description" content="マスターがあってスレーブがいくつかある、でマスターが落ちてもどっかのスレーブがマスターに昇格して運用を継続できるようにする的な事をやりたいのであれば、レプリカセットな機能を使えば良い模様サーバーを起動" />
     <title>mongodbを使ってみる (11) - replica set - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/01/npapi-1.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/fluent-plugin-mongo.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,38 +95,29 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-871bd50ae0fafba9">サーバーを起動</a>
-</li>
-</ul>
--->
-                <p>マスターがあってスレーブがいくつかある、でマスターが落ちてもどっかのスレーブがマスターに昇格して運用を継続できるようにする的な事をやりたいのであれば、レプリカセットな機能を使えば良い模様</p>
-<!--more-->
-
-<h4 id="part-871bd50ae0fafba9">サーバーを起動</h4>
-<p>とりあえずマスター・スレーブとなる3つのMongoDBを起動</p><pre class="line-numbers"><code class="language-">mongod --dbpath /tmp/mongo1 --logpath /tmp/mongo1/mongodb.log --port 10001 --replSet repltest --rest
+                <!--[[1, "サーバーを起動"]]-->
+                <p>マスターがあってスレーブがいくつかある、でマスターが落ちてもどっかのスレーブがマスターに昇格して運用を継続できるようにする的な事をやりたいのであれば、レプリカセットな機能を使えば良い模様</p><h4>サーバーを起動</h4><p>とりあえずマスター・スレーブとなる3つのMongoDBを起動</p><pre class="line-numbers"><code class="language-">mongod --dbpath /tmp/mongo1 --logpath /tmp/mongo1/mongodb.log --port 10001 --replSet repltest --rest
 
 mongod --dbpath /tmp/mongo2 --logpath /tmp/mongo2/mongodb.log --port 10002 --replSet repltest --rest
 
 mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --replSet repltest --rest
 </code></pre><p>でrepltestっていう名前でレプリカセット名を指定している感じなのかな、んまぁそういう感じで</p><p>でレプリカセットな設定を行う</p><pre class="line-numbers"><code class="language-js">rs.initiate({
-  _id: "repltest",
+  _id: &quot;repltest&quot;,
   members: [
-    { _id: 1, host: "localhost:10001" },
-    { _id: 2, host: "localhost:10002" },
-    { _id: 3, host: "localhost:10003" }
+    { _id: 1, host: &quot;localhost:10001&quot; },
+    { _id: 2, host: &quot;localhost:10002&quot; },
+    { _id: 3, host: &quot;localhost:10003&quot; }
   ]
 })
 </code></pre><p>な感じで設定を行う。で <a href="http://localhost:11001/_replSet" target="_blank" rel="noopener noreferrer">http://localhost:11001/_replSet</a> でレプリカセットの状態が見れるのでアクセスすると</p><p><img src="/images/2013/01/20130123213000.jpg" alt="image" /></p><p>っていう感じっすね。PRIMARYとSECONDARYの2つに分かれてる。でマスターを落とすと</p><p><img src="/images/2013/01/20130123213117.jpg" alt="image" /></p><p>てな感じで10001がDOWNになって10003がSECONDARYからPRIMARYになってる(10001は落ちてるので上のWebコンソールは別のサーバーのやつでアクセスする)。でこの状態で現在は10003がPRIMARYなのでこれも落としてみると</p><p><img src="/images/2013/01/20130123213344.jpg" alt="image" /></p><p>でそこら辺を柔軟に管理してPRIMARY/SECONDARYを監査してくれる?のがArbiterな模様なので、もう1個MongoDBを起動する</p><pre class="line-numbers"><code class="language-">mongod --replSet repltest --dbpath /tmp/mongo4 --logpath /tmp/mongo4/mongdb.log --port 10004 --rest
-</code></pre><p>この状態でもう一度上記の3つのサーバー起動しておく。でWebコンソールからPRIMARYに入って</p><pre class="line-numbers"><code class="language-js">db.addArb("localhost:10004")
+</code></pre><p>この状態でもう一度上記の3つのサーバー起動しておく。でWebコンソールからPRIMARYに入って</p><pre class="line-numbers"><code class="language-js">db.addArb(&quot;localhost:10004&quot;)
 </code></pre><p>でArbiterサーバーを設定しておく。で再度Webコンソールを見ると</p><p><img src="/images/2013/01/20130123213948.jpg" alt="image" /></p><p>な感じARBITERな項目が増える。でちょっと停止させておいて、既に3つのサーバーをレプリカセットとして認識させているけど、10003だけ起動せずに停止したままにしてみると</p><p><img src="/images/2013/01/20130123215449.jpg" alt="image" /></p><p>という風に10003が起動してないのでPRIMARYが決まってない。こういう状況になった場合にArbiterがPRIMARYを監査してくれる模様という事で停止しておいたArbiterを起動すると</p><p><img src="/images/2013/01/20130123221002.jpg" alt="image" /></p><p>っていう感じ。まぁPRIMARYかSECONDARYか判断されてないようなケースだとArbiterにそれを委譲するっていう感じなんすかね。はっきりとした理論は無いんですけど</p><p>んまぁレプリカセットな概要的なのはこんな感じかと</p><p>で問題はデータとかどうなんの的な話になると思うんですが、PRIMARYが停止してSECONDARYがPRIMARYに昇格する際にPRIMARYが持ってたデータをsyncする模様。元々SECONDARYの状態で既に持ってるけどSECONDARYだからfind出来ないsave出来ない状態なので確認できないんですが、んまぁロックされててPRIMARYに昇格したらロック解除されて参照できるようになるっていう感じかなーっと</p><p>でクライアントとかだとレプリカセットに指定されているサーバーを指定すれば良い模様。PRIMARYになってる所にデータが行くっていう感じかと。Perlだと</p><pre class="line-numbers"><code class="language-pl">use MongoDB;
 
 my $c = MongoDB::MongoClient-&gt;new(
-    host =&gt; "mongodb://localhost:10001,localhost:10002,localhost:10003"
+    host =&gt; &quot;mongodb://localhost:10001,localhost:10002,localhost:10003&quot;
 );
-my $db = $c-&gt;get_database("sample");
-my $coll = $db-&gt;get_collection("samples");
+my $db = $c-&gt;get_database(&quot;sample&quot;);
+my $coll = $db-&gt;get_collection(&quot;samples&quot;);
 
 $coll-&gt;save(+{ time =&gt; time() });
 </code></pre><p>っていう感じでhostでレプリカセットで指定されているサーバーを指定する</p><p>まぁドキュメント見た方が理論的でいいかと</p><p>ちなみにArbiter運用でレプリカセットを運用する場合に最低でも必要なサーバー数は「N &gt; 2」な感じじゃないかと。最低でも2桁なサーバー数無いと辛そうな気がします</p>
@@ -180,53 +170,67 @@ $coll-&gt;save(+{ time =&gt; time() });
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -234,17 +238,21 @@ $coll-&gt;save(+{ time =&gt; time() });
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -252,32 +260,41 @@ $coll-&gt;save(+{ time =&gt; time() });
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -285,14 +302,17 @@ $coll-&gt;save(+{ time =&gt; time() });
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -300,11 +320,13 @@ $coll-&gt;save(+{ time =&gt; time() });
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -312,20 +334,25 @@ $coll-&gt;save(+{ time =&gt; time() });
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -333,47 +360,43 @@ $coll-&gt;save(+{ time =&gt; time() });
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -381,20 +404,41 @@ $coll-&gt;save(+{ time =&gt; time() });
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -404,17 +448,21 @@ $coll-&gt;save(+{ time =&gt; time() });
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

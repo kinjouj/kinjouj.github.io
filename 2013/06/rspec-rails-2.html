@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="読みつつ検証していない所とかまだまだあるので先に進める。モデルのトランザクションな件は前回で書いたので(ryroutingspecspec/routingディレクトリを作って、そこにテスト定" />
+    <meta name="description" content="読みつつ検証していない所とかまだまだあるので先に進める。モデルのトランザクションな件は前回で書いたので(ryroutingspecspec/routingディレクトリを作って、そこにテスト定義するか" />
     <title>rspec-railsのドキュメント読み (2) - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/06/android-libraryproject-jenkins-build.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/06/jenkins-job-curl-operation.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,82 +97,68 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#routing-spec">routing spec</a>
-</li>
-<li>
-<a href="#errors_on">モデルのerrors_on</a>
-</li>
-</ul>
--->
-                <p>読みつつ検証していない所とかまだまだあるので先に進める。モデルのトランザクションな件は前回で書いたので(ry</p>
-<!--more-->
-
-<h4 id="routing-spec">routing spec</h4>
-<p>spec/routingディレクトリを作って、そこにテスト定義するかdescribeのtypeで:routingを指定する事でルーティングのテストが出来る模様</p><pre class="line-numbers"><code class="language-rb">App::Application.routes.draw do
+                <!--[[1, "routing spec"], [2, "モデルのerrors_on"]]-->
+                <p>読みつつ検証していない所とかまだまだあるので先に進める。モデルのトランザクションな件は前回で書いたので(ry</p><h4>routing spec</h4><p>spec/routingディレクトリを作って、そこにテスト定義するかdescribeのtypeで:routingを指定する事でルーティングのテストが出来る模様</p><pre class="line-numbers"><code class="language-rb">App::Application.routes.draw do
   resources :entry do
     collection do
-    match "search/:query", :action =&gt; :search,
+    match &quot;search/:query&quot;, :action =&gt; :search,
   end
 
-  root :to =&gt; "entry#index"
+  root :to =&gt; &quot;entry#index&quot;
 end
-</code></pre><p>的な感じなルーティングになってたとして、spec/routing/entry_routing_spec.rbを書く</p><pre class="line-numbers"><code class="language-rb">require "spec_helper"
+</code></pre><p>的な感じなルーティングになってたとして、spec/routing/entry_routing_spec.rbを書く</p><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 # spec/routingで処理させない場合は:type =&gt; :routingを指定する
-# describe "routes for Entry", :type =&gt; :routing do
+# describe &quot;routes for Entry&quot;, :type =&gt; :routing do
 
-describe "route for Entry" do
-  it "route to /" do
-    expect(:get =&gt; "/").to be_routable
-    expect(get("/")).to route_to("entry#index") # getっていうショートカットもある
+describe &quot;route for Entry&quot; do
+  it &quot;route to /&quot; do
+    expect(:get =&gt; &quot;/&quot;).to be_routable
+    expect(get(&quot;/&quot;)).to route_to(&quot;entry#index&quot;) # getっていうショートカットもある
 
     # もしcontrollerがnamespace内にあれば[ネームスペース名]/コントローラーで指定
   end
 
-  it "route to /entry" do
-    expect(:get =&gt; "/entry").to be_routable
-    expect(:get =&gt; "/entry").to route_to("entry#index")
+  it &quot;route to /entry&quot; do
+    expect(:get =&gt; &quot;/entry&quot;).to be_routable
+    expect(:get =&gt; &quot;/entry&quot;).to route_to(&quot;entry#index&quot;)
 
     # route_toは以下な感じでも書ける
-    # expect(:get =&gt; "/entry").to route_to(:controller =&gt; "entry", :action =&gt; "index")
+    # expect(:get =&gt; &quot;/entry&quot;).to route_to(:controller =&gt; &quot;entry&quot;, :action =&gt; &quot;index&quot;)
   end
 
-  it "route to /entry/delete" do
-    expect(:delete =&gt; "/entry").to be_routable
-    expect(:delete =&gt; "/entry").to route_to("entry#destroy")
-    expect(:post =&gt; "/entry").not_to route_to("entry#destroy")
+  it &quot;route to /entry/delete&quot; do
+    expect(:delete =&gt; &quot;/entry&quot;).to be_routable
+    expect(:delete =&gt; &quot;/entry&quot;).to route_to(&quot;entry#destroy&quot;)
+    expect(:post =&gt; &quot;/entry&quot;).not_to route_to(&quot;entry#destroy&quot;)
   end
 
-  it "route to /entry/search" do
-    expect(:get =&gt; "/entry/search/A").to be_routable
-    expect(:get =&gt; "/entry/search/A").to route_to("entry#search", :query =&gt; "A")
+  it &quot;route to /entry/search&quot; do
+    expect(:get =&gt; &quot;/entry/search/A&quot;).to be_routable
+    expect(:get =&gt; &quot;/entry/search/A&quot;).to route_to(&quot;entry#search&quot;, :query =&gt; &quot;A&quot;)
 
 =begin
-    expect(:get =&gt; "/entry/search/A").to route_to(
-      :controller =&gt; "entry",
-      :action =&gt; "search",
-      :query =&gt; "A"
+    expect(:get =&gt; &quot;/entry/search/A&quot;).to route_to(
+      :controller =&gt; &quot;entry&quot;,
+      :action =&gt; &quot;search&quot;,
+      :query =&gt; &quot;A&quot;
     )
 =end
 
   end
 end
-</code></pre>
-<h4 id="errors_on">モデルのerrors_on</h4>
-<p>モデルのvalidator辺りを検証するっぽい</p><pre class="line-numbers"><code class="language-rb">require "spec_helper"
+</code></pre><h4>モデルのerrors_on</h4><p>モデルのvalidator辺りを検証するっぽい</p><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 describe Sample do
-  it "validates_presence_of :name" do
+  it &quot;validates_presence_of :name&quot; do
     sample = Sample.new
     expect(sample).to have(1).error_on(:name)
 
     I18n.locale = :en
-    expect(sample.errors_on(:name)).to include("can"t be blank")
+    expect(sample.errors_on(:name)).to include(&quot;can&quot;t be blank&quot;)
 
     I18n.locale = :ja
-    expect(sample.errors_on(:name)).to include("を入力してください")
+    expect(sample.errors_on(:name)).to include(&quot;を入力してください&quot;)
   end
 end
 </code></pre><p>まだバリデーターな辺りとかも勉強進んでないので微妙なんですが、日本語ロケールだとかで検証したい時とかはI18n.localeで書き換えちゃえば良い模様。ただafter辺りとかで初期状態に戻したりしておくべきなのではって思ったり</p><p>とりあえずは以上。あとはまだMailerとか辺り勉強してないので、それ次第で先に進める。バリデーターに関するやつも、もっと詳しくなってから色々やってみる</p>
@@ -226,53 +211,67 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -280,17 +279,21 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -298,32 +301,41 @@ end
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -331,14 +343,17 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -346,11 +361,13 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -358,20 +375,25 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -379,47 +401,43 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -427,20 +445,41 @@ end
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -450,17 +489,21 @@ end
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

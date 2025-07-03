@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,42 +97,25 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#maven-repositories">Maven Repositoriesに関して</a>
-</li>
-<li>
-<a href="#part-a2ab712570ee236b">ライブラリプロジェクトのデプロイ</a>
-</li>
-<li>
-<a href="#maven-repositories-aar">アプリプロジェクトでMaven RepositoriesなAARライブラリを使う</a>
-</li>
-</ul>
--->
-                <p>参考: <a href="http://www.flexlabs.org/2013/06/using-local-aar-android-library-packages-in-gradle-builds" target="_blank" rel="noopener noreferrer">http://www.flexlabs.org/2013/06/using-local-aar-android-library-packages-in-gradle-builds</a></p><p>今時な手法として良いかは知らんけど、例えばAndroidプロジェクトでライブラリプロジェクトを伴うけど、アプリプロジェクトとは別で開発されていてそれは社内なりのMaven Repositories(後術参考)を介して利用できる。それをやってみた</p>
-<!--more-->
-
-<h4 id="maven-repositories">Maven Repositoriesに関して</h4>
-<p>まず社内(ってことにしておく)にMaven Repositoriesが必要になるが、詳しくは<a href="http://news.mynavi.jp/column/ide/129/">「リポジトリ管理ツール「Nexus」でMavenをさらに活用しよう!」</a>を参考に進める。まぁ要はnexus OSSを使ってMaven Repositoriesを構築する。今回はcorporateっていう名前のRepositoryを作っておいた。ここにライブラリプロジェクトのAARパッケージングをデプロイして、それをアプリプロジェクトで使えるようにする</p>
-<h4 id="part-a2ab712570ee236b">ライブラリプロジェクトのデプロイ</h4>
-<pre class="line-numbers"><code class="language-groovy">buildscript {
+                <!--[[1, "Maven Repositoriesに関して"], [2, "ライブラリプロジェクトのデプロイ"], [3, "アプリプロジェクトでMaven RepositoriesなAARライブラリを使う"]]-->
+                <p>参考: <a href="http://www.flexlabs.org/2013/06/using-local-aar-android-library-packages-in-gradle-builds" target="_blank" rel="noopener noreferrer">http://www.flexlabs.org/2013/06/using-local-aar-android-library-packages-in-gradle-builds</a></p><p>今時な手法として良いかは知らんけど、例えばAndroidプロジェクトでライブラリプロジェクトを伴うけど、アプリプロジェクトとは別で開発されていてそれは社内なりのMaven Repositories(後術参考)を介して利用できる。それをやってみた</p><h4>Maven Repositoriesに関して</h4><p>まず社内(ってことにしておく)にMaven Repositoriesが必要になるが、詳しくは<a href="http://news.mynavi.jp/column/ide/129/">「リポジトリ管理ツール「Nexus」でMavenをさらに活用しよう!」</a>を参考に進める。まぁ要はnexus OSSを使ってMaven Repositoriesを構築する。今回はcorporateっていう名前のRepositoryを作っておいた。ここにライブラリプロジェクトのAARパッケージングをデプロイして、それをアプリプロジェクトで使えるようにする</p><h4>ライブラリプロジェクトのデプロイ</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:0.8.+"
+        classpath &quot;com.android.tools.build:gradle:0.8.+&quot;
     }
 }
 
-version = "0.1"
+version = &quot;0.1&quot;
 
-apply plugin: "android-library"
-apply plugin: "maven-publish"
+apply plugin: &quot;android-library&quot;
+apply plugin: &quot;maven-publish&quot;
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    buildToolsVersion &quot;19.0.1&quot;
 
     defaultConfig {
         versionName version
@@ -143,53 +125,51 @@ android {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId "sample.test"
-            artifactId "library"
+            groupId &quot;sample.test&quot;
+            artifactId &quot;library&quot;
 
-            artifact "${project.libsDir}/${project.name}-${project.version}.aar"
+            artifact &quot;${project.libsDir}/${project.name}-${project.version}.aar&quot;
         }
 
         repositories {
             maven {
                 credentials {
-                    username "deployment"
-                    password "deployment123"
+                    username &quot;deployment&quot;
+                    password &quot;deployment123&quot;
                 }
 
-                url "http://[IP or domain]:8081/nexus/content/repositories/corporate"
+                url &quot;http://[IP or domain]:8081/nexus/content/repositories/corporate&quot;
             }
         }
     }
 }
-</code></pre><p>maven-publishなプラグインに関しては<a href="http://www.gradle.org/docs/current/userguide/publishing_maven.html">公式ドキュメント</a>読んだ方が手っ取り早いかと</p><p>あとはpublishタスクを動かす事でMaven Repositoriesにデプロイする事が出来る</p>
-<h4 id="maven-repositories-aar">アプリプロジェクトでMaven RepositoriesなAARライブラリを使う</h4>
-<pre class="line-numbers"><code class="language-groovy">buildscript {
+</code></pre><p>maven-publishなプラグインに関しては<a href="http://www.gradle.org/docs/current/userguide/publishing_maven.html">公式ドキュメント</a>読んだ方が手っ取り早いかと</p><p>あとはpublishタスクを動かす事でMaven Repositoriesにデプロイする事が出来る</p><h4>アプリプロジェクトでMaven RepositoriesなAARライブラリを使う</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:0.8.+"
+        classpath &quot;com.android.tools.build:gradle:0.8.+&quot;
     }
 }
 
-apply plugin: "android"
+apply plugin: &quot;android&quot;
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    buildToolsVersion &quot;19.0.1&quot;
 }
 
 repositories {
     mavenCentral()
 
     maven {
-        url "http://[IP or domain]:8081/nexus/content/repositories/corporate"
+        url &quot;http://[IP or domain]:8081/nexus/content/repositories/corporate&quot;
     }
 }
 
 dependencies {
-    compile "sample.test:library:0.1@aar"
+    compile &quot;sample.test:library:0.1@aar&quot;
 }
 </code></pre><p>な感じでライブラリプロジェクトをデプロイしたMaven Repositoriesから依存性を取って利用するっていう感じ</p>
               </div>
@@ -241,53 +221,67 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -295,17 +289,21 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -313,32 +311,41 @@ dependencies {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -346,14 +353,17 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -361,11 +371,13 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -373,20 +385,25 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -394,47 +411,43 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -442,20 +455,41 @@ dependencies {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -465,17 +499,21 @@ dependencies {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

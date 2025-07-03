@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="以前に「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植するっていうのをやったのですが、それのgulp版その前に以前でも書いたようにjson" />
+    <meta name="description" content="以前に「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植するっていうのをやったのですが、それのgulp版その前に以前でも書いたようにjson2htm" />
     <title>gulpでmocha-phantomjs+jscoverage - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/02/actionbar-pulltorefresh-reload-menu-button.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/02/gradle-android-test-plugin-robolectric-testing.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,45 +97,33 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-2a03577238684a62">その前に</a>
-</li>
-<li>
-<a href="#part-6542bcab9a9">本題</a>
-</li>
-</ul>
--->
-                <p>以前に<a href="/grunt-mocha-phantomjs-jscoverage.html">「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植する</a>っていうのをやったのですが、それのgulp版</p>
-<!--more-->
-
-<h4 id="part-2a03577238684a62">その前に</h4>
-<p>以前でも書いたようにjson2htmlcovをやるとエラーにしかならないケースが存在するのですが、これのfixがなくなってるので</p><pre class="line-numbers"><code class="language-js">#!/usr/bin/env node
+                <!--[[1, "その前に"], [2, "本題"]]-->
+                <p>以前に<a href="/grunt-mocha-phantomjs-jscoverage.html">「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植する</a>っていうのをやったのですが、それのgulp版</p><h4>その前に</h4><p>以前でも書いたようにjson2htmlcovをやるとエラーにしかならないケースが存在するのですが、これのfixがなくなってるので</p><pre class="line-numbers"><code class="language-js">#!/usr/bin/env node
 
 // https://github.com/metaskills/mocha-phantomjs/issues/10
-var jade = require("jade");
-var fs = require("fs");
+var jade = require(&quot;jade&quot;);
+var fs = require(&quot;fs&quot;);
 
 // Strings for code coverage classes
 function coverageClass(n) {
-  if (n &gt;= 75) return "high";
-  if (n &gt;= 50) return "medium";
-  if (n &gt;= 25) return "low";
-  return "terrible";
+  if (n &gt;= 75) return &quot;high&quot;;
+  if (n &gt;= 50) return &quot;medium&quot;;
+  if (n &gt;= 25) return &quot;low&quot;;
+  return &quot;terrible&quot;;
 }
 
 // Read in templates
-var file = __dirname + "/templates/coverage.jade";
-var str = fs.readFileSync(file, "utf8");
+var file = __dirname + &quot;/templates/coverage.jade&quot;;
+var str = fs.readFileSync(file, &quot;utf8&quot;);
 var fn = jade.compile(str, { filename: file });
 
 // ここから修正
 
-var json = "";
-process.stdin.on("data", function(data) {
+var json = &quot;&quot;;
+process.stdin.on(&quot;data&quot;, function(data) {
     json += data.toString();
 });
-process.stdin.on("end", function() {
+process.stdin.on(&quot;end&quot;, function() {
   // Read JSON from stdin
   var cov = JSON.parse(json);
 
@@ -146,33 +133,31 @@ process.stdin.on("end", function() {
     coverageClass: coverageClass
   }));
 });
-</code></pre><p>的な感じで修正しておかないと無理ポなので(ry</p>
-<h4 id="part-6542bcab9a9">本題</h4>
-<p>mocha-phantomjsでテストしつつコードカバレッジを出力するわけですが、そのテストコード等は前回のをそのまま使う。なので今回はgulpfile.jsというタスク定義なだけを書く</p><pre class="line-numbers"><code class="language-js">var fs            =  require("fs"),
-    spawn         =  require("child_process").spawn,
-    gulp          =  require("gulp"),
-    yuidoc        =  require("gulp-yuidoc");
+</code></pre><p>的な感じで修正しておかないと無理ポなので(ry</p><h4>本題</h4><p>mocha-phantomjsでテストしつつコードカバレッジを出力するわけですが、そのテストコード等は前回のをそのまま使う。なので今回はgulpfile.jsというタスク定義なだけを書く</p><pre class="line-numbers"><code class="language-js">var fs            =  require(&quot;fs&quot;),
+    spawn         =  require(&quot;child_process&quot;).spawn,
+    gulp          =  require(&quot;gulp&quot;),
+    yuidoc        =  require(&quot;gulp-yuidoc&quot;);
 
-gulp.task("jscoverage", function() {
-  spawn("jscoverage", ["src"]);
+gulp.task(&quot;jscoverage&quot;, function() {
+  spawn(&quot;jscoverage&quot;, [&quot;src&quot;]);
 });
 
-gulp.task("test-mocha-phantomjs", function(done) {
-  var jsonData = "";
-  var res = spawn("mocha-phantomjs", ["-R", "json-cov", "test/runner.html"]);
-  res.stdout.on("data", function(data) {
+gulp.task(&quot;test-mocha-phantomjs&quot;, function(done) {
+  var jsonData = &quot;&quot;;
+  var res = spawn(&quot;mocha-phantomjs&quot;, [&quot;-R&quot;, &quot;json-cov&quot;, &quot;test/runner.html&quot;]);
+  res.stdout.on(&quot;data&quot;, function(data) {
     jsonData += data.toString();
   });
-  res.on("exit", function() {
-    var stream = fs.createWriteStream("coverage.html", { flags: "w" });
+  res.on(&quot;exit&quot;, function() {
+    var stream = fs.createWriteStream(&quot;coverage.html&quot;, { flags: &quot;w&quot; });
 
-    var cov = spawn("json2htmlcov");
+    var cov = spawn(&quot;json2htmlcov&quot;);
     cov.stdout.pipe(stream);
-    cov.stdout.on("end", function() {
+    cov.stdout.on(&quot;end&quot;, function() {
       stream.close();
       done();
     });
-    cov.stderr.on("data", function(data) {
+    cov.stderr.on(&quot;data&quot;, function(data) {
       throw new Error(data);
     });
     cov.stdin.write(jsonData);
@@ -180,13 +165,13 @@ gulp.task("test-mocha-phantomjs", function(done) {
   });
 });
 
-gulp.task("yuidoc", function() {
-  return gulp.src("src/*.js")
+gulp.task(&quot;yuidoc&quot;, function() {
+  return gulp.src(&quot;src/*.js&quot;)
     .pipe(yuidoc())
-    .pipe(gulp.dest("doc"));
+    .pipe(gulp.dest(&quot;doc&quot;));
 });
 
-gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
+gulp.task(&quot;test&quot;, [&quot;jscoverage&quot;, &quot;test-mocha-phantomjs&quot;]);
 </code></pre>
               </div>
             </div>
@@ -237,53 +222,67 @@ gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -291,17 +290,21 @@ gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -309,32 +312,41 @@ gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -342,14 +354,17 @@ gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -357,11 +372,13 @@ gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -369,20 +386,25 @@ gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -390,47 +412,43 @@ gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -438,20 +456,41 @@ gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -461,17 +500,21 @@ gulp.task("test", ["jscoverage", "test-mocha-phantomjs"]);
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

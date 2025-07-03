@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="タイトル通り。ChromeExtensionでoauth.jsを使いDropboxのアプリ領域なストレージにアクセスしてみるmanifest.json{"name":"chrome-" />
+    <meta name="description" content="タイトル通り。ChromeExtensionでoauth.jsを使いDropboxのアプリ領域なストレージにアクセスしてみるmanifest.json{&quot;name&quot;:&q" />
     <title>Chrome Extension開発を勉強してみる (17) - oauth.jsを使ってDropbox API - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/08/slim3-respond_to.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/08/native-client-4.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2012-08-20 09:00:00 +0900">
+                <time datetime="2012-08-20T09:00:00+09:00">
                   <a href="/archives/2012/08">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -97,73 +96,42 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#manifest-json">manifest.json</a>
-</li>
-<li>
-<a href="#const-js">const.js</a>
-</li>
-<li>
-<a href="#background-js">background.js</a>
-</li>
-<li>
-<a href="#dropbox-js">dropbox.js</a>
-</li>
-<li>
-<a href="#content_script-js">content_script.js</a>
-</li>
-<li>
-<a href="#popup-html">popup.html</a>
-</li>
-<li>
-<a href="#popup-js">popup.js</a>
-</li>
-</ul>
--->
-                <p>タイトル通り。Chrome Extensionでoauth.jsを使いDropboxのアプリ領域なストレージにアクセスしてみる</p>
-<!--more-->
-
-<h4 id="manifest-json">manifest.json</h4>
-<pre class="line-numbers"><code class="language-json">{
-  "name": "chrome-extension-dropbox-oauth-demo",
-  "description": "Chrome Extension Dropbox OAuth Demo (using oauth.js)",
-  "version": "0.1",
-  "manifest_version": 2,
-  "browser_action": {
-    "default_title": "Chrome Extension - Dropbox OAuth Demo -",
-    "default_icon": "icon.png"
+                <!--[[1, "manifest.json"], [2, "const.js"], [3, "background.js"], [4, "dropbox.js"], [5, "content_script.js"], [6, "popup.html"], [7, "popup.js"]]-->
+                <p>タイトル通り。Chrome Extensionでoauth.jsを使いDropboxのアプリ領域なストレージにアクセスしてみる</p><h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;chrome-extension-dropbox-oauth-demo&quot;,
+  &quot;description&quot;: &quot;Chrome Extension Dropbox OAuth Demo (using oauth.js)&quot;,
+  &quot;version&quot;: &quot;0.1&quot;,
+  &quot;manifest_version&quot;: 2,
+  &quot;browser_action&quot;: {
+    &quot;default_title&quot;: &quot;Chrome Extension - Dropbox OAuth Demo -&quot;,
+    &quot;default_icon&quot;: &quot;icon.png&quot;
   },
-  "background": {
-    "scripts": [
-      "library/jquery.js",
-      "library/sha1.js",
-      "library/oauth.js",
-      "const.js",
-      "dropbox.js",
-      "background.js"
+  &quot;background&quot;: {
+    &quot;scripts&quot;: [
+      &quot;library/jquery.js&quot;,
+      &quot;library/sha1.js&quot;,
+      &quot;library/oauth.js&quot;,
+      &quot;const.js&quot;,
+      &quot;dropbox.js&quot;,
+      &quot;background.js&quot;
     ]
   },
-  "content_scripts": [
+  &quot;content_scripts&quot;: [
     {
-      "matches": ["https://www.dropbox.com/1/oauth/authorize"],
-      "js": ["content_script.js"],
-      "run_at": "document_idle"
+      &quot;matches&quot;: [&quot;https://www.dropbox.com/1/oauth/authorize&quot;],
+      &quot;js&quot;: [&quot;content_script.js&quot;],
+      &quot;run_at&quot;: &quot;document_idle&quot;
     }
   ],
-  "permissions": ["https://*.dropbox.com/"]
+  &quot;permissions&quot;: [&quot;https://*.dropbox.com/&quot;]
 }
-</code></pre>
-<h4 id="const-js">const.js</h4>
-<pre class="line-numbers"><code class="language-js">const OAUTH_CONSUMER_KEY = "";
-const OAUTH_CONSUMER_SECRET = "";
-</code></pre><p>これもTwitterな件と同様にDropbox Developerからアプリを登録して、そのConsumer KeyとConsumer Secretをコピペする</p>
-<h4 id="background-js">background.js</h4>
-<pre class="line-numbers"><code class="language-js">// 認証完了後、もしくは認証済みな場合にブラウザアクションで表示されるコンテンツを設定する
+</code></pre><h4>const.js</h4><pre class="line-numbers"><code class="language-js">const OAUTH_CONSUMER_KEY = &quot;&quot;;
+const OAUTH_CONSUMER_SECRET = &quot;&quot;;
+</code></pre><p>これもTwitterな件と同様にDropbox Developerからアプリを登録して、そのConsumer KeyとConsumer Secretをコピペする</p><h4>background.js</h4><pre class="line-numbers"><code class="language-js">// 認証完了後、もしくは認証済みな場合にブラウザアクションで表示されるコンテンツを設定する
 
 function registerPopup() {
-  chrome.browserAction.setPopup({ "popup": "popup.html" });
-  chrome.browserAction.setBadgeText({ "text": String() });
+  chrome.browserAction.setPopup({ &quot;popup&quot;: &quot;popup.html&quot; });
+  chrome.browserAction.setBadgeText({ &quot;text&quot;: String() });
 }
 
 (function(undefined) {
@@ -172,7 +140,7 @@ function registerPopup() {
   if (dropbox.isAuthorized()) {
     registerPopup();
   } else {
-    chrome.browserAction.setBadgeText({ "text": "?" });
+    chrome.browserAction.setBadgeText({ &quot;text&quot;: &quot;?&quot; });
 
     dropbox.login();
   }
@@ -180,17 +148,15 @@ function registerPopup() {
   // ここはコンテントスクリプトから来る
 
   chrome.extension.onRequest.addListener(function(req) {
-    if (req.event === "sign") {
+    if (req.event === &quot;sign&quot;) {
       dropbox.sign(function() {
         registerPopup();
       });
     }
   });
 })();
-</code></pre>
-<h4 id="dropbox-js">dropbox.js</h4>
-<pre class="line-numbers"><code class="language-js">const OAUTH_TOKEN_KEY = "oauth_token";
-const OAUTH_TOKEN_SECRET_KEY = "oauth_token_secret";
+</code></pre><h4>dropbox.js</h4><pre class="line-numbers"><code class="language-js">const OAUTH_TOKEN_KEY = &quot;oauth_token&quot;;
+const OAUTH_TOKEN_SECRET_KEY = &quot;oauth_token_secret&quot;;
 
 var Dropbox = function() {};
 
@@ -211,7 +177,7 @@ Dropbox.prototype.setTokenSecret = function(tokenSecret) {
 };
 
 Dropbox.prototype.isAuthorized = function() {
-  var authorized = localStorage.getItem("authorized");
+  var authorized = localStorage.getItem(&quot;authorized&quot;);
 
   return Boolean(authorized);
 };
@@ -230,16 +196,16 @@ Dropbox.prototype.getParameterTokenSecret = function(res) {
 
 Dropbox.prototype.login = function() {
   var message = {
-    "method": "POST",
-    "action": "https://api.dropbox.com/1/oauth/request_token",
-    "parameters": {
-      "oauth_consumer_key": OAUTH_CONSUMER_KEY,
-      "oauth_signature_method": "HMAC-SHA1"
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;action&quot;: &quot;https://api.dropbox.com/1/oauth/request_token&quot;,
+    &quot;parameters&quot;: {
+      &quot;oauth_consumer_key&quot;: OAUTH_CONSUMER_KEY,
+      &quot;oauth_signature_method&quot;: &quot;HMAC-SHA1&quot;
     }
   };
 
   var accessor = {
-    "consumerSecret": OAUTH_CONSUMER_SECRET
+    &quot;consumerSecret&quot;: OAUTH_CONSUMER_SECRET
   };
 
   OAuth.setTimestampAndNonce(message);
@@ -254,7 +220,7 @@ Dropbox.prototype.login = function() {
         var token = OAuth.getParameter(param, OAUTH_TOKEN_KEY);
         var tokenSecret = OAuth.getParameter(param, OAUTH_TOKEN_SECRET_KEY);
 
-        message.action = "https://api.dropbox.com/1/oauth/authorize";
+        message.action = &quot;https://api.dropbox.com/1/oauth/authorize&quot;;
         message.parameters.oauth_token = token;
 
         accessor.oauth_token_secret = tokenSecret;
@@ -278,18 +244,18 @@ Dropbox.prototype.sign = function(cb) {
   }
 
   var message = {
-    "method": "POST",
-    "action": "https://api.dropbox.com/1/oauth/access_token",
-    "parameters": {
-      "oauth_consumer_key": OAUTH_CONSUMER_KEY,
-      "oauth_token": this.getToken(),
-      "oauth_signature_method": "HMAC-SHA1"
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;action&quot;: &quot;https://api.dropbox.com/1/oauth/access_token&quot;,
+    &quot;parameters&quot;: {
+      &quot;oauth_consumer_key&quot;: OAUTH_CONSUMER_KEY,
+      &quot;oauth_token&quot;: this.getToken(),
+      &quot;oauth_signature_method&quot;: &quot;HMAC-SHA1&quot;
     }
   };
 
   var accessor = {
-    "consumerSecret": OAUTH_CONSUMER_SECRET,
-    "tokenSecret": this.getTokenSecret()
+    &quot;consumerSecret&quot;: OAUTH_CONSUMER_SECRET,
+    &quot;tokenSecret&quot;: this.getTokenSecret()
   };
 
   OAuth.setTimestampAndNonce(message);
@@ -302,7 +268,7 @@ Dropbox.prototype.sign = function(cb) {
         this.setToken(this.getParameterToken(res));
         this.setTokenSecret(this.getParameterTokenSecret(res));
 
-        localStorage.setItem("authorized", true);
+        localStorage.setItem(&quot;authorized&quot;, true);
 
         cb();
       },
@@ -313,18 +279,18 @@ Dropbox.prototype.sign = function(cb) {
 
 Dropbox.prototype.getThumbnails = function(cb) {
   var message = {
-    "method": "GET",
-    "action": "https://api.dropbox.com/1/metadata/sandbox/",
-    "parameters": {
-      "oauth_consumer_key": OAUTH_CONSUMER_KEY,
-      "oauth_token": this.getToken(),
-      "oauth_signature_method": "HMAC-SHA1"
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;action&quot;: &quot;https://api.dropbox.com/1/metadata/sandbox/&quot;,
+    &quot;parameters&quot;: {
+      &quot;oauth_consumer_key&quot;: OAUTH_CONSUMER_KEY,
+      &quot;oauth_token&quot;: this.getToken(),
+      &quot;oauth_signature_method&quot;: &quot;HMAC-SHA1&quot;
     }
   };
 
   var accessor = {
-    "consumerSecret": OAUTH_CONSUMER_SECRET,
-    "tokenSecret": this.getTokenSecret()
+    &quot;consumerSecret&quot;: OAUTH_CONSUMER_SECRET,
+    &quot;tokenSecret&quot;: this.getTokenSecret()
   };
 
   OAuth.setTimestampAndNonce(message);
@@ -336,15 +302,15 @@ Dropbox.prototype.getThumbnails = function(cb) {
       function(res) {
         res.contents.forEach(function(content) {
           if (!content.is_dir) {
-            message.action = "https://api-content.dropbox.com/1/thumbnails/sandbox" + content.path;
-            message.parameters.size = "large";
+            message.action = &quot;https://api-content.dropbox.com/1/thumbnails/sandbox&quot; + content.path;
+            message.parameters.size = &quot;large&quot;;
 
             OAuth.setTimestampAndNonce(message);
             OAuth.SignatureMethod.sign(message, accessor);
 
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", OAuth.addToURL(message.action, message.parameters));
-            xhr.responseType = "arraybuffer";
+            xhr.open(&quot;GET&quot;, OAuth.addToURL(message.action, message.parameters));
+            xhr.responseType = &quot;arraybuffer&quot;;
             xhr.onload = function() {
               cb(this.response);
             };
@@ -356,35 +322,29 @@ Dropbox.prototype.getThumbnails = function(cb) {
     )
   );
 };
-</code></pre>
-<h4 id="content_script-js">content_script.js</h4>
-<pre class="line-numbers"><code class="language-js">chrome.extension.sendRequest({ "event": "sign" });
-</code></pre><p>ただBackground Page側に処理をまるなげするだけ</p>
-<h4 id="popup-html">popup.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><h4>content_script.js</h4><pre class="line-numbers"><code class="language-js">chrome.extension.sendRequest({ &quot;event&quot;: &quot;sign&quot; });
+</code></pre><p>ただBackground Page側に処理をまるなげするだけ</p><h4>popup.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
-    &lt;script type="text/javascript" src="library/jquery.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="library/sha1.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="library/oauth.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="const.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="dropbox.js"&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;library/jquery.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;library/sha1.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;library/oauth.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;const.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;dropbox.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;script type="text/javascript" src="popup.js"&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;popup.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<h4 id="popup-js">popup.js</h4>
-<pre class="line-numbers"><code class="language-js">(function(undefined) {
-  var root = $("body");
+</code></pre><h4>popup.js</h4><pre class="line-numbers"><code class="language-js">(function(undefined) {
+  var root = $(&quot;body&quot;);
 
   var dropbox = new Dropbox();
   dropbox.getThumbnails(function(binaryData) {
     var bb = new WebKitBlobBuilder();
     bb.append(binaryData);
 
-    var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+    var canvas = document.createElement(&quot;canvas&quot;);
+    var context = canvas.getContext(&quot;2d&quot;);
 
     var img = new Image();
     img.src = webkitURL.createObjectURL(bb.getBlob());
@@ -396,7 +356,7 @@ Dropbox.prototype.getThumbnails = function(cb) {
       webkitURL.revokeObjectURL(this.src);
     };
 
-    $(root).append($("&lt;div&gt;").css("margin", "15px").append($(canvas)));
+    $(root).append($(&quot;&lt;div&gt;&quot;).css(&quot;margin&quot;, &quot;15px&quot;).append($(canvas)));
   });
 })();
 </code></pre><p>まぁ取得した画像(サムネイルデータ)を取得して、それを&lt;canvas&gt;で云々するだけ(別にcanvasじゃなくても良い)</p><p>まぁそんな感じ。ちょっとやりきった感全開なのでテキトウにかいちゃいましたがorz</p><p><img src="/images/2012/08/20120820210834.png" alt="image" /></p><p>てな感じでDropboxのアプリフォルダ内に入れた画像が入る。但し、上記のコードで画像であるかのチェックまではしてないので画像以外をうｐするとエラーになるはずなので...</p>
@@ -449,53 +409,67 @@ Dropbox.prototype.getThumbnails = function(cb) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -503,17 +477,21 @@ Dropbox.prototype.getThumbnails = function(cb) {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -521,32 +499,41 @@ Dropbox.prototype.getThumbnails = function(cb) {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -554,14 +541,17 @@ Dropbox.prototype.getThumbnails = function(cb) {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -569,11 +559,13 @@ Dropbox.prototype.getThumbnails = function(cb) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -581,20 +573,25 @@ Dropbox.prototype.getThumbnails = function(cb) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -602,47 +599,43 @@ Dropbox.prototype.getThumbnails = function(cb) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -650,20 +643,41 @@ Dropbox.prototype.getThumbnails = function(cb) {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -673,17 +687,21 @@ Dropbox.prototype.getThumbnails = function(cb) {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

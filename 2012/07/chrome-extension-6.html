@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2012-07-13 00:00:00 +0900">
+                <time datetime="2012-07-13T00:00:00+09:00">
                   <a href="/archives/2012/07">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -97,41 +96,21 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#manifest-json">manifest.json</a>
-</li>
-<li>
-<a href="#background-html">background.html</a>
-</li>
-<li>
-<a href="#popup-html">popup.html</a>
-</li>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>ページアクションを使ってみる。ページアクションって何なの?として</p><p><img src="/images/2012/07/20120712223043.jpg" alt="image" /></p><p>てな感じでURLバーの右側に付けられるアイコンをクリックする事でポップアップなページを出せる事が出来る模様。但し、グローバルに常に出すような場合にはページアクションではなくブラウザアクションを採用するのが正しい模様。とりあえず上記の[S]なアイコンが出せるまでをやってみる</p>
-<!--more-->
-
-<h4 id="manifest-json">manifest.json</h4>
-<pre class="line-numbers"><code class="language-json">{
-  "name": "test",
-  "version": "0.1",
-  "page_action": {
-    "default_icon": "icon_blue.png",
-    "default_title": "test",
-    "default_popup": "popup.html"
+                <!--[[1, "manifest.json"], [2, "background.html"], [3, "popup.html"], [4, "追記"]]-->
+                <p>ページアクションを使ってみる。ページアクションって何なの?として</p><p><img src="/images/2012/07/20120712223043.jpg" alt="image" /></p><p>てな感じでURLバーの右側に付けられるアイコンをクリックする事でポップアップなページを出せる事が出来る模様。但し、グローバルに常に出すような場合にはページアクションではなくブラウザアクションを採用するのが正しい模様。とりあえず上記の[S]なアイコンが出せるまでをやってみる</p><h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;test&quot;,
+  &quot;version&quot;: &quot;0.1&quot;,
+  &quot;page_action&quot;: {
+    &quot;default_icon&quot;: &quot;icon_blue.png&quot;,
+    &quot;default_title&quot;: &quot;test&quot;,
+    &quot;default_popup&quot;: &quot;popup.html&quot;
   },
-  "background_page": "background.html",
-  "permissions": ["tabs"]
+  &quot;background_page&quot;: &quot;background.html&quot;,
+  &quot;permissions&quot;: [&quot;tabs&quot;]
 }
-</code></pre><p>アイコンは常に出ない((chrome.pageAction.showしないと))のでバックグラウンドページを用いて表示しているタブを監視して、そこからpageAction.showをする</p>
-<h4 id="background-html">background.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><p>アイコンは常に出ない((chrome.pageAction.showしないと))のでバックグラウンドページを用いて表示しているタブを監視して、そこからpageAction.showをする</p><h4>background.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
-    &lt;script type="text/javascript"&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
 (function() {
   chrome.tabs.onUpdated.addListener(function(id, changeInfo, tab) {
     if (/^http/.test(tab.url)) {
@@ -142,28 +121,24 @@ ga("send", "pageview");
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<h4 id="popup-html">popup.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><h4>popup.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
-    &lt;div id="title"&gt;&lt;/div&gt;
-    &lt;script type="text/javascript"&gt;
+    &lt;div id=&quot;title&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
 (function() {
   chrome.tabs.getSelected(undefined, function(tab) {
-    var elm = document.createElement("h4");
+    var elm = document.createElement(&quot;h4&quot;);
     elm.innerText = tab.title;
 
-    document.getElementById("title").appendChild(elm);
+    document.getElementById(&quot;title&quot;).appendChild(elm);
   });
 })();
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p>別にdefault_popupは必須では無いらしい。あくまで必須なのはアイコンだけな模様なので。じゃあページアクションをクリックした際はどうするのかというと、バックグラウンドページ内でページアクションをクリックした際に発動する処理をやっちゃえば良い。それはchrome.pageAction.onClickedでイベントをぶっこめる</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><h4>追記</h4><p>別にdefault_popupは必須では無いらしい。あくまで必須なのはアイコンだけな模様なので。じゃあページアクションをクリックした際はどうするのかというと、バックグラウンドページ内でページアクションをクリックした際に発動する処理をやっちゃえば良い。それはchrome.pageAction.onClickedでイベントをぶっこめる</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
-    &lt;script type="text/javascript"&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
 (function() {
   chrome.tabs.onUpdated.addListener(function(id, changeInfo, tab) {
     if (/^http/.test(tab.url)) {
@@ -173,7 +148,7 @@ ga("send", "pageview");
 
   chrome.pageAction.onClicked.addListener(function(tab) {
     chrome.tabs.captureVisibleTab(undefined, function(dataUrl) {
-      chrome.tabs.create({ "url": dataUrl, "selected": false });
+      chrome.tabs.create({ &quot;url&quot;: dataUrl, &quot;selected&quot;: false });
     });
   });
 })();
@@ -230,53 +205,67 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -284,17 +273,21 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -302,32 +295,41 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -335,14 +337,17 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -350,11 +355,13 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -362,20 +369,25 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -383,47 +395,43 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -431,20 +439,41 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -454,17 +483,21 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

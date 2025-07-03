@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,139 +96,99 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654311259e9">要件</a>
-</li>
-<li>
-<a href="#androidmanifest-xml">AndroidManifest.xml</a>
-</li>
-<li>
-<a href="#res-xml-widget-xml">res/xml/widget.xml</a>
-</li>
-<li>
-<a href="#res-layout-widget_layout-xml">res/layout/widget_layout.xml</a>
-</li>
-<li>
-<a href="#res-layout-widget_listview_row-xml">res/layout/widget_listview_row.xml</a>
-</li>
-<li>
-<a href="#samplewidgetprovider-java">SampleWidgetProvider.java</a>
-</li>
-<li>
-<a href="#samplewidgetservice-java">SampleWidgetService.java</a>
-</li>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>検証したのいつかは覚えてないんですが、ネタとして書いておく</p><p>Android API Level 11(Android3.x)くらいから(RemoteViews.setRemoteAdapter辺りがAPI Level14が必要なのでAndroid4.0以降)だと思うんですが、AppWidgetにListViewが使えるようになってる。それを検証したという件</p>
-<!--more-->
-
-<h4 id="part-654311259e9">要件</h4>
-<p>AppWidgetで自分のTwitterのTLの10件を取得してそれをListViewとして表示する。OAuth使いません、まだ普通にリクエストしても取得できる模様なので(正確にはTwitter API 1.1を使う場合には認証が必須かと)</p><p>あとAndroid4.2(Emulator)で検証</p>
-<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+                <!--[[1, "要件"], [2, "AndroidManifest.xml"], [3, "res/xml/widget.xml"], [4, "res/layout/widget_layout.xml"], [5, "res/layout/widget_listview_row.xml"], [6, "SampleWidgetProvider.java"], [7, "SampleWidgetService.java"], [8, "追記"]]-->
+                <p>検証したのいつかは覚えてないんですが、ネタとして書いておく</p><p>Android API Level 11(Android3.x)くらいから(RemoteViews.setRemoteAdapter辺りがAPI Level14が必要なのでAndroid4.0以降)だと思うんですが、AppWidgetにListViewが使えるようになってる。それを検証したという件</p><h4>要件</h4><p>AppWidgetで自分のTwitterのTLの10件を取得してそれをListViewとして表示する。OAuth使いません、まだ普通にリクエストしても取得できる模様なので(正確にはTwitter API 1.1を使う場合には認証が必須かと)</p><p>あとAndroid4.2(Emulator)で検証</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.kinjouj.test.android_appwidget_listview_demo"
-    android:versionCode="1"
-    android:versionName="1.0" &gt;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;net.kinjouj.test.android_appwidget_listview_demo&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot; &gt;
 
-    &lt;uses-sdk android:targetSdkVersion="17" android:minSdkVersion="14" android:maxSdkVersion="17" /&gt;
+    &lt;uses-sdk android:targetSdkVersion=&quot;17&quot; android:minSdkVersion=&quot;14&quot; android:maxSdkVersion=&quot;17&quot; /&gt;
 
-    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
 
     &lt;application
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:allowBackup="false"&gt;
+        android:icon=&quot;@drawable/ic_launcher&quot;
+        android:label=&quot;@string/app_name&quot;
+        android:allowBackup=&quot;false&quot;&gt;
 
-        &lt;receiver android:name=".SampleWidgetProvider"&gt;
+        &lt;receiver android:name=&quot;.SampleWidgetProvider&quot;&gt;
             &lt;intent-filter&gt;
-                &lt;action android:name="android.appwidget.action.APPWIDGET_UPDATE" /&gt;
+                &lt;action android:name=&quot;android.appwidget.action.APPWIDGET_UPDATE&quot; /&gt;
                 &lt;!-- クリックした際のアクションを設定しておく --&gt;
-                &lt;action android:name="net.kinjouj.test.android_appwidget_listview_demo.ACTION_CLICK" /&gt;
+                &lt;action android:name=&quot;net.kinjouj.test.android_appwidget_listview_demo.ACTION_CLICK&quot; /&gt;
             &lt;/intent-filter&gt;
-            &lt;meta-data android:name="android.appwidget.provider" android:resource="@xml/widget" /&gt;
+            &lt;meta-data android:name=&quot;android.appwidget.provider&quot; android:resource=&quot;@xml/widget&quot; /&gt;
         &lt;/receiver&gt;
 
         &lt;service
-            android:name=".SampleWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" /&gt;
+            android:name=&quot;.SampleWidgetService&quot;
+            android:permission=&quot;android.permission.BIND_REMOTEVIEWS&quot; /&gt;
 
     &lt;/application&gt;
 
 &lt;/manifest&gt;
-</code></pre><p>API Level 11以上なんですが、RemoteViews.setRemoteAdapterのメソッドがAPI Level 14以上じゃないといけないのでminSdkVersionは14で良いんじゃないかと</p><p>んでAppWidgetの定義ファイルを作る</p>
-<h4 id="res-xml-widget-xml">res/xml/widget.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+</code></pre><p>API Level 11以上なんですが、RemoteViews.setRemoteAdapterのメソッドがAPI Level 14以上じゃないといけないのでminSdkVersionは14で良いんじゃないかと</p><p>んでAppWidgetの定義ファイルを作る</p><h4>res/xml/widget.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;appwidget-provider
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="294dp"
-    android:minHeight="294dp"
-    android:initialLayout="@layout/widget_layout" /&gt;
-</code></pre><p>確かAppWidgetのWidth/Heightの計算式が「74 * セル数 - 2」なので、今回4面を使うので「74 * 4 - 2 = 294」になるような感じかと</p><p>でinitialLayoutで指定されているレイアウト定義を使うのでそれを作る</p>
-<h4 id="res-layout-widget_layout-xml">res/layout/widget_layout.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:minWidth=&quot;294dp&quot;
+    android:minHeight=&quot;294dp&quot;
+    android:initialLayout=&quot;@layout/widget_layout&quot; /&gt;
+</code></pre><p>確かAppWidgetのWidth/Heightの計算式が「74 * セル数 - 2」なので、今回4面を使うので「74 * 4 - 2 = 294」になるような感じかと</p><p>でinitialLayoutで指定されているレイアウト定義を使うのでそれを作る</p><h4>res/layout/widget_layout.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"&gt;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;&gt;
 
     &lt;LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"&gt;
+        android:layout_width=&quot;fill_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_margin=&quot;5dp&quot;&gt;
 
         &lt;Button
-            android:id="@+id/btn"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/reload_btn_label" /&gt;
+            android:id=&quot;@+id/btn&quot;
+            android:layout_width=&quot;fill_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:text=&quot;@string/reload_btn_label&quot; /&gt;
 
     &lt;/LinearLayout&gt;
 
     &lt;LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="50dp"&gt;
+        android:layout_width=&quot;fill_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:layout_marginTop=&quot;50dp&quot;&gt;
 
         &lt;ListView
-            android:id="@+id/listView"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="10dp" /&gt;
+            android:id=&quot;@+id/listView&quot;
+            android:layout_width=&quot;fill_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            android:layout_margin=&quot;10dp&quot; /&gt;
 
     &lt;/LinearLayout&gt;
 
 &lt;/RelativeLayout&gt;
-</code></pre><p>reload_btn_labelは適当にres/values/strings.xmlに設定しとく。まぁただのレイアウトなんだが、ListViewを使ってるっていう所。でListViewを使うのにデータをレンダリングする際に使うレイアウトファイルも必要なのでそれも作る</p>
-<h4 id="res-layout-widget_listview_row-xml">res/layout/widget_listview_row.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</code></pre><p>reload_btn_labelは適当にres/values/strings.xmlに設定しとく。まぁただのレイアウトなんだが、ListViewを使ってるっていう所。でListViewを使うのにデータをレンダリングする際に使うレイアウトファイルも必要なのでそれも作る</p><h4>res/layout/widget_listview_row.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"&gt;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;&gt;
 
     &lt;ImageView
-        android:id="@+id/profile_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical" /&gt;
+        android:id=&quot;@+id/profile_image&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_gravity=&quot;center_vertical&quot; /&gt;
 
     &lt;TextView
-        android:id="@+id/text1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/profile_image"
-        android:padding="10dp" /&gt;
+        android:id=&quot;@+id/text1&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_alignLeft=&quot;@+id/profile_image&quot;
+        android:padding=&quot;10dp&quot; /&gt;
 
 &lt;/LinearLayout&gt;
-</code></pre><p>プロフィール画像とツイートだけを表示するだけ</p><p>でここからAppWidgetのプログラミングを書く</p>
-<h4 id="samplewidgetprovider-java">SampleWidgetProvider.java</h4>
-<pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
+</code></pre><p>プロフィール画像とツイートだけを表示するだけ</p><p>でここからAppWidgetのプログラミングを書く</p><h4>SampleWidgetProvider.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -241,8 +200,8 @@ import android.widget.RemoteViews;
 
 public class SampleWidgetProvider extends AppWidgetProvider {
 
-    private static final String ACTION_CLICK = "net.kinjouj.test.android_appwidget_listview_demo.ACTION_CLICK";
-    private static final String ACTION_ITEM_CLICK = "net.kinjouj.test.android_appwidget_listview_demo.ACTION_ITEM_CLICK";
+    private static final String ACTION_CLICK = &quot;net.kinjouj.test.android_appwidget_listview_demo.ACTION_CLICK&quot;;
+    private static final String ACTION_ITEM_CLICK = &quot;net.kinjouj.test.android_appwidget_listview_demo.ACTION_ITEM_CLICK&quot;;
 
     @Override
     public void onUpdate(Context ctx, AppWidgetManager manager, int[] appWidgetIds) {
@@ -311,9 +270,7 @@ public class SampleWidgetProvider extends AppWidgetProvider {
         rv.setOnClickPendingIntent(R.id.btn, btnClickPendingIntent);
     }
 }
-</code></pre><p>まぁ定期更新処理はしてません。ボタンを押してリロードする感じ。そこまでは今回の要件じゃないので</p><p>まぁやりたいならAlarmManagerとか使ってやる方で良いかと</p><p>でRemoteViews自体の画面処理自体はSampleWidgetServiceに要求している?ので作る</p>
-<h4 id="samplewidgetservice-java">SampleWidgetService.java</h4>
-<pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
+</code></pre><p>まぁ定期更新処理はしてません。ボタンを押してリロードする感じ。そこまでは今回の要件じゃないので</p><p>まぁやりたいならAlarmManagerとか使ってやる方で良いかと</p><p>でRemoteViews自体の画面処理自体はSampleWidgetServiceに要求している?ので作る</p><h4>SampleWidgetService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
 
 import java.io.IOException;
 
@@ -345,27 +302,27 @@ public class SampleWidgetService extends RemoteViewsService {
 
     private class SampleWidgetFactory implements RemoteViewsFactory {
 
-        private static final String TAG = "SampleViewFactory";
+        private static final String TAG = &quot;SampleViewFactory&quot;;
 
         private JSONArray jsons = new JSONArray();
         private Bitmap profileImage = null;
 
         public void onCreate() {
-            Log.v(TAG, "[onCreate]");
+            Log.v(TAG, &quot;[onCreate]&quot;);
         }
 
         public void onDataSetChanged() {
-            Log.v(TAG, "[onDataSetChanged]");
+            Log.v(TAG, &quot;[onDataSetChanged]&quot;);
 
             fetchTimelines();
         }
 
         public void onDestroy() {
-            Log.v(TAG, "[onDestroy]");
+            Log.v(TAG, &quot;[onDestroy]&quot;);
         }
 
         public RemoteViews getViewAt(int position) {
-            Log.v(TAG, "[getViewAt]: " + position);
+            Log.v(TAG, &quot;[getViewAt]: &quot; + position);
 
             if(jsons.length() &lt;= 0) {
                 return null;
@@ -377,15 +334,15 @@ public class SampleWidgetService extends RemoteViewsService {
                 JSONObject json = jsons.getJSONObject(position);
 
                 if(json != null) {
-                    JSONObject user = json.getJSONObject("user");
+                    JSONObject user = json.getJSONObject(&quot;user&quot;);
 
                     rv = new RemoteViews(getPackageName(), R.layout.widget_listview_row);
-                    rv.setTextViewText(R.id.text1, json.getString("text"));
-                    rv.setImageViewBitmap(R.id.profile_image, fetchProfileImage(user.getString("profile_image_url")));
+                    rv.setTextViewText(R.id.text1, json.getString(&quot;text&quot;));
+                    rv.setImageViewBitmap(R.id.profile_image, fetchProfileImage(user.getString(&quot;profile_image_url&quot;)));
 
                     Intent intent = new Intent();
                     intent.setData(
-                        Uri.parse("http://twitter.com/kinjou_j/status/" + json.getString("id_str"))
+                        Uri.parse(&quot;http://twitter.com/kinjou_j/status/&quot; + json.getString(&quot;id_str&quot;))
                     );
 
                     rv.setOnClickFillInIntent(R.id.text1, intent);
@@ -398,32 +355,32 @@ public class SampleWidgetService extends RemoteViewsService {
         }
 
         public long getItemId(int position) {
-            Log.v(TAG, "[getItemId]: " + position);
+            Log.v(TAG, &quot;[getItemId]: &quot; + position);
 
             return position;
         }
 
         public int getCount() {
-            Log.v(TAG, "[getCount]");
+            Log.v(TAG, &quot;[getCount]&quot;);
 
             return jsons.length();
         }
 
         public RemoteViews getLoadingView() {
-            Log.v(TAG, "[getLoadingView]");
+            Log.v(TAG, &quot;[getLoadingView]&quot;);
 
             return null;
         }
 
 
         public int getViewTypeCount() {
-            Log.v(TAG, "[getViewTypeCount]");
+            Log.v(TAG, &quot;[getViewTypeCount]&quot;);
 
             return 1;
         }
 
         public boolean hasStableIds() {
-            Log.v(TAG, "[hasStableIds]");
+            Log.v(TAG, &quot;[hasStableIds]&quot;);
 
             return true;
         }
@@ -432,7 +389,7 @@ public class SampleWidgetService extends RemoteViewsService {
             try {
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpResponse response = httpClient.execute(
-                    new HttpGet("https://api.twitter.com/1/statuses/user_timeline/kinjou_j.json?count=10")
+                    new HttpGet(&quot;https://api.twitter.com/1/statuses/user_timeline/kinjou_j.json?count=10&quot;)
                 );
 
                 if(response.getStatusLine().getStatusCode() != 200) {
@@ -451,7 +408,7 @@ public class SampleWidgetService extends RemoteViewsService {
 
         private Bitmap fetchProfileImage(String url) {
             if(profileImage == null) {
-                Log.v(TAG, "[fetchProfileImage]: "  + url);
+                Log.v(TAG, &quot;[fetchProfileImage]: &quot;  + url);
 
                 try {
                     HttpClient httpClient = new DefaultHttpClient();
@@ -471,9 +428,7 @@ public class SampleWidgetService extends RemoteViewsService {
         }
     }
 }
-</code></pre><p>以上。で実際に動かしてみると</p><p><img src="/images/2013/01/20130118104310.png" alt="image" /></p><p>っつー感じでAppWidgetでListView使えるみたいな感じ</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p>AndoidAnnotations使われているけど、一応上記同様なソースは <a href="https://github.com/kinjouj/android_appwidget_listview_demo">https://github.com/kinjouj/android_appwidget_listview_demo</a> にて公開してます</p>
+</code></pre><p>以上。で実際に動かしてみると</p><p><img src="/images/2013/01/20130118104310.png" alt="image" /></p><p>っつー感じでAppWidgetでListView使えるみたいな感じ</p><h4>追記</h4><p>AndoidAnnotations使われているけど、一応上記同様なソースは <a href="https://github.com/kinjouj/android_appwidget_listview_demo">https://github.com/kinjouj/android_appwidget_listview_demo</a> にて公開してます</p>
               </div>
             </div>
           </div>
@@ -523,53 +478,67 @@ public class SampleWidgetService extends RemoteViewsService {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -577,17 +546,21 @@ public class SampleWidgetService extends RemoteViewsService {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -595,32 +568,41 @@ public class SampleWidgetService extends RemoteViewsService {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -628,14 +610,17 @@ public class SampleWidgetService extends RemoteViewsService {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -643,11 +628,13 @@ public class SampleWidgetService extends RemoteViewsService {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -655,20 +642,25 @@ public class SampleWidgetService extends RemoteViewsService {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -676,47 +668,43 @@ public class SampleWidgetService extends RemoteViewsService {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -724,20 +712,41 @@ public class SampleWidgetService extends RemoteViewsService {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -747,17 +756,21 @@ public class SampleWidgetService extends RemoteViewsService {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

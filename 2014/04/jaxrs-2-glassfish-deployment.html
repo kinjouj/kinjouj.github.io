@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,35 +96,15 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#glassfish">glassfishの環境構築</a>
-</li>
-<li>
-<a href="#web-xml">web.xml</a>
-</li>
-<li>
-<a href="#sampleapplication-java">SampleApplication.java</a>
-</li>
-<li>
-<a href="#glassfish-json">余談: glassfishでJSONをレンダリングするにあたって</a>
-</li>
-</ul>
--->
-                <p>参考: <a href="https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3</a></p><p>JAX-RSに準拠しているアプリケーションサーバー(glassfish等)ではデプロイ時の設定が若干異なる模様。またJAX-RSに準拠しているアプリケーションサーバーであれば特にデプロイメントデスクリプタ(web.xml)を定義しなくても@ApplicationPathを使う事で引数に指定したパスを&lt;servlet-mapping&gt;のベースとして利用できるようになるっぽい。微妙にややこしいけど</p><p>※記述している内容が正しいかは微妙なのであくまで個人的なメモとして</p>
-<!--more-->
-
-<h4 id="glassfish">glassfishの環境構築</h4>
-<p>glassfishのオープンソース版をダウンロードしてきてインストールする。でglassfishはTomcat等とは違い?ドメインっていう形でアプリケーションをデプロイする。で初期状態でもドメインが存在するのだけど、適当に別なドメインを作るので</p><pre class="line-numbers"><code class="language-">/path/to/glassfish/bin/asadmin create-domain --profile developer --adminport 14848 --instanceport 10080 devDomain
+                <!--[[1, "glassfishの環境構築"], [2, "web.xml"], [3, "SampleApplication.java"], [4, "余談: glassfishでJSONをレンダリングするにあたって"]]-->
+                <p>参考: <a href="https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3</a></p><p>JAX-RSに準拠しているアプリケーションサーバー(glassfish等)ではデプロイ時の設定が若干異なる模様。またJAX-RSに準拠しているアプリケーションサーバーであれば特にデプロイメントデスクリプタ(web.xml)を定義しなくても@ApplicationPathを使う事で引数に指定したパスを&lt;servlet-mapping&gt;のベースとして利用できるようになるっぽい。微妙にややこしいけど</p><p>※記述している内容が正しいかは微妙なのであくまで個人的なメモとして</p><h4>glassfishの環境構築</h4><p>glassfishのオープンソース版をダウンロードしてきてインストールする。でglassfishはTomcat等とは違い?ドメインっていう形でアプリケーションをデプロイする。で初期状態でもドメインが存在するのだけど、適当に別なドメインを作るので</p><pre class="line-numbers"><code class="language-">/path/to/glassfish/bin/asadmin create-domain --profile developer --adminport 14848 --instanceport 10080 devDomain
 </code></pre><p>な感じでWebアプリケーション側のポートを10080で、(Web)管理コンソールのポートを14848でdevDomainっていう名前で作成みたいな感じで。あとは</p><pre class="line-numbers"><code class="language-">/path/to/glassfish/bin/startserv devDomain
-</code></pre><p>あたりをやって作ったドメインなサーバーを起動する。でglassfishではアプリケーションをデプロイするには/path/to/glassfish/domains/ドメイン名/autodeployにwarファイルなり打ち込めばデプロイしてくれる模様なので</p><p>とりあえずはglassfishな環境構築はこんなもんで</p>
-<h4 id="web-xml">web.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</code></pre><p>あたりをやって作ったドメインなサーバーを起動する。でglassfishではアプリケーションをデプロイするには/path/to/glassfish/domains/ドメイン名/autodeployにwarファイルなり打ち込めばデプロイしてくれる模様なので</p><p>とりあえずはglassfishな環境構築はこんなもんで</p><h4>web.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;web-app
-    xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-    version="3.0"&gt;
+    xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;
+    version=&quot;3.0&quot;&gt;
 
     &lt;!--
     &lt;servlet&gt;
@@ -139,24 +118,20 @@ ga("send", "pageview");
     --&gt;
 
 &lt;/web-app&gt;
-</code></pre><p>@ApplicationPathを使ってJAX-RSアプリケーションなリソースパスをマッピングするので特に記述する必要性は無いけど、もし上記のようにweb.xmlで指定する場合には&lt;servlet-name&gt;にApplicationクラス(又はResourceConfig?)を指定すれば良い(&lt;serlet-class&gt;は必要ないっぽい)。又、特にApplicationクラスを拡張しないで使うようなケースであれば、<span style="color: red">javax.ws.rs.core.Application</span>を指定すれば良い模様</p>
-<h4 id="sampleapplication-java">SampleApplication.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>@ApplicationPathを使ってJAX-RSアプリケーションなリソースパスをマッピングするので特に記述する必要性は無いけど、もし上記のようにweb.xmlで指定する場合には&lt;servlet-name&gt;にApplicationクラス(又はResourceConfig?)を指定すれば良い(&lt;serlet-class&gt;は必要ないっぽい)。又、特にApplicationクラスを拡張しないで使うようなケースであれば、<span style="color: red">javax.ws.rs.core.Application</span>を指定すれば良い模様</p><h4>SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 import org.glassfish.jersey.server.ResourceConfig;
 
-@ApplicationPath("resources")
+@ApplicationPath(&quot;resources&quot;)
 public class SampleApplication extends ResourceConfig {
 
     public SampleApplication() {
-        packages("sample");
+        packages(&quot;sample&quot;);
     }
 }
 </code></pre><p>っていう感じで@ApplicationPathでresourcesを引数で指定すると、その指定された引数がベースなリソースパスになる模様なので <a href="http://localhost:10080/context_name/resource_path/@Path" target="_blank" rel="noopener noreferrer">http://localhost:10080/context_name/resource_path/@Path</a> 等で指定されているメソッドなりのハンドラ的な感じで実行できる</p><p>っていうわけで上記なプロジェクトをコンパイル後warにパッケージングして</p><pre class="line-numbers"><code class="language-">mv jaxrs.war /path/to/glassfish/domains/devDomain/autodeploy
-</code></pre><p>にぶん投げる。で@ApplicationPathで指定したリソースパスでアクセス出来るかを確認してみりゃ良い。</p>
-<h4 id="glassfish-json">余談: glassfishでJSONをレンダリングするにあたって</h4>
-<p>※GlassFish4だと問題が発生しない模様</p><p>JSONとしてレンダリングする場合であってもオブジェクトに@XmlRootElementが無い場合とかだとWebApplicationExceptionが発生する模様。又、アクション側において</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>にぶん投げる。で@ApplicationPathで指定したリソースパスでアクセス出来るかを確認してみりゃ良い。</p><h4>余談: glassfishでJSONをレンダリングするにあたって</h4><p>※GlassFish4だと問題が発生しない模様</p><p>JSONとしてレンダリングする場合であってもオブジェクトに@XmlRootElementが無い場合とかだとWebApplicationExceptionが発生する模様。又、アクション側において</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -168,15 +143,15 @@ import sample.bean.SampleBean;
 
 import static javax.ws.rs.core.MediaType.*;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
-    @Path("list")
+    @Path(&quot;list&quot;)
     @GET
     @Produces(APPLICATION_JSON)
     public List&lt;SampleBean&gt; list() {
         List&lt;SampleBean&gt; beans = new ArrayList&lt;SampleBean&gt;(2);
-        beans.add(new SampleBean("hoge/fuga"));
-        beans.add(new SampleBean("foobar"));
+        beans.add(new SampleBean(&quot;hoge/fuga&quot;));
+        beans.add(new SampleBean(&quot;foobar&quot;));
 
         return beans;
     }
@@ -231,53 +206,67 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -285,17 +274,21 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -303,32 +296,41 @@ public class Home {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -336,14 +338,17 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -351,11 +356,13 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -363,20 +370,25 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -384,47 +396,43 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -432,20 +440,41 @@ public class Home {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -455,17 +484,21 @@ public class Home {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

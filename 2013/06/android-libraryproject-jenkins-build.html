@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,45 +96,21 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#jenkins">Jenkins側の事前設定</a>
-</li>
-<li>
-<a href="#part-d2bfece8a53d3a7">アプリプロジェクトの構造</a>
-</li>
-<li>
-<a href="#part-1229aee965e7cc9a">ビルドの設定</a>
-</li>
-<li>
-<a href="#part-cf56df891d51e106">ビルドログ</a>
-</li>
-</ul>
--->
-                <p>んまぁライブラリプロジェクト自体をJenkinsのビルドプロジェクト(フリースタイル)とかで定義しちゃっても良いとは思いますけど、ActionBarSherlockとかだったりだとか公開されている有用なAndroidライブラリとかを伴うプロジェクトをビルドするとなると定義するかプロジェクト内にぶち込んじゃうかっていう所だと思うのですが、その後者側の「参照するライブラリプロジェクト自体をビルドプロジェクトとして定義せずにアプリプロジェクトにぶち込んでビルド」するっていう方式的なのを検証してみた</p>
-<!--more-->
-
-<h4 id="jenkins">Jenkins側の事前設定</h4>
-<p>Jenkins Git Pluginを使う。入れたのは <a href="https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin" target="_blank" rel="noopener noreferrer">https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin</a></p>
-<h4 id="part-d2bfece8a53d3a7">アプリプロジェクトの構造</h4>
-<p>ディレクトリ内にアプリプロジェクトディレクトリと参照するライブラリプロジェクトのディレクトリは分けてる。</p>
+                <!--[[1, "Jenkins側の事前設定"], [2, "アプリプロジェクトの構造"], [3, "ビルドの設定"], [4, "ビルドログ"]]-->
+                <p>んまぁライブラリプロジェクト自体をJenkinsのビルドプロジェクト(フリースタイル)とかで定義しちゃっても良いとは思いますけど、ActionBarSherlockとかだったりだとか公開されている有用なAndroidライブラリとかを伴うプロジェクトをビルドするとなると定義するかプロジェクト内にぶち込んじゃうかっていう所だと思うのですが、その後者側の「参照するライブラリプロジェクト自体をビルドプロジェクトとして定義せずにアプリプロジェクトにぶち込んでビルド」するっていう方式的なのを検証してみた</p><h4>Jenkins側の事前設定</h4><p>Jenkins Git Pluginを使う。入れたのは <a href="https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin" target="_blank" rel="noopener noreferrer">https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin</a></p><h4>アプリプロジェクトの構造</h4><p>ディレクトリ内にアプリプロジェクトディレクトリと参照するライブラリプロジェクトのディレクトリは分けてる。</p>
 <pre>
 root:
   - ActionBarSherlock
   - SlidingMenu
   - アプリプロジェクト
 </pre>
-<p>っていう感じなのだけど。ActionBarSherlockとSlidingMenu自体はgithubで提供されているので、git submoduleを使って取得する。でこの構造をgitサーバー辺りにpushしておく</p><p>git submoduleなやつはJenkinsでワークスペースをビルドする際にフェッチされる模様なのでこっちで何かするとかは無い模様。但し、android update [lib-]projectとかは必要</p><p>まぁ構造的なのはそんくらい</p>
-<h4 id="part-1229aee965e7cc9a">ビルドの設定</h4>
-<p>ソースコード管理からgitを選択して、pushしたgitサーバーのリポジトリを指定する。上記にも書いたけど、これでワークスペースにgitからチェックアウトされて格納される模様</p><p>で上記の注釈でも書いたけど、gitから取ってきてもupdate project関係は必要な模様。なのでビルド手順の追加でantでビルドする前にシェルスクリプトの実行で</p><pre class="line-numbers"><code class="language-">android update lib-project -p ActionBarSherlock/actionbarsherlock -t [Android Build Target]
+<p>っていう感じなのだけど。ActionBarSherlockとSlidingMenu自体はgithubで提供されているので、git submoduleを使って取得する。でこの構造をgitサーバー辺りにpushしておく</p><p>git submoduleなやつはJenkinsでワークスペースをビルドする際にフェッチされる模様なのでこっちで何かするとかは無い模様。但し、android update [lib-]projectとかは必要</p><p>まぁ構造的なのはそんくらい</p><h4>ビルドの設定</h4><p>ソースコード管理からgitを選択して、pushしたgitサーバーのリポジトリを指定する。上記にも書いたけど、これでワークスペースにgitからチェックアウトされて格納される模様</p><p>で上記の注釈でも書いたけど、gitから取ってきてもupdate project関係は必要な模様。なのでビルド手順の追加でantでビルドする前にシェルスクリプトの実行で</p><pre class="line-numbers"><code class="language-">android update lib-project -p ActionBarSherlock/actionbarsherlock -t [Android Build Target]
 android update lib-project -p SlidingMenu/library -t [Android Build Target]
 android update project -p sample -l ../ActionBarSherlock/actionbarsherlock
 android update project -p sample -l ../SlidingMenu/library
 </code></pre><p>等ような初期設定が必要。あともうひとつ難点があって、Androidの場合android-support-v4だとかが組み込まれているケースがある。ファイルのハッシュサムがマッチしないとAndroidのビルドがずっこけるっていうのがあるので、アプリプロジェクトにベースとなるandroid-support-v4を入れておいて</p><pre class="line-numbers"><code class="language-">cp sample/libs/android-support-v4.jar ActionBarSherlock/actionbarsherlock/libs/
 cp sample/libs/android-support-v4.jar SlidingMenu/library/libs/
-</code></pre><p>っていうように同一の物を使うようにする等でビルドするようにする。まぁ上記の2つのビルドスクリプトを合わせれば良い</p><p>でその後にantビルド方式を「clean release」辺りを行うように設定。あとは普通にJenkinsでビルド</p>
-<h4 id="part-cf56df891d51e106">ビルドログ</h4>
-<p>クソ長いので省略</p>
+</code></pre><p>っていうように同一の物を使うようにする等でビルドするようにする。まぁ上記の2つのビルドスクリプトを合わせれば良い</p><p>でその後にantビルド方式を「clean release」辺りを行うように設定。あとは普通にJenkinsでビルド</p><h4>ビルドログ</h4><p>クソ長いので省略</p>
 <pre>
 コンソール出力
 ビルドします。 ワークスペース: /home/kinjouj/.jenkins/jobs/sample/workspace
@@ -218,53 +193,67 @@ Finished: SUCCESS
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -272,17 +261,21 @@ Finished: SUCCESS
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -290,32 +283,41 @@ Finished: SUCCESS
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -323,14 +325,17 @@ Finished: SUCCESS
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -338,11 +343,13 @@ Finished: SUCCESS
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -350,20 +357,25 @@ Finished: SUCCESS
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -371,47 +383,43 @@ Finished: SUCCESS
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -419,20 +427,41 @@ Finished: SUCCESS
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -442,17 +471,21 @@ Finished: SUCCESS
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

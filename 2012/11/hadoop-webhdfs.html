@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,45 +95,9 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-8811212a92a05889">セットアップ</a>
-</li>
-<li>
-<a href="#webhdfs-rest-api">WebHDFS Rest APIを使って操作する</a>
-</li>
-<li>
-<a href="#data">ユーザーディレクトリ内にdataディレクトリを作る</a>
-</li>
-<li>
-<a href="#part-9e85f9abbeb0fa45">作ったディレクトリのステータスを見る</a>
-</li>
-<li>
-<a href="#part-7a7a3af4fe673850">ディレクトリにファイルを突っ込んでみる</a>
-</li>
-<li>
-<a href="#part-a8e3f2c27f7fd9bd">ディレクトリにあるファイルステータスを取る</a>
-</li>
-<li>
-<a href="#part-2e16b7a31b11e613">ファイルを読み取る</a>
-</li>
-<li>
-<a href="#part-500b4aa82fd9f035">ファイル等を消す</a>
-</li>
-<li>
-<a href="#1">追記1</a>
-</li>
-<li>
-<a href="#2-fluent-plugin-webhdfs-webhdfs">追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</a>
-</li>
-</ul>
--->
-                <p>WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた</p><p>(Hadoopのバージョンは1.0.4です)</p>
-<!--more-->
-
-<h4 id="part-8811212a92a05889">セットアップ</h4>
-<p>デフォルトでWebHDFSはサポートしてないので設定しないと使えない模様。なのでhdfs-site.xmlに追加する</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0"?&gt;
-&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;
+                <!--[[1, "セットアップ"], [2, "WebHDFS Rest APIを使って操作する"], [3, "ユーザーディレクトリ内にdataディレクトリを作る"], [4, "作ったディレクトリのステータスを見る"], [5, "ディレクトリにファイルを突っ込んでみる"], [6, "ディレクトリにあるファイルステータスを取る"], [7, "ファイルを読み取る"], [8, "ファイル等を消す"], [9, "追記1"], [10, "追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす"]]-->
+                <p>WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた</p><p>(Hadoopのバージョンは1.0.4です)</p><h4>セットアップ</h4><p>デフォルトでWebHDFSはサポートしてないので設定しないと使えない模様。なのでhdfs-site.xmlに追加する</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
 &lt;configuration&gt;
     &lt;!-- 追加 --&gt;
     &lt;property&gt;
@@ -145,80 +108,62 @@ ga("send", "pageview");
 </code></pre><p>設定はこんだけです。あとは</p><pre class="line-numbers"><code class="language-">sudo -u hadoop /opt/hadoop/bin/hadoop namenode -format
 sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start namenode
 sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
-</code></pre><p>でデータノードが立ち上がったら、初期時は何も無いのでユーザーディレクトリを作っておく。でユーザーディレクトリな所の所有者権限とかも直しておく。それは昨日の記事で書いたので省略</p>
-<h4 id="webhdfs-rest-api">WebHDFS Rest APIを使って操作する</h4>
-<p>WebHDFS Rest APIのエントリーポイントとなるURLのベースが、「 <a href="http://host:port/webhdfs/v1" target="_blank" rel="noopener noreferrer">http://host:port/webhdfs/v1</a> 」になる。でポートっていうのはネームノードフロントエンドページとなる、恐らくはデフォルトでは50070のポート番号になる。そこにリクエストをぶっ飛ばす</p>
-<h4 id="data">ユーザーディレクトリ内にdataディレクトリを作る</h4>
-<pre class="line-numbers"><code class="language-">curl -i -X PUT "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&user.name=kinjouj"
-</code></pre><p>user.nameっていうのは指定しない場合はデフォルトの「webuser」っていうのが使用されるので、所有者関係上がある場合には指定しておく。この場合は自分のkinjoujアカウント。レスポンスが</p><pre class="line-numbers"><code class="language-json">{"boolean": true}
-</code></pre><p>な感じでJSONで返ってくる</p>
-<h4 id="part-9e85f9abbeb0fa45">作ったディレクトリのステータスを見る</h4>
-<pre class="line-numbers"><code class="language-">curl -i "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS"
+</code></pre><p>でデータノードが立ち上がったら、初期時は何も無いのでユーザーディレクトリを作っておく。でユーザーディレクトリな所の所有者権限とかも直しておく。それは昨日の記事で書いたので省略</p><h4>WebHDFS Rest APIを使って操作する</h4><p>WebHDFS Rest APIのエントリーポイントとなるURLのベースが、「 <a href="http://host:port/webhdfs/v1" target="_blank" rel="noopener noreferrer">http://host:port/webhdfs/v1</a> 」になる。でポートっていうのはネームノードフロントエンドページとなる、恐らくはデフォルトでは50070のポート番号になる。そこにリクエストをぶっ飛ばす</p><h4>ユーザーディレクトリ内にdataディレクトリを作る</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&amp;user.name=kinjouj&quot;
+</code></pre><p>user.nameっていうのは指定しない場合はデフォルトの「webuser」っていうのが使用されるので、所有者関係上がある場合には指定しておく。この場合は自分のkinjoujアカウント。レスポンスが</p><pre class="line-numbers"><code class="language-json">{&quot;boolean&quot;: true}
+</code></pre><p>な感じでJSONで返ってくる</p><h4>作ったディレクトリのステータスを見る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS&quot;
 </code></pre><p>結果として</p><pre class="line-numbers"><code class="language-json">{
-  "FileStatus": {
-    "accessTime":0,
-    "blockSize":0,
-    "group":"kinjouj",
-    "length":0,
-    "modificationTime":1353549518275,
-    "owner":"kinjouj",
-    "pathSuffix":"",
-    "permission":"755",
-    "replication":0,
-    "type":"DIRECTORY"
+  &quot;FileStatus&quot;: {
+    &quot;accessTime&quot;:0,
+    &quot;blockSize&quot;:0,
+    &quot;group&quot;:&quot;kinjouj&quot;,
+    &quot;length&quot;:0,
+    &quot;modificationTime&quot;:1353549518275,
+    &quot;owner&quot;:&quot;kinjouj&quot;,
+    &quot;pathSuffix&quot;:&quot;&quot;,
+    &quot;permission&quot;:&quot;755&quot;,
+    &quot;replication&quot;:0,
+    &quot;type&quot;:&quot;DIRECTORY&quot;
   }
 }
-</code></pre><p>なレスポンスが返ってくる</p>
-<h4 id="part-7a7a3af4fe673850">ディレクトリにファイルを突っ込んでみる</h4>
-<pre class="line-numbers"><code class="language-">curl -i -X PUT "http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&user.name=kinjouj" -T accesslog.json
-</code></pre><p>ここポートが50075ってなってるのが50070で投げると50075に要求しろみたいにHTTP/307が出る。まぁ実際はそのLocationヘッダーに投げれば良い</p>
-<h4 id="part-a8e3f2c27f7fd9bd">ディレクトリにあるファイルステータスを取る</h4>
-<pre class="line-numbers"><code class="language-">curl -i "http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus"
+</code></pre><p>なレスポンスが返ってくる</p><h4>ディレクトリにファイルを突っ込んでみる</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&amp;user.name=kinjouj&quot; -T accesslog.json
+</code></pre><p>ここポートが50075ってなってるのが50070で投げると50075に要求しろみたいにHTTP/307が出る。まぁ実際はそのLocationヘッダーに投げれば良い</p><h4>ディレクトリにあるファイルステータスを取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus&quot;
 </code></pre><p>レスポンスとして</p><pre class="line-numbers"><code class="language-json">{
-  "FileStatuses":{
-    "FileStatus":[
+  &quot;FileStatuses&quot;:{
+    &quot;FileStatus&quot;:[
       {
-        "accessTime":1353550656744,
-        "blockSize":67108864,
-        "group":"kinjouj",
-        "length":175,
-        "modificationTime":1353550656744,
-        "owner":"kinjouj",
-        "pathSuffix":"accesslog.txt",
-        "permission":"644",
-        "replication":1,
-        "type":"FILE"
+        &quot;accessTime&quot;:1353550656744,
+        &quot;blockSize&quot;:67108864,
+        &quot;group&quot;:&quot;kinjouj&quot;,
+        &quot;length&quot;:175,
+        &quot;modificationTime&quot;:1353550656744,
+        &quot;owner&quot;:&quot;kinjouj&quot;,
+        &quot;pathSuffix&quot;:&quot;accesslog.txt&quot;,
+        &quot;permission&quot;:&quot;644&quot;,
+        &quot;replication&quot;:1,
+        &quot;type&quot;:&quot;FILE&quot;
       },
       {
-        "accessTime":0,
-        "blockSize":0,
-        "group":"kinjouj",
-        "length":0,
-        "modificationTime":1353551184724,
-        "owner":"kinjouj",
-        "pathSuffix":"test",
-        "permission":"755",
-        "replication":0,
-        "type":"DIRECTORY"
+        &quot;accessTime&quot;:0,
+        &quot;blockSize&quot;:0,
+        &quot;group&quot;:&quot;kinjouj&quot;,
+        &quot;length&quot;:0,
+        &quot;modificationTime&quot;:1353551184724,
+        &quot;owner&quot;:&quot;kinjouj&quot;,
+        &quot;pathSuffix&quot;:&quot;test&quot;,
+        &quot;permission&quot;:&quot;755&quot;,
+        &quot;replication&quot;:0,
+        &quot;type&quot;:&quot;DIRECTORY&quot;
       }
     ]
   }
 }
-</code></pre><p>な感じで返ってくるくる。そこに更にディレクトリがあったらどうなるのかの検証のためにテストなディレクトリを作ってる</p>
-<h4 id="part-2e16b7a31b11e613">ファイルを読み取る</h4>
-<pre class="line-numbers"><code class="language-">curl -i "http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open"
-</code></pre><p>こちらも50070なNamenodeな所のポートにぶん投げるとDatanode側にアクセスしろっと要求される。ちょっと気になるのがブロックサイズでチャンクされてるファイルとかどうなるんだっけと。ビッグデータが無いんでそこ未確認</p>
-<h4 id="part-500b4aa82fd9f035">ファイル等を消す</h4>
-<pre class="line-numbers"><code class="language-">curl -i -X DELETE "http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&user.name=kinjouj"
-</code></pre><p>な感じでファイル・ディレクトリ等を削除可能</p><p>という感じでHTTPリクエストぶん投げるだけでHDFS操作が出来る模様。まぁ詳しい事は <a href="http://hadoop.apache.org/docs/r1.1.0/webhdfs.html" target="_blank" rel="noopener noreferrer">http://hadoop.apache.org/docs/r1.1.0/webhdfs.html</a> 見た方が良いかも</p><p>ちなみにPerlでWebHDFSを利用する場合にNet::Hadoop::WebHDFSっていうモジュールがある模様</p>
-<h4 id="1">追記1</h4>
-<p>appendサポートをするにはhdfs-site.xmlに設定が必要な模様</p><pre class="line-numbers"><code class="language-xml">&lt;property&gt;
+</code></pre><p>な感じで返ってくるくる。そこに更にディレクトリがあったらどうなるのかの検証のためにテストなディレクトリを作ってる</p><h4>ファイルを読み取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open&quot;
+</code></pre><p>こちらも50070なNamenodeな所のポートにぶん投げるとDatanode側にアクセスしろっと要求される。ちょっと気になるのがブロックサイズでチャンクされてるファイルとかどうなるんだっけと。ビッグデータが無いんでそこ未確認</p><h4>ファイル等を消す</h4><pre class="line-numbers"><code class="language-">curl -i -X DELETE &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&amp;user.name=kinjouj&quot;
+</code></pre><p>な感じでファイル・ディレクトリ等を削除可能</p><p>という感じでHTTPリクエストぶん投げるだけでHDFS操作が出来る模様。まぁ詳しい事は <a href="http://hadoop.apache.org/docs/r1.1.0/webhdfs.html" target="_blank" rel="noopener noreferrer">http://hadoop.apache.org/docs/r1.1.0/webhdfs.html</a> 見た方が良いかも</p><p>ちなみにPerlでWebHDFSを利用する場合にNet::Hadoop::WebHDFSっていうモジュールがある模様</p><h4>追記1</h4><p>appendサポートをするにはhdfs-site.xmlに設定が必要な模様</p><pre class="line-numbers"><code class="language-xml">&lt;property&gt;
   &lt;name&gt;dfs.support.append&lt;/name&gt;
   &lt;value&gt;true&lt;/value&gt;
 &lt;/property&gt;
-</code></pre>
-<h4 id="2-fluent-plugin-webhdfs-webhdfs">追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</h4>
-<pre class="line-numbers"><code class="language-">&lt;source&gt;
+</code></pre><h4>追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</h4><pre class="line-numbers"><code class="language-">&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -284,53 +229,67 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -338,17 +297,21 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -356,32 +319,41 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -389,14 +361,17 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -404,11 +379,13 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -416,20 +393,25 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -437,47 +419,43 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -485,20 +463,41 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -508,17 +507,21 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

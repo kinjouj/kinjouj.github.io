@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="http://laravel.com/docs/mailのドキュメント読み。まぁ名前の通りなんでセクション的な所辺りをこなしてみるMailAPIが使えるように設定app/config内にm" />
+    <meta name="description" content="http://laravel.com/docs/mailのドキュメント読み。まぁ名前の通りなんでセクション的な所辺りをこなしてみるMailAPIが使えるように設定app/config内にmail." />
     <title>Laravel使ってみた (20) - Mail - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/07/laravel-password-reminder-expiration.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/08/codemodel-annotation-processing-java-sourcecode-generation.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,39 +96,22 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#mail-api">Mail APIが使えるように設定</a>
-</li>
-<li>
-<a href="#part-c3374ca45fd31c30">メールを送る</a>
-</li>
-<li>
-<a href="#part-654296b22d9">余談</a>
-</li>
-</ul>
--->
-                <p><a href="http://laravel.com/docs/mail" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/mail</a> のドキュメント読み。まぁ名前の通りなんでセクション的な所辺りをこなしてみる</p>
-<!--more-->
-
-<h4 id="mail-api">Mail APIが使えるように設定</h4>
-<p>app/config内にmail.phpを設定しろっつーことで</p>
-<h4 id="part-c3374ca45fd31c30">メールを送る</h4>
-<p>メールを送るにはsendメソッドを使えば良い</p><pre class="line-numbers"><code class="language-php">Mail::send(
+                <!--[[1, "Mail APIが使えるように設定"], [2, "メールを送る"], [3, "余談"]]-->
+                <p><a href="http://laravel.com/docs/mail" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/mail</a> のドキュメント読み。まぁ名前の通りなんでセクション的な所辺りをこなしてみる</p><h4>Mail APIが使えるように設定</h4><p>app/config内にmail.phpを設定しろっつーことで</p><h4>メールを送る</h4><p>メールを送るにはsendメソッドを使えば良い</p><pre class="line-numbers"><code class="language-php">Mail::send(
     // 送るメール内容のビュー
-    "emails/sample",
+    &quot;emails/sample&quot;,
     // メール内容ビューにバインドするデータ。messageっていう変数名は避ける事
-    [ "diag" =&gt; "Hello World"],
+    [ &quot;diag&quot; =&gt; &quot;Hello World&quot;],
     function($msg) {
-        $msg-&gt;to("hoge@example.com")-&gt;subject("hello");
+        $msg-&gt;to(&quot;hoge@example.com&quot;)-&gt;subject(&quot;hello&quot;);
     }
 );
 </code></pre><p>的な感じで使うんだけれども、これデフォルトだとtext/htmlな形式なメールで送られるらしい。テキストメール(text/plain)で送る場合には</p><pre class="line-numbers"><code class="language-php">Mail::send(
-    ["text" =&gt; "emails.sample"]
+    [&quot;text&quot; =&gt; &quot;emails.sample&quot;]
     // 以下省略
 );
 </code></pre><p>っていう感じにすれば良いらしい。又、ドキュメントには書いてないけどAPI Referenceにはplainっていうメソッドが使える模様。上記のtext/plainで送りたいのならば</p><pre class="line-numbers"><code class="language-php">Mail::plain(
-    "emails.sample"
+    &quot;emails.sample&quot;
     // 以下省略
 );
 </code></pre><p>と同じな模様。なのでこっち使えば良いかと。で上記のメール送信なAPIは送信されるまでwaitされる訳なんだが、queue的な事でメールを送る事も出来る。そのAPIが</p>
@@ -138,19 +120,17 @@ ga("send", "pageview");
 <li>  later: 第一引数に指定した秒数だけをwaitして後に送信する?</li>
 <li>  queueOn: 第1引数に指定したキュー名でメールを処理する</li>
 </ul>
-<p>ちなみにlaterOnっていうのもある模様</p><p>まー大体な使い方はこんな感じ。attachとかで添付ファイルとかをつけたりとかも出来る訳なんだけど、例えばデータベースにあるBLOBなデータとかの場合には<a href="http://laravel.com/api/class-Illuminate.Mail.Message.html">Illuminate\Mail\Message</a>にattachDataやembedDataっていうAPI等を利用する事で可能なのかも。そこんとこは未検証</p><p>とりあえずドキュメント読み終わり。今回は結構あっさりしてた</p>
-<h4 id="part-654296b22d9">余談</h4>
-<p>Mail::pretendを使う事でメールを送らずにログに書きだすっていう方式が利用できる模様。Mail::pretendをするか、app/config/mail.php等の設定でpretendをtrueにすれば良い模様。pretendするとログに書き込まれるがそのメッセージ自体は送信先?のメールアドレスは記載されている模様。テストする名目とかであればそこチェックすればいいのかって所なのか</p><pre class="line-numbers"><code class="language-php">&lt;?php
+<p>ちなみにlaterOnっていうのもある模様</p><p>まー大体な使い方はこんな感じ。attachとかで添付ファイルとかをつけたりとかも出来る訳なんだけど、例えばデータベースにあるBLOBなデータとかの場合には<a href="http://laravel.com/api/class-Illuminate.Mail.Message.html">Illuminate\Mail\Message</a>にattachDataやembedDataっていうAPI等を利用する事で可能なのかも。そこんとこは未検証</p><p>とりあえずドキュメント読み終わり。今回は結構あっさりしてた</p><h4>余談</h4><p>Mail::pretendを使う事でメールを送らずにログに書きだすっていう方式が利用できる模様。Mail::pretendをするか、app/config/mail.php等の設定でpretendをtrueにすれば良い模様。pretendするとログに書き込まれるがそのメッセージ自体は送信先?のメールアドレスは記載されている模様。テストする名目とかであればそこチェックすればいいのかって所なのか</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class HogeControllerTest extends TestCase {
     public function test_send_email() {
         Mail::pretend();
 
         Log::listen(function($level, $message) {
-            $this-&gt;assertThat($level, $this-&gt;equalTo("info"));
+            $this-&gt;assertThat($level, $this-&gt;equalTo(&quot;info&quot;));
         });
 
-        $this-&gt;call("GET", "/");
+        $this-&gt;call(&quot;GET&quot;, &quot;/&quot;);
     }
 }
 </code></pre><p>Mail::prentedなログ書き込みはINFOレベルで入る模様。それでテスト十分ですっては正直言い切れない感はハンパない気がしますけど、んまぁテスト時に至らんメール大量発動しちゃうよりは良いかなと</p><p>とりあえずはMail::pretend使えばメールをログに書き出せる。但しアドレスだけ的な感じかと</p>
@@ -203,53 +183,67 @@ class HogeControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -257,17 +251,21 @@ class HogeControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -275,32 +273,41 @@ class HogeControllerTest extends TestCase {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -308,14 +315,17 @@ class HogeControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -323,11 +333,13 @@ class HogeControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -335,20 +347,25 @@ class HogeControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -356,47 +373,43 @@ class HogeControllerTest extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -404,20 +417,41 @@ class HogeControllerTest extends TestCase {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -427,17 +461,21 @@ class HogeControllerTest extends TestCase {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

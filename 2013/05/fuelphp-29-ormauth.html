@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2013-05-08 21:00:00 +0900">
+                <time datetime="2013-05-08T21:00:00+09:00">
                   <a href="/archives/2013/05">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -97,44 +96,30 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#orm-auth">Orm\Authのモデルが使うテーブルをマイグレーション</a>
-</li>
-<li>
-<a href="#fuel-app-config-auth-php">fuel/app/config/auth.php</a>
-</li>
-</ul>
--->
-                <p>これも1.6から入った物だと思うのだけど、まぁ名前の通り「SimpleAuthをOrmパッケージでやった物」的なスタンスなのかなと。まぁ「Orm自体だけでもパフォーマンスそんなに良いとは言えないような気がするのに、これ必要なんですか」っていう疑問がまず出たのだけど、まぁやってみましょうか的な感じで</p><p>恐らくはormパッケージも使うのでalways_loadにはorm及びauthが必要かと</p>
-<!--more-->
-
-<h4 id="orm-auth">Orm\Authのモデルが使うテーブルをマイグレーション</h4>
-<pre class="line-numbers"><code class="language-">oil r migrate --packages=auth
-</code></pre><p>っつーかauthパッケージで使うテーブルってマイグレーションで出来るのかと。それは知らんかった</p>
-<h4 id="fuel-app-config-auth-php">fuel/app/config/auth.php</h4>
-<p>fuel/packages/auth/config/auth.phpからベースはコピー</p><pre class="line-numbers"><code class="language-php">&lt;?php
+                <!--[[1, "Orm\\Authのモデルが使うテーブルをマイグレーション"], [2, "fuel/app/config/auth.php"]]-->
+                <p>これも1.6から入った物だと思うのだけど、まぁ名前の通り「SimpleAuthをOrmパッケージでやった物」的なスタンスなのかなと。まぁ「Orm自体だけでもパフォーマンスそんなに良いとは言えないような気がするのに、これ必要なんですか」っていう疑問がまず出たのだけど、まぁやってみましょうか的な感じで</p><p>恐らくはormパッケージも使うのでalways_loadにはorm及びauthが必要かと</p><h4>Orm\Authのモデルが使うテーブルをマイグレーション</h4><pre class="line-numbers"><code class="language-">oil r migrate --packages=auth
+</code></pre><p>っつーかauthパッケージで使うテーブルってマイグレーションで出来るのかと。それは知らんかった</p><h4>fuel/app/config/auth.php</h4><p>fuel/packages/auth/config/auth.phpからベースはコピー</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(
-    "driver" =&gt; "Ormauth",
-    "verify_multiple_logins" =&gt; false,
-    "salt" =&gt; "put_your_salt_here",
-    "iterations" =&gt; 10000,
+    &quot;driver&quot; =&gt; &quot;Ormauth&quot;,
+    &quot;verify_multiple_logins&quot; =&gt; false,
+    &quot;salt&quot; =&gt; &quot;put_your_salt_here&quot;,
+    &quot;iterations&quot; =&gt; 10000,
 );
-</code></pre><p>driverをOrmauthに変える。でその他もろもろな設定はfuel/packages/config/ormauth.phpがあるのでこれもコピーして内容を要件に応じて変えれば良い</p><p>これで終わり。あとは普通にAuthパッケージを使う用法で利用できる</p><pre class="line-numbers"><code class="language-php">Auth::create_user("demo", "demo", "demo@example.com");
+</code></pre><p>driverをOrmauthに変える。でその他もろもろな設定はfuel/packages/config/ormauth.phpがあるのでこれもコピーして内容を要件に応じて変えれば良い</p><p>これで終わり。あとは普通にAuthパッケージを使う用法で利用できる</p><pre class="line-numbers"><code class="language-php">Auth::create_user(&quot;demo&quot;, &quot;demo&quot;, &quot;demo@example.com&quot;);
 </code></pre><p>なのをoil consoleとか使って適当に作る。あとはコントローラーとビューを作る(ビューは省略)</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Sample extends Controller {
     public function action_index() {
         var_dump(Auth::check());
 
-        return View::forge("login");
+        return View::forge(&quot;login&quot;);
     }
 
     public function post_login() {
         Auth::login();
 
-        Response::redirect("sample");
+        Response::redirect(&quot;sample&quot;);
     }
 }
 </code></pre><p>ただAuth::checkな値を画面にvar_dumpするだけで、あとビューから入力されたユーザー名とパスワードでログインする処理と、その後にリダイレクトするだけ。まぁそこら辺はSimpleAuthと変わらないはずなので(ry</p><p>でOrmAuthを使うメリットとして、モデルリレーションを行なって利用する方式な仕様の場合には有効かも知れないってところかなと</p>
@@ -187,53 +172,67 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -241,17 +240,21 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -259,32 +262,41 @@ class Controller_Sample extends Controller {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -292,14 +304,17 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -307,11 +322,13 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -319,20 +336,25 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -340,47 +362,43 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -388,20 +406,41 @@ class Controller_Sample extends Controller {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -411,17 +450,21 @@ class Controller_Sample extends Controller {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

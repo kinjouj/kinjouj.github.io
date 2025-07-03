@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,86 +96,52 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#androidmanifest-xml">AndroidManifest.xml</a>
-</li>
-<li>
-<a href="#res-xml-accessibility_service-xml">res/xml/accessibility_service.xml</a>
-</li>
-<li>
-<a href="#mainactivity-java">MainActivity.java</a>
-</li>
-<li>
-<a href="#res-layout-notify-xml">res/layout/notify.xml</a>
-</li>
-<li>
-<a href="#sampleaccessibilityservice-java">SampleAccessibilityService.java</a>
-</li>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-<li>
-<a href="#2">追記2</a>
-</li>
-<li>
-<a href="#3">追記3</a>
-</li>
-</ul>
--->
-                <p>ちょっと前にDeskNotifierっていうスマフォの通知をPCにプッシュするというアプリがあったのを見て思ったのですけど、(Android)スマフォのNotificationって監視して取得したり出来る物なのかっていう所が不明だったので色々と調査</p><p>で調査結果としてAccessibilityServiceを使う事で可能な模様、という事でやってみた。まぁ詳しい事は公式ドキュメントに書いてあるんですけど</p>
-<!--more-->
+                <!--[[1, "AndroidManifest.xml"], [2, "res/xml/accessibility_service.xml"], [3, "MainActivity.java"], [4, "res/layout/notify.xml"], [5, "SampleAccessibilityService.java"], [6, "追記"], [7, "追記2"], [8, "追記3"]]-->
+                <p>ちょっと前にDeskNotifierっていうスマフォの通知をPCにプッシュするというアプリがあったのを見て思ったのですけど、(Android)スマフォのNotificationって監視して取得したり出来る物なのかっていう所が不明だったので色々と調査</p><p>で調査結果としてAccessibilityServiceを使う事で可能な模様、という事でやってみた。まぁ詳しい事は公式ドキュメントに書いてあるんですけど</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;sample.test&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot;&gt;
 
-<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="sample.test"
-    android:versionCode="1"
-    android:versionName="1.0"&gt;
-
-    &lt;uses-sdk android:minSdkVersion="16" android:targetSdkVersion="16" /&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;16&quot; android:targetSdkVersion=&quot;16&quot; /&gt;
 
     &lt;application
-        android:label="@string/app_name"
-        android:icon="@drawable/ic_launcher"
-        android:theme="@style/AppTheme"&gt;
+        android:label=&quot;@string/app_name&quot;
+        android:icon=&quot;@drawable/ic_launcher&quot;
+        android:theme=&quot;@style/AppTheme&quot;&gt;
 
-        &lt;activity android:name=".MainActivity" android:label="sample" android:exported="true"&gt;
+        &lt;activity android:name=&quot;.MainActivity&quot; android:label=&quot;sample&quot; android:exported=&quot;true&quot;&gt;
             &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.MAIN" /&gt;
-                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
             &lt;/intent-filter&gt;
         &lt;/activity&gt;
 
         &lt;service
-            android:name=".SampleAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"&gt;
+            android:name=&quot;.SampleAccessibilityService&quot;
+            android:permission=&quot;android.permission.BIND_ACCESSIBILITY_SERVICE&quot;&gt;
 
             &lt;intent-filter&gt;
-                &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;
+                &lt;action android:name=&quot;android.accessibilityservice.AccessibilityService&quot; /&gt;
             &lt;/intent-filter&gt;
 
             &lt;!-- AccessibilityService関係の設定リソースを設定 --&gt;
             &lt;meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service" /&gt;
+                android:name=&quot;android.accessibilityservice&quot;
+                android:resource=&quot;@xml/accessibility_service&quot; /&gt;
 
         &lt;/service&gt;
 
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><p>Activityはテスト名目でただNotificationを送るだけのActivity。でAccessibilityServiceを継承したクラスに&lt;service&gt;に設定しておく。んでそのサービスの設定が必要になるのでそれを&lt;meta-data&gt;で設定しておく</p>
-<h4 id="res-xml-accessibility_service-xml">res/xml/accessibility_service.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+</code></pre><p>Activityはテスト名目でただNotificationを送るだけのActivity。でAccessibilityServiceを継承したクラスに&lt;service&gt;に設定しておく。んでそのサービスの設定が必要になるのでそれを&lt;meta-data&gt;で設定しておく</p><h4>res/xml/accessibility_service.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;accessibility-service
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeNotificationStateChanged"
-    android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagDefault"
-    android:canRetrieveWindowContent="true" /&gt;
-</code></pre><p>こいつも公式ドキュメントに書いてあるので詳しい事は省略しますが、<span style="color: red">android:packageNames</span>を定義すると対象とするパッケージを限定出来る模様。今回それを定義していないのでグローバルになる模様(確証は無い)</p><p>でこれを設定してインストールした場合にAndroid端末の設定画面のユーザー補助な所にサービスとして表示されるようになる。デフォルトではOFFになっているのでこれを使う場合はONにしておく</p>
-<h4 id="mainactivity-java">MainActivity.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.test;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:accessibilityEventTypes=&quot;typeNotificationStateChanged&quot;
+    android:accessibilityFeedbackType=&quot;feedbackGeneric&quot;
+    android:accessibilityFlags=&quot;flagDefault&quot;
+    android:canRetrieveWindowContent=&quot;true&quot; /&gt;
+</code></pre><p>こいつも公式ドキュメントに書いてあるので詳しい事は省略しますが、<span style="color: red">android:packageNames</span>を定義すると対象とするパッケージを限定出来る模様。今回それを定義していないのでグローバルになる模様(確証は無い)</p><p>でこれを設定してインストールした場合にAndroid端末の設定画面のユーザー補助な所にサービスとして表示されるようになる。デフォルトではOFFになっているのでこれを使う場合はONにしておく</p><h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -194,21 +159,21 @@ public class MainActivity extends Activity {
         final NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
         Button btn = new Button(this);
-        btn.setText("start");
+        btn.setText(&quot;start&quot;);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 RemoteViews rv = new RemoteViews(getPackageName(), R.layout.notify);
-                rv.setTextViewText(android.R.id.title, "hoge fuga foobar");
+                rv.setTextViewText(android.R.id.title, &quot;hoge fuga foobar&quot;);
 
                 Notification.Builder builder = new Notification.Builder(v.getContext());
-                builder.setTicker("ticker");
+                builder.setTicker(&quot;ticker&quot;);
                 builder.setContent(rv);
                 builder.setSmallIcon(R.drawable.ic_launcher);
 
                 /*
                  * 今回、カスタムなViewを使うのでここらへんは省略
-                builder.setContentTitle("ABC");
+                builder.setContentTitle(&quot;ABC&quot;);
                 */
 
                 Notification n = builder.build();
@@ -220,159 +185,155 @@ public class MainActivity extends Activity {
         setContentView(btn);
     }
 }
-</code></pre><p>恐らくはデフォルトのNotificationのレイアウト構造自体はandroid.R.layout.notification_template_base(/path/to/aosp/framework/base/core/res/res/layout/notification_template_base.xml)だと思われる</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+</code></pre><p>恐らくはデフォルトのNotificationのレイアウト構造自体はandroid.R.layout.notification_template_base(/path/to/aosp/framework/base/core/res/res/layout/notification_template_base.xml)だと思われる</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;!-- Copyright (C) 2012 The Android Open Source Project
 
-     Licensed under the Apache License, Version 2.0 (the "License");
+     Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
 
 http://www.apache.org/licenses/LICENSE-2.0
 
      Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
+     distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
 --&gt;
 
-&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:internal="http://schemas.android.com/apk/prv/res/android"
-    android:background="@android:drawable/notification_bg"
-    android:id="@+id/status_bar_latest_event_content"
-    android:layout_width="match_parent"
-    android:layout_height="64dp"
-    internal:layout_minHeight="64dp"
-    internal:layout_maxHeight="64dp"
+&lt;FrameLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:internal=&quot;http://schemas.android.com/apk/prv/res/android&quot;
+    android:background=&quot;@android:drawable/notification_bg&quot;
+    android:id=&quot;@+id/status_bar_latest_event_content&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;64dp&quot;
+    internal:layout_minHeight=&quot;64dp&quot;
+    internal:layout_maxHeight=&quot;64dp&quot;
     &gt;
-    &lt;ImageView android:id="@+id/icon"
-        android:layout_width="@dimen/notification_large_icon_width"
-        android:layout_height="@dimen/notification_large_icon_height"
-        android:background="@android:drawable/notification_template_icon_bg"
-        android:scaleType="center"
+    &lt;ImageView android:id=&quot;@+id/icon&quot;
+        android:layout_width=&quot;@dimen/notification_large_icon_width&quot;
+        android:layout_height=&quot;@dimen/notification_large_icon_height&quot;
+        android:background=&quot;@android:drawable/notification_template_icon_bg&quot;
+        android:scaleType=&quot;center&quot;
         /&gt;
     &lt;LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="fill_vertical"
-        android:layout_marginStart="@dimen/notification_large_icon_width"
-        android:minHeight="@dimen/notification_large_icon_height"
-        android:orientation="vertical"
-        android:paddingEnd="8dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp"
-        android:gravity="top"
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_gravity=&quot;fill_vertical&quot;
+        android:layout_marginStart=&quot;@dimen/notification_large_icon_width&quot;
+        android:minHeight=&quot;@dimen/notification_large_icon_height&quot;
+        android:orientation=&quot;vertical&quot;
+        android:paddingEnd=&quot;8dp&quot;
+        android:paddingTop=&quot;2dp&quot;
+        android:paddingBottom=&quot;2dp&quot;
+        android:gravity=&quot;top&quot;
         &gt;
         &lt;LinearLayout
-            android:id="@+id/line1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="6dp"
-            android:layout_marginStart="8dp"
-            android:orientation="horizontal"
+            android:id=&quot;@+id/line1&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:paddingTop=&quot;6dp&quot;
+            android:layout_marginStart=&quot;8dp&quot;
+            android:orientation=&quot;horizontal&quot;
             &gt;
-            &lt;TextView android:id="@+id/title"
-                android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:fadingEdge="horizontal"
-                android:layout_weight="1"
+            &lt;TextView android:id=&quot;@+id/title&quot;
+                android:textAppearance=&quot;@style/TextAppearance.StatusBar.EventContent.Title&quot;
+                android:layout_width=&quot;match_parent&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:singleLine=&quot;true&quot;
+                android:ellipsize=&quot;marquee&quot;
+                android:fadingEdge=&quot;horizontal&quot;
+                android:layout_weight=&quot;1&quot;
                 /&gt;
-            &lt;ViewStub android:id="@+id/time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:visibility="gone"
-                android:layout="@layout/notification_template_part_time"
+            &lt;ViewStub android:id=&quot;@+id/time&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_weight=&quot;0&quot;
+                android:visibility=&quot;gone&quot;
+                android:layout=&quot;@layout/notification_template_part_time&quot;
                 /&gt;
-            &lt;ViewStub android:id="@+id/chronometer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:visibility="gone"
-                android:layout="@layout/notification_template_part_chronometer"
+            &lt;ViewStub android:id=&quot;@+id/chronometer&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_weight=&quot;0&quot;
+                android:visibility=&quot;gone&quot;
+                android:layout=&quot;@layout/notification_template_part_chronometer&quot;
                 /&gt;
         &lt;/LinearLayout&gt;
-        &lt;TextView android:id="@+id/text2"
-            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Line2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-2dp"
-            android:layout_marginBottom="-2dp"
-            android:layout_marginStart="8dp"
-            android:singleLine="true"
-            android:fadingEdge="horizontal"
-            android:ellipsize="marquee"
-            android:visibility="gone"
+        &lt;TextView android:id=&quot;@+id/text2&quot;
+            android:textAppearance=&quot;@style/TextAppearance.StatusBar.EventContent.Line2&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:layout_marginTop=&quot;-2dp&quot;
+            android:layout_marginBottom=&quot;-2dp&quot;
+            android:layout_marginStart=&quot;8dp&quot;
+            android:singleLine=&quot;true&quot;
+            android:fadingEdge=&quot;horizontal&quot;
+            android:ellipsize=&quot;marquee&quot;
+            android:visibility=&quot;gone&quot;
             /&gt;
         &lt;ProgressBar
-            android:id="@android:id/progress"
-            android:layout_width="match_parent"
-            android:layout_height="12dp"
-            android:layout_marginStart="8dp"
-            android:visibility="gone"
-            style="?android:attr/progressBarStyleHorizontal"
+            android:id=&quot;@android:id/progress&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;12dp&quot;
+            android:layout_marginStart=&quot;8dp&quot;
+            android:visibility=&quot;gone&quot;
+            style=&quot;?android:attr/progressBarStyleHorizontal&quot;
             /&gt;
         &lt;LinearLayout
-            android:id="@+id/line3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginStart="8dp"
+            android:id=&quot;@+id/line3&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:orientation=&quot;horizontal&quot;
+            android:gravity=&quot;center_vertical&quot;
+            android:layout_marginStart=&quot;8dp&quot;
             &gt;
-            &lt;TextView android:id="@+id/text"
-                android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:fadingEdge="horizontal"
+            &lt;TextView android:id=&quot;@+id/text&quot;
+                android:textAppearance=&quot;@style/TextAppearance.StatusBar.EventContent&quot;
+                android:layout_width=&quot;0dp&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_weight=&quot;1&quot;
+                android:layout_gravity=&quot;center&quot;
+                android:singleLine=&quot;true&quot;
+                android:ellipsize=&quot;marquee&quot;
+                android:fadingEdge=&quot;horizontal&quot;
                 /&gt;
-            &lt;TextView android:id="@+id/info"
-                android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="0"
-                android:singleLine="true"
-                android:gravity="center"
-                android:paddingStart="8dp"
+            &lt;TextView android:id=&quot;@+id/info&quot;
+                android:textAppearance=&quot;@style/TextAppearance.StatusBar.EventContent.Info&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_gravity=&quot;center&quot;
+                android:layout_weight=&quot;0&quot;
+                android:singleLine=&quot;true&quot;
+                android:gravity=&quot;center&quot;
+                android:paddingStart=&quot;8dp&quot;
                 /&gt;
-            &lt;ImageView android:id="@+id/right_icon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="center"
-                android:layout_weight="0"
-                android:layout_marginStart="8dp"
-                android:scaleType="centerInside"
-                android:visibility="gone"
-                android:drawableAlpha="153"
+            &lt;ImageView android:id=&quot;@+id/right_icon&quot;
+                android:layout_width=&quot;16dp&quot;
+                android:layout_height=&quot;16dp&quot;
+                android:layout_gravity=&quot;center&quot;
+                android:layout_weight=&quot;0&quot;
+                android:layout_marginStart=&quot;8dp&quot;
+                android:scaleType=&quot;centerInside&quot;
+                android:visibility=&quot;gone&quot;
+                android:drawableAlpha=&quot;153&quot;
                 /&gt;
         &lt;/LinearLayout&gt;
     &lt;/LinearLayout&gt;
 &lt;/FrameLayout&gt;
-</code></pre><p>これでR.id.titleが定義されているので、パッケージを含めるとandroid.R.id.titleになるんだと思われる。なのでカスタムViewのレイアウトでも<span style="color: red">android:id</span>な部分はandroidプレフィックスで指定する事でカスタムViewを使った場合にでもグローバルと差を無くして取得出来る(はず。これも確証無し)</p>
-<h4 id="res-layout-notify-xml">res/layout/notify.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+</code></pre><p>これでR.id.titleが定義されているので、パッケージを含めるとandroid.R.id.titleになるんだと思われる。なのでカスタムViewのレイアウトでも<span style="color: red">android:id</span>な部分はandroidプレフィックスで指定する事でカスタムViewを使った場合にでもグローバルと差を無くして取得出来る(はず。これも確証無し)</p><h4>res/layout/notify.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"&gt;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
 
     &lt;TextView
-        android:id="@android:id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" /&gt;
+        android:id=&quot;@android:id/title&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot; /&gt;
 
 &lt;/FrameLayout&gt;
-</code></pre><p>上で言った通りなので詳しい事は省略。だけど、AndroidコアのNotificationのレイアウトだとFrameLayoutになってた気がするので、レイアウトベースはFrameLayoutを使用する</p>
-<h4 id="sampleaccessibilityservice-java">SampleAccessibilityService.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><p>上で言った通りなので詳しい事は省略。だけど、AndroidコアのNotificationのレイアウトだとFrameLayoutになってた気がするので、レイアウトベースはFrameLayoutを使用する</p><h4>SampleAccessibilityService.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.accessibilityservice.AccessibilityService;
 import android.app.Notification;
@@ -385,13 +346,13 @@ import android.widget.Toast;
 
 public class SampleAccessibilityService extends AccessibilityService {
 
-    private static final String TAG = "SampleAccessibilityService";
+    private static final String TAG = &quot;SampleAccessibilityService&quot;;
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (!(event.getClassName().toString().startsWith("android.widget.Toast"))) {
+        if (!(event.getClassName().toString().startsWith(&quot;android.widget.Toast&quot;))) {
             for (CharSequence s : event.getText()) {
-                Toast.makeText(this, "text: " + s, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, &quot;text: &quot; + s, Toast.LENGTH_LONG).show();
             }
         }
 
@@ -414,20 +375,14 @@ public class SampleAccessibilityService extends AccessibilityService {
             return;
         }
 
-        Log.v(TAG, "text: " + textView.getText());
+        Log.v(TAG, &quot;text: &quot; + textView.getText());
     }
 
     @Override
     public void onInterrupt() {
     }
 }
-</code></pre><p>AccessibilityServiceを継承したクラスを作る。で検証はしてないんだけど、onServiceConnectedをオーバーライドして、setServiceInfo(AccessibilityServiceInfo)を設定する事で、上記で設定したaccessibility_service.xmlを使わずにサービスクラス側でコントロールする事も可能な模様(ってどっかのサイトに書いてた)</p><p>それとToastもNotificationとして認識されるのでそこ注意しておく。でToastの実体?っぽいのがandroid.widget.Toast$TNってなってるのでstartsWithでそこら辺チェックしておく。あとは取得されたNotificationからRemoteViewsを取得してそこのビューを取得してandroid.R.id.titleなUIコンポーネントにアクセスしてテキストを取得する事が可能な模様</p><p>ちなみにaccessibility_service.xmlの<span style="color:red">accessibilityEventTypes</span>によってはAccessibilityEventで取得出来る情報は限られている模様。そこも公式ドキュメントにしっかり書かれているので参照</p><p>公式ドキュメント: <a href="http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html" target="_blank" rel="noopener noreferrer">http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html</a></p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p>Android4.3からはNotificationListenerServiceを用いる事で容易に実現可能っぽい。既に<a href="/android43-notificationlistenerservice.html">検証済み</a></p>
-<h4 id="2">追記2</h4>
-<p>古いAndroidのバージョンに関しては<a href="/android-accessibilityservice-legacy-firmware.html">AccessibilityServiceを古いAndroidバージョンで動かす</a>にて補足済み</p>
-<h4 id="3">追記3</h4>
-<p>追記2のリンク先にも書いてますが</p>
+</code></pre><p>AccessibilityServiceを継承したクラスを作る。で検証はしてないんだけど、onServiceConnectedをオーバーライドして、setServiceInfo(AccessibilityServiceInfo)を設定する事で、上記で設定したaccessibility_service.xmlを使わずにサービスクラス側でコントロールする事も可能な模様(ってどっかのサイトに書いてた)</p><p>それとToastもNotificationとして認識されるのでそこ注意しておく。でToastの実体?っぽいのがandroid.widget.Toast$TNってなってるのでstartsWithでそこら辺チェックしておく。あとは取得されたNotificationからRemoteViewsを取得してそこのビューを取得してandroid.R.id.titleなUIコンポーネントにアクセスしてテキストを取得する事が可能な模様</p><p>ちなみにaccessibility_service.xmlの<span style="color:red">accessibilityEventTypes</span>によってはAccessibilityEventで取得出来る情報は限られている模様。そこも公式ドキュメントにしっかり書かれているので参照</p><p>公式ドキュメント: <a href="http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html" target="_blank" rel="noopener noreferrer">http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html</a></p><h4>追記</h4><p>Android4.3からはNotificationListenerServiceを用いる事で容易に実現可能っぽい。既に<a href="/android43-notificationlistenerservice.html">検証済み</a></p><h4>追記2</h4><p>古いAndroidのバージョンに関しては<a href="/android-accessibilityservice-legacy-firmware.html">AccessibilityServiceを古いAndroidバージョンで動かす</a>にて補足済み</p><h4>追記3</h4><p>追記2のリンク先にも書いてますが</p>
 <blockquote class="twitter-tweet" lang="ja">
   <p>
     Android4.xだと4.1までなら問題無いらしいが、それ以降だとandroid.permission.BIND_ACCESSIBILITY_SERVICEを指定してないとユーザー補助機能に出てこない
@@ -487,53 +442,67 @@ public class SampleAccessibilityService extends AccessibilityService {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -541,17 +510,21 @@ public class SampleAccessibilityService extends AccessibilityService {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -559,32 +532,41 @@ public class SampleAccessibilityService extends AccessibilityService {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -592,14 +574,17 @@ public class SampleAccessibilityService extends AccessibilityService {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -607,11 +592,13 @@ public class SampleAccessibilityService extends AccessibilityService {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -619,20 +606,25 @@ public class SampleAccessibilityService extends AccessibilityService {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -640,47 +632,43 @@ public class SampleAccessibilityService extends AccessibilityService {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -688,20 +676,41 @@ public class SampleAccessibilityService extends AccessibilityService {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -711,17 +720,21 @@ public class SampleAccessibilityService extends AccessibilityService {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2018-07-09 00:00:00 +0900">
+                <time datetime="2018-07-09T00:00:00+09:00">
                   <a href="/archives/2018/07">
                   <span class="post-date-year">2018</span>
                   <span class="hyphen">-</span>
@@ -97,33 +96,13 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#gemfile">Gemfile</a>
-</li>
-<li>
-<a href="#config-routes-rb">config/routes.rb</a>
-</li>
-<li>
-<a href="#app-controllers-auth_controller-rb">app/controllers/auth_controller.rb</a>
-</li>
-<li>
-<a href="#public-index-html">public/index.html</a>
-</li>
-</ul>
--->
-                <p>RailsでのWeb API呼び出しにJWT認証を使ってみる</p><p>※あくまでJWTを使ってみた的な感じなので本当ならknock等を利用したりだとかdeviseなどと連携出来るのを使うべきなんでしょうけど今回はそういう趣旨じゃないので</p>
-<h4 id="gemfile">Gemfile</h4>
-<p>単純に</p><pre class="line-numbers"><code class="language-ruby">gems "jwt"
-</code></pre><p>を追加するだけ</p>
-<h4 id="config-routes-rb">config/routes.rb</h4>
-<pre class="line-numbers"><code class="language-ruby">Rails.application.routes.draw do
-  get "/user", to: "auth#user"
-  post "/auth", to: "auth#auth"
+                <!--[[1, "Gemfile"], [2, "config/routes.rb"], [3, "app/controllers/auth_controller.rb"], [4, "public/index.html"]]-->
+                <p>RailsでのWeb API呼び出しにJWT認証を使ってみる</p><p>※あくまでJWTを使ってみた的な感じなので本当ならknock等を利用したりだとかdeviseなどと連携出来るのを使うべきなんでしょうけど今回はそういう趣旨じゃないので</p><h4>Gemfile</h4><p>単純に</p><pre class="line-numbers"><code class="language-ruby">gems &quot;jwt&quot;
+</code></pre><p>を追加するだけ</p><h4>config/routes.rb</h4><pre class="line-numbers"><code class="language-ruby">Rails.application.routes.draw do
+  get &quot;/user&quot;, to: &quot;auth#user&quot;
+  post &quot;/auth&quot;, to: &quot;auth#auth&quot;
 end
-</code></pre>
-<h4 id="app-controllers-auth_controller-rb">app/controllers/auth_controller.rb</h4>
-<pre class="line-numbers"><code class="language-ruby">require "jwt"
+</code></pre><h4>app/controllers/auth_controller.rb</h4><pre class="line-numbers"><code class="language-ruby">require &quot;jwt&quot;
 
 # ApplicationController = ActionController::API
 class AuthController &lt; ApplicationController
@@ -135,25 +114,23 @@ class AuthController &lt; ApplicationController
 
   def auth
     data = { userid: params[:userid] }
-    render plain: JWT.encode(data, Rails.application.secrets.secret_key_base, "HS256")
+    render plain: JWT.encode(data, Rails.application.secrets.secret_key_base, &quot;HS256&quot;)
   end
 
   private
 
   def authenticate
-    if request.headers["Authorization"].present?
-      token = request.headers['Authorization'].split(' ').last
-      @user = JWT.decode(token, Rails.application.secrets.secret_key_base, true, { algorithm: "HS256" })[0]
+    if request.headers[&quot;Authorization&quot;].present?
+      token = request.headers[&apos;Authorization&apos;].split(&apos; &apos;).last
+      @user = JWT.decode(token, Rails.application.secrets.secret_key_base, true, { algorithm: &quot;HS256&quot; })[0]
     else
-      render json: { status: "ERROR", message: "Not Authorized" }
+      render json: { status: &quot;ERROR&quot;, message: &quot;Not Authorized&quot; }
     end
   end
 
 end
-</code></pre><p>要は/userのAPIをコールするにはAuthorizationヘッダーにJWTトークンを仕込んでリクエストしなければならない。でそのトークン自体は/authから取得する事が出来るので、それをリクエストした結果をAuthorizationヘッダーに指定した上でリクエストする事でAPIをコールする事が出来るようになる感じ。でそのチェックをbefore_actionを使って呼び出してるだけ</p>
-<h4 id="public-index-html">public/index.html</h4>
-<p>JavaScript部分だけ抜粋</p><pre class="line-numbers"><code class="language-javascript">function getToken(userid) {
-  const token = localStorage["token"];
+</code></pre><p>要は/userのAPIをコールするにはAuthorizationヘッダーにJWTトークンを仕込んでリクエストしなければならない。でそのトークン自体は/authから取得する事が出来るので、それをリクエストした結果をAuthorizationヘッダーに指定した上でリクエストする事でAPIをコールする事が出来るようになる感じ。でそのチェックをbefore_actionを使って呼び出してるだけ</p><h4>public/index.html</h4><p>JavaScript部分だけ抜粋</p><pre class="line-numbers"><code class="language-javascript">function getToken(userid) {
+  const token = localStorage[&quot;token&quot;];
 
   if (token) {
     return new Promise(resolve =&gt; {
@@ -161,17 +138,17 @@ end
     });
   } else {
     return new Promise(resolve =&gt; {
-      fetch("/auth",
+      fetch(&quot;/auth&quot;,
         {
-          method: "POST",
+          method: &quot;POST&quot;,
           headers: {
-            "Content-Type": "application/json"
+            &quot;Content-Type&quot;: &quot;application/json&quot;
           },
-          body: JSON.stringify({ "userid": userid })
+          body: JSON.stringify({ &quot;userid&quot;: userid })
         }
       ).then(res =&gt; {
         res.text().then(token =&gt; {
-          localStorage["token"] = token;
+          localStorage[&quot;token&quot;] = token;
           resolve(token);
         });
       });
@@ -182,10 +159,10 @@ end
 function getUser(token) {
   return new Promise(resolve =&gt; {
     fetch(
-      "/user",
+      &quot;/user&quot;,
       {
         headers: {
-          "Authorization": token
+          &quot;Authorization&quot;: token
         }
       }
     ).then(res =&gt; {
@@ -196,7 +173,7 @@ function getUser(token) {
   });
 }
 
-getToken("hoge").then(token =&gt; {
+getToken(&quot;hoge&quot;).then(token =&gt; {
   getUser(token).then(data =&gt; {
     console.log(data);
   });
@@ -251,53 +228,67 @@ getToken("hoge").then(token =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -305,17 +296,21 @@ getToken("hoge").then(token =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -323,32 +318,41 @@ getToken("hoge").then(token =&gt; {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -356,14 +360,17 @@ getToken("hoge").then(token =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -371,11 +378,13 @@ getToken("hoge").then(token =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -383,20 +392,25 @@ getToken("hoge").then(token =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -404,47 +418,43 @@ getToken("hoge").then(token =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -452,20 +462,41 @@ getToken("hoge").then(token =&gt; {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -475,17 +506,21 @@ getToken("hoge").then(token =&gt; {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="Robolectricなテストプロジェクトをgradleで動かすなネタと若干似てますけど、こっちではandroidtoolkitなgradleプラグインを用いてAndroidアプリをビルドする、te" />
+    <meta name="description" content="[Robolectricなテストプロジェクトをgradleで動かす][1]なネタと若干似てますけど、こっちではandroidtoolkitなgradleプラグインを用いてAndroidアプリをビルド" />
     <title>gradle-android-toolkitでRobolectricを動かす - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/10/gradle-android-toolkit-android-studio.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/10/angularjs-1.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -99,23 +98,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#app-src-test-java-sample-test-mainactivitytest-java">/app/src/test/java/sample/test/MainActivityTest.java</a>
-</li>
-<li>
-<a href="#app-build-gradle">/app/build.gradle</a>
-</li>
-<li>
-<a href="#part-654296b22d9">余談</a>
-</li>
-</ul>
--->
-                <p><a href="/robolectric-project-gradle-test.html">Robolectricなテストプロジェクトをgradleで動かす</a>なネタと若干似てますけど、こっちではandroid toolkitなgradleプラグインを用いてAndroidアプリをビルドする、testタスクを利用してsrc/test/javaにあるクラスをRobolectric利用でテストを実行するっていう方式をやってみた</p>
-<!--more-->
-
-<h4 id="app-src-test-java-sample-test-mainactivitytest-java">/app/src/test/java/sample/test/MainActivityTest.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.test;
+                <!--[[1, "/app/src/test/java/sample/test/MainActivityTest.java"], [2, "/app/build.gradle"], [3, "余談"]]-->
+                <p>[Robolectricなテストプロジェクトをgradleで動かす][1]なネタと若干似てますけど、こっちではandroid toolkitなgradleプラグインを用いてAndroidアプリをビルドする、testタスクを利用してsrc/test/javaにあるクラスをRobolectric利用でテストを実行するっていう方式をやってみた</p><h4>/app/src/test/java/sample/test/MainActivityTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -146,23 +130,21 @@ public class MainActivityTest {
         assertThat(activity.toast, nullValue());
     }
 }
-</code></pre><p>んなテストを用意しておいて、それをgradleで動かすだけ</p>
-<h4 id="app-build-gradle">/app/build.gradle</h4>
-<pre class="line-numbers"><code class="language-groovy">buildscript {
+</code></pre><p>んなテストを用意しておいて、それをgradleで動かすだけ</p><h4>/app/build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:0.6.1"
+        classpath &quot;com.android.tools.build:gradle:0.6.1&quot;
     }
 }
 
-apply plugin: "android"
+apply plugin: &quot;android&quot;
 
 sourceSets {
     unitTest {
-        java.srcDir file("src/test/java")
+        java.srcDir file(&quot;src/test/java&quot;)
     }
 }
 
@@ -171,16 +153,16 @@ repositories {
 }
 
 dependencies {
-    unitTestCompile files("/opt/android/platforms/android-18/android.jar")
-    unitTestCompile files("${buildDir}/classes/release")
-    unitTestCompile "junit:junit:4.11"
-    unitTestCompile "org.hamcrest:hamcrest-all:1.3"
-    unitTestCompile "org.robolectric:robolectric:2.2"
+    unitTestCompile files(&quot;/opt/android/platforms/android-18/android.jar&quot;)
+    unitTestCompile files(&quot;${buildDir}/classes/release&quot;)
+    unitTestCompile &quot;junit:junit:4.11&quot;
+    unitTestCompile &quot;org.hamcrest:hamcrest-all:1.3&quot;
+    unitTestCompile &quot;org.robolectric:robolectric:2.2&quot;
 }
 
 android {
     compileSdkVersion 18
-    buildToolsVersion "18.1.1"
+    buildToolsVersion &quot;18.1.1&quot;
 
     defaultConfig {
         minSdkVersion 8
@@ -199,9 +181,7 @@ check.dependsOn test
 <li>テストするにあたってのandroid.jarのクラスパスをしないといけない</li>
 <li>src/test/javaがAndroid Studioでソースディレクトリとして認識してくれない</li>
 </ul>
-<p>2に関してはAndroid Studioでsrc/test/javaなところをSource Rootとして設定すれば問題無い模様</p><p>という感じでtestタスクを動かすと</p><p><img src="/images/2014/01/2013102014001.png" alt="image" /></p><p>以上。Robolectricプラグインはあるし普通にそれ使えば良くねっていう感じなんだがなって所</p>
-<h4 id="part-654296b22d9">余談</h4>
-<p>Androidの通常のテスト方式であるInstrumentationTestRunnerなテストはsrc/instrumentTest/javaに書けば良い模様。なんかドキュメントに「run instrumentTest」とかそんな感じで書いてるけどタスク一覧みてもそれが無い。「connectedInstrumentTest」かなって思って実行したら普通に実行できた</p><p>ちなみにsrc/instrumentTestは変更できるっぽそう。sourceSets -&gt; instrumentTest.setRoot辺りで設定すれば良いとか</p>
+<p>2に関してはAndroid Studioでsrc/test/javaなところをSource Rootとして設定すれば問題無い模様</p><p>という感じでtestタスクを動かすと</p><p><img src="/images/2014/01/2013102014001.png" alt="image" /></p><p>以上。Robolectricプラグインはあるし普通にそれ使えば良くねっていう感じなんだがなって所</p><h4>余談</h4><p>Androidの通常のテスト方式であるInstrumentationTestRunnerなテストはsrc/instrumentTest/javaに書けば良い模様。なんかドキュメントに「run instrumentTest」とかそんな感じで書いてるけどタスク一覧みてもそれが無い。「connectedInstrumentTest」かなって思って実行したら普通に実行できた</p><p>ちなみにsrc/instrumentTestは変更できるっぽそう。sourceSets -&gt; instrumentTest.setRoot辺りで設定すれば良いとか</p><p> [1]: /robolectric-project-gradle-test.html</p>
               </div>
             </div>
           </div>
@@ -251,53 +231,67 @@ check.dependsOn test
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -305,17 +299,21 @@ check.dependsOn test
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -323,32 +321,41 @@ check.dependsOn test
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -356,14 +363,17 @@ check.dependsOn test
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -371,11 +381,13 @@ check.dependsOn test
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -383,20 +395,25 @@ check.dependsOn test
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -404,47 +421,43 @@ check.dependsOn test
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -452,20 +465,41 @@ check.dependsOn test
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -475,17 +509,21 @@ check.dependsOn test
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

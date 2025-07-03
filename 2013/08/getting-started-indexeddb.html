@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="今作ってる物ではWebSQLDatabaseを採用しているのだけど、これindexedDBが良いんじゃないのかっていうのを思ったので今更ながらちょいと調査的にやってみた要件単純にURLを格" />
+    <meta name="description" content="今作ってる物ではWebSQLDatabaseを採用しているのだけど、これindexedDBが良いんじゃないのかっていうのを思ったので今更ながらちょいと調査的にやってみた要件単純にURLを格納するi" />
     <title>ざっくりとindexedDBを使ってみる - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/08/chrome-extension-google-app-engine-oauth.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/08/com-google-appengine-api-oauth-oauthservice-testing.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,43 +96,29 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654311259e9">要件</a>
-</li>
-<li>
-<a href="#store-js">store.js</a>
-</li>
-</ul>
--->
-                <p>今作ってる物ではWeb SQL Databaseを採用しているのだけど、これindexedDBが良いんじゃないのかっていうのを思ったので今更ながらちょいと調査的にやってみた</p>
-<!--more-->
+                <!--[[1, "要件"], [2, "store.js"]]-->
+                <p>今作ってる物ではWeb SQL Databaseを採用しているのだけど、これindexedDBが良いんじゃないのかっていうのを思ったので今更ながらちょいと調査的にやってみた</p><h4>要件</h4><p>単純にURLを格納するindexedDBを構築して、一覧取得・保管・削除を持つJavaScriptオブジェクトで操作できるようにする。</p><h4>store.js</h4><pre class="line-numbers"><code class="language-js">(function() {
 
-<h4 id="part-654311259e9">要件</h4>
-<p>単純にURLを格納するindexedDBを構築して、一覧取得・保管・削除を持つJavaScriptオブジェクトで操作できるようにする。</p>
-<h4 id="store-js">store.js</h4>
-<pre class="line-numbers"><code class="language-js">(function() {
-
-  "use strict";
+  &quot;use strict&quot;;
 
   var Share = (function() {
 
     function Share() {}
 
     Share.prototype.getDB = function(callback) {
-      var req = indexedDB.open("shares");
+      var req = indexedDB.open(&quot;shares&quot;);
 
       req.onupgradeneeded = function() {
         var db = req.result;
 
         var store = db.createObjectStore(
-          "share",
+          &quot;share&quot;,
           {
-            "keyPath": "id",
-            "autoIncrement": true
+            &quot;keyPath&quot;: &quot;id&quot;,
+            &quot;autoIncrement&quot;: true
           }
         );
-        store.createIndex("by_url", "url", { "unique": true });
+        store.createIndex(&quot;by_url&quot;, &quot;url&quot;, { &quot;unique&quot;: true });
       };
 
       req.onsuccess = function() {
@@ -143,12 +128,12 @@ ga("send", "pageview");
 
     Share.prototype.urls = function(callback) {
       this.getDB(function(db) {
-        var tx = db.transaction("share", "readonly");
-        var store = tx.objectStore("share");
+        var tx = db.transaction(&quot;share&quot;, &quot;readonly&quot;);
+        var store = tx.objectStore(&quot;share&quot;);
 
         // var req = store.openCursor();
 
-        var index = store.index("by_url");
+        var index = store.index(&quot;by_url&quot;);
         var req = index.openCursor();
 
         var results = [];
@@ -170,9 +155,9 @@ ga("send", "pageview");
 
     Share.prototype.save = function(url, callback) {
       this.getDB(function(db) {
-        var tx = db.transaction("share", "readwrite");
-        var store = tx.objectStore("share");
-        var result = store.put({ "url": url });
+        var tx = db.transaction(&quot;share&quot;, &quot;readwrite&quot;);
+        var store = tx.objectStore(&quot;share&quot;);
+        var result = store.put({ &quot;url&quot;: url });
 
         callback();
       });
@@ -180,10 +165,10 @@ ga("send", "pageview");
 
     Share.prototype.delete = function(id) {
       this.getDB(function(db) {
-        console.log("delete");
+        console.log(&quot;delete&quot;);
 
-        var tx = db.transaction("share", "readwrite");
-        var store = tx.objectStore("share");
+        var tx = db.transaction(&quot;share&quot;, &quot;readwrite&quot;);
+        var store = tx.objectStore(&quot;share&quot;);
 
         var req = store.delete(id);
         req.onsuccess = function() {
@@ -200,15 +185,15 @@ ga("send", "pageview");
 
   var s = new Share();
 
-  s.save("foobar", function(result) {
+  s.save(&quot;foobar&quot;, function(result) {
     s.urls(function(results) {
       results.forEach(function(result) {
         var id = result.id;
         var url = result.url;
 
-        console.log(id + ": " + url);
+        console.log(id + &quot;: &quot; + url);
 
-        if (url === "foobar") {
+        if (url === &quot;foobar&quot;) {
           s.delete(id);
         }
       });
@@ -266,53 +251,67 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -320,17 +319,21 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -338,32 +341,41 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -371,14 +383,17 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -386,11 +401,13 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -398,20 +415,25 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -419,47 +441,43 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -467,20 +485,41 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -490,17 +529,21 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="StrutsにあるActionFormBeansの機能っぽいのを使うには@ActionFormアノテーションを使えば良いらしいSample1Action.javapackagesampl" />
+    <meta name="description" content="StrutsにあるActionFormBeansの機能っぽいのを使うには@ActionFormアノテーションを使えば良いらしいSample1Action.javapackagesample.ac" />
     <title>SAStrutsを勉強してみる (2) - ActionForm - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/10/sastruts-1-getting-start.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/10/sastruts-3-s2jdbc.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,23 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#sample1action-java">Sample1Action.java</a>
-</li>
-<li>
-<a href="#sample1form-java">Sample1Form.java</a>
-</li>
-<li>
-<a href="#web-inf-views-sample1-index-jsp">WEB-INF/views/sample1/index.jsp</a>
-</li>
-</ul>
--->
-                <p>StrutsにあるAction Form Beansの機能っぽいのを使うには@ActionFormアノテーションを使えば良いらしい</p>
-<!--more-->
-
-<h4 id="sample1action-java">Sample1Action.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.action;
+                <!--[[1, "Sample1Action.java"], [2, "Sample1Form.java"], [3, "WEB-INF/views/sample1/index.jsp"]]-->
+                <p>StrutsにあるAction Form Beansの機能っぽいのを使うには@ActionFormアノテーションを使えば良いらしい</p><h4>Sample1Action.java</h4><pre class="line-numbers"><code class="language-java">package sample.action;
 
 import javax.annotation.Resource;
 
@@ -132,30 +116,28 @@ public class Sample1Action {
 
     @Execute(validator = false, removeActionForm = true)
     public String index() {
-        return "index.jsp";
+        return &quot;index.jsp&quot;;
     }
 
     @Execute(
-        input = "/sample1?redirect=true",
+        input = &quot;/sample1?redirect=true&quot;,
         saveErrors = SaveType.SESSION,
         redirect = true
     )
     public String submit() {
         int num = Integer.parseInt(sample1Form.num);
 
-        return "show/" + num;
+        return &quot;show/&quot; + num;
     }
 
-    @Execute(validator = false, urlPattern = "show/{num}")
+    @Execute(validator = false, urlPattern = &quot;show/{num}&quot;)
     public String doShow() {
-        ResponseUtil.write("num: " + sample1Form.num, "text/plain");
+        ResponseUtil.write(&quot;num: &quot; + sample1Form.num, &quot;text/plain&quot;);
 
         return null;
     }
 }
-</code></pre>
-<h4 id="sample1form-java">Sample1Form.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.form;
+</code></pre><h4>Sample1Form.java</h4><pre class="line-numbers"><code class="language-java">package sample.form;
 
 import java.io.Serializable;
 
@@ -170,7 +152,7 @@ public class Sample1Form implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Required(target = "submit")
+    @Required(target = &quot;submit&quot;)
     @IntegerType
     public String num;
 
@@ -178,9 +160,7 @@ public class Sample1Form implements Serializable {
         return num;
     }
 }
-</code></pre><p>JSPで値を参照する場合等にはゲッターメソッドが必要な模様。あとは前回でもやったようにフォームで必要なフィールドに@Required等のアノテーションを付ける。で実行メソッドによって必要なフォームのパーツ違う場合には@Requiredアノテーションのtarget引数にメソッド名を指定すれば良い。</p>
-<h4 id="web-inf-views-sample1-index-jsp">WEB-INF/views/sample1/index.jsp</h4>
-<pre class="line-numbers"><code class="language-jsp">&lt;%@ page pageEncoding="UTF-8" %&gt;
+</code></pre><p>JSPで値を参照する場合等にはゲッターメソッドが必要な模様。あとは前回でもやったようにフォームで必要なフィールドに@Required等のアノテーションを付ける。で実行メソッドによって必要なフォームのパーツ違う場合には@Requiredアノテーションのtarget引数にメソッド名を指定すれば良い。</p><h4>WEB-INF/views/sample1/index.jsp</h4><pre class="line-numbers"><code class="language-jsp">&lt;%@ page pageEncoding=&quot;UTF-8&quot; %&gt;
 &lt;html&gt;
   &lt;body&gt;
     &lt;s:form&gt;
@@ -188,8 +168,8 @@ public class Sample1Form implements Serializable {
         // Sample1Formを参照する。 この際にアクセスするプロパティにはゲッターメソッドが必要な模様。又、今回はindexメソッドの@ExecuteアノテーションでremoveActionForm = trueをしているので参照できない (エラーにはならず何も出てこない)
         ${sample1Form.num}
       --%&gt;
-      &lt;html:text property="num" /&gt;
-      &lt;input type="submit" name="submit" value="send" /&gt;
+      &lt;html:text property=&quot;num&quot; /&gt;
+      &lt;input type=&quot;submit&quot; name=&quot;submit&quot; value=&quot;send&quot; /&gt;
     &lt;/s:form&gt;
     &lt;html:errors /&gt;
   &lt;/body&gt;
@@ -244,53 +224,67 @@ public class Sample1Form implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -298,17 +292,21 @@ public class Sample1Form implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -316,32 +314,41 @@ public class Sample1Form implements Serializable {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -349,14 +356,17 @@ public class Sample1Form implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -364,11 +374,13 @@ public class Sample1Form implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -376,20 +388,25 @@ public class Sample1Form implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -397,47 +414,43 @@ public class Sample1Form implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -445,20 +458,41 @@ public class Sample1Form implements Serializable {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -468,17 +502,21 @@ public class Sample1Form implements Serializable {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

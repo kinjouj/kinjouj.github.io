@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="※以下の手法を使うとセキュリティ問題になる原因になるので注意適当にnginxでオレオレ証明書を使ってHTTPSサーバーを構築した。じゃあそれをJavaで接続してみようimportjava.net" />
+    <meta name="description" content="※以下の手法を使うとセキュリティ問題になる原因になるので注意適当にnginxでオレオレ証明書を使ってHTTPSサーバーを構築した。じゃあそれをJavaで接続してみようimportjava.net.U" />
     <title>オレオレHTTPSにJavaから接続するメモ - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/01/fetchmail.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/01/mock-javamail.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,27 +95,14 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#1-keytool">方法1. keytoolで証明書を信頼するように追加</a>
-</li>
-<li>
-<a href="#2">方法2. 証明書承認要求?を無視する</a>
-</li>
-<li>
-<a href="#part-654296b22d9">余談</a>
-</li>
-</ul>
--->
-                <p><span style="color: red">※以下の手法を使うとセキュリティ問題になる原因になるので注意</span></p><p>適当にnginxでオレオレ証明書を使ってHTTPSサーバーを構築した。じゃあそれをJavaで接続してみよう</p>
-<!--more-->
-<pre class="line-numbers"><code class="language-java">import java.net.URL;
+                <!--[[1, "方法1. keytoolで証明書を信頼するように追加"], [2, "方法2. 証明書承認要求?を無視する"], [3, "余談"]]-->
+                <p><span style="color: red">※以下の手法を使うとセキュリティ問題になる原因になるので注意</span></p><p>適当にnginxでオレオレ証明書を使ってHTTPSサーバーを構築した。じゃあそれをJavaで接続してみよう</p><pre class="line-numbers"><code class="language-java">import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 public class Client {
     public static void main(String[] args) throws Exception {
 
-        URL url = new URL("https://localhost");
+        URL url = new URL(&quot;https://localhost&quot;);
         HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
         conn.setDoOutput(true);
 
@@ -127,15 +113,11 @@ public class Client {
 <blockquote>
 javax.net.ssl.SSLHandshakeException: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
 </blockquote>
-<p>的なエラーが出て処理出来ない</p><p>てな訳でそれを解決する方法が今の所だと2つ</p>
-<h4 id="1-keytool">方法1. keytoolで証明書を信頼するように追加</h4>
-<pre class="line-numbers"><code class="language-">keytool \
+<p>的なエラーが出て処理出来ない</p><p>てな訳でそれを解決する方法が今の所だと2つ</p><h4>方法1. keytoolで証明書を信頼するように追加</h4><pre class="line-numbers"><code class="language-">keytool \
     -import \
     -file /path/to/ssl.crt \
-    -keystore "$JAVA_HOME/jre/lib/security/cacerts"
-</code></pre><p>alias指定してないけど指定しなかったら<span style="color: red">mykey</span>っていうaliasになる模様。-importじゃなくて-deleteにすれば消すのも可能</p><p>設定したら上記のコードをそのまま動かす。問題無ければ例外出ずにステータスコードが出る</p><p>参考: <a href="http://shinodogg.com/?p=3849" target="_blank" rel="noopener noreferrer">http://shinodogg.com/?p=3849</a></p>
-<h4 id="2">方法2. 証明書承認要求?を無視する</h4>
-<p>※以下のコードを利用するとセキュリティ脆弱性になるので可能な限り避けるべきかと</p><pre class="line-numbers"><code class="language-java">import java.net.URL;
+    -keystore &quot;$JAVA_HOME/jre/lib/security/cacerts&quot;
+</code></pre><p>alias指定してないけど指定しなかったら<span style="color: red">mykey</span>っていうaliasになる模様。-importじゃなくて-deleteにすれば消すのも可能</p><p>設定したら上記のコードをそのまま動かす。問題無ければ例外出ずにステータスコードが出る</p><p>参考: <a href="http://shinodogg.com/?p=3849" target="_blank" rel="noopener noreferrer">http://shinodogg.com/?p=3849</a></p><h4>方法2. 証明書承認要求?を無視する</h4><p>※以下のコードを利用するとセキュリティ脆弱性になるので可能な限り避けるべきかと</p><pre class="line-numbers"><code class="language-java">import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -159,10 +141,10 @@ public class Client {
             }
         };
 
-        SSLContext ctx = SSLContext.getInstance("SSL");
+        SSLContext ctx = SSLContext.getInstance(&quot;SSL&quot;);
         ctx.init(null, tm, new SecureRandom());
 
-        URL url = new URL("https://localhost");
+        URL url = new URL(&quot;https://localhost&quot;);
         HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
         conn.setDoOutput(true);
         conn.setSSLSocketFactory(ctx.getSocketFactory());
@@ -171,9 +153,7 @@ public class Client {
         System.out.println(conn.getResponseCode());
     }
 }
-</code></pre>
-<h4 id="part-654296b22d9">余談</h4>
-<p>Androidの場合には公式にドキュメントがあるのでそれ参考</p><p><a href="http://developer.android.com/training/articles/security-ssl.html" target="_blank" rel="noopener noreferrer">http://developer.android.com/training/articles/security-ssl.html</a></p>
+</code></pre><h4>余談</h4><p>Androidの場合には公式にドキュメントがあるのでそれ参考</p><p><a href="http://developer.android.com/training/articles/security-ssl.html" target="_blank" rel="noopener noreferrer">http://developer.android.com/training/articles/security-ssl.html</a></p>
               </div>
             </div>
           </div>
@@ -223,53 +203,67 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -277,17 +271,21 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -295,32 +293,41 @@ public class Client {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -328,14 +335,17 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -343,11 +353,13 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -355,20 +367,25 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -376,47 +393,43 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -424,20 +437,41 @@ public class Client {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -447,17 +481,21 @@ public class Client {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

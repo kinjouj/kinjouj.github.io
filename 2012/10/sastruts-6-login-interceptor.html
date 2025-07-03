@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="http://d.hatena.ne.jp/idesaku/20081226/1230263190をそのまま試してみる。まぁちょっとだけ違いますけど要件sample.action.dashb" />
+    <meta name="description" content="http://d.hatena.ne.jp/idesaku/20081226/1230263190をそのまま試してみる。まぁちょっとだけ違いますけど要件sample.action.dashboard" />
     <title>SAStrutsを勉強してみる (6) - LoginInterceptor - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/10/sastruts-5-mock.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/10/android-support-v13-dreams-basicdream.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,40 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654311259e9">要件</a>
-</li>
-<li>
-<a href="#user-java">User.java</a>
-</li>
-<li>
-<a href="#userdto-java">UserDto.java</a>
-</li>
-<li>
-<a href="#logininterceptor-java">LoginInterceptor.java</a>
-</li>
-<li>
-<a href="#customizer-dicon">customizer.dicon</a>
-</li>
-<li>
-<a href="#indexaction-java">IndexAction.java</a>
-</li>
-<li>
-<a href="#loginaction-java">LoginAction.java</a>
-</li>
-<li>
-<a href="#part-654296b22d9">余談</a>
-</li>
-</ul>
--->
-                <p><a href="http://d.hatena.ne.jp/idesaku/20081226/1230263190" target="_blank" rel="noopener noreferrer">http://d.hatena.ne.jp/idesaku/20081226/1230263190</a> をそのまま試してみる。まぁちょっとだけ違いますけど</p>
-<!--more-->
-
-<h4 id="part-654311259e9">要件</h4>
-<p>sample.action.dashboardなパッケージにあるアクションを参照する場合にはログインが必要なのでLoginActionに飛ばす。但し、sample.action.dashboard.LoginActionだけは非認証でアクセス出来るようにしないといけないので(ry</p><p>んまぁ上記のリンクにあるようにインターセプタでそこら辺をコントロールする。で、必要なのはインターセプタ及びその設定と各種アクションクラスとビュー、んでユーザー情報を参照するEntityとその情報をセッションで管理するDtoオブジェクトクラス</p>
-<h4 id="user-java">User.java</h4>
-<p>ユーザー情報を参照するエンティティクラス</p><pre class="line-numbers"><code class="language-java">package sample.entity;
+                <!--[[1, "要件"], [2, "User.java"], [3, "UserDto.java"], [4, "LoginInterceptor.java"], [5, "customizer.dicon"], [6, "IndexAction.java"], [7, "LoginAction.java"], [8, "余談"]]-->
+                <p><a href="http://d.hatena.ne.jp/idesaku/20081226/1230263190" target="_blank" rel="noopener noreferrer">http://d.hatena.ne.jp/idesaku/20081226/1230263190</a> をそのまま試してみる。まぁちょっとだけ違いますけど</p><h4>要件</h4><p>sample.action.dashboardなパッケージにあるアクションを参照する場合にはログインが必要なのでLoginActionに飛ばす。但し、sample.action.dashboard.LoginActionだけは非認証でアクセス出来るようにしないといけないので(ry</p><p>んまぁ上記のリンクにあるようにインターセプタでそこら辺をコントロールする。で、必要なのはインターセプタ及びその設定と各種アクションクラスとビュー、んでユーザー情報を参照するEntityとその情報をセッションで管理するDtoオブジェクトクラス</p><h4>User.java</h4><p>ユーザー情報を参照するエンティティクラス</p><pre class="line-numbers"><code class="language-java">package sample.entity;
 
 import java.io.Serializable;
 
@@ -142,7 +109,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "user")
+@Table(name = &quot;user&quot;)
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -151,15 +118,13 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     public int id;
 
-    @Column(name = "username")
+    @Column(name = &quot;username&quot;)
     public String userName;
 
-    @Column(name = "password")
+    @Column(name = &quot;password&quot;)
     public String password;
 }
-</code></pre><p>というような感じでテーブルも作っておく</p>
-<h4 id="userdto-java">UserDto.java</h4>
-<p>ユーザー情報を保持しているEntityから情報をセッションで管理するクラス</p><pre class="line-numbers"><code class="language-java">package sample.dto;
+</code></pre><p>というような感じでテーブルも作っておく</p><h4>UserDto.java</h4><p>ユーザー情報を保持しているEntityから情報をセッションで管理するクラス</p><pre class="line-numbers"><code class="language-java">package sample.dto;
 
 import java.io.Serializable;
 
@@ -175,9 +140,7 @@ public class UserDto implements Serializable {
     public String userName;
 
 }
-</code></pre><p><a href="http://sastruts.seasar.org/featureReference.html#Action" target="_blank" rel="noopener noreferrer">http://sastruts.seasar.org/featureReference.html#Action</a> によると「ログインしたユーザに関する情報など、 アクションフォーム以外をセッションで管理する場合、 ルートパッケージ.dtoにXxxDto作成し、@Componentでセッションで管理されるように定義します」との事らしい。でこれを下にインターセプタで認証済みユーザーセッションがあるかないかとかをチェックする</p>
-<h4 id="logininterceptor-java">LoginInterceptor.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.interceptor;
+</code></pre><p><a href="http://sastruts.seasar.org/featureReference.html#Action" target="_blank" rel="noopener noreferrer">http://sastruts.seasar.org/featureReference.html#Action</a> によると「ログインしたユーザに関する情報など、 アクションフォーム以外をセッションで管理する場合、 ルートパッケージ.dtoにXxxDto作成し、@Componentでセッションで管理されるように定義します」との事らしい。でこれを下にインターセプタで認証済みユーザーセッションがあるかないかとかをチェックする</p><h4>LoginInterceptor.java</h4><pre class="line-numbers"><code class="language-java">package sample.interceptor;
 
 import javax.annotation.Resource;
 
@@ -199,60 +162,58 @@ public class LoginInterceptor extends AbstractInterceptor {
         // @Executeアノテーションをあるかチェック
         if (inv.getMethod().isAnnotationPresent(Execute.class)) {
             // ログインユーザーセッションがあるかをチェック
-            if (userDto != null && userDto.userName != null) {
+            if (userDto != null &amp;&amp; userDto.userName != null) {
                 // あればそのままリクエストを流す
                 return inv.proceed();
             }
 
             // なければログインなアクションにぶっ飛ばす
-            return "/dashboard/login?redirect=true";
+            return &quot;/dashboard/login?redirect=true&quot;;
         }
 
         return null;
     }
 }
-</code></pre><p>nullを返すべきかで悩んだのですが、とりあえずそのままにしておく。でこれのパッケージ名なんすけど、「NamingContextImpl.addRootPackageName(convension.dicon) + <q>.interceptor</q>」という感じにすれば、規約に沿って注入される模様げ。でこいつを作動させる為にcustomizer.diconをいじる</p>
-<h4 id="customizer-dicon">customizer.dicon</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-&lt;!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container 2.4//EN" "http://www.seasar.org/dtd/components24.dtd"&gt;
+</code></pre><p>nullを返すべきかで悩んだのですが、とりあえずそのままにしておく。でこれのパッケージ名なんすけど、「NamingContextImpl.addRootPackageName(convension.dicon) + <q>.interceptor</q>」という感じにすれば、規約に沿って注入される模様げ。でこいつを作動させる為にcustomizer.diconをいじる</p><h4>customizer.dicon</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE components PUBLIC &quot;-//SEASAR//DTD S2Container 2.4//EN&quot; &quot;http://www.seasar.org/dtd/components24.dtd&quot;&gt;
 &lt;components&gt;
-    &lt;include path="default-customizer.dicon" /&gt;
+    &lt;include path=&quot;default-customizer.dicon&quot; /&gt;
 
     &lt;component
-        name="actionCustomizer"
-        class="org.seasar.framework.container.customizer.CustomizerChain"&gt;
+        name=&quot;actionCustomizer&quot;
+        class=&quot;org.seasar.framework.container.customizer.CustomizerChain&quot;&gt;
 
-        &lt;initMethod name="addAspectCustomizer"&gt;
-            &lt;arg&gt;"aop.traceInterceptor"&lt;/arg&gt;
+        &lt;initMethod name=&quot;addAspectCustomizer&quot;&gt;
+            &lt;arg&gt;&quot;aop.traceInterceptor&quot;&lt;/arg&gt;
             &lt;arg&gt;true&lt;/arg&gt;
         &lt;/initMethod&gt;
-        &lt;initMethod name="addAspectCustomizer"&gt;
-            &lt;arg&gt;"actionMessagesThrowsInterceptor"&lt;/arg&gt;
+        &lt;initMethod name=&quot;addAspectCustomizer&quot;&gt;
+            &lt;arg&gt;&quot;actionMessagesThrowsInterceptor&quot;&lt;/arg&gt;
         &lt;/initMethod&gt;
-        &lt;initMethod name="addCustomizer"&gt;
+        &lt;initMethod name=&quot;addCustomizer&quot;&gt;
             &lt;arg&gt;
-                &lt;component class="org.seasar.framework.container.customizer.TxAttributeCustomizer" /&gt;
+                &lt;component class=&quot;org.seasar.framework.container.customizer.TxAttributeCustomizer&quot; /&gt;
             &lt;/arg&gt;
         &lt;/initMethod&gt;
-        &lt;initMethod name="addCustomizer"&gt;
+        &lt;initMethod name=&quot;addCustomizer&quot;&gt;
             &lt;arg&gt;
-                &lt;component class="org.seasar.struts.customizer.ActionCustomizer" /&gt;
+                &lt;component class=&quot;org.seasar.struts.customizer.ActionCustomizer&quot; /&gt;
             &lt;/arg&gt;
         &lt;/initMethod&gt;
-        &lt;initMethod name="addCustomizer"&gt;
+        &lt;initMethod name=&quot;addCustomizer&quot;&gt;
             &lt;arg&gt;
-                &lt;component class="org.seasar.framework.container.customizer.AspectCustomizer"&gt;
-                    &lt;property name="interceptorName"&gt;"loginInterceptor"&lt;/property&gt;
+                &lt;component class=&quot;org.seasar.framework.container.customizer.AspectCustomizer&quot;&gt;
+                    &lt;property name=&quot;interceptorName&quot;&gt;&quot;loginInterceptor&quot;&lt;/property&gt;
                     &lt;!-- 対象とするパッケージ名及びクラス名を設定 --&gt;
-                    &lt;initMethod name="addClassPattern"&gt;
-                        &lt;arg&gt;"sample.action.dashboard"&lt;/arg&gt;
-                        &lt;arg&gt;".*"&lt;/arg&gt;
+                    &lt;initMethod name=&quot;addClassPattern&quot;&gt;
+                        &lt;arg&gt;&quot;sample.action.dashboard&quot;&lt;/arg&gt;
+                        &lt;arg&gt;&quot;.*&quot;&lt;/arg&gt;
                     &lt;/initMethod&gt;
 
                     &lt;!-- 除外するパッケージ名及びクラス名を設定 --&gt;
-                    &lt;initMethod name="addIgnoreClassPattern"&gt;
-                        &lt;arg&gt;"sample.action.dashboard"&lt;/arg&gt;
-                        &lt;arg&gt;"LoginAction"&lt;/arg&gt;
+                    &lt;initMethod name=&quot;addIgnoreClassPattern&quot;&gt;
+                        &lt;arg&gt;&quot;sample.action.dashboard&quot;&lt;/arg&gt;
+                        &lt;arg&gt;&quot;LoginAction&quot;&lt;/arg&gt;
                     &lt;/initMethod&gt;
                 &lt;/component&gt;
             &lt;/arg&gt;
@@ -261,9 +222,7 @@ public class LoginInterceptor extends AbstractInterceptor {
 
     &lt;!-- 以下省略 --&gt;
 &lt;/components&gt;
-</code></pre>
-<h4 id="indexaction-java">IndexAction.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
+</code></pre><h4>IndexAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
 
 import org.seasar.framework.aop.annotation.RemoveSession;
 import org.seasar.struts.annotation.Execute;
@@ -272,18 +231,16 @@ public class IndexAction {
 
     @Execute(validator = false)
     public String index() {
-        return "index.jsp";
+        return &quot;index.jsp&quot;;
     }
 
     @Execute(validator = false, redirect = true)
-    @RemoveSession(name = "userDto") // userDtoなセッションを削除
+    @RemoveSession(name = &quot;userDto&quot;) // userDtoなセッションを削除
     public String logout() {
-        return "";
+        return &quot;&quot;;
     }
 }
-</code></pre><p>sample.action.dashboard.IndexActionなんでLoginInterceptorをもろにくらうので非認証状態でアクセスしてもLoginActionにぶっ飛ばされる事を確認する</p>
-<h4 id="loginaction-java">LoginAction.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
+</code></pre><p>sample.action.dashboard.IndexActionなんでLoginInterceptorをもろにくらうので非認証状態でアクセスしてもLoginActionにぶっ飛ばされる事を確認する</p><h4>LoginAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
 
 import javax.annotation.Resource;
 
@@ -311,13 +268,13 @@ public class LoginAction {
     private UserDto userDto;
 
     @Execute(validator = false)
-    @RemoveSession(name = "userDto")
+    @RemoveSession(name = &quot;userDto&quot;)
     public String index() {
-        return "index.jsp";
+        return &quot;index.jsp&quot;;
     }
 
     @Execute(
-        input = "?redirect=true",
+        input = &quot;?redirect=true&quot;,
         saveErrors = SaveType.SESSION,
         redirect = true
     )
@@ -336,12 +293,10 @@ public class LoginAction {
             e.printStackTrace();
         }
 
-        return "/dashboard";
+        return &quot;/dashboard&quot;;
     }
 }
-</code></pre><p>セッション管理されているDtoオブジェクトは値をぶち込むだけで良いみたい。という感じで作ればセッション管理による認証な所を作る事は可能な模様。まぁインターセプタなテスト法とかまだ調べてないんすけど</p>
-<h4 id="part-654296b22d9">余談</h4>
-<p>UserService.javaはこんな感じ</p><pre class="line-numbers"><code class="language-java">package sample.service;
+</code></pre><p>セッション管理されているDtoオブジェクトは値をぶち込むだけで良いみたい。という感じで作ればセッション管理による認証な所を作る事は可能な模様。まぁインターセプタなテスト法とかまだ調べてないんすけど</p><h4>余談</h4><p>UserService.javaはこんな感じ</p><pre class="line-numbers"><code class="language-java">package sample.service;
 
 import org.seasar.extension.jdbc.service.S2AbstractService;
 import org.seasar.extension.jdbc.where.SimpleWhere;
@@ -352,16 +307,16 @@ import sample.util.SampleUtil;
 public class UserService extends S2AbstractService&lt;User&gt; {
     public User getUser(String username, String password) {
         if (username == null) {
-            throw new IllegalArgumentException("required username");
+            throw new IllegalArgumentException(&quot;required username&quot;);
         }
 
         if (password == null) {
-            throw new IllegalArgumentException("required password");
+            throw new IllegalArgumentException(&quot;required password&quot;);
         }
 
         SimpleWhere where = new SimpleWhere();
-        where.eq("username", username);
-        where.eq("password", SampleUtil.toSHA1(password.getBytes()));
+        where.eq(&quot;username&quot;, username);
+        where.eq(&quot;password&quot;, SampleUtil.toSHA1(password.getBytes()));
 
         return select().where(where).getSingleResult();
     }
@@ -416,53 +371,67 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -470,17 +439,21 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -488,32 +461,41 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -521,14 +503,17 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -536,11 +521,13 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -548,20 +535,25 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -569,47 +561,43 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -617,20 +605,41 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -640,17 +649,21 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,39 +96,12 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#pom-xml">pom.xmlを作成</a>
-</li>
-<li>
-<a href="#part-84fea8c3412cae17">レポートファイルを作成</a>
-</li>
-<li>
-<a href="#part-c40196ac0c746947">データソースの作成</a>
-</li>
-<li>
-<a href="#part-4b46290881b1d81">データセットを作成</a>
-</li>
-<li>
-<a href="#client-java">Client.java</a>
-</li>
-<li>
-<a href="#1-maven">備考1: Mavenを使わずに実行する場合</a>
-</li>
-<li>
-<a href="#2">備考2: 今回のサンプルレポートファイル</a>
-</li>
-</ul>
--->
-                <p>単純にDBにあるエントリーをPDFにして出力してみる。BIRTのインストール方法は省略します。但し、最後辺りにBIRT Runtimeな話が出るので <a href="http://download.eclipse.org/birt/downloads" target="_blank" rel="noopener noreferrer">http://download.eclipse.org/birt/downloads</a> からダウンロードしておく(一応ダウンロードしなくてもMaven使うのでそこからコピーでも構わない)</p>
-<!--more-->
-
-<h4 id="pom-xml">pom.xmlを作成</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+                <!--[[1, "pom.xmlを作成"], [2, "レポートファイルを作成"], [3, "データソースの作成"], [4, "データセットを作成"], [5, "Client.java"], [6, "備考1: Mavenを使わずに実行する場合"], [7, "備考2: 今回のサンプルレポートファイル"]]-->
+                <p>単純にDBにあるエントリーをPDFにして出力してみる。BIRTのインストール方法は省略します。但し、最後辺りにBIRT Runtimeな話が出るので <a href="http://download.eclipse.org/birt/downloads" target="_blank" rel="noopener noreferrer">http://download.eclipse.org/birt/downloads</a> からダウンロードしておく(一応ダウンロードしなくてもMaven使うのでそこからコピーでも構わない)</p><h4>pom.xmlを作成</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;project
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4.0.0.xsd"&gt;
+    xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4.0.0.xsd&quot;&gt;
 
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
     &lt;groupId&gt;net.kinjouj.birt&lt;/groupId&gt;
@@ -165,16 +137,8 @@ ga("send", "pageview");
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/project&gt;
-</code></pre><p>まぁ依存性を設定するだけでいいかも。で前述した通り、MySQL JDBC Driverを入れておく。そしてどっかにコピる</p>
-<h4 id="part-84fea8c3412cae17">レポートファイルを作成</h4>
-<p>Eclipse起動して、BIRTレポートファイルを作る。まぁまずファイルを作ったらアウトラインに</p><p><img src="/images/2012/10/20121031030548.jpg" alt="image" /></p><p>な感じで出るはず。これをベースに設定を色々していく</p>
-<h4 id="part-c40196ac0c746947">データソースの作成</h4>
-<p>まずデータベースに接続するのでデータソースを設定する。でこの際に今回はMySQLデータベースに接続するので、mysql-connector-javaが必要になる。$HOME/.m2/mysqlからたどってJARファイルをどっかわかりやすい所にコピーしても良い。でデータソースを作成しJDBCドライバな設定を行う</p><p><img src="/images/2012/10/20121031030803.jpg" alt="image" /></p><p>っていう感じでMySQLのJDBC Driverをセットする。で次にJDBC接続に関する情報を設定する</p><p><img src="/images/2012/10/20121031031117.jpg" alt="image" /></p><p>これでJDBCデータソースに関する設定は終わり。</p>
-<h4 id="part-4b46290881b1d81">データセットを作成</h4>
-<p>データベースから取ってくるデータを設定する。単純に指定したデータベースからのSQLを書くだけ</p><p><img src="/images/2012/10/20121031031405.jpg" alt="image" /></p><p>完了を押したらデータセットが作成される。ただ作成しただけじゃダメなので、右クリックから「レイアウトに含める」をクリックする。やったらレイアウト画面にテーブルグリッドが出る。で保存する。このレポートファイルはXMLファイルになっている</p><p>で1点微妙な所があってEclipseからレポート生成する際には問題無いようだけど、それ以外の所からやると例外が出る。それが</p><pre class="line-numbers"><code class="language-xml">&lt;report xmlns="http://www.eclipse.org/birt/2005/design" version="3" id="1"&gt;
-</code></pre><p>のversion属性が<q>3.2.xx</q>みたいになってる場合はメジャーバージョン以外を消しておく。ちょいとこれ原因が分かってない</p><p>これでレポートファイルの作成は完了。今回作成したレポートファイルの例は最後に載せる</p>
-<h4 id="client-java">Client.java</h4>
-<pre class="line-numbers"><code class="language-java">import org.eclipse.birt.report.engine.api.EngineConfig;
+</code></pre><p>まぁ依存性を設定するだけでいいかも。で前述した通り、MySQL JDBC Driverを入れておく。そしてどっかにコピる</p><h4>レポートファイルを作成</h4><p>Eclipse起動して、BIRTレポートファイルを作る。まぁまずファイルを作ったらアウトラインに</p><p><img src="/images/2012/10/20121031030548.jpg" alt="image" /></p><p>な感じで出るはず。これをベースに設定を色々していく</p><h4>データソースの作成</h4><p>まずデータベースに接続するのでデータソースを設定する。でこの際に今回はMySQLデータベースに接続するので、mysql-connector-javaが必要になる。$HOME/.m2/mysqlからたどってJARファイルをどっかわかりやすい所にコピーしても良い。でデータソースを作成しJDBCドライバな設定を行う</p><p><img src="/images/2012/10/20121031030803.jpg" alt="image" /></p><p>っていう感じでMySQLのJDBC Driverをセットする。で次にJDBC接続に関する情報を設定する</p><p><img src="/images/2012/10/20121031031117.jpg" alt="image" /></p><p>これでJDBCデータソースに関する設定は終わり。</p><h4>データセットを作成</h4><p>データベースから取ってくるデータを設定する。単純に指定したデータベースからのSQLを書くだけ</p><p><img src="/images/2012/10/20121031031405.jpg" alt="image" /></p><p>完了を押したらデータセットが作成される。ただ作成しただけじゃダメなので、右クリックから「レイアウトに含める」をクリックする。やったらレイアウト画面にテーブルグリッドが出る。で保存する。このレポートファイルはXMLファイルになっている</p><p>で1点微妙な所があってEclipseからレポート生成する際には問題無いようだけど、それ以外の所からやると例外が出る。それが</p><pre class="line-numbers"><code class="language-xml">&lt;report xmlns=&quot;http://www.eclipse.org/birt/2005/design&quot; version=&quot;3&quot; id=&quot;1&quot;&gt;
+</code></pre><p>のversion属性が<q>3.2.xx</q>みたいになってる場合はメジャーバージョン以外を消しておく。ちょいとこれ原因が分かってない</p><p>これでレポートファイルの作成は完了。今回作成したレポートファイルの例は最後に載せる</p><h4>Client.java</h4><pre class="line-numbers"><code class="language-java">import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.birt.report.engine.api.PDFRenderOption;
@@ -186,25 +150,23 @@ public class Client {
         EngineConfig config = new EngineConfig();
 
         /* やらなくても良いっぽい
-        config.setEngineHome("/opt/birt");
+        config.setEngineHome(&quot;/opt/birt&quot;);
         */
 
         ReportEngine engine = new ReportEngine(config);
-        IReportRunnable design = engine.openReportDesign("sample.rptdesign");
+        IReportRunnable design = engine.openReportDesign(&quot;sample.rptdesign&quot;);
 
         IRunAndRenderTask task = engine.createRunAndRenderTask(design);
 
         RenderOption options = new PDFRenderOption();
-        options.setOutputFileName("sample.pdf");
+        options.setOutputFileName(&quot;sample.pdf&quot;);
         options.setOutputFormat(RenderOption.OUTPUT_FORMAT_PDF);
 
         task.setRenderOption(options);
         task.run();
     }
 }
-</code></pre><p>コンパイルして実行するとsample.rptdesign(レポートファイル)がsample.pdfとして出力される。</p><p><img src="/images/2012/10/20121031032702.jpg" alt="image" /></p>
-<h4 id="1-maven">備考1: Mavenを使わずに実行する場合</h4>
-<p>めっちゃ多いんですが</p>
+</code></pre><p>コンパイルして実行するとsample.rptdesign(レポートファイル)がsample.pdfとして出力される。</p><p><img src="/images/2012/10/20121031032702.jpg" alt="image" /></p><h4>備考1: Mavenを使わずに実行する場合</h4><p>めっちゃ多いんですが</p>
 <ul>
 <li>  org.eclipse.birt.runtime_4.2.1.v20120918-1113.jar</li>
 <li>  org.eclipse.equinox.common_3.6.100.v20120522-1841.jar</li>
@@ -225,16 +187,14 @@ public class Client {
 <li>  Tidy.jar</li>
 <li>  mysql-connector-java-5.1.21.jar</li>
 </ul>
-<p>というような感じで、今回のサンプルを動かすのにこれだけ必要。でこれMavenからのではなくBIRT Runtimeな所からコピーしているのでpom.xmlで指定したバージョン(3.7.1)とは若干異なりますが...</p>
-<h4 id="2">備考2: 今回のサンプルレポートファイル</h4>
-<p>長いので注意</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;report xmlns="http://www.eclipse.org/birt/2005/design" version="3" id="1"&gt;
-    &lt;property name="createdBy"&gt;Eclipse BIRT Designer Version 3.7.2.v20120213 Build &lt;3.7.2.v20120214-1408&gt;&lt;/property&gt;
-    &lt;property name="units"&gt;in&lt;/property&gt;
-    &lt;property name="layoutPreference"&gt;auto layout&lt;/property&gt;
+<p>というような感じで、今回のサンプルを動かすのにこれだけ必要。でこれMavenからのではなくBIRT Runtimeな所からコピーしているのでpom.xmlで指定したバージョン(3.7.1)とは若干異なりますが...</p><h4>備考2: 今回のサンプルレポートファイル</h4><p>長いので注意</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;report xmlns=&quot;http://www.eclipse.org/birt/2005/design&quot; version=&quot;3&quot; id=&quot;1&quot;&gt;
+    &lt;property name=&quot;createdBy&quot;&gt;Eclipse BIRT Designer Version 3.7.2.v20120213 Build &lt;3.7.2.v20120214-1408&gt;&lt;/property&gt;
+    &lt;property name=&quot;units&quot;&gt;in&lt;/property&gt;
+    &lt;property name=&quot;layoutPreference&quot;&gt;auto layout&lt;/property&gt;
     &lt;data-sources&gt;
-        &lt;oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="データ・ソース" id="44"&gt;
-            &lt;list-property name="privateDriverProperties"&gt;
+        &lt;oda-data-source extensionID=&quot;org.eclipse.birt.report.data.oda.jdbc&quot; name=&quot;データ・ソース&quot; id=&quot;44&quot;&gt;
+            &lt;list-property name=&quot;privateDriverProperties&quot;&gt;
                 &lt;ex-property&gt;
                     &lt;name&gt;metadataBidiFormatStr&lt;/name&gt;
                     &lt;value&gt;ILYNN&lt;/value&gt;
@@ -250,62 +210,62 @@ public class Client {
                     &lt;name&gt;disabledContentBidiFormatStr&lt;/name&gt;
                 &lt;/ex-property&gt;
             &lt;/list-property&gt;
-            &lt;property name="odaDriverClass"&gt;com.mysql.jdbc.Driver&lt;/property&gt;
-            &lt;property name="odaURL"&gt;jdbc:mysql://localhost/knowdb&lt;/property&gt;
-            &lt;property name="odaUser"&gt;ユーザー名&lt;/property&gt;
-            &lt;encrypted-property name="odaPassword" encryptionID="base64"&gt;パスワードのBASE64&lt;/encrypted-property&gt;
+            &lt;property name=&quot;odaDriverClass&quot;&gt;com.mysql.jdbc.Driver&lt;/property&gt;
+            &lt;property name=&quot;odaURL&quot;&gt;jdbc:mysql://localhost/knowdb&lt;/property&gt;
+            &lt;property name=&quot;odaUser&quot;&gt;ユーザー名&lt;/property&gt;
+            &lt;encrypted-property name=&quot;odaPassword&quot; encryptionID=&quot;base64&quot;&gt;パスワードのBASE64&lt;/encrypted-property&gt;
         &lt;/oda-data-source&gt;
     &lt;/data-sources&gt;
     &lt;data-sets&gt;
-        &lt;oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="データ・セット" id="45"&gt;
-            &lt;list-property name="resultSetHints"&gt;
+        &lt;oda-data-set extensionID=&quot;org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet&quot; name=&quot;データ・セット&quot; id=&quot;45&quot;&gt;
+            &lt;list-property name=&quot;resultSetHints&quot;&gt;
                 &lt;structure&gt;
-                    &lt;property name="position"&gt;1&lt;/property&gt;
-                    &lt;property name="name"&gt;id&lt;/property&gt;
-                    &lt;property name="nativeName"&gt;id&lt;/property&gt;
-                    &lt;property name="dataType"&gt;integer&lt;/property&gt;
-                    &lt;property name="nativeDataType"&gt;4&lt;/property&gt;
+                    &lt;property name=&quot;position&quot;&gt;1&lt;/property&gt;
+                    &lt;property name=&quot;name&quot;&gt;id&lt;/property&gt;
+                    &lt;property name=&quot;nativeName&quot;&gt;id&lt;/property&gt;
+                    &lt;property name=&quot;dataType&quot;&gt;integer&lt;/property&gt;
+                    &lt;property name=&quot;nativeDataType&quot;&gt;4&lt;/property&gt;
                 &lt;/structure&gt;
                 &lt;structure&gt;
-                    &lt;property name="position"&gt;2&lt;/property&gt;
-                    &lt;property name="name"&gt;title&lt;/property&gt;
-                    &lt;property name="nativeName"&gt;title&lt;/property&gt;
-                    &lt;property name="dataType"&gt;string&lt;/property&gt;
-                    &lt;property name="nativeDataType"&gt;12&lt;/property&gt;
-                &lt;/structure&gt;
-            &lt;/list-property&gt;
-            &lt;list-property name="columnHints"&gt;
-                &lt;structure&gt;
-                    &lt;property name="columnName"&gt;id&lt;/property&gt;
-                    &lt;text-property name="displayName"&gt;ID&lt;/text-property&gt;
-                    &lt;text-property name="heading"&gt;id&lt;/text-property&gt;
-                &lt;/structure&gt;
-                &lt;structure&gt;
-                    &lt;property name="columnName"&gt;title&lt;/property&gt;
-                    &lt;text-property name="displayName"&gt;タイトル&lt;/text-property&gt;
-                    &lt;text-property name="heading"&gt;title&lt;/text-property&gt;
+                    &lt;property name=&quot;position&quot;&gt;2&lt;/property&gt;
+                    &lt;property name=&quot;name&quot;&gt;title&lt;/property&gt;
+                    &lt;property name=&quot;nativeName&quot;&gt;title&lt;/property&gt;
+                    &lt;property name=&quot;dataType&quot;&gt;string&lt;/property&gt;
+                    &lt;property name=&quot;nativeDataType&quot;&gt;12&lt;/property&gt;
                 &lt;/structure&gt;
             &lt;/list-property&gt;
-            &lt;structure name="cachedMetaData"&gt;
-                &lt;list-property name="resultSet"&gt;
+            &lt;list-property name=&quot;columnHints&quot;&gt;
+                &lt;structure&gt;
+                    &lt;property name=&quot;columnName&quot;&gt;id&lt;/property&gt;
+                    &lt;text-property name=&quot;displayName&quot;&gt;ID&lt;/text-property&gt;
+                    &lt;text-property name=&quot;heading&quot;&gt;id&lt;/text-property&gt;
+                &lt;/structure&gt;
+                &lt;structure&gt;
+                    &lt;property name=&quot;columnName&quot;&gt;title&lt;/property&gt;
+                    &lt;text-property name=&quot;displayName&quot;&gt;タイトル&lt;/text-property&gt;
+                    &lt;text-property name=&quot;heading&quot;&gt;title&lt;/text-property&gt;
+                &lt;/structure&gt;
+            &lt;/list-property&gt;
+            &lt;structure name=&quot;cachedMetaData&quot;&gt;
+                &lt;list-property name=&quot;resultSet&quot;&gt;
                     &lt;structure&gt;
-                        &lt;property name="position"&gt;1&lt;/property&gt;
-                        &lt;property name="name"&gt;id&lt;/property&gt;
-                        &lt;property name="dataType"&gt;integer&lt;/property&gt;
+                        &lt;property name=&quot;position&quot;&gt;1&lt;/property&gt;
+                        &lt;property name=&quot;name&quot;&gt;id&lt;/property&gt;
+                        &lt;property name=&quot;dataType&quot;&gt;integer&lt;/property&gt;
                     &lt;/structure&gt;
                     &lt;structure&gt;
-                        &lt;property name="position"&gt;2&lt;/property&gt;
-                        &lt;property name="name"&gt;title&lt;/property&gt;
-                        &lt;property name="dataType"&gt;string&lt;/property&gt;
+                        &lt;property name=&quot;position&quot;&gt;2&lt;/property&gt;
+                        &lt;property name=&quot;name&quot;&gt;title&lt;/property&gt;
+                        &lt;property name=&quot;dataType&quot;&gt;string&lt;/property&gt;
                     &lt;/structure&gt;
                 &lt;/list-property&gt;
             &lt;/structure&gt;
-            &lt;property name="dataSource"&gt;データ・ソース&lt;/property&gt;
-            &lt;xml-property name="queryText"&gt;&lt;![CDATA[select id,title from entry]]&gt;&lt;/xml-property&gt;
-            &lt;xml-property name="designerValues"&gt;&lt;![CDATA[&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel"&gt;
+            &lt;property name=&quot;dataSource&quot;&gt;データ・ソース&lt;/property&gt;
+            &lt;xml-property name=&quot;queryText&quot;&gt;&lt;![CDATA[select id,title from entry]]&gt;&lt;/xml-property&gt;
+            &lt;xml-property name=&quot;designerValues&quot;&gt;&lt;![CDATA[&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;model:DesignValues xmlns:design=&quot;http://www.eclipse.org/datatools/connectivity/oda/design&quot; xmlns:model=&quot;http://www.eclipse.org/birt/report/model/adapter/odaModel&quot;&gt;
   &lt;Version&gt;2.0&lt;/Version&gt;
-  &lt;design:ResultSets derivedMetaData="true"&gt;
+  &lt;design:ResultSets derivedMetaData=&quot;true&quot;&gt;
     &lt;design:resultSetDefinitions&gt;
       &lt;design:resultSetColumns&gt;
         &lt;design:resultColumnDefinitions&gt;
@@ -358,48 +318,48 @@ public class Client {
         &lt;/oda-data-set&gt;
     &lt;/data-sets&gt;
     &lt;styles&gt;
-        &lt;style name="report" id="2"/&gt;
-        &lt;style name="label" id="3"/&gt;
-        &lt;style name="text" id="4"/&gt;
-        &lt;style name="data" id="5"/&gt;
-        &lt;style name="table" id="6"/&gt;
-        &lt;style name="grid" id="7"/&gt;
-        &lt;style name="list" id="8"/&gt;
-        &lt;style name="image" id="9"/&gt;
+        &lt;style name=&quot;report&quot; id=&quot;2&quot;/&gt;
+        &lt;style name=&quot;label&quot; id=&quot;3&quot;/&gt;
+        &lt;style name=&quot;text&quot; id=&quot;4&quot;/&gt;
+        &lt;style name=&quot;data&quot; id=&quot;5&quot;/&gt;
+        &lt;style name=&quot;table&quot; id=&quot;6&quot;/&gt;
+        &lt;style name=&quot;grid&quot; id=&quot;7&quot;/&gt;
+        &lt;style name=&quot;list&quot; id=&quot;8&quot;/&gt;
+        &lt;style name=&quot;image&quot; id=&quot;9&quot;/&gt;
     &lt;/styles&gt;
     &lt;page-setup&gt;
-        &lt;simple-master-page name="Simple MasterPage" id="10"&gt;
-            &lt;property name="topMargin"&gt;1in&lt;/property&gt;
-            &lt;property name="leftMargin"&gt;1.25in&lt;/property&gt;
-            &lt;property name="bottomMargin"&gt;1in&lt;/property&gt;
-            &lt;property name="rightMargin"&gt;1.25in&lt;/property&gt;
+        &lt;simple-master-page name=&quot;Simple MasterPage&quot; id=&quot;10&quot;&gt;
+            &lt;property name=&quot;topMargin&quot;&gt;1in&lt;/property&gt;
+            &lt;property name=&quot;leftMargin&quot;&gt;1.25in&lt;/property&gt;
+            &lt;property name=&quot;bottomMargin&quot;&gt;1in&lt;/property&gt;
+            &lt;property name=&quot;rightMargin&quot;&gt;1.25in&lt;/property&gt;
             &lt;page-header&gt;
-                &lt;grid id="11"&gt;
-                    &lt;property name="width"&gt;100%&lt;/property&gt;
-                    &lt;column id="12"/&gt;
-                    &lt;row id="13"&gt;
-                        &lt;cell id="14"&gt;
-                            &lt;property name="fontSize"&gt;xx-large&lt;/property&gt;
-                            &lt;property name="fontWeight"&gt;bold&lt;/property&gt;
-                            &lt;property name="textAlign"&gt;center&lt;/property&gt;
-                            &lt;text id="15"&gt;
-                                &lt;property name="marginBottom"&gt;30px&lt;/property&gt;
-                                &lt;property name="contentType"&gt;auto&lt;/property&gt;
-                                &lt;text-property name="content"&gt;&lt;![CDATA[タイトル]]&gt;&lt;/text-property&gt;
+                &lt;grid id=&quot;11&quot;&gt;
+                    &lt;property name=&quot;width&quot;&gt;100%&lt;/property&gt;
+                    &lt;column id=&quot;12&quot;/&gt;
+                    &lt;row id=&quot;13&quot;&gt;
+                        &lt;cell id=&quot;14&quot;&gt;
+                            &lt;property name=&quot;fontSize&quot;&gt;xx-large&lt;/property&gt;
+                            &lt;property name=&quot;fontWeight&quot;&gt;bold&lt;/property&gt;
+                            &lt;property name=&quot;textAlign&quot;&gt;center&lt;/property&gt;
+                            &lt;text id=&quot;15&quot;&gt;
+                                &lt;property name=&quot;marginBottom&quot;&gt;30px&lt;/property&gt;
+                                &lt;property name=&quot;contentType&quot;&gt;auto&lt;/property&gt;
+                                &lt;text-property name=&quot;content&quot;&gt;&lt;![CDATA[タイトル]]&gt;&lt;/text-property&gt;
                             &lt;/text&gt;
                         &lt;/cell&gt;
                     &lt;/row&gt;
                 &lt;/grid&gt;
             &lt;/page-header&gt;
             &lt;page-footer&gt;
-                &lt;grid id="16"&gt;
-                    &lt;property name="width"&gt;100%&lt;/property&gt;
-                    &lt;column id="17"/&gt;
-                    &lt;row id="19"&gt;
-                        &lt;cell id="20"&gt;
-                            &lt;text id="21"&gt;
-                                &lt;property name="contentType"&gt;html&lt;/property&gt;
-                                &lt;text-property name="content"&gt;&lt;![CDATA[&lt;value-of&gt;new Date()&lt;/value-of&gt;]]&gt;&lt;/text-property&gt;
+                &lt;grid id=&quot;16&quot;&gt;
+                    &lt;property name=&quot;width&quot;&gt;100%&lt;/property&gt;
+                    &lt;column id=&quot;17&quot;/&gt;
+                    &lt;row id=&quot;19&quot;&gt;
+                        &lt;cell id=&quot;20&quot;&gt;
+                            &lt;text id=&quot;21&quot;&gt;
+                                &lt;property name=&quot;contentType&quot;&gt;html&lt;/property&gt;
+                                &lt;text-property name=&quot;content&quot;&gt;&lt;![CDATA[&lt;value-of&gt;new Date()&lt;/value-of&gt;]]&gt;&lt;/text-property&gt;
                             &lt;/text&gt;
                         &lt;/cell&gt;
                     &lt;/row&gt;
@@ -408,57 +368,57 @@ public class Client {
         &lt;/simple-master-page&gt;
     &lt;/page-setup&gt;
     &lt;body&gt;
-        &lt;table id="46"&gt;
-            &lt;property name="dataSet"&gt;データ・セット&lt;/property&gt;
-            &lt;list-property name="boundDataColumns"&gt;
+        &lt;table id=&quot;46&quot;&gt;
+            &lt;property name=&quot;dataSet&quot;&gt;データ・セット&lt;/property&gt;
+            &lt;list-property name=&quot;boundDataColumns&quot;&gt;
                 &lt;structure&gt;
-                    &lt;property name="name"&gt;id&lt;/property&gt;
-                    &lt;text-property name="displayName"&gt;ID&lt;/text-property&gt;
-                    &lt;expression name="expression"&gt;dataSetRow["id"]&lt;/expression&gt;
-                    &lt;property name="dataType"&gt;integer&lt;/property&gt;
+                    &lt;property name=&quot;name&quot;&gt;id&lt;/property&gt;
+                    &lt;text-property name=&quot;displayName&quot;&gt;ID&lt;/text-property&gt;
+                    &lt;expression name=&quot;expression&quot;&gt;dataSetRow[&quot;id&quot;]&lt;/expression&gt;
+                    &lt;property name=&quot;dataType&quot;&gt;integer&lt;/property&gt;
                 &lt;/structure&gt;
                 &lt;structure&gt;
-                    &lt;property name="name"&gt;title&lt;/property&gt;
-                    &lt;text-property name="displayName"&gt;タイトル&lt;/text-property&gt;
-                    &lt;expression name="expression"&gt;dataSetRow["title"]&lt;/expression&gt;
-                    &lt;property name="dataType"&gt;string&lt;/property&gt;
+                    &lt;property name=&quot;name&quot;&gt;title&lt;/property&gt;
+                    &lt;text-property name=&quot;displayName&quot;&gt;タイトル&lt;/text-property&gt;
+                    &lt;expression name=&quot;expression&quot;&gt;dataSetRow[&quot;title&quot;]&lt;/expression&gt;
+                    &lt;property name=&quot;dataType&quot;&gt;string&lt;/property&gt;
                 &lt;/structure&gt;
             &lt;/list-property&gt;
-            &lt;property name="pageBreakInterval"&gt;50&lt;/property&gt;
-            &lt;column id="60"/&gt;
-            &lt;column id="61"/&gt;
+            &lt;property name=&quot;pageBreakInterval&quot;&gt;50&lt;/property&gt;
+            &lt;column id=&quot;60&quot;/&gt;
+            &lt;column id=&quot;61&quot;/&gt;
             &lt;header&gt;
-                &lt;row id="47"&gt;
-                    &lt;cell id="48"&gt;
-                        &lt;label id="49"&gt;
-                            &lt;text-property name="text"&gt;ID&lt;/text-property&gt;
+                &lt;row id=&quot;47&quot;&gt;
+                    &lt;cell id=&quot;48&quot;&gt;
+                        &lt;label id=&quot;49&quot;&gt;
+                            &lt;text-property name=&quot;text&quot;&gt;ID&lt;/text-property&gt;
                         &lt;/label&gt;
                     &lt;/cell&gt;
-                    &lt;cell id="50"&gt;
-                        &lt;label id="51"&gt;
-                            &lt;text-property name="text"&gt;タイトル&lt;/text-property&gt;
+                    &lt;cell id=&quot;50&quot;&gt;
+                        &lt;label id=&quot;51&quot;&gt;
+                            &lt;text-property name=&quot;text&quot;&gt;タイトル&lt;/text-property&gt;
                         &lt;/label&gt;
                     &lt;/cell&gt;
                 &lt;/row&gt;
             &lt;/header&gt;
             &lt;detail&gt;
-                &lt;row id="52"&gt;
-                    &lt;cell id="53"&gt;
-                        &lt;data id="54"&gt;
-                            &lt;property name="resultSetColumn"&gt;id&lt;/property&gt;
+                &lt;row id=&quot;52&quot;&gt;
+                    &lt;cell id=&quot;53&quot;&gt;
+                        &lt;data id=&quot;54&quot;&gt;
+                            &lt;property name=&quot;resultSetColumn&quot;&gt;id&lt;/property&gt;
                         &lt;/data&gt;
                     &lt;/cell&gt;
-                    &lt;cell id="55"&gt;
-                        &lt;data id="56"&gt;
-                            &lt;property name="resultSetColumn"&gt;title&lt;/property&gt;
+                    &lt;cell id=&quot;55&quot;&gt;
+                        &lt;data id=&quot;56&quot;&gt;
+                            &lt;property name=&quot;resultSetColumn&quot;&gt;title&lt;/property&gt;
                         &lt;/data&gt;
                     &lt;/cell&gt;
                 &lt;/row&gt;
             &lt;/detail&gt;
             &lt;footer&gt;
-                &lt;row id="57"&gt;
-                    &lt;cell id="58"/&gt;
-                    &lt;cell id="59"/&gt;
+                &lt;row id=&quot;57&quot;&gt;
+                    &lt;cell id=&quot;58&quot;/&gt;
+                    &lt;cell id=&quot;59&quot;/&gt;
                 &lt;/row&gt;
             &lt;/footer&gt;
         &lt;/table&gt;
@@ -514,53 +474,67 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -568,17 +542,21 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -586,32 +564,41 @@ public class Client {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -619,14 +606,17 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -634,11 +624,13 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -646,20 +638,25 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -667,47 +664,43 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -715,20 +708,41 @@ public class Client {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -738,17 +752,21 @@ public class Client {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="簡単に入力検証なのを実現したいのであれば@ValidとBindingResultを利用する事で出来るらしい。色々突っかかる所があるのであくまで暫定的ではあるけどメモっておく必要なライブラリSp" />
+    <meta name="description" content="簡単に入力検証なのを実現したいのであれば@ValidとBindingResultを利用する事で出来るらしい。色々突っかかる所があるのであくまで暫定的ではあるけどメモっておく必要なライブラリSpring" />
     <title>Spring WebMVCをやってみる (13) - @ValidとBindingResult - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/12/spring-webmvc-12-redirectattributes.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/12/spring-webmvc-14-valid-bindingresult-redirectattributes.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,49 +96,23 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-f3bcb87b2ef6e59e">必要なライブラリ</a>
-</li>
-<li>
-<a href="#sampleform-java">SampleForm.java</a>
-</li>
-<li>
-<a href="#validationmessages_ja-properties">ValidationMessages_ja.properties</a>
-</li>
-<li>
-<a href="#samplecontroller-java">SampleController.java</a>
-</li>
-<li>
-<a href="#samplecontrollertest-java">SampleControllerTest.java</a>
-</li>
-<li>
-<a href="#javax-validation-spring">余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</a>
-</li>
-</ul>
--->
-                <p>簡単に入力検証なのを実現したいのであれば@ValidとBindingResultを利用する事で出来るらしい。色々突っかかる所があるのであくまで暫定的ではあるけどメモっておく</p>
-<!--more-->
-
-<h4 id="part-f3bcb87b2ef6e59e">必要なライブラリ</h4>
-<p>Spring Frameworkには@Validではなく、@Validatedっていうアノテーションがある。今回やるのは前者な方で後者に関しては今後やる可能性もあるのでとりあえずは「<a href="http://d.hatena.ne.jp/tatsu-no-toshigo/20131006/1381031027">アノテーション「@Validated」と「@Valid」</a>」を参考されたしという事で(ry</p><p>で本題の必要なライブラリに関して、javax.validationとその実装であるライブラリが必要。んまぁ後者のその実装に関してはHibernate Validatorがサポートされているのでそれを使う。という事でそのライブラリ参照を追加する</p><pre class="line-numbers"><code class="language-groovy">repositories {
+                <!--[[1, "必要なライブラリ"], [2, "SampleForm.java"], [3, "ValidationMessages_ja.properties"], [4, "SampleController.java"], [5, "SampleControllerTest.java"], [6, "余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する"]]-->
+                <p>簡単に入力検証なのを実現したいのであれば@ValidとBindingResultを利用する事で出来るらしい。色々突っかかる所があるのであくまで暫定的ではあるけどメモっておく</p><h4>必要なライブラリ</h4><p>Spring Frameworkには@Validではなく、@Validatedっていうアノテーションがある。今回やるのは前者な方で後者に関しては今後やる可能性もあるのでとりあえずは「<a href="http://d.hatena.ne.jp/tatsu-no-toshigo/20131006/1381031027">アノテーション「@Validated」と「@Valid」</a>」を参考されたしという事で(ry</p><p>で本題の必要なライブラリに関して、javax.validationとその実装であるライブラリが必要。んまぁ後者のその実装に関してはHibernate Validatorがサポートされているのでそれを使う。という事でそのライブラリ参照を追加する</p><pre class="line-numbers"><code class="language-groovy">repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile "javax.servlet:servlet-api:2.5"
-    compile "org.springframework:spring-webmvc:3.2.5.RELEASE"
+    compile &quot;javax.servlet:servlet-api:2.5&quot;
+    compile &quot;org.springframework:spring-webmvc:3.2.5.RELEASE&quot;
     // 追加
-    compile "org.hibernate:hibernate-validator:5.0.2.Final"
+    compile &quot;org.hibernate:hibernate-validator:5.0.2.Final&quot;
 
-    testRuntime "javax.servlet:jstl:1.2"
-    testCompile "junit:junit:4.11"
-    testCompile "org.hamcrest:hamcrest-all:1.3"
-    testCompile "org.springframework:spring-test:3.2.5.RELEASE"
+    testRuntime &quot;javax.servlet:jstl:1.2&quot;
+    testCompile &quot;junit:junit:4.11&quot;
+    testCompile &quot;org.hamcrest:hamcrest-all:1.3&quot;
+    testCompile &quot;org.springframework:spring-test:3.2.5.RELEASE&quot;
 }
-</code></pre>
-<h4 id="sampleform-java">SampleForm.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4>SampleForm.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.Serializable;
 import javax.validation.constraints.NotNull;
@@ -153,7 +126,7 @@ public class SampleForm implements Serializable {
     private int id;
 
     @NotNull
-    @NotEmpty(message = "{error.empty.sample.name}")
+    @NotEmpty(message = &quot;{error.empty.sample.name}&quot;)
     private String name;
 
     public int getId() {
@@ -172,14 +145,10 @@ public class SampleForm implements Serializable {
         this.name = name;
     }
 }
-</code></pre><p>@NotEmptyで引数を指定しているが、引数を指定しない場合には<span style="color: red">org.hibernate.validator.constraints.NotEmpty.message</span>というメッセージリソースなプロパティが参照される。これに関しては後術するので(ry</p>
-<h4 id="validationmessages_ja-properties">ValidationMessages_ja.properties</h4>
-<pre class="line-numbers"><code class="language-ini">#org.hibernate.validator.constraints.NotEmpty.message={sample_form.name}が未入力です
-error.empty.sample_form.name="{sample_form.name}"が入力されてません
+</code></pre><p>@NotEmptyで引数を指定しているが、引数を指定しない場合には<span style="color: red">org.hibernate.validator.constraints.NotEmpty.message</span>というメッセージリソースなプロパティが参照される。これに関しては後術するので(ry</p><h4>ValidationMessages_ja.properties</h4><pre class="line-numbers"><code class="language-ini">#org.hibernate.validator.constraints.NotEmpty.message={sample_form.name}が未入力です
+error.empty.sample_form.name=&quot;{sample_form.name}&quot;が入力されてません
 sample_form.name=名前
-</code></pre>
-<h4 id="samplecontroller-java">SampleController.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4>SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -195,10 +164,10 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.AbstractView;
 
 @Controller
-@RequestMapping("/sample")
+@RequestMapping(&quot;/sample&quot;)
 public class SampleController {
 
-    @ModelAttribute("sample_form")
+    @ModelAttribute(&quot;sample_form&quot;)
     public SampleForm setupForm() {
         SampleForm sample = new SampleForm();
         return sample;
@@ -206,16 +175,16 @@ public class SampleController {
 
     @RequestMapping
     public String index() {
-        return "index";
+        return &quot;index&quot;;
     }
 
-    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    @RequestMapping(value = &quot;/save&quot;, method = RequestMethod.POST)
     public ModelAndView save(
-        @Valid @ModelAttribute("sample_form") final SampleForm sample,
+        @Valid @ModelAttribute(&quot;sample_form&quot;) final SampleForm sample,
         BindingResult bindingResult) {
 
         if (bindingResult.hasErrors())
-            return new ModelAndView("index");
+            return new ModelAndView(&quot;index&quot;);
 
         return new ModelAndView(new AbstractView() {
             @Override
@@ -226,31 +195,29 @@ public class SampleController {
         });
     }
 }
-</code></pre><p>というようにフォーム検証を行うアノテーションを付与して@ModelAttributeで送信したデータとのオブジェクトのマッピングを行い、そのバインディング上でエラーがあるかをチェックすれば良い模様。んで正常な場合だと普通に画面に入力したデータが表示されるだけだけど、エラーな場合にはindexなビューなレスポンスをレンダリングする的な感じかと</p><p>でJSPでは</p><pre class="line-numbers"><code class="language-jsp">&lt;%@ page contentType="text/html; charset=utf-8" %&gt;
-&lt;%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%&gt;
-&lt;%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%&gt;
-&lt;%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %&gt;
-&lt;%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %&gt;
+</code></pre><p>というようにフォーム検証を行うアノテーションを付与して@ModelAttributeで送信したデータとのオブジェクトのマッピングを行い、そのバインディング上でエラーがあるかをチェックすれば良い模様。んで正常な場合だと普通に画面に入力したデータが表示されるだけだけど、エラーな場合にはindexなビューなレスポンスをレンダリングする的な感じかと</p><p>でJSPでは</p><pre class="line-numbers"><code class="language-jsp">&lt;%@ page contentType=&quot;text/html; charset=utf-8&quot; %&gt;
+&lt;%@ taglib uri=&quot;http://java.sun.com/jsp/jstl/core&quot; prefix=&quot;c&quot;%&gt;
+&lt;%@ taglib uri=&quot;http://java.sun.com/jsp/jstl/fmt&quot; prefix=&quot;fmt&quot;%&gt;
+&lt;%@ taglib uri=&quot;http://www.springframework.org/tags&quot; prefix=&quot;spring&quot; %&gt;
+&lt;%@ taglib uri=&quot;http://www.springframework.org/tags/form&quot; prefix=&quot;form&quot; %&gt;
 
-&lt;spring:hasBindErrors name="sample_form"&gt;
-    &lt;c:forEach items="${errors.fieldErrors}" var="error"&gt;
-        &lt;spring:message message="${error}" /&gt;
+&lt;spring:hasBindErrors name=&quot;sample_form&quot;&gt;
+    &lt;c:forEach items=&quot;${errors.fieldErrors}&quot; var=&quot;error&quot;&gt;
+        &lt;spring:message message=&quot;${error}&quot; /&gt;
     &lt;/c:forEach&gt;
 &lt;/spring:hasBindErrors&gt;
 
-&lt;form:form action="/swmvc/sample/save.action" method="post" modelAttribute="sample_form"&gt;
-    &lt;form:input path="name" /&gt;
-    &lt;form:errors path="name" /&gt;
-    &lt;input type="submit" value="save" /&gt;
+&lt;form:form action=&quot;/swmvc/sample/save.action&quot; method=&quot;post&quot; modelAttribute=&quot;sample_form&quot;&gt;
+    &lt;form:input path=&quot;name&quot; /&gt;
+    &lt;form:errors path=&quot;name&quot; /&gt;
+    &lt;input type=&quot;submit&quot; value=&quot;save&quot; /&gt;
 &lt;/form:form&gt;
 </code></pre><p>というようにフォームエラーがある場合には表示させるのは</p>
 <ul>
 <li>  &lt;spring:hasBindErrors&gt;でチェックして&lt;spring:message&gt;で表示させる</li>
 <li>  &lt;form:errors path=&quot;&quot;/&gt;で表示させる</li>
 </ul>
-<p>というような方法がある模様。まぁテストも書きましょうって事で</p>
-<h4 id="samplecontrollertest-java">SampleControllerTest.java</h4>
-<pre class="line-numbers"><code class="language-java">package swmvc;
+<p>というような方法がある模様。まぁテストも書きましょうって事で</p><h4>SampleControllerTest.java</h4><pre class="line-numbers"><code class="language-java">package swmvc;
 
 import org.junit.Test;
 
@@ -262,58 +229,56 @@ public class SampleControllerTest extends AbstractTestCase {
 
     @Test
     public void test_save() throws Exception {
-        mock.perform(post("/sample/save").param("name", "hoge"))
+        mock.perform(post(&quot;/sample/save&quot;).param(&quot;name&quot;, &quot;hoge&quot;))
             .andExpect(status().isOk())
             .andExpect(model().hasNoErrors())
-            .andExpect(content().string(is("hoge")));
+            .andExpect(content().string(is(&quot;hoge&quot;)));
     }
 
     @Test
     public void test_save_fail() throws Exception {
-        mock.perform(post("/sample/save"))
+        mock.perform(post(&quot;/sample/save&quot;))
             .andExpect(status().isOk())
-            .andExpect(view().name(is("index")))
+            .andExpect(view().name(is(&quot;index&quot;)))
             .andExpect(model().hasErrors())
             .andExpect(model().attributeHasFieldErrors(
-                "sample_form", // model attribute name?
-                "name" // property
+                &quot;sample_form&quot;, // model attribute name?
+                &quot;name&quot; // property
             ));
     }
 }
-</code></pre><p>終わり。ただ書いたやり方だと、フォーム検証でエラーが発生したらindexビューをレンダリングするようになっているのでリロードするとPOSTなデータを再送信するような方式になってしまうのでそこら辺の対処法は後日書く</p>
-<h4 id="javax-validation-spring">余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</h4>
-<p>上記でも書いたように検証エラーメッセージ等はValidationMessages_[locale].properties等から読まれる訳ですけど、Springが使うMessageSourceと共通化する形で</p><pre class="line-numbers"><code class="language-xml">&lt;bean
-    id="messageSource"
-    class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
-    p:basename="classpath:applicationMessages" /&gt;
-</code></pre><p>で指定しても、検証メッセージで使用するプロパティはValidationMessagesから参照して無かったらデフォルトを出すっていう形になる模様。なので上記だけ設定してもapplicationMessages.propertiesからは検証メッセージなプロパティが作用しない状態になる模様。その場合は</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:p="http://www.springframework.org/schema/p"
-    xsi:schemaLocation="
+</code></pre><p>終わり。ただ書いたやり方だと、フォーム検証でエラーが発生したらindexビューをレンダリングするようになっているのでリロードするとPOSTなデータを再送信するような方式になってしまうのでそこら辺の対処法は後日書く</p><h4>余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</h4><p>上記でも書いたように検証エラーメッセージ等はValidationMessages_[locale].properties等から読まれる訳ですけど、Springが使うMessageSourceと共通化する形で</p><pre class="line-numbers"><code class="language-xml">&lt;bean
+    id=&quot;messageSource&quot;
+    class=&quot;org.springframework.context.support.ReloadableResourceBundleMessageSource&quot;
+    p:basename=&quot;classpath:applicationMessages&quot; /&gt;
+</code></pre><p>で指定しても、検証メッセージで使用するプロパティはValidationMessagesから参照して無かったらデフォルトを出すっていう形になる模様。なので上記だけ設定してもapplicationMessages.propertiesからは検証メッセージなプロパティが作用しない状態になる模様。その場合は</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:mvc=&quot;http://www.springframework.org/schema/mvc&quot;
+    xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
+    xsi:schemaLocation=&quot;
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context-4.0.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd"&gt;
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd&quot;&gt;
 
-    &lt;context:component-scan base-package="sample" /&gt;
-    &lt;mvc:annotation-driven validator="validator" /&gt;
+    &lt;context:component-scan base-package=&quot;sample&quot; /&gt;
+    &lt;mvc:annotation-driven validator=&quot;validator&quot; /&gt;
 
     &lt;bean
-        id="validator"
-        class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"&gt;
+        id=&quot;validator&quot;
+        class=&quot;org.springframework.validation.beanvalidation.LocalValidatorFactoryBean&quot;&gt;
 
-        &lt;property name="validationMessageSource" ref="messageSource" /&gt;
+        &lt;property name=&quot;validationMessageSource&quot; ref=&quot;messageSource&quot; /&gt;
     &lt;/bean&gt;
 
     &lt;bean
-        id="messageSource"
-        class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
-        p:basename="classpath:applicationMessages" /&gt;
+        id=&quot;messageSource&quot;
+        class=&quot;org.springframework.context.support.ReloadableResourceBundleMessageSource&quot;
+        p:basename=&quot;classpath:applicationMessages&quot; /&gt;
 
 &lt;/beans&gt;
 </code></pre><p>っていうようにLocalValidatorFactoryBeanなvalidationMessageSourceな設定が別途で必要な模様。但し、これSpring3.2.x系で動かすと<a href="https://jira.springsource.org/browse/SPR-8199">Support Bean Validation 1.1 (JSR-349)</a>っていうエラーが起きた。</p><p>3.2.x系で動かす場合には、 <a href="https://jira.springsource.org/browse/SPR-10466" target="_blank" rel="noopener noreferrer">https://jira.springsource.org/browse/SPR-10466</a> を参考にする事で同様な事を利用する事が出来るようになる模様</p><p>一応メモ</p>
@@ -366,53 +331,67 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -420,17 +399,21 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -438,32 +421,41 @@ public class SampleControllerTest extends AbstractTestCase {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -471,14 +463,17 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -486,11 +481,13 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -498,20 +495,25 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -519,47 +521,43 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -567,20 +565,41 @@ public class SampleControllerTest extends AbstractTestCase {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -590,17 +609,21 @@ public class SampleControllerTest extends AbstractTestCase {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

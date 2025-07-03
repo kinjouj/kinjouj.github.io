@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,41 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#samplebean-java">SampleBean.java</a>
-</li>
-<li>
-<a href="#home-java">Home.java</a>
-</li>
-<li>
-<a href="#validationmessages-properties">ValidationMessages.properties</a>
-</li>
-<li>
-<a href="#hometest-java">HomeTest.java</a>
-</li>
-<li>
-<a href="#part-7c5f01336e9f40d2">検証アノテーションを自作する場合</a>
-</li>
-<li>
-<a href="#hoge-java">Hoge.java</a>
-</li>
-<li>
-<a href="#hogevalidator-java">HogeValidator.java</a>
-</li>
-<li>
-<a href="#1">余談1: エラー情報を取得する必要が無いような場合</a>
-</li>
-<li>
-<a href="#2">余談2: バリデーションを自前で動かす方法</a>
-</li>
-</ul>
--->
-                <p>公式リファレンス: <a href="https://jersey.java.net/documentation/latest/user-guide.html#bean-validation" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#bean-validation</a></p><p>単純にアノテーションベースで入力検証のルールを定義出来る。別に説明しなくても良いんじゃねって事で</p>
-<!--more-->
-
-<h4 id="samplebean-java">SampleBean.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.bean;
+                <!--[[1, "SampleBean.java"], [2, "Home.java"], [3, "ValidationMessages.properties"], [4, "HomeTest.java"], [5, "検証アノテーションを自作する場合"], [6, "Hoge.java"], [7, "HogeValidator.java"], [8, "余談1: エラー情報を取得する必要が無いような場合"], [9, "余談2: バリデーションを自前で動かす方法"]]-->
+                <p>公式リファレンス: <a href="https://jersey.java.net/documentation/latest/user-guide.html#bean-validation" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#bean-validation</a></p><p>単純にアノテーションベースで入力検証のルールを定義出来る。別に説明しなくても良いんじゃねって事で</p><h4>SampleBean.java</h4><pre class="line-numbers"><code class="language-java">package sample.bean;
 
 import java.io.Serializable;
 import javax.validation.constraints.NotNull;
@@ -143,7 +109,7 @@ public class SampleBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @QueryParam("name")
+    @QueryParam(&quot;name&quot;)
     @NotNull
     private String name;
 
@@ -162,9 +128,7 @@ public class SampleBean implements Serializable {
         return name;
     }
 }
-</code></pre><p>んな感じでアノテーションベースで@NotNull等の検証ルール定義を付与する</p>
-<h4 id="home-java">Home.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>んな感じでアノテーションベースで@NotNull等の検証ルール定義を付与する</p><h4>Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
@@ -175,7 +139,7 @@ import javax.ws.rs.core.MediaType;
 
 import sample.bean.SampleBean;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     @GET
@@ -184,12 +148,8 @@ public class Home {
         return bean;
     }
 }
-</code></pre><p>な感じで@Validで指定している型のバリデーションを行い正常で無い場合にはValidationException(正確にはConstraiuntViolationException?)がスローされる(但し、ValidationExceptionMapperがあるのでレスポンスは変換される)</p>
-<h4 id="validationmessages-properties">ValidationMessages.properties</h4>
-<p>Spring MVCと同様にバリデーションを行った際のエラーメッセージはカスタム化出来る</p><pre class="line-numbers"><code class="language-ini">javax.validation.constraints.NotNull.message=may not be null
-</code></pre>
-<h4 id="hometest-java">HomeTest.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>な感じで@Validで指定している型のバリデーションを行い正常で無い場合にはValidationException(正確にはConstraiuntViolationException?)がスローされる(但し、ValidationExceptionMapperがあるのでレスポンスは変換される)</p><h4>ValidationMessages.properties</h4><p>Spring MVCと同様にバリデーションを行った際のエラーメッセージはカスタム化出来る</p><pre class="line-numbers"><code class="language-ini">javax.validation.constraints.NotNull.message=may not be null
+</code></pre><h4>HomeTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -215,7 +175,7 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_index() {
-        Response response = target("/sample").request(MediaType.APPLICATION_JSON).get();
+        Response response = target(&quot;/sample&quot;).request(MediaType.APPLICATION_JSON).get();
 
         // Validationにfailすると400になる
         assertThat(response.getStatus(), is(200));
@@ -223,16 +183,12 @@ public class HomeTest extends JerseyTest {
 }
 </code></pre><p>上記の場合データ(QueryParam)が指定されてないのでテストはコケる。そしてエラーメッセージがJSONで取得できる(正確には要求したMediaTypeにより変わる)</p><pre class="line-numbers"><code class="language-json">[
   {
-    "message": "may not be null",
-    "messageTemplate": "{javax.validation.constraints.NotNull.message}",
-    "path": "Home.index.arg0.name"
+    &quot;message&quot;: &quot;may not be null&quot;,
+    &quot;messageTemplate&quot;: &quot;{javax.validation.constraints.NotNull.message}&quot;,
+    &quot;path&quot;: &quot;Home.index.arg0.name&quot;
   }
 ]
-</code></pre>
-<h4 id="part-7c5f01336e9f40d2">検証アノテーションを自作する場合</h4>
-<p>@ConstraintでvalidatedByに指定したConstraintValidatorクラスにてバリデーション実装を定義すればいい</p>
-<h4 id="hoge-java">Hoge.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.validator;
+</code></pre><h4>検証アノテーションを自作する場合</h4><p>@ConstraintでvalidatedByに指定したConstraintValidatorクラスにてバリデーション実装を定義すればいい</p><h4>Hoge.java</h4><pre class="line-numbers"><code class="language-java">package sample.validator;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -249,7 +205,7 @@ import static java.lang.annotation.ElementType.*;
 public @interface Hoge {
 
     // ValidationMessagesでsample.validator.hoge.messageでエラーメッセージを設定出来るように
-    String message() default "{sample.validator.hoge.message}";
+    String message() default &quot;{sample.validator.hoge.message}&quot;;
 
     Class&lt;?&gt;[] groups() default {};
 
@@ -263,9 +219,7 @@ public @interface Hoge {
     }
     */
 }
-</code></pre><p>ってな感じでアノテーションを作る。messageを{}で囲う事でMessageResource周りでエラーメッセージ等を定義出来たりすると思われる</p>
-<h4 id="hogevalidator-java">HogeValidator.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.validator;
+</code></pre><p>ってな感じでアノテーションを作る。messageを{}で囲う事でMessageResource周りでエラーメッセージ等を定義出来たりすると思われる</p><h4>HogeValidator.java</h4><pre class="line-numbers"><code class="language-java">package sample.validator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -279,13 +233,13 @@ public class HogeValidator implements ConstraintValidator&lt;Hoge, String&gt; {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (value != null &#038;&#038; "hoge".equals(value)) {
+        if (value != null &amp;#038;&amp;#038; &quot;hoge&quot;.equals(value)) {
             return true;
         }
 
         /* エラーメッセージのConstraintViolationを自処理で構築する場合?
         context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate("err").addConstraintViolation();
+        context.buildConstraintViolationWithTemplate(&quot;err&quot;).addConstraintViolation();
         */
 
         return false;
@@ -301,10 +255,10 @@ import javax.ws.rs.core.MediaType;
 
 import sample.validator.Hoge;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
-    @QueryParam("name")
+    @QueryParam(&quot;name&quot;)
     @Hoge
     private String name;
 
@@ -314,27 +268,23 @@ public class Home {
         return name;
     }
 }
-</code></pre><p>な感じでアノテーションを付与して使うだけ</p>
-<h4 id="1">余談1: エラー情報を取得する必要が無いような場合</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>な感じでアノテーションを付与して使うだけ</p><h4>余談1: エラー情報を取得する必要が無いような場合</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
-@ApplicationPath("/")
+@ApplicationPath(&quot;/&quot;)
 public class SampleApplication extends ResourceConfig {
 
     public SampleApplication() {
         // falseにするとエラー情報が取得出来ない
         property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, false);
-        packages("sample");
+        packages(&quot;sample&quot;);
     }
 }
-</code></pre>
-<h4 id="2">余談2: バリデーションを自前で動かす方法</h4>
-<pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><h4>余談2: バリデーションを自前で動かす方法</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.Set;
 import javax.inject.Inject;
@@ -349,7 +299,7 @@ import javax.ws.rs.core.MediaType;
 
 import sample.bean.SampleBean;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     @Inject
@@ -357,7 +307,7 @@ public class Home {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public SampleBean index(@QueryParam("name") String name) {
+    public SampleBean index(@QueryParam(&quot;name&quot;) String name) {
 
         SampleBean bean = new SampleBean(name);
         Set&lt;ConstraintViolation&lt;SampleBean&gt;&gt; results = validator.validate(bean);
@@ -419,53 +369,67 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -473,17 +437,21 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -491,32 +459,41 @@ public class Home {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -524,14 +501,17 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -539,11 +519,13 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -551,20 +533,25 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -572,47 +559,43 @@ public class Home {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -620,20 +603,41 @@ public class Home {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -643,17 +647,21 @@ public class Home {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

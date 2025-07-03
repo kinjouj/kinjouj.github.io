@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="更にもうちょいドキュメント進めてみる$set/$unsetオペレーターdb.samples.insert({name:"hoge"})db.samples.update({name:" />
+    <meta name="description" content="更にもうちょいドキュメント進めてみる$set/$unsetオペレーターdb.samples.insert({name:&quot;hoge&quot;})db.samples.update({" />
     <title>mongodbを使ってみる (2) - operators - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-1-getting-start.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-4-index-2.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2013-01-14 21:00:00 +0900">
+                <time datetime="2013-01-14T21:00:00+09:00">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -96,51 +95,32 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#set-unset">$set/$unsetオペレーター</a>
-</li>
-<li>
-<a href="#push-pushall-addtoset">$push/$pushAll/addToSetオペレーター</a>
-</li>
-<li>
-<a href="#inc">$incオペレーター</a>
-</li>
-</ul>
--->
-                <p>更にもうちょいドキュメント進めてみる</p>
-<!--more-->
-
-<h4 id="set-unset">$set/$unsetオペレーター</h4>
-<pre class="line-numbers"><code class="language-js">db.samples.insert({ name: "hoge" })
-db.samples.update({ name: "hoge" }, { size: 1 })
+                <!--[[1, "$set/$unsetオペレーター"], [2, "$push/$pushAll/addToSetオペレーター"], [3, "$incオペレーター"]]-->
+                <p>更にもうちょいドキュメント進めてみる</p><h4>$set/$unsetオペレーター</h4><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot; })
+db.samples.update({ name: &quot;hoge&quot; }, { size: 1 })
 db.samples.find()
 
-// 出力: { "_id" : ObjectId("50f358d043555c5360e9507d"), "size" : 1 }
-</code></pre><p>というように、おいnameどこいった的な事になる模様。こういう場合新しいデータを追加するような前提であれば</p><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: "hoge" })
-db.samples.update({ name: "hoge" }, { $set: { size: 1 }})
+// 出力: { &quot;_id&quot; : ObjectId(&quot;50f358d043555c5360e9507d&quot;), &quot;size&quot; : 1 }
+</code></pre><p>というように、おいnameどこいった的な事になる模様。こういう場合新しいデータを追加するような前提であれば</p><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot; })
+db.samples.update({ name: &quot;hoge&quot; }, { $set: { size: 1 }})
 db.samples.find()
 
-// 出力: { "_id" : ObjectId("50f3591143555c5360e9507e"), "name" : "hoge", "size" : 1 }
-</code></pre><p>というように$setオペレーターを利用する事で既存するデータに新しい値を追加するという方式を採用できる模様</p><p>で引き続き、sizeデータだけを消す場合は</p><pre class="line-numbers"><code class="language-js">db.samples.update({ name: "hoge" }, { $unset: { size: 1 }})
+// 出力: { &quot;_id&quot; : ObjectId(&quot;50f3591143555c5360e9507e&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;size&quot; : 1 }
+</code></pre><p>というように$setオペレーターを利用する事で既存するデータに新しい値を追加するという方式を採用できる模様</p><p>で引き続き、sizeデータだけを消す場合は</p><pre class="line-numbers"><code class="language-js">db.samples.update({ name: &quot;hoge&quot; }, { $unset: { size: 1 }})
 db.samples.find()
 
-// 出力: { "_id" : ObjectId("50f35a8d43555c5360e9507f"), "name" : "hoge" }
-</code></pre>
-<h4 id="push-pushall-addtoset">$push/$pushAll/addToSetオペレーター</h4>
-<pre class="line-numbers"><code class="language-js">db.samples.insert({ values: [] })
-db.samples.update({ "_id": ObjectId("50f35ba5da8178ec5484b11e") }, { $push: { values: "A" }})
-db.samples.update({ "_id": ObjectId("50f35ba5da8178ec5484b11e") }, { $push: { values: "B" }})
+// 出力: { &quot;_id&quot; : ObjectId(&quot;50f35a8d43555c5360e9507f&quot;), &quot;name&quot; : &quot;hoge&quot; }
+</code></pre><h4>$push/$pushAll/addToSetオペレーター</h4><pre class="line-numbers"><code class="language-js">db.samples.insert({ values: [] })
+db.samples.update({ &quot;_id&quot;: ObjectId(&quot;50f35ba5da8178ec5484b11e&quot;) }, { $push: { values: &quot;A&quot; }})
+db.samples.update({ &quot;_id&quot;: ObjectId(&quot;50f35ba5da8178ec5484b11e&quot;) }, { $push: { values: &quot;B&quot; }})
 db.samples.find()
 
-// 出力: { "_id" : ObjectId("50f35ba5da8178ec5484b11e"), "values" : [ "A", "B" ] }
-</code></pre><p>てな感じで。でArrayで$pushするフィールドが存在しなければ[フィールドに指定した値で、存在するけどArrayじゃない場合にはエラーが発生するらしい(検証ではなぜか出てこない)</p><p>でpushAllな場合はフィールドに指定する値がArrayで指定出来て、それにマージするような感じかなーっと。多分</p><p>で$addToSetの場合は配列型でかつ、値が存在しない場合のみ追加処理が行われる模様</p>
-<h4 id="inc">$incオペレーター</h4>
-<pre class="line-numbers"><code class="language-js">db.samples.insert({ name: "hoge", size: 1 })
-db.samples.update({ name: "hoge" }, { $inc: { size: 2 }})
+// 出力: { &quot;_id&quot; : ObjectId(&quot;50f35ba5da8178ec5484b11e&quot;), &quot;values&quot; : [ &quot;A&quot;, &quot;B&quot; ] }
+</code></pre><p>てな感じで。でArrayで$pushするフィールドが存在しなければ[フィールドに指定した値で、存在するけどArrayじゃない場合にはエラーが発生するらしい(検証ではなぜか出てこない)</p><p>でpushAllな場合はフィールドに指定する値がArrayで指定出来て、それにマージするような感じかなーっと。多分</p><p>で$addToSetの場合は配列型でかつ、値が存在しない場合のみ追加処理が行われる模様</p><h4>$incオペレーター</h4><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot;, size: 1 })
+db.samples.update({ name: &quot;hoge&quot; }, { $inc: { size: 2 }})
 db.samples.find()
 
-// 出力: { "_id" : ObjectId("50f35de7da8178ec5484b123"), "name" : "hoge", "size" : 3 }
+// 出力: { &quot;_id&quot; : ObjectId(&quot;50f35de7da8178ec5484b123&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;size&quot; : 3 }
 </code></pre><p>あくまで1づつ足していくような感じじゃなくて、$incで指定したフィールドの値分だけを足していく模様。ちなみに$incのフィールド値に文字列型とか入れると</p>
 <blockquote>
 Modifier $inc allowed for numbers only
@@ -195,53 +175,67 @@ Modifier $inc allowed for numbers only
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -249,17 +243,21 @@ Modifier $inc allowed for numbers only
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -267,32 +265,41 @@ Modifier $inc allowed for numbers only
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -300,14 +307,17 @@ Modifier $inc allowed for numbers only
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -315,11 +325,13 @@ Modifier $inc allowed for numbers only
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -327,20 +339,25 @@ Modifier $inc allowed for numbers only
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -348,47 +365,43 @@ Modifier $inc allowed for numbers only
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -396,20 +409,41 @@ Modifier $inc allowed for numbers only
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -419,17 +453,21 @@ Modifier $inc allowed for numbers only
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

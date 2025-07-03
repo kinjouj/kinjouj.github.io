@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,76 +96,41 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-8811212a92a05889">セットアップ</a>
-</li>
-<li>
-<a href="#web-xml">web.xml</a>
-</li>
-<li>
-<a href="#part-fb8a0ec973877c7c">コントローラーを作成</a>
-</li>
-<li>
-<a href="#part-f821d88d3f791077">コントローラーのテストを書く</a>
-</li>
-<li>
-<a href="#queryparam">@QueryParamアノテーション</a>
-</li>
-<li>
-<a href="#pathparam">@PathParamアノテーション</a>
-</li>
-<li>
-<a href="#matrixparam">@MatrixParamアノテーション</a>
-</li>
-<li>
-<a href="#formparam">@FormParam</a>
-</li>
-<li>
-<a href="#encoded">追記: @Encodedアノテーションについて</a>
-</li>
-</ul>
--->
-                <p>Jerseyドキュメント: <a href="https://jersey.java.net/documentation/latest/index.html" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/index.html</a>  </p><p>参考: <a href="http://backpaper0.github.io/2013/05/02/jaxrs.html" target="_blank" rel="noopener noreferrer">http://backpaper0.github.io/2013/05/02/jaxrs.html</a></p><p>JavaでRESTfulなWebアプリケーションを作るっていう場合とかだとJAX-RSを使えば何かと便利っぽそうなのでいろいろ勉強してみたのでちょっとだけまとめる</p><p>※JAX-RSのバージョンは2.x系をターゲットにしてます。又、以下で書くのはあくまでサーバーを起動して利用する前提ではなくテストを書いて実行しているだけなのでサーバー関係に伴ってくる部分に関しては今後に書く予定</p>
-<!--more-->
-
-<h4 id="part-8811212a92a05889">セットアップ</h4>
-<pre class="line-numbers"><code class="language-groovy">// javaプラグインじゃなくてwarプラグインを利用するべきかも
-apply plugin: "java"
-apply plugin: "jetty"
-apply plugin: "eclipse"
+                <!--[[1, "セットアップ"], [2, "web.xml"], [3, "コントローラーを作成"], [4, "コントローラーのテストを書く"], [5, "@QueryParamアノテーション"], [6, "@PathParamアノテーション"], [7, "@MatrixParamアノテーション"], [8, "@FormParam"], [9, "追記: @Encodedアノテーションについて"]]-->
+                <p>Jerseyドキュメント: <a href="https://jersey.java.net/documentation/latest/index.html" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/index.html</a>  </p><p>参考: <a href="http://backpaper0.github.io/2013/05/02/jaxrs.html" target="_blank" rel="noopener noreferrer">http://backpaper0.github.io/2013/05/02/jaxrs.html</a></p><p>JavaでRESTfulなWebアプリケーションを作るっていう場合とかだとJAX-RSを使えば何かと便利っぽそうなのでいろいろ勉強してみたのでちょっとだけまとめる</p><p>※JAX-RSのバージョンは2.x系をターゲットにしてます。又、以下で書くのはあくまでサーバーを起動して利用する前提ではなくテストを書いて実行しているだけなのでサーバー関係に伴ってくる部分に関しては今後に書く予定</p><h4>セットアップ</h4><pre class="line-numbers"><code class="language-groovy">// javaプラグインじゃなくてwarプラグインを利用するべきかも
+apply plugin: &quot;java&quot;
+apply plugin: &quot;jetty&quot;
+apply plugin: &quot;eclipse&quot;
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile "org.glassfish.jersey.containers:jersey-container-servlet:2.+"
-    runtime "org.glassfish.jersey.media:jersey-media-moxy:+"
+    compile &quot;org.glassfish.jersey.containers:jersey-container-servlet:2.+&quot;
+    runtime &quot;org.glassfish.jersey.media:jersey-media-moxy:+&quot;
 
-    testCompile "org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:+"
-    testCompile "org.hamcrest:hamcrest-all:+"
+    testCompile &quot;org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:+&quot;
+    testCompile &quot;org.hamcrest:hamcrest-all:+&quot;
 }
-</code></pre><p>バージョン指定周りは適当ですけど、実際にこっちで使ってるバージョンは2.9.x系な模様なので</p><p>まぁこれでデプロイ出来るwar作ってアプリケーションサーバーにデプロイしたらなんらかの問題出そうだけど</p>
-<h4 id="web-xml">web.xml</h4>
-<p><a href="https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet</a>にも書いてあるけど、javax.ws.rs.Applicationに該当するクラスを作るか、アノテーションを探索するパッケージを指定するかの2つを指定出来る</p><p>例えば前者のjavax.ws.rs.Applicationに該当するようなクラスを作る場合とかだと</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>バージョン指定周りは適当ですけど、実際にこっちで使ってるバージョンは2.9.x系な模様なので</p><p>まぁこれでデプロイ出来るwar作ってアプリケーションサーバーにデプロイしたらなんらかの問題出そうだけど</p><h4>web.xml</h4><p><a href="https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet</a>にも書いてあるけど、javax.ws.rs.Applicationに該当するクラスを作るか、アノテーションを探索するパッケージを指定するかの2つを指定出来る</p><p>例えば前者のjavax.ws.rs.Applicationに該当するようなクラスを作る場合とかだと</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 import org.glassfish.jersey.server.ResourceConfig;
 
-@ApplicationPath("/aaa")
+@ApplicationPath(&quot;/aaa&quot;)
 public class SampleApplication extends ResourceConfig {
 
     public SampleApplication() {
-        packages("sample");
+        packages(&quot;sample&quot;);
     }
 }
-</code></pre><p>のようにしてコンストラクタでpackagesメソッドを用いてアノテーションを探索するパッケージを指定する。で後者のパッケージ名をweb.xml自体に記述する事でも可能</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</code></pre><p>のようにしてコンストラクタでpackagesメソッドを用いてアノテーションを探索するパッケージを指定する。で後者のパッケージ名をweb.xml自体に記述する事でも可能</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;web-app
-    xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-    version="3.0"&gt;
+    xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;
+    version=&quot;3.0&quot;&gt;
 
     &lt;servlet&gt;
         &lt;servlet-name&gt;jersey&lt;/servlet-name&gt;
@@ -192,9 +156,7 @@ public class SampleApplication extends ResourceConfig {
     &lt;/servlet-mapping&gt;
 
 &lt;/web-app&gt;
-</code></pre><p>んまぁここまでが開発環境構築的な所。ちなみに上記のjavax.ws.rs.Applicationに該当するクラスにある@ApplicationPathはJAX-RSに準拠しているアプリケーションサーバー以外では作用しないのではないかと(あくまで&lt;servlet-mapping&gt;によるパスをオーバーライドする目的な模様。詳しくないのでggrks)</p>
-<h4 id="part-fb8a0ec973877c7c">コントローラーを作成</h4>
-<p>JAX-RSアプリケーションのコントローラーは特に何かを継承したりはしない。ほとんどがアノテーションを利用してマッピングなどを利用する為アノテーションを使ったコードを書けば良いだけ</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>んまぁここまでが開発環境構築的な所。ちなみに上記のjavax.ws.rs.Applicationに該当するクラスにある@ApplicationPathはJAX-RSに準拠しているアプリケーションサーバー以外では作用しないのではないかと(あくまで&lt;servlet-mapping&gt;によるパスをオーバーライドする目的な模様。詳しくないのでggrks)</p><h4>コントローラーを作成</h4><p>JAX-RSアプリケーションのコントローラーは特に何かを継承したりはしない。ほとんどがアノテーションを利用してマッピングなどを利用する為アノテーションを使ったコードを書けば良いだけ</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -208,29 +170,27 @@ import sample.bean.SampleBean;
 
 import static javax.ws.rs.core.MediaType.*;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     @GET
     @Produces({ TEXT_PLAIN, TEXT_HTML })
     public Response index() {
-        return Response.ok("hoge").build();
+        return Response.ok(&quot;hoge&quot;).build();
     }
 
-    @Path("list")
+    @Path(&quot;list&quot;)
     @GET
     @Produces(APPLICATION_JSON)
     public List&lt;SampleBean&gt; indexListToJson() {
         List&lt;SampleBean&gt; beans = new ArrayList&lt;SampleBean&gt;(2);
-        beans.add(new SampleBean("hoge"));
-        beans.add(new SampleBean("fuga"));
+        beans.add(new SampleBean(&quot;hoge&quot;));
+        beans.add(new SampleBean(&quot;fuga&quot;));
 
         return beans;
     }
 }
-</code></pre><p>んまぁ@Pathだとか@GETは単純に名称だけでどういう役割を持つかわかると思うので省略するが、@Producesやここには書いてないけど@Consumesっていうのもある(以降で記述しているのでここでは避ける)</p><p>@Producesや@ConsumesはSpring WebMVCにもあるけど受け手や出し手に対するメディアタイプを指定するような物だと思うので、上記の場合indexListToJsonで返されたListはJSONとしてレンダリングするように出来る。だけど、それのメディアタイプのコンバーターが無いと返す値によってはレンダリングは出来ない。Listやオブジェクトなどの場合においては上記のbuild.gradleで書いてるjersey-media-moxyっていうのを使えば出来る模様</p><p>んまぁコントローラーはざっくりとこんなもんで。他のアノテーションも以降で記述するので(ry</p>
-<h4 id="part-f821d88d3f791077">コントローラーのテストを書く</h4>
-<p>んまぁJerseyTestを使えば簡単に出来る</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>んまぁ@Pathだとか@GETは単純に名称だけでどういう役割を持つかわかると思うので省略するが、@Producesやここには書いてないけど@Consumesっていうのもある(以降で記述しているのでここでは避ける)</p><p>@Producesや@ConsumesはSpring WebMVCにもあるけど受け手や出し手に対するメディアタイプを指定するような物だと思うので、上記の場合indexListToJsonで返されたListはJSONとしてレンダリングするように出来る。だけど、それのメディアタイプのコンバーターが無いと返す値によってはレンダリングは出来ない。Listやオブジェクトなどの場合においては上記のbuild.gradleで書いてるjersey-media-moxyっていうのを使えば出来る模様</p><p>んまぁコントローラーはざっくりとこんなもんで。他のアノテーションも以降で記述するので(ry</p><h4>コントローラーのテストを書く</h4><p>んまぁJerseyTestを使えば簡単に出来る</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.List;
 
@@ -260,23 +220,23 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_index() {
-        String data = target("/sample").request(TEXT_PLAIN).get(String.class);
+        String data = target(&quot;/sample&quot;).request(TEXT_PLAIN).get(String.class);
         assertThat(data, notNullValue());
-        assertThat(data, is("hoge"));
+        assertThat(data, is(&quot;hoge&quot;));
 
         // Response型と利用してテストするケース
-        Response response = target("/sample").request(TEXT_PLAIN).get();
+        Response response = target(&quot;/sample&quot;).request(TEXT_PLAIN).get();
         assertThat(response, notNullValue());
         assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
 
         String readData = response.readEntity(String.class);
         assertThat(readData, notNullValue());
-        assertThat(readData, is("hoge"));
+        assertThat(readData, is(&quot;hoge&quot;));
     }
 
     @Test
     public void test_indexListToJson() {
-        List&lt;SampleBean&gt; beans = target("/sample/list")
+        List&lt;SampleBean&gt; beans = target(&quot;/sample/list&quot;)
             .request()
             .accept(APPLICATION_JSON)
             .get(new GenericType&lt;List&lt;SampleBean&gt;&gt;() {});
@@ -284,9 +244,7 @@ public class HomeTest extends JerseyTest {
         assertThat(beans, hasSize(2));
     }
 }
-</code></pre><p>てな感じでテスト書いて実行</p><p>んまぁそんな感じでJAX-RSを使ってアノテーションベースでRESTful Webアプリケーションを作る事が出来るっていう感じで。んまぁ今後もドキュメントなり読みつつ勉強する予定なのでその都度色々ネタ書く予定って事で、おさわり的な所はこんなもんで</p><p>※以降がその他のアノテーションの紹介</p>
-<h4 id="queryparam">@QueryParamアノテーション</h4>
-<p>@QueryParamを使えばクエリパラメータをメソッドの引数等(フィールド等に定義したりする事も可能)に指定する事で値を引数にマッピングしたり出来る。又、@DefualtValueを使えばデフォルト値の設定なども出来る</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>てな感じでテスト書いて実行</p><p>んまぁそんな感じでJAX-RSを使ってアノテーションベースでRESTful Webアプリケーションを作る事が出来るっていう感じで。んまぁ今後もドキュメントなり読みつつ勉強する予定なのでその都度色々ネタ書く予定って事で、おさわり的な所はこんなもんで</p><p>※以降がその他のアノテーションの紹介</p><h4>@QueryParamアノテーション</h4><p>@QueryParamを使えばクエリパラメータをメソッドの引数等(フィールド等に定義したりする事も可能)に指定する事で値を引数にマッピングしたり出来る。又、@DefualtValueを使えばデフォルト値の設定なども出来る</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;
@@ -297,13 +255,13 @@ import javax.ws.rs.QueryParam;
 import sample.bean.SampleBean;
 import static javax.ws.rs.core.MediaType.*;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
-    @Path("get")
+    @Path(&quot;get&quot;)
     @GET
     @Produces(APPLICATION_JSON)
-    public SampleBean get(@QueryParam("name") @DefaultValue("hoge") SampleBean bean) {
+    public SampleBean get(@QueryParam(&quot;name&quot;) @DefaultValue(&quot;hoge&quot;) SampleBean bean) {
         return bean;
     }
 }
@@ -356,25 +314,23 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_get() {
-        SampleBean bean = target("/sample/get")
-            .queryParam("name", "test_get")
+        SampleBean bean = target(&quot;/sample/get&quot;)
+            .queryParam(&quot;name&quot;, &quot;test_get&quot;)
             .request()
             .get(SampleBean.class);
 
         assertThat(bean, notNullValue());
-        assertThat(bean.getName(), is("test_get"));
+        assertThat(bean.getName(), is(&quot;test_get&quot;));
     }
 
     @Test
     public void test_get_default() {
-        SampleBean bean = target("/sample/get").request().get(SampleBean.class);
+        SampleBean bean = target(&quot;/sample/get&quot;).request().get(SampleBean.class);
         assertThat(bean, notNullValue());
-        assertThat(bean.getName(), is("hoge"));
+        assertThat(bean.getName(), is(&quot;hoge&quot;));
     }
 }
-</code></pre><p>又、引数にInteger等を指定した場合にInteger型ではないデータを指定しているような場合だと、javax.ws.rs.NotFoundExceptionになる模様</p>
-<h4 id="pathparam">@PathParamアノテーション</h4>
-<pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>又、引数にInteger等を指定した場合にInteger型ではないデータを指定しているような場合だと、javax.ws.rs.NotFoundExceptionになる模様</p><h4>@PathParamアノテーション</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
@@ -384,19 +340,17 @@ import javax.ws.rs.Produces;
 import sample.bean.SampleBean;
 import static javax.ws.rs.core.MediaType.*;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
-    @Path("show/{name}")
+    @Path(&quot;show/{name}&quot;)
     @GET
     @Produces(APPLICATION_JSON)
-    public SampleBean show(@PathParam("name") SampleBean bean) {
+    public SampleBean show(@PathParam(&quot;name&quot;) SampleBean bean) {
         return bean;
     }
 }
-</code></pre><p>URLパスの一部をマッピングするアノテーションで、正規表現によるパターンマッチングも可能な模様。テストする場合には普通にパス指定すれば良いだけなのでこの件に関しては省略</p>
-<h4 id="matrixparam">@MatrixParamアノテーション</h4>
-<p>参考サイトによるとセミコロンで区切った形式の値をマッピング出来る模様</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>URLパスの一部をマッピングするアノテーションで、正規表現によるパターンマッチングも可能な模様。テストする場合には普通にパス指定すれば良いだけなのでこの件に関しては省略</p><h4>@MatrixParamアノテーション</h4><p>参考サイトによるとセミコロンで区切った形式の値をマッピング出来る模様</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -409,15 +363,15 @@ import javax.ws.rs.Produces;
 import sample.bean.SampleBean;
 import static javax.ws.rs.core.MediaType.*;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
-    @Path("pair")
+    @Path(&quot;pair&quot;)
     @GET
     @Produces(APPLICATION_JSON)
     public List&lt;SampleBean&gt; pair(
-        @MatrixParam("first") SampleBean first,
-        @MatrixParam("second") SampleBean second
+        @MatrixParam(&quot;first&quot;) SampleBean first,
+        @MatrixParam(&quot;second&quot;) SampleBean second
     ) {
         List&lt;SampleBean&gt; beans = new ArrayList&lt;SampleBean&gt;(2);
         beans.add(first);
@@ -451,27 +405,25 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_pair() {
-        List&lt;SampleBean&gt; beans = target("/sample/pair")
-            .matrixParam("first", "sample_first")
-            .matrixParam("second", "sample_second")
+        List&lt;SampleBean&gt; beans = target(&quot;/sample/pair&quot;)
+            .matrixParam(&quot;first&quot;, &quot;sample_first&quot;)
+            .matrixParam(&quot;second&quot;, &quot;sample_second&quot;)
             .request()
             .get(new GenericType&lt;List&lt;SampleBean&gt;&gt;() {});
 
         assertThat(beans, hasSize(2));
-        assertThat(beans.get(0).getName(), is("sample_first"));
-        assertThat(beans.get(1).getName(), is("sample_second"));
+        assertThat(beans.get(0).getName(), is(&quot;sample_first&quot;));
+        assertThat(beans.get(1).getName(), is(&quot;sample_second&quot;));
     }
 }
-</code></pre><p>っていう感じで、martixParamを用いてパラメーターを設定してリクエストしてテスト出来る</p>
-<h4 id="formparam">@FormParam</h4>
-<p>@FormParamを用いるとフォーム送信(application/x-www-form-urlencoded?)によるパラメーターの取得が可能になる。又、@BeanParamを使う事でフォームから送信されたデータをオブジェクトにマッピングしたりも出来る。その場合はオブジェクトに@FormParamアノテーションを付与する</p><pre class="line-numbers"><code class="language-java">package sample.bean;
+</code></pre><p>っていう感じで、martixParamを用いてパラメーターを設定してリクエストしてテスト出来る</p><h4>@FormParam</h4><p>@FormParamを用いるとフォーム送信(application/x-www-form-urlencoded?)によるパラメーターの取得が可能になる。又、@BeanParamを使う事でフォームから送信されたデータをオブジェクトにマッピングしたりも出来る。その場合はオブジェクトに@FormParamアノテーションを付与する</p><pre class="line-numbers"><code class="language-java">package sample.bean;
 
 import java.io.Serializable;
 import javax.ws.rs.FormParam;
 
 public class SampleBean implements Serializable {
 
-    @FormParam("name")
+    @FormParam(&quot;name&quot;)
     private String name;
 
     public SampleBean() {
@@ -499,10 +451,10 @@ import javax.ws.rs.Produces;
 import sample.bean.SampleBean;
 import static javax.ws.rs.core.MediaType.*;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
-    @Path("save")
+    @Path(&quot;save&quot;)
     @POST
     // 明示的に@Consumesをつけておいた方が良いのかも
     @Produces(APPLICATION_JSON)
@@ -535,14 +487,14 @@ public class HomeTest extends JerseyTest {
     @Test
     public void test_save_form() {
         Form form = new Form();
-        form.param("name", "test_save_form");
+        form.param(&quot;name&quot;, &quot;test_save_form&quot;);
 
-        SampleBean bean = target("/sample/save")
+        SampleBean bean = target(&quot;/sample/save&quot;)
             .request()
             .post(Entity.form(form), SampleBean.class);
 
         assertThat(bean, notNullValue());
-        assertThat(bean.getName(), is("test_save_form"));
+        assertThat(bean.getName(), is(&quot;test_save_form&quot;));
     }
 }
 </code></pre><p>っていう感じでpostメソッドの引数に指定すりゃ良い。ちなみにリクエストメソッドがサポートされていないような場合とかだとjavax.ws.rs.NotAllowedExceptionがスローされる</p><p>余談としてJSONをPOSTしてぶん投げるような場合のテストは</p><pre class="line-numbers"><code class="language-java">package sample.controller;
@@ -569,35 +521,33 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_save_json() {
-        SampleBean bean = target("/sample/save")
+        SampleBean bean = target(&quot;/sample/save&quot;)
             .request()
-            .post(Entity.entity(new SampleBean("test_save"), APPLICATION_JSON), SampleBean.class);
+            .post(Entity.entity(new SampleBean(&quot;test_save&quot;), APPLICATION_JSON), SampleBean.class);
 
         assertThat(bean, notNullValue());
-        assertThat(bean.getName(), is("test_save"));
+        assertThat(bean.getName(), is(&quot;test_save&quot;));
     }
 }
-</code></pre><p>っていうようにEntity.entityでやれば良い模様</p><p>以上でアノテーションの紹介は終わりだけど、まだまだアノテーションたくさんあると思われるので状況次第でネタを書く</p>
-<h4 id="encoded">追記: @Encodedアノテーションについて</h4>
-<pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>っていうようにEntity.entityでやれば良い模様</p><p>以上でアノテーションの紹介は終わりだけど、まだまだアノテーションたくさんあると思われるので状況次第でネタを書く</p><h4>追記: @Encodedアノテーションについて</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.Encoded;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     @GET
-    @Path("save")
-    public String saveEncode(@Encoded @QueryParam("q") String query) {
+    @Path(&quot;save&quot;)
+    public String saveEncode(@Encoded @QueryParam(&quot;q&quot;) String query) {
         return query;
     }
 
     @GET
-    @Path("save/noenc")
-    public String saveNonEncode(@QueryParam("q") String query) {
+    @Path(&quot;save/noenc&quot;)
+    public String saveNonEncode(@QueryParam(&quot;q&quot;) String query) {
         return query;
     }
 }
@@ -622,20 +572,20 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_save() {
-        String response = target("/sample/save")
-            .queryParam("q", "&lt;script&gt;alert("hoge");&lt;/script&gt;")
+        String response = target(&quot;/sample/save&quot;)
+            .queryParam(&quot;q&quot;, &quot;&lt;script&gt;alert(&quot;hoge&quot;);&lt;/script&gt;&quot;)
             .request()
             .get(String.class);
-        assertThat(response, is("%3Cscript%3Ealert("hoge");%3C/script%3E"));
+        assertThat(response, is(&quot;%3Cscript%3Ealert(&quot;hoge&quot;);%3C/script%3E&quot;));
     }
 
     @Test
     public void test_saveNonEncode() {
-        String response = target("/sample/save/noenc")
-            .queryParam("q", "&lt;script&gt;alert("hoge");&lt;/script&gt;")
+        String response = target(&quot;/sample/save/noenc&quot;)
+            .queryParam(&quot;q&quot;, &quot;&lt;script&gt;alert(&quot;hoge&quot;);&lt;/script&gt;&quot;)
             .request()
             .get(String.class);
-        assertThat(response, is("&lt;script&gt;alert("hoge");&lt;/script&gt;"));
+        assertThat(response, is(&quot;&lt;script&gt;alert(&quot;hoge&quot;);&lt;/script&gt;&quot;));
     }
 }
 </code></pre><p>っていう事になる。JAX-RSではクエリー等を受け取る際にエンコードされたデータを自動でデコードしてメソッド等にマッピングするが、@Encodedをついてる場合に限っては生データが直接渡される模様</p><p>ロクな検証してないけど、@Encodedをついてないでデータベースに登録してテンプレートエンジン等を用いてそのデータをレンダリングした場合等にはXSSの可能性が出てくるのはないかと</p>
@@ -688,53 +638,67 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -742,17 +706,21 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -760,32 +728,41 @@ public class HomeTest extends JerseyTest {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -793,14 +770,17 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -808,11 +788,13 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -820,20 +802,25 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -841,47 +828,43 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -889,20 +872,41 @@ public class HomeTest extends JerseyTest {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -912,17 +916,21 @@ public class HomeTest extends JerseyTest {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

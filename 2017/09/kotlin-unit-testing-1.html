@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="参考:https://www.slideshare.net/shoma2da/kotlin-63635954KotlinでUnitTestingをやってみた余談Kotlinでは基本的にデフォ" />
+    <meta name="description" content="参考:https://www.slideshare.net/shoma2da/kotlin-63635954KotlinでUnitTestingをやってみた余談Kotlinでは基本的にデフォルトでc" />
     <title>Kotlin Unit Testing (1) - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2017/07/mutationobserver.html" />
     <link rel="next" href="https://kinjouj.github.io/2017/09/mockito-final-class-mocking.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,49 +95,20 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654296b22d9">余談</a>
-</li>
-<li>
-<a href="#build-gradle">build.gradle</a>
-</li>
-<li>
-<a href="#user-kt">User.kt</a>
-</li>
-<li>
-<a href="#usertest-kt">UserTest.kt</a>
-</li>
-<li>
-<a href="#1-open-class">方法1: open classにする</a>
-</li>
-<li>
-<a href="#2-user">方法2: Userをインターフェースにする</a>
-</li>
-<li>
-<a href="#allopen">余談: allopenに関して</a>
-</li>
-</ul>
--->
-                <p>参考: <a href="https://www.slideshare.net/shoma2da/kotlin-63635954" target="_blank" rel="noopener noreferrer">https://www.slideshare.net/shoma2da/kotlin-63635954</a></p><p>KotlinでUnitTestingをやってみた</p>
-<!--more-->
-
-<h4 id="part-654296b22d9">余談</h4>
-<p>Kotlinでは基本的にデフォルトでclassはfinal、メソッドにもfinalがついてる。つまりMockitoなどを使って普通にMockしたりする事が出来ない(Mockitoではfinal classそのものをサポートしていないため)。でまぁそうなるとPowerMockitoとかを使う必要があるのだけど、一応open classにすることで継承可能にしたりすることが可能らしいので今回のスコープはそこにあてて使う</p><p>※追記: <a href="/2017/09/mockito-final-class-mocking.html">mockito2を使う</a>事でfinalクラスでも出来る模様</p>
-<h4 id="build-gradle">build.gradle</h4>
-<pre class="line-numbers"><code class="language-groovy">buildscript {
-    ext.kotlin_version = '1.1.4-3'
+                <!--[[1, "余談"], [2, "build.gradle"], [3, "User.kt"], [4, "UserTest.kt"], [5, "方法1: open classにする"], [6, "方法2: Userをインターフェースにする"], [7, "余談: allopenに関して"]]-->
+                <p>参考: <a href="https://www.slideshare.net/shoma2da/kotlin-63635954" target="_blank" rel="noopener noreferrer">https://www.slideshare.net/shoma2da/kotlin-63635954</a></p><p>KotlinでUnitTestingをやってみた</p><h4>余談</h4><p>Kotlinでは基本的にデフォルトでclassはfinal、メソッドにもfinalがついてる。つまりMockitoなどを使って普通にMockしたりする事が出来ない(Mockitoではfinal classそのものをサポートしていないため)。でまぁそうなるとPowerMockitoとかを使う必要があるのだけど、一応open classにすることで継承可能にしたりすることが可能らしいので今回のスコープはそこにあてて使う</p><p>※追記: <a href="/2017/09/mockito-final-class-mocking.html">mockito2を使う</a>事でfinalクラスでも出来る模様</p><h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
+    ext.kotlin_version = &apos;1.1.4-3&apos;
 
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath &quot;org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version&quot;
     }
 }
 
-apply plugin: "kotlin"
+apply plugin: &quot;kotlin&quot;
 
 repositories {
     mavenCentral()
@@ -146,19 +116,15 @@ repositories {
 }
 
 dependencies {
-    testCompile "junit:junit:+"
-    testCompile "org.assertj:assertj-core:+"
-    testCompile "org.mockito:mockito-core:+"
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testCompile &quot;junit:junit:+&quot;
+    testCompile &quot;org.assertj:assertj-core:+&quot;
+    testCompile &quot;org.mockito:mockito-core:+&quot;
+    compile &quot;org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version&quot;
 }
-</code></pre><p>※めんどくさいので一部バージョンは適当にしてありますので(ry</p><p>まぁAndroidとかでKotlin使う人が多いんでしょうけど(多分)、そこまでする必要性もなかったので普通にgradleプラグインを使って検証します</p>
-<h4 id="user-kt">User.kt</h4>
-<p>※資料からのコードを利用してます</p><pre class="line-numbers"><code class="language-kotlin">class User(birthYear: Int) {
+</code></pre><p>※めんどくさいので一部バージョンは適当にしてありますので(ry</p><p>まぁAndroidとかでKotlin使う人が多いんでしょうけど(多分)、そこまでする必要性もなかったので普通にgradleプラグインを使って検証します</p><h4>User.kt</h4><p>※資料からのコードを利用してます</p><pre class="line-numbers"><code class="language-kotlin">class User(birthYear: Int) {
     fun getAge() = 2017 - birthYear
 }
-</code></pre>
-<h4 id="usertest-kt">UserTest.kt</h4>
-<pre class="line-numbers"><code class="language-kotlin">import org.junit.Test
+</code></pre><h4>UserTest.kt</h4><pre class="line-numbers"><code class="language-kotlin">import org.junit.Test
 import org.assertj.core.api.Assertions.*
 import org.mockito.Mockito.*
 
@@ -178,14 +144,10 @@ class UserTest {
     }
 }
 </code></pre><p>でまぁこれをそのまま実行すると</p><p><img src="/images/2017/09/kotlin-unit-testing-1-1.jpg" alt="image" /></p><p>というようにfinalクラスはmockできねーよって怒られるわけです。
-ということでそれを解決する方法(ここからが本題)</p>
-<h4 id="1-open-class">方法1: open classにする</h4>
-<pre class="line-numbers"><code class="language-kotlin">open class User(birthYear: Int) {
+ということでそれを解決する方法(ここからが本題)</p><h4>方法1: open classにする</h4><pre class="line-numbers"><code class="language-kotlin">open class User(birthYear: Int) {
     open fun getAge() = 2017 - birthYear
 }
-</code></pre><p>ちなみにクラスだけではなくメソッドにもnon-publicではない状態になっていると、whenなどでテストがコケてしまうのでメソッドにもopenをつける。この方法ならテストコードは書き換えなくても出切る</p><p>ちなみにallOpenっていう公式プラグインも存在するそうです(やりません)</p>
-<h4 id="2-user">方法2: Userをインターフェースにする</h4>
-<pre class="line-numbers"><code class="language-kotlin">interface User {
+</code></pre><p>ちなみにクラスだけではなくメソッドにもnon-publicではない状態になっていると、whenなどでテストがコケてしまうのでメソッドにもopenをつける。この方法ならテストコードは書き換えなくても出切る</p><p>ちなみにallOpenっていう公式プラグインも存在するそうです(やりません)</p><h4>方法2: Userをインターフェースにする</h4><pre class="line-numbers"><code class="language-kotlin">interface User {
     fun getAge(): Int
 }
 </code></pre><p>を定義して</p><pre class="line-numbers"><code class="language-kotlin">class UserImpl(birthYear: Int) : User {
@@ -210,23 +172,21 @@ class UserTest {
         assertThat(user.getAge()).isEqualTo(1)
     }
 }
-</code></pre><p>こうすればなんとかopenにしなくてもイケる模様</p><p>終わりだけど、まぁKotlin UnitTestingネタは続くかもねｗ</p>
-<h4 id="allopen">余談: allopenに関して</h4>
-<p>上記の対策法のopenのやつをやるにあたって自分でopenをがちゃがちゃしなくてもallOpenっていう公式プラグインがあるのでそれを使ってやることもできる</p><p>参考: <a href="https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin" target="_blank" rel="noopener noreferrer">https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin</a></p><pre class="line-numbers"><code class="language-groovy">buildscript {
-    ext.kotlin_version = '1.1.4-3'
+</code></pre><p>こうすればなんとかopenにしなくてもイケる模様</p><p>終わりだけど、まぁKotlin UnitTestingネタは続くかもねｗ</p><h4>余談: allopenに関して</h4><p>上記の対策法のopenのやつをやるにあたって自分でopenをがちゃがちゃしなくてもallOpenっていう公式プラグインがあるのでそれを使ってやることもできる</p><p>参考: <a href="https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin" target="_blank" rel="noopener noreferrer">https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin</a></p><pre class="line-numbers"><code class="language-groovy">buildscript {
+    ext.kotlin_version = &apos;1.1.4-3&apos;
 
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlin_version"
+        classpath &quot;org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version&quot;
+        classpath &quot;org.jetbrains.kotlin:kotlin-allopen:$kotlin_version&quot;
     }
 }
 
-apply plugin: "kotlin"
-apply plugin: "kotlin-allopen"
+apply plugin: &quot;kotlin&quot;
+apply plugin: &quot;kotlin-allopen&quot;
 
 repositories {
     mavenCentral()
@@ -234,14 +194,14 @@ repositories {
 }
 
 dependencies {
-    testCompile "junit:junit:+"
-    testCompile "org.assertj:assertj-core:+"
-    testCompile "org.mockito:mockito-core:+"
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testCompile &quot;junit:junit:+&quot;
+    testCompile &quot;org.assertj:assertj-core:+&quot;
+    testCompile &quot;org.mockito:mockito-core:+&quot;
+    compile &quot;org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version&quot;
 }
 
 allOpen {
-    annotation("AllOpen")
+    annotation(&quot;AllOpen&quot;)
 }
 </code></pre><p>というふうに、allOpenでannotationに指定したアノテーションを持つクラスに限ってはallOpen側で自動でopenクラスとして定義してくれる模様</p><p>まぁ選択肢の一つとして</p>
               </div>
@@ -293,53 +253,67 @@ allOpen {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -347,17 +321,21 @@ allOpen {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -365,32 +343,41 @@ allOpen {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -398,14 +385,17 @@ allOpen {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -413,11 +403,13 @@ allOpen {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -425,20 +417,25 @@ allOpen {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -446,47 +443,43 @@ allOpen {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -494,20 +487,41 @@ allOpen {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -517,17 +531,21 @@ allOpen {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

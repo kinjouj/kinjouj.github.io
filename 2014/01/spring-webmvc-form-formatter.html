@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,47 +96,26 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#sample-java">Sample.java</a>
-</li>
-<li>
-<a href="#sampleformatter-java">SampleFormatter.java</a>
-</li>
-<li>
-<a href="#sampleformatterfactory">SampleFormatterFactory</a>
-</li>
-<li>
-<a href="#sampleform-java">SampleForm.java</a>
-</li>
-<li>
-<a href="#samplecontroller-java">SampleController.java</a>
-</li>
-</ul>
--->
+                <!--[[1, "Sample.java"], [2, "SampleFormatter.java"], [3, "SampleFormatterFactory"], [4, "SampleForm.java"], [5, "SampleController.java"]]-->
                 <p>※おそらくは書いてる内容は自分以外は理解しにくいと思いますので興味ないならCTRL+Wしてください(笑)</p><p><a href="/spring-webmvc-18-annotationformatterfactory.html">Spring WebMVCをやってみる (18) – AnnotationFormatterFactory -</a>でも書いてるけど</p>
 <blockquote>
 「getPrinter実装してもどういう作用で発生するのかが謎」。普通にFormatterを使う場合とかだと<spring:bind expression=”…” />等で作用されるっていうはあるのだけど、このAnnotationFormatterFactoryの事象だけはgetPrinterメソッドが作用する事が無い
 </blockquote>
-<p>っていう件に関して。結論から言うと「やり方が悪い」っていうだけだった模様</p>
-<!--more-->
-<p>いわゆる@ModelAttributeなオブジェクトにプッシュしてやる事で発生する模様。単純に</p><pre class="line-numbers"><code class="language-jsp">&lt;form:form action="/swmvc/sample/save.action" method="post" modelAttribute="sample_form"&gt;
+<p>っていう件に関して。結論から言うと「やり方が悪い」っていうだけだった模様</p><p>いわゆる@ModelAttributeなオブジェクトにプッシュしてやる事で発生する模様。単純に</p><pre class="line-numbers"><code class="language-jsp">&lt;form:form action=&quot;/swmvc/sample/save.action&quot; method=&quot;post&quot; modelAttribute=&quot;sample_form&quot;&gt;
 
     &lt;!-- java.util.Dateを@DateTimeFormatterでフォーマット出力をする --&gt;
-    &lt;form:input path="createdAt" /&gt;
+    &lt;form:input path=&quot;createdAt&quot; /&gt;
 
     &lt;!-- sampleはenumでSampleFormatterを利用してフォーマット出力をする --&gt;
-    &lt;form:input path="sample" /&gt;
+    &lt;form:input path=&quot;sample&quot; /&gt;
 
-    &lt;input type="submit" value="save" /&gt;
+    &lt;input type=&quot;submit&quot; value=&quot;save&quot; /&gt;
 &lt;/form:form&gt;
-</code></pre><p>で前回のだとURLから受け取ったデータをそのままModelMapに突っ込んでJSPで参照するっていう方式でやったけれども、それをやるといざform:input等で利用してもフォーマット出力されない</p><p>で検証してみた所だと@ModelAttributeで使用されるクラスでゲッターセッターを持ち、そのフィールドでアノテーションを付与しておいてそれを利用する事でgetPrinterを利用したフォーマット出力を利用できる模様</p><p>という事で長いけどやってみる。要件は上記でも書いてるようにEnumをフォーマット出力するAnnotationFormatterFactoryを利用する</p>
-<h4 id="sample-java">Sample.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>で前回のだとURLから受け取ったデータをそのままModelMapに突っ込んでJSPで参照するっていう方式でやったけれども、それをやるといざform:input等で利用してもフォーマット出力されない</p><p>で検証してみた所だと@ModelAttributeで使用されるクラスでゲッターセッターを持ち、そのフィールドでアノテーションを付与しておいてそれを利用する事でgetPrinterを利用したフォーマット出力を利用できる模様</p><p>という事で長いけどやってみる。要件は上記でも書いてるようにEnumをフォーマット出力するAnnotationFormatterFactoryを利用する</p><h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 public enum Sample {
 
-    HOGE("hoge");
+    HOGE(&quot;hoge&quot;);
 
     private String name;
 
@@ -149,9 +127,7 @@ public enum Sample {
         return name;
     }
 }
-</code></pre>
-<h4 id="sampleformatter-java">SampleFormatter.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4>SampleFormatter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -170,9 +146,7 @@ public class SampleFormatter implements Formatter&lt;Sample&gt; {
         return Sample.valueOf(text.toUpperCase());
     }
 }
-</code></pre><p>前回のだとURLのクエリーからこのparseメソッドを使ってStringからEnumへ変換するっていうのをやったけど、printが発生しない(正確にはAnnotationFormatterFactory#getPrinterが発生しない)</p>
-<h4 id="sampleformatterfactory">SampleFormatterFactory</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>前回のだとURLのクエリーからこのparseメソッドを使ってStringからEnumへ変換するっていうのをやったけど、printが発生しない(正確にはAnnotationFormatterFactory#getPrinterが発生しない)</p><h4>SampleFormatterFactory</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -199,9 +173,7 @@ public class SampleFormatterFactory implements AnnotationFormatterFactory&lt;Sam
         return new SampleFormatter();
     }
 }
-</code></pre><p>おそらくは前回のとまったく変わってないはずなので(ry</p>
-<h4 id="sampleform-java">SampleForm.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>おそらくは前回のとまったく変わってないはずなので(ry</p><h4>SampleForm.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -215,7 +187,7 @@ public class SampleForm implements Serializable {
     @SampleFormat
     private Sample sample;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd&quot;)
     private Date createdAt = new Date();
 
     public Date getCreatedAt() {
@@ -230,9 +202,7 @@ public class SampleForm implements Serializable {
         this.sample = sample;
     }
 }
-</code></pre>
-<h4 id="samplecontroller-java">SampleController.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4>SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.stereotype.Controller;
@@ -243,10 +213,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/sample")
+@RequestMapping(&quot;/sample&quot;)
 public class SampleController {
 
-    private static final String FORM_NAME = "sample_form";
+    private static final String FORM_NAME = &quot;sample_form&quot;;
 
     private SampleForm form;
 
@@ -263,11 +233,11 @@ public class SampleController {
         return form;
     }
 
-    @RequestMapping("/index")
-    public String index(@RequestParam("name") @SampleFormat Sample sample) {
+    @RequestMapping(&quot;/index&quot;)
+    public String index(@RequestParam(&quot;name&quot;) @SampleFormat Sample sample) {
         form.setSample(sample);
 
-        return "index";
+        return &quot;index&quot;;
     }
 }
 </code></pre><p>っていう感じで@ModelAttributeなコマンドオブジェクトにリクエストからparseされたSampleなenumをセットする。でそのコマンドオブジェクトなSampleFormでSampleなenumは@SampleFormatがついてるので、それがAnnotationFormatterFactory#getPrinterからFormatter#printに処理が発生するっていう感じ</p><p>ちなみにSampleFormの@SampleFormatなアノテーションを外すとSampleFormatterでは処理されないがEnum#nameメソッドが表記で出力される模様</p>
@@ -320,53 +290,67 @@ public class SampleController {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -374,17 +358,21 @@ public class SampleController {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -392,32 +380,41 @@ public class SampleController {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -425,14 +422,17 @@ public class SampleController {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -440,11 +440,13 @@ public class SampleController {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -452,20 +454,25 @@ public class SampleController {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -473,47 +480,43 @@ public class SampleController {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -521,20 +524,41 @@ public class SampleController {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -544,17 +568,21 @@ public class SampleController {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2017-11-07 08:00:00 +0900">
+                <time datetime="2017-11-07T08:00:00+09:00">
                   <a href="/archives/2017/11">
                   <span class="post-date-year">2017</span>
                   <span class="hyphen">-</span>
@@ -96,70 +95,45 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-2b935faccc118bde">前提条件</a>
-</li>
-<li>
-<a href="#index-html">index.html</a>
-</li>
-<li>
-<a href="#app-js">app.js</a>
-</li>
-<li>
-<a href="#service-worker-js">service-worker.js</a>
-</li>
-<li>
-<a href="#part-6542fd4df31">結果</a>
-</li>
-</ul>
--->
-                <p>参考1: <a href="https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja" target="_blank" rel="noopener noreferrer">https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja</a></p><p>参考2: <a href="https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja" target="_blank" rel="noopener noreferrer">https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja</a></p><p>PWA(Progressive Web Apps)などで、Webアプリケーションをネイティブアプリケーションのような内部にリソースを持つようにWebアプリケーションでもそういうリソースをServiceWorkerでキャッシュさせて利用する事が出来るとのことなのでちょっとやってみた</p><p>※上記参考を必読推奨</p><p>※あくまで個人的なメモです</p>
-<!--more-->
-
-<h4 id="part-2b935faccc118bde">前提条件</h4>
-<p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p><pre class="line-numbers"><code class="language-js">navigator.serviceWorker.register("sw.js").then(() =&gt; {
-  fetch("省略");
+                <!--[[1, "前提条件"], [2, "index.html"], [3, "app.js"], [4, "service-worker.js"], [5, "結果"]]-->
+                <p>参考1: <a href="https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja" target="_blank" rel="noopener noreferrer">https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja</a></p><p>参考2: <a href="https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja" target="_blank" rel="noopener noreferrer">https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja</a></p><p>PWA(Progressive Web Apps)などで、Webアプリケーションをネイティブアプリケーションのような内部にリソースを持つようにWebアプリケーションでもそういうリソースをServiceWorkerでキャッシュさせて利用する事が出来るとのことなのでちょっとやってみた</p><p>※上記参考を必読推奨</p><p>※あくまで個人的なメモです</p><h4>前提条件</h4><p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p><pre class="line-numbers"><code class="language-js">navigator.serviceWorker.register(&quot;sw.js&quot;).then(() =&gt; {
+  fetch(&quot;省略&quot;);
 });
-</code></pre><p>みたいにやっても初回アクセス時はコントロール化に置かれるまではthenからのfetchがコントロール化になってない場合にはキャッシュなどの処理が行われないと思われる。よってfetch処理などはコントロール化に置かれてから処理する必要があるのでそこも考慮する</p><p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p><p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p>
-<h4 id="index-html">index.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
+</code></pre><p>みたいにやっても初回アクセス時はコントロール化に置かれるまではthenからのfetchがコントロール化になってない場合にはキャッシュなどの処理が行われないと思われる。よってfetch処理などはコントロール化に置かれてから処理する必要があるのでそこも考慮する</p><p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p><p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;body&gt;
-    &lt;div id="msg"&gt;&lt;/div&gt;
-    &lt;script src="app.js"&gt;&lt;/script&gt;
+    &lt;div id=&quot;msg&quot;&gt;&lt;/div&gt;
+    &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<h4 id="app-js">app.js</h4>
-<pre class="line-numbers"><code class="language-js">"use strict";
+</code></pre><h4>app.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
-if ("serviceWorker" in navigator) {
+if (&quot;serviceWorker&quot; in navigator) {
   let controller = new Promise((resolve, reject) =&gt; {
-    navigator.serviceWorker.addEventListener("controllerchange", resolve);
+    navigator.serviceWorker.addEventListener(&quot;controllerchange&quot;, resolve);
   });
 
-  navigator.serviceWorker.register("service-worker.js" ).then(() =&gt; {
+  navigator.serviceWorker.register(&quot;service-worker.js&quot; ).then(() =&gt; {
     if (navigator.serviceWorker.controller) {
       return navigator.serviceWorker.controller;
     }
 
     return controller;
   }).then(() =&gt; {
-    if ("caches" in window) {
-      caches.match("/data").then(res =&gt; {
+    if (&quot;caches&quot; in window) {
+      caches.match(&quot;/data&quot;).then(res =&gt; {
         // キャッシュがあればキャッシュのデータをレンダリング
         // キャッシュが無ければAPIリクエストをコールしたのちそれをキャッシュ
         if (res) {
           res.text().then(data =&gt; {
-            console.log("from cache");
-            document.querySelector("#msg").innerHTML = "cache data = " + data;
+            console.log(&quot;from cache&quot;);
+            document.querySelector(&quot;#msg&quot;).innerHTML = &quot;cache data = &quot; + data;
           });
         } else {
-          fetch("/data").then(res =&gt; {
+          fetch(&quot;/data&quot;).then(res =&gt; {
             res.text().then(data =&gt; {
-              console.log("from realtime");
-              document.querySelector("#msg").innerHTML = "realtime data = " + data;
+              console.log(&quot;from realtime&quot;);
+              document.querySelector(&quot;#msg&quot;).innerHTML = &quot;realtime data = &quot; + data;
             });
           });
         }
@@ -167,22 +141,20 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
-</code></pre><p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p>
-<h4 id="service-worker-js">service-worker.js</h4>
-<pre class="line-numbers"><code class="language-js">let cacheName = "sample-pwa-cache-v1";
-let cacheDataName = "sample-pwa-data-cache-v1";
-let filesToCache = [ "/", "/index.html", "/app.js" ];
+</code></pre><p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p><h4>service-worker.js</h4><pre class="line-numbers"><code class="language-js">let cacheName = &quot;sample-pwa-cache-v1&quot;;
+let cacheDataName = &quot;sample-pwa-data-cache-v1&quot;;
+let filesToCache = [ &quot;/&quot;, &quot;/index.html&quot;, &quot;/app.js&quot; ];
 
-self.addEventListener("install", event =&gt; {
-  console.log("install");
+self.addEventListener(&quot;install&quot;, event =&gt; {
+  console.log(&quot;install&quot;);
   self.skipWaiting();
   event.waitUntil(
     caches.open(cacheName).then(cache =&gt; cache.addAll(filesToCache))
   );
 });
 
-self.addEventListener('activate', event =&gt; {
-  console.log("activate");
+self.addEventListener(&apos;activate&apos;, event =&gt; {
+  console.log(&quot;activate&quot;);
 
   event.waitUntil(
     caches.keys().then(
@@ -203,16 +175,16 @@ self.addEventListener('activate', event =&gt; {
   );
 });
 
-self.addEventListener("fetch", event =&gt; {
+self.addEventListener(&quot;fetch&quot;, event =&gt; {
   console.log(`fetch ${event.request.url}`);
   let url = new URL(event.request.url);
 
-  if (url.pathname === "/data") {
+  if (url.pathname === &quot;/data&quot;) {
     event.respondWith(
       fetch(event.request).then(res =&gt; {
         return caches.open(cacheDataName).then(cache =&gt; {
           cache.put(event.request.url, res.clone());
-          console.log("[SW] data cached");
+          console.log(&quot;[SW] data cached&quot;);
           return res;
         });
       })
@@ -227,9 +199,7 @@ self.addEventListener("fetch", event =&gt; {
     );
   }
 });
-</code></pre>
-<h4 id="part-6542fd4df31">結果</h4>
-<p>初回リクエスト時にはAPIコールにしつつそのデータをキャッシュすることになるので</p><p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-1.png" alt="image" /></p><p>となる。次回リクエスト時には</p><p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-2.png" alt="image" /></p><p>となる。またindex.htmlやapp.jsなどもキャッシュしているので初回時にキャッシュされるので再度ロードされる際にはServiceWorkerからのキャッシュとして配信されるようになる。なので一度キャッシュした状態でサーバーを落としてみても結果はキャッシュされたのがServiceWorkerから配信されるようになる</p><p>ちなみにこういうのを実現したいのであればそれをサポートしてくれるライブラリ(sw-precache等)があるのでそれを使っても良いかと</p><p>今回はAPIコールした結果をキャッシュしてそれがある場合にはそれをレンダリングしているが、本式としてはキャッシュをしつつAPIをコールして得られる結果を取得する前にキャッシュからレンダリングしておいて、リアルタイムなデータをレンダリングするような形になるかと</p>
+</code></pre><h4>結果</h4><p>初回リクエスト時にはAPIコールにしつつそのデータをキャッシュすることになるので</p><p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-1.png" alt="image" /></p><p>となる。次回リクエスト時には</p><p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-2.png" alt="image" /></p><p>となる。またindex.htmlやapp.jsなどもキャッシュしているので初回時にキャッシュされるので再度ロードされる際にはServiceWorkerからのキャッシュとして配信されるようになる。なので一度キャッシュした状態でサーバーを落としてみても結果はキャッシュされたのがServiceWorkerから配信されるようになる</p><p>ちなみにこういうのを実現したいのであればそれをサポートしてくれるライブラリ(sw-precache等)があるのでそれを使っても良いかと</p><p>今回はAPIコールした結果をキャッシュしてそれがある場合にはそれをレンダリングしているが、本式としてはキャッシュをしつつAPIをコールして得られる結果を取得する前にキャッシュからレンダリングしておいて、リアルタイムなデータをレンダリングするような形になるかと</p>
               </div>
             </div>
           </div>
@@ -279,53 +249,67 @@ self.addEventListener("fetch", event =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -333,17 +317,21 @@ self.addEventListener("fetch", event =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -351,32 +339,41 @@ self.addEventListener("fetch", event =&gt; {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -384,14 +381,17 @@ self.addEventListener("fetch", event =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -399,11 +399,13 @@ self.addEventListener("fetch", event =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -411,20 +413,25 @@ self.addEventListener("fetch", event =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -432,47 +439,43 @@ self.addEventListener("fetch", event =&gt; {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -480,20 +483,41 @@ self.addEventListener("fetch", event =&gt; {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -503,17 +527,21 @@ self.addEventListener("fetch", event =&gt; {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

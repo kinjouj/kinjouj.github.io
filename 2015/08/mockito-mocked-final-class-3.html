@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2015-08-19 15:34:57 +0900">
+                <time datetime="2015-08-19T15:34:57+09:00">
                   <a href="/archives/2015/08">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -96,29 +95,13 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#sampletest-java">SampleTest.java</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<a href="#build-gradle">余談: build.gradle</a>
--->
+                <!--[[1, "SampleTest.java"], [2, "余談: build.gradle"]]-->
                 <p>今まで</p>
 <ul>
 <li><a href="/2013/06/mockito-mocked-final-class.html">Mockitoでfinalクラスをモック化</a></li>
 <li><a href="/2013/10/mockito-mocked-final-class-2.html">Mockitoでfinalクラスをモック化 (2)</a></li>
 </ul>
-<p>というように書いてきたんですが、知ってはいたものの書いてなかったっていうのもあるので改めて書く事にした</p>
-<!--more-->
-<p>でそのfinalクラスをモック化出来るようにする方法はMockitoではなくPowerMockを使う</p>
-<h4 id="sampletest-java">SampleTest.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+<p>というように書いてきたんですが、知ってはいたものの書いてなかったっていうのもあるので改めて書く事にした</p><p>でそのfinalクラスをモック化出来るようにする方法はMockitoではなくPowerMockを使う</p><h4>SampleTest.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.junit.Test;
 
@@ -130,9 +113,9 @@ public class SampleTest {
     @Test
     public void test() {
         Sample sample = mock(Sample.class);
-        when(sample.say()).thenReturn("fuga");
+        when(sample.say()).thenReturn(&quot;fuga&quot;);
 
-        assertThat(sample.say()).isSameAs("hoge");
+        assertThat(sample.say()).isSameAs(&quot;hoge&quot;);
     }
 }
 </code></pre><p>まぁこのSampleクラスはfinalクラスだったとする。そうした場合にこのテストを動かすと</p><p><img src="/images/2015/08/201508191530_1.jpg" alt="image" /></p><p>というような結果になるはず。んまぁ今まで散々言ってきたMockito自体がfinalクラスをサポートしていない為っていう事なので、これをPowerMockを使うように置き換える</p><pre class="line-numbers"><code class="language-java">package sample;
@@ -154,30 +137,28 @@ public class SampleTest {
     @Test
     public void test() {
         Sample sample = mock(Sample.class);
-        when(sample.say()).thenReturn("fuga");
+        when(sample.say()).thenReturn(&quot;fuga&quot;);
 
-        assertThat(sample.say()).isSameAs("hoge");
+        assertThat(sample.say()).isSameAs(&quot;hoge&quot;);
     }
 }
-</code></pre><p>※import staticするのがMockitoのじゃないのは注意</p><p>っていうようにして実行すると</p><p><img src="/images/2015/08/201508191530_2.jpg" alt="image" /></p><p>というような結果になる。@Ruleをしなくても@RunWith(PowerMockRunner.class)を使えば良いけど、一定の環境下においてはその@RunWithが使う事が出来ないような事象の場合もある</p><p>ちなみに余談として、@Ruleでやるのはいかんという意見もあるようで ( <a href="http://irof.hateblo.jp/entry/20130517/p1" target="_blank" rel="noopener noreferrer">http://irof.hateblo.jp/entry/20130517/p1</a> )</p><p>んまぁどの方法を使ってfinalクラスをモック化出来るようにするかっていう所はケースバイケースって事で</p>
-<h1 id="build-gradle">余談: build.gradle</h1>
-<p>どのライブラリ必要なのか一応メモっておく</p><pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
+</code></pre><p>※import staticするのがMockitoのじゃないのは注意</p><p>っていうようにして実行すると</p><p><img src="/images/2015/08/201508191530_2.jpg" alt="image" /></p><p>というような結果になる。@Ruleをしなくても@RunWith(PowerMockRunner.class)を使えば良いけど、一定の環境下においてはその@RunWithが使う事が出来ないような事象の場合もある</p><p>ちなみに余談として、@Ruleでやるのはいかんという意見もあるようで ( <a href="http://irof.hateblo.jp/entry/20130517/p1" target="_blank" rel="noopener noreferrer">http://irof.hateblo.jp/entry/20130517/p1</a> )</p><p>んまぁどの方法を使ってfinalクラスをモック化出来るようにするかっていう所はケースバイケースって事で</p><h4>余談: build.gradle</h4><p>どのライブラリ必要なのか一応メモっておく</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 
 repositories {
     jcenter()
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.assertj:assertj-core:2.1.0'
-    testCompile 'org.mockito:mockito-all:1.10.19'
+    testCompile &apos;junit:junit:4.12&apos;
+    testCompile &apos;org.assertj:assertj-core:2.1.0&apos;
+    testCompile &apos;org.mockito:mockito-all:1.10.19&apos;
 
-    testCompile 'org.powermock:powermock-core:1.6.2'
-    testCompile 'org.powermock:powermock-api-mockito:1.6.2'
-    testCompile 'org.powermock:powermock-module-junit4:1.6.2'
-    testCompile 'org.powermock:powermock-module-junit4-rule:1.6.2'
-    testCompile 'org.powermock:powermock-classloading-base:1.6.2'
-    testCompile 'org.powermock:powermock-classloading-xstream:1.6.2'
+    testCompile &apos;org.powermock:powermock-core:1.6.2&apos;
+    testCompile &apos;org.powermock:powermock-api-mockito:1.6.2&apos;
+    testCompile &apos;org.powermock:powermock-module-junit4:1.6.2&apos;
+    testCompile &apos;org.powermock:powermock-module-junit4-rule:1.6.2&apos;
+    testCompile &apos;org.powermock:powermock-classloading-base:1.6.2&apos;
+    testCompile &apos;org.powermock:powermock-classloading-xstream:1.6.2&apos;
 }
 </code></pre>
               </div>
@@ -229,53 +210,67 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -283,17 +278,21 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -301,32 +300,41 @@ dependencies {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -334,14 +342,17 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -349,11 +360,13 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -361,20 +374,25 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -382,47 +400,43 @@ dependencies {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -430,20 +444,41 @@ dependencies {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -453,17 +488,21 @@ dependencies {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

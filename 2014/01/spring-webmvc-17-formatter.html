@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,37 +96,13 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#sample-java">Sample.java</a>
-</li>
-<li>
-<a href="#sampleformatter-java">SampleFormatter.java</a>
-</li>
-<li>
-<a href="#spring-web-servlet-xml">spring-web-servlet.xml</a>
-</li>
-<li>
-<a href="#samplecontroller-java">SampleController.java</a>
-</li>
-<li>
-<a href="#1-xml-formatter">余談1: XMLで定義せずにFormatterを使う</a>
-</li>
-<li>
-<a href="#2-formatterregistrar">余談2: FormatterRegistrarを使う場合</a>
-</li>
-</ul>
--->
-                <p>前回のConverter同様に型を変換したりする仕組みな模様。@DateTimeFormatのようにアノテーションによって型変換を行うのも可能(後日書く)。んまぁ違い的な所としては非常に曖昧で微妙なのだけど、Formatterはインターフェースによりパースする所と出力サポートを行うメソッドを実装する必要がある。んまぁ詳しい違いとかわかり次第補足なりする予定</p><p>とりあえず使ってみる。題材的なのとしてEnumを変換する仕組み的なのを作ってみる</p>
-<!--more-->
-
-<h4 id="sample-java">Sample.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+                <!--[[1, "Sample.java"], [2, "SampleFormatter.java"], [3, "spring-web-servlet.xml"], [4, "SampleController.java"], [5, "余談1: XMLで定義せずにFormatterを使う"], [6, "余談2: FormatterRegistrarを使う場合"]]-->
+                <p>前回のConverter同様に型を変換したりする仕組みな模様。@DateTimeFormatのようにアノテーションによって型変換を行うのも可能(後日書く)。んまぁ違い的な所としては非常に曖昧で微妙なのだけど、Formatterはインターフェースによりパースする所と出力サポートを行うメソッドを実装する必要がある。んまぁ詳しい違いとかわかり次第補足なりする予定</p><p>とりあえず使ってみる。題材的なのとしてEnumを変換する仕組み的なのを作ってみる</p><h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 public enum Sample {
 
-    HOGE("hoge"),
-    FUGA("fuga");
+    HOGE(&quot;hoge&quot;),
+    FUGA(&quot;fuga&quot;);
 
     private String name;
 
@@ -139,9 +114,7 @@ public enum Sample {
         return name;
     }
 }
-</code></pre><p>でこのEnumに変換なりを行うFormatterインターフェースの実装クラスが必要</p>
-<h4 id="sampleformatter-java">SampleFormatter.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>でこのEnumに変換なりを行うFormatterインターフェースの実装クラスが必要</p><h4>SampleFormatter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -160,39 +133,35 @@ public class SampleFormatter implements Formatter&lt;Sample&gt; {
         return Sample.valueOf(text.toUpperCase());
     }
 }
-</code></pre><p>んでこのFormatterが使えるように設定を行う</p>
-<h4 id="spring-web-servlet-xml">spring-web-servlet.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:p="http://www.springframework.org/schema/p"
-    xsi:schemaLocation="
+</code></pre><p>んでこのFormatterが使えるように設定を行う</p><h4>spring-web-servlet.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:mvc=&quot;http://www.springframework.org/schema/mvc&quot;
+    xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
+    xsi:schemaLocation=&quot;
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context-4.0.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd"&gt;
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd&quot;&gt;
 
-    &lt;context:component-scan base-package="sample" /&gt;
-    &lt;mvc:annotation-driven conversion-service="conversionService" /&gt;
+    &lt;context:component-scan base-package=&quot;sample&quot; /&gt;
+    &lt;mvc:annotation-driven conversion-service=&quot;conversionService&quot; /&gt;
 
     &lt;bean
-        id="conversionService"
-        class="org.springframework.format.support.FormattingConversionServiceFactoryBean"&gt;
+        id=&quot;conversionService&quot;
+        class=&quot;org.springframework.format.support.FormattingConversionServiceFactoryBean&quot;&gt;
 
-        &lt;property name="formatters"&gt;
+        &lt;property name=&quot;formatters&quot;&gt;
             &lt;list&gt;
-                &lt;bean class="sample.SampleFormatter" /&gt;
+                &lt;bean class=&quot;sample.SampleFormatter&quot; /&gt;
             &lt;/list&gt;
         &lt;/property&gt;
     &lt;/bean&gt;
 &lt;/beans&gt;
-</code></pre>
-<h4 id="samplecontroller-java">SampleController.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4>SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -200,17 +169,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/sample")
+@RequestMapping(&quot;/sample&quot;)
 public class SampleController {
 
-    @RequestMapping("/test")
-    public void test(@RequestParam("name") Sample sample, ModelMap model) {
+    @RequestMapping(&quot;/test&quot;)
+    public void test(@RequestParam(&quot;name&quot;) Sample sample, ModelMap model) {
         model.addAttribute(sample);
     }
 }
-</code></pre><p>的な感じで@RequestParamに指定している型な引数がFormatterで変換される。もし変換に失敗した場合などには400エラーになる</p>
-<h4 id="1-xml-formatter">余談1: XMLで定義せずにFormatterを使う</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>的な感じで@RequestParamに指定している型な引数がFormatterで変換される。もし変換に失敗した場合などには400エラーになる</p><h4>余談1: XMLで定義せずにFormatterを使う</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
@@ -221,7 +188,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/sample")
+@RequestMapping(&quot;/sample&quot;)
 public class SampleController {
 
     @Autowired
@@ -229,14 +196,12 @@ public class SampleController {
         ((DefaultFormattingConversionService)conversion).addFormatterForFieldType(Sample.class, new SampleFormatter());
     }
 
-    @RequestMapping("/test")
-    public void test(@RequestParam("name") Sample sample, ModelMap model) {
+    @RequestMapping(&quot;/test&quot;)
+    public void test(@RequestParam(&quot;name&quot;) Sample sample, ModelMap model) {
         model.addAttribute(sample);
     }
 }
-</code></pre><p>っていう感じで、DefaultFormattingConversionService.addFormatterForFieldTypeメソッドを使う事で出来る模様</p>
-<h4 id="2-formatterregistrar">余談2: FormatterRegistrarを使う場合</h4>
-<p>例えば複数のFormatterとかをまとめてregisterしたい時とか</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>っていう感じで、DefaultFormattingConversionService.addFormatterForFieldTypeメソッドを使う事で出来る模様</p><h4>余談2: FormatterRegistrarを使う場合</h4><p>例えば複数のFormatterとかをまとめてregisterしたい時とか</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
@@ -249,12 +214,12 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
     }
 }
 </code></pre><p>とかで定義してこれを</p><pre class="line-numbers"><code class="language-xml">&lt;bean
-    id="conversionService"
-    class="org.springframework.format.support.FormattingConversionServiceFactoryBean"&gt;
+    id=&quot;conversionService&quot;
+    class=&quot;org.springframework.format.support.FormattingConversionServiceFactoryBean&quot;&gt;
 
-    &lt;property name="formatterRegistrars"&gt;
+    &lt;property name=&quot;formatterRegistrars&quot;&gt;
         &lt;list&gt;
-            &lt;bean class="sample.SampleFormatter" /&gt;
+            &lt;bean class=&quot;sample.SampleFormatter&quot; /&gt;
         &lt;/list&gt;
     &lt;/property&gt;
 &lt;/bean&gt;
@@ -308,53 +273,67 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -362,17 +341,21 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -380,32 +363,41 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -413,14 +405,17 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -428,11 +423,13 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -440,20 +437,25 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -461,47 +463,43 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -509,20 +507,41 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -532,17 +551,21 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

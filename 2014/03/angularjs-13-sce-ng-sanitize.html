@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="※ややこしいので公式ドキュメント読んだ方がいい&lt;divng-controller="SampleController"&gt;&lt;span&gt;{%raw%}{{message" />
+    <meta name="description" content="※ややこしいので公式ドキュメント読んだ方がいい&lt;divng-controller=&quot;SampleController&quot;&gt;&lt;span&gt;{%raw%" />
     <title>angular.jsをやってみる (13) - $sceとngSanitize - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/03/angularjs-11-interval.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/03/swiperefreshlayout.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,27 +96,20 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#linky">余談: linkyフィルターについて</a>
-</li>
-</ul>
--->
-                <p>※ややこしいので公式ドキュメント読んだ方がいい</p><pre class="line-numbers"><code class="language-html">&lt;div ng-controller="SampleController"&gt;
+                <!--[[1, "余談: linkyフィルターについて"]]-->
+                <p>※ややこしいので公式ドキュメント読んだ方がいい</p><pre class="line-numbers"><code class="language-html">&lt;div ng-controller=&quot;SampleController&quot;&gt;
   &lt;span&gt;{% raw %}{{message}}{% endraw %}&lt;/span&gt;
 &lt;/div&gt;
-</code></pre><p>的な感じになってて</p><pre class="line-numbers"><code class="language-js">angular.module("app", [])
-  .controller("SampleController", function($scope) {
-    $scope.message = '&lt;span style="color: red"&gt;hoge&lt;/span&gt;';
+</code></pre><p>的な感じになってて</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
+  .controller(&quot;SampleController&quot;, function($scope) {
+    $scope.message = &apos;&lt;span style=&quot;color: red&quot;&gt;hoge&lt;/span&gt;&apos;;
   });
-</code></pre><p>みたいにすると、$scopeとかに含まれるHTMLとかはエスケープされて出力されるらしい</p>
-<!--more-->
-<pre class="line-numbers"><code class="language-html">&lt;div ng-controller="SampleController"&gt;
-  &lt;span ng-bind-html="message" /&gt;
+</code></pre><p>みたいにすると、$scopeとかに含まれるHTMLとかはエスケープされて出力されるらしい</p><pre class="line-numbers"><code class="language-html">&lt;div ng-controller=&quot;SampleController&quot;&gt;
+  &lt;span ng-bind-html=&quot;message&quot; /&gt;
 &lt;/div&gt;
-</code></pre><p>みたいにすると「Error: $sce:unsafe」っていうエラーになる模様。但し、このエラーが発生するのはangular-sanitize.jsが参照されていない場合であって参照されている場合などにおいては物によっては出力は許可されるがCSP(Content Security Policy)に反するようなインラインなスタイルやスクリプトは除去される模様。あくまで汚染物を除去する的な所かと</p><p>ちょっと余談が多いけど、それの出力を許可するようにするには$sce(Strict Contextual Escaping)を使う事で出来る模様。あくまで$sceはangular-sanitizeに含まれる物では無い模様</p><pre class="line-numbers"><code class="language-js">angular.module("app", [])
-  .controller("SampleController", function($scope, $sce) {
-    var text = '&lt;span style="color: red"&gt;hoge&lt;/span&gt;';
+</code></pre><p>みたいにすると「Error: $sce:unsafe」っていうエラーになる模様。但し、このエラーが発生するのはangular-sanitize.jsが参照されていない場合であって参照されている場合などにおいては物によっては出力は許可されるがCSP(Content Security Policy)に反するようなインラインなスタイルやスクリプトは除去される模様。あくまで汚染物を除去する的な所かと</p><p>ちょっと余談が多いけど、それの出力を許可するようにするには$sce(Strict Contextual Escaping)を使う事で出来る模様。あくまで$sceはangular-sanitizeに含まれる物では無い模様</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
+  .controller(&quot;SampleController&quot;, function($scope, $sce) {
+    var text = &apos;&lt;span style=&quot;color: red&quot;&gt;hoge&lt;/span&gt;&apos;;
     $scope.message = $sce.trustAsHtml($text);
   });
 </code></pre><p>$sceで使えるAPIについては<a href="http://docs.angularjs.org/api/ng/service/$sce" target="_blank" rel="noopener noreferrer">http://docs.angularjs.org/api/ng/service/$sce</a>を参照</p><p>若干ややこしいが</p>
@@ -127,14 +119,12 @@ ga("send", "pageview");
 <li>  angular-sanitize.jsを参照してng-bind-htmlでHTMLをバインドすると出力されるが、CSPに反するような部分は除去される</li>
 <li>  $sceのAPIを使う事でCSPに反するようなのを除去せずにHTMLとして出力する事が可能(但し、許可されないのもある)</li>
 </ul>
-<p>っていう感じかと。んまぁセキュリティ観点からするとむやみに$sce.trustAsHtmlとかしないようにするべきなのが一番良いのだろうと。</p>
-<h4 id="linky">余談: linkyフィルターについて</h4>
-<p>angular-sanitize.jsのドキュメントによるとデータ中のURL等をマークアップ化する方法としてはlinkyフィルターを使えば良い模様</p><pre class="line-numbers"><code class="language-html">&lt;div ng-controller="SampleController"&gt;
-  &lt;span ng-bind-html="message | linky" /&gt;
+<p>っていう感じかと。んまぁセキュリティ観点からするとむやみに$sce.trustAsHtmlとかしないようにするべきなのが一番良いのだろうと。</p><h4>余談: linkyフィルターについて</h4><p>angular-sanitize.jsのドキュメントによるとデータ中のURL等をマークアップ化する方法としてはlinkyフィルターを使えば良い模様</p><pre class="line-numbers"><code class="language-html">&lt;div ng-controller=&quot;SampleController&quot;&gt;
+  &lt;span ng-bind-html=&quot;message | linky&quot; /&gt;
 &lt;/div&gt;
-</code></pre><p>的な感じにして</p><pre class="line-numbers"><code class="language-js">angular.module("app", ["ngSanitize"])
-  .controller("SampleController", function($scope) {
-    $scope.message = "http://localhost";
+</code></pre><p>的な感じにして</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngSanitize&quot;])
+  .controller(&quot;SampleController&quot;, function($scope) {
+    $scope.message = &quot;http://localhost&quot;;
   });
 </code></pre><p>的な感じでURL等が含まれるデータはlinkyフィルターによってマークアップされる模様</p><p>んまぁ詳しいことはドキュメント(<a href="http://docs.angularjs.org/api/ngSanitize/filter/linky)" target="_blank" rel="noopener noreferrer">http://docs.angularjs.org/api/ngSanitize/filter/linky)</a>読めって事で</p>
               </div>
@@ -186,53 +176,67 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -240,17 +244,21 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -258,32 +266,41 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -291,14 +308,17 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -306,11 +326,13 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -318,20 +340,25 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -339,47 +366,43 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -387,20 +410,41 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -410,17 +454,21 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

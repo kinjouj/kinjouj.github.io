@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,41 +96,21 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#src-main-resources-sample-controllers-sampleaction-validation-xml">src/main/resources/sample/controllers/SampleAction-validation.xml</a>
-</li>
-<li>
-<a href="#sampleaction-java">SampleAction.java</a>
-</li>
-<li>
-<a href="#struts-xml">struts.xml</a>
-</li>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
+                <!--[[1, "src/main/resources/sample/controllers/SampleAction-validation.xml"], [2, "SampleAction.java"], [3, "struts.xml"], [4, "追記"]]-->
                 <p><a href="/struts2-6-form-validation-1.html">validateメソッドによる入力検証</a>だったり、<a href="/struts2-7-form-validation-2.html">XML定義による入力検証</a>っていうような方式がある。でこういう処理はフレームワークレベルで判断される訳だけど、これを抑制して自動で処理せずに自分でコントロールしたい場合とかの方法も用意されているようで</p><p>ちなみにStruts2のバリデーションインターセプターの実体はcom.opensymphony.xwork2.validator.ValidationInterceptorとなっている模様。でこちらで色々オプションなパラメーターがある模様</p>
-<!--more-->
-
 <ul>
 <li>  programmatic: validateメソッドフローを行わない</li>
 <li>  declarative: XML定義によるバリデーションフローをサポートしない</li>
 </ul>
-<p>的な感じじゃないかなと。ってな訳で自分でコントロールする方式をやってみた</p>
-<h4 id="src-main-resources-sample-controllers-sampleaction-validation-xml">src/main/resources/sample/controllers/SampleAction-validation.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
-&lt;!DOCTYPE validators PUBLIC "-//Apache Struts//XWork Validator 1.0.3//EN" "http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd"&gt;
+<p>的な感じじゃないかなと。ってな訳で自分でコントロールする方式をやってみた</p><h4>src/main/resources/sample/controllers/SampleAction-validation.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;!DOCTYPE validators PUBLIC &quot;-//Apache Struts//XWork Validator 1.0.3//EN&quot; &quot;http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd&quot;&gt;
 &lt;validators&gt;
-    &lt;validator type="requiredstring"&gt;
-        &lt;param name="fieldName"&gt;name&lt;/param&gt;
+    &lt;validator type=&quot;requiredstring&quot;&gt;
+        &lt;param name=&quot;fieldName&quot;&gt;name&lt;/param&gt;
         &lt;message&gt;name is required&lt;/message&gt;
     &lt;/validator&gt;
 &lt;/validators&gt;
-</code></pre><p>これも作用しないけどとりあえず書いておく</p>
-<h4 id="sampleaction-java">SampleAction.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.controllers;
+</code></pre><p>これも作用しないけどとりあえず書いておく</p><h4>SampleAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.controllers;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -165,7 +144,7 @@ public class SampleAction extends ActionSupport {
 
     public String submit() {
         if (StringUtils.isEmpty(name)) {
-            addFieldError("name", "required");
+            addFieldError(&quot;name&quot;, &quot;required&quot;);
             return ERROR;
         }
 
@@ -176,34 +155,30 @@ public class SampleAction extends ActionSupport {
         this.name = name;
     }
 }
-</code></pre><p>という感じで。でvalidateメソッドもフォローせずXML定義もフォローしない設定を行いこれをサポートさせる設定を行う</p>
-<h4 id="struts-xml">struts.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
+</code></pre><p>という感じで。でvalidateメソッドもフォローせずXML定義もフォローしない設定を行いこれをサポートさせる設定を行う</p><h4>struts.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
-    &lt;package name="sample" extends="struts-default"&gt;
-        &lt;action name="test" class="sample.controllers.SampleAction" method="input"&gt;
-            &lt;interceptor-ref name="store"&gt;
-                &lt;param name="operationMode"&gt;RETRIEVE&lt;/param&gt;
+    &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot;&gt;
+        &lt;action name=&quot;test&quot; class=&quot;sample.controllers.SampleAction&quot; method=&quot;input&quot;&gt;
+            &lt;interceptor-ref name=&quot;store&quot;&gt;
+                &lt;param name=&quot;operationMode&quot;&gt;RETRIEVE&lt;/param&gt;
             &lt;/interceptor-ref&gt;
-            &lt;result name="input"&gt;/WEB-INF/jsp/input.jsp&lt;/result&gt;
-            &lt;result name="success"&gt;/WEB-INF/jsp/input.jsp&lt;/result&gt;
+            &lt;result name=&quot;input&quot;&gt;/WEB-INF/jsp/input.jsp&lt;/result&gt;
+            &lt;result name=&quot;success&quot;&gt;/WEB-INF/jsp/input.jsp&lt;/result&gt;
         &lt;/action&gt;
-        &lt;action name="test-submit" class="sample.controllers.SampleAction" method="submit"&gt;
-            &lt;interceptor-ref name="defaultStack"&gt;
-                &lt;param name="validation.programmatic"&gt;false&lt;/param&gt;
-                &lt;param name="validation.declarative"&gt;false&lt;/param&gt;
-                &lt;param name="store.operationMode"&gt;STORE&lt;/param&gt;
+        &lt;action name=&quot;test-submit&quot; class=&quot;sample.controllers.SampleAction&quot; method=&quot;submit&quot;&gt;
+            &lt;interceptor-ref name=&quot;defaultStack&quot;&gt;
+                &lt;param name=&quot;validation.programmatic&quot;&gt;false&lt;/param&gt;
+                &lt;param name=&quot;validation.declarative&quot;&gt;false&lt;/param&gt;
+                &lt;param name=&quot;store.operationMode&quot;&gt;STORE&lt;/param&gt;
             &lt;/interceptor-ref&gt;
-            &lt;result name="error" type="redirectAction"&gt;s
-                &lt;param name="actionName"&gt;test&lt;/param&gt;
+            &lt;result name=&quot;error&quot; type=&quot;redirectAction&quot;&gt;s
+                &lt;param name=&quot;actionName&quot;&gt;test&lt;/param&gt;
             &lt;/result&gt;
         &lt;/action&gt;
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre><p>んまぁデフォルトなインターセプターのスタックにvalidationが入ってるのでそれのパラメーターをいじる感じでprogrammaticとdeclarativeをfalseにする。後者のdeclarativeをfalseにする事でXML定義なのはフォローされない模様。programmaticは別にvalidateメソッド実装していなければ良いんじゃないかと思うので</p><p>という感じでオプションパラメーターを使う事でデフォルトなバリデーションインターセプターが行う検証機構なフローをすっ飛ばして自分でコントロールする事も可能な模様</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-
+</code></pre><p>んまぁデフォルトなインターセプターのスタックにvalidationが入ってるのでそれのパラメーターをいじる感じでprogrammaticとdeclarativeをfalseにする。後者のdeclarativeをfalseにする事でXML定義なのはフォローされない模様。programmaticは別にvalidateメソッド実装していなければ良いんじゃないかと思うので</p><p>という感じでオプションパラメーターを使う事でデフォルトなバリデーションインターセプターが行う検証機構なフローをすっ飛ばして自分でコントロールする事も可能な模様</p><h4>追記</h4>
 <blockquote class="twitter-tweet" lang="ja">
   <p>
     <a href="https://twitter.com/kinjou_j">@kinjou_j</a> ＠SkipValidation でそのActionクラスのメソッドだけキャンセルできますね。
@@ -263,53 +238,67 @@ public class SampleAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -317,17 +306,21 @@ public class SampleAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -335,32 +328,41 @@ public class SampleAction extends ActionSupport {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -368,14 +370,17 @@ public class SampleAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -383,11 +388,13 @@ public class SampleAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -395,20 +402,25 @@ public class SampleAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -416,47 +428,43 @@ public class SampleAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -464,20 +472,41 @@ public class SampleAction extends ActionSupport {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -487,17 +516,21 @@ public class SampleAction extends ActionSupport {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

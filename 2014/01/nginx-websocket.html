@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="nginx1.3から正式サポートされたらしいのでやった事無かった為やってみただけ。前回のAndroidでsocket.ioで使ったのをちょいと修正して使うnginx1.3のインストール検証マシ" />
+    <meta name="description" content="nginx1.3から正式サポートされたらしいのでやった事無かった為やってみただけ。前回の[Androidでsocket.io][1]で使ったのをちょいと修正して使うnginx1.3のインストール検証マ" />
     <title>nginxでwebsocket - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/01/android-socketio.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/01/svg-rendering-bar-and-line-chart.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,85 +97,61 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#nginx1-3">nginx1.3のインストール</a>
-</li>
-<li>
-<a href="#part-6807caf1b423779f">クライアント</a>
-</li>
-<li>
-<a href="#part-e67f35cecc447913">サーバー側</a>
-</li>
-<li>
-<a href="#nginx-conf">nginx.conf</a>
-</li>
-</ul>
--->
-                <p>nginx1.3から正式サポートされたらしいのでやった事無かった為やってみただけ。前回の<a href="/android-socketio.html">Androidでsocket.io</a>で使ったのをちょいと修正して使う</p>
-<!--more-->
-
-<h4 id="nginx1-3">nginx1.3のインストール</h4>
-<p>検証マシンに入ってるnginxが1.2系だったので、nginx公式のPPAを使えば1.3系以降なのもインストール出来る模様</p><pre class="line-numbers"><code class="language-sh">sudo add-apt-repository ppa:nginx/stable
+                <!--[[1, "nginx1.3のインストール"], [2, "クライアント"], [3, "サーバー側"], [4, "nginx.conf"]]-->
+                <p>nginx1.3から正式サポートされたらしいのでやった事無かった為やってみただけ。前回の[Androidでsocket.io][1]で使ったのをちょいと修正して使う</p><h4>nginx1.3のインストール</h4><p>検証マシンに入ってるnginxが1.2系だったので、nginx公式のPPAを使えば1.3系以降なのもインストール出来る模様</p><pre class="line-numbers"><code class="language-sh">sudo add-apt-repository ppa:nginx/stable
 sudo apt-get update
 
 # 既に入ってるnginxをアップグレードする。もしくはnginxを一回消してから再度入れるとか
 sudo apt-get upgrade
-</code></pre>
-<h4 id="part-6807caf1b423779f">クライアント</h4>
-<p>前回、socket.io.js辺りなやつはコピペして使うって書いたけど、socket.ioなサーバー上で/socket.io/socket.io.jsなURLで利用できるっぽい</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><h4>クライアント</h4><p>前回、socket.io.js辺りなやつはコピペして使うって書いたけど、socket.ioなサーバー上で/socket.io/socket.io.jsなURLで利用できるっぽい</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
-    &lt;script type="text/javascript" src="/socket.io/socket.io.js"&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;/socket.io/socket.io.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;input type="text" id="message" /&gt;
-    &lt;input type="button" id="send_btn" value="send" /&gt;
-    &lt;div id="messages"&gt;&lt;/div&gt;
-    &lt;script type="text/javascript"&gt;
+    &lt;input type=&quot;text&quot; id=&quot;message&quot; /&gt;
+    &lt;input type=&quot;button&quot; id=&quot;send_btn&quot; value=&quot;send&quot; /&gt;
+    &lt;div id=&quot;messages&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
 (function(undefined) {
-  "use strict";
+  &quot;use strict&quot;;
 
-  var messages = document.querySelector("#messages");
+  var messages = document.querySelector(&quot;#messages&quot;);
 
-  var socket = io.connect("http://server.name/");
-  socket.on("connect", function() {
-    socket.on("message", function(data) {
-      var elm = document.createElement("div");
+  var socket = io.connect(&quot;http://server.name/&quot;);
+  socket.on(&quot;connect&quot;, function() {
+    socket.on(&quot;message&quot;, function(data) {
+      var elm = document.createElement(&quot;div&quot;);
       elm.innerText = data;
 
       messages.appendChild(elm);
     });
 
-    document.querySelector("#send_btn").addEventListener("click", function() {
-      socket.send(document.querySelector("#message").value);
+    document.querySelector(&quot;#send_btn&quot;).addEventListener(&quot;click&quot;, function() {
+      socket.send(document.querySelector(&quot;#message&quot;).value);
     });
   });
 })();
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<h4 id="part-e67f35cecc447913">サーバー側</h4>
-<pre class="line-numbers"><code class="language-js">var express = require("express");
+</code></pre><h4>サーバー側</h4><pre class="line-numbers"><code class="language-js">var express = require(&quot;express&quot;);
 
 var app = express();
 app.configure(function() {
   // クライアント側にあるファイルを静的ファイルで読み込めるように?
-  app.use(express.static(__dirname + "/../client"));
+  app.use(express.static(__dirname + &quot;/../client&quot;));
 });
 
-var server = require("http").createServer(app);
+var server = require(&quot;http&quot;).createServer(app);
 server.listen(3000);
 
-var io = require("socket.io").listen(server);
-io.sockets.on("connection", function(socket) {
-  socket.on("message", function(data) {
+var io = require(&quot;socket.io&quot;).listen(server);
+io.sockets.on(&quot;connection&quot;, function(socket) {
+  socket.on(&quot;message&quot;, function(data) {
     socket.broadcast.send(data);
   });
 });
-</code></pre>
-<h4 id="nginx-conf">nginx.conf</h4>
-<pre class="line-numbers"><code class="language-nginx">upstream socketio {
+</code></pre><h4>nginx.conf</h4><pre class="line-numbers"><code class="language-nginx">upstream socketio {
     server 127.0.0.1:3000;
 }
 
@@ -185,11 +160,11 @@ server {
 
     location / {
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
+        proxy_set_header Connection &quot;Upgrade&quot;;
         proxy_pass http://socketio;
     }
 }
-</code></pre><p>最小限で、proxy_Set_headerでUpgradeとConnectionを指定しておけば良いっぽい。んまぁ詳しくは以下参考にすりゃ良いっぽい</p><p>で外部からnginxにアクセスしても問題無いかどうかをAndroidのブラウザでサーバーにアクセスして、PCから入力したデータが表示されるかの検証してみた所だと</p><p><img src="/images/2014/01/20140112-182622.png" alt="image" /></p><p>参考: <a href="http://blog.geta6.net/post/45741693575/nginx-1-3-14-websocket-proxy" target="_blank" rel="noopener noreferrer">http://blog.geta6.net/post/45741693575/nginx-1-3-14-websocket-proxy</a></p>
+</code></pre><p>最小限で、proxy_Set_headerでUpgradeとConnectionを指定しておけば良いっぽい。んまぁ詳しくは以下参考にすりゃ良いっぽい</p><p>で外部からnginxにアクセスしても問題無いかどうかをAndroidのブラウザでサーバーにアクセスして、PCから入力したデータが表示されるかの検証してみた所だと</p><p><img src="/images/2014/01/20140112-182622.png" alt="image" /></p><p>参考: <a href="http://blog.geta6.net/post/45741693575/nginx-1-3-14-websocket-proxy" target="_blank" rel="noopener noreferrer">http://blog.geta6.net/post/45741693575/nginx-1-3-14-websocket-proxy</a></p><p> [1]: /android-socketio.html</p>
               </div>
             </div>
           </div>
@@ -239,53 +214,67 @@ server {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -293,17 +282,21 @@ server {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -311,32 +304,41 @@ server {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -344,14 +346,17 @@ server {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -359,11 +364,13 @@ server {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -371,20 +378,25 @@ server {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -392,47 +404,43 @@ server {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -440,20 +448,41 @@ server {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -463,17 +492,21 @@ server {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

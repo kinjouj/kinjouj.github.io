@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,22 +97,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-f3bcb87b2ef6e59e">必要なライブラリ</a>
-</li>
-<li>
-<a href="#part-b3b788b566bf5c91">アクティビティ及びテストを書く</a>
-</li>
-</ul>
--->
-                <p>参考: <a href="http://addie9000.blogspot.jp/2012/12/robolectricpowermockandroidunit-test.html" target="_blank" rel="noopener noreferrer">http://addie9000.blogspot.jp/2012/12/robolectricpowermockandroidunit-test.html</a></p><p>Robolectricを使ってJUnit4ベースでテストしたいけど、PowerMockitoを使ってstaticメソッドをテストしたいって思ってもRobolectric自体が@RunWith(RobolectricTestRunner.class)を使うので、PowerMockitoのPowerMockRunner.class指定出来ないよねっていう事で上記の参考にRobolectricでのPowerMockitoの動かし方参考にしつつやってみた。ただ気になる事の検証的な目的かなと</p><p>※但し、上記の参考のRobolectricバージョン(1.1)とこの記事のバージョン(2.2)は違う</p>
-<!--more-->
-
-<h4 id="part-f3bcb87b2ef6e59e">必要なライブラリ</h4>
-<p>上記の参考に書いてる通りにライブラリを取ってくる。でまぁ</p><p><img src="/images/2013/10/201310112000.png" alt="image" /></p><p>hamcrestは使わない人は要らないけど。で良くEclipseであるあるなケースとしてライブラリの照合順序によっては色々実行でずっこけたりする。参考でもandroid.jarを最後に読むこまないとダメとかっていうのがあるらしいけど、こっちでやったのだとそういう問題は出なかった。せいぜいJUnitに入ってるhamcrestが認識してhamcrest-allなやつが認識してくれないから照合順序を上げるとかそういうのは必要だった</p><p>んまぁあとは普通にテスト書けば良いんじゃねって事で適当に</p>
-<h4 id="part-b3b788b566bf5c91">アクティビティ及びテストを書く</h4>
-<pre class="line-numbers"><code class="language-java">package shareroid.app;
+                <!--[[1, "必要なライブラリ"], [2, "アクティビティ及びテストを書く"]]-->
+                <p>参考: <a href="http://addie9000.blogspot.jp/2012/12/robolectricpowermockandroidunit-test.html" target="_blank" rel="noopener noreferrer">http://addie9000.blogspot.jp/2012/12/robolectricpowermockandroidunit-test.html</a></p><p>Robolectricを使ってJUnit4ベースでテストしたいけど、PowerMockitoを使ってstaticメソッドをテストしたいって思ってもRobolectric自体が@RunWith(RobolectricTestRunner.class)を使うので、PowerMockitoのPowerMockRunner.class指定出来ないよねっていう事で上記の参考にRobolectricでのPowerMockitoの動かし方参考にしつつやってみた。ただ気になる事の検証的な目的かなと</p><p>※但し、上記の参考のRobolectricバージョン(1.1)とこの記事のバージョン(2.2)は違う</p><h4>必要なライブラリ</h4><p>上記の参考に書いてる通りにライブラリを取ってくる。でまぁ</p><p><img src="/images/2013/10/201310112000.png" alt="image" /></p><p>hamcrestは使わない人は要らないけど。で良くEclipseであるあるなケースとしてライブラリの照合順序によっては色々実行でずっこけたりする。参考でもandroid.jarを最後に読むこまないとダメとかっていうのがあるらしいけど、こっちでやったのだとそういう問題は出なかった。せいぜいJUnitに入ってるhamcrestが認識してhamcrest-allなやつが認識してくれないから照合順序を上げるとかそういうのは必要だった</p><p>んまぁあとは普通にテスト書けば良いんじゃねって事で適当に</p><h4>アクティビティ及びテストを書く</h4><pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import android.util.Base64;
 
@@ -146,7 +131,7 @@ public class SampleActivity extends Activity {
             textView = new TextView(this);
         }
 
-        textView.setText(Sample.encodeB64("hoge"));
+        textView.setText(Sample.encodeB64(&quot;hoge&quot;));
     }
 }
 </code></pre><p>的な感じで使われる(※AndroidManifest.xmlに定義しておく必要性は無い)。でこの場合にSample.encodeB64メソッドが返す値をPowerMockitoを使ってモックを差し込み返す値を変えたりした場合どうなるかとか</p><pre class="line-numbers"><code class="language-java">package shareroid.app;
@@ -170,7 +155,7 @@ import static org.powermock.api.mockito.PowerMockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 @PrepareForTest(Sample.class)
-@PowerMockIgnore({"org.robolectric.*", "android.*"})
+@PowerMockIgnore({&quot;org.robolectric.*&quot;, &quot;android.*&quot;})
 public class SampleTestCase {
 
     @Rule
@@ -188,12 +173,12 @@ public class SampleTestCase {
                 public String answer(InvocationOnMock invocation) throws Throwable {
                     Object[] args = invocation.getArguments();
                     assertThat(args.length, is(1));
-                    assertThat((String)args[0], is("hoge"));
+                    assertThat((String)args[0], is(&quot;hoge&quot;));
                     assertThat(
                         (String)invocation.callRealMethod(),
                         is(
                             Base64.encodeToString(
-                                "hoge".getBytes(),
+                                &quot;hoge&quot;.getBytes(),
                                 Base64.NO_WRAP | Base64.NO_PADDING
                             )
                         )
@@ -265,53 +250,67 @@ public class SampleTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -319,17 +318,21 @@ public class SampleTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -337,32 +340,41 @@ public class SampleTestCase {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -370,14 +382,17 @@ public class SampleTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -385,11 +400,13 @@ public class SampleTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -397,20 +414,25 @@ public class SampleTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -418,47 +440,43 @@ public class SampleTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -466,20 +484,41 @@ public class SampleTestCase {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -489,17 +528,21 @@ public class SampleTestCase {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

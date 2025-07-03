@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="タイトル通り。ActionSupportなクラスにvalidateメソッドを定義する事で入力検証な機能を実装出来る。こいつの実体自体はValidateableインターフェースが作用している模様。" />
+    <meta name="description" content="タイトル通り。ActionSupportなクラスにvalidateメソッドを定義する事で入力検証な機能を実装出来る。こいつの実体自体はValidateableインターフェースが作用している模様。画面転" />
     <title>Struts2をやってみる (6) - フォームバリデーション (1) - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/09/hbase-hfile-reading.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/09/struts2-7-form-validation-2.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,45 +96,23 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-9b0d35ab1f547b8a">画面転移仕様</a>
-</li>
-<li>
-<a href="#web-inf-jsp-index-jsp">WEB-INF/jsp/index.jsp</a>
-</li>
-<li>
-<a href="#indexaction-java">IndexAction.java</a>
-</li>
-<li>
-<a href="#struts-xml">struts.xml</a>
-</li>
-</ul>
--->
-                <p>タイトル通り。ActionSupportなクラスにvalidateメソッドを定義する事で入力検証な機能を実装出来る。こいつの実体自体はValidateableインターフェースが作用している模様。</p>
-<!--more-->
-
-<h4 id="part-9b0d35ab1f547b8a">画面転移仕様</h4>
-<p><img src="/images/2013/09/201309191345_1.png" alt="image" /></p><p>っていうような感じ</p>
-<h4 id="web-inf-jsp-index-jsp">WEB-INF/jsp/index.jsp</h4>
-<pre class="line-numbers"><code class="language-jsp">&lt;%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="utf-8" %&gt;
-&lt;%@ taglib prefix="s" uri="/struts-tags" %&gt;
+                <!--[[1, "画面転移仕様"], [2, "WEB-INF/jsp/index.jsp"], [3, "IndexAction.java"], [4, "struts.xml"]]-->
+                <p>タイトル通り。ActionSupportなクラスにvalidateメソッドを定義する事で入力検証な機能を実装出来る。こいつの実体自体はValidateableインターフェースが作用している模様。</p><h4>画面転移仕様</h4><p><img src="/images/2013/09/201309191345_1.png" alt="image" /></p><p>っていうような感じ</p><h4>WEB-INF/jsp/index.jsp</h4><pre class="line-numbers"><code class="language-jsp">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;utf-8&quot; %&gt;
+&lt;%@ taglib prefix=&quot;s&quot; uri=&quot;/struts-tags&quot; %&gt;
 &lt;html&gt;
   &lt;head&gt;
-    &lt;meta charset="utf-8" /&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
     &lt;s:head /&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;s:form action="say"&gt;
-      &lt;s:textfield key="name" name="name" errorPosition="false" /&gt;
+    &lt;s:form action=&quot;say&quot;&gt;
+      &lt;s:textfield key=&quot;name&quot; name=&quot;name&quot; errorPosition=&quot;false&quot; /&gt;
       &lt;s:submit /&gt;
     &lt;/s:form&gt;
-    &lt;s:fielderror key="name" theme="simple" /&gt;
+    &lt;s:fielderror key=&quot;name&quot; theme=&quot;simple&quot; /&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>&lt;s:textfield&gt;に<span style="color: red">errorPosition=<q>false</q></span>をしているが、これを指定しなかった場合</p><p><img src="/images/2013/09/201309191345_2.jpg" alt="image" /></p><p>というように&lt;s:fielderror&gt;でエラー表示の場所を指定したい場合にはこれを指定しないとフレームワークレベルで行われるエラー表示が出てしまう</p><p>んまぁあとは上記処理フローで書いているようにindex.actionでこれがレンダリングされてサブミットした際にsay.actionが発生、その際にバリデーションを行いエラー発生時にはこのビュー側に移動してエラーを表示するという事を行う</p>
-<h4 id="indexaction-java">IndexAction.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.action;
+</code></pre><p>&lt;s:textfield&gt;に<span style="color: red">errorPosition=<q>false</q></span>をしているが、これを指定しなかった場合</p><p><img src="/images/2013/09/201309191345_2.jpg" alt="image" /></p><p>というように&lt;s:fielderror&gt;でエラー表示の場所を指定したい場合にはこれを指定しないとフレームワークレベルで行われるエラー表示が出てしまう</p><p>んまぁあとは上記処理フローで書いているようにindex.actionでこれがレンダリングされてサブミットした際にsay.actionが発生、その際にバリデーションを行いエラー発生時にはこのビュー側に移動してエラーを表示するという事を行う</p><h4>IndexAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -154,13 +131,13 @@ public class IndexAction extends ActionSupport {
     @Override
     public void validate() {
         if (StringUtils.isEmpty(getName())) {
-            addFieldError("name", getText("name") + "を入力せよ");
+            addFieldError(&quot;name&quot;, getText(&quot;name&quot;) + &quot;を入力せよ&quot;);
         }
     }
 
     public String say() throws IOException {
         HttpServletResponse response = ServletActionContext.getResponse();
-        response.setContentType("text/plain); charset=utf-8");
+        response.setContentType(&quot;text/plain); charset=utf-8&quot;);
 
         PrintWriter out = response.getWriter();
         out.print(name);
@@ -179,50 +156,48 @@ public class IndexAction extends ActionSupport {
     }
 }
 </code></pre><p>addFieldErrorを使ってエラー情報を格納する。でgetTextっていうメソッドを使っているけど、src/main/resources/クラスパッケージ/クラス名.properties辺りに</p><pre class="line-numbers"><code class="language-ini">name=名前
-</code></pre><p>的なのを作っておけば取得出来るようになる模様</p><p>でsayの時点でバリデーションがずっこけたら、inputなresultに向かう模様なのでそれをもろもろ設定を行う</p>
-<h4 id="struts-xml">struts.xml</h4>
-<p>でここでとある問題として上記の処理フロー的な所としては</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
+</code></pre><p>的なのを作っておけば取得出来るようになる模様</p><p>でsayの時点でバリデーションがずっこけたら、inputなresultに向かう模様なのでそれをもろもろ設定を行う</p><h4>struts.xml</h4><p>でここでとある問題として上記の処理フロー的な所としては</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
-    &lt;constant name="struts.devMode" value="true" /&gt;
+    &lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
 
-    &lt;package name="sample" extends="struts-default" namespace="/sample"&gt;
+    &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot; namespace=&quot;/sample&quot;&gt;
 
-        &lt;action name="index" class="sample.action.IndexAction" method="input"&gt;
-            &lt;result name="input"&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
+        &lt;action name=&quot;index&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;input&quot;&gt;
+            &lt;result name=&quot;input&quot;&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
         &lt;/action&gt;
 
-        &lt;action name="say" class="sample.action.IndexAction" method="say"&gt;
-            &lt;result name="input"&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
-            &lt;result name="success" /&gt;
+        &lt;action name=&quot;say&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;say&quot;&gt;
+            &lt;result name=&quot;input&quot;&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
+            &lt;result name=&quot;success&quot; /&gt;
         &lt;/action&gt;
 
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre><p>っていうような設定を行った場合には、index.actionからsay.actionへPOSTした場合にバリデーションがずっこけたらindex.jspが普通にforward(RequestDispatcher#forward)的な事が行われると思われるのだけど、これやるとリロード時にPOSTの状態が維持されたままなので所々問題になる場合もあるとは思う</p><p>そこでsay.actionからのinputなresultを&lt;result name=<q>input</q> type=<q>redirectAction</q>&gt;を利用してアクションへリダイレクトされるようにした場合だとエラー情報をセッションなどに格納しない限りはバリデーションを行ったエラー情報が保持されない。でそれを解決する為にinterceptorを利用する事で可能らしいので上記のstruts.xmlではなく</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
+</code></pre><p>っていうような設定を行った場合には、index.actionからsay.actionへPOSTした場合にバリデーションがずっこけたらindex.jspが普通にforward(RequestDispatcher#forward)的な事が行われると思われるのだけど、これやるとリロード時にPOSTの状態が維持されたままなので所々問題になる場合もあるとは思う</p><p>そこでsay.actionからのinputなresultを&lt;result name=<q>input</q> type=<q>redirectAction</q>&gt;を利用してアクションへリダイレクトされるようにした場合だとエラー情報をセッションなどに格納しない限りはバリデーションを行ったエラー情報が保持されない。でそれを解決する為にinterceptorを利用する事で可能らしいので上記のstruts.xmlではなく</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
-    &lt;constant name="struts.devMode" value="true" /&gt;
+    &lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
 
-    &lt;package name="sample" extends="struts-default" namespace="/sample"&gt;
+    &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot; namespace=&quot;/sample&quot;&gt;
 
-        &lt;action name="index" class="sample.action.IndexAction" method="input"&gt;
-            &lt;interceptor-ref name="store"&gt;
-                &lt;param name="operationMode"&gt;RETRIEVE&lt;/param&gt;
+        &lt;action name=&quot;index&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;input&quot;&gt;
+            &lt;interceptor-ref name=&quot;store&quot;&gt;
+                &lt;param name=&quot;operationMode&quot;&gt;RETRIEVE&lt;/param&gt;
             &lt;/interceptor-ref&gt;
-            &lt;result name="input"&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
+            &lt;result name=&quot;input&quot;&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
         &lt;/action&gt;
 
-        &lt;action name="say" class="sample.action.IndexAction" method="say"&gt;
-            &lt;interceptor-ref name="store"&gt;
-                &lt;param name="operationMode"&gt;STORE&lt;/param&gt;
+        &lt;action name=&quot;say&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;say&quot;&gt;
+            &lt;interceptor-ref name=&quot;store&quot;&gt;
+                &lt;param name=&quot;operationMode&quot;&gt;STORE&lt;/param&gt;
             &lt;/interceptor-ref&gt;
-            &lt;interceptor-ref name="defaultStack" /&gt;
-            &lt;result name="input" type="redirectAction"&gt;
-                &lt;param name="actionName"&gt;index&lt;/param&gt;
-                &lt;param name="namespace"&gt;/sample&lt;/param&gt;
+            &lt;interceptor-ref name=&quot;defaultStack&quot; /&gt;
+            &lt;result name=&quot;input&quot; type=&quot;redirectAction&quot;&gt;
+                &lt;param name=&quot;actionName&quot;&gt;index&lt;/param&gt;
+                &lt;param name=&quot;namespace&quot;&gt;/sample&lt;/param&gt;
             &lt;/result&gt;
-            &lt;result name="success" /&gt;
+            &lt;result name=&quot;success&quot; /&gt;
         &lt;/action&gt;
 
     &lt;/package&gt;
@@ -277,53 +252,67 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -331,17 +320,21 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -349,32 +342,41 @@ public class IndexAction extends ActionSupport {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -382,14 +384,17 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -397,11 +402,13 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -409,20 +416,25 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -430,47 +442,43 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -478,20 +486,41 @@ public class IndexAction extends ActionSupport {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -501,17 +530,21 @@ public class IndexAction extends ActionSupport {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

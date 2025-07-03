@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,36 +96,27 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#fuel-app-models-sample-php">fuel/app/models/sample.php</a>
-</li>
-</ul>
--->
+                <!--[[1, "fuel/app/models/sample.php"]]-->
                 <p>FuelPHP 1.6 Release(祝)</p><p>っていう事で1.6から追加された模様気なOrmModel_Temporalを使ってみる。まずこれなんなのかって、バージョニング出来るモデルみたいな感じなのかなと。で</p>
 <div style="margin-bottom:5px">
   <strong> <a href="https://www.slideshare.net/takyam1213/temporal-model-takyam" title="What"s Temporal model FuelPHP東京勉強会03" target="_blank">What"s Temporal model FuelPHP東京勉強会03</a> </strong> from <strong><a href="http://www.slideshare.net/takyam1213" target="_blank">Takayuki Yamaguchi</a></strong>
 </div>
-<p>ぶっちゃけこれ見た方が概要全て解説されているかと思いますんで、是非一読される事をオススメします。っていうか自分もこれ見てやってみただけなので</p>
-<!--more-->
-
-<h4 id="fuel-app-models-sample-php">fuel/app/models/sample.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+<p>ぶっちゃけこれ見た方が概要全て解説されているかと思いますんで、是非一読される事をオススメします。っていうか自分もこれ見てやってみただけなので</p><h4>fuel/app/models/sample.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Model_Sample extends Orm\Model_Temporal {
 
-    protected static $_table_name = "sample";
+    protected static $_table_name = &quot;sample&quot;;
 
     protected static $_primary_key = array(
-        "id",
-        "temporal_start",
-        "temporal_end"
+        &quot;id&quot;,
+        &quot;temporal_start&quot;,
+        &quot;temporal_end&quot;
     );
 
     protected static $_temporal = array(
-        "start_column" =&gt; "temporal_start",
-        "end_column" =&gt; "temporal_end",
-        "mysql_timestamp" =&gt; true
+        &quot;start_column&quot; =&gt; &quot;temporal_start&quot;,
+        &quot;end_column&quot; =&gt; &quot;temporal_end&quot;,
+        &quot;mysql_timestamp&quot; =&gt; true
     );
 }
 </code></pre><p>っつー感じでOrmModel_Temporalを継承したモデルクラスを定義。ドキュメントと違うのはmysql_timestampがtrueなくらい。あとマイグレーション的なの作っとけば</p><pre class="line-numbers"><code class="language-php">&lt;?php
@@ -136,18 +126,18 @@ namespace Fuel\Migrations;
 class Sample {
     public function up() {
         DBUtil::create_table(
-            "sample",
+            &quot;sample&quot;,
             array(
-                "id" =&gt; array(
-                    "type" =&gt; "int",
-                    "auto_increment" =&gt; true,
-                "constraint" =&gt; 11
+                &quot;id&quot; =&gt; array(
+                    &quot;type&quot; =&gt; &quot;int&quot;,
+                    &quot;auto_increment&quot; =&gt; true,
+                &quot;constraint&quot; =&gt; 11
             ),
-            "name" =&gt; array("type" =&gt; "text"),
-                "temporal_start" =&gt; array("type" =&gt; "datetime"),
-                "temporal_end" =&gt; array("type" =&gt; "datetime")
+            &quot;name&quot; =&gt; array(&quot;type&quot; =&gt; &quot;text&quot;),
+                &quot;temporal_start&quot; =&gt; array(&quot;type&quot; =&gt; &quot;datetime&quot;),
+                &quot;temporal_end&quot; =&gt; array(&quot;type&quot; =&gt; &quot;datetime&quot;)
             ),
-            array("id", "temporal_start", "temporal_end")
+            array(&quot;id&quot;, &quot;temporal_start&quot;, &quot;temporal_end&quot;)
         );
     }
 
@@ -155,21 +145,21 @@ class Sample {
     }
 }
 </code></pre><p>な感じかと。で本題はこれから、ただモデル定義しただけなので</p><p>でOrm\Model_Temporalの特徴だと思われる「find(ID)-&gt;saveしてもupdateでは無く、同一のIDを持ったINSERTが行われる」模様。もちろんoverwriteメソッドを使う事でリビジョン管理をする事無く同一のIDをupdateする事は出来る。コード的に書くと</p><pre class="line-numbers"><code class="language-php">$model = Model_Sample::forge();
-$model-&gt;name = "test1";
+$model-&gt;name = &quot;test1&quot;;
 $model-&gt;save(); // 普通にsave
 
 $model = Model_Sample::find(1);
-$model-&gt;name = "test2";
+$model-&gt;name = &quot;test2&quot;;
 $model-&gt;save(); // updateと思いきやinsertになる。レコード的には同一IDが存在する
 
 $model = Model_Sample::find(1);
-$model-&gt;name = "test3";
+$model-&gt;name = &quot;test3&quot;;
 $model-&gt;overwrite(); // insertと思いきや、これはupdate
 
 $model-&gt;delete(); // 削除できるし、findしてもnullにしかならないけどレコード自体は削除されていない
 
 // deleteしたレコードはrestoreで復元出来る
-$model = Model_Sample::find_revision(1, "2013-05-08 xx:xx:xx")-&gt;restore();
+$model = Model_Sample::find_revision(1, &quot;2013-05-08 xx:xx:xx&quot;)-&gt;restore();
 
 // purgeをすればレコード自体にもリビジョンを残さず削除出来る
 $model-&gt;purge();
@@ -177,7 +167,7 @@ $model-&gt;purge();
 
 class Controller_Sample extends Controller {
     public function action_index() {
-        $samples = Model_Sample::find("all");
+        $samples = Model_Sample::find(&quot;all&quot;);
 
         foreach ($samples as $sample) {
             var_dump($sample);
@@ -253,53 +243,67 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -307,17 +311,21 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -325,32 +333,41 @@ class Controller_Sample extends Controller {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -358,14 +375,17 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -373,11 +393,13 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -385,20 +407,25 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -406,47 +433,43 @@ class Controller_Sample extends Controller {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -454,20 +477,41 @@ class Controller_Sample extends Controller {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -477,17 +521,21 @@ class Controller_Sample extends Controller {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

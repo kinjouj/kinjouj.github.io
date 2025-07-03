@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="AndroidでJsonPullParserを使うっていうネタ。まぁ公式にもサンプルあるしそれ参考にすれば良いんじゃねって所なんで※@JsonModel等は前回のをそのまま利用MainActiv" />
+    <meta name="description" content="AndroidでJsonPullParserを使うっていうネタ。まぁ公式にもサンプルあるしそれ参考にすれば良いんじゃねって所なんで※@JsonModel等は前回のをそのまま利用MainActivity" />
     <title>Android+JsonPullParser - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/11/jsonpullparser.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/11/slf4j.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2013-11-14 21:00:00 +0900">
+                <time datetime="2013-11-14T21:00:00+09:00">
                   <a href="/archives/2013/11">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -97,17 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#mainactivity-java">MainActivity.java</a>
-</li>
-</ul>
--->
-                <p>AndroidでJsonPullParserを使うっていうネタ。まぁ公式にもサンプルあるしそれ参考にすれば良いんじゃねって所なんで</p><p>※@JsonModel等は前回のをそのまま利用</p>
-<!--more-->
-
-<h4 id="mainactivity-java">MainActivity.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.test.jpp;
+                <!--[[1, "MainActivity.java"]]-->
+                <p>AndroidでJsonPullParserを使うっていうネタ。まぁ公式にもサンプルあるしそれ参考にすれば良いんじゃねって所なんで</p><p>※@JsonModel等は前回のをそのまま利用</p><h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test.jpp;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -179,16 +169,16 @@ public class MainActivity extends Activity {
         return repositories;
     }
 }
-</code></pre><p>もろUIThreadでネット通信しているからAndroid4.x系ではエラーになりそうな気がするけど</p><p>でEclipseで開発する分には注釈処理なファクトリーパスとか設定すればいいけど、antを使ってビルドするようなケース(Jenkinsとか?)の場合には公式にあるcustom_rules.xmlを使えば良い</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;project name="custom_rules"&gt;
-    &lt;target name="-pre-compile"&gt;
-        &lt;!-- pre-compile時に-processorする際にandroidパッケージが解決できないエラーが出るけどソースの生成は出来る。それが気になる場合には bootclasspathref="project.target.class.path" を追加すれば良い? --&gt;
-        &lt;javac fork="yes" srcdir="${src}" compiler="javac1.6" encoding="UTF-8" includeantruntime="false"&gt;
-            &lt;compilerarg line="-proc:only" /&gt;
-            &lt;compilerarg line="-classpath ${apt.processor.dir}/*" /&gt;
-            &lt;compilerarg line="-processor net.vvakame.util.jsonpullparser.factory.JsonAnnotationProcessor" /&gt;
-            &lt;compilerarg line="-s ${gen}" /&gt;
-            &lt;compilerarg line="-AJsonPullParserClassPostfix=${jpp.genclass.postfix}" /&gt;
+</code></pre><p>もろUIThreadでネット通信しているからAndroid4.x系ではエラーになりそうな気がするけど</p><p>でEclipseで開発する分には注釈処理なファクトリーパスとか設定すればいいけど、antを使ってビルドするようなケース(Jenkinsとか?)の場合には公式にあるcustom_rules.xmlを使えば良い</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project name=&quot;custom_rules&quot;&gt;
+    &lt;target name=&quot;-pre-compile&quot;&gt;
+        &lt;!-- pre-compile時に-processorする際にandroidパッケージが解決できないエラーが出るけどソースの生成は出来る。それが気になる場合には bootclasspathref=&quot;project.target.class.path&quot; を追加すれば良い? --&gt;
+        &lt;javac fork=&quot;yes&quot; srcdir=&quot;${src}&quot; compiler=&quot;javac1.6&quot; encoding=&quot;UTF-8&quot; includeantruntime=&quot;false&quot;&gt;
+            &lt;compilerarg line=&quot;-proc:only&quot; /&gt;
+            &lt;compilerarg line=&quot;-classpath ${apt.processor.dir}/*&quot; /&gt;
+            &lt;compilerarg line=&quot;-processor net.vvakame.util.jsonpullparser.factory.JsonAnnotationProcessor&quot; /&gt;
+            &lt;compilerarg line=&quot;-s ${gen}&quot; /&gt;
+            &lt;compilerarg line=&quot;-AJsonPullParserClassPostfix=${jpp.genclass.postfix}&quot; /&gt;
         &lt;/javac&gt;
     &lt;/target&gt;
 &lt;/project&gt;
@@ -246,53 +236,67 @@ jpp.genclass.postfix=Gen
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -300,17 +304,21 @@ jpp.genclass.postfix=Gen
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -318,32 +326,41 @@ jpp.genclass.postfix=Gen
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -351,14 +368,17 @@ jpp.genclass.postfix=Gen
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -366,11 +386,13 @@ jpp.genclass.postfix=Gen
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -378,20 +400,25 @@ jpp.genclass.postfix=Gen
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -399,47 +426,43 @@ jpp.genclass.postfix=Gen
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -447,20 +470,41 @@ jpp.genclass.postfix=Gen
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -470,17 +514,21 @@ jpp.genclass.postfix=Gen
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

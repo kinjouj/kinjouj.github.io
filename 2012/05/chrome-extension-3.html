@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="実際に使ってるのを例に書いてみる要件見ているWebサイトをTwitterのツイートフォームにタイトルとURLをツイートするのを支援する拡張機能。方式として右クリックメニューに拡張アプリのアイコンと" />
+    <meta name="description" content="実際に使ってるのを例に書いてみる要件見ているWebサイトをTwitterのツイートフォームにタイトルとURLをツイートするのを支援する拡張機能。方式として右クリックメニューに拡張アプリのアイコンと名前" />
     <title>Chrome Extension開発を勉強してみる (3) - 右クリック拡張でTwitter intent - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/05/chrome-extension-2.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/06/chrome-extension-4.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2012-05-31 09:00:00 +0900">
+                <time datetime="2012-05-31T09:00:00+09:00">
                   <a href="/archives/2012/05">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -97,48 +96,24 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654311259e9">要件</a>
-</li>
-<li>
-<a href="#manifest-json">manifest.json</a>
-</li>
-<li>
-<a href="#background-html">background.html</a>
-</li>
-<li>
-<a href="#twify-js">twify.js</a>
-</li>
-</ul>
--->
-                <p>実際に使ってるのを例に書いてみる</p>
-<h4 id="part-654311259e9">要件</h4>
-<p>見ているWebサイトをTwitterのツイートフォームにタイトルとURLをツイートするのを支援する拡張機能。方式として右クリックメニューに拡張アプリのアイコンと名前を出してそれを選択する事で新しいタブにてツイートフォームのページを表示させる。サイトによっては共有ツールが無い場合があり、サイトをツイートしたりするのが何かとめんどくさいので(以前に)作ってみた</p>
-<!--more-->
-
-<h4 id="manifest-json">manifest.json</h4>
-<pre class="line-numbers"><code class="language-json">{
-  "name": "twify",
-  "version": "0.1",
-  "description": "URL tweet Context Menu Chrome Extension",
-  "background_page": "background.html",
-  "permissions": ["contextMenus"]
+                <!--[[1, "要件"], [2, "manifest.json"], [3, "background.html"], [4, "twify.js"]]-->
+                <p>実際に使ってるのを例に書いてみる</p><h4>要件</h4><p>見ているWebサイトをTwitterのツイートフォームにタイトルとURLをツイートするのを支援する拡張機能。方式として右クリックメニューに拡張アプリのアイコンと名前を出してそれを選択する事で新しいタブにてツイートフォームのページを表示させる。サイトによっては共有ツールが無い場合があり、サイトをツイートしたりするのが何かとめんどくさいので(以前に)作ってみた</p><h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;twify&quot;,
+  &quot;version&quot;: &quot;0.1&quot;,
+  &quot;description&quot;: &quot;URL tweet Context Menu Chrome Extension&quot;,
+  &quot;background_page&quot;: &quot;background.html&quot;,
+  &quot;permissions&quot;: [&quot;contextMenus&quot;]
 }
-</code></pre><p>今回は右クリックメニューにアクションを追加するのでcontextMenusのパーミッションが必要</p>
-<h4 id="background-html">background.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><p>今回は右クリックメニューにアクションを追加するのでcontextMenusのパーミッションが必要</p><h4>background.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
-    &lt;script type="text/javascript" src="twify.js"&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;twify.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
   &lt;body&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>単純にtwify.jsを読み込むだけ</p>
-<h4 id="twify-js">twify.js</h4>
-<pre class="line-numbers"><code class="language-js">function getTitle(tab) {
-  if (tab !== undefined && tab !== null) {
-    if ("title" in tab) {
+</code></pre><p>単純にtwify.jsを読み込むだけ</p><h4>twify.js</h4><pre class="line-numbers"><code class="language-js">function getTitle(tab) {
+  if (tab !== undefined &amp;&amp; tab !== null) {
+    if (&quot;title&quot; in tab) {
       return tab.title;
     }
   }
@@ -147,8 +122,8 @@ ga("send", "pageview");
 }
 
 function getURL(tab) {
-  if (tab !== undefined && tab !== null) {
-    if ("url" in tab) {
+  if (tab !== undefined &amp;&amp; tab !== null) {
+    if (&quot;url&quot; in tab) {
       return tab.url;
     }
   }
@@ -157,8 +132,8 @@ function getURL(tab) {
 }
 
 function buildTweetURL(title, url) {
-  if ((title !== undefined && title !== null) && (url !== undefined && url !== null)) {
-    return "http://twitter.com/intent/tweet?source=webclient&text=" + encodeURIComponent(title) + "%20" + encodeURIComponent(url);
+  if ((title !== undefined &amp;&amp; title !== null) &amp;&amp; (url !== undefined &amp;&amp; url !== null)) {
+    return &quot;http://twitter.com/intent/tweet?source=webclient&amp;text=&quot; + encodeURIComponent(title) + &quot;%20&quot; + encodeURIComponent(url);
   }
 
   return undefined;
@@ -166,17 +141,17 @@ function buildTweetURL(title, url) {
 
 (function() {
   chrome.contextMenus.create({
-    "type": "normal",
-    "title": "twify",
-    "onclick": function(info, tab) {
+    &quot;type&quot;: &quot;normal&quot;,
+    &quot;title&quot;: &quot;twify&quot;,
+    &quot;onclick&quot;: function(info, tab) {
       var title = getTitle(tab);
       var url = getURL(tab);
 
-      if (title !== undefined && url !== undefined && /^http/.test(url)) {
+      if (title !== undefined &amp;&amp; url !== undefined &amp;&amp; /^http/.test(url)) {
         var openURL = buildTweetURL(title, url);
 
         if (openURL !== undefined) {
-          chrome.tabs.create({ "url": openURL });
+          chrome.tabs.create({ &quot;url&quot;: openURL });
         }
       }
     }
@@ -232,53 +207,67 @@ function buildTweetURL(title, url) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -286,17 +275,21 @@ function buildTweetURL(title, url) {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -304,32 +297,41 @@ function buildTweetURL(title, url) {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -337,14 +339,17 @@ function buildTweetURL(title, url) {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -352,11 +357,13 @@ function buildTweetURL(title, url) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -364,20 +371,25 @@ function buildTweetURL(title, url) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -385,47 +397,43 @@ function buildTweetURL(title, url) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -433,20 +441,41 @@ function buildTweetURL(title, url) {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -456,17 +485,21 @@ function buildTweetURL(title, url) {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

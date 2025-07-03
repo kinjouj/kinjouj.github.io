@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="前回の「ActiveRecordValidation#1」の続きlength名前通りlengthを検証するヘルパーrequire"rails_helper"classEntry&" />
+    <meta name="description" content="前回の「ActiveRecordValidation#1」の続きlength名前通りlengthを検証するヘルパーrequire&quot;rails_helper&quot;classE" />
     <title>ActiveRecord Validation #2 - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/08/activerecord-validation-1.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/08/activerecord-validation-3-validates_with.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,40 +97,22 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#length">length</a>
-</li>
-<li>
-<a href="#numericality">numericality</a>
-</li>
-<li>
-<a href="#absence">absence</a>
-</li>
-<li>
-<a href="#uniqueness">uniqueness</a>
-</li>
-</ul>
--->
-                <p>前回の「<a href="/activerecord-validation-1.html">ActiveRecord Validation #1</a>」の続き</p>
-<!--more-->
-
-<h4 id="length">length</h4>
-<p>名前通りlengthを検証するヘルパー</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
+                <!--[[1, "length"], [2, "numericality"], [3, "absence"], [4, "uniqueness"]]-->
+                <p>前回の「<a href="/activerecord-validation-1.html">ActiveRecord Validation #1</a>」の続き</p><h4>length</h4><p>名前通りlengthを検証するヘルパー</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   # allow_blankをfalseでminimumが指定されてない場合?においてはminimumが1に設定される模様
   validates :name, length: {
     minimum: 2,
     maximum: 8,
-    too_short: "%{attribute} too short %{count} words",
-    too_long: "%{attribute} too long %{count} words",
+    too_short: &quot;%{attribute} too short %{count} words&quot;,
+    too_long: &quot;%{attribute} too long %{count} words&quot;,
   }
 end
 
 describe Entry do
-  it "lengthのテスト(minimum)" do
-    entry = Entry.new({ name: "a" })
+  it &quot;lengthのテスト(minimum)&quot; do
+    entry = Entry.new({ name: &quot;a&quot; })
     expect(entry.valid?).to eq false
 
     errors = entry.errors
@@ -141,11 +122,11 @@ describe Entry do
     expect(messages).not_to be_empty
 
     message = messages.first
-    expect(message).to eq([:name, ["Name too short 2 words"]])
+    expect(message).to eq([:name, [&quot;Name too short 2 words&quot;]])
   end
 
-  it "lengthのテスト(maximum)" do
-    entry = Entry.new({ name: "x" * 10 })
+  it &quot;lengthのテスト(maximum)&quot; do
+    entry = Entry.new({ name: &quot;x&quot; * 10 })
     expect(entry.valid?).to eq false
 
     errors = entry.errors
@@ -155,22 +136,20 @@ describe Entry do
     expect(messages).not_to be_empty
 
     message = messages.first
-    expect(message).to eq([:name, ["Name too long 8 words"]])
+    expect(message).to eq([:name, [&quot;Name too long 8 words&quot;]])
   end
 end
 </code></pre><p>っていう感じでminimum/maximumを設定する事でlengthによる制限をチェック出来る。isオプションを使えば指定したlengthでのチェックをする事も出来るし</p><pre class="line-numbers"><code class="language-rb">class Entry &lt; ActiveRecord::Base
   validates :name, length: { in: 2..8 }
 end
-</code></pre><p>な感じでinオプションでRange型で指定する事も出来る模様</p>
-<h4 id="numericality">numericality</h4>
-<p>数値かどうかを検証するヘルパー</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
+</code></pre><p>な感じでinオプションでRange型で指定する事も出来る模様</p><h4>numericality</h4><p>数値かどうかを検証するヘルパー</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :age, numericality: { only_integer: true }
 end
 
 describe Entry do
-  it "numericalityのテスト" do
+  it &quot;numericalityのテスト&quot; do
     expect(Entry.new({ age: 1 }).valid?).to eq true
 
     entry = Entry.new({ age: 1.0 })
@@ -183,10 +162,10 @@ describe Entry do
     expect(messages).not_to be_empty
 
     message = messages.first
-    expect(message).to eq [:age, ["must be an integer"]]
+    expect(message).to eq [:age, [&quot;must be an integer&quot;]]
   end
 end
-</code></pre><p>てな感じでonly_integerを設定すると整数値は可能だけど小数点型等を指定するとエラーになる</p><p>又、指定した値より大きいかとかodd/evenか等も検証する事が可能</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
+</code></pre><p>てな感じでonly_integerを設定すると整数値は可能だけど小数点型等を指定するとエラーになる</p><p>又、指定した値より大きいかとかodd/evenか等も検証する事が可能</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :age, numericality: {
@@ -199,7 +178,7 @@ class Entry &lt; ActiveRecord::Base
 end
 
 describe Entry do
-  it "numericalityのテスト" do
+  it &quot;numericalityのテスト&quot; do
     expect(Entry.new({ age: 2 }).valid?).to eq true
     expect(Entry.new({ age: 2.0 }).valid?).to eq true
 
@@ -222,22 +201,20 @@ describe Entry do
     expect(messages).not_to be_empty
 
     message = messages.first
-    expect(message).to eq([:age, ["is not a number"]])
+    expect(message).to eq([:age, [&quot;is not a number&quot;]])
   end
 end
-</code></pre>
-<h4 id="absence">absence</h4>
-<p>空白かどうかを検証するヘルパー。presenceの逆的な感じ?</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
+</code></pre><h4>absence</h4><p>空白かどうかを検証するヘルパー。presenceの逆的な感じ?</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :name, absence: true
 end
 
 describe Entry do
-  it "absenceのテスト" do
+  it &quot;absenceのテスト&quot; do
     expect(Entry.new.valid?).to eq true
 
-    entry = Entry.new({ name: "hoge" })
+    entry = Entry.new({ name: &quot;hoge&quot; })
     expect(entry.valid?).to eq false
 
     errors = entry.errors
@@ -247,12 +224,10 @@ describe Entry do
     expect(messages).not_to be_empty
 
     message = messages.first
-    expect(message).to eq [:name, ["must be blank"]]
+    expect(message).to eq [:name, [&quot;must be blank&quot;]]
   end
 end
-</code></pre>
-<h4 id="uniqueness">uniqueness</h4>
-<p>カラムに対する一意性をチェック出来るヘルパー</p><pre class="line-numbers"><code class="language-rb">require "rails_helper"
+</code></pre><h4>uniqueness</h4><p>カラムに対する一意性をチェック出来るヘルパー</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :name, uniqueness: { case_sensitive: true }
@@ -261,11 +236,11 @@ end
 describe Entry do
   fixtures :entry
 
-  it "uniquenessのテスト" do
+  it &quot;uniquenessのテスト&quot; do
     # case_sensitiveオプションをtrueにするとテストが通る
-    expect(Entry.new({ name: "HOGE" }).valid?).to eq true
+    expect(Entry.new({ name: &quot;HOGE&quot; }).valid?).to eq true
 
-    entry = Entry.new({ name: "hoge" })
+    entry = Entry.new({ name: &quot;hoge&quot; })
     expect(entry.valid?).to eq false
 
     errors = entry.errors
@@ -275,7 +250,7 @@ describe Entry do
     expect(messages).not_to be_empty
 
     message = messages.first
-    expect(message).to eq [:name, ["has already been taken"]]
+    expect(message).to eq [:name, [&quot;has already been taken&quot;]]
   end
 end
 </code></pre><p>っていう感じでcase_sensitiveオプションで大文字小文字を評価するかを指定出来る。上記の場合であると</p><pre class="line-numbers"><code class="language-sql">begin transaction
@@ -283,17 +258,17 @@ end
 SELECT
     1 AS one
 FROM
-    "entries"
+    &quot;entries&quot;
 WHERE
-    "entries"."name" = "HOGE"
+    &quot;entries&quot;.&quot;name&quot; = &quot;HOGE&quot;
 LIMIT 1
 
 SELECT
     1 AS one
 FROM
-    "entries"
+    &quot;entries&quot;
 WHERE
-    "entries"."name" = "hoge"
+    &quot;entries&quot;.&quot;name&quot; = &quot;hoge&quot;
 LIMIT 1
 
 rollback transaction
@@ -302,17 +277,17 @@ rollback transaction
 SELECT
     1 AS one
 FROM
-    "entries"
+    &quot;entries&quot;
 WHERE
-    LOWER("entries"."name") = LOWER("HOGE")
+    LOWER(&quot;entries&quot;.&quot;name&quot;) = LOWER(&quot;HOGE&quot;)
 LIMIT 1
 
 SELECT
     1 AS one
 FROM
-    "entries"
+    &quot;entries&quot;
 WHERE
-    LOWER("entries"."name") = LOWER("hoge")
+    LOWER(&quot;entries&quot;.&quot;name&quot;) = LOWER(&quot;hoge&quot;)
 LIMIT 1
 
 rollback transaction
@@ -366,53 +341,67 @@ rollback transaction
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -420,17 +409,21 @@ rollback transaction
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -438,32 +431,41 @@ rollback transaction
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -471,14 +473,17 @@ rollback transaction
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -486,11 +491,13 @@ rollback transaction
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -498,20 +505,25 @@ rollback transaction
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -519,47 +531,43 @@ rollback transaction
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -567,20 +575,41 @@ rollback transaction
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -590,17 +619,21 @@ rollback transaction
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

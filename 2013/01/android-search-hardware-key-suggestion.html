@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="まだ微妙だけどメモる。一応、テストケースとかで色々してませんので概要というような画面があって、サーチハードウェアキーを押して「h」を入力した後にというようなフィルタリングを行ったりというように" />
+    <meta name="description" content="まだ微妙だけどメモる。一応、テストケースとかで色々してませんので概要というような画面があって、サーチハードウェアキーを押して「h」を入力した後にというようなフィルタリングを行ったりというようにサーチハ" />
     <title>Androidアプリ上でのサーチハードウェアキーによる振る舞い機能を実装 - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/01/linux-java-util-prefs-preferences.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/mockito.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,69 +96,39 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-6542c68a322">概要</a>
-</li>
-<li>
-<a href="#androidmanifest-xml">AndroidManifest.xml</a>
-</li>
-<li>
-<a href="#res-xml-searchable-xml">res/xml/searchable.xml</a>
-</li>
-<li>
-<a href="#samplearrayadapter-java">SampleArrayAdapter.java</a>
-</li>
-<li>
-<a href="#searchsuggestionprovider-java">SearchSuggestionProvider.java</a>
-</li>
-<li>
-<a href="#mainactivity-java">MainActivity.java</a>
-</li>
-</ul>
--->
-                <p>まだ微妙だけどメモる。一応、テストケースとかで色々してませんので</p>
-<!--more-->
-
-<h4 id="part-6542c68a322">概要</h4>
-<p><img src="/images/2013/01/20130101000110.png" alt="image" /></p><p>というような画面があって、サーチハードウェアキーを押して「h」を入力した後に</p><p><img src="/images/2013/01/20130101000217.png" alt="image" /></p><p>というようなフィルタリングを行ったり</p><p><img src="/images/2013/01/20130101001319.png" alt="image" /></p><p>というようにサーチハードウェアキーを押してキーワードでインクレメンタル検索のようなのを実装したい場合にはSearchRecentSuggestionProvider等を駆使する事で出来る模様</p><p>ただ結果をフィルタリングする機能自体はただのAdapterのFilterを実装するだけ</p>
-<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+                <!--[[1, "概要"], [2, "AndroidManifest.xml"], [3, "res/xml/searchable.xml"], [4, "SampleArrayAdapter.java"], [5, "SearchSuggestionProvider.java"], [6, "MainActivity.java"]]-->
+                <p>まだ微妙だけどメモる。一応、テストケースとかで色々してませんので</p><h4>概要</h4><p><img src="/images/2013/01/20130101000110.png" alt="image" /></p><p>というような画面があって、サーチハードウェアキーを押して「h」を入力した後に</p><p><img src="/images/2013/01/20130101000217.png" alt="image" /></p><p>というようなフィルタリングを行ったり</p><p><img src="/images/2013/01/20130101001319.png" alt="image" /></p><p>というようにサーチハードウェアキーを押してキーワードでインクレメンタル検索のようなのを実装したい場合にはSearchRecentSuggestionProvider等を駆使する事で出来る模様</p><p>ただ結果をフィルタリングする機能自体はただのAdapterのFilterを実装するだけ</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="sample.test"
-    android:versionCode="1"
-    android:versionName="1.0" &gt;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;sample.test&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot; &gt;
 
-    &lt;uses-sdk android:minSdkVersion="8" /&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;8&quot; /&gt;
 
-    &lt;application android:icon="@drawable/ic_launcher" android:label="@string/app_name"&gt;
-        &lt;activity android:name=".MainActivity" android:label="@string/app_name" android:launchMode="singleTop"&gt;
+    &lt;application android:icon=&quot;@drawable/ic_launcher&quot; android:label=&quot;@string/app_name&quot;&gt;
+        &lt;activity android:name=&quot;.MainActivity&quot; android:label=&quot;@string/app_name&quot; android:launchMode=&quot;singleTop&quot;&gt;
             &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.MAIN" /&gt;
-                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
             &lt;/intent-filter&gt;
             &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.SEARCH" /&gt;
+                &lt;action android:name=&quot;android.intent.action.SEARCH&quot; /&gt;
             &lt;/intent-filter&gt;
-            &lt;meta-data android:name="android.app.default_searchable" android:value=".MainActivity" /&gt;
-            &lt;meta-data android:name="android.app.searchable" android:resource="@xml/searchable" /&gt;
+            &lt;meta-data android:name=&quot;android.app.default_searchable&quot; android:value=&quot;.MainActivity&quot; /&gt;
+            &lt;meta-data android:name=&quot;android.app.searchable&quot; android:resource=&quot;@xml/searchable&quot; /&gt;
         &lt;/activity&gt;
-        &lt;provider android:name=".SearchSuggestionProvider" android:authorities="sample.test.provider" /&gt;
+        &lt;provider android:name=&quot;.SearchSuggestionProvider&quot; android:authorities=&quot;sample.test.provider&quot; /&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre>
-<h4 id="res-xml-searchable-xml">res/xml/searchable.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+</code></pre><h4>res/xml/searchable.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;searchable
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:label="@string/app_name"
-    android:searchSuggestAuthority="sample.test.provider"
-    android:searchSuggestSelection=" ? "
-    android:searchSuggestIntentAction="sample.test.action.SEARCH_SUGGEST" /&gt;
-</code></pre>
-<h4 id="samplearrayadapter-java">SampleArrayAdapter.java</h4>
-<p>ListViewの結果な部分をフィルタするのに必要なArrayAdapter</p><pre class="line-numbers"><code class="language-java">package sample.test;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:label=&quot;@string/app_name&quot;
+    android:searchSuggestAuthority=&quot;sample.test.provider&quot;
+    android:searchSuggestSelection=&quot; ? &quot;
+    android:searchSuggestIntentAction=&quot;sample.test.action.SEARCH_SUGGEST&quot; /&gt;
+</code></pre><h4>SampleArrayAdapter.java</h4><p>ListViewの結果な部分をフィルタするのに必要なArrayAdapter</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -207,7 +176,7 @@ public class SampleArrayAdapter extends ArrayAdapter&lt;String&gt; {
             // 検索クエリーから
             SortedSet&lt;String&gt; filterItems = new TreeSet&lt;String&gt;();
 
-            if (constraint != null && constraint.toString().length() &gt; 0) {
+            if (constraint != null &amp;&amp; constraint.toString().length() &gt; 0) {
                 StringTokenizer tokens = new StringTokenizer(constraint.toString());
 
                 while(tokens.hasMoreTokens()) {
@@ -231,7 +200,7 @@ public class SampleArrayAdapter extends ArrayAdapter&lt;String&gt; {
 
         @Override
         protected void publishResults(CharSequence constraint,FilterResults results) {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(&quot;unchecked&quot;)
             SortedSet&lt;String&gt; filters = (SortedSet&lt;String&gt;)results.values;
 
             clear();
@@ -242,9 +211,7 @@ public class SampleArrayAdapter extends ArrayAdapter&lt;String&gt; {
         }
     }
 }
-</code></pre>
-<h4 id="searchsuggestionprovider-java">SearchSuggestionProvider.java</h4>
-<p>検索項目からフィルターしてサジェストする項目をCursorで出す</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><h4>SearchSuggestionProvider.java</h4><p>検索項目からフィルターしてサジェストする項目をCursorで出す</p><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.content.SearchRecentSuggestionsProvider;
 import android.database.Cursor;
@@ -254,20 +221,20 @@ import android.net.Uri;
 public class SearchSuggestionProvider extends SearchRecentSuggestionsProvider {
 
     public SearchSuggestionProvider() {
-        setupSuggestions("sample.test.provider", SearchSuggestionProvider.DATABASE_MODE_QUERIES);
+        setupSuggestions(&quot;sample.test.provider&quot;, SearchSuggestionProvider.DATABASE_MODE_QUERIES);
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         if (selectionArgs.length &gt; 0) {
             MatrixCursor csr = new MatrixCursor(
-                new String[] { "_id", "suggest_text_1", "suggest_intent_query" }
+                new String[] { &quot;_id&quot;, &quot;suggest_text_1&quot;, &quot;suggest_intent_query&quot; }
             );
 
             String[] values = getContext().getResources().getStringArray(R.array.values);
 
             String query = selectionArgs[0];
-            String[] queries = query.split("s");
+            String[] queries = query.split(&quot;s&quot;);
 
             for (int i = 0;i &lt; values.length;i++) {
                 String value = values[i];
@@ -285,9 +252,7 @@ public class SearchSuggestionProvider extends SearchRecentSuggestionsProvider {
         return super.query(uri,projection,selection,selectionArgs,sortOrder);
     }
 }
-</code></pre>
-<h4 id="mainactivity-java">MainActivity.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -300,7 +265,7 @@ import static android.app.SearchManager.APP_DATA;
 
 public class MainActivity extends ListActivity {
 
-    public static final String ACTION_SEARCH_SUGGEST = "sample.test.action.SEARCH_SUGGEST";
+    public static final String ACTION_SEARCH_SUGGEST = &quot;sample.test.action.SEARCH_SUGGEST&quot;;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -337,7 +302,7 @@ public class MainActivity extends ListActivity {
             String selectedValue = b.getString(QUERY);
 
             if (selectedValue != null) {
-                Toast.makeText(this, "selected: " + selectedValue, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, &quot;selected: &quot; + selectedValue, Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -345,7 +310,7 @@ public class MainActivity extends ListActivity {
     @Override
     public boolean onSearchRequested() {
         Bundle bundle = new Bundle();
-        bundle.putString("message", "hoge fuga foobar");
+        bundle.putString(&quot;message&quot;, &quot;hoge fuga foobar&quot;);
 
         startSearch(null, false, bundle, false);
 
@@ -402,53 +367,67 @@ public class MainActivity extends ListActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -456,17 +435,21 @@ public class MainActivity extends ListActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -474,32 +457,41 @@ public class MainActivity extends ListActivity {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -507,14 +499,17 @@ public class MainActivity extends ListActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -522,11 +517,13 @@ public class MainActivity extends ListActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -534,20 +531,25 @@ public class MainActivity extends ListActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -555,47 +557,43 @@ public class MainActivity extends ListActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -603,20 +601,41 @@ public class MainActivity extends ListActivity {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -626,17 +645,21 @@ public class MainActivity extends ListActivity {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

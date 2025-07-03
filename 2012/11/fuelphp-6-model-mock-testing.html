@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="例えば以下のようなモデルクラスがあった場合fuel/app/classes/model/items.php&lt;?phpclassModel_ItemsextendsModel_Cru" />
+    <meta name="description" content="例えば以下のようなモデルクラスがあった場合fuel/app/classes/model/items.php&lt;?phpclassModel_ItemsextendsModel_Crud" />
     <title>FuelPHPをやってみる (6) - モデルテストとモック - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/11/fuelphp-7-controller-testing-passive-response.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/11/fuelphp-8-orm-model.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,28 +96,18 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#fuel-app-classes-model-items-php">fuel/app/classes/model/items.php</a>
-</li>
-<li>
-<a href="#fuel-app-tests-model-test_items-php">fuel/app/tests/model/test_items.php</a>
-</li>
-</ul>
--->
-                <p>例えば以下のようなモデルクラスがあった場合</p>
-<h4 id="fuel-app-classes-model-items-php">fuel/app/classes/model/items.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+                <!--[[1, "fuel/app/classes/model/items.php"], [2, "fuel/app/tests/model/test_items.php"]]-->
+                <p>例えば以下のようなモデルクラスがあった場合</p><h4>fuel/app/classes/model/items.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Model_Items extends Model_Crud {
 
-    protected static $_table_name = "items";
+    protected static $_table_name = &quot;items&quot;;
 
     public static function findById($id) {
         $entry = null;
 
         try {
-            $entry = static::find_one_by("id", $id);
+            $entry = static::find_one_by(&quot;id&quot;, $id);
         } catch (Database_Exception $e) {
             Log::warning($e-&gt;getMessage());
         }
@@ -126,28 +115,24 @@ class Model_Items extends Model_Crud {
         return $entry;
     }
 }
-</code></pre><p>まぁ単純にID値から取得するだけのメソッドを定義する。で問題は実際にfind_one_byが失敗した場合(例外により)、結果がちゃんと「NULLである」という保証をテストする必要があると思いますけど。でどうやってそれを再現させるかってところなんですが、まぁよくあるパターンとしてモックでfind_one_byを実行させると例外が出るように設定する。まぁそんな感じの事したいっていう事でやってみた</p>
-<!--more-->
-<p>んまぁFuelPHPネタというよりはPHPUnitネタに近いですけど</p>
-<h4 id="fuel-app-tests-model-test_items-php">fuel/app/tests/model/test_items.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>まぁ単純にID値から取得するだけのメソッドを定義する。で問題は実際にfind_one_byが失敗した場合(例外により)、結果がちゃんと「NULLである」という保証をテストする必要があると思いますけど。でどうやってそれを再現させるかってところなんですが、まぁよくあるパターンとしてモックでfind_one_byを実行させると例外が出るように設定する。まぁそんな感じの事したいっていう事でやってみた</p><p>んまぁFuelPHPネタというよりはPHPUnitネタに近いですけど</p><h4>fuel/app/tests/model/test_items.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Model_Items extends TestCase {
     public function test_findById() {
         // findメソッドを実行する事で例外が発生するようにモックを仕込む
-        $mock = $this-&gt;getMock("Model_Items", array("find"));
+        $mock = $this-&gt;getMock(&quot;Model_Items&quot;, array(&quot;find&quot;));
         $mock-&gt;staticExpects(
             $this-&gt;any()
         )-&gt;method(
-            "find"
+            &quot;find&quot;
         )-&gt;will(
-            $this-&gt;throwException(new Database_Exception("stub error"))
+            $this-&gt;throwException(new Database_Exception(&quot;stub error&quot;))
         );
 
         // 普通にやると問題なく出来る
         $entry1 = Model_Items::findById(1);
         $this-&gt;assertNotNull($entry1);
-        $this-&gt;assertEquals("iPhone", $entry1-&gt;item_name);
+        $this-&gt;assertEquals(&quot;iPhone&quot;, $entry1-&gt;item_name);
         $this-&gt;assertEquals(39800, $entry1-&gt;price);
 
         // モックオブジェクト経由でfindメソッドを利用するメソッドを実行すると例外が差し込まれてるので、実行するとtry内で例外が発生する
@@ -205,53 +190,67 @@ class Test_Model_Items extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -259,17 +258,21 @@ class Test_Model_Items extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -277,32 +280,41 @@ class Test_Model_Items extends TestCase {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -310,14 +322,17 @@ class Test_Model_Items extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -325,11 +340,13 @@ class Test_Model_Items extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -337,20 +354,25 @@ class Test_Model_Items extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -358,47 +380,43 @@ class Test_Model_Items extends TestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -406,20 +424,41 @@ class Test_Model_Items extends TestCase {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -429,17 +468,21 @@ class Test_Model_Items extends TestCase {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

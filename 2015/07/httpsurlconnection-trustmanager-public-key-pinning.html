@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2015-07-07 09:55:21 +0900">
+                <time datetime="2015-07-07T09:55:21+09:00">
                   <a href="/archives/2015/07">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -96,23 +95,9 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-9f309047c9e2f846">検証の下準備</a>
-</li>
-<li>
-<a href="#main-java">Main.java</a>
-</li>
-</ul>
--->
-                <p>参考1: <a href="http://d.hatena.ne.jp/jovi0608/20140902/1409635279">不正なSSL証明書を見破るPublic Key Pinningを試す</a></p><p>参考2: <a href="https://developer.mozilla.org/ja/docs/Web/Security/Public_Key_Pinning" target="_blank" rel="noopener noreferrer">https://developer.mozilla.org/ja/docs/Web/Security/Public_Key_Pinning</a></p><p>関連エントリー: <a href="/2014/10/httpsurlconnection-trustmanager.html">HttpsURLConnection TrustManager</a></p><p>要はHTTPS通信をする際にサーバーから送られてくる証明書が正当な物であるかをどう検証するべきかっていう所が色々あるのですが、それを検証する手法としてあるのがPublic Key Pinningっていう事っぽい(あってるかは微妙)</p><p>とりあえず色々検証してみた</p><p>※あくまでセキュリティ対策を前提としたネタではない</p><p>※個人的なメモなので上記参考を読むべき</p>
-<!--more-->
-
-<h4 id="part-9f309047c9e2f846">検証の下準備</h4>
-<p>mitmproxyが使える環境とHTTPSなサーバーを用意しておく。んでサーバー側の証明書がある環境下において以下のコマンドを実行して証明書のシグニチャとなるbase64を取得する(※証明書じゃなくても秘密鍵等からも生成可能。詳しくは上記参考2を参照)</p><pre class="line-numbers"><code class="language-sh">openssl x509 -in server.crt -pubkey -noout | openssl pkey -pubin -outform der| openssl dgst -sha256 -binary | openssl base64
-</code></pre><p>これを実行した値をSSLコンテキストにおいて証明書のチェックを行う際にこの値で検証するような感じかと</p>
-<h4 id="main-java">Main.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+                <!--[[1, "検証の下準備"], [2, "Main.java"]]-->
+                <p>参考1: <a href="http://d.hatena.ne.jp/jovi0608/20140902/1409635279">不正なSSL証明書を見破るPublic Key Pinningを試す</a></p><p>参考2: <a href="https://developer.mozilla.org/ja/docs/Web/Security/Public_Key_Pinning" target="_blank" rel="noopener noreferrer">https://developer.mozilla.org/ja/docs/Web/Security/Public_Key_Pinning</a></p><p>関連エントリー: <a href="/2014/10/httpsurlconnection-trustmanager.html">HttpsURLConnection TrustManager</a></p><p>要はHTTPS通信をする際にサーバーから送られてくる証明書が正当な物であるかをどう検証するべきかっていう所が色々あるのですが、それを検証する手法としてあるのがPublic Key Pinningっていう事っぽい(あってるかは微妙)</p><p>とりあえず色々検証してみた</p><p>※あくまでセキュリティ対策を前提としたネタではない</p><p>※個人的なメモなので上記参考を読むべき</p><h4>検証の下準備</h4><p>mitmproxyが使える環境とHTTPSなサーバーを用意しておく。んでサーバー側の証明書がある環境下において以下のコマンドを実行して証明書のシグニチャとなるbase64を取得する(※証明書じゃなくても秘密鍵等からも生成可能。詳しくは上記参考2を参照)</p><pre class="line-numbers"><code class="language-sh">openssl x509 -in server.crt -pubkey -noout | openssl pkey -pubin -outform der| openssl dgst -sha256 -binary | openssl base64
+</code></pre><p>これを実行した値をSSLコンテキストにおいて証明書のチェックを行う際にこの値で検証するような感じかと</p><h4>Main.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -136,15 +121,15 @@ public class Main {
 
     private static final Proxy proxy = new Proxy(
         Proxy.Type.HTTP,
-        new InetSocketAddress("localhost", 8080)
+        new InetSocketAddress(&quot;localhost&quot;, 8080)
     );
 
-    private static final String url = "https://localhost/report.json";
+    private static final String url = &quot;https://localhost/report.json&quot;;
 
     public static void main(String[] args) {
         try {
 
-            SSLContext context = SSLContext.getInstance("TLS");
+            SSLContext context = SSLContext.getInstance(&quot;TLS&quot;);
             context.init(
                 null,
                 new TrustManager[] { new SampleTrustManager() },
@@ -167,7 +152,7 @@ public class Main {
 
     private static class SampleTrustManager implements X509TrustManager {
 
-        private final String trustBase64 = "コマンドで生成したbase64";
+        private final String trustBase64 = &quot;コマンドで生成したbase64&quot;;
 
         @Override
         public void checkClientTrusted(X509Certificate[] chain, String authType)
@@ -193,7 +178,7 @@ public class Main {
 
             // 正当な証明書では無いとbase64でチェックしマッチしないなら例外を送出する
             if (!trustBase64.equals(base64)) {
-                throw new CertificateException("cert doesn`t match " + base64);
+                throw new CertificateException(&quot;cert doesn`t match &quot; + base64);
             }
         }
 
@@ -202,7 +187,7 @@ public class Main {
             String base64 = null;
 
             try {
-                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                MessageDigest md = MessageDigest.getInstance(&quot;SHA-256&quot;);
                 md.update(b);
 
                 byte[] sha256byte = md.digest();
@@ -265,53 +250,67 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -319,17 +318,21 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -337,32 +340,41 @@ public class Main {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -370,14 +382,17 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -385,11 +400,13 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -397,20 +414,25 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -418,47 +440,43 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -466,20 +484,41 @@ public class Main {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -489,17 +528,21 @@ public class Main {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

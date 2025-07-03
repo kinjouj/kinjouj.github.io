@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,26 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#basetable-java">BaseTable.java</a>
-</li>
-<li>
-<a href="#sample-java">Sample.java</a>
-</li>
-<li>
-<a href="#color-java">Color.java</a>
-</li>
-<li>
-<a href="#hectorclient-java">HectorClient.java</a>
-</li>
-</ul>
--->
-                <p>さらにちょっと進めてみた。やってみる項目として、継承・AnonymousPropertyHandling(ドキュメントではAnonymousPropertyAddHandler)・Listなデータを突っ込んでみる</p>
-<!--more-->
-
-<h4 id="basetable-java">BaseTable.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+                <!--[[1, "BaseTable.java"], [2, "Sample.java"], [3, "Color.java"], [4, "HectorClient.java"]]-->
+                <p>さらにちょっと進めてみた。やってみる項目として、継承・AnonymousPropertyHandling(ドキュメントではAnonymousPropertyAddHandler)・Listなデータを突っ込んでみる</p><h4>BaseTable.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -132,14 +113,14 @@ import me.prettyprint.hom.annotations.AnonymousPropertyHandling;
 import me.prettyprint.hom.annotations.Id;
 
 @Entity
-@Table(name = "Sample")
+@Table(name = &quot;Sample&quot;)
 @Inheritance
-@DiscriminatorColumn(name = "class")
+@DiscriminatorColumn(name = &quot;class&quot;)
 @AnonymousPropertyHandling(
     type = String.class,
     serializer = StringSerializer.class,
-    adder = "addAnonymousProperty",
-    getter = "getAnonymousProperties"
+    adder = &quot;addAnonymousProperty&quot;,
+    getter = &quot;getAnonymousProperties&quot;
 )
 public abstract class BaseTable {
 
@@ -164,9 +145,7 @@ public abstract class BaseTable {
         return anonymousProperties.entrySet();
     }
 }
-</code></pre><p>例えば、毎回テーブルマッピングを行う度にIdアノテーションなの定義するのめんどくさい。なのでこれを外部クラスで提供して継承することで実装をしない方向で</p><p>Inheritanceアノテーションとabstract classに関しては省略。でDiscriminatorColumnアノテーションによって、クラスを識別するにあたって必要な情報を格納するカラムを指定する模様。で値になるのはDiscriminatorValueアノテーションになる</p><p>んでAnonymousPropertyHandlingアノテーションによって、Columnアノテーションで指定してない等のプロパティもCassandraに突っ込みたい場合にadderに対応するメソッドを介してデータをつっこみ、getterに対応するメソッドが返すCollection<Map.Entry>によって返されたデータがCassandraに突っ込まれる模様</p>
-<h4 id="sample-java">Sample.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>例えば、毎回テーブルマッピングを行う度にIdアノテーションなの定義するのめんどくさい。なのでこれを外部クラスで提供して継承することで実装をしない方向で</p><p>Inheritanceアノテーションとabstract classに関しては省略。でDiscriminatorColumnアノテーションによって、クラスを識別するにあたって必要な情報を格納するカラムを指定する模様。で値になるのはDiscriminatorValueアノテーションになる</p><p>んでAnonymousPropertyHandlingアノテーションによって、Columnアノテーションで指定してない等のプロパティもCassandraに突っ込みたい場合にadderに対応するメソッドを介してデータをつっこみ、getterに対応するメソッドが返すCollection<Map.Entry>によって返されたデータがCassandraに突っ込まれる模様</p><h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,13 +156,13 @@ import javax.persistence.Entity;
 import me.prettyprint.hom.annotations.Column;
 
 @Entity
-@DiscriminatorValue("sample")
+@DiscriminatorValue(&quot;sample&quot;)
 public class Sample extends BaseTable {
 
-    @Column(name = "name")
+    @Column(name = &quot;name&quot;)
     private String name;
 
-    @Column(name = "colors", converter = Color.ColorConverter.class)
+    @Column(name = &quot;colors&quot;, converter = Color.ColorConverter.class)
     private List&lt;Color&gt; colors = new ArrayList&lt;Color&gt;();
 
     public void setName(String name) {
@@ -206,9 +185,7 @@ public class Sample extends BaseTable {
         colors.add(color);
     }
 }
-</code></pre><p>前回の記事で違うのは、BaseTableを継承する・(set/get)Colorでは無く、(get/set)ColorsでList&lt;Color&gt;を使う点。もちろん前回で書いたColor.javaももろもろ修正する</p>
-<h4 id="color-java">Color.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>前回の記事で違うのは、BaseTableを継承する・(set/get)Colorでは無く、(get/set)ColorsでList&lt;Color&gt;を使う点。もちろん前回で書いたColor.javaももろもろ修正する</p><h4>Color.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -238,7 +215,7 @@ public class Color {
     public static class ColorConverter implements Converter&lt;List&lt;Color&gt;&gt; {
         @Override
         public List&lt;Color&gt; convertCassTypeToObjType(PropertyMappingDefinition def, byte[] value) {
-            String[] colorNames = StringUtils.split(new String(value), ",");
+            String[] colorNames = StringUtils.split(new String(value), &quot;,&quot;);
             List&lt;Color&gt; colors = new ArrayList&lt;Color&gt;(colorNames.length);
 
             for (String colorName : colorNames) {
@@ -250,13 +227,11 @@ public class Color {
 
         @Override
         public byte[] convertObjTypeToCassType(List&lt;Color&gt; colors) {
-            return StringUtils.join(colors, ",").getBytes();
+            return StringUtils.join(colors, &quot;,&quot;).getBytes();
         }
     }
 }
-</code></pre>
-<h4 id="hectorclient-java">HectorClient.java</h4>
-<pre class="line-numbers"><code class="language-java">import sample.Color;
+</code></pre><h4>HectorClient.java</h4><pre class="line-numbers"><code class="language-java">import sample.Color;
 import sample.Sample;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -268,23 +243,23 @@ public class HectorClient {
     private static long time;
 
     public static void main(String[] args) {
-        Cluster cluster = HFactory.getOrCreateCluster("Test Cluster", "127.0.0.1");
-        Keyspace keyspace = HFactory.createKeyspace("sample", cluster);
+        Cluster cluster = HFactory.getOrCreateCluster(&quot;Test Cluster&quot;, &quot;127.0.0.1&quot;);
+        Keyspace keyspace = HFactory.createKeyspace(&quot;sample&quot;, cluster);
 
-        EntityManagerImpl em = new EntityManagerImpl(keyspace, "sample");
+        EntityManagerImpl em = new EntityManagerImpl(keyspace, &quot;sample&quot;);
 
         putSample(em);
 
         Sample sample = em.find(Sample.class, String.valueOf(time));
 
-        System.out.println(sample.getName()); // "hoge"が出力
+        System.out.println(sample.getName()); // &quot;hoge&quot;が出力
 
         for (Color color : sample.getColors()) {
-            System.out.println(color); // "red" "blue" が一行づつ表示
+            System.out.println(color); // &quot;red&quot; &quot;blue&quot; が一行づつ表示
         }
 
         System.out.println(sample.getAnonymousProperties()); //
-"[test=hoge fuga foobar]" と表示される
+&quot;[test=hoge fuga foobar]&quot; と表示される
 
         cluster.getConnectionManager().shutdown();
     }
@@ -294,10 +269,10 @@ public class HectorClient {
 
         Sample sample = new Sample();
         sample.setKey(String.valueOf(time));
-        sample.setName("hoge");
-        sample.addColor(new Color("red"));
-        sample.addColor(new Color("blue"));
-        sample.addAnonymousProperty("test", "hoge fuga foobar");
+        sample.setName(&quot;hoge&quot;);
+        sample.addColor(new Color(&quot;red&quot;));
+        sample.addColor(new Color(&quot;blue&quot;));
+        sample.addAnonymousProperty(&quot;test&quot;, &quot;hoge fuga foobar&quot;);
 
         em.persist(sample);
     }
@@ -360,53 +335,67 @@ RowKey: 1348330541878
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -414,17 +403,21 @@ RowKey: 1348330541878
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -432,32 +425,41 @@ RowKey: 1348330541878
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -465,14 +467,17 @@ RowKey: 1348330541878
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -480,11 +485,13 @@ RowKey: 1348330541878
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -492,20 +499,25 @@ RowKey: 1348330541878
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -513,47 +525,43 @@ RowKey: 1348330541878
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -561,20 +569,41 @@ RowKey: 1348330541878
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -584,17 +613,21 @@ RowKey: 1348330541878
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

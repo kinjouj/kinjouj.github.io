@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="SimpleAuthパッケージを使えば簡単に認証機能を組み込む事が出来る模様ですが、まだ未検証なので自前で認証機能を実装してみる認証方式単純にセッションにユーザーが認証済みかを検証できるように" />
+    <meta name="description" content="SimpleAuthパッケージを使えば簡単に認証機能を組み込む事が出来る模様ですが、まだ未検証なので自前で認証機能を実装してみる認証方式単純にセッションにユーザーが認証済みかを検証できるようにする。で" />
     <title>FuelPHPをやってみる (21) - 認証機能 (1) - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/11/fuelphp-20-fileupload.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/11/fuelphp-22-authentication-2.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,52 +96,30 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-2e61a25dc5d6a055">認証方式</a>
-</li>
-<li>
-<a href="#part-b84cb74282f77ef3">データベーステーブル構造</a>
-</li>
-<li>
-<a href="#fuel-app-classes-controller-auth-php">ログインアクションを作る (fuel/app/classes/controller/auth.php)</a>
-</li>
-<li>
-<a href="#part-8091c1c592bf05c0">認証チェックを行うコントローラークラスを作る</a>
-</li>
-</ul>
--->
-                <p>SimpleAuthパッケージを使えば簡単に認証機能を組み込む事が出来る模様ですが、まだ未検証なので自前で認証機能を実装してみる</p>
-<!--more-->
-
-<h4 id="part-2e61a25dc5d6a055">認証方式</h4>
-<p>単純にセッションにユーザーが認証済みかを検証できるようにする。でそのセッションにユーザーIDやパスワードを含ませるのはイケてない(それなりに暗号化すれば問題無いのかは微妙)。なのでログイン時にログインハッシュを発行して、それを元にログインをチェックする</p><p>で認証されているかをチェックするのを毎回コードで実装するのもあれなので、それを行うコントローラークラスを作りbeforeメソッドで処理を行う。</p>
-<h4 id="part-b84cb74282f77ef3">データベーステーブル構造</h4>
-<pre class="line-numbers"><code class="language-sql">CREATE TABLE user(
+                <!--[[1, "認証方式"], [2, "データベーステーブル構造"], [3, "ログインアクションを作る (fuel/app/classes/controller/auth.php)"], [4, "認証チェックを行うコントローラークラスを作る"]]-->
+                <p>SimpleAuthパッケージを使えば簡単に認証機能を組み込む事が出来る模様ですが、まだ未検証なので自前で認証機能を実装してみる</p><h4>認証方式</h4><p>単純にセッションにユーザーが認証済みかを検証できるようにする。でそのセッションにユーザーIDやパスワードを含ませるのはイケてない(それなりに暗号化すれば問題無いのかは微妙)。なのでログイン時にログインハッシュを発行して、それを元にログインをチェックする</p><p>で認証されているかをチェックするのを毎回コードで実装するのもあれなので、それを行うコントローラークラスを作りbeforeメソッドで処理を行う。</p><h4>データベーステーブル構造</h4><pre class="line-numbers"><code class="language-sql">CREATE TABLE user(
   id int auto_increment primary key,
   userid varchar(30) not null unique,
   password varchar(50) not null
   salt varchar(255) not null
 );
-</code></pre><p>saltは64で十分なのだけど</p>
-<h4 id="fuel-app-classes-controller-auth-php">ログインアクションを作る (fuel/app/classes/controller/auth.php)</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>saltは64で十分なのだけど</p><h4>ログインアクションを作る (fuel/app/classes/controller/auth.php)</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Auth extends Controller {
 
     public function get_index() {
-        return View::forge("login");
+        return View::forge(&quot;login&quot;);
     }
 
     public function post_login() {
         // 入力情報から該当ユーザーを算出
         $user = Model_User::find(
             array(
-                "where" =&gt; array(
-                    "userid" =&gt; Input::post("userid"),
-                    "password" =&gt; sha1(Input::post("password"))
+                &quot;where&quot; =&gt; array(
+                    &quot;userid&quot; =&gt; Input::post(&quot;userid&quot;),
+                    &quot;password&quot; =&gt; sha1(Input::post(&quot;password&quot;))
                 ),
-                "limit" =&gt; 1
+                &quot;limit&quot; =&gt; 1
             )
         );
 
@@ -150,48 +127,46 @@ class Controller_Auth extends Controller {
             // ユーザーがマッチした場合にはsaltを更新する
 
             $user = reset($user);
-            $user-&gt;salt = Str::random("sha2", 64);
+            $user-&gt;salt = Str::random(&quot;sha2&quot;, 64);
             $user-&gt;save();
 
             // セッションに認証チェックに必要な情報を突っ込む
 
             Session::set(
-                "current_user", array(
-                    "id" =&gt; $user-&gt;id,
-                    "salt" =&gt; $user-&gt;salt
+                &quot;current_user&quot;, array(
+                    &quot;id&quot; =&gt; $user-&gt;id,
+                    &quot;salt&quot; =&gt; $user-&gt;salt
                 )
             );
         }
 
-        Response::redirect("/");
+        Response::redirect(&quot;/&quot;);
     }
 
     public function get_logout() {
         // ログアウト時はセッションを消してリダイレクト
 
-        Session::delete("current_user");
-        Response::redirect("/");
+        Session::delete(&quot;current_user&quot;);
+        Response::redirect(&quot;/&quot;);
     }
 }
-</code></pre><p>な感じ。ログインフォームに関しては単純なフォーム(userid,passwordを含むインプットのみ)なので省略。但し、今回書いてないけど本来はCSRFチェックしないとダメかと</p>
-<h4 id="part-8091c1c592bf05c0">認証チェックを行うコントローラークラスを作る</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>な感じ。ログインフォームに関しては単純なフォーム(userid,passwordを含むインプットのみ)なので省略。但し、今回書いてないけど本来はCSRFチェックしないとダメかと</p><h4>認証チェックを行うコントローラークラスを作る</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 abstract class Controller_Secure extends Controller {
 
     public function before() {
         // 現在ログインしているセッションのデータを取得
-        $current_user = Session::get("current_user", null);
+        $current_user = Session::get(&quot;current_user&quot;, null);
 
         if (!is_null($current_user)) {
-            if (isset($current_user["id"]) and isset($current_user["salt"])) {
+            if (isset($current_user[&quot;id&quot;]) and isset($current_user[&quot;salt&quot;])) {
                 // セッションに格納されているユーザー情報から特定する
 
                 $user = Model_User::find(
                     array(
-                        "where" =&gt; array(
-                            "id" =&gt; $current_user["id"],
-                            "salt" =&gt; $current_user["salt"]
+                        &quot;where&quot; =&gt; array(
+                            &quot;id&quot; =&gt; $current_user[&quot;id&quot;],
+                            &quot;salt&quot; =&gt; $current_user[&quot;salt&quot;]
                         )
                     )
                 );
@@ -204,14 +179,14 @@ abstract class Controller_Secure extends Controller {
         }
 
         // 認証していないのでログインアクションへリダイレクト
-        return Response::redirect("/auth");
+        return Response::redirect(&quot;/auth&quot;);
     }
 }
 </code></pre><p>というような感じ。で要認証アクションで</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller_Secure {
     public function get_index() {
-        return Response::forge("hello");
+        return Response::forge(&quot;hello&quot;);
     }
 }
 </code></pre><p>というように要認証が必要な場合にbeforeでチェックされるコントローラーを継承する</p><p>っていうような感じで作れば独自の認証方式を採用する事も出来るような感じかと</p>
@@ -264,53 +239,67 @@ class Controller_Home extends Controller_Secure {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -318,17 +307,21 @@ class Controller_Home extends Controller_Secure {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -336,32 +329,41 @@ class Controller_Home extends Controller_Secure {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -369,14 +371,17 @@ class Controller_Home extends Controller_Secure {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -384,11 +389,13 @@ class Controller_Home extends Controller_Secure {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -396,20 +403,25 @@ class Controller_Home extends Controller_Secure {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -417,47 +429,43 @@ class Controller_Home extends Controller_Secure {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -465,20 +473,41 @@ class Controller_Home extends Controller_Secure {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -488,17 +517,21 @@ class Controller_Home extends Controller_Secure {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

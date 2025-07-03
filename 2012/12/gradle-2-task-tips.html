@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,25 +95,13 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-1d13e48674192ff5">タスクをスキップする</a>
-</li>
-<li>
-<a href="#part-ff3fb4202f4f417">タスクのパターンマッチ</a>
-</li>
-</ul>
--->
-                <p>ひとまずちょいとGroovyな勉強が必要だったので間が開いちゃいましたが進めてみる。ちなみにこのgradle使ってみるに関しては基本的に公式ドキュメント(と思われる)のを見てやってるのでそっち見た方が良いかと</p><p>前の続き的な感じでGradleのタスク定義なちょっとしたメモ的なのを</p>
-<!--more-->
-
-<h4 id="part-1d13e48674192ff5">タスクをスキップする</h4>
-<p>色々方法がある模様で</p><pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
-    println "test"
+                <!--[[1, "タスクをスキップする"], [2, "タスクのパターンマッチ"]]-->
+                <p>ひとまずちょいとGroovyな勉強が必要だったので間が開いちゃいましたが進めてみる。ちなみにこのgradle使ってみるに関しては基本的に公式ドキュメント(と思われる)のを見てやってるのでそっち見た方が良いかと</p><p>前の続き的な感じでGradleのタスク定義なちょっとしたメモ的なのを</p><h4>タスクをスキップする</h4><p>色々方法がある模様で</p><pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
+    println &quot;test&quot;
 }
 
 test.onlyIf {
-    project.hasProperty("ok")
+    project.hasProperty(&quot;ok&quot;)
 }
 </code></pre><p>上記の場合onlyIfに指定されているクロージャ部分がtrueを返さない限りはタスクはスキップされる模様。なので</p><pre class="line-numbers"><code class="language-sh"># スキップされる
 gradle test
@@ -122,16 +109,16 @@ gradle test
 # 実行される
 gradle test -Pok
 </code></pre><p>な感じ。で2つ目の方法として、gradleのタスクにはenabledっていうプロパティが存在する、デフォルトではtrueになっているけどこれをfalseにするとタスクはスキップされる模様</p><pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
-    println "test"
+    println &quot;test&quot;
 }
 
 test.enabled = false
 </code></pre><p>という感じになる。この場合testタスクを実行してもスキップされる。一定の理由でタスクを実行させる場合にはenabledを切り替えて実行させるようにすれば良い模様</p><pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
-    println "test"
+    println &quot;test&quot;
 }
 
 task test2 &lt;&lt; {
-    println "test2"
+    println &quot;test2&quot;
 
     test.enabled = true
 
@@ -140,24 +127,22 @@ task test2 &lt;&lt; {
 
 test.enabled = false
 </code></pre><p>でさらに、StopExecutionExceptionをスローする事で以降のタスクが実行されなくなる。但し、あくまでタスク単位な話っぽい</p><pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
-    println "test"
+    println &quot;test&quot;
 }
 
 task test2(dependsOn: test) &lt;&lt; {
-    println "test2"
+    println &quot;test2&quot;
 }
 
 test.doFirst {
-    if (!project.hasProperty("ok")) {
+    if (!project.hasProperty(&quot;ok&quot;)) {
         throw new StopExecutionException()
     }
 }
-</code></pre><p>こうするとtest2タスクを実行するとtestタスクを依存性としているので実行されるが-Pokしない限りはStopExecutionExceptionがスローされる。でこれはdoFirstでスローしているけど、あくまでtestタスク内でのみ限る模様。test2タスクは普通に実行される。ちょっとtest2のタスクまで止める方法は判明してない...orz</p><p>とりあえずはタスクをスキップする方法はこんな感じの方法がある模様</p>
-<h4 id="part-ff3fb4202f4f417">タスクのパターンマッチ</h4>
-<p>task.addRule使えば出来る模様</p><pre class="line-numbers"><code class="language-groovy">tasks.addRule("Pattern: test&lt;ID&gt;") { name -&gt;
-    if (name.startsWith("test")) {
+</code></pre><p>こうするとtest2タスクを実行するとtestタスクを依存性としているので実行されるが-Pokしない限りはStopExecutionExceptionがスローされる。でこれはdoFirstでスローしているけど、あくまでtestタスク内でのみ限る模様。test2タスクは普通に実行される。ちょっとtest2のタスクまで止める方法は判明してない...orz</p><p>とりあえずはタスクをスキップする方法はこんな感じの方法がある模様</p><h4>タスクのパターンマッチ</h4><p>task.addRule使えば出来る模様</p><pre class="line-numbers"><code class="language-groovy">tasks.addRule(&quot;Pattern: test&lt;ID&gt;&quot;) { name -&gt;
+    if (name.startsWith(&quot;test&quot;)) {
         task(name) &lt;&lt; {
-            println "task: " + (name - "test")
+            println &quot;task: &quot; + (name - &quot;test&quot;)
         }
     }
 }
@@ -213,53 +198,67 @@ gradle test123
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -267,17 +266,21 @@ gradle test123
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -285,32 +288,41 @@ gradle test123
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -318,14 +330,17 @@ gradle test123
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -333,11 +348,13 @@ gradle test123
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -345,20 +362,25 @@ gradle test123
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -366,47 +388,43 @@ gradle test123
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -414,20 +432,41 @@ gradle test123
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -437,17 +476,21 @@ gradle test123
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="例えば、テスト時に同時リクエストが発生させて処理が異常がなのをチェックしたりする方法検証アプリケーションの作成単純にSpringFrameworkでの依存性注入は基本的にはSingleton" />
+    <meta name="description" content="例えば、テスト時に同時リクエストが発生させて処理が異常がなのをチェックしたりする方法検証アプリケーションの作成単純にSpringFrameworkでの依存性注入は基本的にはSingletonで行われ" />
     <title>Javaで同時リクエストをテストする方法 - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/10/chrome-extension-gcm-api.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/11/springframework-default-scope.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,35 +95,12 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-c4893a8e8d28a5b2">検証アプリケーションの作成</a>
-</li>
-<li>
-<a href="#sampleservice-java">SampleService.java</a>
-</li>
-<li>
-<a href="#samplecontroller-java">SampleController.java</a>
-</li>
-<li>
-<a href="#sampletest-java">SampleTest.java</a>
-</li>
-<li>
-<a href="#part-654296b22d9">余談</a>
-</li>
-</ul>
--->
-                <p>例えば、テスト時に同時リクエストが発生させて処理が異常がなのをチェックしたりする方法</p>
-<!--more-->
-
-<h4 id="part-c4893a8e8d28a5b2">検証アプリケーションの作成</h4>
-<p>単純にSpring Frameworkでの依存性注入は基本的にはSingletonで行われる。そこでSingletonで注入されると問題になるようなケースを利用する。ちなみに<a href="http://javatechnology.net/spring/spring-singleton-scope/を利用" target="_blank" rel="noopener noreferrer">http://javatechnology.net/spring/spring-singleton-scope/を利用</a></p>
-<h4 id="sampleservice-java">SampleService.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+                <!--[[1, "検証アプリケーションの作成"], [2, "SampleService.java"], [3, "SampleController.java"], [4, "SampleTest.java"], [5, "余談"]]-->
+                <p>例えば、テスト時に同時リクエストが発生させて処理が異常がなのをチェックしたりする方法</p><h4>検証アプリケーションの作成</h4><p>単純にSpring Frameworkでの依存性注入は基本的にはSingletonで行われる。そこでSingletonで注入されると問題になるようなケースを利用する。ちなみに<a href="http://javatechnology.net/spring/spring-singleton-scope/を利用" target="_blank" rel="noopener noreferrer">http://javatechnology.net/spring/spring-singleton-scope/を利用</a></p><h4>SampleService.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.stereotype.Service;
 
-// @Scope("prototype")は指定しない
+// @Scope(&quot;prototype&quot;)は指定しない
 @Service
 public class SampleService {
 
@@ -140,9 +116,7 @@ public class SampleService {
         this.name = name;
     }
 }
-</code></pre>
-<h4 id="samplecontroller-java">SampleController.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4>SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -151,26 +125,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@Scope("prototype")
+@Scope(&quot;prototype&quot;)
 @Controller
-@RequestMapping("/sample")
+@RequestMapping(&quot;/sample&quot;)
 public class SampleController {
 
     @Autowired
     SampleService service;
 
-    @RequestMapping("/index")
+    @RequestMapping(&quot;/index&quot;)
     @ResponseBody
-    public String index(@RequestParam("name") String name) throws InterruptedException {
+    public String index(@RequestParam(&quot;name&quot;) String name) throws InterruptedException {
         service.setName(name);
         Thread.sleep(3000);
 
         return service.getName();
     }
 }
-</code></pre><p>ここには@Scope(“prototype”)を指定しているけど、コントローラー自体はprototypeインスタンス方式が採用されてもそれで注入されるSampleService側自体はprototypeインスタンスではなくSingletonインスタンスになる。なので同時リクエストをした場合等においては返ってくるレスポンス自体が後でリクエストされたので汚染されてしまって不整合な値になるのではと思う</p><p>まぁ単純にこういうケースな処理する事まずありえないと思うんですが(あくまで注入したオブジェクトの状態を破壊するような実装する事自体が)</p><p>まぁあくまでアプリケーション側の例題なので(ry</p>
-<h4 id="sampletest-java">SampleTest.java</h4>
-<p>でテスト時の要求として複数のURLに同時にリクエストして処理する的な所だと思うので</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>ここには@Scope(“prototype”)を指定しているけど、コントローラー自体はprototypeインスタンス方式が採用されてもそれで注入されるSampleService側自体はprototypeインスタンスではなくSingletonインスタンスになる。なので同時リクエストをした場合等においては返ってくるレスポンス自体が後でリクエストされたので汚染されてしまって不整合な値になるのではと思う</p><p>まぁ単純にこういうケースな処理する事まずありえないと思うんですが(あくまで注入したオブジェクトの状態を破壊するような実装する事自体が)</p><p>まぁあくまでアプリケーション側の例題なので(ry</p><h4>SampleTest.java</h4><p>でテスト時の要求として複数のURLに同時にリクエストして処理する的な所だと思うので</p><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -194,7 +166,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ContextConfiguration("classpath:spring-web-servlet.xml")
+@ContextConfiguration(&quot;classpath:spring-web-servlet.xml&quot;)
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SampleTest {
@@ -219,7 +191,7 @@ public class SampleTest {
                 MvcResult result =  null;
 
                 try {
-                    result = mvc.perform(get("/sample/index?name=hoge"))
+                    result = mvc.perform(get(&quot;/sample/index?name=hoge&quot;))
                         .andExpect(status().isOk())
                         .andReturn();
                 } catch (Exception e) {
@@ -236,7 +208,7 @@ public class SampleTest {
                 MvcResult result = null;
 
                 try {
-                    result = mvc.perform(get("/sample/index?name=fuga"))
+                    result = mvc.perform(get(&quot;/sample/index?name=fuga&quot;))
                         .andExpect(status().isOk())
                         .andReturn();
                 } catch (Exception e) {
@@ -250,13 +222,11 @@ public class SampleTest {
         MvcResult result1 = future1.get();
         MvcResult result2 = future2.get();
 
-        assertThat(result1.getResponse().getContentAsString(), is("hoge"));
-        assertThat(result2.getResponse().getContentAsString(), is("fuga"));
+        assertThat(result1.getResponse().getContentAsString(), is(&quot;hoge&quot;));
+        assertThat(result2.getResponse().getContentAsString(), is(&quot;fuga&quot;));
     }
 }
-</code></pre><p>んな感じでExecutorServiceを使ってやれば良いっぽい。テスト実行してレポート見ると</p><p>っていうような感じで同時リクエストして注入オブジェクトが汚染されるような状態になりエラーになるような感じ。でSampleService側に@Scope(“prototype”)をつけるとテストが正常になる</p><p>一応メモっておく</p>
-<h4 id="part-654296b22d9">余談</h4>
-<p>今回のプロジェクトに限らずにJUnitのテストを並列で動かすようなケースであれば <a href="http://java.dzone.com/articles/concurrent-junit-tests" target="_blank" rel="noopener noreferrer">http://java.dzone.com/articles/concurrent-junit-tests</a> を参考にConcurrentJUnitRunnerを使えば出来るっぽい</p>
+</code></pre><p>んな感じでExecutorServiceを使ってやれば良いっぽい。テスト実行してレポート見ると</p><p>っていうような感じで同時リクエストして注入オブジェクトが汚染されるような状態になりエラーになるような感じ。でSampleService側に@Scope(“prototype”)をつけるとテストが正常になる</p><p>一応メモっておく</p><h4>余談</h4><p>今回のプロジェクトに限らずにJUnitのテストを並列で動かすようなケースであれば <a href="http://java.dzone.com/articles/concurrent-junit-tests" target="_blank" rel="noopener noreferrer">http://java.dzone.com/articles/concurrent-junit-tests</a> を参考にConcurrentJUnitRunnerを使えば出来るっぽい</p>
               </div>
             </div>
           </div>
@@ -306,53 +276,67 @@ public class SampleTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -360,17 +344,21 @@ public class SampleTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -378,32 +366,41 @@ public class SampleTest {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -411,14 +408,17 @@ public class SampleTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -426,11 +426,13 @@ public class SampleTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -438,20 +440,25 @@ public class SampleTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -459,47 +466,43 @@ public class SampleTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -507,20 +510,41 @@ public class SampleTest {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -530,17 +554,21 @@ public class SampleTest {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

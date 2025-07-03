@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="久々にFuelPHPを使ってて思う所がいろいろあったのでメモまずFuelPHPのhttpexceptions.php。PHPの例外クラスが定義されていて、それで且つresponseメソッドを使う事" />
+    <meta name="description" content="久々にFuelPHPを使ってて思う所がいろいろあったのでメモまずFuelPHPのhttpexceptions.php。PHPの例外クラスが定義されていて、それで且つresponseメソッドを使う事でエ" />
     <title>FuelPHPのエラー処理の雑多メモ - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/03/backgrid.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/03/crxmake-chrome-extension-build.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,24 +96,22 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!---->
-                <p>久々にFuelPHPを使ってて思う所がいろいろあったのでメモ</p>
-<!--more-->
-<p>まずFuelPHPのhttpexceptions.php。PHPの例外クラスが定義されていて、それで且つresponseメソッドを使う事でエラービューなどを表示したりなどの事が出来ている訳なんだが。個人的には例外出しても良いんだろうけど、前にも書いたがFuel\CoreRequestとかを使ってテストを書いたりする際には例外ではなくHttpNotFoundExceptionであれば404、HttpServerErrorExceptionであれば500を取得できるようにしてテストしたいって思う所があるんだけど。で思ったのが「throw new HttpNotFoundException」ではなく「return new HttpNotFoundException」をしつつafterでそれを処理するっていうのはどうだろうと。という事で色々やってみた</p><pre class="line-numbers"><code class="language-php">&lt;?php
+                <!--[]-->
+                <p>久々にFuelPHPを使ってて思う所がいろいろあったのでメモ</p><p>まずFuelPHPのhttpexceptions.php。PHPの例外クラスが定義されていて、それで且つresponseメソッドを使う事でエラービューなどを表示したりなどの事が出来ている訳なんだが。個人的には例外出しても良いんだろうけど、前にも書いたがFuel\CoreRequestとかを使ってテストを書いたりする際には例外ではなくHttpNotFoundExceptionであれば404、HttpServerErrorExceptionであれば500を取得できるようにしてテストしたいって思う所があるんだけど。で思ったのが「throw new HttpNotFoundException」ではなく「return new HttpNotFoundException」をしつつafterでそれを処理するっていうのはどうだろうと。という事で色々やってみた</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller_Rest {
 
     protected $_supported_formats = array(
-        "html" =&gt; "text/html",
-        "json" =&gt; "application/json"
+        &quot;html&quot; =&gt; &quot;text/html&quot;,
+        &quot;json&quot; =&gt; &quot;application/json&quot;
     );
 
     public function get_index() {
-        if ($this-&gt;format === "html") {
+        if ($this-&gt;format === &quot;html&quot;) {
             return new HttpServerErrorException();
         }
 
-        return $this-&gt;response(array("message" =&gt; "hoge fuga foobar"));
+        return $this-&gt;response(array(&quot;message&quot; =&gt; &quot;hoge fuga foobar&quot;));
     }
 
     public function after($res) {
@@ -148,20 +145,20 @@ class SampleTestCase extends PHPUnit_Framework_TestCase {
     public function test1() {
         if ($this-&gt;pid == 0) {
             pcntl_exec(
-                "/home/kinjouj/.phpbrew/php/php-5.4.12/bin/php",
-                ["-S", "localhost:8080", "-t", DOCROOT."/public"]
+                &quot;/home/kinjouj/.phpbrew/php/php-5.4.12/bin/php&quot;,
+                [&quot;-S&quot;, &quot;localhost:8080&quot;, &quot;-t&quot;, DOCROOT.&quot;/public&quot;]
             );
         } elseif($this-&gt;pid) {
             sleep(1);
 
-            $driver = Request::forge("http://localhost:8080", "Curl");
-            //$driver-&gt;set_mime_type("json");
+            $driver = Request::forge(&quot;http://localhost:8080&quot;, &quot;Curl&quot;);
+            //$driver-&gt;set_mime_type(&quot;json&quot;);
 
             $res = $driver-&gt;execute()-&gt;response();
             $this-&gt;assertThat($res-&gt;status, $this-&gt;equalTo(200));
             $this-&gt;assertThat(
                 $res-&gt;body,
-                $this-&gt;equalTo(array("message" =&gt; "hoge fuga foobar"))
+                $this-&gt;equalTo(array(&quot;message&quot; =&gt; &quot;hoge fuga foobar&quot;))
             );
         }
     }
@@ -247,53 +244,67 @@ Tests: 1, Assertions: 1, Failures: 1.
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -301,17 +312,21 @@ Tests: 1, Assertions: 1, Failures: 1.
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -319,32 +334,41 @@ Tests: 1, Assertions: 1, Failures: 1.
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -352,14 +376,17 @@ Tests: 1, Assertions: 1, Failures: 1.
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -367,11 +394,13 @@ Tests: 1, Assertions: 1, Failures: 1.
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -379,20 +408,25 @@ Tests: 1, Assertions: 1, Failures: 1.
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -400,47 +434,43 @@ Tests: 1, Assertions: 1, Failures: 1.
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -448,20 +478,41 @@ Tests: 1, Assertions: 1, Failures: 1.
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -471,17 +522,21 @@ Tests: 1, Assertions: 1, Failures: 1.
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

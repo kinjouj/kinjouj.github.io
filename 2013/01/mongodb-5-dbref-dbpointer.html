@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="更にドキュメントよみを進めてみる。今回はDBRefに関して例えばドキュメントから別のドキュメントのデータを参照したい場合にどうするかって話なんですが、DBRefを使えば一応そういった事も出来る模様" />
+    <meta name="description" content="更にドキュメントよみを進めてみる。今回はDBRefに関して例えばドキュメントから別のドキュメントのデータを参照したい場合にどうするかって話なんですが、DBRefを使えば一応そういった事も出来る模様。言" />
     <title>mongodbを使ってみる (5) - DBRef/DBPointerに関して - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-6-findandmodify.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-tailable-cursor.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,31 +95,29 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!---->
-                <p>更にドキュメントよみを進めてみる。今回はDBRefに関して</p>
-<!--more-->
-<p>例えばドキュメントから別のドキュメントのデータを参照したい場合にどうするかって話なんですが、DBRefを使えば一応そういった事も出来る模様。言うよりやれ論でとりあえずやってみる</p><pre class="line-numbers"><code class="language-js">db.samples.tags.save({ name: "テスト" })
+                <!--[]-->
+                <p>更にドキュメントよみを進めてみる。今回はDBRefに関して</p><p>例えばドキュメントから別のドキュメントのデータを参照したい場合にどうするかって話なんですが、DBRefを使えば一応そういった事も出来る模様。言うよりやれ論でとりあえずやってみる</p><pre class="line-numbers"><code class="language-js">db.samples.tags.save({ name: &quot;テスト&quot; })
 </code></pre><p>っていうのをやると_idが自動で付く。でその値は<span style="color: red">50f5370e85ac77daf3dd4bfb</span>っていう感じになってるとする。でそれを別のデータから参照したい場合には</p><pre class="line-numbers"><code class="language-js">db.samples.entry.save({
-  name: "Test",
-  tag: new DBRef("samples.tags", ObjectId("50f5370e85ac77daf3dd4bfb"))
+  name: &quot;Test&quot;,
+  tag: new DBRef(&quot;samples.tags&quot;, ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;))
 })
 </code></pre><p>という感じでsaveする。んじゃとりあえずfindしてみると</p><pre class="line-numbers"><code class="language-json">{
-  "_id" : ObjectId("50f5379785ac77daf3dd4bfd"),
-  "name" : "Test",
-  "tag" : {
-    "$ref" : "samples.tags",
-    "$id" : ObjectId("50f5370e85ac77daf3dd4bfb")
+  &quot;_id&quot; : ObjectId(&quot;50f5379785ac77daf3dd4bfd&quot;),
+  &quot;name&quot; : &quot;Test&quot;,
+  &quot;tag&quot; : {
+    &quot;$ref&quot; : &quot;samples.tags&quot;,
+    &quot;$id&quot; : ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;)
   }
 }
 </code></pre><p>っていう結果になる。まぁDBRefとしてsaveしなくても上記のように$refと$idを持つ連想配列型を作れば参照できる模様。で$ref自体はあくまでコレクションからの名前なので、今回<span style="color: red">db.samples.tags</span>っていうのを参照したいのでsamples.tagsで指定しなければならないような感じ。$idは言わなくてもわかるとおもうので(ry</p><p>んでもって</p><pre class="line-numbers"><code class="language-js">db.samples.entry.findOne().tag
-// 出力: { "$ref" : "samples.tags", "$id" : ObjectId("50f5370e85ac77daf3dd4bfb") }
+// 出力: { &quot;$ref&quot; : &quot;samples.tags&quot;, &quot;$id&quot; : ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;) }
 
 db.samples.entry.findOne().tag.fetch()
-// 出力: { "_id" : ObjectId("50f5370e85ac77daf3dd4bfb"), "name" : "テスト" }
-</code></pre><p>という感じで、データが参照しているデータを紐づけてフェッチする事が出来る模様。</p><p>でDBRefじゃなくてDBPointerっていうのもある模様</p><pre class="line-numbers"><code class="language-js">db.samples.entry.save({ name: "Test", tag: new DBPointer("samples.tags", ObjectId("50f5370e85ac77daf3dd4bfb") })
+// 出力: { &quot;_id&quot; : ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;), &quot;name&quot; : &quot;テスト&quot; }
+</code></pre><p>という感じで、データが参照しているデータを紐づけてフェッチする事が出来る模様。</p><p>でDBRefじゃなくてDBPointerっていうのもある模様</p><pre class="line-numbers"><code class="language-js">db.samples.entry.save({ name: &quot;Test&quot;, tag: new DBPointer(&quot;samples.tags&quot;, ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;) })
 </code></pre><p>DBPointerってのを使うと</p><pre class="line-numbers"><code class="language-json">{
-  "ns": "samples.tags",
-  "id": ObjectId("50f5370e85ac77daf3dd4bfb")
+  &quot;ns&quot;: &quot;samples.tags&quot;,
+  &quot;id&quot;: ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;)
 }
 </code></pre><p>っていうような形式になる模様。DBRefと同様な方式でフェッチ出来る模様</p>
               </div>
@@ -172,53 +169,67 @@ db.samples.entry.findOne().tag.fetch()
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -226,17 +237,21 @@ db.samples.entry.findOne().tag.fetch()
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -244,32 +259,41 @@ db.samples.entry.findOne().tag.fetch()
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -277,14 +301,17 @@ db.samples.entry.findOne().tag.fetch()
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -292,11 +319,13 @@ db.samples.entry.findOne().tag.fetch()
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -304,20 +333,25 @@ db.samples.entry.findOne().tag.fetch()
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -325,47 +359,43 @@ db.samples.entry.findOne().tag.fetch()
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -373,20 +403,41 @@ db.samples.entry.findOne().tag.fetch()
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -396,17 +447,21 @@ db.samples.entry.findOne().tag.fetch()
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

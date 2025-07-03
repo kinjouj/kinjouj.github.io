@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2015-07-01 20:30:40 +0900">
+                <time datetime="2015-07-01T20:30:40+09:00">
                   <a href="/archives/2015/07">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -97,32 +96,12 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-c34dbe44d54f29f6">その前に余談</a>
-</li>
-<li>
-<a href="#sampleapi-java">SampleApi.java</a>
-</li>
-<li>
-<a href="#sampleapitest-java">SampleApiTest.java</a>
-</li>
-<li>
-<a href="#sampleapitransformer-java">SampleApiTransformer.java</a>
-</li>
-</ul>
--->
-                <p>公式ドキュメント: <a href="https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer" target="_blank" rel="noopener noreferrer">https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer</a></p><p><a href="/2015/06/google-cloud-endpoints.html">前回</a>で省略した@ApiTransformerをやってみた</p>
-<!--more-->
-
-<h4 id="part-c34dbe44d54f29f6">その前に余談</h4>
-
+                <!--[[1, "その前に余談"], [2, "SampleApi.java"], [3, "SampleApiTest.java"], [4, "SampleApiTransformer.java"]]-->
+                <p>公式ドキュメント: <a href="https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer" target="_blank" rel="noopener noreferrer">https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer</a></p><p><a href="/2015/06/google-cloud-endpoints.html">前回</a>で省略した@ApiTransformerをやってみた</p><h4>その前に余談</h4>
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">gradle-appengine-pluginではsrc/functionalTestを用意する事でappengineFunctionalTestでテストを実行する前にサーバーをdaemon=trueで起動してテストを実行させる事が出来る模様</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/615920383032627200">2015, 6月 30</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<p>っていう事なので(ry</p>
-<h4 id="sampleapi-java">SampleApi.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+<p>っていう事なので(ry</p><h4>SampleApi.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Arrays;
 import java.util.List;
@@ -130,16 +109,14 @@ import java.util.List;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 
-@Api(name = "sample")
+@Api(name = &quot;sample&quot;)
 public class SampleApi {
-    @ApiMethod(path = "say")
+    @ApiMethod(path = &quot;say&quot;)
     public List&lt;Sample&gt; getSay(Sample sample) {
         return Arrays.asList(sample);
     }
 }
-</code></pre>
-<h4 id="sampleapitest-java">SampleApiTest.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4>SampleApiTest.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.net.URL;
 import java.util.List;
@@ -180,7 +157,7 @@ public class SampleApiTest {
     @Test
     public void test() throws Exception {
         URLFetchService fetchService = URLFetchServiceFactory.getURLFetchService();
-        URL url = new URL("http://localhost:8080/_ah/api/sample/v1/say?name=hoge");
+        URL url = new URL(&quot;http://localhost:8080/_ah/api/sample/v1/say?name=hoge&quot;);
 
         HTTPResponse response = fetchService.fetch(url);
         assertThat(response.getResponseCode(), is(200));
@@ -190,19 +167,17 @@ public class SampleApiTest {
             // java.lang.reflect.Type
             new TypeToken&lt;Map&lt;String, Object&gt;&gt;() {}.getType()
         );
-        assertThat(parsedJson, hasKey("items"));
+        assertThat(parsedJson, hasKey(&quot;items&quot;));
 
-        List&lt;Object&gt; items = (List&lt;Object&gt;)parsedJson.get("items");
+        List&lt;Object&gt; items = (List&lt;Object&gt;)parsedJson.get(&quot;items&quot;);
         assertThat(items, hasSize(1));
 
         Map&lt;String, String&gt; item = (Map&lt;String, String&gt;)items.get(0);
-        assertThat(item, hasKey("name"));
-        assertThat(item.get("name"), is("hoge"));
+        assertThat(item, hasKey(&quot;name&quot;));
+        assertThat(item.get(&quot;name&quot;), is(&quot;hoge&quot;));
     }
 }
-</code></pre><p>まぁ普通に/_ah/api/sample/v1/say?name=hogeなリクエストぶん投げてレスポンスをテストしているだけなのだけど、特に@ApiTransformerを介していないのでこのテストは無難に成功する</p>
-<h4 id="sampleapitransformer-java">SampleApiTransformer.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>まぁ普通に/_ah/api/sample/v1/say?name=hogeなリクエストぶん投げてレスポンスをテストしているだけなのだけど、特に@ApiTransformerを介していないのでこのテストは無難に成功する</p><h4>SampleApiTransformer.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -213,14 +188,14 @@ public class SampleTransformer implements Transformer&lt;Sample, Map&lt;String, 
 
     public Sample transformFrom(Map&lt;String, String&gt; in) {
         Sample sample = new Sample();
-        sample.setName(in.get("name"));
+        sample.setName(in.get(&quot;name&quot;));
 
         return sample;
     }
 
     public Map&lt;String, String&gt; transformTo(Sample in) {
         Map&lt;String, String&gt; out = new HashMap&lt;String, String&gt;(1);
-        out.put("name", in.getName().toUpperCase());
+        out.put(&quot;name&quot;, in.getName().toUpperCase());
 
         return out;
     }
@@ -306,53 +281,67 @@ public class Sample implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -360,17 +349,21 @@ public class Sample implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -378,32 +371,41 @@ public class Sample implements Serializable {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -411,14 +413,17 @@ public class Sample implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -426,11 +431,13 @@ public class Sample implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -438,20 +445,25 @@ public class Sample implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -459,47 +471,43 @@ public class Sample implements Serializable {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -507,20 +515,41 @@ public class Sample implements Serializable {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -530,17 +559,21 @@ public class Sample implements Serializable {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

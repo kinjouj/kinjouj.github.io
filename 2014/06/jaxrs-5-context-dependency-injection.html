@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="んまぁJAX-RSの機能っていうわけでもないと思うのですが、JavaEEな@Injectを使ってDependencyInjectionするっていうだけな事設定何やらWEB-INF/bean" />
+    <meta name="description" content="んまぁJAX-RSの機能っていうわけでもないと思うのですが、JavaEEな@Injectを使ってDependencyInjectionするっていうだけな事設定何やらWEB-INF/beans.xm" />
     <title>JAX-RSをやってみる (5) - CDI - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/06/jaxrs-4-messagebodyreader.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/06/jaxrs-6-exception-mapping.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,33 +96,16 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654314eae0f">設定</a>
-</li>
-<li>
-<a href="#home-java">Home.java</a>
-</li>
-<li>
-<a href="#hometest-java">HomeTest.java</a>
-</li>
-</ul>
--->
-                <p>んまぁJAX-RSの機能っていうわけでもないと思うのですが、Java EEな@Injectを使ってDependency Injectionするっていうだけな事</p>
-<!--more-->
-
-<h4 id="part-654314eae0f">設定</h4>
-<p>何やらWEB-INF/beans.xmlを作っておかないとエラーになる(多分テスト側ではエラーにならないけど、APサーバーとかにデプロイするとエラーになる的な感じかと)</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+                <!--[[1, "設定"], [2, "Home.java"], [3, "HomeTest.java"]]-->
+                <p>んまぁJAX-RSの機能っていうわけでもないと思うのですが、Java EEな@Injectを使ってDependency Injectionするっていうだけな事</p><h4>設定</h4><p>何やらWEB-INF/beans.xmlを作っておかないとエラーになる(多分テスト側ではエラーにならないけど、APサーバーとかにデプロイするとエラーになる的な感じかと)</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
-    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
-    version="1.1"
-    bean-discovery-mode="all"&gt;
+    xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd&quot;
+    version=&quot;1.1&quot;
+    bean-discovery-mode=&quot;all&quot;&gt;
 &lt;/beans&gt;
-</code></pre><p>ってな感じで作っておく</p>
-<h4 id="home-java">Home.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>ってな感じで作っておく</p><h4>Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -132,22 +114,20 @@ import javax.ws.rs.Path;
 import sample.bean.SampleBean;
 import sample.service.HogeService;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     @Inject
     private HogeService service;
 
     @GET
-    @Path("index")
+    @Path(&quot;index&quot;)
     public String index() {
         SampleBean bean = service.get();
-        return "hello: " + bean.getName();
+        return &quot;hello: &quot; + bean.getName();
     }
 }
-</code></pre><p>な感じで適当に作ったクラスを@Injectで依存性注入する的な感じで。あとはコンテナ側(CDI的にはコンテキストっていうべきなのかと)で処理されて注入されるはずなので(ry</p>
-<h4 id="hometest-java">HomeTest.java</h4>
-<p>アプリケーションサーバーとかで動かす分には依存性の注入は自動で判断して行ってくれるみたいだけど、JerseyTestを使ったテストではこの依存性注入が自動で行われない模様。っていうかその依存性の注入の解決をしない限りは@Injectを入れてるだけでエラーになる模様。なのでそこら辺を指定すれば良いっぽい</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><p>な感じで適当に作ったクラスを@Injectで依存性注入する的な感じで。あとはコンテナ側(CDI的にはコンテキストっていうべきなのかと)で処理されて注入されるはずなので(ry</p><h4>HomeTest.java</h4><p>アプリケーションサーバーとかで動かす分には依存性の注入は自動で判断して行ってくれるみたいだけど、JerseyTestを使ったテストではこの依存性注入が自動で行われない模様。っていうかその依存性の注入の解決をしない限りは@Injectを入れてるだけでエラーになる模様。なのでそこら辺を指定すれば良いっぽい</p><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.core.Application;
 
@@ -181,11 +161,11 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_index() {
-        String response = target("/sample/index")
+        String response = target(&quot;/sample/index&quot;)
             .request()
             .get(String.class);
         assertThat(response, notNullValue());
-        assertThat(response, is("hello: hoge"));
+        assertThat(response, is(&quot;hello: hoge&quot;));
     }
 }
 </code></pre>
@@ -238,53 +218,67 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -292,17 +286,21 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -310,32 +308,41 @@ public class HomeTest extends JerseyTest {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -343,14 +350,17 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -358,11 +368,13 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -370,20 +382,25 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -391,47 +408,43 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -439,20 +452,41 @@ public class HomeTest extends JerseyTest {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -462,17 +496,21 @@ public class HomeTest extends JerseyTest {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

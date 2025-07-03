@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,35 +96,14 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#fluentd">fluentd側のセットアップ</a>
-</li>
-<li>
-<a href="#mongodb">MongoDB側を確認</a>
-</li>
-<li>
-<a href="#mongodb-mapreduce-api-javascript">MongoDBでMapReduce APIを使うJavaScriptを書く</a>
-</li>
-<li>
-<a href="#part-4108a8c1b1383ea7">コレクション名</a>
-</li>
-<li>
-<a href="#merge-replace">mergeとreplace</a>
-</li>
-</ul>
--->
+                <!--[[1, "fluentd側のセットアップ"], [2, "MongoDB側を確認"], [3, "MongoDBでMapReduce APIを使うJavaScriptを書く"], [4, "コレクション名"], [5, "mergeとreplace"]]-->
                 <p>MongoDBにもれなく付いてくる(笑)MapReduceを使ってみる。ただ使っても面白くないので</p>
 <ul>
 <li>fluentdを使ってnginxのアクセスログをtailする</li>
 <li>fluentdでパースされたアクセスログをfluent-plugin-mongoを使ってMongoDBにプッシュする</li>
 <li>MongoDB MapReduce APIを使って、アクセスカウント統計を作る</li>
 </ul>
-<p>という流れで</p>
-<!--more-->
-
-<h4 id="fluentd">fluentd側のセットアップ</h4>
-<pre class="line-numbers"><code class="language-">sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
+<p>という流れで</p><h4>fluentd側のセットアップ</h4><pre class="line-numbers"><code class="language-">sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
 </code></pre><p>でとりあえずfluent-plugin-mongoを入れる。んで</p><pre class="line-numbers"><code class="language-">&lt;source&gt;
     type tail
     format apache
@@ -139,46 +117,42 @@ ga("send", "pageview");
     collection accesslog
 &lt;/match&gt;
 </code></pre><p>なtd-agent.confを作って</p><pre class="line-numbers"><code class="language-">/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
-</code></pre><p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p>
-<h4 id="mongodb">MongoDB側を確認</h4>
-<p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
-{ "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f6647c8cdabd1739000004"), "path" : "/" }
-{ "_id" : ObjectId("50f6647c8cdabd1739000005"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f6647c8cdabd1739000007"), "path" : "/" }
-{ "_id" : ObjectId("50f6647c8cdabd1739000008"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f6647c8cdabd1739000009"), "path" : "/" }
-{ "_id" : ObjectId("50f6647c8cdabd173900000a"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f6647c8cdabd173900000b"), "path" : "/" }
-{ "_id" : ObjectId("50f6647c8cdabd173900000c"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f6647c8cdabd173900000d"), "path" : "/" }
-{ "_id" : ObjectId("50f6647c8cdabd173900000e"), "path" : "/" }
-{ "_id" : ObjectId("50f6647c8cdabd173900000f"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f6647c8cdabd1739000010"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f6647c8cdabd1739000011"), "path" : "/" }
-{ "_id" : ObjectId("50f6647c8cdabd1739000012"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f664ba8cdabd1739000013"), "path" : "/" }
-{ "_id" : ObjectId("50f664ba8cdabd1739000014"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f712338cdabd1739000015"), "path" : "/home/index" }
-{ "_id" : ObjectId("50f712338cdabd1739000016"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f712338cdabd1739000018"), "path" : "/home/index" }
-{ "_id" : ObjectId("50f712338cdabd1739000019"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f712708cdabd173900001b"), "path" : "/home/index" }
-{ "_id" : ObjectId("50f712708cdabd173900001c"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f712708cdabd173900001d"), "path" : "/home/index" }
-{ "_id" : ObjectId("50f712708cdabd173900001e"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f712708cdabd1739000020"), "path" : "/home/index" }
-{ "_id" : ObjectId("50f712708cdabd1739000021"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f712708cdabd1739000022"), "path" : "/home/index" }
-{ "_id" : ObjectId("50f712708cdabd1739000023"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f712708cdabd1739000024"), "path" : "/home/index" }
-{ "_id" : ObjectId("50f712708cdabd1739000025"), "path" : "/favicon.ico" }
-</code></pre><p>という風にずどどどどとぶっこまれるのが確認できる。ただこれフィルターしているので、あれなんすけど</p><pre class="line-numbers"><code class="language-json">{ "_id" : ObjectId("50f664408cdabd1739000001"), "path" : "/" }
-{ "_id" : ObjectId("50f664408cdabd1739000002"), "path" : "/favicon.ico" }
-{ "_id" : ObjectId("50f664408cdabd1739000003") }
-</code></pre><p>という風にpath属性が無いのもあるので</p>
-<h4 id="mongodb-mapreduce-api-javascript">MongoDBでMapReduce APIを使うJavaScriptを書く</h4>
-<pre class="line-numbers"><code class="language-js">var res = db.accesslog.mapReduce(
+</code></pre><p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p><h4>MongoDB側を確認</h4><p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f664408cdabd1739000001&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f664408cdabd1739000002&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd1739000004&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd1739000005&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd1739000007&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd1739000008&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd1739000009&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd173900000a&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd173900000b&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd173900000c&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd173900000d&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd173900000e&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd173900000f&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd1739000010&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd1739000011&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f6647c8cdabd1739000012&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f664ba8cdabd1739000013&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f664ba8cdabd1739000014&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712338cdabd1739000015&quot;), &quot;path&quot; : &quot;/home/index&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712338cdabd1739000016&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712338cdabd1739000018&quot;), &quot;path&quot; : &quot;/home/index&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712338cdabd1739000019&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd173900001b&quot;), &quot;path&quot; : &quot;/home/index&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd173900001c&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd173900001d&quot;), &quot;path&quot; : &quot;/home/index&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd173900001e&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd1739000020&quot;), &quot;path&quot; : &quot;/home/index&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd1739000021&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd1739000022&quot;), &quot;path&quot; : &quot;/home/index&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd1739000023&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd1739000024&quot;), &quot;path&quot; : &quot;/home/index&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f712708cdabd1739000025&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+</code></pre><p>という風にずどどどどとぶっこまれるのが確認できる。ただこれフィルターしているので、あれなんすけど</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f664408cdabd1739000001&quot;), &quot;path&quot; : &quot;/&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f664408cdabd1739000002&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;50f664408cdabd1739000003&quot;) }
+</code></pre><p>という風にpath属性が無いのもあるので</p><h4>MongoDBでMapReduce APIを使うJavaScriptを書く</h4><pre class="line-numbers"><code class="language-js">var res = db.accesslog.mapReduce(
   // Map
   function() {
     // fluentからmongoへプッシュされたログの行毎のデータはthisからアクセス出来る模様
@@ -209,44 +183,40 @@ ga("send", "pageview");
 
 printjson(res)
 </code></pre><p>な感じで実行すると</p><pre class="line-numbers"><code class="language-json">{
-    "results" : [
+    &quot;results&quot; : [
         {
-            "_id" : "/",
-            "value" : {
-                "count" : 9,
-                "path" : "/"
+            &quot;_id&quot; : &quot;/&quot;,
+            &quot;value&quot; : {
+                &quot;count&quot; : 9,
+                &quot;path&quot; : &quot;/&quot;
             }
         },
         {
-            "_id" : "/favicon.ico",
-            "value" : {
-                "count" : 16,
-                "path" : "/favicon.ico"
+            &quot;_id&quot; : &quot;/favicon.ico&quot;,
+            &quot;value&quot; : {
+                &quot;count&quot; : 16,
+                &quot;path&quot; : &quot;/favicon.ico&quot;
             }
         },
         {
-            "_id" : "/home/index",
-            "value" : {
-                "count" : 7,
-                "path" : "/home/index"
+            &quot;_id&quot; : &quot;/home/index&quot;,
+            &quot;value&quot; : {
+                &quot;count&quot; : 7,
+                &quot;path&quot; : &quot;/home/index&quot;
             }
         }
     ],
-    "timeMillis" : 15,
-    "counts" : {
-        "input" : 32,
-        "emit" : 32,
-        "reduce" : 3,
-        "output" : 3
+    &quot;timeMillis&quot; : 15,
+    &quot;counts&quot; : {
+        &quot;input&quot; : 32,
+        &quot;emit&quot; : 32,
+        &quot;reduce&quot; : 3,
+        &quot;output&quot; : 3
     },
-    "ok" : 1,
+    &quot;ok&quot; : 1,
 }
-</code></pre><p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p>
-<h4 id="part-4108a8c1b1383ea7">コレクション名</h4>
-<pre class="line-numbers"><code class="language-json">{ out: "コレクション名" }
-</code></pre><p>で指定すると指定したコレクション名にぶち込まれる</p>
-<h4 id="merge-replace">mergeとreplace</h4>
-
+</code></pre><p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p><h4>コレクション名</h4><pre class="line-numbers"><code class="language-json">{ out: &quot;コレクション名&quot; }
+</code></pre><p>で指定すると指定したコレクション名にぶち込まれる</p><h4>mergeとreplace</h4>
 <ul>
 <li>  既存するデータをぶち消して、新しい結果をぶち込むのがreplace</li>
 <li>  既存するデータを消さずにそのまま新しい結果をマージするのがmerge</li>
@@ -301,53 +271,67 @@ printjson(res)
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -355,17 +339,21 @@ printjson(res)
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -373,32 +361,41 @@ printjson(res)
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -406,14 +403,17 @@ printjson(res)
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -421,11 +421,13 @@ printjson(res)
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -433,20 +435,25 @@ printjson(res)
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -454,47 +461,43 @@ printjson(res)
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -502,20 +505,41 @@ printjson(res)
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -525,17 +549,21 @@ printjson(res)
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

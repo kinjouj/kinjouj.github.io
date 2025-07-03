@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="CSRF関係のAPIも存在するのでそれを利用すれば良い模様。あくまでFuelPHPAPIの話なだけですのでfuel/app/views/home.php&lt;html&gt;&lt;" />
+    <meta name="description" content="CSRF関係のAPIも存在するのでそれを利用すれば良い模様。あくまでFuelPHPAPIの話なだけですのでfuel/app/views/home.php&lt;html&gt;&lt;body" />
     <title>FuelPHPをやってみる (16) - CSRFに関して - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/11/fuelphp-15-package.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/11/hdfs-operations.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,84 +96,60 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#fuel-app-views-home-php">fuel/app/views/home.php</a>
-</li>
-<li>
-<a href="#fuel-app-classes-controller-home-php">fuel/app/classes/controller/home.php</a>
-</li>
-<li>
-<a href="#fuel-app-tests-controller-home_test-php">fuel/app/tests/controller/home_test.php</a>
-</li>
-<li>
-<a href="#1-javascript-csrf">備考1: JavaScript用のCSRFトークン機能に関して</a>
-</li>
-</ul>
--->
-                <p>CSRF関係のAPIも存在するのでそれを利用すれば良い模様。あくまでFuelPHP APIの話なだけですので</p>
-<!--more-->
-
-<h4 id="fuel-app-views-home-php">fuel/app/views/home.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;html&gt;
+                <!--[[1, "fuel/app/views/home.php"], [2, "fuel/app/classes/controller/home.php"], [3, "fuel/app/tests/controller/home_test.php"], [4, "備考1: JavaScript用のCSRFトークン機能に関して"]]-->
+                <p>CSRF関係のAPIも存在するのでそれを利用すれば良い模様。あくまでFuelPHP APIの話なだけですので</p><h4>fuel/app/views/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;html&gt;
   &lt;body&gt;
-    &lt;form action="/" method="POST"&gt;
-      &lt;input type="hidden" name="&lt;?php echo Config::get("security.csrf_token_key") ?&gt;" value="&lt;?php echo Security::fetch_token() ?&gt;" /&gt;
-      &lt;input type="submit" /&gt;
+    &lt;form action=&quot;/&quot; method=&quot;POST&quot;&gt;
+      &lt;input type=&quot;hidden&quot; name=&quot;&lt;?php echo Config::get(&quot;security.csrf_token_key&quot;) ?&gt;&quot; value=&quot;&lt;?php echo Security::fetch_token() ?&gt;&quot; /&gt;
+      &lt;input type=&quot;submit&quot; /&gt;
     &lt;/form&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>Security::fetch_tokenを使ってCSRFに使うワンタイムトークンのような物を生成出来る模様。んでCSRFチェックを行う際にSecurityクラスで使うメソッドがConfig::get(<q>security.csrf\_token\_key</q>)を参照してポストされたトークンを取得すると思われるのでそれを確認しておく(デフォルトはfuel_csrf_token)。まぁ要はキー名ってだけなんだけど</p>
-<h4 id="fuel-app-classes-controller-home-php">fuel/app/classes/controller/home.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>Security::fetch_tokenを使ってCSRFに使うワンタイムトークンのような物を生成出来る模様。んでCSRFチェックを行う際にSecurityクラスで使うメソッドがConfig::get(<q>security.csrf\_token\_key</q>)を参照してポストされたトークンを取得すると思われるのでそれを確認しておく(デフォルトはfuel_csrf_token)。まぁ要はキー名ってだけなんだけど</p><h4>fuel/app/classes/controller/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
     public function get_index() {
-        return View::forge("home");
+        return View::forge(&quot;home&quot;);
     }
 
     public function post_index() {
         if (Security::check_token()) {
-            return Response::forge("OK");
+            return Response::forge(&quot;OK&quot;);
         }
 
-        return Response::forge("NG");
+        return Response::forge(&quot;NG&quot;);
     }
 }
-</code></pre><p>CSRFチェックを行うにはSecurity::check_tokenを使用する。本来であれば、CSRFがfailした際には正常リクエストな場合で出すステータスとは別にした方が良いかと思われる(そうじゃないとコントローラーテストで識別しにくいのではと)</p><p>一回普通にポストしてリダイレクト等をせずリロードした場合には、既にセッション内に確保されている(と思われる)CSRFトークンは削除されている(ワンタイムである為)。なのでリロードしてもその時点でセッション内トークンは削除されているのでCSRFチェックはfailすると思われる</p><p>でhiddenを設定しない、もしくは別の領域からポストされている場合には送信元認証がされてない事によりCSRFチェックはfailする</p><p>っていう感じでしょうかね。んじゃこのコントローラーのテストケースを書くには</p>
-<h4 id="fuel-app-tests-controller-home_test-php">fuel/app/tests/controller/home_test.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>CSRFチェックを行うにはSecurity::check_tokenを使用する。本来であれば、CSRFがfailした際には正常リクエストな場合で出すステータスとは別にした方が良いかと思われる(そうじゃないとコントローラーテストで識別しにくいのではと)</p><p>一回普通にポストしてリダイレクト等をせずリロードした場合には、既にセッション内に確保されている(と思われる)CSRFトークンは削除されている(ワンタイムである為)。なのでリロードしてもその時点でセッション内トークンは削除されているのでCSRFチェックはfailすると思われる</p><p>でhiddenを設定しない、もしくは別の領域からポストされている場合には送信元認証がされてない事によりCSRFチェックはfailする</p><p>っていう感じでしょうかね。んじゃこのコントローラーのテストケースを書くには</p><h4>fuel/app/tests/controller/home_test.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Controller_Home extends TestCase {
     public function test_post_index() {
-        $key = Config::get("security.csrf_token_key");
+        $key = Config::get(&quot;security.csrf_token_key&quot;);
         $val = Security::fetch_token();
 
         $res = Request::forge(
-            "http://localhost/",
+            &quot;http://localhost/&quot;,
             array(
-                "driver" =&gt; "Curl",
-                "options" =&gt; array(CURLOPT_COOKIE =&gt; "$key=$val;")
+                &quot;driver&quot; =&gt; &quot;Curl&quot;,
+                &quot;options&quot; =&gt; array(CURLOPT_COOKIE =&gt; &quot;$key=$val;&quot;)
             )
         )-&gt;set_method(
-            "POST"
+            &quot;POST&quot;
         )-&gt;execute(
             array($key =&gt; $val)
         )-&gt;response();
 
-        $this-&gt;assertEquals("OK", $res-&gt;body);
+        $this-&gt;assertEquals(&quot;OK&quot;, $res-&gt;body);
     }
 }
-</code></pre><p>っていう感じじゃないですかね。CurlドライバーなRequestクラスを使い、クッキーにfetch_tokenした結果をぶち込んでおく。んでPOSTする際にも同じトークンをぶち込む(ここの値を変えるとCSRFチェックがfailする)</p><p>な感じですかねと。ぶっちゃけこれ気休め程度にしかならないんじゃないのかっていう疑問もちょっとあるんですが</p>
-<h4 id="1-javascript-csrf">備考1: JavaScript用のCSRFトークン機能に関して</h4>
-<p>Security::js_fetch_tokenを使うとJavaScriptで利用する用のCSRFトークンを取得する関数が定義されるのですが、これを使うと</p><pre class="line-numbers"><code class="language-js">function fuel_csrf_token() {
+</code></pre><p>っていう感じじゃないですかね。CurlドライバーなRequestクラスを使い、クッキーにfetch_tokenした結果をぶち込んでおく。んでPOSTする際にも同じトークンをぶち込む(ここの値を変えるとCSRFチェックがfailする)</p><p>な感じですかねと。ぶっちゃけこれ気休め程度にしかならないんじゃないのかっていう疑問もちょっとあるんですが</p><h4>備考1: JavaScript用のCSRFトークン機能に関して</h4><p>Security::js_fetch_tokenを使うとJavaScriptで利用する用のCSRFトークンを取得する関数が定義されるのですが、これを使うと</p><pre class="line-numbers"><code class="language-js">function fuel_csrf_token() {
     if (document.cookie.length &gt; 0) {
-        var c_name = "fuel_csrf_token";
-        c_start = document.cookie.indexOf(c_name + "=");
+        var c_name = &quot;fuel_csrf_token&quot;;
+        c_start = document.cookie.indexOf(c_name + &quot;=&quot;);
 
         if (c_start != -1) {
             c_start = c_start + c_name.length + 1;
-            c_end = document.cookie.indexOf(";" , c_start);
+            c_end = document.cookie.indexOf(&quot;;&quot; , c_start);
 
             if (c_end == -1) {
                 c_end=document.cookie.length;
@@ -184,12 +159,12 @@ class Test_Controller_Home extends TestCase {
         }
     }
 
-    return "";
+    return &quot;&quot;;
 }
 </code></pre><p>という風になっている。見てわかる通りにJavaScriptからクッキーにアクセスしているんですが、cookieがhttponlyな場合はJavaScriptからアクセスする事が出来ないはずなのでfuel/app/config/config.phpに</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(
-    "cookie" =&gt; array("http_only" =&gt; true)
+    &quot;cookie&quot; =&gt; array(&quot;http_only&quot; =&gt; true)
 );
 </code></pre><p>とするとFuelPHP上のクッキーはhttponlyが付与されるようになりますが、この状態で上記のJavaScript用のfuel_csrf_tokenを実行しても取得出来なくなるっていうのがある</p>
               </div>
@@ -241,53 +216,67 @@ return array(
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -295,17 +284,21 @@ return array(
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -313,32 +306,41 @@ return array(
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -346,14 +348,17 @@ return array(
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -361,11 +366,13 @@ return array(
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -373,20 +380,25 @@ return array(
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -394,47 +406,43 @@ return array(
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -442,20 +450,41 @@ return array(
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -465,17 +494,21 @@ return array(
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

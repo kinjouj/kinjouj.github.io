@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2012-04-07 00:00:00 +0900">
+                <time datetime="2012-04-07T00:00:00+09:00">
                   <a href="/archives/2012/04">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -98,29 +97,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#hadoop">Hadoop側の設定</a>
-</li>
-<li>
-<a href="#cassandra">Cassandra側の設定</a>
-</li>
-<li>
-<a href="#hadoopclient2-java">HadoopClient2.java</a>
-</li>
-<li>
-<a href="#samplemapper-java">SampleMapper.java</a>
-</li>
-<li>
-<a href="#samplecassandrareducer-java">SampleCassandraReducer.java</a>
-</li>
-</ul>
--->
-                <p>前回はCassandraなデータを使うMapperを作って、HDFS上にMapReduce結果を出したので今回はその逆をやってみる。HDFSにインプットデータを用意して、それをMapReduceで処理後CassandraのColumn Familyにプッシュしてみる</p>
-<!--more-->
-
-<h4 id="hadoop">Hadoop側の設定</h4>
-<p>適当に</p>
+                <!--[[1, "Hadoop側の設定"], [2, "Cassandra側の設定"], [3, "HadoopClient2.java"], [4, "SampleMapper.java"], [5, "SampleCassandraReducer.java"]]-->
+                <p>前回はCassandraなデータを使うMapperを作って、HDFS上にMapReduce結果を出したので今回はその逆をやってみる。HDFSにインプットデータを用意して、それをMapReduceで処理後CassandraのColumn Familyにプッシュしてみる</p><h4>Hadoop側の設定</h4><p>適当に</p>
 <pre>
 hoge
 fuga
@@ -129,12 +107,8 @@ hoge
 hoge
 </pre>
 <p>なデータ(data/data.txt)をinputとしてプッシュしておく</p><pre class="line-numbers"><code class="language-sh">hadoop fs -put data input
-</code></pre>
-<h4 id="cassandra">Cassandra側の設定</h4>
-<p>Outputする側のColumn Familyを作っておく</p><pre class="line-numbers"><code class="language-">create column family Outputs with default_validation_class = UTF8Type and key_validation_class = UTF8Type and comparator = UTF8Type
-</code></pre>
-<h4 id="hadoopclient2-java">HadoopClient2.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4>Cassandra側の設定</h4><p>Outputする側のColumn Familyを作っておく</p><pre class="line-numbers"><code class="language-">create column family Outputs with default_validation_class = UTF8Type and key_validation_class = UTF8Type and comparator = UTF8Type
+</code></pre><h4>HadoopClient2.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -169,14 +143,14 @@ public class HadoopClient2 extends Configured implements Tool {
     @Override
     public int run(String[] arg0) throws Exception {
         JobConf conf = new JobConf();
-        conf.setJar("sample.jar");
+        conf.setJar(&quot;sample.jar&quot;);
 
-        ConfigHelper.setInitialAddress(conf, "127.0.0.1");
-        ConfigHelper.setRpcPort(conf, "9160");
-        ConfigHelper.setOutputColumnFamily(conf, "Keyspace1", "Outputs");
-        ConfigHelper.setPartitioner(conf, "org.apache.cassandra.dht.RandomPartitioner");
+        ConfigHelper.setInitialAddress(conf, &quot;127.0.0.1&quot;);
+        ConfigHelper.setRpcPort(conf, &quot;9160&quot;);
+        ConfigHelper.setOutputColumnFamily(conf, &quot;Keyspace1&quot;, &quot;Outputs&quot;);
+        ConfigHelper.setPartitioner(conf, &quot;org.apache.cassandra.dht.RandomPartitioner&quot;);
 
-        SlicePredicate predicate = new SlicePredicate().setColumn_names(Arrays.asList(ByteBufferUtil.bytes("name")));
+        SlicePredicate predicate = new SlicePredicate().setColumn_names(Arrays.asList(ByteBufferUtil.bytes(&quot;name&quot;)));
         ConfigHelper.setInputSlicePredicate(conf, predicate);
 
         Job job = new Job(conf);
@@ -189,14 +163,12 @@ public class HadoopClient2 extends Configured implements Tool {
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(ColumnFamilyOutputFormat.class);
 
-        FileInputFormat.setInputPaths(job, new Path("input"));
+        FileInputFormat.setInputPaths(job, new Path(&quot;input&quot;));
 
         return job.waitForCompletion(true) ? 0 : 1;
     }
 }
-</code></pre><p>今回はCassandraのデータを読み込まないで、アウトプット先がCassandraなのでConfigHelper.setOutputColumnFamilyで設定。でsetPartitionerは設定しておく必要がある(TokenRing関係っぽい) 。あとsetOutputFormatClass(ColumnFamilyOutputFormat.class)も</p><p>であとはSampleMapperとSampleCassandraReducerを作る</p>
-<h4 id="samplemapper-java">SampleMapper.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.mapreduce;
+</code></pre><p>今回はCassandraのデータを読み込まないで、アウトプット先がCassandraなのでConfigHelper.setOutputColumnFamilyで設定。でsetPartitionerは設定しておく必要がある(TokenRing関係っぽい) 。あとsetOutputFormatClass(ColumnFamilyOutputFormat.class)も</p><p>であとはSampleMapperとSampleCassandraReducerを作る</p><h4>SampleMapper.java</h4><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
 
@@ -212,9 +184,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
         ctx.write(value, new IntWritable(1));
     }
 }
-</code></pre>
-<h4 id="samplecassandrareducer-java">SampleCassandraReducer.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.mapreduce;
+</code></pre><h4>SampleCassandraReducer.java</h4><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -248,7 +218,7 @@ public class SampleCassandraReducer extends Reducer&lt;Text, IntWritable, ByteBu
         m.setColumn_or_supercolumn(new ColumnOrSuperColumn());
         m.column_or_supercolumn.setColumn(c);
 
-        ctx.write(ByteBufferUtil.bytes("count"),Collections.singletonList(m));
+        ctx.write(ByteBufferUtil.bytes(&quot;count&quot;),Collections.singletonList(m));
     }
 }
 </code></pre><p>って感じ。実行したらcassandra-cliで</p><pre class="line-numbers"><code class="language-">use Keyspace1;
@@ -304,53 +274,67 @@ list Outputs; # MapReduceで処理された結果一覧が出る
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -358,17 +342,21 @@ list Outputs; # MapReduceで処理された結果一覧が出る
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -376,32 +364,41 @@ list Outputs; # MapReduceで処理された結果一覧が出る
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -409,14 +406,17 @@ list Outputs; # MapReduceで処理された結果一覧が出る
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -424,11 +424,13 @@ list Outputs; # MapReduceで処理された結果一覧が出る
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -436,20 +438,25 @@ list Outputs; # MapReduceで処理された結果一覧が出る
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -457,47 +464,43 @@ list Outputs; # MapReduceで処理された結果一覧が出る
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -505,20 +508,41 @@ list Outputs; # MapReduceで処理された結果一覧が出る
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -528,17 +552,21 @@ list Outputs; # MapReduceで処理された結果一覧が出る
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

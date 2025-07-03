@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,35 +96,25 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#sample-cc">sample.cc</a>
-</li>
-<li>
-<a href="#index-html">index.html</a>
-</li>
-</ul>
--->
+                <!--[[1, "sample.cc"], [2, "index.html"]]-->
                 <p>タイトル通り、今まで同様にサンプル(今回はfile_io)にあるソースを読んでやってみてる。File IOなAPIを使ってストレージサービス(Webサービスでは無い)なところにデータを読み書きしてみる</p>
 <!--more-->
-
-<h4 id="sample-cc">sample.cc</h4>
-<pre class="line-numbers"><code class="language-cpp">#include &lt;iostream&gt;
+<h4>sample.cc</h4><pre class="line-numbers"><code class="language-cpp">#include &lt;iostream&gt;
 #include &lt;sstream&gt;
 #include &lt;time.h&gt;
 
-#include "ppapi/c/ppb_file_io.h"
+#include &quot;ppapi/c/ppb_file_io.h&quot;
 
-#include "ppapi/cpp/instance.h"
-#include "ppapi/cpp/module.h"
-#include "ppapi/cpp/file_system.h"
-#include "ppapi/cpp/file_ref.h"
-#include "ppapi/cpp/file_io.h"
-#include "ppapi/utility/completion_callback_factory.h"
+#include &quot;ppapi/cpp/instance.h&quot;
+#include &quot;ppapi/cpp/module.h&quot;
+#include &quot;ppapi/cpp/file_system.h&quot;
+#include &quot;ppapi/cpp/file_ref.h&quot;
+#include &quot;ppapi/cpp/file_io.h&quot;
+#include &quot;ppapi/utility/completion_callback_factory.h&quot;
 
 using namespace std;
 
-const string filename = "/sample.txt";
+const string filename = &quot;/sample.txt&quot;;
 
 class SampleInstance : public pp::Instance {
   public:
@@ -137,7 +126,7 @@ class SampleInstance : public pp::Instance {
 
     virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]) {
       pp::CompletionCallback callback = factory_.NewCallback(
-        &SampleInstance::OnFileSystemOpen
+        &amp;SampleInstance::OnFileSystemOpen
       );
 
       int32_t rv = fs_.Open(1024 * 1024, callback);
@@ -151,15 +140,15 @@ class SampleInstance : public pp::Instance {
       return true;
     }
 
-    virtual void HandleMessage(const pp::Var& message) {
+    virtual void HandleMessage(const pp::Var&amp; message) {
       string s = message.AsString();
 
-      if (s.compare("load") == 0) {
+      if (s.compare(&quot;load&quot;) == 0) {
         Load();
-      } else if (s.compare("save") == 0) {
+      } else if (s.compare(&quot;save&quot;) == 0) {
         Save();
       } else {
-        PostMessage("Unknown Command");
+        PostMessage(&quot;Unknown Command&quot;);
       }
     }
 
@@ -176,7 +165,7 @@ class SampleInstance : public pp::Instance {
 
     long getTime() {
       time_t timer;
-      time(&timer);
+      time(&amp;timer);
 
       long t = timer;
 
@@ -188,7 +177,7 @@ class SampleInstance : public pp::Instance {
         return;
       }
 
-      PostMessage("OnFileSystemOpen");
+      PostMessage(&quot;OnFileSystemOpen&quot;);
     }
 
     void Load() {
@@ -200,7 +189,7 @@ class SampleInstance : public pp::Instance {
 
 
       pp::CompletionCallback callback = factory_.NewCallback(
-        &SampleInstance::OnLoad,
+        &amp;SampleInstance::OnLoad,
         info
       );
 
@@ -210,13 +199,13 @@ class SampleInstance : public pp::Instance {
         callback.Run(rv);
       }
 
-      PostMessage("Load");
+      PostMessage(&quot;Load&quot;);
     }
 
     void OnLoad(int32_t result, SampleInstance::RequestFileInfo* info) {
       if (result != PP_OK) {
         if (result == PP_ERROR_FILENOTFOUND) {
-          PostMessage("404");
+          PostMessage(&quot;404&quot;);
         }
 
         delete info;
@@ -225,17 +214,17 @@ class SampleInstance : public pp::Instance {
       }
 
       pp::CompletionCallback callback = factory_.NewCallback(
-        &SampleInstance::OnQuery,
+        &amp;SampleInstance::OnQuery,
         info
       );
 
-      int32_t rv = info-&gt;file.Query(&info-&gt;stat, callback);
+      int32_t rv = info-&gt;file.Query(&amp;info-&gt;stat, callback);
 
       if (rv != PP_OK_COMPLETIONPENDING) {
         callback.Run(rv);
       }
 
-      PostMessage("OnLoad");
+      PostMessage(&quot;OnLoad&quot;);
     }
 
     void OnQuery(int32_t result, SampleInstance::RequestFileInfo* info) {
@@ -245,16 +234,16 @@ class SampleInstance : public pp::Instance {
         return;
       }
 
-      info-&gt;data.resize(info-&gt;stat.size, " ");
+      info-&gt;data.resize(info-&gt;stat.size, &quot; &quot;);
 
       pp::CompletionCallback callback = factory_.NewCallback(
-        &SampleInstance::OnRead,
+        &amp;SampleInstance::OnRead,
         info
       );
 
       int32_t rv = info-&gt;file.Read(
         0,
-        &info-&gt;data[0],
+        &amp;info-&gt;data[0],
         info-&gt;data.length(),
         callback
       );
@@ -263,12 +252,12 @@ class SampleInstance : public pp::Instance {
         callback.Run(rv);
       }
 
-      PostMessage("OnQuery");
+      PostMessage(&quot;OnQuery&quot;);
     }
 
     void OnRead(int32_t result, SampleInstance::RequestFileInfo* info) {
-      PostMessage("OnRead");
-      PostMessage("data: " + info-&gt;data);
+      PostMessage(&quot;OnRead&quot;);
+      PostMessage(&quot;data: &quot; + info-&gt;data);
 
       delete info;
     }
@@ -281,7 +270,7 @@ class SampleInstance : public pp::Instance {
       info-&gt;ref = pp::FileRef(fs_, filename.c_str());
 
       pp::CompletionCallback callback = factory_.NewCallback(
-        &SampleInstance::OnSave,
+        &amp;SampleInstance::OnSave,
         info
       );
 
@@ -304,7 +293,7 @@ class SampleInstance : public pp::Instance {
       }
 
       pp::CompletionCallback callback = factory_.NewCallback(
-        &SampleInstance::OnWrite,
+        &amp;SampleInstance::OnWrite,
         info
       );
 
@@ -321,12 +310,12 @@ class SampleInstance : public pp::Instance {
         callback.Run(rv);
       }
 
-      PostMessage("OnSave");
+      PostMessage(&quot;OnSave&quot;);
     }
 
     void OnWrite(int32_t result, SampleInstance::RequestFileInfo* info) {
       pp::CompletionCallback callback = factory_.NewCallback(
-        &SampleInstance::OnFlush
+        &amp;SampleInstance::OnFlush
       );
 
       int32_t rv = info-&gt;file.Flush(callback);
@@ -335,7 +324,7 @@ class SampleInstance : public pp::Instance {
         callback.Run(rv);
       }
 
-      PostMessage("OnWrite");
+      PostMessage(&quot;OnWrite&quot;);
 
       delete info;
     }
@@ -345,7 +334,7 @@ class SampleInstance : public pp::Instance {
         return;
       }
 
-      PostMessage("OnFlush");
+      PostMessage(&quot;OnFlush&quot;);
     }
 };
 
@@ -364,35 +353,33 @@ namespace pp {
     return new SampleModule();
   }
 }
-</code></pre><p>とりあえず適当に現時点のタイムを書きこんでそれを読み込むだけ</p>
-<h4 id="index-html">index.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE&gt;
+</code></pre><p>とりあえず適当に現時点のタイムを書きこんでそれを読み込むだけ</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE&gt;
 &lt;html&gt;
   &lt;head&gt;
-    &lt;meta http-equiv="Pragma" content="no-cache" /&gt;
-    &lt;meta http-equiv="Expires" content="-1" /&gt;
+    &lt;meta http-equiv=&quot;Pragma&quot; content=&quot;no-cache&quot; /&gt;
+    &lt;meta http-equiv=&quot;Expires&quot; content=&quot;-1&quot; /&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;button id="btn1"&gt;load&lt;/button&gt;
-    &lt;button id="btn2"&gt;save&lt;/button&gt;
-    &lt;embed id="plugin" width="0" height="0" src="/sample.nmf" type="application/x-nacl" style="display: none" /&gt;
+    &lt;button id=&quot;btn1&quot;&gt;load&lt;/button&gt;
+    &lt;button id=&quot;btn2&quot;&gt;save&lt;/button&gt;
+    &lt;embed id=&quot;plugin&quot; width=&quot;0&quot; height=&quot;0&quot; src=&quot;/sample.nmf&quot; type=&quot;application/x-nacl&quot; style=&quot;display: none&quot; /&gt;
 
-    &lt;script type="text/javascript"&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
 (function(undefined) {
   webkitStorageInfo.requestQuota(PERSISTENT, 1024 * 1024, function() {
-    var plugin = document.querySelector("#plugin");
-    plugin.style.display = "block";
+    var plugin = document.querySelector(&quot;#plugin&quot;);
+    plugin.style.display = &quot;block&quot;;
 
-    plugin.addEventListener("message", function(msg) {
+    plugin.addEventListener(&quot;message&quot;, function(msg) {
       console.log(msg.data);
     });
 
-    document.querySelector("#btn1").addEventListener("click", function() {
-      plugin.postMessage("load");
+    document.querySelector(&quot;#btn1&quot;).addEventListener(&quot;click&quot;, function() {
+      plugin.postMessage(&quot;load&quot;);
     });
 
-    document.querySelector("#btn2").addEventListener("click", function() {
-      plugin.postMessage("save");
+    document.querySelector(&quot;#btn2&quot;).addEventListener(&quot;click&quot;, function() {
+      plugin.postMessage(&quot;save&quot;);
     });
   });
 })();
@@ -449,53 +436,67 @@ namespace pp {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -503,17 +504,21 @@ namespace pp {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -521,32 +526,41 @@ namespace pp {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -554,14 +568,17 @@ namespace pp {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -569,11 +586,13 @@ namespace pp {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -581,20 +600,25 @@ namespace pp {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -602,47 +626,43 @@ namespace pp {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -650,20 +670,41 @@ namespace pp {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -673,17 +714,21 @@ namespace pp {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

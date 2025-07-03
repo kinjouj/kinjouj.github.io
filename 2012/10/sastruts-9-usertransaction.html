@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="SAStrutsっていうかS2JDBCな件だとは思うのですが、それはおいといて。トランザクションを自動化せずに手動によるトランザクションを利用したい場合のメモUserService.javap" />
+    <meta name="description" content="SAStrutsっていうかS2JDBCな件だとは思うのですが、それはおいといて。トランザクションを自動化せずに手動によるトランザクションを利用したい場合のメモUserService.javapacka" />
     <title>SAStrutsを勉強してみる (9) - UserTransaction - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/10/rails3-rspec-testing-5-spork-headless.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/10/android-accessibilityservice.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,20 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#userservice-java">UserService.java</a>
-</li>
-<li>
-<a href="#userservicetestcase-java">UserServiceTestCase.java</a>
-</li>
-</ul>
--->
-                <p>SAStrutsっていうかS2JDBCな件だとは思うのですが、それはおいといて。トランザクションを自動化せずに手動によるトランザクションを利用したい場合のメモ</p>
-<!--more-->
-
-<h4 id="userservice-java">UserService.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.service;
+                <!--[[1, "UserService.java"], [2, "UserServiceTestCase.java"]]-->
+                <p>SAStrutsっていうかS2JDBCな件だとは思うのですが、それはおいといて。トランザクションを自動化せずに手動によるトランザクションを利用したい場合のメモ</p><h4>UserService.java</h4><pre class="line-numbers"><code class="language-java">package sample.service;
 
 import javax.annotation.Resource;
 import javax.ejb.TransactionAttribute;
@@ -132,16 +119,16 @@ public class UserService extends S2AbstractService&lt;User&gt; {
 
     public User getUser(String username, String password) {
         if (username == null) {
-            throw new IllegalArgumentException("required username");
+            throw new IllegalArgumentException(&quot;required username&quot;);
         }
 
         if (password == null) {
-            throw new IllegalArgumentException("required password");
+            throw new IllegalArgumentException(&quot;required password&quot;);
         }
 
         SimpleWhere where = new SimpleWhere();
-        where.eq("username", username);
-        where.eq("password", SampleUtil.toSHA1(password.getBytes()));
+        where.eq(&quot;username&quot;, username);
+        where.eq(&quot;password&quot;, SampleUtil.toSHA1(password.getBytes()));
 
         return select().where(where).getSingleResult();
     }
@@ -149,7 +136,7 @@ public class UserService extends S2AbstractService&lt;User&gt; {
     @TransactionAttribute(TransactionAttributeType.NEVER)
     public void createUser(User user) {
         if (user == null) {
-            throw new IllegalArgumentException("required user");
+            throw new IllegalArgumentException(&quot;required user&quot;);
         }
 
         try {
@@ -179,9 +166,7 @@ public class UserService extends S2AbstractService&lt;User&gt; {
         }
     }
 }
-</code></pre><p>手動トランザクションしたいメソッドに@TransactionAttributeでNEVERにする(もしくはNOT_SUPPORTED?)。でメソッドで例外キャッチしたらUserTransaction.setRollbackOnlyを行う事でUserTransaction.getStatusがSTATUS_MARKED_ROLLBACK(値は1)になる。あとはfinally区において、現状のトランザクションステータスによりコミットするかロールバックするかとか</p><p>っていう感じで自動トランザクションしちゃいけないケースの場合のUserTransactionの使い方はこんな感じかなと</p><p>でこれテストする場合どうなるのって所</p>
-<h4 id="userservicetestcase-java">UserServiceTestCase.java</h4>
-<pre class="line-numbers"><code class="language-java">import org.junit.Test;
+</code></pre><p>手動トランザクションしたいメソッドに@TransactionAttributeでNEVERにする(もしくはNOT_SUPPORTED?)。でメソッドで例外キャッチしたらUserTransaction.setRollbackOnlyを行う事でUserTransaction.getStatusがSTATUS_MARKED_ROLLBACK(値は1)になる。あとはfinally区において、現状のトランザクションステータスによりコミットするかロールバックするかとか</p><p>っていう感じで自動トランザクションしちゃいけないケースの場合のUserTransactionの使い方はこんな感じかなと</p><p>でこれテストする場合どうなるのって所</p><h4>UserServiceTestCase.java</h4><pre class="line-numbers"><code class="language-java">import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.seasar.framework.unit.Seasar2;
 import org.seasar.framework.unit.annotation.TxBehavior;
@@ -199,8 +184,8 @@ public class UserServiceTestCase {
     @TxBehavior(TxBehaviorType.NONE)
     public void createUserTest1() {
         User user = new User();
-        user.userName = "test1";
-        user.password = "test1";
+        user.userName = &quot;test1&quot;;
+        user.password = &quot;test1&quot;;
 
         service.createUser(user);
     }
@@ -261,53 +246,67 @@ public class UserServiceTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -315,17 +314,21 @@ public class UserServiceTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -333,32 +336,41 @@ public class UserServiceTestCase {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -366,14 +378,17 @@ public class UserServiceTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -381,11 +396,13 @@ public class UserServiceTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -393,20 +410,25 @@ public class UserServiceTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -414,47 +436,43 @@ public class UserServiceTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -462,20 +480,41 @@ public class UserServiceTestCase {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -485,17 +524,21 @@ public class UserServiceTestCase {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2012-08-02 09:00:00 +0900">
+                <time datetime="2012-08-02T09:00:00+09:00">
                   <a href="/archives/2012/08">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -97,56 +96,24 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-6542c68a322">概要</a>
-</li>
-<li>
-<a href="#twitter-js">twitter.js</a>
-</li>
-<li>
-<a href="#manifest-json">manifest.json</a>
-</li>
-<li>
-<a href="#background-js">background.js</a>
-</li>
-<li>
-<a href="#popup-html">popup.html</a>
-</li>
-<li>
-<a href="#popup-js">popup.js</a>
-</li>
-<li>
-<a href="#content_script-js">content_script.js</a>
-</li>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを<a href="http://dev.twitter.com" target="_blank" rel="noopener noreferrer">http://dev.twitter.com</a>から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる</p>
-<!--more-->
+                <!--[[1, "概要"], [2, "twitter.js"], [3, "manifest.json"], [4, "background.js"], [5, "popup.html"], [6, "popup.js"], [7, "content_script.js"], [8, "追記"]]-->
+                <p>oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを<a href="http://dev.twitter.com" target="_blank" rel="noopener noreferrer">http://dev.twitter.com</a>から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる</p><h4>概要</h4><p>ブラウザアクションをクリックした際に出るポップアップにホームタイムラインを表示する。その際に認証されてなかったらOAuthで認証を要求させてAccess Tokenを取得する。あくまでAccess Token自体をソース内にコピペはしない。sha1.js、oauth.js、jquery.jsは別途でダウンロードしてくる</p><p>で今回はChrome ExtensionなのでTwitter OAuthのCallback URLは空にしてPINを画面上に出るようにする。その際にそのPINをコピペしなくてもそこはコンテントスクリプトを使って自動で処理出来るようにする</p><h4>twitter.js</h4><p>oauth.jsを使ってTwitter APIを云々するJavaScriptを作る</p><pre class="line-numbers"><code class="language-js">const CONSUMER_KEY = &quot;省略&quot;;
+const CONSUMER_SECRET = &quot;省略&quot;;
 
-<h4 id="part-6542c68a322">概要</h4>
-<p>ブラウザアクションをクリックした際に出るポップアップにホームタイムラインを表示する。その際に認証されてなかったらOAuthで認証を要求させてAccess Tokenを取得する。あくまでAccess Token自体をソース内にコピペはしない。sha1.js、oauth.js、jquery.jsは別途でダウンロードしてくる</p><p>で今回はChrome ExtensionなのでTwitter OAuthのCallback URLは空にしてPINを画面上に出るようにする。その際にそのPINをコピペしなくてもそこはコンテントスクリプトを使って自動で処理出来るようにする</p>
-<h4 id="twitter-js">twitter.js</h4>
-<p>oauth.jsを使ってTwitter APIを云々するJavaScriptを作る</p><pre class="line-numbers"><code class="language-js">const CONSUMER_KEY = "省略";
-const CONSUMER_SECRET = "省略";
-
-const OAUTH_SIGNATURE_METHOD = "HMAC-SHA1";
+const OAUTH_SIGNATURE_METHOD = &quot;HMAC-SHA1&quot;;
 
 var Twitter = function() {
-  this.access_token = localStorage.getItem("access_token");
-  this.access_token_secret = localStorage.getItem("access_token_secret");
-  this.user_id = localStorage.getItem("user_id");
+  this.access_token = localStorage.getItem(&quot;access_token&quot;);
+  this.access_token_secret = localStorage.getItem(&quot;access_token_secret&quot;);
+  this.user_id = localStorage.getItem(&quot;user_id&quot;);
 };
 
 Twitter.prototype.parseToken = function(data) {
-  var tokens = data.split("&");
+  var tokens = data.split(&quot;&amp;&quot;);
   var parsedToken = {};
 
   tokens.forEach(function(token) {
-    var kv = token.split("=");
+    var kv = token.split(&quot;=&quot;);
 
     parsedToken[kv[0]] = kv[1];
   });
@@ -158,16 +125,16 @@ Twitter.prototype.login = function() {
   // リクエストートークンを取得する
 
   var message = {
-    "method": "GET",
-    "action": "https://api.twitter.com/oauth/request_token",
-    "parameters": {
-      "oauth_consumer_key": CONSUMER_KEY,
-      "oauth_signature_method": OAUTH_SIGNATURE_METHOD
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;action&quot;: &quot;https://api.twitter.com/oauth/request_token&quot;,
+    &quot;parameters&quot;: {
+      &quot;oauth_consumer_key&quot;: CONSUMER_KEY,
+      &quot;oauth_signature_method&quot;: OAUTH_SIGNATURE_METHOD
     }
   };
 
   var accessor = {
-    "consumerSecret": CONSUMER_SECRET
+    &quot;consumerSecret&quot;: CONSUMER_SECRET
   };
 
   OAuth.setTimestampAndNonce(message);
@@ -177,15 +144,15 @@ Twitter.prototype.login = function() {
     OAuth.addToURL(message.action, message.parameters),
     $.proxy(function(data) {
       var params = this.parseToken(data);
-      var token = params["oauth_token"];
-      var secret = params["oauth_token_secret"];
+      var token = params[&quot;oauth_token&quot;];
+      var secret = params[&quot;oauth_token_secret&quot;];
 
       // リクエストトークンを取得した後に認可を促すURLを開く
 
-      message.action = "https://api.twitter.com/oauth/authorize";
-      message.parameters["oauth_token"] = token;
+      message.action = &quot;https://api.twitter.com/oauth/authorize&quot;;
+      message.parameters[&quot;oauth_token&quot;] = token;
 
-      accessor["oauth_token_secret"] = secret;
+      accessor[&quot;oauth_token_secret&quot;] = secret;
 
       OAuth.setTimestampAndNonce(message);
       OAuth.SignatureMethod.sign(message, accessor);
@@ -202,19 +169,19 @@ Twitter.prototype.sign = function(pin) {
   // アクセストークンを取得する
 
   var message = {
-    "method": "GET",
-    "action": "https://api.twitter.com/oauth/access_token",
-    "parameters": {
-      "oauth_consumer_key": CONSUMER_KEY,
-      "oauth_signature_method": OAUTH_SIGNATURE_METHOD,
-      "oauth_token": this.request_token,
-      "oauth_verifier": pin
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;action&quot;: &quot;https://api.twitter.com/oauth/access_token&quot;,
+    &quot;parameters&quot;: {
+      &quot;oauth_consumer_key&quot;: CONSUMER_KEY,
+      &quot;oauth_signature_method&quot;: OAUTH_SIGNATURE_METHOD,
+      &quot;oauth_token&quot;: this.request_token,
+      &quot;oauth_verifier&quot;: pin
     }
   };
 
   var accessor = {
-    "consumerSecret": CONSUMER_SECRET,
-    "tokenSecret": this.request_token_secret
+    &quot;consumerSecret&quot;: CONSUMER_SECRET,
+    &quot;tokenSecret&quot;: this.request_token_secret
   };
 
   OAuth.setTimestampAndNonce(message);
@@ -227,9 +194,9 @@ Twitter.prototype.sign = function(pin) {
 
       // 取得したアクセストークン等を保管する
 
-      this.access_token = params["oauth_token"];
-      this.access_token_secret = params["oauth_token_secret"];
-      this.user_id = params["user_id"];
+      this.access_token = params[&quot;oauth_token&quot;];
+      this.access_token_secret = params[&quot;oauth_token_secret&quot;];
+      this.user_id = params[&quot;user_id&quot;];
       this.save();
     }, this)
   );
@@ -238,13 +205,13 @@ Twitter.prototype.sign = function(pin) {
 Twitter.prototype.save = function() {
   // 内部に保管されたトークン等をローカルストレージに保管しておく
 
-  localStorage.setItem("access_token", this.access_token);
-  localStorage.setItem("access_token_secret", this.access_token_secret);
-  localStorage.setItem("user_id", this.user_id);
+  localStorage.setItem(&quot;access_token&quot;, this.access_token);
+  localStorage.setItem(&quot;access_token_secret&quot;, this.access_token_secret);
+  localStorage.setItem(&quot;user_id&quot;, this.user_id);
 };
 
 Twitter.prototype.isAuthenticated = function() {
-  if (this.access_token !== null && this.access_token_secret !== null) {
+  if (this.access_token !== null &amp;&amp; this.access_token_secret !== null) {
     if (/^d+$/.test(this.user_id)) {
       return true;
     }
@@ -257,18 +224,18 @@ Twitter.prototype.fetchTimelines = function(cb) {
   // Home Timelineを取得するAPIからレスポンスを取得する
 
   var message = {
-    "method": "GET",
-    "action": "https://api.twitter.com/1/statuses/home_timeline.json",
-    "parameters": {
-      "oauth_consumer_key": CONSUMER_KEY,
-      "oauth_signature_method": OAUTH_SIGNATURE_METHOD,
-      "oauth_token": this.access_token
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;action&quot;: &quot;https://api.twitter.com/1/statuses/home_timeline.json&quot;,
+    &quot;parameters&quot;: {
+      &quot;oauth_consumer_key&quot;: CONSUMER_KEY,
+      &quot;oauth_signature_method&quot;: OAUTH_SIGNATURE_METHOD,
+      &quot;oauth_token&quot;: this.access_token
     }
   };
 
   var accessor = {
-    "consumerSecret": CONSUMER_SECRET,
-    "tokenSecret": this.access_token_secret
+    &quot;consumerSecret&quot;: CONSUMER_SECRET,
+    &quot;tokenSecret&quot;: this.access_token_secret
   };
 
   OAuth.setTimestampAndNonce(message);
@@ -278,31 +245,27 @@ Twitter.prototype.fetchTimelines = function(cb) {
     cb(data);
   });
 };
-</code></pre><p>チェック系をまったくしてないですけど、ざっくり書くとこんな感じで。まぁ認証してアクセストークンを取得して、そこからホームタイムラインを取得するAPIにリクエストを投げるという処理</p><p>んじゃこれからChrome Extensionの開発をする</p>
-<h4 id="manifest-json">manifest.json</h4>
-<pre class="line-numbers"><code class="language-json">{
-  "name": "test",
-  "version": "0.1",
-  "content_scripts": [
+</code></pre><p>チェック系をまったくしてないですけど、ざっくり書くとこんな感じで。まぁ認証してアクセストークンを取得して、そこからホームタイムラインを取得するAPIにリクエストを投げるという処理</p><p>んじゃこれからChrome Extensionの開発をする</p><h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;test&quot;,
+  &quot;version&quot;: &quot;0.1&quot;,
+  &quot;content_scripts&quot;: [
     {
-      "matches": ["https://api.twitter.com/oauth/authorize"],
-      "js": ["content_script.js"],
-      "run_at": "document_end"
+      &quot;matches&quot;: [&quot;https://api.twitter.com/oauth/authorize&quot;],
+      &quot;js&quot;: [&quot;content_script.js&quot;],
+      &quot;run_at&quot;: &quot;document_end&quot;
     }
   ],
-  "browser_action": {
-    "default_title": "test",
-    "default_icon": "icon.png",
-    "default_popup": "popup.html"
+  &quot;browser_action&quot;: {
+    &quot;default_title&quot;: &quot;test&quot;,
+    &quot;default_icon&quot;: &quot;icon.png&quot;,
+    &quot;default_popup&quot;: &quot;popup.html&quot;
   },
-  "background": {
-    "scripts":  ["jquery.js", "sha1.js", "oauth.js", "twitter.js", "background.js"]
+  &quot;background&quot;: {
+    &quot;scripts&quot;:  [&quot;jquery.js&quot;, &quot;sha1.js&quot;, &quot;oauth.js&quot;, &quot;twitter.js&quot;, &quot;background.js&quot;]
   },
-  "permissions": ["https://api.twitter.com/"]
+  &quot;permissions&quot;: [&quot;https://api.twitter.com/&quot;]
 }
-</code></pre><p>今回はContent Scriptを使ってPINコードを自動でコピペして処理するが、その処理自体は主にBackground Pageに促すようにする。でBrowser Action側も主な処理は同様にBackground Pageを介して行う(getBackgroundPageを使うだけ)</p>
-<h4 id="background-js">background.js</h4>
-<pre class="line-numbers"><code class="language-js">var api = new Twitter();
+</code></pre><p>今回はContent Scriptを使ってPINコードを自動でコピペして処理するが、その処理自体は主にBackground Pageに促すようにする。でBrowser Action側も主な処理は同様にBackground Pageを介して行う(getBackgroundPageを使うだけ)</p><h4>background.js</h4><pre class="line-numbers"><code class="language-js">var api = new Twitter();
 
 chrome.extension.onRequest.addListener(function(req, sender) {
   // Content Scriptから来たPINコードを処理する
@@ -312,26 +275,22 @@ chrome.extension.onRequest.addListener(function(req, sender) {
 function getTwitterAPI() {
   return api;
 }
-</code></pre>
-<h4 id="popup-html">popup.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><h4>popup.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
-    &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
-    &lt;link rel="stylesheet" type="text/css" href="popup.css" /&gt;
-    &lt;script type="text/javascript" src="jquery.js"&gt;&lt;/script&gt;
+    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;popup.css&quot; /&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;jquery.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;div id="content"&gt;
-      &lt;div id="twitter-login"&gt;
-        &lt;a href="javascript:void(0)" onclick="login()"&gt;Twitterにログイン&lt;/a&gt;
+    &lt;div id=&quot;content&quot;&gt;
+      &lt;div id=&quot;twitter-login&quot;&gt;
+        &lt;a href=&quot;javascript:void(0)&quot; onclick=&quot;login()&quot;&gt;Twitterにログイン&lt;/a&gt;
       &lt;/div&gt;
     &lt;/div&gt;
-    &lt;script type="text/javascript" src="popup.js"&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;popup.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<h4 id="popup-js">popup.js</h4>
-<pre class="line-numbers"><code class="language-js">// Background Pageを取得する
+</code></pre><h4>popup.js</h4><pre class="line-numbers"><code class="language-js">// Background Pageを取得する
 var bgPage = chrome.extension.getBackgroundPage();
 
 // Background Pageで初期化されているTwitter APIなクラスを取得する
@@ -344,38 +303,34 @@ function login() {
 (function(undefined) {
   if (twitter.isAuthenticated()) {
     // 認証済みならログインなボタンなエレメントを消す
-    $("#twitter-login").remove();
+    $(&quot;#twitter-login&quot;).remove();
 
-    var contentRoot = $("#content");
+    var contentRoot = $(&quot;#content&quot;);
 
     twitter.fetchTimelines(function(tweets) {
       tweets.forEach(function(tweet) {
         contentRoot.append(
-          $("&lt;div&gt;").attr("class", "tweet").append(
-            $("&lt;span&gt;").append(
-              $("&lt;a&gt;").attr(
-                "href",
-                "http://twitter.com/" + tweet.user.screen_name
-              ).text("@" + tweet.user.name)
+          $(&quot;&lt;div&gt;&quot;).attr(&quot;class&quot;, &quot;tweet&quot;).append(
+            $(&quot;&lt;span&gt;&quot;).append(
+              $(&quot;&lt;a&gt;&quot;).attr(
+                &quot;href&quot;,
+                &quot;http://twitter.com/&quot; + tweet.user.screen_name
+              ).text(&quot;@&quot; + tweet.user.name)
             ),
-            $("&lt;div&gt;").text(tweet.text)
+            $(&quot;&lt;div&gt;&quot;).text(tweet.text)
           )
         );
       });
     });
   }
 })();
-</code></pre>
-<h4 id="content_script-js">content_script.js</h4>
-<pre class="line-numbers"><code class="language-js">var pin = document.querySelector("div#oauth_pin &gt; p &gt; kbd &gt; code");
+</code></pre><h4>content_script.js</h4><pre class="line-numbers"><code class="language-js">var pin = document.querySelector(&quot;div#oauth_pin &gt; p &gt; kbd &gt; code&quot;);
 
-if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
+if ((pin !== undefined &amp;&amp; pin !== null) &amp;&amp; /^d{7}$/.test(pin.innerText)) {
   // Background PageでonRequestさせて処理させる
-  chrome.extension.sendRequest({ "verifier": pin.innerText });
+  chrome.extension.sendRequest({ &quot;verifier&quot;: pin.innerText });
 }
-</code></pre><p>という感じ。動かすと認証してない時にブラウザアクションをクリックすると</p><p><img src="/images/2012/08/20120802181056.png" alt="image" /></p><p>てな感じで認証後に行うと</p><p><img src="/images/2012/08/20120802181114.png" alt="image" /></p><p>というようにホームタイムラインが表示される。んまぁそんな感じでTwitter APIをアクセストークンを取得して行う場合は大体こんな感じかなと</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p><a href="https://github.com/kinjouj/chrome-extension-twitter-oauth-demo" target="_blank" rel="noopener noreferrer">https://github.com/kinjouj/chrome-extension-twitter-oauth-demo</a> の方にてチェックアウト出来るようにしました(但し、oauth.js・sha1.js・jquery.js等は未混入)</p><p>又、主に記事は修正せずにgithub側の方へ修正を行いますのであしからず</p>
+</code></pre><p>という感じ。動かすと認証してない時にブラウザアクションをクリックすると</p><p><img src="/images/2012/08/20120802181056.png" alt="image" /></p><p>てな感じで認証後に行うと</p><p><img src="/images/2012/08/20120802181114.png" alt="image" /></p><p>というようにホームタイムラインが表示される。んまぁそんな感じでTwitter APIをアクセストークンを取得して行う場合は大体こんな感じかなと</p><h4>追記</h4><p><a href="https://github.com/kinjouj/chrome-extension-twitter-oauth-demo" target="_blank" rel="noopener noreferrer">https://github.com/kinjouj/chrome-extension-twitter-oauth-demo</a> の方にてチェックアウト出来るようにしました(但し、oauth.js・sha1.js・jquery.js等は未混入)</p><p>又、主に記事は修正せずにgithub側の方へ修正を行いますのであしからず</p>
               </div>
             </div>
           </div>
@@ -425,53 +380,67 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -479,17 +448,21 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -497,32 +470,41 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -530,14 +512,17 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -545,11 +530,13 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -557,20 +544,25 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -578,47 +570,43 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -626,20 +614,41 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -649,17 +658,21 @@ if ((pin !== undefined && pin !== null) && /^d{7}$/.test(pin.innerText)) {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

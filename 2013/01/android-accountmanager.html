@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,131 +96,82 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-2e61a25dc5d6a055">認証方式</a>
-</li>
-<li>
-<a href="#androidmanifest-xml">AndroidManifest.xml</a>
-</li>
-<li>
-<a href="#res-values-strings-xml">res/values/strings.xml</a>
-</li>
-<li>
-<a href="#res-xml-authenticator-xml">res/xml/authenticator.xml</a>
-</li>
-<li>
-<a href="#res-xml-prefs-xml">res/xml/prefs.xml</a>
-</li>
-<li>
-<a href="#authenticatorpreferenceactivity-java">AuthenticatorPreferenceActivity.java</a>
-</li>
-<li>
-<a href="#res-xml-pref-xml">res/xml/pref.xml</a>
-</li>
-<li>
-<a href="#mainactivity-java">MainActivity.java</a>
-</li>
-<li>
-<a href="#authenticatorservice-java">AuthenticatorService.java</a>
-</li>
-<li>
-<a href="#sampleaccountauthenticator-java">SampleAccountAuthenticator.java</a>
-</li>
-<li>
-<a href="#authenticatoractivity-java">AuthenticatorActivity.java</a>
-</li>
-</ul>
--->
-                <p>んまぁAndroid端末使ってる人とかだと見た事あるし、触った事もある人もいるだろう</p><p><img src="/images/2013/01/20130119095120.png" alt="image" /></p><p>まぁWebサービスとかのアカウントを端末内に保管して、認証要求だとかをAccountManagerな機能を通じて行えたり出来るAPIが存在する訳ですが、これの独自のを作る方法。まぁ結構書く量が多いので</p>
-<!--more-->
-
-<h4 id="part-2e61a25dc5d6a055">認証方式</h4>
-<p>OAuthとか使って権限管理の元で色々出来たりするのが一番良いんですが、今回は適当にトークン取得リクエストしたらトークン返して、でAPIを実行する際にトークンをヘッダーにぶち込んでリクエストしたら結果が返ってくる的な感じ</p><p>まぁ良くあるかどうかは定かじゃないけど、RailsとかだとDeviseとかそういうのがあったりもする訳で。これもとりあえずおいといて</p><p>という事で本題な所のAndroidの方を実装する。もっかいいうけどクソ長いんでww</p>
-<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+                <!--[[1, "認証方式"], [2, "AndroidManifest.xml"], [3, "res/values/strings.xml"], [4, "res/xml/authenticator.xml"], [5, "res/xml/prefs.xml"], [6, "AuthenticatorPreferenceActivity.java"], [7, "res/xml/pref.xml"], [8, "MainActivity.java"], [9, "AuthenticatorService.java"], [10, "SampleAccountAuthenticator.java"], [11, "AuthenticatorActivity.java"]]-->
+                <p>んまぁAndroid端末使ってる人とかだと見た事あるし、触った事もある人もいるだろう</p><p><img src="/images/2013/01/20130119095120.png" alt="image" /></p><p>まぁWebサービスとかのアカウントを端末内に保管して、認証要求だとかをAccountManagerな機能を通じて行えたり出来るAPIが存在する訳ですが、これの独自のを作る方法。まぁ結構書く量が多いので</p><h4>認証方式</h4><p>OAuthとか使って権限管理の元で色々出来たりするのが一番良いんですが、今回は適当にトークン取得リクエストしたらトークン返して、でAPIを実行する際にトークンをヘッダーにぶち込んでリクエストしたら結果が返ってくる的な感じ</p><p>まぁ良くあるかどうかは定かじゃないけど、RailsとかだとDeviseとかそういうのがあったりもする訳で。これもとりあえずおいといて</p><p>という事で本題な所のAndroidの方を実装する。もっかいいうけどクソ長いんでww</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.kinjouj.test"
-    android:versionCode="1"
-    android:versionName="1.0"&gt;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;net.kinjouj.test&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot;&gt;
 
-    &lt;uses-sdk android:minSdkVersion="5" android:maxSdkVersion="17" android:targetSdkVersion="17" /&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;5&quot; android:maxSdkVersion=&quot;17&quot; android:targetSdkVersion=&quot;17&quot; /&gt;
 
-    &lt;uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" /&gt;
-    &lt;uses-permission android:name="android.permission.GET_ACCOUNTS" /&gt;
-    &lt;uses-permission android:name="android.permission.USE_CREDENTIALS" /&gt;
-    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.AUTHENTICATE_ACCOUNTS&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.GET_ACCOUNTS&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.USE_CREDENTIALS&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
 
-    &lt;application android:label="@string/app_name" android:icon="@drawable/icon"&gt;
+    &lt;application android:label=&quot;@string/app_name&quot; android:icon=&quot;@drawable/icon&quot;&gt;
         &lt;!-- AccountManagerを使って認証してAPIを使ってデータを表示するだけのActivity --&gt;
-        &lt;activity android:name=".MainActivity"&gt;
+        &lt;activity android:name=&quot;.MainActivity&quot;&gt;
             &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.MAIN" /&gt;
-                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
             &lt;/intent-filter&gt;
         &lt;/activity&gt;
 
         &lt;!-- 認証要求の際のAcitvity --&gt;
-        &lt;activity android:name=".AuthenticatorActivity" android:exported="false"&gt;
+        &lt;activity android:name=&quot;.AuthenticatorActivity&quot; android:exported=&quot;false&quot;&gt;
             &lt;intent-filter&gt;
-                &lt;action android:name="net.kinjouj.test.account.LOGIN" /&gt;
-                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+                &lt;action android:name=&quot;net.kinjouj.test.account.LOGIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
             &lt;/intent-filter&gt;
         &lt;/activity&gt;
 
         &lt;!-- アカウントのオプション設定のActivity(Preferences) --&gt;
-        &lt;activity android:name=".AuthenticatorPreferenceActivity" /&gt;
+        &lt;activity android:name=&quot;.AuthenticatorPreferenceActivity&quot; /&gt;
 
         &lt;!-- AccountAuthenticatorなサービス --&gt;
-        &lt;service android:name=".AuthenticatorService" android:exported="true" android:process=":auth"&gt;
+        &lt;service android:name=&quot;.AuthenticatorService&quot; android:exported=&quot;true&quot; android:process=&quot;:auth&quot;&gt;
             &lt;intent-filter&gt;
-                &lt;action android:name="android.accounts.AccountAuthenticator" /&gt;
+                &lt;action android:name=&quot;android.accounts.AccountAuthenticator&quot; /&gt;
             &lt;/intent-filter&gt;
-            &lt;meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator" /&gt;
+            &lt;meta-data android:name=&quot;android.accounts.AccountAuthenticator&quot; android:resource=&quot;@xml/authenticator&quot; /&gt;
         &lt;/service&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><p>な感じ。で必要な設定リソースから作る</p>
-<h4 id="res-values-strings-xml">res/values/strings.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+</code></pre><p>な感じ。で必要な設定リソースから作る</p><h4>res/values/strings.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;resources&gt;
-    &lt;string name="app_name"&gt;Sample&lt;/string&gt;
+    &lt;string name=&quot;app_name&quot;&gt;Sample&lt;/string&gt;
 
-    &lt;string name="account_missing_dialog_title"&gt;認証アカウントがありません&lt;/string&gt;
-    &lt;string name="account_missing_dialog_summary"&gt;認証アカウントの設定がされていません。アカウント設定画面を開きます&lt;/string&gt;
+    &lt;string name=&quot;account_missing_dialog_title&quot;&gt;認証アカウントがありません&lt;/string&gt;
+    &lt;string name=&quot;account_missing_dialog_summary&quot;&gt;認証アカウントの設定がされていません。アカウント設定画面を開きます&lt;/string&gt;
 
-    &lt;string name="account_type"&gt;net.kinjouj.test.account&lt;/string&gt;
-    &lt;string name="account_label"&gt;サンプルアプリ認証アカウント&lt;/string&gt;
+    &lt;string name=&quot;account_type&quot;&gt;net.kinjouj.test.account&lt;/string&gt;
+    &lt;string name=&quot;account_label&quot;&gt;サンプルアプリ認証アカウント&lt;/string&gt;
 
-    &lt;string name="preference_category_extra_title"&gt;その他&lt;/string&gt;
-    &lt;string name="preference_category_extra_nickname_title"&gt;ニックネーム&lt;/string&gt;
-    &lt;string name="preference_category_extra_nickname_summary"&gt;ニックネームを設定&lt;/string&gt;
+    &lt;string name=&quot;preference_category_extra_title&quot;&gt;その他&lt;/string&gt;
+    &lt;string name=&quot;preference_category_extra_nickname_title&quot;&gt;ニックネーム&lt;/string&gt;
+    &lt;string name=&quot;preference_category_extra_nickname_summary&quot;&gt;ニックネームを設定&lt;/string&gt;
 &lt;/resources&gt;
-</code></pre><p>でAccountAuthenticatorを使う際に必要となる設定リソース(AndroidManifest.xmlだとres/xml/authenticator.xml)を作る</p>
-<h4 id="res-xml-authenticator-xml">res/xml/authenticator.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+</code></pre><p>でAccountAuthenticatorを使う際に必要となる設定リソース(AndroidManifest.xmlだとres/xml/authenticator.xml)を作る</p><h4>res/xml/authenticator.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;account-authenticator
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accountType="@string/account_type"
-    android:icon="@drawable/icon"
-    android:smallIcon="@drawable/icon"
-    android:label="@string/account_label"
-    android:accountPreferences="@xml/prefs" /&gt;
-</code></pre><p>でアカウント設定でオプションで設定出来るPreferenceな設定ファイルも必要</p>
-<h4 id="res-xml-prefs-xml">res/xml/prefs.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
-&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"&gt;
-    &lt;PreferenceCategory android:title="設定" /&gt;
-    &lt;PreferenceScreen android:key="account_settings" android:title="Account Settings"&gt;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:accountType=&quot;@string/account_type&quot;
+    android:icon=&quot;@drawable/icon&quot;
+    android:smallIcon=&quot;@drawable/icon&quot;
+    android:label=&quot;@string/account_label&quot;
+    android:accountPreferences=&quot;@xml/prefs&quot; /&gt;
+</code></pre><p>でアカウント設定でオプションで設定出来るPreferenceな設定ファイルも必要</p><h4>res/xml/prefs.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;PreferenceCategory android:title=&quot;設定&quot; /&gt;
+    &lt;PreferenceScreen android:key=&quot;account_settings&quot; android:title=&quot;Account Settings&quot;&gt;
         &lt;intent
-            android:targetPackage="net.kinjouj.test"
-            android:targetClass="net.kinjouj.test.AuthenticatorPreferenceActivity" /&gt;
+            android:targetPackage=&quot;net.kinjouj.test&quot;
+            android:targetClass=&quot;net.kinjouj.test.AuthenticatorPreferenceActivity&quot; /&gt;
     &lt;/PreferenceScreen&gt;
 &lt;/PreferenceScreen&gt;
-</code></pre><p>な感じ。設定画面はAuthenticatorPreferenceActivityにintentする方向で</p><p>んでPreferenceな所からちょっと作っておく</p>
-<h4 id="authenticatorpreferenceactivity-java">AuthenticatorPreferenceActivity.java</h4>
-<pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre><p>な感じ。設定画面はAuthenticatorPreferenceActivityにintentする方向で</p><p>んでPreferenceな所からちょっと作っておく</p><h4>AuthenticatorPreferenceActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.preference.PreferenceActivity;
 import android.preference.Preference;
@@ -234,7 +184,7 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
         super.onCreate(bundle);
         addPreferencesFromResource(R.xml.pref);
 
-        findPreference("user_nickname").setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+        findPreference(&quot;user_nickname&quot;).setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 // newValueで新しい設定値を取得出来る
 
@@ -243,21 +193,17 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
         });
     }
 }
-</code></pre><p>でPreferenceで参照するリソースが必要</p>
-<h4 id="res-xml-pref-xml">res/xml/pref.xml</h4>
-<p>prefs.xmlでは無いので注意</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
-&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"&gt;
-    &lt;PreferenceCategory android:title="@string/preference_category_extra_title"&gt;
+</code></pre><p>でPreferenceで参照するリソースが必要</p><h4>res/xml/pref.xml</h4><p>prefs.xmlでは無いので注意</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;PreferenceCategory android:title=&quot;@string/preference_category_extra_title&quot;&gt;
         &lt;EditTextPreference
-            android:key="user_nickname"
-            android:title="@string/preference_category_extra_nickname_title"
-            android:dialogTitle="@string/preference_category_extra_nickname_title"
-            android:summary="@string/preference_category_extra_nickname_summary" /&gt;
+            android:key=&quot;user_nickname&quot;
+            android:title=&quot;@string/preference_category_extra_nickname_title&quot;
+            android:dialogTitle=&quot;@string/preference_category_extra_nickname_title&quot;
+            android:summary=&quot;@string/preference_category_extra_nickname_summary&quot; /&gt;
     &lt;/PreferenceCategory&gt;
 &lt;/PreferenceScreen&gt;
-</code></pre><p>まぁニックネームを設定出来るようにするだけ</p><p>あとはアプリのActivity(MainActivity)とか認証要求を行うActivity(AuthenticatorActivity)とService(AuthenticatorService)とかをもろもろ作る</p>
-<h4 id="mainactivity-java">MainActivity.java</h4>
-<pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre><p>まぁニックネームを設定出来るようにするだけ</p><p>あとはアプリのActivity(MainActivity)とか認証要求を行うActivity(AuthenticatorActivity)とService(AuthenticatorService)とかをもろもろ作る</p><h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -283,7 +229,7 @@ import android.widget.ListView;
 
 public class MainActivity extends Activity {
 
-    public static final String TAG = "AndroidAuthenticator";
+    public static final String TAG = &quot;AndroidAuthenticator&quot;;
 
     private ArrayAdapter&lt;String&gt; adapter;
 
@@ -336,8 +282,8 @@ public class MainActivity extends Activity {
                             try {
                                 // 取得したトークンでAPIにヘッダーをつけてリクエスト
                                 DefaultHttpClient httpClient = new DefaultHttpClient();
-                                HttpGet request = new HttpGet("http://192.168.1.1:5000/api/data");
-                                request.setHeader("X-Android-Security-Token", token);
+                                HttpGet request = new HttpGet(&quot;http://192.168.1.1:5000/api/data&quot;);
+                                request.setHeader(&quot;X-Android-Security-Token&quot;, token);
 
                                 HttpResponse res = httpClient.execute(request);
 
@@ -353,7 +299,7 @@ public class MainActivity extends Activity {
                                             for(int i = 0;i &lt; jsons.length();i++) {
                                                 JSONObject json = jsons.getJSONObject(i);
 
-                                                adapter.add(json.getString("name"));
+                                                adapter.add(json.getString(&quot;name&quot;));
                                             }
                                         } catch(JSONException e) {
                                             e.printStackTrace();
@@ -387,12 +333,12 @@ public class MainActivity extends Activity {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(getString(R.string.account_missing_dialog_title));
             builder.setMessage(getString(R.string.account_missing_dialog_summary));
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(&quot;OK&quot;, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     startActivity(new Intent(Settings.ACTION_ADD_ACCOUNT));
                 }
             });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            builder.setNegativeButton(&quot;Cancel&quot;, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     MainActivity.this.finish();
                 }
@@ -401,9 +347,7 @@ public class MainActivity extends Activity {
         }
     }
 }
-</code></pre><p>アカウントがあれば、そのアカウントでgetAuthTokenしてそのトークンを使ってWeb APIにヘッダーをつけてリクエストしレスポンスをパースしてListViewにバインド</p><p>アカウントがなければAndroidのアカウント設定画面にintentしてアカウントを作るように要求</p><p>でアカウントを追加する際に今回の独自のアカウントを選択した場合にはAuthenticatorServiceが作用するのでそれを作る</p>
-<h4 id="authenticatorservice-java">AuthenticatorService.java</h4>
-<pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre><p>アカウントがあれば、そのアカウントでgetAuthTokenしてそのトークンを使ってWeb APIにヘッダーをつけてリクエストしレスポンスをパースしてListViewにバインド</p><p>アカウントがなければAndroidのアカウント設定画面にintentしてアカウントを作るように要求</p><p>でアカウントを追加する際に今回の独自のアカウントを選択した場合にはAuthenticatorServiceが作用するのでそれを作る</p><h4>AuthenticatorService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.accounts.AccountManager;
 import android.app.Service;
@@ -421,9 +365,7 @@ public class AuthenticatorService extends Service {
         return null;
     }
 }
-</code></pre><p>でonBindでAbstractAccountAuthenticatorを継承したクラスをnewしでgetIBinderを返す</p>
-<h4 id="sampleaccountauthenticator-java">SampleAccountAuthenticator.java</h4>
-<pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre><p>でonBindでAbstractAccountAuthenticatorを継承したクラスをnewしでgetIBinderを返す</p><h4>SampleAccountAuthenticator.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -472,21 +414,21 @@ class SampleAccountAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account, Bundle options) throws NetworkErrorException {
-        Log.v(TAG, "confirmCredentials");
+        Log.v(TAG, &quot;confirmCredentials&quot;);
 
         return null;
     }
 
     @Override
     public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
-        Log.v(TAG, "editProperties");
+        Log.v(TAG, &quot;editProperties&quot;);
 
         return null;
     }
 
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) {
-        Log.v(TAG, "getAuthToken");
+        Log.v(TAG, &quot;getAuthToken&quot;);
 
         if(account == null) {
             return null;
@@ -494,7 +436,7 @@ class SampleAccountAuthenticator extends AbstractAccountAuthenticator {
 
         /* ここでアカウント設定でオプショナルな設定項目(Preference)を取る事も出来る
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        String nickname = prefs.getString("user_nickname", null);
+        String nickname = prefs.getString(&quot;user_nickname&quot;, null);
         */
 
         AccountManager am = AccountManager.get(ctx);
@@ -510,11 +452,11 @@ class SampleAccountAuthenticator extends AbstractAccountAuthenticator {
 
         try {
             List&lt;NameValuePair&gt; pairs = new ArrayList&lt;NameValuePair&gt;(2);
-            pairs.add(new BasicNameValuePair("username", username));
-            pairs.add(new BasicNameValuePair("password", password));
+            pairs.add(new BasicNameValuePair(&quot;username&quot;, username));
+            pairs.add(new BasicNameValuePair(&quot;password&quot;, password));
 
             DefaultHttpClient httpClient = new DefaultHttpClient();
-            HttpPost request = new HttpPost("http://192.168.1.1:5000/user_token");
+            HttpPost request = new HttpPost(&quot;http://192.168.1.1:5000/user_token&quot;);
             request.setEntity(new UrlEncodedFormEntity(pairs));
 
             HttpResponse res = httpClient.execute(request);
@@ -541,28 +483,26 @@ class SampleAccountAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public String getAuthTokenLabel(String authTokenType) {
-        Log.v(TAG,"getAuthTokenLabel");
+        Log.v(TAG,&quot;getAuthTokenLabel&quot;);
 
         return null;
     }
 
     @Override
     public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account, String[] features) throws NetworkErrorException {
-        Log.v(TAG,"hasFeatures");
+        Log.v(TAG,&quot;hasFeatures&quot;);
 
         return null;
     }
 
     @Override
     public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-        Log.v(TAG,"updateCredentials");
+        Log.v(TAG,&quot;updateCredentials&quot;);
 
         return null;
     }
 }
-</code></pre><p>AccountManager.getAuthTokenをするとコールバックでAccountManagerFuture<Bundle>.getResultsでgetAuthTokenから返したBundleを取得できる。</p><p>でアカウント追加から来た時にはaddAccountが呼び出されて、そこからAuthenticatorActivity.ACTION(AuthenticatorActivityを発生させるアクションintent)が投げられて、登録に伴う認証開始が行われるという感じ</p><p>でそのAuthenticatorActivityを作る</p>
-<h4 id="authenticatoractivity-java">AuthenticatorActivity.java</h4>
-<pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre><p>AccountManager.getAuthTokenをするとコールバックでAccountManagerFuture<Bundle>.getResultsでgetAuthTokenから返したBundleを取得できる。</p><p>でアカウント追加から来た時にはaddAccountが呼び出されて、そこからAuthenticatorActivity.ACTION(AuthenticatorActivityを発生させるアクションintent)が投げられて、登録に伴う認証開始が行われるという感じ</p><p>でそのAuthenticatorActivityを作る</p><h4>AuthenticatorActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -577,7 +517,7 @@ import android.os.Bundle;
 
 public class AuthenticatorActivity extends Activity {
 
-    public static final String ACTION = "net.kinjouj.test.account.LOGIN";
+    public static final String ACTION = &quot;net.kinjouj.test.account.LOGIN&quot;;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -585,16 +525,16 @@ public class AuthenticatorActivity extends Activity {
 
         Intent intent = getIntent();
 
-        if(intent != null && ACTION.equals(intent.getAction())) {
+        if(intent != null &amp;&amp; ACTION.equals(intent.getAction())) {
             bundle = intent.getExtras();
 
-            String password = toSHA1("test".getBytes());
+            String password = toSHA1(&quot;test&quot;.getBytes());
 
             if(password != null) {
                 // ここで認証出来るかチェックするのが良いかと。そうしないと認証できないアカウントをaddAccountされる
 
                 AccountManager am = AccountManager.get(this);
-                Account account = new Account("test", getString(R.string.account_type));
+                Account account = new Account(&quot;test&quot;, getString(R.string.account_type));
                 boolean accountCreateSuccessful = am.addAccountExplicitly(account, password, null);
 
                 if(accountCreateSuccessful) {
@@ -611,7 +551,7 @@ public class AuthenticatorActivity extends Activity {
         byte[] digest = null;
 
         try {
-            digest = MessageDigest.getInstance("SHA1").digest(data);
+            digest = MessageDigest.getInstance(&quot;SHA1&quot;).digest(data);
         } catch(NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -682,53 +622,67 @@ public class AuthenticatorActivity extends Activity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -736,17 +690,21 @@ public class AuthenticatorActivity extends Activity {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -754,32 +712,41 @@ public class AuthenticatorActivity extends Activity {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -787,14 +754,17 @@ public class AuthenticatorActivity extends Activity {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -802,11 +772,13 @@ public class AuthenticatorActivity extends Activity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -814,20 +786,25 @@ public class AuthenticatorActivity extends Activity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -835,47 +812,43 @@ public class AuthenticatorActivity extends Activity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -883,20 +856,41 @@ public class AuthenticatorActivity extends Activity {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -906,17 +900,21 @@ public class AuthenticatorActivity extends Activity {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,26 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-6542c7faa86">構造</a>
-</li>
-<li>
-<a href="#res-layout-list_fragment_layout-xml">res/layout/list_fragment_layout.xml</a>
-</li>
-<li>
-<a href="#mainlistfragment-java">MainListFragment.java</a>
-</li>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>まぁ要はListViewの末尾に達したら新しいデータをロードする等の仕組みを提供する機能的なやつ。Android PullToRefreshにはそういう機能があったけど、何回かふれているけどActionBar PullToRefreshを使うべきという形になっているので、それっぽい機能をどうするかって所なんですが</p><p>調べた所によると、<a href="https://github.com/shontauro/android-pulltorefresh-and-loadmore">LoadMoreListView</a>っていうのを利用する事で出来るっぽい。という事で使ってみた</p>
-<!--more-->
-
-<h4 id="part-6542c7faa86">構造</h4>
-
+                <!--[[1, "構造"], [2, "res/layout/list_fragment_layout.xml"], [3, "MainListFragment.java"], [4, "追記"]]-->
+                <p>まぁ要はListViewの末尾に達したら新しいデータをロードする等の仕組みを提供する機能的なやつ。Android PullToRefreshにはそういう機能があったけど、何回かふれているけどActionBar PullToRefreshを使うべきという形になっているので、それっぽい機能をどうするかって所なんですが</p><p>調べた所によると、<a href="https://github.com/shontauro/android-pulltorefresh-and-loadmore">LoadMoreListView</a>っていうのを利用する事で出来るっぽい。という事で使ってみた</p><h4>構造</h4>
 <pre>
 ├── app
 │   ├── build.gradle
@@ -144,23 +125,19 @@ ga("send", "pageview");
 ├── local.properties
 └── settings.gradle
 </pre>
-<p>pulltorefresh-and-loadmoreなやつは内容を省略してますが、要はgradle-android-toolkitベースなプロジェクトで利用する。恐らくはEclipseなプロジェクトだとライブラリプロジェクトをインポートすりゃ良さそうな気がする</p><p>まぁ見て分かるようにListFragmentがあるんだけれども、pulltorefresh-and-loadmoreのListView実装を使う必要があるのでレイアウトを定義しなきゃならん。activity_mainなレイアウトはただ<fragment>しているだけなので(ry</p>
-<h4 id="res-layout-list_fragment_layout-xml">res/layout/list_fragment_layout.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+<p>pulltorefresh-and-loadmoreなやつは内容を省略してますが、要はgradle-android-toolkitベースなプロジェクトで利用する。恐らくはEclipseなプロジェクトだとライブラリプロジェクトをインポートすりゃ良さそうな気がする</p><p>まぁ見て分かるようにListFragmentがあるんだけれども、pulltorefresh-and-loadmoreのListView実装を使う必要があるのでレイアウトを定義しなきゃならん。activity_mainなレイアウトはただ<fragment>しているだけなので(ry</p><h4>res/layout/list_fragment_layout.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"&gt;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;&gt;
 
     &lt;com.costum.android.widget.LoadMoreListView
-        android:id="@+id/android:list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" /&gt;
+        android:id=&quot;@+id/android:list&quot;
+        android:layout_width=&quot;fill_parent&quot;
+        android:layout_height=&quot;fill_parent&quot; /&gt;
 
 &lt;/LinearLayout&gt;
-</code></pre><p>android:id/emptyは省略してますが(ry android.R.id.listで参照できるやつをLoadMoreListViewを使うようにするだけ</p>
-<h4 id="mainlistfragment-java">MainListFragment.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><p>android:id/emptyは省略してますが(ry android.R.id.listで参照できるやつをLoadMoreListViewを使うようにするだけ</p><h4>MainListFragment.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -222,47 +199,45 @@ public class MainListFragment extends SherlockListFragment {
         // データをロードする処理
     }
 }
-</code></pre><p>っていう感じで、ListViewのデータ終端に達したらLoadMoreListView.OnLoadMoreListener#onLoadMoreが発生するのでそこでデータをロードする処理を実装すりゃ良いってだけ</p><p>でお馴染み動作動画用意しました</p><p>{% youtube Zl-hlqMvdig %}</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p>LoadMoreListViewが生成するフッターなProgressなレイアウトを修正したりしたいのであれば、res/layout/load_more_footer.xmlを作って修正なりすれば良い模様。ちなみにデフォルトでは以下のようになっている模様</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/load_more_footer"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/black" &gt;
+</code></pre><p>っていう感じで、ListViewのデータ終端に達したらLoadMoreListView.OnLoadMoreListener#onLoadMoreが発生するのでそこでデータをロードする処理を実装すりゃ良いってだけ</p><p>でお馴染み動作動画用意しました</p><p>{% youtube Zl-hlqMvdig %}</p><h4>追記</h4><p>LoadMoreListViewが生成するフッターなProgressなレイアウトを修正したりしたいのであれば、res/layout/load_more_footer.xmlを作って修正なりすれば良い模様。ちなみにデフォルトでは以下のようになっている模様</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:id=&quot;@+id/load_more_footer&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:background=&quot;@color/black&quot; &gt;
 
     &lt;View
-        android:id="@+id/top_line"
-        android:layout_width="fill_parent"
-        android:layout_height="0.5dp"
-        android:layout_alignParentTop="true"
-        android:background="@color/dark_slate_gray"
-        android:visibility="visible" /&gt;
+        android:id=&quot;@+id/top_line&quot;
+        android:layout_width=&quot;fill_parent&quot;
+        android:layout_height=&quot;0.5dp&quot;
+        android:layout_alignParentTop=&quot;true&quot;
+        android:background=&quot;@color/dark_slate_gray&quot;
+        android:visibility=&quot;visible&quot; /&gt;
 
     &lt;!--
         &lt;TextView
-        android:id="@+id/load_more_lab_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center_horizontal"
-        android:padding="3dp"
-        android:text="@string/load_more_post"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/dark_slate_gray" /&gt;
+        android:id=&quot;@+id/load_more_lab_view&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_centerInParent=&quot;true&quot;
+        android:gravity=&quot;center_horizontal&quot;
+        android:padding=&quot;3dp&quot;
+        android:text=&quot;@string/load_more_post&quot;
+        android:textAppearance=&quot;?android:attr/textAppearanceSmall&quot;
+        android:textColor=&quot;@color/dark_slate_gray&quot; /&gt;
 
 
     --&gt;
 
     &lt;ProgressBar
-        android:id="@+id/load_more_progressBar"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_centerInParent="true"
-        android:indeterminate="true"
-        android:indeterminateDrawable="@drawable/costum_progress_bar"
-        android:padding="3dp"
-        android:visibility="gone" /&gt;
+        android:id=&quot;@+id/load_more_progressBar&quot;
+        android:layout_width=&quot;36dp&quot;
+        android:layout_height=&quot;36dp&quot;
+        android:layout_centerInParent=&quot;true&quot;
+        android:indeterminate=&quot;true&quot;
+        android:indeterminateDrawable=&quot;@drawable/costum_progress_bar&quot;
+        android:padding=&quot;3dp&quot;
+        android:visibility=&quot;gone&quot; /&gt;
 
 &lt;/RelativeLayout&gt;
 </code></pre><p>あと実装では</p><pre class="line-numbers"><code class="language-java">mFooterView = (RelativeLayout) mInflater.inflate(R.layout.load_more_footer, this, false);
@@ -325,53 +300,67 @@ addFooterView(mFooterView);
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -379,17 +368,21 @@ addFooterView(mFooterView);
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -397,32 +390,41 @@ addFooterView(mFooterView);
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -430,14 +432,17 @@ addFooterView(mFooterView);
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -445,11 +450,13 @@ addFooterView(mFooterView);
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -457,20 +464,25 @@ addFooterView(mFooterView);
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -478,47 +490,43 @@ addFooterView(mFooterView);
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -526,20 +534,41 @@ addFooterView(mFooterView);
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -549,17 +578,21 @@ addFooterView(mFooterView);
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

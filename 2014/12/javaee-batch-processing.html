@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,38 +96,14 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#sampleitemreader-java">SampleItemReader.java</a>
-</li>
-<li>
-<a href="#sampleitemwriter-java">SampleItemWriter.java</a>
-</li>
-<li>
-<a href="#main-java">Main.java</a>
-</li>
-<li>
-<a href="#meta-inf-batch-jobs-sample-xml">META-INF/batch-jobs/sample.xml</a>
-</li>
-<li>
-<a href="#basecontext-xml">baseContext.xml</a>
-</li>
-<li>
-<a href="#part-6542ab424ec">実行</a>
-</li>
-</ul>
--->
-                <p>公式リファレンス: <a href="http://www.oracle.com/technetwork/articles/java/batch-1965499.html" target="_blank" rel="noopener noreferrer">http://www.oracle.com/technetwork/articles/java/batch-1965499.html</a></p><p>参考(jBatch): <a href="http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf" target="_blank" rel="noopener noreferrer">http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf</a></p><p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p>
-<!--more-->
-<p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p>
-<h4 id="sampleitemreader-java">SampleItemReader.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+                <!--[[1, "SampleItemReader.java"], [2, "SampleItemWriter.java"], [3, "Main.java"], [4, "META-INF/batch-jobs/sample.xml"], [5, "baseContext.xml"], [6, "実行"]]-->
+                <p>公式リファレンス: <a href="http://www.oracle.com/technetwork/articles/java/batch-1965499.html" target="_blank" rel="noopener noreferrer">http://www.oracle.com/technetwork/articles/java/batch-1965499.html</a></p><p>参考(jBatch): <a href="http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf" target="_blank" rel="noopener noreferrer">http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf</a></p><p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p><p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p><h4>SampleItemReader.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.batch.api.chunk.ItemReader;
 import javax.batch.api.chunk.AbstractItemReader;
 import javax.inject.Named;
 
-@Named("batch-reader")
+@Named(&quot;batch-reader&quot;)
 public class SampleItemReader extends AbstractItemReader {
 
     private int count = 0;
@@ -136,7 +111,7 @@ public class SampleItemReader extends AbstractItemReader {
     @Override
     public Object readItem() throws Exception {
         count++;
-        return count &lt; 10 ? "hoge" : null;
+        return count &lt; 10 ? &quot;hoge&quot; : null;
     }
 }
 </code></pre><p>上記のjBatch参考に書いてけど、後々設定ファイルで参照するクラスは@Namedで指定した名前でも参照させる事が可能な模様。あと公式ではItemReaderっていうインターフェースを実装しているけど、今回はそれの抽象クラスにあたると思われるAbstractItemReaderを継承して実装</p><p>おそらくはここでnullを返す事をすればバッチチャンク終了となり、すでにあるバッチチャンクをItemWriterに流して終了的な感じになるのではと</p><p>**** SampleItemProcessor.java</p><pre class="line-numbers"><code class="language-java">package sample;
@@ -149,9 +124,7 @@ public class SampleItemProcessor implements ItemProcessor {
         return ((String)item).toUpperCase();
     }
 }
-</code></pre><p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p>
-<h4 id="sampleitemwriter-java">SampleItemWriter.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p><h4>SampleItemWriter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 import javax.batch.api.chunk.AbstractItemWriter;
@@ -162,99 +135,91 @@ public class SampleItemWriter extends AbstractItemWriter {
         // ItemProcessor側で処理したデータをチャンクサイズに応じてたまった分がこちらで処理出来るので、書き出し処理等を実装
     }
 }
-</code></pre><p>とまぁBatch Processingを動かすのに必要なのは書いたので</p>
-<h4 id="main-java">Main.java</h4>
-<pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
+</code></pre><p>とまぁBatch Processingを動かすのに必要なのは書いたので</p><h4>Main.java</h4><pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 
 public class Main {
     public static void main(String[] args) {
         JobOperator job = BatchRuntime.getJobOperator();
-        job.start("sample", new java.util.Properties());
+        job.start(&quot;sample&quot;, new java.util.Properties());
     }
 }
-</code></pre><p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p>
-<h4 id="meta-inf-batch-jobs-sample-xml">META-INF/batch-jobs/sample.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;job id="sample" xmlns="http://xmlns.jcp.org/xml/ns/javaee"  version="1.0"&gt;
-    &lt;step id="sample-chunk"&gt;
-        &lt;chunk item-count="5"&gt;
-            &lt;!-- &lt;reader ref="sample.SampleItemReader" /&gt; --&gt;
+</code></pre><p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p><h4>META-INF/batch-jobs/sample.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;job id=&quot;sample&quot; xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;  version=&quot;1.0&quot;&gt;
+    &lt;step id=&quot;sample-chunk&quot;&gt;
+        &lt;chunk item-count=&quot;5&quot;&gt;
+            &lt;!-- &lt;reader ref=&quot;sample.SampleItemReader&quot; /&gt; --&gt;
             &lt;!-- @Namedで指定した名前でも指定可能 --&gt;
-            &lt;reader ref="batch-reader" /&gt;
-            &lt;processor ref="sample.SampleItemProcessor" /&gt;
-            &lt;writer ref="sample.SampleItemWriter" /&gt;
+            &lt;reader ref=&quot;batch-reader&quot; /&gt;
+            &lt;processor ref=&quot;sample.SampleItemProcessor&quot; /&gt;
+            &lt;writer ref=&quot;sample.SampleItemWriter&quot; /&gt;
         &lt;/chunk&gt;
     &lt;/step&gt;
 &lt;/job&gt;
-</code></pre><p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p><p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p>
-<h4 id="basecontext-xml">baseContext.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:p="http://www.springframework.org/schema/p"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="
+</code></pre><p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p><p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p><h4>baseContext.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;
         http://xmlns.jcp.org/xml/ns/javaee
         http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd
         http://www.springframework.org/schema/beans 
         http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context-3.1.xsd"&gt;
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd&quot;&gt;
 
-    &lt;import resource="database.xml" /&gt;
-    &lt;context:component-scan base-package="sample" /&gt;
+    &lt;import resource=&quot;database.xml&quot; /&gt;
+    &lt;context:component-scan base-package=&quot;sample&quot; /&gt;
 
-    &lt;bean id="jobParametersConverter" class="org.springframework.batch.core.jsr.JsrJobParametersConverter"&gt;
-        &lt;constructor-arg ref="dataSource" /&gt;
+    &lt;bean id=&quot;jobParametersConverter&quot; class=&quot;org.springframework.batch.core.jsr.JsrJobParametersConverter&quot;&gt;
+        &lt;constructor-arg ref=&quot;dataSource&quot; /&gt;
     &lt;/bean&gt;
 
     &lt;bean
-        id="jobExplorer"
-        class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean"
-        p:dataSource-ref="dataSource"
-        p:tablePrefix="BATCH_" /&gt;
+        id=&quot;jobExplorer&quot;
+        class=&quot;org.springframework.batch.core.explore.support.JobExplorerFactoryBean&quot;
+        p:dataSource-ref=&quot;dataSource&quot;
+        p:tablePrefix=&quot;BATCH_&quot; /&gt;
 
     &lt;bean
-        id="jobRepository"
-        class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
-        p:dataSource-ref="dataSource"
-        p:transactionManager-ref="transactionManager"
-        p:maxVarCharLength="2000"
-        p:isolationLevelForCreate="ISOLATION_SERIALIZABLE" /&gt;
+        id=&quot;jobRepository&quot;
+        class=&quot;org.springframework.batch.core.repository.support.JobRepositoryFactoryBean&quot;
+        p:dataSource-ref=&quot;dataSource&quot;
+        p:transactionManager-ref=&quot;transactionManager&quot;
+        p:maxVarCharLength=&quot;2000&quot;
+        p:isolationLevelForCreate=&quot;ISOLATION_SERIALIZABLE&quot; /&gt;
 
 &lt;/beans&gt;
-</code></pre><p>database.xmlは</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+</code></pre><p>database.xmlは</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
-    xmlns="http://www.springframework.org/schema/beans"
-    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="
+    xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:jdbc=&quot;http://www.springframework.org/schema/jdbc&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;
         http://www.springframework.org/schema/beans 
         http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
         http://www.springframework.org/schema/jdbc 
-        http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd"&gt;
+        http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd&quot;&gt;
 
     &lt;bean
-        id="dataSource"
-        class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+        id=&quot;dataSource&quot;
+        class=&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot;&gt;
 
-        &lt;property name="driverClassName" value="com.mysql.jdbc.Driver" /&gt;
-        &lt;property name="url" value="jdbc:mysql://localhost:3306/sample" /&gt;
-        &lt;property name="username" value="kinjouj" /&gt;
-        &lt;property name="password" value="1234" /&gt;
+        &lt;property name=&quot;driverClassName&quot; value=&quot;com.mysql.jdbc.Driver&quot; /&gt;
+        &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://localhost:3306/sample&quot; /&gt;
+        &lt;property name=&quot;username&quot; value=&quot;kinjouj&quot; /&gt;
+        &lt;property name=&quot;password&quot; value=&quot;1234&quot; /&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="transactionManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" /&gt;
+    &lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.batch.support.transaction.ResourcelessTransactionManager&quot; /&gt;
 
-    &lt;jdbc:initialize-database data-source="dataSource"&gt;
-        &lt;jdbc:script location="org/springframework/batch/core/schema-drop-mysql.sql" /&gt;
-        &lt;jdbc:script location="org/springframework/batch/core/schema-mysql.sql" /&gt;
+    &lt;jdbc:initialize-database data-source=&quot;dataSource&quot;&gt;
+        &lt;jdbc:script location=&quot;org/springframework/batch/core/schema-drop-mysql.sql&quot; /&gt;
+        &lt;jdbc:script location=&quot;org/springframework/batch/core/schema-mysql.sql&quot; /&gt;
     &lt;/jdbc:initialize-database&gt;
 &lt;/beans&gt;
-</code></pre><p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p>
-<h4 id="part-6542ab424ec">実行</h4>
-<p>実装して処理の流れなログとってみると</p>
+</code></pre><p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p><h4>実行</h4><p>実装して処理の流れなログとってみると</p>
 <pre>
 情報: Executing step: [sample-chunk]
 
@@ -352,53 +317,67 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -406,17 +385,21 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -424,32 +407,41 @@ public class Main {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -457,14 +449,17 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -472,11 +467,13 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -484,20 +481,25 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -505,47 +507,43 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -553,20 +551,41 @@ public class Main {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -576,17 +595,21 @@ public class Main {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="今回コードはまったくありません(SQL以外は)。ほぼ操作方法的な感じになる。下準備とりあえず今回以下のようなテーブル構造を使用するCREATETABLE`items`(`id`i" />
+    <meta name="description" content="今回コードはまったくありません(SQL以外は)。ほぼ操作方法的な感じになる。下準備とりあえず今回以下のようなテーブル構造を使用するCREATETABLE`items`(`id`int(1" />
     <title>Eclipse BIRTを使ってみる (3) - チャートを出力する - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/11/eclipse-birt-2-data-binding.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/11/fpm-fuelphp.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,23 +95,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-3786c54721f9cc2">下準備</a>
-</li>
-<li>
-<a href="#part-4b4628f0737edbc">データセットの作成</a>
-</li>
-<li>
-<a href="#part-6d7ff706149fe3be">チャートをマッピングする</a>
-</li>
-</ul>
--->
-                <p>今回コードはまったくありません(SQL以外は)。ほぼ操作方法的な感じになる。</p>
-<!--more-->
-
-<h4 id="part-3786c54721f9cc2">下準備</h4>
-<p>とりあえず今回以下のようなテーブル構造を使用する</p><pre class="line-numbers"><code class="language-sql">CREATE TABLE `items` (
+                <!--[[1, "下準備"], [2, "データセットの作成"], [3, "チャートをマッピングする"]]-->
+                <p>今回コードはまったくありません(SQL以外は)。ほぼ操作方法的な感じになる。</p><h4>下準備</h4><p>とりあえず今回以下のようなテーブル構造を使用する</p><pre class="line-numbers"><code class="language-sql">CREATE TABLE `items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `item_name` varchar(50) NOT NULL,
   `price` int(11) DEFAULT NULL,
@@ -124,9 +108,7 @@ CREATE TABLE `sales` (
   `item_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-</code></pre><p>てな感じ。ID、アイテム名、値段、販売数、値段*販売数の5つのデータをバインディングする</p>
-<h4 id="part-4b4628f0737edbc">データセットの作成</h4>
-<pre class="line-numbers"><code class="language-sql">SELECT
+</code></pre><p>てな感じ。ID、アイテム名、値段、販売数、値段*販売数の5つのデータをバインディングする</p><h4>データセットの作成</h4><pre class="line-numbers"><code class="language-sql">SELECT
   i.id,
   i.item_name,
   i.price,
@@ -138,9 +120,7 @@ INNER JOIN
 ON
   i.id = s.item_id
 GROUP BY i.id
-</code></pre><p>をクエリーで参照する。で計算例な所に値段*販売数をバインドする(以下参照)</p><p><img src="/images/2012/11/20121102020512.jpg" alt="image" /></p><p>で結果プレビューすると</p><p><img src="/images/2012/11/20121102020606.jpg" alt="image" /></p><p>てな感じになる。これでデータセットは完了</p>
-<h4 id="part-6d7ff706149fe3be">チャートをマッピングする</h4>
-<p>パレットビューからグラフをDnDしてレイアウトに設定する。ダイアログが出るので、とりあえず今回は棒グラフを生成する。で次にデータ選択画面にて、データをバインドする設定を行う</p><p>まずデータ選択から「Use Data from」で作成したデータセットを選択する。んで左側にある値系列を押して、値としてバインドするデータカラムを設定。今回はsales_sumを設定する</p><p>でカテゴリー系列でラベルを設定する。でその隣のソート画面で</p><p><img src="/images/2012/11/20121102023802.jpg" alt="image" /></p><p>てな感じで設定する。特にグルーピングする必要が無ければチェック外しておく事(外さないとデータがグルーピングされる)</p><p>で右側のY系のグループ設定は必要ないなら設定しなくて良いので今回はやらない。あとはグラフの書式設定だけど、値系列設定で「Show Series Labels」をチェックしておくとグラフに対応する値がグラフにレンダリング出来る。</p><p>これで設定終わり。保存してプレビューして見てみる</p><p>んで、プレビューで成功しても以前同様にJavaから実行して行う場合ではエラーになる事があるのでそこでもチェックしてみる</p><p>でこんな感じになる</p><p><img src="/images/2012/11/20121102023930.jpg" alt="image" /></p>
+</code></pre><p>をクエリーで参照する。で計算例な所に値段*販売数をバインドする(以下参照)</p><p><img src="/images/2012/11/20121102020512.jpg" alt="image" /></p><p>で結果プレビューすると</p><p><img src="/images/2012/11/20121102020606.jpg" alt="image" /></p><p>てな感じになる。これでデータセットは完了</p><h4>チャートをマッピングする</h4><p>パレットビューからグラフをDnDしてレイアウトに設定する。ダイアログが出るので、とりあえず今回は棒グラフを生成する。で次にデータ選択画面にて、データをバインドする設定を行う</p><p>まずデータ選択から「Use Data from」で作成したデータセットを選択する。んで左側にある値系列を押して、値としてバインドするデータカラムを設定。今回はsales_sumを設定する</p><p>でカテゴリー系列でラベルを設定する。でその隣のソート画面で</p><p><img src="/images/2012/11/20121102023802.jpg" alt="image" /></p><p>てな感じで設定する。特にグルーピングする必要が無ければチェック外しておく事(外さないとデータがグルーピングされる)</p><p>で右側のY系のグループ設定は必要ないなら設定しなくて良いので今回はやらない。あとはグラフの書式設定だけど、値系列設定で「Show Series Labels」をチェックしておくとグラフに対応する値がグラフにレンダリング出来る。</p><p>これで設定終わり。保存してプレビューして見てみる</p><p>んで、プレビューで成功しても以前同様にJavaから実行して行う場合ではエラーになる事があるのでそこでもチェックしてみる</p><p>でこんな感じになる</p><p><img src="/images/2012/11/20121102023930.jpg" alt="image" /></p>
               </div>
             </div>
           </div>
@@ -190,53 +170,67 @@ GROUP BY i.id
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -244,17 +238,21 @@ GROUP BY i.id
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -262,32 +260,41 @@ GROUP BY i.id
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -295,14 +302,17 @@ GROUP BY i.id
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -310,11 +320,13 @@ GROUP BY i.id
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -322,20 +334,25 @@ GROUP BY i.id
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -343,47 +360,43 @@ GROUP BY i.id
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -391,20 +404,41 @@ GROUP BY i.id
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -414,17 +448,21 @@ GROUP BY i.id
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

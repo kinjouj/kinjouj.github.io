@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="コンテントスクリプトとバックグラウンドページを使って、表示画面中にある画像へのリンクをマウスオーバーした段階で別タブで開くっていうのをやってみるmanifest.json{"name":" />
+    <meta name="description" content="コンテントスクリプトとバックグラウンドページを使って、表示画面中にある画像へのリンクをマウスオーバーした段階で別タブで開くっていうのをやってみるmanifest.json{&quot;name&" />
     <title>Chrome Extension開発を勉強してみる (5) - content script + background page - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/06/hadoop-mapreduce-testing-mrunit.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/07/chrome-extension-7.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2012-07-11 00:00:00 +0900">
+                <time datetime="2012-07-11T00:00:00+09:00">
                   <a href="/archives/2012/07">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -97,73 +96,49 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#manifest-json">manifest.json</a>
-</li>
-<li>
-<a href="#test-js">test.js</a>
-</li>
-<li>
-<a href="#background-html">background.html</a>
-</li>
-<li>
-<a href="#part-e3d7e2606fc19eb1">余談ですが</a>
-</li>
-</ul>
--->
-                <p>コンテントスクリプトとバックグラウンドページを使って、表示画面中にある画像へのリンクをマウスオーバーした段階で別タブで開くっていうのをやってみる</p>
-<!--more-->
-
-<h4 id="manifest-json">manifest.json</h4>
-<pre class="line-numbers"><code class="language-json">{
-  "name": "test",
-  "version": "0.1",
-  "content_scripts": [
+                <!--[[1, "manifest.json"], [2, "test.js"], [3, "background.html"], [4, "余談ですが"]]-->
+                <p>コンテントスクリプトとバックグラウンドページを使って、表示画面中にある画像へのリンクをマウスオーバーした段階で別タブで開くっていうのをやってみる</p><h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;test&quot;,
+  &quot;version&quot;: &quot;0.1&quot;,
+  &quot;content_scripts&quot;: [
     {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["test.js"],
-      "run_at": "document_end"
+      &quot;matches&quot;: [&quot;http://*/*&quot;, &quot;https://*/*&quot;],
+      &quot;js&quot;: [&quot;test.js&quot;],
+      &quot;run_at&quot;: &quot;document_end&quot;
     }
   ],
-  "background_page": "background.html"
+  &quot;background_page&quot;: &quot;background.html&quot;
 }
-</code></pre><p>んまぁ本当は対象とするサイトとかをちゃんと指定すべきなんだと思いますが... とりあえずコンテントスクリプトとバックグラウンドページに関する設定をしておく</p>
-<h4 id="test-js">test.js</h4>
-<pre class="line-numbers"><code class="language-js">var elements = document.querySelectorAll("a");
+</code></pre><p>んまぁ本当は対象とするサイトとかをちゃんと指定すべきなんだと思いますが... とりあえずコンテントスクリプトとバックグラウンドページに関する設定をしておく</p><h4>test.js</h4><pre class="line-numbers"><code class="language-js">var elements = document.querySelectorAll(&quot;a&quot;);
 var elements_length = elements.length;
 
 for (var i = 0; i &lt; elements_length;i++) {
   var element = elements[i];
 
   if (element instanceof HTMLAnchorElement) {
-    element.addEventListener("mouseover", function(event) {
-      var href = this.getAttribute("href");
+    element.addEventListener(&quot;mouseover&quot;, function(event) {
+      var href = this.getAttribute(&quot;href&quot;);
 
-      if (href !== undefined && /^http(?:.+)[jpg|png]$/.test(href)) {
-        chrome.extension.sendRequest({ "url": href });
+      if (href !== undefined &amp;&amp; /^http(?:.+)[jpg|png]$/.test(href)) {
+        chrome.extension.sendRequest({ &quot;url&quot;: href });
       }
     });
   }
 }
-</code></pre><p>な感じで表示しているページの&lt;a&gt;を取得して、そこのhref属性が画像であるかをチェックして、バックグラウンドページ側に処理をぶん投げる(コンテントスクリプト側からだと何かと権限上の問題で出来ない事がある模様げなので)</p>
-<h4 id="background-html">background.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><p>な感じで表示しているページの&lt;a&gt;を取得して、そこのhref属性が画像であるかをチェックして、バックグラウンドページ側に処理をぶん投げる(コンテントスクリプト側からだと何かと権限上の問題で出来ない事がある模様げなので)</p><h4>background.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;body&gt;
-    &lt;script type="text/javascript"&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
 (function(undefined) {
   chrome.extension.onRequest.addListener(function(req, sender, res) {
     console.log(req.url);
 
-    chrome.tabs.create({ "url": req.url, "selected": false });
+    chrome.tabs.create({ &quot;url&quot;: req.url, &quot;selected&quot;: false });
   });
 })();
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>コンテントスクリプトからsendRequestされたのをここでキャッチする。</p>
-<h4 id="part-e3d7e2606fc19eb1">余談ですが</h4>
-<p>ブラウザアクションとかでXMLHttpRequestとかを使おうとすると、クロスドメインの制限などにひっかかりますが、manifest.jsonで設定する事で回避は出来る模様なのですが、コンテントスクリプトの場合だとこの制限に当てはまらない模様(制限が無いわけじゃなくて、content_scriptのmatchesに制限されるみたい)。その理由は <a href="http://xkansan.tumblr.com/post/19043957246/xhr-finalurl-for-chrome-extension" target="_blank" rel="noopener noreferrer">http://xkansan.tumblr.com/post/19043957246/xhr-finalurl-for-chrome-extension</a> が非常に参考になる</p>
+</code></pre><p>コンテントスクリプトからsendRequestされたのをここでキャッチする。</p><h4>余談ですが</h4><p>ブラウザアクションとかでXMLHttpRequestとかを使おうとすると、クロスドメインの制限などにひっかかりますが、manifest.jsonで設定する事で回避は出来る模様なのですが、コンテントスクリプトの場合だとこの制限に当てはまらない模様(制限が無いわけじゃなくて、content_scriptのmatchesに制限されるみたい)。その理由は <a href="http://xkansan.tumblr.com/post/19043957246/xhr-finalurl-for-chrome-extension" target="_blank" rel="noopener noreferrer">http://xkansan.tumblr.com/post/19043957246/xhr-finalurl-for-chrome-extension</a> が非常に参考になる</p>
               </div>
             </div>
           </div>
@@ -213,53 +188,67 @@ for (var i = 0; i &lt; elements_length;i++) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -267,17 +256,21 @@ for (var i = 0; i &lt; elements_length;i++) {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -285,32 +278,41 @@ for (var i = 0; i &lt; elements_length;i++) {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -318,14 +320,17 @@ for (var i = 0; i &lt; elements_length;i++) {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -333,11 +338,13 @@ for (var i = 0; i &lt; elements_length;i++) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -345,20 +352,25 @@ for (var i = 0; i &lt; elements_length;i++) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -366,47 +378,43 @@ for (var i = 0; i &lt; elements_length;i++) {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -414,20 +422,41 @@ for (var i = 0; i &lt; elements_length;i++) {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -437,17 +466,21 @@ for (var i = 0; i &lt; elements_length;i++) {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

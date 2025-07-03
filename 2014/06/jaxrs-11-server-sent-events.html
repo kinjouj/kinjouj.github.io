@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,20 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#home-java">Home.java</a>
-</li>
-<li>
-<a href="#ssebroadcaster">SseBroadcasterを使う</a>
-</li>
-</ul>
--->
-                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#sse" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#sse</a></p><p>Server Sent Eventsにも対応している模様。んまぁドキュメントに書いてる通りにjersey-media-sseなライブラリを参照をすればAutoDiscoverableとかそれによりSseFeatureが作用してServer Sent Eventsなのを利用出来るようになる感じかと</p>
-<!--more-->
-
-<h4 id="home-java">Home.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.controller;
+                <!--[[1, "Home.java"], [2, "SseBroadcasterを使う"]]-->
+                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#sse" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#sse</a></p><p>Server Sent Eventsにも対応している模様。んまぁドキュメントに書いてる通りにjersey-media-sseなライブラリを参照をすればAutoDiscoverableとかそれによりSseFeatureが作用してServer Sent Eventsなのを利用出来るようになる感じかと</p><h4>Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.io.IOException;
 import javax.ws.rs.GET;
@@ -121,10 +108,10 @@ import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
-    @Path("events")
+    @Path(&quot;events&quot;)
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     public EventOutput getServerSentEvents() {
@@ -135,8 +122,8 @@ public class Home {
             public void run() {
                 try {
                     OutboundEvent.Builder builder = new OutboundEvent.Builder();
-                    builder.name("sample_event");
-                    builder.data(String.class, "hoge");
+                    builder.name(&quot;sample_event&quot;);
+                    builder.data(String.class, &quot;hoge&quot;);
 
                     final OutboundEvent event = builder.build();
                     output.write(event);
@@ -185,7 +172,7 @@ public class HomeTest extends JerseyTest {
         final CountDownLatch latch = new CountDownLatch(1);
         final List&lt;String&gt; data = new ArrayList&lt;String&gt;(1);
 
-        EventSource es = EventSource.target(target("/sample/events")).build();
+        EventSource es = EventSource.target(target(&quot;/sample/events&quot;)).build();
         assertThat(es, notNullValue());
 
         es.register(
@@ -200,42 +187,40 @@ public class HomeTest extends JerseyTest {
                 }
             },
             // ここで起きないイベント名を指定するとテストはタイムアウトによりずっこける
-            "sample_event"
+            &quot;sample_event&quot;
         );
         es.open();
         latch.await(3, TimeUnit.SECONDS);
         es.close();
 
         assertThat(data, hasSize(1));
-        assertThat(data, hasItem("hoge"));
+        assertThat(data, hasItem(&quot;hoge&quot;));
     }
 }
-</code></pre><p>てな感じでEventSourceクラスなりEventListenerなりを使ってテストする事が出来る模様で。<a href="https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java" target="_blank" rel="noopener noreferrer">https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java</a>とかにもあるのでそれ参考にすれば良いのではと</p>
-<h4 id="ssebroadcaster">SseBroadcasterを使う</h4>
-<p>上記だけだと面白くないので、SseBroadcasterっていうのを使うとServer Sent Events側にイベントをブロードキャスト出来る仕組みがある模様。例えば</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><p>てな感じでEventSourceクラスなりEventListenerなりを使ってテストする事が出来る模様で。<a href="https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java" target="_blank" rel="noopener noreferrer">https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java</a>とかにもあるのでそれ参考にすれば良いのではと</p><h4>SseBroadcasterを使う</h4><p>上記だけだと面白くないので、SseBroadcasterっていうのを使うとServer Sent Events側にイベントをブロードキャスト出来る仕組みがある模様。例えば</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
-    &lt;script src="jquery.js"&gt;&lt;/script&gt;
+    &lt;script src=&quot;jquery.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;input type="text" id="message" /&gt;
-    &lt;button onclick="send(document.querySelector("#message").value)"&gt;send&lt;/button&gt;
+    &lt;input type=&quot;text&quot; id=&quot;message&quot; /&gt;
+    &lt;button onclick=&quot;send(document.querySelector(&quot;#message&quot;).value)&quot;&gt;send&lt;/button&gt;
     &lt;hr /&gt;
-    &lt;div id="messages"&gt;&lt;/div&gt;
+    &lt;div id=&quot;messages&quot;&gt;&lt;/div&gt;
     &lt;script&gt;
-var messages = document.querySelector("#messages");
+var messages = document.querySelector(&quot;#messages&quot;);
 
-var es = new EventSource("/jaxrs/resources/sample/events");
-es.addEventListener("sample_event", function(e) {
+var es = new EventSource(&quot;/jaxrs/resources/sample/events&quot;);
+es.addEventListener(&quot;sample_event&quot;, function(e) {
   console.log(e);
 
-  var elm = document.createElement("div");
+  var elm = document.createElement(&quot;div&quot;);
   elm.innerText = e.data;
 
   messages.appendChild(elm);
 }, false);
 
 function send(message) {
-  $.post("/jaxrs/resources/sample/push", { message: message });
+  $.post(&quot;/jaxrs/resources/sample/push&quot;, { message: message });
 }
     &lt;/script&gt;
   &lt;/body&gt;
@@ -258,12 +243,12 @@ import org.glassfish.jersey.media.sse.SseBroadcaster;
 import org.glassfish.jersey.media.sse.SseFeature;
 
 @Singleton
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     private final SseBroadcaster broadcaster = new SseBroadcaster();
 
-    @Path("events")
+    @Path(&quot;events&quot;)
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     public EventOutput getServerSentEvents() {
@@ -273,12 +258,12 @@ public class Home {
         return output;
     }
 
-    @Path("push")
+    @Path(&quot;push&quot;)
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response push(@FormParam("message") String message) {
+    public Response push(@FormParam(&quot;message&quot;) String message) {
         OutboundEvent event = new OutboundEvent.Builder()
-            .name("sample_event")
+            .name(&quot;sample_event&quot;)
             .data(String.class, message)
             .build();
 
@@ -321,7 +306,7 @@ public class HomeTest extends JerseyTest {
         final CountDownLatch latch = new CountDownLatch(1);
         final List&lt;String&gt; data = new ArrayList&lt;String&gt;(1);
 
-        EventSource es = EventSource.target(target("/sample/events")).build();
+        EventSource es = EventSource.target(target(&quot;/sample/events&quot;)).build();
         assertThat(es, notNullValue());
 
         es.register(
@@ -335,16 +320,16 @@ public class HomeTest extends JerseyTest {
                     }
                 }
             },
-            "sample_event"
+            &quot;sample_event&quot;
         );
         es.open();
 
         // 送るデータを準備
         Form form = new Form();
-        form.param("message", "hoge");
+        form.param(&quot;message&quot;, &quot;hoge&quot;);
 
         // データを送信。んでステータスが正常に返ってくるかをテスト
-        Response response = target("/sample/push").request().post(Entity.form(form));
+        Response response = target(&quot;/sample/push&quot;).request().post(Entity.form(form));
         assertThat(response, notNullValue());
         assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
 
@@ -355,7 +340,7 @@ public class HomeTest extends JerseyTest {
 
         // その後にデータを検証
         assertThat(data, hasSize(1));
-        assertThat(data, hasItem("hoge"));
+        assertThat(data, hasItem(&quot;hoge&quot;));
     }
 }
 </code></pre><p>的な感じかと。んまぁ大体はドキュメント通りなので(ry</p>
@@ -408,53 +393,67 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -462,17 +461,21 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -480,32 +483,41 @@ public class HomeTest extends JerseyTest {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -513,14 +525,17 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -528,11 +543,13 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -540,20 +557,25 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -561,47 +583,43 @@ public class HomeTest extends JerseyTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -609,20 +627,41 @@ public class HomeTest extends JerseyTest {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -632,17 +671,21 @@ public class HomeTest extends JerseyTest {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2015-05-17 00:00:00 +0900">
+                <time datetime="2015-05-17T00:00:00+09:00">
                   <a href="/archives/2015/05">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -96,78 +95,43 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-2a03577238684a62">その前に</a>
-</li>
-<li>
-<a href="#part-6fc833aab655ef08">必要なのを揃える</a>
-</li>
-<li>
-<a href="#manifest-json">manifest.json</a>
-</li>
-<li>
-<a href="#index-html">index.html</a>
-</li>
-<li>
-<a href="#main-js">main.js</a>
-</li>
-<li>
-<a href="#push-js">push.js</a>
-</li>
-<li>
-<a href="#send-sh">send.sh</a>
-</li>
-</ul>
--->
-                <p>公式ドラフトドキュメント?: <a href="http://www.w3.org/TR/push-api/" target="_blank" rel="noopener noreferrer">http://www.w3.org/TR/push-api/</a></p><p>参考1: <a href="http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web" target="_blank" rel="noopener noreferrer">http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web</a></p><p>参考2: <a href="http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d" target="_blank" rel="noopener noreferrer">http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d</a></p><p>前から気になってたServiceWorkerを使ってPush APIを実装するっていうのが話題になってた気がするので、ざっくりと参考を読みつつやってみた</p>
-<!--more-->
-
-<h4 id="part-2a03577238684a62">その前に</h4>
-<p>以前にChrome Extensionで使えるchrome.gcmっていうのがあるネタを書いたけど、今回はこれをChrome Extensionではなく普通のWebアプリケーションから使える基盤的な仕組みみたいなのっぽい</p>
-<h4 id="part-6fc833aab655ef08">必要なのを揃える</h4>
-<p>GoogleのPush Messagingサービスを使うので、まず必要なのが</p>
+                <!--[[1, "その前に"], [2, "必要なのを揃える"], [3, "manifest.json"], [4, "index.html"], [5, "main.js"], [6, "push.js"], [7, "send.sh"]]-->
+                <p>公式ドラフトドキュメント?: <a href="http://www.w3.org/TR/push-api/" target="_blank" rel="noopener noreferrer">http://www.w3.org/TR/push-api/</a></p><p>参考1: <a href="http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web" target="_blank" rel="noopener noreferrer">http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web</a></p><p>参考2: <a href="http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d" target="_blank" rel="noopener noreferrer">http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d</a></p><p>前から気になってたServiceWorkerを使ってPush APIを実装するっていうのが話題になってた気がするので、ざっくりと参考を読みつつやってみた</p><h4>その前に</h4><p>以前にChrome Extensionで使えるchrome.gcmっていうのがあるネタを書いたけど、今回はこれをChrome Extensionではなく普通のWebアプリケーションから使える基盤的な仕組みみたいなのっぽい</p><h4>必要なのを揃える</h4><p>GoogleのPush Messagingサービスを使うので、まず必要なのが</p>
 <ul>
 <li>Cloud Messaging for Chromeを有効にする</li>
 <li>Cloud Messaging for Androidを有効にする</li>
 <li>Google APIsのAPI Key</li>
 <li>Google APIsのプロジェクト識別番号</li>
 </ul>
-<p>の4つが最低限でも必要っぽいので取得しておく。上記で書いたchrome.gcmのネタ中にも多分書いてるはずなので省略(APIへのアクセス権の設定項目)</p>
-<h4 id="manifest-json">manifest.json</h4>
-<p>※Chrome Extensionのmanifest.jsonでは無い</p><p>Push Notification APIを使う際に必要となる情報を定義したJSONファイル</p><pre class="line-numbers"><code class="language-json">{
-  "name": "sample",
-  "short_name": "sample",
-  "start_url": "http://localhost:8000/index.html",
-  "display": "standalone",
-  "gcm_sender_id": "上記で取得したGoogle APIsプロジェクトのプロジェクト番号",
-  "gcm_user_visible_only": true
+<p>の4つが最低限でも必要っぽいので取得しておく。上記で書いたchrome.gcmのネタ中にも多分書いてるはずなので省略(APIへのアクセス権の設定項目)</p><h4>manifest.json</h4><p>※Chrome Extensionのmanifest.jsonでは無い</p><p>Push Notification APIを使う際に必要となる情報を定義したJSONファイル</p><pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;sample&quot;,
+  &quot;short_name&quot;: &quot;sample&quot;,
+  &quot;start_url&quot;: &quot;http://localhost:8000/index.html&quot;,
+  &quot;display&quot;: &quot;standalone&quot;,
+  &quot;gcm_sender_id&quot;: &quot;上記で取得したGoogle APIsプロジェクトのプロジェクト番号&quot;,
+  &quot;gcm_user_visible_only&quot;: true
 }
-</code></pre><p>これに関するリファレンスがちょっとどこにあるのか分かってないので省略</p>
-<h4 id="index-html">index.html</h4>
-<pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+</code></pre><p>これに関するリファレンスがちょっとどこにあるのか分かってないので省略</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
-    &lt;link rel="manifest" href="manifest.json" /&gt;
+    &lt;link rel=&quot;manifest&quot; href=&quot;manifest.json&quot; /&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;div id="subscription"&gt;&lt;/div&gt;&lt;p /&gt;
-    &lt;button class="js-push-button"&gt;register&lt;/button&gt;
-    &lt;script src="main.js"&gt;&lt;/script&gt;
+    &lt;div id=&quot;subscription&quot;&gt;&lt;/div&gt;&lt;p /&gt;
+    &lt;button class=&quot;js-push-button&quot;&gt;register&lt;/button&gt;
+    &lt;script src=&quot;main.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>上記で書いたmanifest.jsonを&lt;link rel=“manifest”&gt;で読み込む。んまぁあとはJSをダラっと書くだけ</p>
-<h4 id="main-js">main.js</h4>
-<pre class="line-numbers"><code class="language-js">window.addEventListener("load", function() {
-  var el = document.querySelector(".js-push-button");
-  el.addEventListener("click", function() {
+</code></pre><p>上記で書いたmanifest.jsonを&lt;link rel=“manifest”&gt;で読み込む。んまぁあとはJSをダラっと書くだけ</p><h4>main.js</h4><pre class="line-numbers"><code class="language-js">window.addEventListener(&quot;load&quot;, function() {
+  var el = document.querySelector(&quot;.js-push-button&quot;);
+  el.addEventListener(&quot;click&quot;, function() {
     subscribe();
   });
 
   // 指定したスクリプトをServiceWorkerとしてインストール
-  navigator.serviceWorker.register("push.js").then(function() {
-    if (Notification.permission === "denied") {
-      throw new "Notification is denied";
+  navigator.serviceWorker.register(&quot;push.js&quot;).then(function() {
+    if (Notification.permission === &quot;denied&quot;) {
+      throw new &quot;Notification is denied&quot;;
     }
 
     navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
@@ -189,7 +153,7 @@ ga("send", "pageview");
 function subscribe() {
   navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
     serviceWorkerRegistration.pushManager.subscribe().then(function(subscription) {
-      var el = document.querySelector(".js-push-button");
+      var el = document.querySelector(&quot;.js-push-button&quot;);
       el.disabled = true;
       renderSubscription(subscription);
     });
@@ -197,36 +161,32 @@ function subscribe() {
 }
 
 function renderSubscription(subscription) {
-  document.querySelector('#subscription').innerHTML = subscription.subscriptionId;
+  document.querySelector(&apos;#subscription&apos;).innerHTML = subscription.subscriptionId;
 }
-</code></pre>
-<h4 id="push-js">push.js</h4>
-<pre class="line-numbers"><code class="language-js">self.addEventListener("install", function() {
-  console.log("install");
+</code></pre><h4>push.js</h4><pre class="line-numbers"><code class="language-js">self.addEventListener(&quot;install&quot;, function() {
+  console.log(&quot;install&quot;);
 }, false);
 
-self.addEventListener("push", function(event) {
+self.addEventListener(&quot;push&quot;, function(event) {
   event.waitUntil(
     self.registration.showNotification(
-      "title",
+      &quot;title&quot;,
       {
-        "body": "body"
+        &quot;body&quot;: &quot;body&quot;
       }
     )
   );
 }, false);
-</code></pre><p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p><p>でとりあえず今までの流れを確認すると</p><p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p><p><img src="/images/2015/05/201505171800_1.jpg" alt="image" /></p><p>んな感じになってる。でregisterボタンを押すと</p><p><img src="/images/2015/05/201505171800_2.jpg" alt="image" /></p><p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p><p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p><p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p>
-<h4 id="send-sh">send.sh</h4>
-<pre class="line-numbers"><code class="language-sh">#!/bin/sh
+</code></pre><p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p><p>でとりあえず今までの流れを確認すると</p><p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p><p><img src="/images/2015/05/201505171800_1.jpg" alt="image" /></p><p>んな感じになってる。でregisterボタンを押すと</p><p><img src="/images/2015/05/201505171800_2.jpg" alt="image" /></p><p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p><p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p><p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p><h4>send.sh</h4><pre class="line-numbers"><code class="language-sh">#!/bin/sh
 
-ID="上記のSubscription ID"
-KEY="Google Consoleで取得したGoogle Apis Key"
+ID=&quot;上記のSubscription ID&quot;
+KEY=&quot;Google Consoleで取得したGoogle Apis Key&quot;
 
 
 curl \
-    -H "Content-Type:application/json" \
-    -H "Authorization: key=$KEY" \
-    -d "{ \"registration_ids\": [\"$ID\"] }" \
+    -H &quot;Content-Type:application/json&quot; \
+    -H &quot;Authorization: key=$KEY&quot; \
+    -d &quot;{ \&quot;registration_ids\&quot;: [\&quot;$ID\&quot;] }&quot; \
     https://android.googleapis.com/gcm/send
 </code></pre><p>を実行すると</p><p><img src="/images/2015/05/201505171800_3.jpg" alt="image" /></p><p>みたいにデスクトップ通知が出るようになる。何やら通知をクリックした時のイベントがどうたらとかもあるらしい</p><p>まぁざっくり書きましたが現状でもまだ策定中な所もあるようだし実装もまだできてなくて制限が一部あるんですが</p>
 <ul>
@@ -284,53 +244,67 @@ curl \
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -338,17 +312,21 @@ curl \
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -356,32 +334,41 @@ curl \
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -389,14 +376,17 @@ curl \
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -404,11 +394,13 @@ curl \
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -416,20 +408,25 @@ curl \
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -437,47 +434,43 @@ curl \
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -485,20 +478,41 @@ curl \
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -508,17 +522,21 @@ curl \
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

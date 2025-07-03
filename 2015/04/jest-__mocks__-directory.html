@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2015-04-11 00:00:00 +0900">
+                <time datetime="2015-04-11T00:00:00+09:00">
                   <a href="/archives/2015/04">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -96,53 +95,39 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#js-components-_tests_-echo-test-js">js/components/_<em>tests</em>_/Echo-test.js</a>
-</li>
-<li>
-<a href="#js-actions-_mocks_-appactioncreators-js">js/actions/_<em>mocks</em>_/AppActionCreators.js</a>
-</li>
-</ul>
--->
-                <p>前回のjestを使ってReact.jsなコンポーネントをテストするネタを書いたけど、その最後に_<em>mocks</em>_を使うとモック化されるオブジェクトを意図的に別のに差し替えるような事が可能らしいとの事でやってみた</p>
-<!--more-->
-
-<h4 id="js-components-_tests_-echo-test-js">js/components/_<em>tests</em>_/Echo-test.js</h4>
-<pre class="line-numbers"><code class="language-js">"use strict";
+                <!--[[1, "js/components/_<em>tests</em>_/Echo-test.js"], [2, "js/actions/_<em>mocks</em>_/AppActionCreators.js"]]-->
+                <p>前回のjestを使ってReact.jsなコンポーネントをテストするネタを書いたけど、その最後に_<em>mocks</em>_を使うとモック化されるオブジェクトを意図的に別のに差し替えるような事が可能らしいとの事でやってみた</p><h4>js/components/_<em>tests</em>_/Echo-test.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 // autoMockOffを利用する事でモック化されるオブジェクト等がモック化されなくなるので実体を使ってテストしたいような場合にはこれ使えば良い?
 // jest.autoMockOff();
 
-jest.dontMock("../Echo");
+jest.dontMock(&quot;../Echo&quot;);
 
-var React             = require("react/addons"),
+var React             = require(&quot;react/addons&quot;),
     TestUtils         = React.addons.TestUtils;
 
-describe("Echo", function() {
-  it("button click event test", function() {
-    var AppActionCreators = require("../../actions/AppActionCreators");
+describe(&quot;Echo&quot;, function() {
+  it(&quot;button click event test&quot;, function() {
+    var AppActionCreators = require(&quot;../../actions/AppActionCreators&quot;);
     // 今回は__mocks__にあるオブジェクトを利用してモックオブジェクトを提供するのでやらない
-    // AppActionCreators.say.mockReturnValue("A");
+    // AppActionCreators.say.mockReturnValue(&quot;A&quot;);
 
-    var Echo = require("../Echo");
+    var Echo = require(&quot;../Echo&quot;);
     var echo = TestUtils.renderIntoDocument(&lt;Echo /&gt;);
-    expect(echo.state.msg).toEqual("hoge");
+    expect(echo.state.msg).toEqual(&quot;hoge&quot;);
 
-    var input = TestUtils.findRenderedDOMComponentWithTag(echo, "input");
-    input.props.valueLink.requestChange('fuga');
-    expect(echo.state.msg).toEqual("fuga");
+    var input = TestUtils.findRenderedDOMComponentWithTag(echo, &quot;input&quot;);
+    input.props.valueLink.requestChange(&apos;fuga&apos;);
+    expect(echo.state.msg).toEqual(&quot;fuga&quot;);
 
-    var button = TestUtils.findRenderedDOMComponentWithTag(echo, "button");
+    var button = TestUtils.findRenderedDOMComponentWithTag(echo, &quot;button&quot;);
     TestUtils.Simulate.click(button.getDOMNode());
 
-    expect(echo.state.msg).toEqual("FUGA");
+    expect(echo.state.msg).toEqual(&quot;FUGA&quot;);
   });
 });
-</code></pre><p>っていうようにAppActionCreatorsはモックオブジェクト化されるのは前回も書いた通りな訳ですけど、AppActionCreatorsがあるディレクトリに_<em>mocks</em>_ディレクトリ作って、そこにモックオブジェクト化されるAppActionCreatorsなのを定義しておけばテスト時にはそれが使用される模様</p>
-<h4 id="js-actions-_mocks_-appactioncreators-js">js/actions/_<em>mocks</em>_/AppActionCreators.js</h4>
-<pre class="line-numbers"><code class="language-js">var AppActionCreators = jest.genMockFunction().mockReturnThis();
-AppActionCreators.say = jest.genMockFunction().mockReturnValue("B");
+</code></pre><p>っていうようにAppActionCreatorsはモックオブジェクト化されるのは前回も書いた通りな訳ですけど、AppActionCreatorsがあるディレクトリに_<em>mocks</em>_ディレクトリ作って、そこにモックオブジェクト化されるAppActionCreatorsなのを定義しておけばテスト時にはそれが使用される模様</p><h4>js/actions/_<em>mocks</em>_/AppActionCreators.js</h4><pre class="line-numbers"><code class="language-js">var AppActionCreators = jest.genMockFunction().mockReturnThis();
+AppActionCreators.say = jest.genMockFunction().mockReturnValue(&quot;B&quot;);
 
 module.exports = AppActionCreators;
 </code></pre><p>っていう感じで作っておけばテスト時にはこっちが呼ばれる模様。でテストを実行すると以下のような結果が得られる</p>
@@ -200,53 +185,67 @@ module.exports = AppActionCreators;
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -254,17 +253,21 @@ module.exports = AppActionCreators;
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -272,32 +275,41 @@ module.exports = AppActionCreators;
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -305,14 +317,17 @@ module.exports = AppActionCreators;
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -320,11 +335,13 @@ module.exports = AppActionCreators;
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -332,20 +349,25 @@ module.exports = AppActionCreators;
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -353,47 +375,43 @@ module.exports = AppActionCreators;
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -401,20 +419,41 @@ module.exports = AppActionCreators;
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -424,17 +463,21 @@ module.exports = AppActionCreators;
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

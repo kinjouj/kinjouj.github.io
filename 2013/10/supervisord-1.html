@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="前から勉強する予定に入ってたsupervisordを使ってみる事に。とりあえずGettingStarted的に使うのが今回なセクションとして今後はドキュメント読みつつ色々やってみる的な感じで要" />
+    <meta name="description" content="前から勉強する予定に入ってたsupervisordを使ってみる事に。とりあえずGettingStarted的に使うのが今回なセクションとして今後はドキュメント読みつつ色々やってみる的な感じで要件普通" />
     <title>supervisord (1) - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/10/angularjs-3-directive.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/10/supervisord-2-signal-handlers.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,52 +96,28 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654311259e9">要件</a>
-</li>
-<li>
-<a href="#part-bdf5c55b74bb686">インストール</a>
-</li>
-<li>
-<a href="#rails-unicorn">RailsプロジェクトをUnicornで動かす設定</a>
-</li>
-<li>
-<a href="#supervisord-conf">supervisord.conf</a>
-</li>
-</ul>
--->
-                <p>前から勉強する予定に入ってた<a href="http://supervisord.org/">supervisord</a>を使ってみる事に。とりあえずGetting Started的に使うのが今回なセクションとして今後はドキュメント読みつつ色々やってみる的な感じで</p>
-<!--more-->
-
-<h4 id="part-654311259e9">要件</h4>
-<p>普通にRubyOnRailsで作ったプロジェクトとRedmineなパッケージをunicorn(_rails)で起動。それをsupervisordを行う</p><p>っていう事だけ。上記を/var/wwwに格納</p>
+                <!--[[1, "要件"], [2, "インストール"], [3, "RailsプロジェクトをUnicornで動かす設定"], [4, "supervisord.conf"]]-->
+                <p>前から勉強する予定に入ってた<a href="http://supervisord.org/">supervisord</a>を使ってみる事に。とりあえずGetting Started的に使うのが今回なセクションとして今後はドキュメント読みつつ色々やってみる的な感じで</p><h4>要件</h4><p>普通にRubyOnRailsで作ったプロジェクトとRedmineなパッケージをunicorn(_rails)で起動。それをsupervisordを行う</p><p>っていう事だけ。上記を/var/wwwに格納</p>
 <pre>
 .
 ├── redmine
 └── sample
 </pre>
-<p>な感じ</p>
-<h4 id="part-bdf5c55b74bb686">インストール</h4>
-<pre class="line-numbers"><code class="language-">sudo pip install supervisor
+<p>な感じ</p><h4>インストール</h4><pre class="line-numbers"><code class="language-">sudo pip install supervisor
 </code></pre><p>でインストール出来る。あとはsupervisord.conf的な設定ファイルを書けば良い。ちなみに</p><pre class="line-numbers"><code class="language-">echo_supervisord_conf
-</code></pre><p>をやればデフォルトのテンプレート的な設定を出力出来る模様</p>
-<h4 id="rails-unicorn">RailsプロジェクトをUnicornで動かす設定</h4>
-<p>unicorn的なインストールは普通に上記要件なプロジェクト中にあるGemfileに</p><pre class="line-numbers"><code class="language-rb">source "https://rubygems.org"
+</code></pre><p>をやればデフォルトのテンプレート的な設定を出力出来る模様</p><h4>RailsプロジェクトをUnicornで動かす設定</h4><p>unicorn的なインストールは普通に上記要件なプロジェクト中にあるGemfileに</p><pre class="line-numbers"><code class="language-rb">source &quot;https://rubygems.org&quot;
 
 # 追加
-gem "unicorn"
-</code></pre><p>をしておく。で更に別にどこでも良い(supervisord.confで指定する)ので、unicornな設定を行うRubyスクリプトを書く</p><pre class="line-numbers"><code class="language-rb">APP_PATH = "/var/www/sample"
+gem &quot;unicorn&quot;
+</code></pre><p>をしておく。で更に別にどこでも良い(supervisord.confで指定する)ので、unicornな設定を行うRubyスクリプトを書く</p><pre class="line-numbers"><code class="language-rb">APP_PATH = &quot;/var/www/sample&quot;
 
 listen 8080
 
 working_directory APP_PATH
-pid APP_PATH + "/tmp/pids/unicorn.pid"
+pid APP_PATH + &quot;/tmp/pids/unicorn.pid&quot;
 preload_app true
 </code></pre><p>でunicornが開放するデフォルトのポートが8080番になるので、2つのプロジェクトで別々なポートを指定しておく。あとAPP_PATHな所も要所で修正</p><p>とりあえず動かすだけならこれだけで良いっぽい。プラスアルファな設定辺りは後術する参考を</p><pre class="line-numbers"><code class="language-">unicorn_rails -c config/unicorn.rb -E production
-</code></pre><p>辺りで起動してみて無難にアクセス出来るかを確認しておく (一応念の為)</p>
-<h4 id="supervisord-conf">supervisord.conf</h4>
-<pre class="line-numbers"><code class="language-ini">[inet_http_server]
+</code></pre><p>辺りで起動してみて無難にアクセス出来るかを確認しておく (一応念の為)</p><h4>supervisord.conf</h4><pre class="line-numbers"><code class="language-ini">[inet_http_server]
 port=127.0.0.1:9001
 
 [supervisord]
@@ -213,53 +188,67 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -267,17 +256,21 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -285,32 +278,41 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -318,14 +320,17 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -333,11 +338,13 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -345,20 +352,25 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -366,47 +378,43 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -414,20 +422,41 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -437,17 +466,21 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様Act" />
+    <meta name="description" content="何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様Activ" />
     <title>FactoryGirlを使ってみる - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/06/jenkins-job-curl-operation.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/06/laravel-5-subdomain-routing.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,76 +97,47 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-6542acef337">導入</a>
-</li>
-<li>
-<a href="#part-2a83f22271e085c4">モデル仕様</a>
-</li>
-<li>
-<a href="#spec-factories-categories-rb">spec/factories/categories.rb</a>
-</li>
-<li>
-<a href="#spec-factories-entries-rb">spec/factories/entries.rb</a>
-</li>
-<li>
-<a href="#spec-models-entry_spec-rb">spec/models/entry_spec.rb</a>
-</li>
-</ul>
--->
-                <p>何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様</p>
-<!--more-->
-<p>ActiveRecordにもfixtureな機能自体はあるけど、こっちはyamlとかで定義したりすると思うのだけど、事細かいリレーション構造とかだとテストデータをどう表現するのかはちょっと謎。っていうかそこまで使いこなせてないっていうオチな気もするけど</p><p>とりまぁ使ってみる</p>
-<h4 id="part-6542acef337">導入</h4>
-<p>Gemfileに</p><pre class="line-numbers"><code class="language-rb">gem "factory_girl_rails", :group =&gt; [:development, :test]
+                <!--[[1, "導入"], [2, "モデル仕様"], [3, "spec/factories/categories.rb"], [4, "spec/factories/entries.rb"], [5, "spec/models/entry_spec.rb"]]-->
+                <p>何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様</p><p>ActiveRecordにもfixtureな機能自体はあるけど、こっちはyamlとかで定義したりすると思うのだけど、事細かいリレーション構造とかだとテストデータをどう表現するのかはちょっと謎。っていうかそこまで使いこなせてないっていうオチな気もするけど</p><p>とりまぁ使ってみる</p><h4>導入</h4><p>Gemfileに</p><pre class="line-numbers"><code class="language-rb">gem &quot;factory_girl_rails&quot;, :group =&gt; [:development, :test]
 </code></pre><p>を記述して、bundle installしておく。んで</p><pre class="line-numbers"><code class="language-">rails g factory_girl:model モデル
 </code></pre><p>な感じでファイルを生成する。RSpecとかの場合にはspec/factoriesディレクトリ内にファイルが生成される模様(RSpecじゃない場合にはtest/factories)</p><p>んでもって、ドキュメント通りにテストで使用する環境によってFactoryGirlなメソッドをincludeしちゃったりする(しなくてもFactoryGirlクラスのメソッドを使う事で出来るのかも、それは未検証)。今回はRSpecを使ってるんでspec_helper.rbに</p><pre class="line-numbers"><code class="language-rb">RSpec.configure do |config|
   # 追加
   config.include FactoryGirl::Syntax::Methods
 end
-</code></pre><p>を追加</p>
-<h4 id="part-2a83f22271e085c4">モデル仕様</h4>
-<p><img src="/images/2013/06/201304241014072.png" alt="image" /></p>
+</code></pre><p>を追加</p><h4>モデル仕様</h4><p><img src="/images/2013/06/201304241014072.png" alt="image" /></p>
 <ul>
 <li>  Entry.categoryでカテゴリー(Category)参照を取得できる</li>
 <li>  Category.entryでカテゴリーを参照しているエントリー(Entry)参照を取得できる</li>
 <li>  Category.parent_categoryでカテゴリーが参照している親カテゴリーを取得できる</li>
 <li>  Category.sub_categoriesでカテゴリーを参照している子カテゴリーを参照できる</li>
 </ul>
-<p>っていうような仕様がぶち込まれている。それをやってるのがhas_and_belongs_to_many辺り</p><p>んまぁ仕様的なはこんなもんかなと。あとはspec/factories等やモデルテストを書く</p>
-<h4 id="spec-factories-categories-rb">spec/factories/categories.rb</h4>
-<pre class="line-numbers"><code class="language-">rails g factory_girl:model category
+<p>っていうような仕様がぶち込まれている。それをやってるのがhas_and_belongs_to_many辺り</p><p>んまぁ仕様的なはこんなもんかなと。あとはspec/factories等やモデルテストを書く</p><h4>spec/factories/categories.rb</h4><pre class="line-numbers"><code class="language-">rails g factory_girl:model category
 </code></pre><p>で生成したFactoryGirlの定義を書く</p><pre class="line-numbers"><code class="language-rb"># Read about factories at https://github.com/thoughtbot/factory_girl
 
 FactoryGirl.define do
   factory :category1, :class =&gt; Category do
-    name "A"
+    name &quot;A&quot;
   end
 
   factory :category2, :class =&gt; Category do
-    name "B"
+    name &quot;B&quot;
     association :parent_category, :factory =&gt; :category1
   end
 end
-</code></pre><p>2つのカテゴリーを定義するけど、カテゴリーBはカテゴリーAの子カテゴリーとなりCategoryクラスのparent_categoryを参照する事で親カテゴリーなカテゴリーAを取得できるっていうような形になっているので、associationでカテゴリーAなfactoryを指定する</p>
-<h4 id="spec-factories-entries-rb">spec/factories/entries.rb</h4>
-<pre class="line-numbers"><code class="language-">rails g factory_girl:model entry
+</code></pre><p>2つのカテゴリーを定義するけど、カテゴリーBはカテゴリーAの子カテゴリーとなりCategoryクラスのparent_categoryを参照する事で親カテゴリーなカテゴリーAを取得できるっていうような形になっているので、associationでカテゴリーAなfactoryを指定する</p><h4>spec/factories/entries.rb</h4><pre class="line-numbers"><code class="language-">rails g factory_girl:model entry
 </code></pre><p>で生成したFactoryGirlの定義を書いていく</p><pre class="line-numbers"><code class="language-rb"># Read about factories at https://github.com/thoughtbot/factory_girl
 
 FactoryGirl.define do
   factory :entry, :class =&gt; Entry do
-    title "test"
-    content "test"
+    title &quot;test&quot;
+    content &quot;test&quot;
 
     after :create do |e|
       e.category &lt;&lt; FactoryGirl.create(:category2)
     end
   end
 end
-</code></pre><p>entryを作った後にafter :createが発生する模様で、そこでカテゴリーな参照をぶち込まないとちゃんとhas_and_belongs_to_manyなリレーション関係が解決出来なかった。これはちょっと要確認</p><p>で見て分かるようにentryからはcategory1な参照は含まれていない。だけどcategory2側からはcategory1なfactoryを参照する方式で親カテゴリーの参照をぶち込んでるのでそれで利用されるっていう感じ</p>
-<h4 id="spec-models-entry_spec-rb">spec/models/entry_spec.rb</h4>
-<p>まぁテストを書く。要件的には</p>
+</code></pre><p>entryを作った後にafter :createが発生する模様で、そこでカテゴリーな参照をぶち込まないとちゃんとhas_and_belongs_to_manyなリレーション関係が解決出来なかった。これはちょっと要確認</p><p>で見て分かるようにentryからはcategory1な参照は含まれていない。だけどcategory2側からはcategory1なfactoryを参照する方式で親カテゴリーの参照をぶち込んでるのでそれで利用されるっていう感じ</p><h4>spec/models/entry_spec.rb</h4><p>まぁテストを書く。要件的には</p>
 <ul>
 <li>  FactoryGirlでentryを作る</li>
 <li>  作ったエントリーのカテゴリー参照を取得。結果は1件のみで結果はcategory2なCategoryクラスが入ってる (hashは異なる)</li>
@@ -175,15 +145,15 @@ end
 <li>  取得した親カテゴリーから子カテゴリー参照を取得。結果は1件のみで上記で書いてる category2なCategoryのインスタンスが入る (hashは異なる)</li>
 <li>  親カテゴリーから取得した子カテゴリー自体が参照するentryが最初に取得したEntryなインスタンスと同等なオブジェクトであるかをチェック</li>
 </ul>
-<pre class="line-numbers"><code class="language-rb">require "spec_helper"
+<pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 describe Entry do
-  it "factory_girl test" do
+  it &quot;factory_girl test&quot; do
     # FactoryGirlでEntryを作る
     entry = create(:entry)
     expect(entry).not_to be_nil
-    expect(entry.title).to eq("test")
-    expect(entry.content).to eq("test")
+    expect(entry.title).to eq(&quot;test&quot;)
+    expect(entry.content).to eq(&quot;test&quot;)
 
     # Entryが参照しているCategoryを取得
     categories = entry.category
@@ -192,12 +162,12 @@ describe Entry do
     # Entryが参照しているカテゴリーを取得。category2であるかチェック
     category = categories.first
     expect(category).not_to be_nil
-    expect(category.name).to eq("B")
+    expect(category.name).to eq(&quot;B&quot;)
 
     # 参照しているカテゴリーの親カテゴリーを取得。category1であるかチェック
     parent = category.parent_category
     expect(parent).not_to be_nil
-    expect(parent.name).to eq("A")
+    expect(parent.name).to eq(&quot;A&quot;)
     expect(parent.entry.size).to eq(0)
 
     # 親カテゴリーを参照している子カテゴリーを取得
@@ -269,53 +239,67 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -323,17 +307,21 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -341,32 +329,41 @@ end
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -374,14 +371,17 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -389,11 +389,13 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -401,20 +403,25 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -422,47 +429,43 @@ end
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -470,20 +473,41 @@ end
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -493,17 +517,21 @@ end
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

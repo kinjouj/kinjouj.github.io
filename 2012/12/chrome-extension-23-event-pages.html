@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="何やらそういう仕様がある模様で。詳しい概要は省略するけど、要は「常に常駐しないバックグラウンドページ」っていう感じな模様でこれ使うには専用のAPIがある訳でも無い模様。通常のバックグラウンドページ" />
+    <meta name="description" content="何やらそういう仕様がある模様で。詳しい概要は省略するけど、要は「常に常駐しないバックグラウンドページ」っていう感じな模様でこれ使うには専用のAPIがある訳でも無い模様。通常のバックグラウンドページの仕" />
     <title>Chrome Extension開発を勉強してみる (23) - Event Pages - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/12/chrome-extension-22-alarms-api.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/12/s2jdbc-gen-tinyblob.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,28 +96,19 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#1-chrome-extension-getbackgroundpage">追記1: chrome.extension.getBackgroundPageに関して</a>
-</li>
-</ul>
--->
-                <p>何やらそういう仕様がある模様で。詳しい概要は省略するけど、要は「常に常駐しないバックグラウンドページ」っていう感じな模様</p>
-<!--more-->
-<p>でこれ使うには専用のAPIがある訳でも無い模様。通常のバックグラウンドページの仕様に設定をするだけでバックグラウンドページがイベントページとして認識するようになる模様。例えば前回のchrome.alarmsなmanifest.jsonをEvent Pagesとして扱う場合には</p><pre class="line-numbers"><code class="language-json">{
-  "name": "experimental",
-  "version": "0.1",
-  "manifest_version": 2,
-  "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+                <!--[[1, "追記1: chrome.extension.getBackgroundPageに関して"]]-->
+                <p>何やらそういう仕様がある模様で。詳しい概要は省略するけど、要は「常に常駐しないバックグラウンドページ」っていう感じな模様</p><p>でこれ使うには専用のAPIがある訳でも無い模様。通常のバックグラウンドページの仕様に設定をするだけでバックグラウンドページがイベントページとして認識するようになる模様。例えば前回のchrome.alarmsなmanifest.jsonをEvent Pagesとして扱う場合には</p><pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;experimental&quot;,
+  &quot;version&quot;: &quot;0.1&quot;,
+  &quot;manifest_version&quot;: 2,
+  &quot;background&quot;: {
+    &quot;scripts&quot;: [&quot;background.js&quot;],
+    &quot;persistent&quot;: false
   },
-  "permissions": ["alarms"],
-  "minimum_chrome_version": "23"
+  &quot;permissions&quot;: [&quot;alarms&quot;],
+  &quot;minimum_chrome_version&quot;: &quot;23&quot;
 }
-</code></pre><p>というように<span style="color: red">persistent: false</span>をするだけ。この一行を付けるだけで可能。</p><p>でこれどういう感じなのかと簡単に言うと上記な設定を行った場合、バックグラウンドページプロセスを見ると、一旦は起動されているがちょっとたつとプロセスが消える。で必要になった際に応じてイベントページのプロセスが常駐するようになったりする。つまりアイドル状態にあるバックグラウンドページを開放して常駐してリソースを食い込んだりしないような感じになる模様。表現合ってるかは微妙ですけど</p><p>んで後述する参考に書いてあるけど、一定の条件下の場合バックグラウンドページが正しく実行されないケースがある模様なのでそれは注意。</p><p>参考1: <a href="http://developer.chrome.com/extensions/event_pages.html" target="_blank" rel="noopener noreferrer">http://developer.chrome.com/extensions/event_pages.html</a></p><p>参考2: <a href="http://blog.monoweb.info/blog/2012/11/08/chrome-event-pages" target="_blank" rel="noopener noreferrer">http://blog.monoweb.info/blog/2012/11/08/chrome-event-pages</a></p>
-<h4 id="1-chrome-extension-getbackgroundpage">追記1: chrome.extension.getBackgroundPageに関して</h4>
-<p>Event Pagesな状態で使ってる場合にchrome.extension.getBackgroundPageをEvent Pagesなプロセスが落ちてる時にやるとnullが返ってくる模様。なのでchrome.runtime.getBackgroundPageを使うべきらしい。ただし使い方が従来のと違う</p><pre class="line-numbers"><code class="language-js">chrome.runtime.getBackgroundPage(function(bgPage) {});
+</code></pre><p>というように<span style="color: red">persistent: false</span>をするだけ。この一行を付けるだけで可能。</p><p>でこれどういう感じなのかと簡単に言うと上記な設定を行った場合、バックグラウンドページプロセスを見ると、一旦は起動されているがちょっとたつとプロセスが消える。で必要になった際に応じてイベントページのプロセスが常駐するようになったりする。つまりアイドル状態にあるバックグラウンドページを開放して常駐してリソースを食い込んだりしないような感じになる模様。表現合ってるかは微妙ですけど</p><p>んで後述する参考に書いてあるけど、一定の条件下の場合バックグラウンドページが正しく実行されないケースがある模様なのでそれは注意。</p><p>参考1: <a href="http://developer.chrome.com/extensions/event_pages.html" target="_blank" rel="noopener noreferrer">http://developer.chrome.com/extensions/event_pages.html</a></p><p>参考2: <a href="http://blog.monoweb.info/blog/2012/11/08/chrome-event-pages" target="_blank" rel="noopener noreferrer">http://blog.monoweb.info/blog/2012/11/08/chrome-event-pages</a></p><h4>追記1: chrome.extension.getBackgroundPageに関して</h4><p>Event Pagesな状態で使ってる場合にchrome.extension.getBackgroundPageをEvent Pagesなプロセスが落ちてる時にやるとnullが返ってくる模様。なのでchrome.runtime.getBackgroundPageを使うべきらしい。ただし使い方が従来のと違う</p><pre class="line-numbers"><code class="language-js">chrome.runtime.getBackgroundPage(function(bgPage) {});
 </code></pre><p>という感じになる。ちなみにこれをやった際にはEvent Pagesなプロセスが起きる模様</p>
               </div>
             </div>
@@ -169,53 +159,67 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -223,17 +227,21 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -241,32 +249,41 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -274,14 +291,17 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -289,11 +309,13 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -301,20 +323,25 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -322,47 +349,43 @@ ga("send", "pageview");
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -370,20 +393,41 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -393,17 +437,21 @@ ga("send", "pageview");
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

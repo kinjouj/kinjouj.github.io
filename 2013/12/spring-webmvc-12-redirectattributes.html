@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,28 +96,13 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#1">パターン1: リダイレクト先にパラメーターを指定してリダイレクト</a>
-</li>
-<li>
-<a href="#2">パターン2: フラッシュスコープを利用してリダイレクト</a>
-</li>
-<li>
-<a href="#redirecthttp10compatible">余談: redirectHttp10Compatible</a>
-</li>
-</ul>
--->
+                <!--[[1, "パターン1: リダイレクト先にパラメーターを指定してリダイレクト"], [2, "パターン2: フラッシュスコープを利用してリダイレクト"], [3, "余談: redirectHttp10Compatible"]]-->
                 <p>んまぁSpring WebMVCでアクションからリダイレクトを利用したい場合等にはredirect:なプレフィックスを利用する事で出来るんだけれども</p>
 <ul>
 <li>  リダイレクト先にパラメーターを設置したい (リダイレクト先で@RequestParam)</li>
 <li>  フラッシュスコープを利用してリダイレクトしたい</li>
 </ul>
-<p>っていう要件を検証してみた</p>
-<!--more-->
-
-<h4 id="1">パターン1: リダイレクト先にパラメーターを指定してリダイレクト</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+<p>っていう要件を検証してみた</p><h4>パターン1: リダイレクト先にパラメーターを指定してリダイレクト</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -127,18 +111,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/sample")
+@RequestMapping(&quot;/sample&quot;)
 public class SampleController {
 
     @RequestMapping
     public String index(RedirectAttributes attributes) {
-        attributes.addAttribute("message", "hoge");
-        return "redirect:/sample/show.action";
+        attributes.addAttribute(&quot;message&quot;, &quot;hoge&quot;);
+        return &quot;redirect:/sample/show.action&quot;;
     }
 
-    @RequestMapping("/show")
+    @RequestMapping(&quot;/show&quot;)
     @ResponseBody
-    public String show(@RequestParam("message") String message) {
+    public String show(@RequestParam(&quot;message&quot;) String message) {
         return message;
     }
 }
@@ -153,14 +137,12 @@ public class SampleControllerTest extends AbstractTestCase {
 
     @Test
     public void test_index() throws Exception {
-        mock.perform(get("/sample"))
+        mock.perform(get(&quot;/sample&quot;))
             .andExpect(status().isFound())
-            .andExpect(redirectedUrl("/sample/show.action?message=hoge"));
+            .andExpect(redirectedUrl(&quot;/sample/show.action?message=hoge&quot;));
     }
 }
-</code></pre><p>っていうテストになる</p>
-<h4 id="2">パターン2: フラッシュスコープを利用してリダイレクト</h4>
-<pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><p>っていうテストになる</p><h4>パターン2: フラッシュスコープを利用してリダイレクト</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -169,19 +151,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/sample")
+@RequestMapping(&quot;/sample&quot;)
 public class SampleController {
 
     @RequestMapping
     public String index(RedirectAttributes attributes) {
-        attributes.addFlashAttribute("message", "hoge");
-        return "redirect:/sample/show.action";
+        attributes.addFlashAttribute(&quot;message&quot;, &quot;hoge&quot;);
+        return &quot;redirect:/sample/show.action&quot;;
     }
 
-    @RequestMapping("/show")
+    @RequestMapping(&quot;/show&quot;)
     @ResponseBody
     public String show(ModelMap model) {
-        String message = (String)model.get("message");
+        String message = (String)model.get(&quot;message&quot;);
         return message;
     }
 }
@@ -197,48 +179,46 @@ public class SampleControllerTest extends AbstractTestCase {
 
     @Test
     public void test_index() throws Exception {
-        mock.perform(get("/sample"))
+        mock.perform(get(&quot;/sample&quot;))
             .andExpect(status().isFound())
-            .andExpect(redirectedUrl("/sample/show.action"))
-            .andExpect(flash().attributeExists("message"))
-            .andExpect(flash().attribute("message", is("hoge")));
+            .andExpect(redirectedUrl(&quot;/sample/show.action&quot;))
+            .andExpect(flash().attributeExists(&quot;message&quot;))
+            .andExpect(flash().attribute(&quot;message&quot;, is(&quot;hoge&quot;)));
     }
 
     @Test
     public void test_show() throws Exception {
-        mock.perform(get("/sample/show").flashAttr("message", "hoge"))
+        mock.perform(get(&quot;/sample/show&quot;).flashAttr(&quot;message&quot;, &quot;hoge&quot;))
             .andExpect(status().isOk())
-            .andExpect(content().string(is("hoge")));
+            .andExpect(content().string(is(&quot;hoge&quot;)));
     }
 }
-</code></pre><p>みたいにテスト</p><p>んまぁリダイレクトを利用する場合にはRedirectAttributesを使えばパラメーターとかの追加とかわざわざリダイレクト先の文字列を結合したりとかしなくても良いんじゃないかと</p>
-<h4 id="redirecthttp10compatible">余談: redirectHttp10Compatible</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:p="http://www.springframework.org/schema/p"
-    xsi:schemaLocation="
+</code></pre><p>みたいにテスト</p><p>んまぁリダイレクトを利用する場合にはRedirectAttributesを使えばパラメーターとかの追加とかわざわざリダイレクト先の文字列を結合したりとかしなくても良いんじゃないかと</p><h4>余談: redirectHttp10Compatible</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:mvc=&quot;http://www.springframework.org/schema/mvc&quot;
+    xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
+    xsi:schemaLocation=&quot;
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context-3.2.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd"&gt;
+        http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd&quot;&gt;
 
-    &lt;context:component-scan base-package="sample" /&gt;
+    &lt;context:component-scan base-package=&quot;sample&quot; /&gt;
     &lt;mvc:annotation-driven /&gt;
 
-    &lt;bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"&gt;
-        &lt;property name="viewResolvers"&gt;
+    &lt;bean class=&quot;org.springframework.web.servlet.view.ContentNegotiatingViewResolver&quot;&gt;
+        &lt;property name=&quot;viewResolvers&quot;&gt;
             &lt;list&gt;
-                &lt;bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
-                    &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
-                    &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
-                    &lt;property name="suffix" value=".jsp"/&gt;
-                    &lt;property name="order" value="1" /&gt;
-                    &lt;property name="redirectHttp10Compatible" value="false" /&gt;
+                &lt;bean id=&quot;jspViewResolver&quot; class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;
+                    &lt;property name=&quot;viewClass&quot; value=&quot;org.springframework.web.servlet.view.JstlView&quot;/&gt;
+                    &lt;property name=&quot;prefix&quot; value=&quot;/WEB-INF/jsp/&quot;/&gt;
+                    &lt;property name=&quot;suffix&quot; value=&quot;.jsp&quot;/&gt;
+                    &lt;property name=&quot;order&quot; value=&quot;1&quot; /&gt;
+                    &lt;property name=&quot;redirectHttp10Compatible&quot; value=&quot;false&quot; /&gt;
                 &lt;/bean&gt;
             &lt;/list&gt;
         &lt;/property&gt;
@@ -294,53 +274,67 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -348,17 +342,21 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -366,32 +364,41 @@ public class SampleControllerTest extends AbstractTestCase {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -399,14 +406,17 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -414,11 +424,13 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -426,20 +438,25 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -447,47 +464,43 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -495,20 +508,41 @@ public class SampleControllerTest extends AbstractTestCase {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -518,17 +552,21 @@ public class SampleControllerTest extends AbstractTestCase {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

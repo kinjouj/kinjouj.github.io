@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="現状は概念までは説明出来ないので、あくまでお触り程度な所をメモるインストールhttp://cassandra.apache.orgからダウンロード。一応、この記事の検証環境として1.0.8の" />
+    <meta name="description" content="現状は概念までは説明出来ないので、あくまでお触り程度な所をメモるインストールhttp://cassandra.apache.orgからダウンロード。一応、この記事の検証環境として1.0.8のバージョ" />
     <title>Cassandra使ってみた - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/03/android-spellcheckerservice.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/04/hadoop-mapper-cassandra.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -78,7 +77,7 @@ ga("send", "pageview");
           <div id="content">
             <div class="post" style="width: 100%;margin: 10px">
               <div class="post-date">
-                <time datetime="2012-03-21 00:00:00 +0900">
+                <time datetime="2012-03-21T00:00:00+09:00">
                   <a href="/archives/2012/03">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -97,44 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-bdf5c55b74bb686">インストール</a>
-</li>
-<li>
-<a href="#part-e6869ed7a7542be4">起動とその他もろもろ</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<a href="#keyspace-create-keyspace-keyspace1-keyspace">Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</a>
-</li>
-<li>
-<a href="#column-family">Column Familyを作る</a>
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li>
-<a href="#pom-xml">pom.xml</a>
-</li>
-<li>
-<a href="#client-java">Client.java</a>
-</li>
-</ul>
--->
-                <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p>
-<!--more-->
-
-<h4 id="part-bdf5c55b74bb686">インストール</h4>
-<p><a href="http://cassandra.apache.org" target="_blank" rel="noopener noreferrer">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p>
-<h4 id="part-e6869ed7a7542be4">起動とその他もろもろ</h4>
-<p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p><pre class="line-numbers"><code class="language-sh">mkdir -p /var/{log,lib}/cassandra
+                <!--[[1, "インストール"], [2, "起動とその他もろもろ"], [3, "Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する"], [4, "Column Familyを作る"], [5, "pom.xml"], [6, "Client.java"]]-->
+                <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p><h4>インストール</h4><p><a href="http://cassandra.apache.org" target="_blank" rel="noopener noreferrer">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p><h4>起動とその他もろもろ</h4><p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p><pre class="line-numbers"><code class="language-sh">mkdir -p /var/{log,lib}/cassandra
 
 # ※各ディレクトリの所有者関係も設定する
 </code></pre><p>まずサーバーを起動。</p><pre class="line-numbers"><code class="language-sh">cassandra -f
@@ -153,11 +116,7 @@ ga("send", "pageview");
 とりあえずColumn Familyを作ってみる
 
 
-</code></pre>
-<h1 id="keyspace-create-keyspace-keyspace1-keyspace">Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</h1>
-<p>use Keyspace1;</p>
-<h1 id="column-family">Column Familyを作る</h1>
-<p>create column family Sample with comparator = UTF8Type and key_validation_class = UTF8Type and default_validation_class = UTF8Type
+</code></pre><h4>Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</h4><p>use Keyspace1;</p><h4>Column Familyを作る</h4><p>create column family Sample with comparator = UTF8Type and key_validation_class = UTF8Type and default_validation_class = UTF8Type
 ```</p><p>まぁこんな感じで作る。で最後の所ですが、作ったColumn Familyをdescribeしてみると</p>
 <pre>
 ColumnFamily: Sample
@@ -186,18 +145,16 @@ ColumnFamily: Sample
   GC grace seconds: 864000  Compaction min/max thresholds: 4/32  Read repair chance: 1.0  Replicate on write: true  Bloom Filter FP chance: default  Built indexes: []  Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
 </pre>
 <p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p><pre class="line-numbers"><code class="language-">use Keyspace1;
-set Sample[test1][name] = "hoge";
+set Sample[test1][name] = &quot;hoge&quot;;
 </code></pre><p>で突っ込んだので</p><pre class="line-numbers"><code class="language-">use Keyspace1;
 get Sample[test1];
 
 # 出力 =&gt; (column=name, value=hoge, timestamp=省略)
-</code></pre><p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p>
-<h4 id="pom-xml">pom.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" ?&gt;
+</code></pre><p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p><h4>pom.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;project
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4.0.0.xsd"&gt;
+    xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4.0.0.xsd&quot;&gt;
 
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
     &lt;groupId&gt;省略&lt;/groupId&gt;
@@ -234,9 +191,7 @@ get Sample[test1];
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/project&gt;
-</code></pre><p>んじゃJava側のClientクラスを書く</p>
-<h4 id="client-java">Client.java</h4>
-<pre class="line-numbers"><code class="language-java">import java.nio.ByteBuffer;
+</code></pre><p>んじゃJava側のClientクラスを書く</p><h4>Client.java</h4><pre class="line-numbers"><code class="language-java">import java.nio.ByteBuffer;
 import java.io.UnsupportedEncodingException;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -257,13 +212,13 @@ import org.apache.thrift.TException;
 
 public class Client {
 
-    private static final String KEYSPACE = "Keyspace1";
-    private static final String COLUMN_FAMILY = "Sample";
-    private static final String COLUMN_FAMILY_KEY = "test1";
-    private static final String COLUMN_FAMILY_KEY_COLUMN = "name";
+    private static final String KEYSPACE = &quot;Keyspace1&quot;;
+    private static final String COLUMN_FAMILY = &quot;Sample&quot;;
+    private static final String COLUMN_FAMILY_KEY = &quot;test1&quot;;
+    private static final String COLUMN_FAMILY_KEY_COLUMN = &quot;name&quot;;
 
     public static void main(String[] args) {
-        TTransport transport = new TFramedTransport(new TSocket("localhost", 9160));
+        TTransport transport = new TFramedTransport(new TSocket(&quot;localhost&quot;, 9160));
         TProtocol proto = new TBinaryProtocol(transport);
 
         try {
@@ -280,7 +235,7 @@ public class Client {
 
             String columnName = bufferToString(column.name);
             String columnValue = bufferToString(column.value);
-            String output = String.format("%s[%s][%s] = %s", COLUMN_FAMILY, COLUMN_FAMILY_KEY, columnName, columnValue);
+            String output = String.format(&quot;%s[%s][%s] = %s&quot;, COLUMN_FAMILY, COLUMN_FAMILY_KEY, columnName, columnValue);
 
             System.out.println(output);
         } catch (TTransportException e) {
@@ -303,14 +258,14 @@ public class Client {
     }
 
     public static ByteBuffer stringToBuffer(String str) throws UnsupportedEncodingException {
-        return ByteBuffer.wrap(str.getBytes("UTF-8"));
+        return ByteBuffer.wrap(str.getBytes(&quot;UTF-8&quot;));
     }
 
     public static String bufferToString(ByteBuffer buffer) throws UnsupportedEncodingException {
         byte[] b = new byte[buffer.remaining()];
         buffer.get(b);
 
-        return new String(b, "UTF-8");
+        return new String(b, &quot;UTF-8&quot;);
     }
 }
 </code></pre><p>(ByteBufferな変換あれこれはCassandraにByteBufferUtilっていうのがあるのでそれを使うべきかと思われる)</p><p>あとはmvn compileしたあとにmvn exec:javaで実行してみる。現時点で勉強しているのはここまでなので終了乙</p>
@@ -363,53 +318,67 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -417,17 +386,21 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -435,32 +408,41 @@ public class Client {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -468,14 +450,17 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -483,11 +468,13 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -495,20 +482,25 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -516,47 +508,43 @@ public class Client {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -564,20 +552,41 @@ public class Client {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -587,17 +596,21 @@ public class Client {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

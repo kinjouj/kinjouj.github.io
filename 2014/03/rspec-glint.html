@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="以前にrspecとspawnっていうのをやったけど、それっぽい事を実現するのにglintっていうのがあるらしいのでやってみたlib/sample.rbrequire"mongo"clas" />
+    <meta name="description" content="以前にrspecとspawnっていうのをやったけど、それっぽい事を実現するのにglintっていうのがあるらしいのでやってみたlib/sample.rbrequire&quot;mongo&quot;" />
     <title>rspec+glint - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/02/loadmorelistview.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/03/gradle-war-bundled-javascripts.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,29 +96,14 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#lib-sample-rb">lib/sample.rb</a>
-</li>
-<li>
-<a href="#spec-spec_helper-rb">spec/spec_helper.rb</a>
-</li>
-<li>
-<a href="#spec-sample_spec-rb">spec/sample_spec.rb</a>
-</li>
-</ul>
--->
-                <p>以前に<a href="/2013/07/rspec-spawn.html">rspecとspawn</a>っていうのをやったけど、それっぽい事を実現するのに<a href="https://github.com/kentaro/glint">glint</a>っていうのがあるらしいのでやってみた</p>
-<!--more-->
-
-<h4 id="lib-sample-rb">lib/sample.rb</h4>
-<pre class="line-numbers"><code class="language-rb">require "mongo"
+                <!--[[1, "lib/sample.rb"], [2, "spec/spec_helper.rb"], [3, "spec/sample_spec.rb"]]-->
+                <p>以前に<a href="/2013/07/rspec-spawn.html">rspecとspawn</a>っていうのをやったけど、それっぽい事を実現するのに<a href="https://github.com/kentaro/glint">glint</a>っていうのがあるらしいのでやってみた</p><h4>lib/sample.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;mongo&quot;
 
 class Sample
   def self.get
     client = mongo()
-    db = client.db("sample")
-    coll = db.collection("samples")
+    db = client.db(&quot;sample&quot;)
+    coll = db.collection(&quot;samples&quot;)
 
     coll.find_one
   end
@@ -133,40 +117,36 @@ class Sample
   private_class_method :mongo
 
 end
-</code></pre><p>前回のとはちょっとだけ修正。MongoDBなクライアントインスタンスをメソッドとして出しておいた。今回はこれをmockする事でテスト時に起動したMongoDBなクライアントインスタンスに差し替える事で実現する</p>
-<h4 id="spec-spec_helper-rb">spec/spec_helper.rb</h4>
-<p>公式にあるmemcachedなサンプルなのではspec_helperでのglintによるサーバーの起動処理等に関しては別のスクリプト上で行い、Glient::Server.infoっていうプロパティ的なのを使ってる模様だけど今回はパスするので気になる場合はそちらを参照すりゃよろし</p><pre class="line-numbers"><code class="language-rb">RSpec.configure do |config|
+</code></pre><p>前回のとはちょっとだけ修正。MongoDBなクライアントインスタンスをメソッドとして出しておいた。今回はこれをmockする事でテスト時に起動したMongoDBなクライアントインスタンスに差し替える事で実現する</p><h4>spec/spec_helper.rb</h4><p>公式にあるmemcachedなサンプルなのではspec_helperでのglintによるサーバーの起動処理等に関しては別のスクリプト上で行い、Glient::Server.infoっていうプロパティ的なのを使ってる模様だけど今回はパスするので気になる場合はそちらを参照すりゃよろし</p><pre class="line-numbers"><code class="language-rb">RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
-  config.order = "random"
+  config.order = &quot;random&quot;
 end
 
-require "glint"
-require "mongo"
+require &quot;glint&quot;
+require &quot;mongo&quot;
 
 server = Glint::Server.new do |port|
-  exec "mongod",
-    "--dbpath", "/tmp/mongo",
-    "--logpath", "/dev/null",
-    "--port", port.to_s
+  exec &quot;mongod&quot;,
+    &quot;--dbpath&quot;, &quot;/tmp/mongo&quot;,
+    &quot;--logpath&quot;, &quot;/dev/null&quot;,
+    &quot;--port&quot;, port.to_s
   exit 0
 end
-server.on_stopped = -&gt;(s) { puts "mongodb stopped" }
+server.on_stopped = -&gt;(s) { puts &quot;mongodb stopped&quot; }
 server.start
 
-shared_context "mongodb" do
+shared_context &quot;mongodb&quot; do
   let(:client) do
-    Mongo::MongoClient.new("localhost", server.port)
+    Mongo::MongoClient.new(&quot;localhost&quot;, server.port)
   end
 end
-</code></pre><p>※別途事前に/tmp/mongoを作っておいてそこにMongoDBなデータを事前に突っ込んでしておく</p>
-<h4 id="spec-sample_spec-rb">spec/sample_spec.rb</h4>
-<pre class="line-numbers"><code class="language-rb">require "spec_helper"
-require "sample"
+</code></pre><p>※別途事前に/tmp/mongoを作っておいてそこにMongoDBなデータを事前に突っ込んでしておく</p><h4>spec/sample_spec.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
+require &quot;sample&quot;
 
 describe Sample do
-  include_context "mongodb"
+  include_context &quot;mongodb&quot;
 
   it {
     Sample.stub(:mongo).and_return(client)
@@ -239,53 +219,67 @@ mongodb stopped
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -293,17 +287,21 @@ mongodb stopped
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -311,32 +309,41 @@ mongodb stopped
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -344,14 +351,17 @@ mongodb stopped
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -359,11 +369,13 @@ mongodb stopped
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -371,20 +383,25 @@ mongodb stopped
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -392,47 +409,43 @@ mongodb stopped
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -440,20 +453,41 @@ mongodb stopped
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -463,17 +497,21 @@ mongodb stopped
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

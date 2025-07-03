@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,26 +95,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-1738c18ef7e0ad50">キーストアを作る</a>
-</li>
-<li>
-<a href="#part-6807caf1b423779f">クライアント</a>
-</li>
-<li>
-<a href="#x509-keystore">余談: X509証明書からKeyStoreなインスタンスを作る方法</a>
-</li>
-<li>
-<a href="#trustmanager">余談: TrustManagerを独自実装してチェックする場合</a>
-</li>
-</ul>
--->
-                <p>参考: <a href="https://developer.android.com/training/articles/security-ssl.html" target="_blank" rel="noopener noreferrer">https://developer.android.com/training/articles/security-ssl.html</a></p><p>※セキュリティ対策を前提としたネタではないので</p><p>以前にオレオレHTTPSにJavaから接続するメモというネタで書いてる。そこでTrustManagerを使用するがnullを返すだけなパターンが色々と問題なのでそういう手法を使わない方法をちょっと調べてみたのでメモ</p>
-<!--more-->
-
-<h4 id="part-1738c18ef7e0ad50">キーストアを作る</h4>
-<pre class="line-numbers"><code class="language-sh"># JKSなキーストアを作る
+                <!--[[1, "キーストアを作る"], [2, "クライアント"], [3, "余談: X509証明書からKeyStoreなインスタンスを作る方法"], [4, "余談: TrustManagerを独自実装してチェックする場合"]]-->
+                <p>参考: <a href="https://developer.android.com/training/articles/security-ssl.html" target="_blank" rel="noopener noreferrer">https://developer.android.com/training/articles/security-ssl.html</a></p><p>※セキュリティ対策を前提としたネタではないので</p><p>以前にオレオレHTTPSにJavaから接続するメモというネタで書いてる。そこでTrustManagerを使用するがnullを返すだけなパターンが色々と問題なのでそういう手法を使わない方法をちょっと調べてみたのでメモ</p><h4>キーストアを作る</h4><pre class="line-numbers"><code class="language-sh"># JKSなキーストアを作る
 keytool \
   -importcert \
   -v \
@@ -136,9 +117,7 @@ keytool \
   -keystore server.bks \
   -storetype BKS \
   -storepass abcdef
-</code></pre><p>JKSとBKSのアルゴリズムの２つなパターンを検証してみるので(ただし以下ソースではJKSのみ)</p>
-<h4 id="part-6807caf1b423779f">クライアント</h4>
-<pre class="line-numbers"><code class="language-java">import java.io.IOException;
+</code></pre><p>JKSとBKSのアルゴリズムの２つなパターンを検証してみるので(ただし以下ソースではJKSのみ)</p><h4>クライアント</h4><pre class="line-numbers"><code class="language-java">import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -157,23 +136,23 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class Main {
     public static void main(String[] args) {
-        try (InputStream is = Main.class.getResourceAsStream("server.jks")) {
-            KeyStore ks = KeyStore.getInstance("JKS");
-            ks.load(is, "abcdef".toCharArray());
+        try (InputStream is = Main.class.getResourceAsStream(&quot;server.jks&quot;)) {
+            KeyStore ks = KeyStore.getInstance(&quot;JKS&quot;);
+            ks.load(is, &quot;abcdef&quot;.toCharArray());
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(
                 TrustManagerFactory.getDefaultAlgorithm()
             );
             tmf.init(ks);
 
-            SSLContext context = SSLContext.getInstance("TLS");
+            SSLContext context = SSLContext.getInstance(&quot;TLS&quot;);
             context.init(null, tmf.getTrustManagers(), new SecureRandom());
 
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
 
             HttpsURLConnection conn = (HttpsURLConnection)
-                new URL("https://localhost/test.txt").openConnection(
-                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", 8080))
+                new URL(&quot;https://localhost/test.txt&quot;).openConnection(
+                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress(&quot;localhost&quot;, 8080))
                 );
             conn.connect();
 
@@ -191,9 +170,7 @@ public class Main {
         }
     }
 }
-</code></pre><p>っていう感じで作って、上記でプロキシを介してリクエストするのでmitmproxyを使ってサーバーから送られてくる証明書等?を偽装出来るようなプロキシを使うと使用しているキーストアとサーバーから送られてくる不適切な証明書を検証して問題があれば例外が発生してリクエストが成立しなくなる(もちろんプロキシする部分のコードを消してプロキシを介さないようにした場合はサーバー側の証明書とキーストアを検証して問題は起きないのでリクエストは成立する)</p><p>で上記コードだとJKSを使ってるだけなので、BKSを使う場合にはserver.bksを使うのとKeyStore.getInstanceの引数にBKSを指定するだけでほかは特に変わらないので省略(※ただし、BKSの場合はキーストアパスを空にしてもロード出来る模様。詳しくは <a href="https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786" target="_blank" rel="noopener noreferrer">https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786</a> )</p><p>っていうような感じでHTTPS通信するのはいいけど証明書周りの検証をやらないで問答無用ですっ飛ばすような実装するべきじゃないってことで。ちなみにそういう系の専門な人がいうにはサーバーから来た証明書とかのコモンネームなどもちゃんと検証するべきだとのこと</p>
-<h4 id="x509-keystore">余談: X509証明書からKeyStoreなインスタンスを作る方法</h4>
-<pre class="line-numbers"><code class="language-java">import java.io.IOException;
+</code></pre><p>っていう感じで作って、上記でプロキシを介してリクエストするのでmitmproxyを使ってサーバーから送られてくる証明書等?を偽装出来るようなプロキシを使うと使用しているキーストアとサーバーから送られてくる不適切な証明書を検証して問題があれば例外が発生してリクエストが成立しなくなる(もちろんプロキシする部分のコードを消してプロキシを介さないようにした場合はサーバー側の証明書とキーストアを検証して問題は起きないのでリクエストは成立する)</p><p>で上記コードだとJKSを使ってるだけなので、BKSを使う場合にはserver.bksを使うのとKeyStore.getInstanceの引数にBKSを指定するだけでほかは特に変わらないので省略(※ただし、BKSの場合はキーストアパスを空にしてもロード出来る模様。詳しくは <a href="https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786" target="_blank" rel="noopener noreferrer">https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786</a> )</p><p>っていうような感じでHTTPS通信するのはいいけど証明書周りの検証をやらないで問答無用ですっ飛ばすような実装するべきじゃないってことで。ちなみにそういう系の専門な人がいうにはサーバーから来た証明書とかのコモンネームなどもちゃんと検証するべきだとのこと</p><h4>余談: X509証明書からKeyStoreなインスタンスを作る方法</h4><pre class="line-numbers"><code class="language-java">import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -213,28 +190,28 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class Main {
     public static void main(String[] args) {
-        try (InputStream is = Main.class.getResourceAsStream("server.crt")) {
+        try (InputStream is = Main.class.getResourceAsStream(&quot;server.crt&quot;)) {
             X509Certificate cert = (X509Certificate)CertificateFactory
-                .getInstance("X.509")
+                .getInstance(&quot;X.509&quot;)
                 .generateCertificate(is);
 
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             ks.load(null);
-            ks.setCertificateEntry("ca", cert);
+            ks.setCertificateEntry(&quot;ca&quot;, cert);
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(
                 TrustManagerFactory.getDefaultAlgorithm()
             );
             tmf.init(ks);
 
-            SSLContext context = SSLContext.getInstance("TLS");
+            SSLContext context = SSLContext.getInstance(&quot;TLS&quot;);
             context.init(null, tmf.getTrustManagers(), new SecureRandom());
 
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
 
             HttpsURLConnection conn = (HttpsURLConnection)
-                new URL("https://localhost/test.txt").openConnection(
-                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", 8080))
+                new URL(&quot;https://localhost/test.txt&quot;).openConnection(
+                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress(&quot;localhost&quot;, 8080))
                 );
             conn.connect();
 
@@ -252,9 +229,7 @@ public class Main {
         }
     }
 }
-</code></pre><p>っていうような感じでCertificateFactoryを使って生成出来る</p>
-<h4 id="trustmanager">余談: TrustManagerを独自実装してチェックする場合</h4>
-<pre class="line-numbers"><code class="language-java">import java.io.IOException;
+</code></pre><p>っていうような感じでCertificateFactoryを使って生成出来る</p><h4>余談: TrustManagerを独自実装してチェックする場合</h4><pre class="line-numbers"><code class="language-java">import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -273,8 +248,8 @@ import javax.net.ssl.X509TrustManager;
 
 public class Main {
     public static void main(String[] args) {
-        try (InputStream is = Main.class.getResourceAsStream("server.crt")) {
-            SSLContext context = SSLContext.getInstance("TLS");
+        try (InputStream is = Main.class.getResourceAsStream(&quot;server.crt&quot;)) {
+            SSLContext context = SSLContext.getInstance(&quot;TLS&quot;);
             context.init(
                 null,
                 new TrustManager[] { new SampleTrustManager(is) },
@@ -284,8 +259,8 @@ public class Main {
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
 
             HttpsURLConnection conn = (HttpsURLConnection)
-                new URL("https://localhost/test.txt").openConnection(
-                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", 8080))
+                new URL(&quot;https://localhost/test.txt&quot;).openConnection(
+                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress(&quot;localhost&quot;, 8080))
                 );
             conn.connect();
 
@@ -306,7 +281,7 @@ public class Main {
         public SampleTrustManager(InputStream is) {
             try {
                 trustedCert = (X509Certificate)CertificateFactory
-                                .getInstance("X.509")
+                                .getInstance(&quot;X.509&quot;)
                                 .generateCertificate(is);
             } catch (CertificateException e) {
                 e.printStackTrace();
@@ -385,53 +360,67 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -439,17 +428,21 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -457,32 +450,41 @@ public class Main {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -490,14 +492,17 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -505,11 +510,13 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -517,20 +524,25 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -538,47 +550,43 @@ public class Main {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -586,20 +594,41 @@ public class Main {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -609,17 +638,21 @@ public class Main {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,35 +96,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-b84cb7427fbc8bcb">データベーステーブル仕様</a>
-</li>
-<li>
-<a href="#fuel-app-classess-controller-home-php">fuel/app/classess/controller/home.php</a>
-</li>
-<li>
-<a href="#fuel-app-classess-controller-auth-php">fuel/app/classess/controller/auth.php</a>
-</li>
-<li>
-<a href="#auth">Authドライバの構成</a>
-</li>
-<li>
-<a href="#fuel-app-classes-auth-login-lite-php">fuel/app/classes/auth/login/lite.php</a>
-</li>
-<li>
-<a href="#fuel-app-classes-auth-group-lite-php">fuel/app/classes/auth/group/lite.php</a>
-</li>
-<li>
-<a href="#fuel-app-classes-auth-acl-lite-php">fuel/app/classes/auth/acl/lite.php</a>
-</li>
-</ul>
--->
-                <p>前回でSimpleAuthを使って認証する方法がありましたが、これを独自実装でやりたい場合にAuthパッケージな機能を利用し認証ドライバを開発する事で組み込める模様。なのでちょっとやってみた</p><p>※一応、暫定版です。色々追記するかも</p>
-<!--more-->
-
-<h4 id="part-b84cb7427fbc8bcb">データベーステーブル仕様</h4>
-<pre class="line-numbers"><code class="language-sql">CREATE TABLE `user` (
+                <!--[[1, "データベーステーブル仕様"], [2, "fuel/app/classess/controller/home.php"], [3, "fuel/app/classess/controller/auth.php"], [4, "Authドライバの構成"], [5, "fuel/app/classes/auth/login/lite.php"], [6, "fuel/app/classes/auth/group/lite.php"], [7, "fuel/app/classes/auth/acl/lite.php"]]-->
+                <p>前回でSimpleAuthを使って認証する方法がありましたが、これを独自実装でやりたい場合にAuthパッケージな機能を利用し認証ドライバを開発する事で組み込める模様。なのでちょっとやってみた</p><p>※一応、暫定版です。色々追記するかも</p><h4>データベーステーブル仕様</h4><pre class="line-numbers"><code class="language-sql">CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(80) NOT NULL,
   `password` varchar(50) NOT NULL,
@@ -136,9 +108,7 @@ ga("send", "pageview");
   UNIQUE KEY `userid` (`username`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
-</code></pre><p>というようなテーブルを作る。で前回はやらなかったけど、指定したページのアクセス権限となる機能(Authパッケージで言うとGroupとかAclとか)を組み込む為にpermissionカラムに権限的なのを付ける</p><p>でまずはAuthドライバーパッケージは後回しで機能そういう機能的な所をコントローラー等に実装する</p>
-<h4 id="fuel-app-classess-controller-home-php">fuel/app/classess/controller/home.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>というようなテーブルを作る。で前回はやらなかったけど、指定したページのアクセス権限となる機能(Authパッケージで言うとGroupとかAclとか)を組み込む為にpermissionカラムに権限的なのを付ける</p><p>でまずはAuthドライバーパッケージは後回しで機能そういう機能的な所をコントローラー等に実装する</p><h4>fuel/app/classess/controller/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
 
@@ -147,51 +117,47 @@ class Controller_Home extends Controller {
 
         // ログインしているかチェック
         if (!$auth-&gt;check()) {
-            return Response::redirect("/auth");
+            return Response::redirect(&quot;/auth&quot;);
         }
 
         // ログインユーザーのアクセス権限をチェック。この場合はpermissionカラムの値がadminであるかをチェック。そうじゃなければ/auth/deniedにリダイレクト
-        if (!$auth-&gt;has_access("admin")) {
-            return Response::redirect("/auth/denied");
+        if (!$auth-&gt;has_access(&quot;admin&quot;)) {
+            return Response::redirect(&quot;/auth/denied&quot;);
         }
     }
 
     public function get_index() {
         // ログアウトのリンクだけを付けたビューなので詳細は省略
-        return View::forge("home");
+        return View::forge(&quot;home&quot;);
     }
 }
-</code></pre><p>まぁ前回同様ですが、今回はアクセス権限があるかまでチェックしたいのでそこら辺を使う。has_accessでログインユーザーが持つ権限でアクセス可能かをチェックする</p><p>でログインフォームだとかログイン処理を行うauthコントローラーを作る</p>
-<h4 id="fuel-app-classess-controller-auth-php">fuel/app/classess/controller/auth.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>まぁ前回同様ですが、今回はアクセス権限があるかまでチェックしたいのでそこら辺を使う。has_accessでログインユーザーが持つ権限でアクセス可能かをチェックする</p><p>でログインフォームだとかログイン処理を行うauthコントローラーを作る</p><h4>fuel/app/classess/controller/auth.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Auth extends Controller {
 
     public function get_index() {
         // ログインフォームを出すだけ
-        return View::forge("login");
+        return View::forge(&quot;login&quot;);
     }
 
     public function post_login() {
         // ログインしてリダイレクト。ログインに失敗したかをチェックする場合にはloginメソッドの返り値等で実装を行う
         Auth::login();
-        Response::redirect("/");
+        Response::redirect(&quot;/&quot;);
     }
 
     public function get_logout() {
         // ログアウトしてリダイレクト
         Auth::logout();
-        Response::redirect("/");
+        Response::redirect(&quot;/&quot;);
     }
 
     // ログインユーザー権限でアクセス出来ない場合に表示されるアクション
     public function get_denied() {
-        return Response::forge("Access Denied");
+        return Response::forge(&quot;Access Denied&quot;);
     }
 }
-</code></pre><p>これも前回のSimpleAuthとほとんど同じ。ビューはそのまま再利用しているので省略</p><p>でここから独自のAuthドライバーを作って、ログイン処理等を実装する</p>
-<h4 id="auth">Authドライバの構成</h4>
-<p>fuel/app/classes/authに置く。で必要なのがLogin・Group・Aclなクラスの3つが必要になる。で今回はLiteっていうドライバ名にしたので</p>
+</code></pre><p>これも前回のSimpleAuthとほとんど同じ。ビューはそのまま再利用しているので省略</p><p>でここから独自のAuthドライバーを作って、ログイン処理等を実装する</p><h4>Authドライバの構成</h4><p>fuel/app/classes/authに置く。で必要なのがLogin・Group・Aclなクラスの3つが必要になる。で今回はLiteっていうドライバ名にしたので</p>
 <pre>
 auth
 ├── acl
@@ -204,40 +170,38 @@ auth
 <p>っていうのが必要になるような感じで。んで認証ドライバを設定しなきゃならんのでfuel/app/config/auth.phpを</p><pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(
-    "driver" =&gt; "Lite",
-    "verify_multiple_logins" =&gt; false,
-    "salt" =&gt; "put_your_salt_here",
+    &quot;driver&quot; =&gt; &quot;Lite&quot;,
+    &quot;verify_multiple_logins&quot; =&gt; false,
+    &quot;salt&quot; =&gt; &quot;put_your_salt_here&quot;,
 );
-</code></pre><p>な感じで以降で作るAuthドライバを指定しておく</p>
-<h4 id="fuel-app-classes-auth-login-lite-php">fuel/app/classes/auth/login/lite.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>な感じで以降で作るAuthドライバを指定しておく</p><h4>fuel/app/classes/auth/login/lite.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Auth_Login_Lite extends Auth\Auth_Login_Driver {
 
     // Groupドライバの設定
     protected $config = array(
-        "drivers" =&gt; array(
-            "group" =&gt; array("Lite")
+        &quot;drivers&quot; =&gt; array(
+            &quot;group&quot; =&gt; array(&quot;Lite&quot;)
         )
     );
 
     private $user;
 
     protected function perform_check() {
-        $current_user = Session::get("current_user");
+        $current_user = Session::get(&quot;current_user&quot;);
 
-        if (!is_null($current_user) && is_array($current_user)) {
-            if (isset($current_user["id"]) && isset($current_user["salt"])) {
+        if (!is_null($current_user) &amp;&amp; is_array($current_user)) {
+            if (isset($current_user[&quot;id&quot;]) &amp;&amp; isset($current_user[&quot;salt&quot;])) {
                 $users = Model_User::find(array(
-                    "select" =&gt; array("id", "username", "email", "permission"),
-                    "where" =&gt; array(
-                        "id" =&gt; $current_user["id"],
-                        "salt" =&gt; $current_user["salt"]
+                    &quot;select&quot; =&gt; array(&quot;id&quot;, &quot;username&quot;, &quot;email&quot;, &quot;permission&quot;),
+                    &quot;where&quot; =&gt; array(
+                        &quot;id&quot; =&gt; $current_user[&quot;id&quot;],
+                        &quot;salt&quot; =&gt; $current_user[&quot;salt&quot;]
                     ),
-                    "limit" =&gt; 1
+                    &quot;limit&quot; =&gt; 1
                 ));
 
-                if (!is_null($users) && is_array($users) && count($users) === 1) {
+                if (!is_null($users) &amp;&amp; is_array($users) &amp;&amp; count($users) === 1) {
                     $this-&gt;user = reset($users);
 
                     return true;
@@ -248,32 +212,32 @@ class Auth_Login_Lite extends Auth\Auth_Login_Driver {
         return false;
     }
 
-    public function validate_user($username = "", $password = "") {
+    public function validate_user($username = &quot;&quot;, $password = &quot;&quot;) {
         if (empty($username)) {
-            $username = Input::post("userid");
+            $username = Input::post(&quot;userid&quot;);
         }
 
         if (empty($password)) {
-            $password = Input::post("password");
+            $password = Input::post(&quot;password&quot;);
         }
 
         $users = Model_User::find(array(
-            "select" =&gt; array("id", "salt"),
-            "where" =&gt; array(
-                "username" =&gt; $username,
-                "password" =&gt; sha1($password)
+            &quot;select&quot; =&gt; array(&quot;id&quot;, &quot;salt&quot;),
+            &quot;where&quot; =&gt; array(
+                &quot;username&quot; =&gt; $username,
+                &quot;password&quot; =&gt; sha1($password)
             ),
-            "limit" =&gt; 1
+            &quot;limit&quot; =&gt; 1
         ));
 
-        if (!is_null($users) && is_array($users) && count($users) === 1) {
+        if (!is_null($users) &amp;&amp; is_array($users) &amp;&amp; count($users) === 1) {
             $user = reset($users);
-            $user-&gt;salt = Str::random("sha2", 64);
+            $user-&gt;salt = Str::random(&quot;sha2&quot;, 64);
             $user-&gt;save();
 
-            Session::set("current_user", array(
-                "id" =&gt; $user-&gt;id,
-                "salt" =&gt; $user-&gt;salt
+            Session::set(&quot;current_user&quot;, array(
+                &quot;id&quot; =&gt; $user-&gt;id,
+                &quot;salt&quot; =&gt; $user-&gt;salt
             ));
 
             $this-&gt;user = $user;
@@ -284,29 +248,29 @@ class Auth_Login_Lite extends Auth\Auth_Login_Driver {
         return false;
     }
 
-    public function login($username = "", $password = "") {
+    public function login($username = &quot;&quot;, $password = &quot;&quot;) {
         return $this-&gt;validate_user($username, $password);
     }
 
     public function logout() {
-        Session::delete("current_user");
+        Session::delete(&quot;current_user&quot;);
 
         return true;
     }
 
     public function get_user_id() {
-        if (!empty($this-&gt;user) && isset($this-&gt;user["id"])) {
-            return array($this-&gt;id, (int)$this-&gt;user["id"]);
+        if (!empty($this-&gt;user) &amp;&amp; isset($this-&gt;user[&quot;id&quot;])) {
+            return array($this-&gt;id, (int)$this-&gt;user[&quot;id&quot;]);
         }
 
         return null;
     }
 
     public function get_groups() {
-        if (!empty($this-&gt;user) && isset($this-&gt;user["permission"])) {
+        if (!empty($this-&gt;user) &amp;&amp; isset($this-&gt;user[&quot;permission&quot;])) {
 
             return array(
-                array("Lite", $this-&gt;user["permission"])
+                array(&quot;Lite&quot;, $this-&gt;user[&quot;permission&quot;])
             );
         }
 
@@ -314,23 +278,23 @@ class Auth_Login_Lite extends Auth\Auth_Login_Driver {
     }
 
     public function get_email() {
-        if (!empty($this-&gt;user) && isset($this-&gt;user["email"])) {
-            return $this-&gt;user["email"];
+        if (!empty($this-&gt;user) &amp;&amp; isset($this-&gt;user[&quot;email&quot;])) {
+            return $this-&gt;user[&quot;email&quot;];
         }
 
         return null;
     }
 
     public function get_screen_name() {
-        if (!empty($this-&gt;user) && isset($this-&gt;user["username"])) {
-            return $this-&gt;user["username"];
+        if (!empty($this-&gt;user) &amp;&amp; isset($this-&gt;user[&quot;username&quot;])) {
+            return $this-&gt;user[&quot;username&quot;];
         }
 
         return null;
     }
 
     public function has_access($condition, $driver = null, $entity = null) {
-        if (is_null($entity) && !empty($this-&gt;user)) {
+        if (is_null($entity) &amp;&amp; !empty($this-&gt;user)) {
             $groups = $this-&gt;get_groups();
             $entity = reset($groups);
         }
@@ -338,16 +302,14 @@ class Auth_Login_Lite extends Auth\Auth_Login_Driver {
         return parent::has_access($condition, $driver, $entity);
     }
 }
-</code></pre><p>コメント書かなくても何してるかは大体は分かると思うのですが、でどうやらhas_accessでもAuth::checkか何やらが走る模様なので、このクラスのperform_checkが数回走るので既にログインチェック済みかを検証して行った方が良いかと(そうしないとDBアクセスが数回走るという微妙な事になる)</p><p>んでhas_accessでアクセス権限チェックするのはGroupとAclの方になるのでそこを実装する</p>
-<h4 id="fuel-app-classes-auth-group-lite-php">fuel/app/classes/auth/group/lite.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>コメント書かなくても何してるかは大体は分かると思うのですが、でどうやらhas_accessでもAuth::checkか何やらが走る模様なので、このクラスのperform_checkが数回走るので既にログインチェック済みかを検証して行った方が良いかと(そうしないとDBアクセスが数回走るという微妙な事になる)</p><p>んでhas_accessでアクセス権限チェックするのはGroupとAclの方になるのでそこを実装する</p><h4>fuel/app/classes/auth/group/lite.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Auth_Group_Lite extends Auth\Auth_Group_Driver {
 
     // Aclの設定
     protected $config = array(
-        "drivers" =&gt; array(
-            "acl" =&gt; array("Lite")
+        &quot;drivers&quot; =&gt; array(
+            &quot;acl&quot; =&gt; array(&quot;Lite&quot;)
         )
     );
 
@@ -361,9 +323,7 @@ class Auth_Group_Lite extends Auth\Auth_Group_Driver {
         return in_array(array($this-&gt;id, $group), $groups);
     }
 }
-</code></pre><p>で実際に権限チェックを行う側はAclになる(Authのmemberメソッドでも呼び出せる)。memberメソッドはAclから呼び出すので</p>
-<h4 id="fuel-app-classes-auth-acl-lite-php">fuel/app/classes/auth/acl/lite.php</h4>
-<pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre><p>で実際に権限チェックを行う側はAclになる(Authのmemberメソッドでも呼び出せる)。memberメソッドはAclから呼び出すので</p><h4>fuel/app/classes/auth/acl/lite.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
     public function has_access($condition, Array $entity) {
@@ -428,53 +388,67 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -482,17 +456,21 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -500,32 +478,41 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -533,14 +520,17 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -548,11 +538,13 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -560,20 +552,25 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -581,47 +578,43 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -629,20 +622,41 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -652,17 +666,21 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

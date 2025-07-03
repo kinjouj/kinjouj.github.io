@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -96,15 +95,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-65432f7b3b1">追記</a>
-</li>
-</ul>
--->
-                <p>okhttp <a href="https://github.com/square/okhttp" target="_blank" rel="noopener noreferrer">https://github.com/square/okhttp</a></p><p>mockwebserver <a href="https://github.com/square/okhttp/tree/master/mockwebserver" target="_blank" rel="noopener noreferrer">https://github.com/square/okhttp/tree/master/mockwebserver</a></p><p>Android界隈向けでよく名前出てくるokhttp、と同等なプロジェクトグループ?が開発しているmockwebserverを使ってみた</p>
-<!--more-->
-<pre class="line-numbers"><code class="language-java">import com.squareup.okhttp.OkHttpClient;
+                <!--[[1, "追記"]]-->
+                <p>okhttp <a href="https://github.com/square/okhttp" target="_blank" rel="noopener noreferrer">https://github.com/square/okhttp</a></p><p>mockwebserver <a href="https://github.com/square/okhttp/tree/master/mockwebserver" target="_blank" rel="noopener noreferrer">https://github.com/square/okhttp/tree/master/mockwebserver</a></p><p>Android界隈向けでよく名前出てくるokhttp、と同等なプロジェクトグループ?が開発しているmockwebserverを使ってみた</p><pre class="line-numbers"><code class="language-java">import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.squareup.okhttp.mockwebserver.Dispatcher;
@@ -136,13 +128,13 @@ public class MainTest {
         server.setDispatcher(new Dispatcher() {
             @Override
             public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
-                return new MockResponse().setBody("test1");
+                return new MockResponse().setBody(&quot;test1&quot;);
             }
         });
         server.play();
 
         Request request = new Request.Builder()
-                .url("http://kinjouj.github.io")
+                .url(&quot;http://kinjouj.github.io&quot;)
                 .build();
 
         OkHttpClient client = new OkHttpClient();
@@ -155,7 +147,7 @@ public class MainTest {
 
         Response   response = client.newCall(request).execute();
         assertThat(response.isSuccessful(), is(true));
-        assertThat(response.body().string(), is("test1"));
+        assertThat(response.body().string(), is(&quot;test1&quot;));
     }
 
     @Test
@@ -165,10 +157,10 @@ public class MainTest {
             public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
                 MockResponse response = null;
 
-                if (request.getPath().equals("/test2")) {
-                    response = new MockResponse().setBody("test2");
+                if (request.getPath().equals(&quot;/test2&quot;)) {
+                    response = new MockResponse().setBody(&quot;test2&quot;);
                 } else {
-                    response = new MockResponse().setStatus("HTTP/1.1 404 Not Found");
+                    response = new MockResponse().setStatus(&quot;HTTP/1.1 404 Not Found&quot;);
                 }
 
                 return response;
@@ -179,22 +171,20 @@ public class MainTest {
         OkHttpClient client  = new OkHttpClient();
 
         Request request1 = new Request.Builder()
-                .url(server.getUrl("/test2"))
+                .url(server.getUrl(&quot;/test2&quot;))
                 .build();
         Response response1  = client.newCall(request1).execute();
         assertThat(response1.isSuccessful(), is(true));
-        assertThat(response1.body().string(), is("test2"));
+        assertThat(response1.body().string(), is(&quot;test2&quot;));
 
         Request request2 = new Request.Builder()
-            .url(server.getUrl("/test1"))
+            .url(server.getUrl(&quot;/test1&quot;))
             .build();
         Response response2 = client.newCall(request2).execute();
         assertThat(response2.code(), is(200)); // fail
     }
 }
-</code></pre><p>てな感じでMockWebServerを使って起動して返すレスポンスをMockResponseで返す。それをOkHttpClientで取得してテストみたいなまぁ適当なパターン。でtest1では外部へリクエストするけど、MockWebServerをプロキシとして利用してレスポンスを擬似的に返してテストしたりとか出来る?んじゃないかと</p><p>んまぁそういう面でも利用も出来なくもないんじゃないかと</p>
-<h4 id="part-65432f7b3b1">追記</h4>
-<p><a href="/2015/06/mockwebserverrule.html">MockWebServerRule</a>を書いた</p>
+</code></pre><p>てな感じでMockWebServerを使って起動して返すレスポンスをMockResponseで返す。それをOkHttpClientで取得してテストみたいなまぁ適当なパターン。でtest1では外部へリクエストするけど、MockWebServerをプロキシとして利用してレスポンスを擬似的に返してテストしたりとか出来る?んじゃないかと</p><p>んまぁそういう面でも利用も出来なくもないんじゃないかと</p><h4>追記</h4><p><a href="/2015/06/mockwebserverrule.html">MockWebServerRule</a>を書いた</p>
               </div>
             </div>
           </div>
@@ -244,53 +234,67 @@ public class MainTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -298,17 +302,21 @@ public class MainTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -316,32 +324,41 @@ public class MainTest {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -349,14 +366,17 @@ public class MainTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -364,11 +384,13 @@ public class MainTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -376,20 +398,25 @@ public class MainTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -397,47 +424,43 @@ public class MainTest {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -445,20 +468,41 @@ public class MainTest {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -468,17 +512,21 @@ public class MainTest {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

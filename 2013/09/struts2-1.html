@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="まぁStruts1.xがEOLっていう事で代わりとなりえるだろうフレームワークを調査中で。でまぁStruts2とかもあるんじゃないかっていう事で色々勉強をしてみる事にセットアップまぁ本来どうやるの" />
+    <meta name="description" content="まぁStruts1.xがEOLっていう事で代わりとなりえるだろうフレームワークを調査中で。でまぁStruts2とかもあるんじゃないかっていう事で色々勉強をしてみる事にセットアップまぁ本来どうやるのかは" />
     <title>Struts2をやってみる (1) - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/09/testem-mocha-coverjs-code-coverage.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/09/struts2-2-action-testing.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -97,36 +96,14 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-8811212a92a05889">セットアップ</a>
-</li>
-<li>
-<a href="#src-main-resources-struts-xml">src/main/resources/struts.xml</a>
-</li>
-<li>
-<a href="#src-main-webapp-web-inf-web-xml">src/main/webapp/WEB-INF/web.xml</a>
-</li>
-<li>
-<a href="#part-654311259e9">要件</a>
-</li>
-<li>
-<a href="#src-main-webapp-web-inf-jsp-index-jsp">src/main/webapp/WEB-INF/jsp/index.jsp</a>
-</li>
-<li>
-<a href="#src-main-java-sample-action-indexaction-java">src/main/java/sample/action/IndexAction.java</a>
-</li>
-</ul>
--->
-                <p>まぁStruts1.xがEOLっていう事で代わりとなりえるだろうフレームワークを調査中で。でまぁStruts2とかもあるんじゃないかっていう事で色々勉強をしてみる事に</p>
-<h4 id="part-8811212a92a05889">セットアップ</h4>
-<p>まぁ本来どうやるのかは微妙ですけど。gradleでプロジェクト管理してEclipseで開発したり、jettyで動かしてみたりしたいのでbuild.gradleを書く</p><pre class="line-numbers"><code class="language-groovy">apply plugin: "java"
-apply plugin: "war"
-apply plugin: "jetty"
-apply plugin: "eclipse"
+                <!--[[1, "セットアップ"], [2, "src/main/resources/struts.xml"], [3, "src/main/webapp/WEB-INF/web.xml"], [4, "要件"], [5, "src/main/webapp/WEB-INF/jsp/index.jsp"], [6, "src/main/java/sample/action/IndexAction.java"]]-->
+                <p>まぁStruts1.xがEOLっていう事で代わりとなりえるだろうフレームワークを調査中で。でまぁStruts2とかもあるんじゃないかっていう事で色々勉強をしてみる事に</p><h4>セットアップ</h4><p>まぁ本来どうやるのかは微妙ですけど。gradleでプロジェクト管理してEclipseで開発したり、jettyで動かしてみたりしたいのでbuild.gradleを書く</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+apply plugin: &quot;war&quot;
+apply plugin: &quot;jetty&quot;
+apply plugin: &quot;eclipse&quot;
 
 ext {
-    targetDir = "target"
+    targetDir = &quot;target&quot;
 }
 
 buildDir = targetDir
@@ -136,25 +113,25 @@ repositories {
 }
 
 dependencies {
-    compile "org.apache.struts:struts2-core:2.3.15.1"
+    compile &quot;org.apache.struts:struts2-core:2.3.15.1&quot;
 }
 
 sourceSets {
     main {
-        output.classesDir = "${buildDir}/classes"
-        output.resourcesDir = "${buildDir}/classes"
+        output.classesDir = &quot;${buildDir}/classes&quot;
+        output.resourcesDir = &quot;${buildDir}/classes&quot;
     }
 
     test {
-        output.classesDir = "${buildDir}/classes"
+        output.classesDir = &quot;${buildDir}/classes&quot;
     }
 }
 
 eclipse.classpath.file {
     whenMerged { classpath -&gt;
         classpath.entries.findAll { entry -&gt;
-            entry.kind == "output"
-        }*.path = "/${project.name}/${targetDir}/classes"
+            entry.kind == &quot;output&quot;
+        }*.path = &quot;/${project.name}/${targetDir}/classes&quot;
     }
 }
 </code></pre><p>jettyとかで動かしたい時は</p><pre class="line-numbers"><code class="language-">gradle jettyRun
@@ -178,29 +155,25 @@ eclipse.classpath.file {
         ├── java
         └── resources
 </pre>
-<p>んな感じ。で上記で書く必要のあるファイルを書いていく</p>
-<h4 id="src-main-resources-struts-xml">src/main/resources/struts.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;
+<p>んな感じ。で上記で書く必要のあるファイルを書いていく</p><h4>src/main/resources/struts.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
 
     &lt;!-- package name属性に指定するのはユニークな値であればなんでも良いっぽい --&gt;
     &lt;!-- namespaceでプレフィックス的なが指定出来る模様 --&gt;
 
-    &lt;package name="sample" extends="struts-default" namespace="/sample"&gt;
-        &lt;action name="index" class="sample.action.IndexAction"&gt;
+    &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot; namespace=&quot;/sample&quot;&gt;
+        &lt;action name=&quot;index&quot; class=&quot;sample.action.IndexAction&quot;&gt;
             &lt;result&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
         &lt;/action&gt;
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre><p>Struts2にはZero Configuration的な機構なあれもあるらしいけどそこまでやってないので(ry</p>
-<h4 id="src-main-webapp-web-inf-web-xml">src/main/webapp/WEB-INF/web.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</code></pre><p>Struts2にはZero Configuration的な機構なあれもあるらしいけどそこまでやってないので(ry</p><h4>src/main/webapp/WEB-INF/web.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;web-app
-    xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-    version="3.0"&gt;
+    xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;
+    version=&quot;3.0&quot;&gt;
 
     &lt;filter&gt;
         &lt;filter-name&gt;struts2&lt;/filter-name&gt;
@@ -211,30 +184,24 @@ eclipse.classpath.file {
         &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
     &lt;/filter-mapping&gt;
 &lt;/web-app&gt;
-</code></pre><p>特に言う事無いと思うので</p><p>んまぁこれでStruts2が動く環境を構築したのでJavaソース及びJSPを書いていく</p>
-<h4 id="part-654311259e9">要件</h4>
-<p>名前入力してサブミットしたら表示するただそれだけ</p>
-<h4 id="src-main-webapp-web-inf-jsp-index-jsp">src/main/webapp/WEB-INF/jsp/index.jsp</h4>
-<pre class="line-numbers"><code class="language-jsp">&lt;%@ page language="java" contentType="text/html; charset=UTF-8" %&gt;
-&lt;%@ taglib prefix="s" uri="/struts-tags" %&gt;
+</code></pre><p>特に言う事無いと思うので</p><p>んまぁこれでStruts2が動く環境を構築したのでJavaソース及びJSPを書いていく</p><h4>要件</h4><p>名前入力してサブミットしたら表示するただそれだけ</p><h4>src/main/webapp/WEB-INF/jsp/index.jsp</h4><pre class="line-numbers"><code class="language-jsp">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; %&gt;
+&lt;%@ taglib prefix=&quot;s&quot; uri=&quot;/struts-tags&quot; %&gt;
 &lt;html&gt;
   &lt;head&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;s:form action="index"&gt;
-      &lt;s:textfield name="name" /&gt;
+    &lt;s:form action=&quot;index&quot;&gt;
+      &lt;s:textfield name=&quot;name&quot; /&gt;
       &lt;s:submit /&gt;
     &lt;/s:form&gt;
 
-    &lt;s:if test="name != null"&gt;
-    &lt;p&gt;say: &lt;s:property value="name" /&gt;&lt;/p&gt;
+    &lt;s:if test=&quot;name != null&quot;&gt;
+    &lt;p&gt;say: &lt;s:property value=&quot;name&quot; /&gt;&lt;/p&gt;
     &lt;p&gt;say: ${name}&lt;/p&gt;
     &lt;/s:if&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre>
-<h4 id="src-main-java-sample-action-indexaction-java">src/main/java/sample/action/IndexAction.java</h4>
-<pre class="line-numbers"><code class="language-java">package sample.action;
+</code></pre><h4>src/main/java/sample/action/IndexAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -256,7 +223,7 @@ public class IndexAction extends ActionSupport {
         this.name = name;
     }
 }
-</code></pre><p>デフォルトだとexecuteだと思いますが、struts.xmlにて</p><pre class="line-numbers"><code class="language-xml">&lt;action name="index" class="sample.action.IndexAction" method="execute"&gt;
+</code></pre><p>デフォルトだとexecuteだと思いますが、struts.xmlにて</p><pre class="line-numbers"><code class="language-xml">&lt;action name=&quot;index&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;execute&quot;&gt;
 &lt;/action&gt;
 </code></pre><p>っていう感じで指定出来る模様。検証してないけど...</p><p>JSP側からはActionのgetterメソッドをOGNL式として評価して利用できる模様。</p><p>んでコンパイルしてサーバー起動。テキストボックスがあるのでそこに適当に入力してサブミット</p><p><img src="/images/2013/09/201309151600.jpg" alt="image" /></p><p>っていう感じになる。んまぁファーストステップ的な所はこんな所で</p>
               </div>
@@ -308,53 +275,67 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -362,17 +343,21 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -380,32 +365,41 @@ public class IndexAction extends ActionSupport {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -413,14 +407,17 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -428,11 +425,13 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -440,20 +439,25 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -461,47 +465,43 @@ public class IndexAction extends ActionSupport {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -509,20 +509,41 @@ public class IndexAction extends ActionSupport {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -532,17 +553,21 @@ public class IndexAction extends ActionSupport {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>

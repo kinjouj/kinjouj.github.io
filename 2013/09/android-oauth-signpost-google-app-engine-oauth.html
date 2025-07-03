@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="タイトル通り。要件は以下※但し以下のソースがプロトタイプ段階な為、めちゃくちゃすぎるので注意要件Androidのブラウザ等から共有機能を使ってURLをGoogleAppEngine向けに送" />
+    <meta name="description" content="タイトル通り。要件は以下※但し以下のソースがプロトタイプ段階な為、めちゃくちゃすぎるので注意要件Androidのブラウザ等から共有機能を使ってURLをGoogleAppEngine向けに送信する。" />
     <title>oauth-signpost(Android)でGoogle App Engine(+OAuth) - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/09/git-repository-file-and-history-deletion.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/09/android-accessibilityservice-legacy-firmware.html" />
@@ -44,12 +44,11 @@ ga("send", "pageview");
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="nav-item">
-  <a class="nav-link" href="/info.html">info</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="/about.html">about</a>
-</li>
-
+              <a class="nav-link" href="/about.html">about</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/info.html">info</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
             </li>
@@ -98,32 +97,8 @@ ga("send", "pageview");
                 </span>
               </p>
               <div class="post-content">
-                <!--<ul>
-<li>
-<a href="#part-654311259e9">要件</a>
-</li>
-<li>
-<a href="#part-8811212a92a05889">セットアップ</a>
-</li>
-<li>
-<a href="#androidmanifest-xml">AndroidManifest.xml</a>
-</li>
-<li>
-<a href="#shareroidactivity-java">ShareroidActivity.java</a>
-</li>
-<li>
-<a href="#oauthactivity-java">OAuthActivity.java</a>
-</li>
-<li>
-<a href="#oauthcallbackactivity-java">OAuthCallbackActivity.java</a>
-</li>
-</ul>
--->
-                <p>タイトル通り。要件は以下</p>
-<!--more-->
-<p>※但し以下のソースがプロトタイプ段階な為、めちゃくちゃすぎるので注意</p>
-<h4 id="part-654311259e9">要件</h4>
-<p>Androidのブラウザ等から共有機能を使ってURLをGoogle App Engine向けに送信する。でその際にGoogle App Engine側はOAuthServiceによりOAuth認可が必要な為、oauth-signpostを利用して共有機能から得られたURLを送出する</p><p>でActivityな流れ的には</p>
+                <!--[[1, "要件"], [2, "セットアップ"], [3, "AndroidManifest.xml"], [4, "ShareroidActivity.java"], [5, "OAuthActivity.java"], [6, "OAuthCallbackActivity.java"]]-->
+                <p>タイトル通り。要件は以下</p><p>※但し以下のソースがプロトタイプ段階な為、めちゃくちゃすぎるので注意</p><h4>要件</h4><p>Androidのブラウザ等から共有機能を使ってURLをGoogle App Engine向けに送信する。でその際にGoogle App Engine側はOAuthServiceによりOAuth認可が必要な為、oauth-signpostを利用して共有機能から得られたURLを送出する</p><p>でActivityな流れ的には</p>
 <ul>
 <li>共有機能からURLをシェアする</li>
 <li>OAuthに関するトークン等が取得されているのであれば、それを利用してそのままクラウド側にOAuthパラメーターを付与する形式でリクエスト(POST)する</li>
@@ -131,61 +106,55 @@ ga("send", "pageview");
 <li>↑でコールバックされたActivityでoauth_verifierを取得して、アクセストークンを取得。その後SharedPreferencesに格納しておく</li>
 <li>上記のコールバック先に認証前に取得しておいたURLなクエリーを付与しておいて、認証後にそれを処理する</li>
 </ul>
-<p>っていう事。あくまで3以降なのは3に特有する。から1や2の状態で4や5な所を意識する必要は無い(かも)</p><p>Androidでoauth-signpostを使ってゴニョゴニョ利用するにはどうするかって所をやってみる</p>
-<h4 id="part-8811212a92a05889">セットアップ</h4>
-<p>oauth-signpostなライブラリが必要なので <a href="https://code.google.com/p/oauth-signpost" target="_blank" rel="noopener noreferrer">https://code.google.com/p/oauth-signpost</a> からダウンロードしてくる。ダウンロードしてくるファイルは</p>
+<p>っていう事。あくまで3以降なのは3に特有する。から1や2の状態で4や5な所を意識する必要は無い(かも)</p><p>Androidでoauth-signpostを使ってゴニョゴニョ利用するにはどうするかって所をやってみる</p><h4>セットアップ</h4><p>oauth-signpostなライブラリが必要なので <a href="https://code.google.com/p/oauth-signpost" target="_blank" rel="noopener noreferrer">https://code.google.com/p/oauth-signpost</a> からダウンロードしてくる。ダウンロードしてくるファイルは</p>
 <ul>
 <li>  signpost-core-バージョン.jar</li>
 <li>  signpost-commonshttp4-バージョン.jar</li>
 </ul>
-<p>の2つだけで良い。でAndroidアプリプロジェクトのlibsディレクトリに突っ込んでおく</p>
-<h4 id="androidmanifest-xml">AndroidManifest.xml</h4>
-<pre class="line-numbers"><code class="language-xml">&lt;manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="shareroid.app"
-    android:versionCode="1"
-    android:versionName="1.0"&gt;
+<p>の2つだけで良い。でAndroidアプリプロジェクトのlibsディレクトリに突っ込んでおく</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;shareroid.app&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot;&gt;
 
-    &lt;uses-sdk android:minSdkVersion="8" android:maxSdkVersion="18" android:targetSdkVersion="8" /&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;8&quot; android:maxSdkVersion=&quot;18&quot; android:targetSdkVersion=&quot;8&quot; /&gt;
 
-    &lt;uses-permission android:name="android.permission.GET_ACCOUNTS" /&gt;
-    &lt;uses-permission android:name="android.permission.USE_CREDENTIALS" /&gt;
-    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.GET_ACCOUNTS&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.USE_CREDENTIALS&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
 
     &lt;application
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"&gt;
+        android:allowBackup=&quot;true&quot;
+        android:icon=&quot;@drawable/ic_launcher&quot;
+        android:label=&quot;@string/app_name&quot;&gt;
 
         &lt;activity
-            android:name=".ShareroidActivity"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.NoDisplay"&gt;
+            android:name=&quot;.ShareroidActivity&quot;
+            android:label=&quot;@string/app_name&quot;
+            android:theme=&quot;@android:style/Theme.NoDisplay&quot;&gt;
 
             &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.SEND" /&gt;
-                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
-                &lt;data android:mimeType="text/plain" /&gt;
+                &lt;action android:name=&quot;android.intent.action.SEND&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+                &lt;data android:mimeType=&quot;text/plain&quot; /&gt;
             &lt;/intent-filter&gt;
         &lt;/activity&gt;
 
         &lt;activity
-            android:name=".OAuthCallbackActivity"
-            android:label="@string/app_name"&gt;
+            android:name=&quot;.OAuthCallbackActivity&quot;
+            android:label=&quot;@string/app_name&quot;&gt;
 
             &lt;intent-filter&gt;
-                &lt;action android:name="android.intent.action.VIEW" /&gt;
-                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
-                &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+                &lt;action android:name=&quot;android.intent.action.VIEW&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.BROWSABLE&quot; /&gt;
                 &lt;!-- shareroid://oauth/callbackでActivityがフックされる? --&gt;
-                &lt;data android:scheme="shareroid" android:host="oauth" android:path="/callback" /&gt;
+                &lt;data android:scheme=&quot;shareroid&quot; android:host=&quot;oauth&quot; android:path=&quot;/callback&quot; /&gt;
             &lt;/intent-filter&gt;
         &lt;/activity&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre>
-<h4 id="shareroidactivity-java">ShareroidActivity.java</h4>
-<pre class="line-numbers"><code class="language-java">package shareroid.app;
+</code></pre><h4>ShareroidActivity.java</h4><pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
@@ -204,7 +173,7 @@ public class ShareroidActivity extends OAuthActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG, "onCreate");
+        Log.v(TAG, &quot;onCreate&quot;);
 
         final String query = getQuery(getIntent());
 
@@ -259,9 +228,7 @@ public class ShareroidActivity extends OAuthActivity {
         return url;
     }
 }
-</code></pre><p>共有機能(android.intent.action.SEND)からぶっ飛んでくるActviity。でその共有から送信されたデータ(URL)を取得、んでサーバーに投げる前に認可状態をチェックして認可してればそのままぶん投げる、認可してなければoauth-signpostな機能を使ってぶん投げる。でそのAPI自体はOAuthActivityっていう基底Activityクラスでメソッド定義してある。それは後術</p>
-<h4 id="oauthactivity-java">OAuthActivity.java</h4>
-<p>上記で書いた基底Activityクラス</p><pre class="line-numbers"><code class="language-java">package shareroid.app;
+</code></pre><p>共有機能(android.intent.action.SEND)からぶっ飛んでくるActviity。でその共有から送信されたデータ(URL)を取得、んでサーバーに投げる前に認可状態をチェックして認可してればそのままぶん投げる、認可してなければoauth-signpostな機能を使ってぶん投げる。でそのAPI自体はOAuthActivityっていう基底Activityクラスでメソッド定義してある。それは後術</p><h4>OAuthActivity.java</h4><p>上記で書いた基底Activityクラス</p><pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -304,7 +271,7 @@ public abstract class OAuthActivity extends Activity {
     protected String acquireRequestToken(String query) throws OAuthMessageSignerException, OAuthNotAuthorizedException, OAuthExpectationFailedException, OAuthCommunicationException {
         // 認可処理を行うURLを取得する。でその前に共有時に指定されたURLをクエリーに含んでおけばコールバック側でも取得できるので、コールバック時にそれを処理するようにする
 
-        return getProvider().retrieveRequestToken(consumer, OAUTH_CALLBACK + "?query=" + query);
+        return getProvider().retrieveRequestToken(consumer, OAUTH_CALLBACK + &quot;?query=&quot; + query);
     }
 
     protected String[] acquireAccessToken(String verifier) throws OAuthMessageSignerException, OAuthNotAuthorizedException, OAuthExpectationFailedException, OAuthCommunicationException {
@@ -326,9 +293,9 @@ public abstract class OAuthActivity extends Activity {
 
         try {
             List&lt;nameValuePair&gt; params = new ArrayList&lt;nameValuePair&gt;(1);
-            params.add(new BasicNameValuePair("url", query));
+            params.add(new BasicNameValuePair(&quot;url&quot;, query));
 
-            HttpPost request = new HttpPost("https://shareroid.appspot.com/push");
+            HttpPost request = new HttpPost(&quot;https://shareroid.appspot.com/push&quot;);
             request.setEntity(new UrlEncodedFormEntity(params));
 
             // OAuthConsumer.setTokenWithSecretメソッドをSharedPreferencesに保管されているトークンを取得して流しこむだけのメソッド
@@ -365,15 +332,13 @@ public abstract class OAuthActivity extends Activity {
 
     private OAuthProvider getProvider() {
         return new CommonsHttpOAuthProvider(
-            BASE_URL + "/_ah/OAuthGetRequestToken",
-            BASE_URL + "/_ah/OAuthGetAccessToken",
-            BASE_URL + "/_ah/OAuthAuthorizeToken"
+            BASE_URL + &quot;/_ah/OAuthGetRequestToken&quot;,
+            BASE_URL + &quot;/_ah/OAuthGetAccessToken&quot;,
+            BASE_URL + &quot;/_ah/OAuthAuthorizeToken&quot;
         );
     }
 }
-</code></pre>
-<h4 id="oauthcallbackactivity-java">OAuthCallbackActivity.java</h4>
-<pre class="line-numbers"><code class="language-java">package shareroid.app;
+</code></pre><h4>OAuthCallbackActivity.java</h4><pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
@@ -391,15 +356,15 @@ public class OAuthCallbackActivity extends OAuthActivity {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        Log.v(TAG, "onCraate");
+        Log.v(TAG, &quot;onCraate&quot;);
         Intent intent = getIntent();
 
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri uri = intent.getData();
 
             if (uri != null) {
-                String verifier = uri.getQueryParameter("oauth_verifier");
-                String query = uri.getQueryParameter("query");
+                String verifier = uri.getQueryParameter(&quot;oauth_verifier&quot;);
+                String query = uri.getQueryParameter(&quot;query&quot;);
 
                 try {
                     String[] tokens = acquireAccessToken(verifier);
@@ -473,53 +438,67 @@ public class OAuthCallbackActivity extends OAuthActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/sastruts">SAStruts (9)</a>
-  </li>
-  <li>
-    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mahout">Mahout (8)</a>
-  </li>
-  <li>
-    <a href="/archives/category/gradle">gradle (32)</a>
-  </li>
-  <li>
-    <a href="/archives/category/java-ee">Java EE (2)</a>
-  </li>
-  <li>
-    <a href="/archives/category/rxjava">RxJava (3)</a>
-  </li>
-  <li>
     <a href="/archives/category/android">Android (100)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
     <a href="/archives/category/robolectric">robolectric (10)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/kotlin">Kotlin (1)</a>
+    <a href="/archives/category/gradle">gradle (32)</a>
   </li>
-  <li>
-    <a href="/archives/category/struts2">Struts2 (16)</a>
-  </li>
-  <li>
-    <a href="/archives/category/doma">doma (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/hadoop">Hadoop (28)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
   </li>
+  
   <li>
     <a href="/archives/category/jax-rs">JAX-RS (22)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -527,17 +506,21 @@ public class OAuthCallbackActivity extends OAuthActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
   </li>
+  
   <li>
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
+  
   <li>
-    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+    <a href="/archives/category/native-client">Native Client (8)</a>
   </li>
-  <li>
-    <a href="/archives/category/grunt">grunt (1)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/react-dot-js">React.js (7)</a>
   </li>
@@ -545,32 +528,41 @@ public class OAuthCallbackActivity extends OAuthActivity {
   <li>
     <a href="/archives/category/redux">redux (1)</a>
   </li>
+  
   <li>
     <a href="/archives/category/almin">almin (1)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/webpack">webpack (2)</a>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
-  <li>
-    <a href="/archives/category/typescript">TypeScript (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
-  </li>
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/typescript">TypeScript (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/gulp">gulp (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -578,14 +570,17 @@ public class OAuthCallbackActivity extends OAuthActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  
+  <li>
     <a href="/archives/category/laravel">Laravel (20)</a>
   </li>
+  
   <li>
     <a href="/archives/category/phpunit">PHPUnit (3)</a>
   </li>
-  <li>
-    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -593,11 +588,13 @@ public class OAuthCallbackActivity extends OAuthActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/rspec">rspec (21)</a>
-  </li>
-  <li>
     <a href="/archives/category/rails">Rails (34)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+  
 </ul>
 
   <li>
@@ -605,20 +602,25 @@ public class OAuthCallbackActivity extends OAuthActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/postfix">postfix (4)</a>
+    <a href="/archives/category/qmail">qmail (7)</a>
   </li>
-  <li>
-    <a href="/archives/category/supervisord">supervisord (4)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/varnish">varnish (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/squid">squid (4)</a>
   </li>
-  <li>
-    <a href="/archives/category/qmail">qmail (7)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -626,47 +628,43 @@ public class OAuthCallbackActivity extends OAuthActivity {
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/beanstalk">beanstalk (1)</a>
-  </li>
-  <li>
     <a href="/archives/category/database">Database (15)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/hbase">HBase (7)</a>
-  </li>
-  <li>
     <a href="/archives/category/mongodb">MongoDB (15)</a>
   </li>
-  <li>
-    <a href="/archives/category/cassandra">Cassandra (10)</a>
-  </li>
-  <li>
-    <a href="/archives/category/mysql">MySQL (7)</a>
-  </li>
-  <li>
-    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
-  </li>
-  <li>
-    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/oracle">Oracle (13)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/git">git (1)</a>
+    <a href="/archives/category/docker">Docker (9)</a>
   </li>
-  <li>
-    <a href="/archives/category/jenkins">Jenkins (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/graphql">GraphQL (3)</a>
-  </li>
-  <li>
-    <a href="/archives/category/eclipse">Eclipse (6)</a>
-  </li>
+  
   <li>
     <a href="/archives/category/html5">HTML5 (8)</a>
   </li>
@@ -674,20 +672,41 @@ public class OAuthCallbackActivity extends OAuthActivity {
   <li>
     <a href="/archives/category/css">CSS (6)</a>
   </li>
+  
 </ul>
 
   <li>
-    <a href="/archives/category/fluentd">fluentd (4)</a>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
   </li>
+  
   <li>
     <a href="/archives/category/nginx">nginx (5)</a>
   </li>
+  
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/beanstalk">beanstalk (1)</a>
+  </li>
+  
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  
   <li>
     <a href="/archives/category/zookeeper">zookeeper (1)</a>
   </li>
-  <li>
-    <a href="/archives/category/docker">Docker (9)</a>
-  </li>
+  
 </ul>
 
   <li>
@@ -697,17 +716,21 @@ public class OAuthCallbackActivity extends OAuthActivity {
   <li>
     <a href="/archives/category/c-plus-plus">C++ (14)</a>
   </li>
+  
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
+  
 </ul>
 
   <li>
     <a href="/archives/category/perl">Perl (10)</a>
   </li>
+  
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
+  
 </ul>
 
           </div>
