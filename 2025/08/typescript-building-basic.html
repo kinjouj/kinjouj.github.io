@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="https://github.com/kinjouj/chrome-extension/twifyをベースにTypeScriptビルド環境をメモTypeScriptをJavaScriptにトランスパイ" />
+    <title>TypeScriptのビルド環境を構築する - kinjouj.github.io</title>
+    <link rel="prev" href="https://kinjouj.github.io/2025/07/zsh-gitkeep-ignore.html" />
+    <link rel="canonical" href="https://kinjouj.github.io/2025/08/typescript-building-basic.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
+<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0..1,-25..0" />
+
+    <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-56169419-1', 'auto');
+ga("send", "pageview");
+</script>
+
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg p-0">
+      <div class="container-fluid">
+        <nav class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav mavbar-right ms-auto">
+            <li class="nav-item">
+              <form action="https://www.google.com/search" method="GET">
+                <input type="hidden" name="hl" value="ja" />
+                <input type="hidden" name="sitesearch" value="kinjouj.github.io" />
+                <input type="search" name="q" class="form-control" />
+              </form>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div>
+      <header class="logo-header text-center">
+        <h2><a href="/">kinjouj.github.io</a></h2>
+      </header>
+    </div>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-12"></div>
+        <div class="col col-lg-8">
+          <div id="content">
+            <div class="post">
+              <div class="post-date">
+                <time datetime="2025-08-19T00:00:00+09:00">
+                  <a href="/archives/2025/08">
+                  <span class="post-date-year">2025</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">8</span>
+                  <span classs="hyphen">-</span>
+                  <span class="post-date-day">19</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title">TypeScriptのビルド環境を構築する</h1>
+              <hr />
+              <p class="meta">
+                <span class="categories">
+                  <a class="post-category" href="/archives/category/typescript">TypeScript</a>
+                </span>
+              </p>
+              <div class="post-content">
+                <!--["TypeScriptをJavaScriptにトランスパイルする環境を作る", "src/app.ts", "package.json", "tsconfig.json", "vite.config.js", "ESLintでLintできる環境を作る", "余談"]-->
+                <p><a href="https://github.com/kinjouj/chrome-extension/twify" target="_blank" rel="noopener noreferrer">https://github.com/kinjouj/chrome-extension/twify</a>をベースにTypeScriptビルド環境をメモ</p><h4>TypeScriptをJavaScriptにトランスパイルする環境を作る</h4><pre class="line-numbers"><code class="language-treeview">├── eslint.config.mjs
+├── package.json
+├── public
+　　   └── manifest.json
+├── src
+　　   ├── app.ts
+├── tsconfig.json
+└── vite.config.js
+</code></pre><p>TypeScriptをビルドするのに必要なのは</p>
+<ul>
+<li>package.json</li>
+<li>tsconfig.json</li>
+<li>vite.config.js</li>
+</ul>
+
+<div class="note"><span class="material-symbols-outlined">info</span>public/manifest.jsonはビルド時にビルド先にコピーされるので省略</div>
+<h4>src/app.ts</h4><pre class="line-numbers"><code class="language-typescript">class Sample {
+  say(): string {
+    return &apos;Hello World&apos;;
+  }
+}
+
+const sample: Sample = new Sample();
+console.log(sample.say());
+</code></pre><h4>package.json</h4><pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;test&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
+  &quot;scripts&quot;: {
+    &quot;build&quot;: &quot;vite build&quot;
+  },
+  &quot;devDependencies&quot;: {
+    &quot;@stylistic/eslint-plugin&quot;: &quot;^5.2.3&quot;,
+    &quot;eslint&quot;: &quot;^9.33.0&quot;,
+    &quot;typescript&quot;: &quot;^5.9.2&quot;,
+    &quot;typescript-eslint&quot;: &quot;^8.39.1&quot;,
+    &quot;vite&quot;: &quot;^7.1.1&quot;
+  }
+}
+</code></pre><p>ビルドに必要な依存性とビルドスクリプトを定義するだけ</p><h4>tsconfig.json</h4><pre class="line-numbers"><code class="language-json">{
+  &quot;compilerOptions&quot;: {
+    &quot;target&quot;: &quot;es2024&quot;,
+    &quot;module&quot;: &quot;ESNext&quot;,
+    &quot;strict&quot;: true
+  },
+  &quot;include&quot;: [&quot;src/**/*.ts&quot;]
+}
+</code></pre><p>必要最小限で。詳しくは<a href="https://www.typescriptlang.org/docs/handbook/tsconfig-json.html" target="_blank" rel="noopener noreferrer">https://www.typescriptlang.org/docs/handbook/tsconfig-json.html</a></p><h4>vite.config.js</h4><pre class="line-numbers"><code class="language-js">import { resolve } from &apos;node:path&apos;
+import { defineConfig } from &apos;vite&apos;
+
+export default defineConfig((opt) =&gt; {
+  return {
+    root: &apos;src&apos;,
+    publicDir: &quot;../public&quot;,
+    build: {
+      outDir: &apos;../build&apos;,
+      emptyOutDir: true,
+      copyPublicDir: true,
+      minify: false,
+      rollupOptions: {
+        input: {
+          app: resolve(__dirname, &apos;src/app.ts&apos;),
+        },
+        output: {
+          entryFileNames: &apos;[name].js&apos;,
+        },
+      },
+    },
+  }
+});
+</code></pre><p>publicディレクトリにあるファイルをbuild内にコピーしてsrc/app.tsをトランスパイルしたのをbuild/app.jsとしてビルドする</p><p>詳しいことは<a href="https://vite.dev/config/" target="_blank" rel="noopener noreferrer">https://vite.dev/config/</a></p><p>ここまででビルドする環境自体はできたので</p><pre class="line-numbers"><code class="language-shell">npm run build # or vite build
+</code></pre><p>でビルドしてみるとbuild/app.jsは以下のようにトランスパイルされる</p><pre class="line-numbers"><code class="language-js">class Sample {
+  say() {
+    return &quot;Hello World&quot;;
+  }
+}
+const sample = new Sample();
+console.log(sample.say());
+</code></pre><p>これでビルドするだけな環境はおｋってことで(ry</p><h4>ESLintでLintできる環境を作る</h4><pre class="line-numbers"><code class="language-shell">npx eslint --init
+</code></pre><p>でeslint.config.mjs(場合によって拡張子が異なる)が生成される。今回はtypescript-eslintの設定を利用するので以下のように修正</p><pre class="line-numbers"><code class="language-js">import eslint from &apos;@eslint/js&apos;;
+import globals from &apos;globals&apos;;
+import stylistic from &apos;@stylistic/eslint-plugin&apos;;
+import tseslint from &apos;typescript-eslint&apos;;
+
+export default tseslint.config(
+  {
+    files: [&apos;**/*.{ts,tsx}&apos;],
+    extends: [
+      eslint.configs.recommended,
+      tseslint.configs.recommendedTypeChecked,
+      tseslint.configs.stylisticTypeChecked,
+    ],
+    plugins: { &apos;@stylistic&apos;: stylistic },
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+      globals: {
+        ...globals.browser
+      }
+    },
+    rules: {
+      ...stylistic.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules,
+      &apos;@stylistic/semi&apos;: [&apos;error&apos;, &apos;always&apos;],
+      &apos;@typescript-eslint/array-type&apos;: &apos;error&apos;,
+      &apos;@typescript-eslint/consistent-type-imports&apos;: &apos;error&apos;,
+      &apos;@typescript-eslint/explicit-function-return-type&apos;: &apos;error&apos;,
+      &apos;@typescript-eslint/no-non-null-assertion&apos;: &apos;error&apos;,
+    }
+  },
+  {
+    ignores: [&apos;**/*.js&apos;, &apos;**/*.mjs&apos;]
+  }
+);
+</code></pre><p>詳しくは<a href="https://eslint.org/docs/latest/use/configure/configuration-files" target="_blank" rel="noopener noreferrer">https://eslint.org/docs/latest/use/configure/configuration-files</a></p><p>ちょっとわざとエラーを起こさせたいので先程のapp.tsを</p><pre class="line-numbers"><code class="language-typescript">say() {
+    return &quot;Hello World&quot;
+}
+</code></pre><p>のように返り値の型の指定を削除してeslintを実行してみると</p><pre class="line-numbers"><code class="language-shell">npx eslint
+</code></pre><p>以下のようにエラーになる</p><pre class="line-numbers"><code class="language-">&gt; test@0.0.1 build
+&gt; npx eslint &amp;&amp; vite build
+
+
+/home/kinjouj/ts-sample/src/app.ts
+  2:3  error  Missing return type on function  @typescript-eslint/explicit-function-return-type
+
+✖ 1 problem (1 error, 0 warnings)
+</code></pre><p>という感じでビルド前にLintでチェックしたりすることもできるようにする</p><p>以上終わり</p><h4>余談</h4><p>本番で使ったりするのであればもっと細かい設定とか色々必要なんだろうけどめんどくさいんで自分で調べろと</p><p>あとESLintのrulesとか色々設定しないと有効にならなかったりするのもあるんでそこが色々めんどくさいなって思ったりはした。
+それとESLintはやたらと古い情報が多いので最近のFlat Config形式で書くみたいなのがあんまりなかったりとか
+あっても現在は使えなかったりとか色々あるんでそういう前方互換をあっさり壊していくJS界隈のスタイルは如何なものかとｗｗ</p>
+              </div>
+            </div>
+          </div>
+          <div class="my-pagination mt-5">
+            <!-- prev post -->
+            <a class="float-end box-link" href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法&nbsp;&gt;</a>
+          </div>
+        </div>
+        <aside class="col col-lg-4 px-5 sidebar">
+          <div id="recent_posts">
+              <h4>Recent Posts</h4>
+              <ul id="recent_posts">
+  <li class="recent-post"><a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a></li>
+  <li class="recent-post"><a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a></li>
+  <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
+  <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
+  <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
+  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
+  <li class="recent-post"><a href="/2025/06/ruby-stdout-to-logger.html">Rubyで標準出力を標準的に出しつつログを取る方法</a></li>
+  <li class="recent-post"><a href="/2025/06/docker-9-docker-compose.html">Docker (9) - Docker Composeを使う -</a></li>
+  <li class="recent-post"><a href="/2025/06/docker-8-bake.html">Docker (8) - bakeを使う -</a></li>
+  <li class="recent-post"><a href="/2025/06/ffmpeg-record-rectangular-selection-area.html">ffmpegを使って矩形選択エリアを録画録音する方法</a></li>
+</ul>
+
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/java">Java (291)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/android">Android (100)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/robolectric">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/gradle">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/archives/category/hadoop">Hadoop (28)</a>
+  </li>
+  <li>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/archives/category/jax-rs">JAX-RS (22)</a>
+  </li>
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  <li>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/javascript">JavaScript (167)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  <li>
+    <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/archives/category/node-dot-js">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/archives/category/native-client">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/archives/category/react-dot-js">React.js (8)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/redux">redux (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/jquery">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  <li>
+    <a href="/archives/category/typescript">TypeScript (2)</a>
+  </li>
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/archives/category/gulp">gulp (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/php">PHP (70)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  <li>
+    <a href="/archives/category/laravel">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/archives/category/phpunit">PHPUnit (3)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/ruby">Ruby (63)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/rails">Rails (34)</a>
+  </li>
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/linux">Linux (29)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/qmail">qmail (7)</a>
+  </li>
+  <li>
+    <a href="/archives/category/nginx">nginx (5)</a>
+  </li>
+  <li>
+    <a href="/archives/category/varnish">varnish (5)</a>
+  </li>
+  <li>
+    <a href="/archives/category/squid">squid (4)</a>
+  </li>
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/database">Database (15)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/mongodb">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/archives/category/oracle">Oracle (13)</a>
+  </li>
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/sonota">その他 (14)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/docker">Docker (9)</a>
+  </li>
+  <li>
+    <a href="/archives/category/html5">HTML5 (8)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/css">CSS (7)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+  <li>
+    <a href="/archives/category/zookeeper">zookeeper (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/c">C (14)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+  </li>
+  <li>
+    <a href="/archives/category/objective-c">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/she-hui">社会 (1)</a>
+  </li>
+</ul>
+
+          </div>
+        </aside>
+      </div>
+    </div>
+    <button type="button" class="btn btn-info btn-floating btn-lg" id="btn-back-to-top"><i class="fas fa-arrow-up"></i></button>
+<script type="text/javascript">
+$("#btn-back-to-top").click(() => {
+  $("body").animate({ scrollTop: 0 });
+});
+</script>
+
+    <footer>
+      <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>
+    </footer>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061"
+     crossorigin="anonymous"></script>
+  </body>
+</html>
