@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="TypeScript+React+Electronでデスクトップアプリケーションを作ってみる環境構築まずTypeScript+React+Electronをビルドできる環境を作る。作るのはpackag" />
+    <title>TypeScript+React+Electronでデスクトップアプリを作る - kinjouj.github.io</title>
+    <link rel="prev" href="https://kinjouj.github.io/2025/10/ffmpeg-rtmp-streaming.html" />
+    <link rel="canonical" href="https://kinjouj.github.io/2025/11/typescript-react-electron-desktop-app.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0..1,-25..0" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-56169419-1', 'auto');ga("send", "pageview");</script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg p-0">
+      <div class="container-fluid">
+        <nav class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="mailto:kinjouj@gmail.com">Contact</a>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav mavbar-right ms-auto">
+            <li class="nav-item">
+              <form action="https://www.google.com/search" method="GET">
+                <input type="hidden" name="hl" value="ja" />
+                <input type="hidden" name="sitesearch" value="kinjouj.github.io" />
+                <input type="search" name="q" class="form-control" />
+              </form>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <div>
+      <header class="logo-header text-center">
+        <h2><a href="/">kinjouj.github.io</a></h2>
+      </header>
+    </div>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-12"></div>
+        <div class="col col-lg-8">
+          <div id="content">
+            <div class="post">
+              <div class="post-date">
+                <time datetime="2025-11-03T00:00:00+09:00">
+                  <a href="/archives/2025/11">
+                  <span class="post-date-year">2025</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">11</span>
+                  <span classs="hyphen">-</span>
+                  <span class="post-date-day">3</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title">TypeScript+React+Electronでデスクトップアプリを作る</h1>
+              <hr />
+              <p class="meta">
+                <span class="categories">
+                  <a class="post-category" href="/archives/category/typescript">TypeScript</a>
+                  <a class="post-category" href="/archives/category/react-dot-js">React.js</a>
+                  <a class="post-category" href="/archives/category/electron">Electron</a>
+                </span>
+              </p>
+              <div class="post-content">
+                <!--["環境構築", "tsconfig.json", "vite.config.js", "index.html", "作るアプリについて", "src/main/main.ts", "src/ipc/preload.ts", "src/renderer/electron.d.ts", "src/renderer/app.tsx", "余談１", "余談２: ElectronメインプロセスからReactレンダラープロセスに値をぶんなげる方法"]-->
+                <p>TypeScript+React+Electronでデスクトップアプリケーションを作ってみる</p><h4>環境構築</h4><p>まずTypeScript+React+Electronをビルドできる環境を作る。作るのはpackage.json/tsconfig.json/vite.config.js</p><p>それぞれを作っていく</p><h3>package.json</h3><pre class="line-numbers"><code class="language-json">{
+  &quot;main&quot;: &quot;dist/main.js&quot;,
+  &quot;license&quot;: &quot;MIT&quot;,
+  &quot;scripts&quot;: {
+    &quot;check&quot;: &quot;tsc --noEmit&quot;,
+    &quot;build&quot;: &quot;npm run check &amp;&amp; vite build&quot;,
+    &quot;start&quot;: &quot;electron .&quot;
+  },
+  &quot;devDependencies&quot;: {
+    &quot;@types/react&quot;: &quot;^19.2.0&quot;,
+    &quot;@types/react-dom&quot;: &quot;^19.2.0&quot;,
+    &quot;@vitejs/plugin-react-swc&quot;: &quot;^4.1.0&quot;,
+    &quot;electron&quot;: &quot;^39.0.0&quot;,
+    &quot;typescript&quot;: &quot;^5.9.3&quot;,
+    &quot;vite&quot;: &quot;^7.1.9&quot;,
+    &quot;vite-plugin-electron&quot;: &quot;^0.29.0&quot;
+  },
+  &quot;dependencies&quot;: {
+    &quot;react&quot;: &quot;^19.2.0&quot;,
+    &quot;react-dom&quot;: &quot;^19.2.0&quot;,
+    &quot;react-router-dom&quot;: &quot;^7.9.4&quot;
+  }
+}
+</code></pre><p><mark>dependencies</mark>で実行に必要なReactの依存性を設定。<mark>devDependencies</mark>でTypeScriptやviteでビルドする環境に必要なのを設定しておく。今回は普通に<mark>vite-plugin-electron</mark>を使って作る</p><p><mark>main</mark>にはElectronアプリが起動するのに使うエントリーポイントファイルを指定する</p><h4>tsconfig.json</h4><pre class="line-numbers"><code class="language-json">{
+  &quot;compilerOptions&quot;: {
+    &quot;incremental&quot;: true,
+    &quot;tsBuildInfoFile&quot;: &quot;node_modules/.tsBuildInfo&quot;,
+    &quot;noEmit&quot;: true,
+    &quot;noUnusedLocals&quot;: true,
+    &quot;skipLibCheck&quot;: true,
+    &quot;target&quot;: &quot;ESNext&quot;,
+    &quot;module&quot;: &quot;ESNext&quot;,
+    &quot;moduleResolution&quot;: &quot;bundler&quot;,
+    &quot;strict&quot;: true,
+    &quot;jsx&quot;: &quot;react-jsx&quot;,
+    &quot;esModuleInterop&quot;: true,
+    &quot;isolatedModules&quot;: true,
+    &quot;types&quot;: [&quot;node&quot;, &quot;electron&quot;]
+  },
+  &quot;include&quot;: [&quot;src/**/*&quot;]
+}
+</code></pre><p><mark>types</mark>でnodeとelectronの型定義を有効にしておく。あとは省略</p><h4>vite.config.js</h4><pre class="line-numbers"><code class="language-js">import { resolve } from &apos;node:path&apos;
+import { defineConfig } from &apos;vite&apos;
+import electron from &apos;vite-plugin-electron&apos;;
+import react from &apos;@vitejs/plugin-react-swc&apos;;
+
+export default defineConfig({
+  base: &apos;./&apos;,
+  plugins: [
+    react(),
+    electron([
+      {
+        entry: &apos;src/main/main.ts&apos;,
+        vite: {
+          build: {
+            outDir: &apos;dist&apos;
+          }
+        }
+      },
+      {
+        entry: &apos;src/ipc/preload.ts&apos;,
+        vite: {
+          build: {
+            outDir: &apos;dist&apos;
+          }
+        }
+      }
+    ])
+  ],
+  build: {
+    minify: &apos;esbuild&apos;,
+    outDir: &apos;./dist&apos;,
+    emptyOutDir: true,
+    copyPublicDir: false,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === &apos;MODULE_LEVEL_DIRECTIVE&apos;) {
+          return;
+        }
+
+        warn(warning);
+      },
+      input: {
+        index: resolve(__dirname, &apos;index.html&apos;),
+      }
+    },
+  },
+});
+</code></pre><p><mark>vite-plugin-electorn</mark>を使ってElectronアプリをビルドするように設定</p><p>これでビルドできる環境はできたので上記にあるアプリのファイルを作っていく</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;root&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;module&quot; src=&quot;./src/renderer/index.tsx&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p><mark>&lt;script type=<q>module</q>&gt;</mark>でReactで表示するエントリーポイントなファイルを指定</p><p>あとはガシガシ実装を書いていくだけ。ちなみに以下のファイルを作っていくがrenderer/index.tsxはapp.tsxを描画してるだけなので省略する</p><pre class="line-numbers"><code class="language-tree">├── ipc
+│   └── preload.ts
+├── main
+│   └── main.ts
+└── renderer
+    ├── app.tsx
+    ├── electron.d.ts
+    └── index.tsx
+</code></pre><h4>作るアプリについて</h4><p>ざっくりとElectronで画面を作ってそれをReactでレンダリング。でReactでレンダリングする際にReact側からElectronのプロセス側にデータを要求してElectron側からデータを返す。でそれを描画するだけ</p>
+<div class="note"><span class="material-symbols-outlined">info</span>ちなみに逆(Electron側からReact側にデータをプッシュ)も可能なのでそれは余談で書く</div>
+<h4>src/main/main.ts</h4><p>Electronアプリケーションのエントリーポイントファイル</p><pre class="line-numbers"><code class="language-typescript">import { app, BrowserWindow, ipcMain } from &apos;electron&apos;;
+import * as path from &apos;node:path&apos;;
+
+app.disableHardwareAcceleration();
+
+const setupIPCListener = (): void =&gt; {
+  ipcMain.handle(&apos;file:request-file&apos;, async (event) =&gt; {
+    return &apos;/path/to/test/test.jpg&apos;;
+  });
+};
+
+const createWindow = async (): Promise&lt;BrowserWindow&gt; =&gt; {
+  const win = new BrowserWindow({
+    darkTheme: true,
+    autoHideMenuBar: true,
+    center: true,
+    webPreferences: {
+      preload: path.resolve(__dirname, &apos;preload.js&apos;),
+      contextIsolation: true,
+      nodeIntegration: false,
+      webSecurity: true,
+    },
+  });
+  await win.loadFile(path.resolve(__dirname, &apos;index.html&apos;));
+
+  return win;
+};
+
+app.whenReady().then(async () =&gt; {
+  setupIPCListener();
+  const win = await createWindow();
+}).catch(() =&gt; app.quit());
+</code></pre><p><mark>file:request-file</mark>っていうのはReact側からElectronプロセス側にデータを要求する際に使うチャネル名</p><p>でElectronアプリプロセス側とReactでレンダリングしている側と繋げるためのipcスクリプトが必要なのでそれをipc/preload.tsに定義する</p><h4>src/ipc/preload.ts</h4><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &apos;electron&apos;;
+
+contextBridge.exposeInMainWorld(&apos;electronAPI&apos;, {
+  requestFile: (): Promise&lt;string&gt; =&gt; {
+    return ipcRenderer.invoke(&quot;file:request-file&quot;);
+  }
+});
+</code></pre><p>main.ts側で定義したElectronメインプロセス側にデータ要求リクエストを送信してデータを受信するだけ。invokeの引数にはElectronメインプロセスで指定したチャネル名を指定する</p><p>これでElectronアプリ側の実装は終わり。あとはReactでレンダリングする側のアプリケーションの実装を作る</p><h4>src/renderer/electron.d.ts</h4><p>まあただの型定義なんで(ry</p><pre class="line-numbers"><code class="language-typescript">type ElectronAPI = {
+  requestFile: () =&gt; Promise&lt;string&gt;
+};
+
+declare global {
+  interface Window {
+    electronAPI: ElectronAPI
+  }
+}
+
+export {}
+</code></pre><h4>src/renderer/app.tsx</h4><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &apos;react&apos;;
+
+const App = (): React.JSX.Element =&gt; {
+  const [ file, setFile ] = useState&lt;string | null&gt;(null);
+
+  // renderer(React) -&gt; electron -&gt; renderer(React)
+  useEffect(() =&gt; {
+    (async () =&gt; {
+      const requestFile = await window.electronAPI.requestFile();
+      setFile(requestFile);
+    })();
+  }, []);
+
+  if (file === null) {
+    return (&lt;div&gt;loading...&lt;/div&gt;);
+  }
+
+  return (
+    &lt;img src={file} /&gt;
+  );
+};
+
+export default App;
+</code></pre><p>終わり。これでビルドするとReact側で<mark>window.electronAPI.requestFile();</mark>でElectronメインプロセスにデータを要求する、そしてメインプロセス側のipcMain.handleが対応するチャネルで処理されて値がReact側に返されそれが描画される(今回はただ画像を表示しているだけなのでそれが表示されるだけ)</p><p>んまあという感じでElectronでデスクトップアプリを作ってそのUIとかをReactとかで作ったりすることもできるよ〜ってことで終わり</p><h4>余談１</h4><p>今回のは紹介用に一部を切り出して作ったやつなので切り出してないやつは<a href="https://github.com/kinjouj/typescript-react-electron-photoviewer" target="_blank" rel="noopener noreferrer">https://github.com/kinjouj/typescript-react-electron-photoviewer</a>にあります</p><h4>余談２: ElectronメインプロセスからReactレンダラープロセスに値をぶんなげる方法</h4><p>上記で書いた方法はReact側からメインプロセス側にデータ要求リスエストを出してそれを受け取るような形でやったがメインプロセス側からReactなどのレンダリング側にデータを受け取らせるようなこともできる。なのでそういう方法を取りたい場合は以下のように修正する</p><h5>src/ipc/preload.ts</h5><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &apos;electron&apos;;
+
+contextBridge.exposeInMainWorld(&apos;electronAPI&apos;, {
+  onReceived: (callback: (data: string) =&gt; void): void =&gt; {
+    ipcRenderer.on(&apos;file:request-file&apos;, (event, data: string) =&gt; callback(data));
+  }
+});
+</code></pre><p>んまあReact側からElectronメインプロセスから送られてくるデータを受信するAPIを定義</p><h5>src/renderer/electron.d.ts</h5><pre class="line-numbers"><code class="language-typescript">type ElectronAPI = {
+  onReceived: (data) =&gt; Promise&lt;string&gt;
+};
+
+declare global {
+  interface Window {
+    electronAPI: ElectronAPI
+  }
+}
+
+export {}
+</code></pre><p>単純に<mark>ElectronAPI</mark>側の定義を設定</p><h5>src/renderer/app.tsx</h5><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &apos;react&apos;;
+
+const App = (): React.JSX.Element =&gt; {
+  const [ file, setFile ] = useState&lt;string | null&gt;(null);
+
+  useEffect(() =&gt; {
+    window.electronAPI.onReceived((data: string)  =&gt; {
+      setFile(data);
+    });
+  });
+
+  if (file === null) {
+    return (&lt;div&gt;loading...&lt;/div&gt;);
+  }
+
+  return (
+    &lt;img src={file} /&gt;
+  );
+};
+
+export default App;
+</code></pre><p>定義した<mark>onReceived</mark>を使ってデータを受信してそれを描画する</p><h5>src/main/main.ts</h5><pre class="line-numbers"><code class="language-typescript">app.whenReady().then(async () =&gt; {
+  const win = await createWindow();
+  setTimeout(() =&gt; {
+    win.webContents.send(&apos;file:request-file&apos;, &apos;/path/to/test/test.jpg&apos;);
+  }, 3000);
+}).catch(() =&gt; app.quit());
+</code></pre><p><mark>BrowserWindow.webContents.send</mark>を使ってチェネル名でデータを送信。これでElectronアプリ側からReactなどで表示してるレンダラープロセス側でデータを受信したりできるようになる</p>
+<div class="note"><span class="material-symbols-outlined">info</span>ただし場合によっては受信するコールバックの登録が遅延してデータが正常に受け取れなくなる場合もあるので注意</div>
+
+              </div>
+            </div>
+          </div>
+          <div class="my-pagination mt-5">
+            <!-- prev post -->
+            <a class="float-end box-link" href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング&nbsp;&gt;</a>
+          </div>
+        </div>
+        <aside class="col col-lg-4 px-5 sidebar">
+          <div id="recent_posts">
+              <h4>Recent Posts</h4>
+              <ul id="recent_posts">
+  <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
+  <li class="recent-post"><a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a></li>
+  <li class="recent-post"><a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a></li>
+  <li class="recent-post"><a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a></li>
+  <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
+  <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
+  <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
+  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
+  <li class="recent-post"><a href="/2025/06/ruby-stdout-to-logger.html">Rubyで標準出力を標準的に出しつつログを取る方法</a></li>
+  <li class="recent-post"><a href="/2025/06/docker-9-docker-compose.html">Docker (9) - Docker Composeを使う -</a></li>
+</ul>
+
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/java">Java (291)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/android">Android (100)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/robolectric">robolectric (10)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/gradle">gradle (32)</a>
+  </li>
+  <li>
+    <a href="/archives/category/hadoop">Hadoop (28)</a>
+  </li>
+  <li>
+    <a href="/archives/category/spring-framework">Spring Framework (26)</a>
+  </li>
+  <li>
+    <a href="/archives/category/jax-rs">JAX-RS (22)</a>
+  </li>
+  <li>
+    <a href="/archives/category/struts2">Struts2 (16)</a>
+  </li>
+  <li>
+    <a href="/archives/category/sastruts">SAStruts (9)</a>
+  </li>
+  <li>
+    <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
+  </li>
+  <li>
+    <a href="/archives/category/mahout">Mahout (8)</a>
+  </li>
+  <li>
+    <a href="/archives/category/eclipse">Eclipse (6)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/doma">doma (5)</a>
+  </li>
+  <li>
+    <a href="/archives/category/rxjava">RxJava (3)</a>
+  </li>
+  <li>
+    <a href="/archives/category/java-ee">Java EE (2)</a>
+  </li>
+  <li>
+    <a href="/archives/category/kotlin">Kotlin (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/javascript">JavaScript (167)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+  </li>
+  <li>
+    <a href="/archives/category/chrome-extension">Chrome Extension (38)</a>
+  </li>
+  <li>
+    <a href="/archives/category/node-dot-js">Node.js (17)</a>
+  </li>
+  <li>
+    <a href="/archives/category/react-dot-js">React.js (9)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/redux">redux (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/native-client">Native Client (8)</a>
+  </li>
+  <li>
+    <a href="/archives/category/jquery">jQuery (6)</a>
+  </li>
+  <li>
+    <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+  </li>
+  <li>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
+  </li>
+  <li>
+    <a href="/archives/category/typescript">TypeScript (3)</a>
+  </li>
+  <li>
+    <a href="/archives/category/webpack">webpack (2)</a>
+  </li>
+  <li>
+    <a href="/archives/category/grunt">grunt (1)</a>
+  </li>
+  <li>
+    <a href="/archives/category/gulp">gulp (1)</a>
+  </li>
+  <li>
+    <a href="/archives/category/electron">Electron (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/php">PHP (70)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+  </li>
+  <li>
+    <a href="/archives/category/laravel">Laravel (20)</a>
+  </li>
+  <li>
+    <a href="/archives/category/phpunit">PHPUnit (3)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/ruby">Ruby (63)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/rails">Rails (34)</a>
+  </li>
+  <li>
+    <a href="/archives/category/rspec">rspec (21)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/linux">Linux (29)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/qmail">qmail (7)</a>
+  </li>
+  <li>
+    <a href="/archives/category/nginx">nginx (5)</a>
+  </li>
+  <li>
+    <a href="/archives/category/varnish">varnish (5)</a>
+  </li>
+  <li>
+    <a href="/archives/category/squid">squid (4)</a>
+  </li>
+  <li>
+    <a href="/archives/category/postfix">postfix (4)</a>
+  </li>
+  <li>
+    <a href="/archives/category/supervisord">supervisord (4)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/database">Database (15)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/mongodb">MongoDB (15)</a>
+  </li>
+  <li>
+    <a href="/archives/category/oracle">Oracle (13)</a>
+  </li>
+  <li>
+    <a href="/archives/category/cassandra">Cassandra (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/mysql">MySQL (7)</a>
+  </li>
+  <li>
+    <a href="/archives/category/hbase">HBase (7)</a>
+  </li>
+  <li>
+    <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+  </li>
+  <li>
+    <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/sonota">その他 (15)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/docker">Docker (9)</a>
+  </li>
+  <li>
+    <a href="/archives/category/html5">HTML5 (8)</a>
+  </li>
+  <li>
+    <a href="/archives/category/css">CSS (7)</a>
+  </li>
+  <li>
+    <a href="/archives/category/fluentd">fluentd (4)</a>
+  </li>
+  <li>
+    <a href="/archives/category/jenkins">Jenkins (3)</a>
+  </li>
+  <li>
+    <a href="/archives/category/graphql">GraphQL (3)</a>
+  </li>
+  <li>
+    <a href="/archives/category/zookeeper">zookeeper (1)</a>
+  </li>
+  <li>
+    <a href="/archives/category/git">git (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/c">C (14)</a>
+  </li>
+  <ul class="mx-2 my-1">
+  <li>
+    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+  </li>
+  <li>
+    <a href="/archives/category/objective-c">Objective-C (1)</a>
+  </li>
+</ul>
+
+  <li>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/she-hui">社会 (1)</a>
+  </li>
+</ul>
+
+          </div>
+        </aside>
+      </div>
+    </div>
+    <button type="button" class="btn btn-info btn-floating btn-lg" id="btn-back-to-top"><i class="fas fa-arrow-up"></i></button>
+    <script type="text/javascript">
+$("#btn-back-to-top").click(() => {
+  $("body").animate({ scrollTop: 0 });
+});
+    </script>
+    <footer>
+      <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>
+    </footer>
+    <script src="/js/prism.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061"
+     crossorigin="anonymous"></script>
+  </body>
+</html>
