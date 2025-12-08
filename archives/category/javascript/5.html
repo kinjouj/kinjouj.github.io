@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/scroll-contents-paging-2.html">スクロールによるページング処理に関して#2</a>
                 </h3>
-                参考:要素が画面上に見えているかどうかを調べるjquery.inview:https://github.com/protonet/jquery.inviewスクロールによるページング処理に関してではス
+                参考: [要素が画面上に見えているかどうかを調べる][1]
               </div>
             </div>
             <div id="4e9793fdf54923950986a05f854b4d89391e80b9" class="card m-4 mb-5">
@@ -63,7 +63,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/angularjs-26-ng-messages.html">angular.jsをやってみる (26) - ngMessages -</a>
                 </h3>
-                公式リファレンス:https://docs.angularjs.org/api/ngMessages要は入力フォームなどの検証メッセージを表示ような要件なUIをサポートしたりするようなライブラリな模様
+                公式リファレンス: <https://docs.angularjs.org/api/ngMessages>
               </div>
             </div>
             <div id="2ac0e344c50ccb9b3133589a1b7db3d00477b578" class="card m-4 mb-5">
@@ -72,7 +72,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/angularjs-ng-init-func-evaluate.html">angular.jsでng-initのような式評価を使う</a>
                 </h3>
-                参考:https://github.com/angular/angular.js/blob/master/src/ng/directive/ngInit.js#L63angular.jsで&lt;di
+                参考: <https://github.com/angular/angular.js/blob/master/src/ng/directive/ngInit.js#L63>
               </div>
             </div>
             <div id="eb90cd12af119945b959b0c732e10343c3c0a944" class="card m-4 mb-5">
@@ -81,7 +81,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/scope-eval-arguments.html">scope.$evalで引数を設定する方法</a>
                 </h3>
-                参考:https://docs.angularjs.org/api/ng/service/$parse「angular.jsでng-initのような式評価を使う」の続き的な所として、scope.$ev
+                参考: <https://docs.angularjs.org/api/ng/service/>$parse
               </div>
             </div>
             <div id="9a7b0670abb49bd4559c4ec723d69429f58ebe59" class="card m-4 mb-5">
@@ -90,7 +90,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/scroll-contents-paging.html">スクロールによるページング処理に関して</a>
                 </h3>
-                参考:http://yurubu.org/jquery-autoload/513んまぁTwitterとかであるスクロールでコンテンツの末尾に到達すると次のページのコンテンツを出してくれる仕組み的なの。
+                参考: <http://yurubu.org/jquery-autoload/513>
               </div>
             </div>
             <div id="71e05c98a5a7f1e63116dc6bec694ec66974830d" class="card m-4 mb-5">
@@ -99,7 +99,112 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/05/engine-io.html">engine.io</a>
                 </h3>
-                参考:[Engine.IO単体でチャットを作った][1]上記の参考に触発されてやってみたserver.jsvarhttp=require(&quot;http&quot;),express=requi
+                参考: [Engine.IO単体でチャットを作った][1]
+
+
+上記の参考に触発されてやってみた
+
+
+
+
+
+#### server.js
+
+```js
+var http    = require("http"),
+    express = require("express"),
+    engine  = require("engine.io");
+
+var app = express();
+app.use(express.static(__dirname + "/public"));
+app.get("/", function(req, res) {
+  res.sendfile("client.html");
+});
+
+var server = http.createServer(app);
+
+var io = engine.attach(server);
+io.on("connection", function(socket) {
+  socket.on("message", function(data) {
+    // 着信したデータを接続しているクライアント全部に送る
+    for (var key in io.clients) {
+      var client = io.clients[key];
+      client.send(key + " -> " + data);
+    }
+  });
+});
+io.on("error", function() {
+});
+
+server.listen(3000);
+```
+
+
+expressを使うようにしているのであれなのだけど、必要ないようなEngine.IOの単独サーバーとして稼働したりする要件な場合には <https://github.com/learnboost/engine.io> に書いてるコードを参考にすればいい
+
+
+それとSocket.IOとは違い、broadcastのような「自身以外へのバッファの送信」などには対応していないのでそれに対応するには自身でそういうような処理をしなければならない。又、engine.ioのsendで送れるデータはStringやBuffer(typed array)などがサポートされているけど、オブジェクトなどを送信するようなケースにおいては一度JSON.stringifyなどを用いて文字列正規化して送るっていう方法を取るしか無いっぽい
+
+
+んまぁざっくりしてるけどサーバー側はこんな感じで
+
+
+#### client.html
+
+```html
+<html>
+  <head>
+    <script src="/engine.io.js"></script>
+  </head>
+  <body>
+    <input id="message" />
+    <button onclick="send()">send</button>
+    <ul id="messages"></ul>
+    <script>
+var sock = new eio.Socket("ws://localhost:3000");
+sock.on("open", function() {
+  sock.on("message", function(data) {
+    var elm = document.createElement("li");
+    elm.innerText = data;
+
+    document.querySelector("#messages").appendChild(elm);
+  });
+
+  /*
+  あくまでemitは内部的なcallをするだけでサーバー側にイベント通知などを仕組みでは無い模様
+  sock.on("A", function() {
+    console.debug("A", arguments);
+  });
+  sock.emit("A");
+  */
+});
+
+function send() {
+  var text = document.querySelector("#message").value;
+  sock.send(text);
+}
+    </script>
+  </body>
+</html>
+```
+
+
+engine.ioのクライアントライブラリは <https://github.com/LearnBoost/engine.io-client> から取ってきて利用する(npmで入れてそのライブラリをコピーするなど)
+
+
+な感じで書いて<http://localhost:3000>にアクセスしテキストボックスになんか入れてボタンを押すとページにアクセスしているクライアント全部にメッセージがぶっ飛んでくる
+
+
+んまぁこっちもざっくりしているけど、こんな感じで使える模様げで
+
+
+#### 余談
+
+
+<https://github.com/nkzawa/engine.io-client.java> を使えばAndroidとかでも使える模様
+
+
+ [1]: http://shokai.org/blog/archives/8893
               </div>
             </div>
             <div id="0b73da3ca4bc1d0668d261c59c66cf087bbfe0a1" class="card m-4 mb-5">
@@ -108,7 +213,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/05/angularjs-25-httpprovider-interceptors.html">angular.jsをやってみる (25) - $httpProvider.interceptors -</a>
                 </h3>
-                たまたまドキュメントを見ていたら、$httpで処理されるリクエストやレスポンスなどにインターセプターを利用してfilter的なことできるっぽい。ということでやってみたapp.jsangular.mod
+                たまたまドキュメントを見ていたら、$httpで処理されるリクエストやレスポンスなどにインターセプターを利用してfilter的なことできるっぽい。ということでやってみた
               </div>
             </div>
             <div id="d8ea53b7053eea81f8cf44669f6ea61e1e8ab360" class="card m-4 mb-5">
@@ -117,7 +222,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/05/angularjs-24-ng-non-bindable.html">angular.jsをやってみる (24) - ng-non-bindable -</a>
                 </h3>
-                参考:AngularJSとサーバーサイドテンプレートの混在とngNonBindable※上記の参考を必読することをオススメ上記参考にも書いてるのですが、例えばクエリーなどにおいてangular.jsが
+                参考: [AngularJSとサーバーサイドテンプレートの混在とngNonBindable][1]
               </div>
             </div>
             <div id="278cd7c9541d3c1c8a353150b4bf09fda71698cf" class="card m-4 mb-5">
@@ -126,7 +231,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/04/angularjs-23-ng-touch-swipe-event.html">angular.jsをやってみる (23) - ngTouchを使ってスワイプイベントを利用 -</a>
                 </h3>
-                公式リファレンス:http://docs.angularjs.org/api/ngTouchスマートフォン等においてカルーセルビュー的な例でスワイプする事でビューを切り替えたり出来るようにしたいとかの
+                公式リファレンス: <http://docs.angularjs.org/api/ngTouch>
               </div>
             </div>
             <div id="1e7d75ee541df6bcdc11ee562c4b2ead649d5971" class="card m-4 mb-5">
@@ -135,7 +240,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/04/angularjs-21-logprovider.html">angular.jsをやってみる (21) - $logProvider -</a>
                 </h3>
-                $logを使えばログ(console.メソッド)に対応するのを利用できるただそれだけな模様なのだけど、デバッグメッセージ(console.debug|$log.debug)に関しては$logProvi
+                $logを使えばログ(console.メソッド)に対応するのを利用できるただそれだけな模様なのだけど、デバッグメッセージ(console.debug|$log.debug)に関しては$logProviderで設定する事により発生しない模様
               </div>
             </div>
             <div class="my-pagination my-5">

@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/struts2-6-form-validation-1.html">Struts2をやってみる (6) - フォームバリデーション (1) -</a>
                 </h3>
-                タイトル通り。ActionSupportなクラスにvalidateメソッドを定義する事で入力検証な機能を実装出来る。こいつの実体自体はValidateableインターフェースが作用している模様。画面転
+                タイトル通り。ActionSupportなクラスにvalidateメソッドを定義する事で入力検証な機能を実装出来る。こいつの実体自体はValidateableインターフェースが作用している模様。
               </div>
             </div>
             <div id="b19e0df0b7c7eeffaac45a9eca05a1b5960a2177" class="card m-4 mb-5">
@@ -63,7 +63,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/struts2-5-action-test-dynamic-definition.html">Struts2をやってみる (5) - struts.xmlに定義する事なくActionをテストする -</a>
                 </h3>
-                単純に言うと、struts.xmlにを定義せずにテストクラスにアクションクラスを書いてそいつをregisterしてテストするっていう方式。どうやるのか不明だったので色々Struts2のソースを探ってみ
+                単純に言うと、struts.xmlに<action>を定義せずにテストクラスにアクションクラスを書いてそいつをregisterしてテストするっていう方式。どうやるのか不明だったので色々Struts2のソースを探ってみると
               </div>
             </div>
             <div id="d668aa4f2a3568f104ea391b16fb8b20f6f1f7b0" class="card m-4 mb-5">
@@ -72,7 +72,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/struts2-4-custom-strutsresultsupport.html">Struts2をやってみる (4) - StrutsResultSupportクラスを作る -</a>
                 </h3>
-                前回では書いて無かったけど、で使えるtypeに指定出来るようにするにはStrutsResultSupportを継承したクラスを定義するstruts.xmlにてで定義したStrutsResultSupp
+                前回では書いて無かったけど、<result>で使えるtypeに指定出来るようにするには
               </div>
             </div>
             <div id="410ba76ff8fac7617ed81d26a6e42f92437182a2" class="card m-4 mb-5">
@@ -81,7 +81,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/struts2-3-result-type.html">Struts2をやってみる (3) - &lt;result&gt;のtypeに関して</a>
                 </h3>
-                struts.xmlにて&lt;actionname=&quot;...&quot;class=&quot;...&quot;&gt;&lt;resultname=&quot;success&quot
+                struts.xmlにて
               </div>
             </div>
             <div id="f0c322a34fa6beeafc92820ee10396ae338b5ad2" class="card m-4 mb-5">
@@ -90,7 +90,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/struts2-2-action-testing.html">Struts2をやってみる (2) - Actionのテスト -</a>
                 </h3>
-                まぁサブタイトル?通り。struts2-junit-pluginっていうのを利用する事でorg.apache.struts2.StrutsTestCaseっていうのが利用できそれを使う事でコントローラ
+                まぁサブタイトル?通り。struts2-junit-pluginっていうのを利用する事でorg.apache.struts2.StrutsTestCaseっていうのが利用できそれを使う事でコントローラー部分なテストをする事が可能な模様
               </div>
             </div>
             <div id="30c689fc159134bc2ba0750ed292d7815e42e0c6" class="card m-4 mb-5">
@@ -99,7 +99,224 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/struts2-1.html">Struts2をやってみる (1)</a>
                 </h3>
-                まぁStruts1.xがEOLっていう事で代わりとなりえるだろうフレームワークを調査中で。でまぁStruts2とかもあるんじゃないかっていう事で色々勉強をしてみる事にセットアップまぁ本来どうやるのかは
+                まぁStruts1.xがEOLっていう事で代わりとなりえるだろうフレームワークを調査中で。でまぁStruts2とかもあるんじゃないかっていう事で色々勉強をしてみる事に
+
+
+#### セットアップ
+
+
+まぁ本来どうやるのかは微妙ですけど。gradleでプロジェクト管理してEclipseで開発したり、jettyで動かしてみたりしたいのでbuild.gradleを書く
+
+
+```groovy
+apply plugin: "java"
+apply plugin: "war"
+apply plugin: "jetty"
+apply plugin: "eclipse"
+
+ext {
+    targetDir = "target"
+}
+
+buildDir = targetDir
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.apache.struts:struts2-core:2.3.15.1"
+}
+
+sourceSets {
+    main {
+        output.classesDir = "${buildDir}/classes"
+        output.resourcesDir = "${buildDir}/classes"
+    }
+
+    test {
+        output.classesDir = "${buildDir}/classes"
+    }
+}
+
+eclipse.classpath.file {
+    whenMerged { classpath ->
+        classpath.entries.findAll { entry ->
+            entry.kind == "output"
+        }*.path = "/${project.name}/${targetDir}/classes"
+    }
+}
+```
+
+
+jettyとかで動かしたい時は
+
+
+```
+gradle jettyRun
+```
+
+
+まぁ構造とかは
+
+
+<pre>
+├── build.gradle
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── sample
+    │   │       └── action
+    │   │           └── IndexAction.java
+    │   ├── resources
+    │   │   └── struts.xml
+    │   └── webapp
+    │       └── WEB-INF
+    │           ├── jsp
+    │           │   └── index.jsp
+    │           └── web.xml
+    └── test
+        ├── java
+        └── resources
+</pre>
+
+
+んな感じ。で上記で書く必要のあるファイルを書いていく
+
+
+#### src/main/resources/struts.xml
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+    <!-- package name属性に指定するのはユニークな値であればなんでも良いっぽい -->
+    <!-- namespaceでプレフィックス的なが指定出来る模様 -->
+
+    <package name="sample" extends="struts-default" namespace="/sample">
+        <action name="index" class="sample.action.IndexAction">
+            <result>/WEB-INF/jsp/index.jsp</result>
+        </action>
+    </package>
+</struts>
+```
+
+
+Struts2にはZero Configuration的な機構なあれもあるらしいけどそこまでやってないので(ry
+
+
+#### src/main/webapp/WEB-INF/web.xml
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+    version="3.0">
+
+    <filter>
+        <filter-name>struts2</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts2</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+</web-app>
+```
+
+
+特に言う事無いと思うので
+
+
+んまぁこれでStruts2が動く環境を構築したのでJavaソース及びJSPを書いていく
+
+
+#### 要件
+
+
+名前入力してサブミットしたら表示するただそれだけ
+
+
+#### src/main/webapp/WEB-INF/jsp/index.jsp
+
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<html>
+  <head>
+  </head>
+  <body>
+    <s:form action="index">
+      <s:textfield name="name" />
+      <s:submit />
+    </s:form>
+
+    <s:if test="name != null">
+    <p>say: <s:property value="name" /></p>
+    <p>say: ${name}</p>
+    </s:if>
+  </body>
+</html>
+```
+
+
+#### src/main/java/sample/action/IndexAction.java
+
+
+```java
+package sample.action;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class IndexAction extends ActionSupport {
+
+    private static final long serialVersionUID = 1L;
+
+    private String name = null;
+
+    public String execute() {
+        return SUCCESS;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+
+デフォルトだとexecuteだと思いますが、struts.xmlにて
+
+
+```xml
+<action name="index" class="sample.action.IndexAction" method="execute">
+</action>
+```
+
+
+っていう感じで指定出来る模様。検証してないけど...
+
+
+JSP側からはActionのgetterメソッドをOGNL式として評価して利用できる模様。
+
+
+んでコンパイルしてサーバー起動。テキストボックスがあるのでそこに適当に入力してサブミット
+
+
+![](/images/2013/09/201309151600.jpg)
+
+
+っていう感じになる。んまぁファーストステップ的な所はこんな所で
               </div>
             </div>
             <div class="my-pagination my-5">

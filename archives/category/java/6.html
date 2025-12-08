@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-8-dynamicfeature.html">JAX-RSをやってみる (8)  - DynamicFeature -</a>
                 </h3>
-                公式ドキュメント先:https://jersey.java.net/documentation/latest/user-guide.html#d0e8531例えば特定のリソースクラスだったりメソッドだ
+                公式ドキュメント先: <https://jersey.java.net/documentation/latest/user-guide.html#d0e8531>
               </div>
             </div>
             <div id="f75ffd638aecedd0167d499d939a7490712f8544" class="card m-4 mb-5">
@@ -63,7 +63,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-7-reader-writer-interceptor.html">JAX-RSをやってみる (7) - Reader &#038; Writer interceptor -</a>
                 </h3>
-                公式ドキュメント先:https://jersey.java.net/documentation/latest/user-guide.html#filters-and-interceptorsリクエスト
+                公式ドキュメント先: <https://jersey.java.net/documentation/latest/user-guide.html#filters-and-interceptors>
               </div>
             </div>
             <div id="7d2c57c1fd286885a6e41bba7cef3f07f5231a12" class="card m-4 mb-5">
@@ -72,7 +72,114 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-6-exception-mapping.html">JAX-RSをやってみる (6) - 例外処理 -</a>
                 </h3>
-                んまぁJAX-RSアプリケーション上における例外処理な所をWebApplicationExceptionを使うWebApplicationExceptionを使えばまぁ普通に引数にステータスコード指定
+                んまぁJAX-RSアプリケーション上における例外処理な所を
+
+
+
+
+
+#### WebApplicationExceptionを使う
+
+
+WebApplicationExceptionを使えばまぁ普通に引数にステータスコード指定したりだとかで
+
+
+```java
+package sample.controller;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
+//import static javax.ws.rs.core.MediaType.*;
+
+@Path("/sample")
+public class Home {
+
+    @GET
+    public String index() {
+        throw new WebApplicationException(Response.Status.BAD_REQUEST);
+    }
+}
+```
+
+
+な感じでWebApplicationExceptionな例外でぶっ飛ばせば
+
+
+```java
+package sample.controller;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.SampleApplication;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new SampleApplication();
+    }
+
+    @Test
+    public void test_index() {
+        Response response = target("/sample").request().get();
+        assertThat(response, notNullValue());
+        assertThat(response.getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+    }
+}
+```
+
+
+てなことになるので
+
+
+#### 独自例外をResponseに変換するExceptionMapperを使う
+
+
+```java
+package sample.controller;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
+@Path("/sample")
+public class Home {
+
+    @GET
+    public String index() {
+        throw new SampleException();
+    }
+
+    public static class SampleException extends RuntimeException {
+    }
+
+    // @Providerするか自明的にregisterしておけば良い
+    @Provider
+    public static class SampleExceptionMapper implements ExceptionMapper<SampleException> {
+        @Override
+        public Response toResponse(SampleException exception) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
+}
+```
+
+
+てな感じで上記のWebApplicationExceptionセクションで書いてるテストをそのまま動かしてテストがコケないかを確認
               </div>
             </div>
             <div id="b4d6836b291e8461feaa7c65546e3c174251bf76" class="card m-4 mb-5">
@@ -81,7 +188,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-5-context-dependency-injection.html">JAX-RSをやってみる (5) - CDI -</a>
                 </h3>
-                んまぁJAX-RSの機能っていうわけでもないと思うのですが、JavaEEな@Injectを使ってDependencyInjectionするっていうだけな事設定何やらWEB-INF/beans.xmlを
+                んまぁJAX-RSの機能っていうわけでもないと思うのですが、Java EEな@Injectを使ってDependency Injectionするっていうだけな事
               </div>
             </div>
             <div id="d28bf7a5bd91ef8365830eb8249767c47291847a" class="card m-4 mb-5">
@@ -90,7 +197,199 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-4-messagebodyreader.html">JAX-RSをやってみる (4) - MessageBodyReader -</a>
                 </h3>
-                前回の「[JAX-RSをやってみる(3)–AutoDiscoverable-][1]」とかだとpackagesample.controller;importjavax.ws.rs.Consumes;i
+                前回の「[JAX-RSをやってみる (3) – AutoDiscoverable -][1]」とかだと
+
+
+```java
+package sample.controller;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
+import sample.bean.SampleBean;
+import static javax.ws.rs.core.MediaType.*;
+
+@Path("/sample")
+public class Home {
+
+    @Path("save")
+    @POST
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    public SampleBean save(SampleBean bean) {
+        return bean;
+    }
+}
+```
+
+
+なんていうので
+
+
+```java
+package sample.controller;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
+
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.SampleApplication;
+import sample.bean.SampleBean;
+
+import static javax.ws.rs.core.MediaType.*;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new SampleApplication();
+    }
+
+    @Test
+    public void test_save() {
+        Entity<SampleBean> entity = Entity.entity(
+            new SampleBean("hoge"),
+            APPLICATION_JSON
+        );
+
+        SampleBean response = target("/sample/save").request().post(entity, SampleBean.class);
+        assertThat(response, notNullValue());
+    }
+}
+```
+
+
+なんていうテストをやってみると「not found MessageBodyReader」なんていうエラーになるわけで。もちろん前回のはMessageBodyWriterは実装してあるけど、MessageBodyReaderが実装されてないので。っていう事でMessageBodyReaderを実装してみた
+
+
+
+
+
+#### GsonReaderProvider.java
+
+
+```java
+package sample.provider;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
+import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyReader;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+@Singleton
+@Consumes(MediaType.APPLICATION_JSON)
+public class GsonReaderProvider implements MessageBodyReader<Object> {
+
+    private Gson gson = new GsonBuilder().create();
+
+    @Override
+    public boolean isReadable(Class<?> type, Type genericType,
+        Annotation[] annotations, MediaType mediaType) {
+
+        return true;
+    }
+
+    @Override
+    public Object readFrom(Class<Object> type, Type genericType,
+        Annotation[] annotations, MediaType mediaType,
+        MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
+        throws IOException, WebApplicationException {
+
+        Object value = null;
+
+        try (Reader reader = new InputStreamReader(entityStream)) {
+            value = gson.fromJson(reader, genericType);
+        }
+
+        return value;
+    }
+}
+```
+
+
+んまぁMessageBodyReaderを実装するだけ。んでもって前回のSampleFeatureで
+
+
+```java
+package sample.internal;
+
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.MessageBodyWriter;
+
+import org.glassfish.jersey.CommonProperties;
+import org.glassfish.jersey.internal.util.PropertiesHelper;
+
+import sample.provider.GsonReaderProvider;
+import sample.provider.GsonWriterProvider;
+import static org.glassfish.jersey.internal.InternalProperties.JSON_FEATURE;
+
+public class SampleFeature implements Feature {
+
+    private static final String SAMPLE_JSON_FEATURE = SampleFeature.class.getSimpleName();
+
+    @Override
+    public boolean configure(final FeatureContext context) {
+        final Configuration config = context.getConfiguration();
+        final String jsonFeature = CommonProperties.getValue(
+            config.getProperties(),
+            config.getRuntimeType(),
+            JSON_FEATURE,
+            null,
+            String.class
+        );
+
+        if (jsonFeature != null) {
+            return false;
+        }
+
+        context.property(
+            PropertiesHelper.getPropertyNameForRuntime(JSON_FEATURE, config.getRuntimeType()),
+            SAMPLE_JSON_FEATURE
+        );
+
+        if (!config.isRegistered(GsonWriterProvider.class)) {
+            context.register(GsonWriterProvider.class, MessageBodyWriter.class);
+        }
+
+        // 追加
+        if (!config.isRegistered(GsonReaderProvider.class)) {
+            context.register(GsonReaderProvider.class, MessageBodyReader.class);
+        }
+
+        return true;
+    }
+}
+```
+
+
+な感じでGsonReaderProviderをregisterしておく。あとは上記で書いてるテストをそのまま実行してテストがずっこけなければオッケー
+
+
+っていう感じでgsonを使ってJAX-RSなレスポンスをエンコードしたり、JSONデータなリクエストをデコードしたり等な件はひとまずこれにて終了
+
+
+ [1]: /jaxrs-3-autodiscoverable.html
               </div>
             </div>
             <div id="5f66dd4f9f21d33fdab0671388688634bfb6a4ed" class="card m-4 mb-5">
@@ -99,7 +398,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-3-autodiscoverable.html">JAX-RSをやってみる (3) - AutoDiscoverable -</a>
                 </h3>
-                JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerア
+                JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。
               </div>
             </div>
             <div id="f4e95a6f1e6da48367f4e626d7ca4fb8436d82d8" class="card m-4 mb-5">
@@ -108,7 +407,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/04/jaxrs-2-glassfish-deployment.html">JAX-RSをやってみる (2) - glassfish deployment -</a>
                 </h3>
-                参考:https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3JAX-RSに準拠しているアプリ
+                参考: <https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3>
               </div>
             </div>
             <div id="fa9da933c8d93ce771162484ad6045e467ec15f3" class="card m-4 mb-5">
@@ -117,7 +416,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/04/jaxrs-1.html">JAX-RSをやってみる (1)</a>
                 </h3>
-                Jerseyドキュメント:https://jersey.java.net/documentation/latest/index.html参考:http://backpaper0.github.io/2
+                Jerseyドキュメント: <https://jersey.java.net/documentation/latest/index.html>
               </div>
             </div>
             <div id="8805a3146e51ad868ed45e8d8297fbc00cefeb3e" class="card m-4 mb-5">
@@ -126,7 +425,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/05/android-engineio.html">Androidでengine.io</a>
                 </h3>
-                前回やったengine.ioの記事にも書いてるが、Java向けのクライアントライブラリが既にengine.io-client-javaっていうのがあるので、それを使えば出来るだろうってことでやってみた
+                [前回やったengine.io][1]の記事にも書いてるが、Java向けのクライアントライブラリが既に[engine.io-client-java][2]っていうのがあるので、それを使えば出来るだろうってことでやってみた
               </div>
             </div>
             <div id="38e2499d1a64c045b2d7dbb001c088742f7173cd" class="card m-4 mb-5">
@@ -135,7 +434,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/04/gradle-android-test-plugin-robolectric-espresso.html">gradle-android-test-plugin+robolectric+espresso</a>
                 </h3>
-                https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4にあるように元はJakeWharton氏が開発されていてdeprecate
+                <https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4> にあるように元はJake Wharton氏が開発されていてdeprecatedになっていたgradle-android-test-pluginをrobolectric開発チームによってメンテされるようになった模様
               </div>
             </div>
             <div class="my-pagination my-5">

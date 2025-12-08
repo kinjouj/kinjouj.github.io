@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/01/mockito.html">Mockito</a>
                 </h3>
-                どうもモック伊藤です。っていう鉄板ジョークはおいといて、Mockitoを使ってみた。でstaticメソッドのmockはPowerMockitoってのを使えば出来る模様なのでbuild.gradleap
+                どうもモック伊藤です。っていう鉄板ジョークはおいといて、Mockitoを使ってみた。でstaticメソッドのmockはPowerMockitoってのを使えば出来る模様なので
               </div>
             </div>
             <div id="473924e9ee397abe3aaa89f91bc39eca46b8232e" class="card m-4 mb-5">
@@ -63,7 +63,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/01/linux-java-util-prefs-preferences.html">Linuxでのjava.util.prefs.Preferences</a>
                 </h3>
-                Windowsでいうレジストリ的な事するの場合にはjava.util.prefs.Preferencesを使えば出来た気がするのですが、これLinuxだとどこでデータが保管されているのか知らない(って
+                Windowsでいうレジストリ的な事するの場合にはjava.util.prefs.Preferencesを使えば出来た気がするのですが、これLinuxだとどこでデータが保管されているのか知らない(っていうかやった事が無い)のでやってみた
               </div>
             </div>
             <div id="d828854916f7104357d4377f4247caa3f41df6f8" class="card m-4 mb-5">
@@ -72,7 +72,300 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/01/android-search-hardware-key-suggestion.html">Androidアプリ上でのサーチハードウェアキーによる振る舞い機能を実装</a>
                 </h3>
-                まだ微妙だけどメモる。一応、テストケースとかで色々してませんので概要というような画面があって、サーチハードウェアキーを押して「h」を入力した後にというようなフィルタリングを行ったりというようにサーチハ
+                まだ微妙だけどメモる。一応、テストケースとかで色々してませんので
+
+
+
+
+
+#### 概要
+
+
+![](/images/2013/01/20130101000110.png)
+
+
+というような画面があって、サーチハードウェアキーを押して「h」を入力した後に
+
+
+![](/images/2013/01/20130101000217.png)
+
+
+というようなフィルタリングを行ったり
+
+
+![](/images/2013/01/20130101001319.png)
+
+
+というようにサーチハードウェアキーを押してキーワードでインクレメンタル検索のようなのを実装したい場合にはSearchRecentSuggestionProvider等を駆使する事で出来る模様
+
+
+ただ結果をフィルタリングする機能自体はただのAdapterのFilterを実装するだけ
+
+
+#### AndroidManifest.xml
+
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="sample.test"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk android:minSdkVersion="8" />
+
+    <application android:icon="@drawable/ic_launcher" android:label="@string/app_name">
+        <activity android:name=".MainActivity" android:label="@string/app_name" android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.default_searchable" android:value=".MainActivity" />
+            <meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
+        </activity>
+        <provider android:name=".SearchSuggestionProvider" android:authorities="sample.test.provider" />
+    </application>
+</manifest>
+```
+
+#### res/xml/searchable.xml
+
+
+```xml
+<?xml version="1.0" ?>
+<searchable
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:label="@string/app_name"
+    android:searchSuggestAuthority="sample.test.provider"
+    android:searchSuggestSelection=" ? "
+    android:searchSuggestIntentAction="sample.test.action.SEARCH_SUGGEST" />
+```
+
+
+#### SampleArrayAdapter.java
+
+
+ListViewの結果な部分をフィルタするのに必要なArrayAdapter
+
+
+```java
+package sample.test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+
+import android.content.Context;
+import android.widget.ArrayAdapter;
+import android.widget.Filter;
+
+public class SampleArrayAdapter extends ArrayAdapter<String> {
+
+    private Filter filter;
+    private List<String> items = new ArrayList<String>();
+
+    public SampleArrayAdapter(Context ctx) {
+        super(ctx, android.R.layout.simple_list_item_1);
+
+        String[] items = ctx.getResources().getStringArray(R.array.values);
+
+        // API Level11からならaddAllメソッドで対応可能かも
+
+        for (String item : items) {
+            add(item);
+
+            this.items.add(item);
+        }
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (filter == null) {
+            filter = new SampleFilter();
+        }
+
+        return filter;
+    }
+
+    private class SampleFilter extends Filter {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults results = new FilterResults();
+
+            // 検索クエリーから
+            SortedSet<String> filterItems = new TreeSet<String>();
+
+            if (constraint != null && constraint.toString().length() > 0) {
+                StringTokenizer tokens = new StringTokenizer(constraint.toString());
+
+                while(tokens.hasMoreTokens()) {
+                    String token = tokens.nextToken();
+
+                    for (String item : items) {
+                        if (item.contains(token)) {
+                            filterItems.add(item);
+                        }
+                    }
+                }
+            } else {
+                filterItems = new TreeSet<String>(items);
+            }
+
+            results.values = filterItems;
+            results.count = filterItems.size();
+
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint,FilterResults results) {
+            @SuppressWarnings("unchecked")
+            SortedSet<String> filters = (SortedSet<String>)results.values;
+
+            clear();
+
+            for (String filter : filters) {
+                add(filter);
+            }
+        }
+    }
+}
+```
+
+
+#### SearchSuggestionProvider.java
+
+
+検索項目からフィルターしてサジェストする項目をCursorで出す
+
+
+```java
+package sample.test;
+
+import android.content.SearchRecentSuggestionsProvider;
+import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.net.Uri;
+
+public class SearchSuggestionProvider extends SearchRecentSuggestionsProvider {
+
+    public SearchSuggestionProvider() {
+        setupSuggestions("sample.test.provider", SearchSuggestionProvider.DATABASE_MODE_QUERIES);
+    }
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        if (selectionArgs.length > 0) {
+            MatrixCursor csr = new MatrixCursor(
+                new String[] { "_id", "suggest_text_1", "suggest_intent_query" }
+            );
+
+            String[] values = getContext().getResources().getStringArray(R.array.values);
+
+            String query = selectionArgs[0];
+            String[] queries = query.split("s");
+
+            for (int i = 0;i < values.length;i++) {
+                String value = values[i];
+
+                for (String splitedQuery : queries) {
+                    if (value.contains(splitedQuery)) {
+                        csr.addRow(new Object[] { i, value, value });
+                    }
+                }
+            }
+
+            return csr;
+        }
+
+        return super.query(uri,projection,selection,selectionArgs,sortOrder);
+    }
+}
+```
+
+
+#### MainActivity.java
+
+
+```java
+package sample.test;
+
+import android.app.ListActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Filter;
+import android.widget.Toast;
+
+import static android.app.SearchManager.QUERY;
+import static android.app.SearchManager.APP_DATA;
+
+public class MainActivity extends ListActivity {
+
+    public static final String ACTION_SEARCH_SUGGEST = "sample.test.action.SEARCH_SUGGEST";
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+
+        getListView().setTextFilterEnabled(true);
+        setListAdapter(new SampleArrayAdapter(this));
+
+        // onSearchRequested();
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        String action = intent.getAction();
+
+        // startSearch際に指定されたBundleを取得できる模様
+        Bundle  bundle = intent.getBundleExtra(APP_DATA);
+
+        if (Intent.ACTION_SEARCH.equals(action)) {
+            final Filter textFilter = ((SampleArrayAdapter)getListAdapter()).getFilter();
+
+            textFilter.filter(intent.getStringExtra(QUERY), new Filter.FilterListener() {
+                public void onFilterComplete(int count) {
+                    if (count <= 0) {
+                        // もしマッチせず見つからなかった場合にListAdapterにバインドされてるフィルターを無効にしないと元のデータ一覧が表示されなくなる
+                        textFilter.filter(null);
+                    }
+                }
+            });
+        } else if (ACTION_SEARCH_SUGGEST.equals(action)) {
+            Bundle b = intent.getExtras();
+
+            // サーチハードウェア上の項目をクリックした際の項目はsuggest_intent_queryから取れる模様
+            String selectedValue = b.getString(QUERY);
+
+            if (selectedValue != null) {
+                Toast.makeText(this, "selected: " + selectedValue, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @Override
+    public boolean onSearchRequested() {
+        Bundle bundle = new Bundle();
+        bundle.putString("message", "hoge fuga foobar");
+
+        startSearch(null, false, bundle, false);
+
+        return true;
+    }
+}
+```
+
+
+ACTION\_SEARCHはサーチハードウェアを押してキーワードを入力して検索した際に、ACTION\_SEARCH_SUGGEST(searchabel.xmlで設定したIntentAction)は検索候補をタッチした際に返ってくる模様
+
+
+んまぁざっくり書いたけど、 <http://y-anz-m.blogspot.jp/2010/03/android-searchmanager.html> が参考になるんじゃねーかなって所
               </div>
             </div>
             <div id="c425f942c894457f36e4fa433849e24b86dcb569" class="card m-4 mb-5">
@@ -81,7 +374,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/01/android-sharecompat-actionprovider.html">ShareCompatとActionProvider</a>
                 </h3>
-                Android4.x系からはShareActionProviderとかあるんすけど、それを使わずにActionProviderを使ってShareCompatで共有の処理を実装する方法ちなみに元々参考と
+                Android4.x系からはShareActionProviderとかあるんすけど、それを使わずにActionProviderを使ってShareCompatで共有の処理を実装する方法
               </div>
             </div>
             <div id="ce00aa22f5c17c012bb667f7da677e5d8353f4f1" class="card m-4 mb-5">
@@ -90,7 +383,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2012/12/gradle-selenium.html">gradleでselenium</a>
                 </h3>
-                Gradleを使ってSeleniumベースなテストをサーバー起動を含め自動化しちゃいたい場合のメモテストケース(SampleTestCase.java)packagesample.test.integ
+                Gradleを使ってSeleniumベースなテストをサーバー起動を含め自動化しちゃいたい場合のメモ
               </div>
             </div>
             <div id="ec921b6cc7451a871571f9914b18024381176449" class="card m-4 mb-5">
@@ -99,7 +392,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2012/12/eclipse-gradle-plugin.html">EclipseでGradle</a>
                 </h3>
-                EclipseでGradleを使う場合にはGradleSTS(SpringToolSuite)なプラグインを使う事でEclipse上からGradleタスクとか動かせれるらしい。インストール方法の詳細は
+                EclipseでGradleを使う場合にはGradle STS(Spring Tool Suite)なプラグインを使う事でEclipse上からGradleタスクとか動かせれるらしい。インストール方法の詳細は <http://static.springsource.org/sts/docs/latest/reference/html/gradle/installation.html> を見れば分かるけど、やってみる
               </div>
             </div>
             <div id="14c4d030935786a3d770ee7a26128c08a6d5c454" class="card m-4 mb-5">
@@ -108,7 +401,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2012/12/jsonic.html">jsonicを使ってみる</a>
                 </h3>
-                ちょいと事情によりorg.jsonじゃなくてjsonicを使う事案が出てきて勉強している。まだまだ勉強途中だけどとりあえずまとめてみた。まずObjectからJSONに変換するベースとなるクラスを作るi
+                ちょいと事情によりorg.jsonじゃなくてjsonicを使う事案が出てきて勉強している。まだまだ勉強途中だけどとりあえずまとめてみた。
               </div>
             </div>
             <div id="9fccd06b73b4064722babc0faec8522854f8f440" class="card m-4 mb-5">
@@ -117,7 +410,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2012/12/phpunit-private-method-testing.html">PHPUnitを使ってprivateメソッドをテストする</a>
                 </h3>
-                Closure::bindを使って出来るらしい。実際に自分でやらないと信用しないタイプな人間なもんで&lt;?phpclassSample{privatefunctionsay(){return&qu
+                Closure::bindを使って出来るらしい。実際に自分でやらないと信用しないタイプな人間なもんで
               </div>
             </div>
             <div id="15c8d3ce16004e1c935cf91ca053f5a7f8e6fb87" class="card m-4 mb-5">
@@ -126,7 +419,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2012/12/s2jdbc-gen-tinyblob.html">s2jdbc-genでtinyblobになる件</a>
                 </h3>
-                何やらs2jdbc-genでgen-ddlをした際のSQLでLob型のやつがデータベース上ではtinyblob(MySQL)になってるのを確認。これmediumblobとかにする場合にはpackage
+                何やらs2jdbc-genでgen-ddlをした際のSQLでLob型のやつがデータベース上ではtinyblob(MySQL)になってるのを確認。これmediumblobとかにする場合には
               </div>
             </div>
             <div id="2a90b1f8c497b25dd73b9aa1c253a9b41cdd7b1e" class="card m-4 mb-5">
@@ -135,7 +428,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2012/12/gradle-5-war-plugin.html">gradle使ってみる (5) - warプラグイン -</a>
                 </h3>
-                warプラグインを使ってWebアプリケーション管理をやってみるapply{plugin&quot;war&quot;plugin&quot;jetty&quot;}repositories{maven
+                warプラグインを使ってWebアプリケーション管理をやってみる
               </div>
             </div>
             <div class="my-pagination my-5">

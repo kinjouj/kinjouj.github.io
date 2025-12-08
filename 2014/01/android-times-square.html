@@ -10,7 +10,92 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="CalendarっぽいViewなのでhttps://github.com/square/android-times-squareっていうのがある模様。ってな訳でちょいと使ってみたレイアウトはドキュメン" />
+    <meta name="description" content="CalendarっぽいViewなので<https://github.com/square/android-times-square>っていうのがある模様。ってな訳でちょいと使ってみた
+
+
+
+
+
+レイアウトはドキュメントに書いてる通りで
+
+```xml
+<com.squareup.timessquare.CalendarPickerView
+    android:id="@+id/calendar_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+
+だけを単純につけただけ
+
+
+#### MainActivity.java
+
+
+```java
+package sample.test;
+
+import java.util.Date;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.Toast;
+
+import com.squareup.timessquare.CalendarPickerView;
+
+import org.joda.time.DateTime;
+
+
+public class MainActivity extends Activity implements
+    CalendarPickerView.OnDateSelectedListener,
+    CalendarPickerView.OnInvalidDateSelectedListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        DateTime today = DateTime.now();
+
+        CalendarPickerView calendar = (CalendarPickerView)findViewById(R.id.calendar_view);
+        calendar.setOnDateSelectedListener(this);
+        calendar.setOnInvalidDateSelectedListener(this);
+
+        calendar
+            .init(
+                today.toDate(),
+                today.plusWeeks(1).toDate()
+            )
+            .inMode(CalendarPickerView.SelectionMode.MULTIPLE);
+    }
+
+    @Override
+    public void onDateSelected(Date date) {
+        Toast.makeText(this, "OK(Selected): " + date.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    // inMode(SelectionMode.MULTIPLE)等?において日付選択が解除された場合に発生する
+    @Override
+    public void onDateUnselected(Date date) {
+        Toast.makeText(this, "OK(Unselected): " + date.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    // initで指定した範囲以外の日付をタップした場合等に発生
+    @Override
+    public void onInvalidDateSelected(Date date) {
+        Toast.makeText(this, "NG: " + date.toString(), Toast.LENGTH_LONG).show();
+    }
+}
+```
+
+
+てな感じにすると
+
+
+![](/images/2014/01/201401191725.png)
+
+
+てな感じのビューになると。単純にそういうのを必要とするようなケースであれば非常に有用に使えるのではという印象(UIデザインとかそこはおいといて)" />
     <title>android-times-square - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/01/gradle-android-test-plugin.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/01/picasso-android-imageview-library.html" />

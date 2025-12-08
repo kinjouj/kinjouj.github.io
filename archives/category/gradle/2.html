@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/gradle-android-toolkit-build-library-project.html">gradle-android-toolkitでライブラリプロジェクト</a>
                 </h3>
-                例えば、アプリプロジェクト・ライブラリプロジェクトの両方を持ちつつActionBarSherlock等のような外部のライブラリプロジェクトを利用する場合のgradle-android-toolkitで
+                例えば、アプリプロジェクト・ライブラリプロジェクトの両方を持ちつつActionBarSherlock等のような外部のライブラリプロジェクトを利用する場合のgradle-android-toolkitでのビルドってどうなってるかとか辺りをまだやってなかったのでやってみた (※Android Studioに関してはノータッチで)
               </div>
             </div>
             <div id="9f111226465966c983d49a07b611d404f7adf411" class="card m-4 mb-5">
@@ -63,7 +63,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/12/spring-webmvc-1.html">Spring WebMVCをやってみる (1)</a>
                 </h3>
-                タイトル通り、まぁ特に依存性注入するとか細かい所は今回無しな方向で画面にテキストを出すだけな事をSpringWebMVCを使ってやってみる。まぁ要は使い方の一歩目的な感じでbuild.gradleap
+                タイトル通り、まぁ特に依存性注入するとか細かい所は今回無しな方向で画面にテキストを出すだけな事をSpring WebMVCを使ってやってみる。まぁ要は使い方の一歩目的な感じで
               </div>
             </div>
             <div id="c77547491e7123cb568f97d93d285570136d7c3b" class="card m-4 mb-5">
@@ -72,7 +72,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/11/java-annotation-processor.html">Annotation Processorの基本的な所</a>
                 </h3>
-                codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成とかでもやってるけど、色々思う所があったのでやってみたpackagesample.annotation;public@i
+                [codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成][1]とかでもやってるけど、色々思う所があったのでやってみた
               </div>
             </div>
             <div id="762c2463ea1f6e2c91a04a9dea88fcc8704fe001" class="card m-4 mb-5">
@@ -81,7 +81,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/11/gradle-fatjar.html">gradleでfatjarを作る</a>
                 </h3>
-                https://github.com/musketyr/gradle-fatjar-pluginを使えば良いっぽい。それだけ
+                <https://github.com/musketyr/gradle-fatjar-plugin>
               </div>
             </div>
             <div id="c36b330004ecdf7f1d5cfce3a416e1def52b809c" class="card m-4 mb-5">
@@ -90,7 +90,134 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/gradle-android-toolkit-robolectric-testing.html">gradle-android-toolkitでRobolectricを動かす</a>
                 </h3>
-                [Robolectricなテストプロジェクトをgradleで動かす][1]なネタと若干似てますけど、こっちではandroidtoolkitなgradleプラグインを用いてAndroidアプリをビルドす
+                [Robolectricなテストプロジェクトをgradleで動かす][1]なネタと若干似てますけど、こっちではandroid toolkitなgradleプラグインを用いてAndroidアプリをビルドする、testタスクを利用してsrc/test/javaにあるクラスをRobolectric利用でテストを実行するっていう方式をやってみた
+
+
+
+
+
+#### /app/src/test/java/sample/test/MainActivityTest.java
+
+
+```java
+package sample.test;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+import org.robolectric.util.ActivityController;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+@Config(manifest = Config.NONE)
+@RunWith(RobolectricTestRunner.class)
+public class MainActivityTest {
+
+    @Test
+    public void test1() {
+        ActivityController<MainActivity> controller = Robolectric.buildActivity(
+            MainActivity.class
+        );
+        MainActivity activity = controller.create().get();
+
+        assertThat(activity.toast, nullValue());
+
+        controller.start();
+
+        // わざとテストずっこけるようにしている。実際はNotNull
+        assertThat(activity.toast, nullValue());
+    }
+}
+```
+
+
+んなテストを用意しておいて、それをgradleで動かすだけ
+
+#### /app/build.gradle
+
+
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:0.6.1"
+    }
+}
+
+apply plugin: "android"
+
+sourceSets {
+    unitTest {
+        java.srcDir file("src/test/java")
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    unitTestCompile files("/opt/android/platforms/android-18/android.jar")
+    unitTestCompile files("${buildDir}/classes/release")
+    unitTestCompile "junit:junit:4.11"
+    unitTestCompile "org.hamcrest:hamcrest-all:1.3"
+    unitTestCompile "org.robolectric:robolectric:2.2"
+}
+
+android {
+    compileSdkVersion 18
+    buildToolsVersion "18.1.1"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 18
+    }
+}
+
+task test(type: Test, dependsOn: assemble) {
+    testClassesDir = sourceSets.unitTest.output.classesDir
+    classpath = sourceSets.unitTest.runtimeClasspath
+}
+
+check.dependsOn test
+```
+
+
+一応微妙な点を書くと
+
+
+* テストするにあたってのandroid.jarのクラスパスをしないといけない
+* src/test/javaがAndroid Studioでソースディレクトリとして認識してくれない
+
+
+2に関してはAndroid Studioでsrc/test/javaなところをSource Rootとして設定すれば問題無い模様
+
+
+という感じでtestタスクを動かすと
+
+
+![](/images/2014/01/2013102014001.png)
+
+
+以上。Robolectricプラグインはあるし普通にそれ使えば良くねっていう感じなんだがなって所
+
+
+#### 余談
+
+
+Androidの通常のテスト方式であるInstrumentationTestRunnerなテストはsrc/instrumentTest/javaに書けば良い模様。なんかドキュメントに「run instrumentTest」とかそんな感じで書いてるけどタスク一覧みてもそれが無い。「connectedInstrumentTest」かなって思って実行したら普通に実行できた
+
+
+ちなみにsrc/instrumentTestは変更できるっぽそう。sourceSets -> instrumentTest.setRoot辺りで設定すれば良いとか
+
+
+ [1]: /robolectric-project-gradle-test.html
               </div>
             </div>
             <div id="bdf057edf5a351b68d02fbc8fee235e521d9ae8f" class="card m-4 mb-5">
@@ -99,7 +226,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/gradle-android-toolkit-android-studio.html">gradle-android-toolkit+Android Studio (1)</a>
                 </h3>
-                普通ならAndroidStudioから「NewProject」-&gt;「NewModule」でAndroidプロジェクトなりモジュールなりどんどん作成していくだけで良いと思うんだけれども、Andro
+                普通ならAndroid Studioから「New Project」 -> 「New Module」でAndroidプロジェクトなりモジュールなりどんどん作成していくだけで良いと思うんだけれども、Android公式がサポートしているandroid-toolkitなgradle supportを使ってプロジェクト構成を作った場合なケースに関して検証してみた
               </div>
             </div>
             <div id="22d533ba80c91b7a60cc063e16129010445ea8db" class="card m-4 mb-5">
@@ -108,7 +235,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/robolectric-project-gradle-test.html">Robolectricなテストプロジェクトをgradleで動かす</a>
                 </h3>
-                但し、android用のgradlepluginだとかrobolectricなgradlepluginはある模様だけどそれを使わずに素のbuild.gradleだけでごちゃごちゃとやってみた構造的には
+                但し、android用のgradle pluginだとかrobolectricなgradle pluginはある模様だけどそれを使わずに素のbuild.gradleだけでごちゃごちゃとやってみた
               </div>
             </div>
             <div id="88de4cc24d3ce5801df63e68b6c3095e6cb89d69" class="card m-4 mb-5">
@@ -117,7 +244,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/eclipse-java-project-classes-change-output-directory.html">Eclipse Javaプロジェクトのクラス出力先を変える</a>
                 </h3>
-                結論から言うとという風になれば良いんだが、このプロジェクトのベースがgradleプロジェクトになっていて、どうにもこうにもEclipse上から設定出来ないなーって事で、gradleで無茶ぶりすればイケ
+                結論から言うと
               </div>
             </div>
             <div id="a70e278619d2e7a064da2b82cdfb9fb15a04b4c6" class="card m-4 mb-5">
@@ -126,7 +253,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/hbase-tablereducer.html">HBaseのTableReducer</a>
                 </h3>
-                タイトル通り、HadoopMapReduce上でReducer側から処理したデータをHBaseにぶっこむ為にTableReducerを使う事が出来る。やってみたセットアップHadoop(1.2.1)は
+                タイトル通り、Hadoop MapReduce上でReducer側から処理したデータをHBaseにぶっこむ為にTableReducerを使う事が出来る。やってみた
               </div>
             </div>
             <div id="6196b8be0a461ae808393412c6c4df318d0b054b" class="card m-4 mb-5">
@@ -135,7 +262,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/08/codemodel-annotation-processing-java-sourcecode-generation.html">codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成</a>
                 </h3>
-                とあるチャットにて、「クラスについたアノテーションからJavaソース生成させるとかどうやるの」っていう相談を受けたんだが、まぁ出来るんだろうけどやった事が無いっていう事でやってみたでJavaコード(.
+                とあるチャットにて、「クラスについたアノテーションからJavaソース生成させるとかどうやるの」っていう相談を受けたんだが、まぁ出来るんだろうけどやった事が無いっていう事でやってみた
               </div>
             </div>
             <div class="my-pagination my-5">

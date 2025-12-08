@@ -10,7 +10,114 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="んまぁJAX-RSアプリケーション上における例外処理な所をWebApplicationExceptionを使うWebApplicationExceptionを使えばまぁ普通に引数にステータスコード指定" />
+    <meta name="description" content="んまぁJAX-RSアプリケーション上における例外処理な所を
+
+
+
+
+
+#### WebApplicationExceptionを使う
+
+
+WebApplicationExceptionを使えばまぁ普通に引数にステータスコード指定したりだとかで
+
+
+```java
+package sample.controller;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
+//import static javax.ws.rs.core.MediaType.*;
+
+@Path("/sample")
+public class Home {
+
+    @GET
+    public String index() {
+        throw new WebApplicationException(Response.Status.BAD_REQUEST);
+    }
+}
+```
+
+
+な感じでWebApplicationExceptionな例外でぶっ飛ばせば
+
+
+```java
+package sample.controller;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.SampleApplication;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new SampleApplication();
+    }
+
+    @Test
+    public void test_index() {
+        Response response = target("/sample").request().get();
+        assertThat(response, notNullValue());
+        assertThat(response.getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+    }
+}
+```
+
+
+てなことになるので
+
+
+#### 独自例外をResponseに変換するExceptionMapperを使う
+
+
+```java
+package sample.controller;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
+@Path("/sample")
+public class Home {
+
+    @GET
+    public String index() {
+        throw new SampleException();
+    }
+
+    public static class SampleException extends RuntimeException {
+    }
+
+    // @Providerするか自明的にregisterしておけば良い
+    @Provider
+    public static class SampleExceptionMapper implements ExceptionMapper<SampleException> {
+        @Override
+        public Response toResponse(SampleException exception) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
+}
+```
+
+
+てな感じで上記のWebApplicationExceptionセクションで書いてるテストをそのまま動かしてテストがコケないかを確認" />
     <title>JAX-RSをやってみる (6) - 例外処理 - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/06/jaxrs-5-context-dependency-injection.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/06/jaxrs-7-reader-writer-interceptor.html" />

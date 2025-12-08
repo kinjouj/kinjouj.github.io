@@ -10,7 +10,187 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="[Mockitoでfinalクラスをモック化][1]の続き例えばpackagesample;publicfinalclassSample{publicStringsay(){return&quot;h" />
+    <meta name="description" content="[Mockitoでfinalクラスをモック化][1]の続き
+
+
+
+
+
+例えば
+
+
+```java
+package sample;
+
+public final class Sample {
+    public String say() {
+        return "hoge fuga foobar";
+    }
+}
+```
+
+
+なんていうfinalクラスがあったとして
+
+
+```java
+package sample;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
+
+public class SampleTest {
+
+    @Test
+    public void test() {
+        Sample sample = mock(Sample.class);
+        when(sample.say()).thenReturn("hoge");
+        assertThat(sample.say(), is("hoge fuga foobar"));
+
+        verify(sample).say();
+    }
+}
+```
+
+
+なんていうテストを普通にぶちかますと
+
+
+<pre>
+org.mockito.exceptions.base.MockitoException:
+Cannot mock/spy class sample.Sample
+Mockito cannot mock/spy following:
+  - final classes
+  - anonymous classes
+  - primitive types
+</pre>
+
+
+っていうようにfinalクラスはモック化出来ねーよって怒られる訳ですが。で前回だと独自のクラスローダーを利用してjavassistを使ってfinal modifierを消したクラスバイトコードを動的にロードするっていう方式だったんですが、これだとこのクラスローダーからロードしないといけないとかめんどくさいよねっていう事で色々調べつつやってみた。無論上記のコードでテストは一切書き換えないっていう条件付き
+
+
+その前に「このクラスはfinalクラスでモック出来るようにするよ」っていうのを識別させる為にアノテーションを利用
+
+
+```java
+package sample;
+
+public @interface FinalMock {
+}
+```
+
+
+なアノテーションインターフェースを作ってSampleクラスにこのアノテーションを付与しておく
+
+
+あとはクラスロードな仕組み辺りでこのアノテーションが付与されてるのだけfinal modifierを消して動的にロードするっていう方式を採用する
+
+
+#### ClassFileTransformerを実装したクラスを作る
+
+
+簡単に言うと-javaagentな仕組みを使ってクラスからfinal modifierを消してロードするっていう仕組みを作るだけ
+
+
+```java
+import java.io.IOException;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
+import java.lang.reflect.Modifier;
+import java.security.ProtectionDomain;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import sample.FinalMock;
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.NotFoundException;
+
+public class SampleClassTransformer implements ClassFileTransformer {
+
+    private static final Logger logger = LoggerFactory.getLogger(SampleClassTransformer.class);
+    private ClassPool pool;
+
+    public SampleClassTransformer() {
+        pool = ClassPool.getDefault();
+    }
+
+    @Override
+    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+        ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+
+        byte[] b = null;
+
+        try {
+            String name = className.replace("/", ".");
+            CtClass clazz = pool.get(name);
+
+            if (clazz.hasAnnotation(FinalMock.class)) {
+                clazz.setModifiers(clazz.getModifiers() & ~Modifier.FINAL);
+                b = clazz.toBytecode();
+
+                logger.info("processed: {}", clazz.getName());
+            }
+        } catch (NotFoundException e) {
+        } catch (CannotCompileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return b;
+    }
+}
+```
+
+
+で-javaagentな仕組みを使うので
+
+
+```java
+import java.lang.instrument.Instrumentation;
+
+public class JavaAgent {
+    public static void premain(String args, Instrumentation inst) {
+        inst.addTransformer(new SampleClassTransformer(), inst.isRetransformClassesSupported());
+    }
+}
+```
+
+
+っていうようなクラスを作る。んでMETA-INF/MANIFEST.MFで
+
+
+```mf
+Manifest-Version: 1.0
+Premain-Class: JavaAgent
+```
+
+
+を定義して、上記のJavaAgentクラスとSampleClassTransformerクラスをぶち込んでjar化する
+
+
+終わり。あとは実行時に-javaagent:sample.jar(作成したjarファイル)でテストを実行すると
+
+
+<pre>
+java.lang.AssertionError:
+Expected: is "hoge fuga foobar"
+     but: was "hoge"
+</pre>
+
+
+っていうように「when(sample.say()).thenReturn("hoge")」としているのでまぁどっちにしろテストは成功しないけど、モック化してメソッドが返す値をfinalクラスでもぶち込んだり出来るっていう訳
+
+
+参考: <http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class>
+
+
+ [1]: /mockito-mocked-final-class.html" />
     <title>Mockitoでfinalクラスをモック化 (2) - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/10/android-testing-robolectric-mockito.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/10/robolectric-project-gradle-test.html" />

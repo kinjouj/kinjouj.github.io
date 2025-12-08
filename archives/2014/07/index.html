@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/rails-generate-factorygirl-fixtures.html">rails generateでFactoryGirl Fixtures</a>
                 </h3>
-                ※Gemfileでenvironmentにおける依存性で:developmentを指定していればこういう設定しなくても良い模様参考:http://stackoverflow.com/questions
+                ※Gemfileでenvironmentにおける依存性で:developmentを指定していればこういう設定しなくても良い模様
               </div>
             </div>
             <div id="41820cac673b11b9d55fc8c59cc9fe894d1f14cd" class="card m-4 mb-5">
@@ -63,7 +63,148 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/rails-strong-parameters.html">strong parameters</a>
                 </h3>
-                公式ドキュメント:[http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1]Actio
+                公式ドキュメント: [http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1]
+
+ActionController::Parametersリファレンス: <http://api.rubyonrails.org/classes/ActionController/Parameters.html> 
+
+参考: <http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters>
+
+
+
+
+
+例えば以下のようなテストを実行したらどうなるか
+
+
+```ruby
+require "rails_helper"
+
+describe ApplicationController do
+  fixtures :entry, :author
+
+  controller do
+    def update
+      begin
+        entry = Entry.find(params[:id])
+        entry.update(params[:entry])
+      rescue => e
+        raise e
+      end
+
+      render :text => "OK"
+    end
+  end
+
+  it "request POST /create" do
+    post :update, :id => 1, :entry => { :author_id => 2, :name => "fuga" }
+    entry = Entry.find(1)
+    expect(entry).not_to be_nil
+
+    # fail: author_idがfilterされてないので通りそれがアップデートされる為
+    author = entry.author
+    expect(author).not_to be_nil
+  end
+end
+
+```
+
+
+※config/environments/test.rbにて「<span style="color: red">config.action\_controller.permit\_all_parameters = true</span>」をしておく。設定しない場合にはホワイトリスト化されてないパラメーター?に対してActiveModel::ForbiddenAttributesErrorが発生してエラーになる模様
+
+
+テスト実行する前にspec/fixturesに
+
+
+```yml
+entry1:
+  id: 1
+  author_id: 1
+  name: hoge
+```
+
+
+と
+
+
+```yml
+author1:
+  id: 1
+  name: author1
+```
+
+
+初期データを突っ込んでおく。で、このテストを実行すると
+
+
+<pre>
+F
+
+Failures:
+
+  1) ApplicationController request POST /create
+     Failure/Error: expect(author).not_to be_nil
+       expected: not nil
+            got: nil
+</pre>
+
+
+意図しないデータを送ってしまう事により改変されてしまうような事態になる。こういう事態になるのを防ぐのがStrong Parametersっていう機能な模様。てな訳でStrong Parametersを使ってみる
+
+
+```rb
+require "rails_helper"
+
+describe ApplicationController do
+  fixtures :entry, :author
+
+  controller do
+    def update
+      begin
+        entry_params = params.require(:entry).permit(:name)
+        entry = Entry.find(params[:id])
+        entry.update(entry_params)
+      rescue => e
+        raise e
+      end
+
+      render :text => "OK"
+    end
+  end
+
+  it "request POST /create" do
+    post :update, :id => 1, :entry => { :author_id => 2, :name => "fuga" }
+    entry = Entry.find(1)
+    expect(entry).not_to be_nil
+
+    author = entry.author
+    expect(author).not_to be_nil
+  end
+end
+```
+
+
+っていうように:nameは通すけど:author_idは通さないようにする。又、config/environments/test.rbにて「<span style="color: red">config.action_controller.action_on_unpermitted_parameters = :raise</span>」っていう設定をする事でpermitする段階において、許容されないパラメーターが含まれているような場合にはActionController::UnpermittedParametersのエラーが発生するようになる。なのでその設定をした状態で上記のテストを動かすと
+
+
+<pre>
+F
+
+Failures:
+
+  1) ApplicationController request POST /create
+     Failure/Error: entry_params = params.require(:entry).permit(:name)
+     ActionController::UnpermittedParameters:
+       found unpermitted parameters: author_id
+</pre>
+
+
+というようにauthor_idが許容されないパラメーターな為にエラーが発生するようになる。
+
+
+終わり。というのがStrong Parametersの機能概要的な感じかと。要はパラメーターをフィルターする事で不当な注入による処理をされないようにするっていう感じかと
+
+
+ [1]: http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters
               </div>
             </div>
             <div id="4b42a36cd91375e12aee41ccda9d87ba65c5dfdd" class="card m-4 mb-5">
@@ -72,7 +213,19 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/angularjs-directive-multielement.html">directiveのmultiElement</a>
                 </h3>
-                &lt;!DOCTYPEhtml&gt;&lt;htmlng-app=&quot;sample&quot;&gt;&lt;head&gt;&lt;scriptsrc=&quot;https://cod
+                ```html
+<!DOCTYPE html>
+<html ng-app="sample">
+  <head>
+    <script src="https://code.angularjs.org/1.3.0-beta.16/angular.js"></script>
+    <script src="app.js"></script>
+  </head>
+  <body ng-controller="SampleCtrl">
+    <div directive1-start></div>
+    <div directive1-end></div>
+  </body>
+</html>
+```
               </div>
             </div>
             <div id="1a6e4865de66ff100db358d81f4d5b32341559fc" class="card m-4 mb-5">
@@ -81,7 +234,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/rails-concerns.html">Railsのconcernsについて</a>
                 </h3>
-                モデルやらコントローラーでmixinすることで定義を分割するような仕組みみたいなのらしい。要はコントローラーやらモデルやらにずらーっと定義しなくてもconcernsに定義をする事でinlcudeして利
+                モデルやらコントローラーでmixinすることで定義を分割するような仕組みみたいなのらしい。要はコントローラーやらモデルやらにずらーっと定義しなくてもconcernsに定義をする事でinlcudeして利用できる
               </div>
             </div>
             <div id="fc6ea61ec94410e5245b2a96766a4e130d2095c1" class="card m-4 mb-5">
@@ -90,7 +243,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/angularjs-ng-directive-scope.html">ng-directiveのscope</a>
                 </h3>
-                参考:AngularJSのdirectiveとは&lt;htmlng-app=&quot;sample&quot;&gt;&lt;head&gt;&lt;scriptsrc=&quot;https:/
+                参考: [AngularJSのdirectiveとは][1]
               </div>
             </div>
             <div id="c0e69aad3abe09b217690d228348a055b81a3c34" class="card m-4 mb-5">
@@ -99,7 +252,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/rails-generate-migration.html">rails g migration</a>
                 </h3>
-                よくジェネレータ(scaffold)を使わずにapp/modelsとかに直書きしちゃうケースもあるのですが、そういう場合のモデルに対応するマイグレーションを利用する場合railsgmigratione
+                よくジェネレータ(scaffold)を使わずにapp/modelsとかに直書きしちゃうケースもあるのですが、そういう場合のモデルに対応するマイグレーションを利用する場合
               </div>
             </div>
             <div id="892d465429e6bb66d44bcafb5a6fa5160862de4b" class="card m-4 mb-5">
@@ -108,7 +261,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/rails-omnioauth-facebook-login.html">OmniAuthを使ってfacebookログインする</a>
                 </h3>
-                公式:https://github.com/intridea/omniauthタイトル通りRails(じゃなくても出来る。Sinatraとかもサポートされている)で、facebookへのログインを行っ
+                公式: <https://github.com/intridea/omniauth>
               </div>
             </div>
             <div id="5f1d48a47ce2776b99320b6f2cc751a094281680" class="card m-4 mb-5">
@@ -117,7 +270,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/jaxrs-15-forcedautodiscoverable.html">JAX-RSをやってみる (15) - ForcedAutoDiscoverable -</a>
                 </h3>
-                以前にJAX-RSをやってみる(3)–AutoDiscoverable-っていうのでAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録
+                以前に[JAX-RSをやってみる (3) – AutoDiscoverable -][1]っていうので
               </div>
             </div>
             <div id="bfeededa4f53defa4ca7a6914e41083d36313d2e" class="card m-4 mb-5">
@@ -126,7 +279,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/scroll-contents-paging-2.html">スクロールによるページング処理に関して#2</a>
                 </h3>
-                参考:要素が画面上に見えているかどうかを調べるjquery.inview:https://github.com/protonet/jquery.inviewスクロールによるページング処理に関してではス
+                参考: [要素が画面上に見えているかどうかを調べる][1]
               </div>
             </div>
             <div id="24561232399c4469f776535e5303db996e21f36e" class="card m-4 mb-5">
@@ -135,7 +288,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/07/jaxrs-14-bean-validation.html">JAX-RSをやってみる (14) - Bean Validation -</a>
                 </h3>
-                公式リファレンス:https://jersey.java.net/documentation/latest/user-guide.html#bean-validation単純にアノテーションベースで入
+                公式リファレンス: <https://jersey.java.net/documentation/latest/user-guide.html#bean-validation>
               </div>
             </div>
             <div class="my-pagination my-5">

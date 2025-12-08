@@ -10,7 +10,166 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="GradleのRobolectricテスト用プラグインとして、非推奨になったJake氏のgradle-android-test-pluginではなくNovoda氏のrobolectric-plugin" />
+    <meta name="description" content="<blockquote class="twitter-tweet" lang="ja">
+  <p>
+    GradleのRobolectricテスト用プラグインとして、非推奨になったJake氏のgradle-android-test-pluginではなくNovoda氏のrobolectric-pluginを使っているサンプル <a href="http://t.co/lgPqRqbHHE">http://t.co/lgPqRqbHHE</a> …
+  </p>
+  
+  <p>
+    &mdash; なかざん＠ミラ・イース現象だ！！！ (@Nkzn) <a href="https://twitter.com/Nkzn/statuses/435417429317935106">2014, 2月 17</a>
+  </p>
+</blockquote>
+
+
+っていう事でrobolectric-pluginっていうのがあるっては知ってはいたんですが、どうも上手く行かなずな感じで。まぁ一回は挫折したんですが再チャレンジでようやくテストの実行が出来たのでメモっておく
+
+
+
+
+
+#### 構成
+
+
+構成は前回の[gradle-android-test-plugin+Robolectricでテスト][1]のをそのまま利用する。build.gradle等を色々書き換えしたりとかをする
+
+
+#### 公式のrobolectric-pluginが動かない
+
+
+どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 <http://qiita.com/turugina/items/972f46b40bb972c180f0> にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど
+
+
+まぁ <https://github.com/turugina/robolectric-plugin> からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る
+
+
+#### build.gradle
+
+
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:0.8.+"
+        // ローカルにインストールしたのを使うのでSNAPSHOTサフィックスは要らない
+        classpath "com.novoda.gradle:robolectric-plugin:0.0.1"
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+    }
+}
+```
+
+
+#### app/build.gradle
+
+
+```groovy
+apply plugin: "android"
+// robolectric-pluginをロード
+apply plugin: "robolectric"
+
+dependencies {
+    compile project(":libraries:sample_library")
+    compile "com.actionbarsherlock:actionbarsherlock:4.4.0@aar"
+
+    robolectricCompile "junit:junit:4.11"
+    robolectricCompile "org.hamcrest:hamcrest-all:1.3"
+    robolectricCompile "org.robolectric:robolectric:2.3-SNAPSHOT"
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.0.1"
+}
+
+tasks.withType(Test) {
+    scanForTestClasses = false
+    include "**/*Test.class"
+}
+```
+
+
+あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない
+
+
+#### android.content.res.Resources$NotFoundException が出る
+
+
+まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る
+
+
+で記事トップに書いてる[robolectric-pluginを使うサンプル][2]は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと
+
+
+んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で
+
+
+```java
+package sample.test;
+
+import org.junit.runners.model.InitializationError;
+import org.robolectric.AndroidManifest;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+import org.robolectric.res.Fs;
+
+public class RobolectricGradleTestRunner extends RobolectricTestRunner {
+
+    public RobolectricGradleTestRunner(Class<?> testClass) throws InitializationError {
+        super(testClass);
+    }
+
+    @Override
+    protected AndroidManifest getAppManifest(Config config) {
+        String myAppPath = RobolectricGradleTestRunner.class
+            .getProtectionDomain()
+            .getCodeSource()
+            .getLocation()
+            .getPath();
+
+        // myAppPathはbuild/classes/robolectricにスコープされている
+
+        String manifestPath = myAppPath + "../../../src/main/AndroidManifest.xml";
+
+        // build/res/allにライブラリプロジェクトを含むリソースがマージされた集約されるっぽいのでそっちを指定する
+        String resPath = myAppPath + "../../res/all/debug";
+
+        // こっちも上記のresPath同様にしないといけないのかも
+        String assetPath = myAppPath + "../../../src/main/assets";
+
+        return new AndroidManifest(
+            Fs.fileFromPath(manifestPath),
+            Fs.fileFromPath(resPath),
+            Fs.fileFromPath(assetPath)
+        );
+    }
+}
+```
+
+
+![](/images/2014/02/201402160218.jpg)
+
+
+結果前回どうようのAssertionErrorが出る (これはわざと出している)
+
+
+ [1]: /gradle-android-test-plugin-robolectric-testing.html
+ [2]: http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments　" />
     <title>gradle-android-toolkit+robolectric-plugin - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/02/supervisord-4-eventlistener.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/02/maven-android-archive.html" />

@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/loadmorelistview.html">LoadMoreListView</a>
                 </h3>
-                まぁ要はListViewの末尾に達したら新しいデータをロードする等の仕組みを提供する機能的なやつ。AndroidPullToRefreshにはそういう機能があったけど、何回かふれているけどAction
+                まぁ要はListViewの末尾に達したら新しいデータをロードする等の仕組みを提供する機能的なやつ。Android PullToRefreshにはそういう機能があったけど、何回かふれているけどActionBar PullToRefreshを使うべきという形になっているので、それっぽい機能をどうするかって所なんですが
               </div>
             </div>
             <div id="86856571b53e771748d97c5cdc76f425c3c3683a" class="card m-4 mb-5">
@@ -63,7 +63,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/activerecord-logging-sql-query.html">ActiveRecordでSQLのログを取る</a>
                 </h3>
-                ※Railsで使う場合だと設定方法異なるらしい。その件は今回はノータッチでrequire&quot;active_record&quot;require&quot;./sample&quot;logg
+                ※Railsで使う場合だと設定方法異なるらしい。その件は今回はノータッチで
               </div>
             </div>
             <div id="7b5a433715cffd5ad5b985ad4bc5c53d7ecf6414" class="card m-4 mb-5">
@@ -72,7 +72,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/chrome-extension-browseraction-icon-rotation.html">Chrome拡張のブラウザアクションなアイコンを回転させる技</a>
                 </h3>
-                Google公式なGmailな拡張ではメールを受信したりするとブラウザアクションなアイコンが回転するようになっている。これどうやってやってるのか非常に気になったのでその拡張のソースを見てやってみた※本
+                Google公式なGmailな拡張ではメールを受信したりするとブラウザアクションなアイコンが回転するようになっている。これどうやってやってるのか非常に気になったのでその拡張のソースを見てやってみた
               </div>
             </div>
             <div id="a2f7d55212f32c718d87e77b180ca5094e175815" class="card m-4 mb-5">
@@ -81,7 +81,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/gradle-android-apt-plugin.html">gradle-android-apt-plugin</a>
                 </h3>
-                gradle-android-apt-pluginが便利っぽい単純にandroid-aptなプラグインをapplypluginしてaptconfigurationscopeにaptなライブラリ突っ込む
+                [gradle-android-apt-plugin][1]が便利っぽい
               </div>
             </div>
             <div id="bd1e1caadb26c8f6a34f56294801651aace40b78" class="card m-4 mb-5">
@@ -90,7 +90,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/maven-android-archive.html">maven+android archive</a>
                 </h3>
-                参考:http://www.flexlabs.org/2013/06/using-local-aar-android-library-packages-in-gradle-builds今時な手法として
+                参考: <http://www.flexlabs.org/2013/06/using-local-aar-android-library-packages-in-gradle-builds>
               </div>
             </div>
             <div id="b06ca4643785716d7c309589e03d213627aba7a4" class="card m-4 mb-5">
@@ -99,7 +99,166 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/gradle-android-toolkit-robolectric-plugin.html">gradle-android-toolkit+robolectric-plugin</a>
                 </h3>
-                GradleのRobolectricテスト用プラグインとして、非推奨になったJake氏のgradle-android-test-pluginではなくNovoda氏のrobolectric-plugin
+                <blockquote class="twitter-tweet" lang="ja">
+  <p>
+    GradleのRobolectricテスト用プラグインとして、非推奨になったJake氏のgradle-android-test-pluginではなくNovoda氏のrobolectric-pluginを使っているサンプル <a href="http://t.co/lgPqRqbHHE">http://t.co/lgPqRqbHHE</a> …
+  </p>
+  
+  <p>
+    &mdash; なかざん＠ミラ・イース現象だ！！！ (@Nkzn) <a href="https://twitter.com/Nkzn/statuses/435417429317935106">2014, 2月 17</a>
+  </p>
+</blockquote>
+
+
+っていう事でrobolectric-pluginっていうのがあるっては知ってはいたんですが、どうも上手く行かなずな感じで。まぁ一回は挫折したんですが再チャレンジでようやくテストの実行が出来たのでメモっておく
+
+
+
+
+
+#### 構成
+
+
+構成は前回の[gradle-android-test-plugin+Robolectricでテスト][1]のをそのまま利用する。build.gradle等を色々書き換えしたりとかをする
+
+
+#### 公式のrobolectric-pluginが動かない
+
+
+どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 <http://qiita.com/turugina/items/972f46b40bb972c180f0> にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど
+
+
+まぁ <https://github.com/turugina/robolectric-plugin> からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る
+
+
+#### build.gradle
+
+
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:0.8.+"
+        // ローカルにインストールしたのを使うのでSNAPSHOTサフィックスは要らない
+        classpath "com.novoda.gradle:robolectric-plugin:0.0.1"
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+    }
+}
+```
+
+
+#### app/build.gradle
+
+
+```groovy
+apply plugin: "android"
+// robolectric-pluginをロード
+apply plugin: "robolectric"
+
+dependencies {
+    compile project(":libraries:sample_library")
+    compile "com.actionbarsherlock:actionbarsherlock:4.4.0@aar"
+
+    robolectricCompile "junit:junit:4.11"
+    robolectricCompile "org.hamcrest:hamcrest-all:1.3"
+    robolectricCompile "org.robolectric:robolectric:2.3-SNAPSHOT"
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.0.1"
+}
+
+tasks.withType(Test) {
+    scanForTestClasses = false
+    include "**/*Test.class"
+}
+```
+
+
+あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない
+
+
+#### android.content.res.Resources$NotFoundException が出る
+
+
+まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る
+
+
+で記事トップに書いてる[robolectric-pluginを使うサンプル][2]は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと
+
+
+んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で
+
+
+```java
+package sample.test;
+
+import org.junit.runners.model.InitializationError;
+import org.robolectric.AndroidManifest;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+import org.robolectric.res.Fs;
+
+public class RobolectricGradleTestRunner extends RobolectricTestRunner {
+
+    public RobolectricGradleTestRunner(Class<?> testClass) throws InitializationError {
+        super(testClass);
+    }
+
+    @Override
+    protected AndroidManifest getAppManifest(Config config) {
+        String myAppPath = RobolectricGradleTestRunner.class
+            .getProtectionDomain()
+            .getCodeSource()
+            .getLocation()
+            .getPath();
+
+        // myAppPathはbuild/classes/robolectricにスコープされている
+
+        String manifestPath = myAppPath + "../../../src/main/AndroidManifest.xml";
+
+        // build/res/allにライブラリプロジェクトを含むリソースがマージされた集約されるっぽいのでそっちを指定する
+        String resPath = myAppPath + "../../res/all/debug";
+
+        // こっちも上記のresPath同様にしないといけないのかも
+        String assetPath = myAppPath + "../../../src/main/assets";
+
+        return new AndroidManifest(
+            Fs.fileFromPath(manifestPath),
+            Fs.fileFromPath(resPath),
+            Fs.fileFromPath(assetPath)
+        );
+    }
+}
+```
+
+
+![](/images/2014/02/201402160218.jpg)
+
+
+結果前回どうようのAssertionErrorが出る (これはわざと出している)
+
+
+ [1]: /gradle-android-test-plugin-robolectric-testing.html
+ [2]: http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments　
               </div>
             </div>
             <div id="b0c2c5526704f11d248093fa5229c752ea79ecb6" class="card m-4 mb-5">
@@ -108,7 +267,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/supervisord-4-eventlistener.html">supervisord (4) - eventlistener -</a>
                 </h3>
-                参考:http://blog.hakutoitoi.com/?p=396supervisordで管理しているプロセスが落ちたりだとか(規定されている?)一定時間毎に何かコマンドを動かしたい時とかに使え
+                参考: <http://blog.hakutoitoi.com/?p=396>
               </div>
             </div>
             <div id="bd0cbbbbc283b3f78bb995550164ebbe79d34ade" class="card m-4 mb-5">
@@ -117,7 +276,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/gradle-android-test-plugin-robolectric-testing.html">gradle-android-test-plugin+Robolectricでテスト</a>
                 </h3>
-                参考:http://starzero.hatenablog.com/entry/2013/12/22/201149gradle-android-test-pluginがいつの間にかDEPRECATED
+                参考: <http://starzero.hatenablog.com/entry/2013/12/22/201149>
               </div>
             </div>
             <div id="67bcfb6a79ca4ad3f3bc6d200f7b85323f172b5a" class="card m-4 mb-5">
@@ -126,7 +285,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/gulp-mocha-phantomjs-jscoverage.html">gulpでmocha-phantomjs+jscoverage</a>
                 </h3>
-                以前に「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植するっていうのをやったのですが、それのgulp版その前に以前でも書いたようにjson2htm
+                以前に[「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植する][1]っていうのをやったのですが、それのgulp版
               </div>
             </div>
             <div id="6f8b29c25953743c4d322a57744ce18ac76fa335" class="card m-4 mb-5">
@@ -135,7 +294,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/gradle-android-toolkit-allprojects.html">gradle-android-toolkitのallprojects</a>
                 </h3>
-                例えばapp/build.gradleがあってapplyplugin:&quot;android&quot;repositories{mavenCentral()}dependencies{compi
+                例えばapp/build.gradleがあって
               </div>
             </div>
             <div class="my-pagination my-5">

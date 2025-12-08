@@ -10,7 +10,177 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="参考1:[GettingYourSMSAppsReadyforKitKat][1]参考2:[AndroidKITKAT:デフォルトSMSアプリを作る-ブライテクノBlog][2]※非常に内容がざっくり" />
+    <meta name="description" content="参考1: [Getting Your SMS Apps Ready for KitKat][1]  
+
+参考2: [Android KITKAT: デフォルトSMSアプリを作る - ブライテクノBlog][2]
+
+
+※非常に内容がざっくりとしてますので上記参考を(ry
+
+
+Android 4.4(Kitkat)からデフォルトなSMSのアプリを作って利用する事が出来るらしいとの事は知っていたのだけど検証的な辺りとかしてなかったので色々やってみた
+
+
+
+
+
+#### 要点
+
+
+ポイントはandroid.provider.Telephony.SmsなContent Providerのandroid.net.Uriに対してinsertしたりする事でどのアプリを使っても不整合になったりしないような仕組みを採用しているんじゃないかと。つまりはSMSを受信したらそのContent Providerにinsertしろ、見るアプリ側ではContent Providerでqueryして取得しろ的な事なのではと
+
+
+多分、android.provider.Telephony.Sms.CONTENT_URIは"[content://sms]()"だと思われる。ソースは読んでないけど
+
+
+#### AndroidManifest.xml
+
+
+公式ブログな参考読めば分かるけど適切な設定を行えばデフォルトSMSとして切り替える事が可能な模様。その条件は上記参考2に記載されている
+
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="sample.test"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="19"
+        android:targetSdkVersion="19" />
+
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_SMS"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+
+        <receiver
+            android:name=".SmsReceiver"
+            android:permission="android.permission.BROADCAST_SMS">
+
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_DELIVER" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".MmsReceiver"
+            android:permission="android.permission.BROADCAST_WAP_PUSH">
+
+            <intent-filter>
+                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+                <data android:mimeType="application/vnd.wap.mms-message" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".ComposeSmsActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+                <data android:scheme="mms" />
+                <data android:scheme="mmsto" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".HeadlessSmsSendService"
+            android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+                <data android:scheme="mms" />
+                <data android:scheme="mmsto" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>
+```
+
+
+HeadlessSmsSendServiceとComposeSmsActivityは今回ノータッチだけど、さっきも書いた参考2の所にソースが記載されているのでそれ読めば良い。要はComposeSmsActivity自体はSMS関係のschemeに対応するメール送信フォーム的なのじゃないかと。で実際に送るのはHeadlessSmsSendServiceかと
+
+
+#### SmsReceiver.java
+
+
+MmsReceiverに関しては実験出来る環境が無いのでパス
+
+
+```java
+package sample.test;
+
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.Telephony.Sms;
+import android.telephony.SmsMessage;
+import android.util.Log;
+
+public class SmsReceiver extends BroadcastReceiver {
+
+    private static final String TAG = SmsReceiver.class.getName();
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.v(TAG, "onReceive: " + intent.getAction());
+
+        // ここでintent#getActionを評価して処理条件をパスするべき
+
+        Bundle extras = intent.getExtras();
+
+        if (extras == null)
+            return;
+
+        ContentResolver resolver = context.getContentResolver();
+
+        Object[] smsExtras = (Object[])extras.get("pdus");
+
+        for (Object smsExtra : smsExtras) {
+            SmsMessage sms = SmsMessage.createFromPdu((byte[])smsExtra);
+
+            ContentValues values = new ContentValues();
+            values.put("address", sms.getOriginatingAddress());
+            values.put("body", sms.getMessageBody());
+
+            @SuppressWarnings("unused")
+            Uri uri = resolver.insert(Sms.CONTENT_URI, values);
+        }
+    }
+}
+```
+
+
+っていう感じでさっきも書いたけど、SMSなContent Providerにinsertすりゃ良いみたいなので
+
+
+でそんなこんなで入れてみると
+
+
+![](/images/2014/01/201401291220.png)
+
+
+っていうように「設定」から「無線とネットワーク」「デフォルトSMSアプリ」で設定出来る模様
+
+
+ [1]: http://android-developers.blogspot.jp/2013/10/getting-your-sms-apps-ready-for-kitkat.html
+ [2]: http://brightechno.com/blog/archives/231" />
     <title>Android4.4(Kitkat)のデフォルトSMSアプリに関して - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/01/otto-library-and-activity-recognition.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/01/refreshactionitem.html" />

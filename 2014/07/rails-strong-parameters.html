@@ -10,7 +10,148 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="公式ドキュメント:[http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1]Actio" />
+    <meta name="description" content="公式ドキュメント: [http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1]
+
+ActionController::Parametersリファレンス: <http://api.rubyonrails.org/classes/ActionController/Parameters.html> 
+
+参考: <http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters>
+
+
+
+
+
+例えば以下のようなテストを実行したらどうなるか
+
+
+```ruby
+require "rails_helper"
+
+describe ApplicationController do
+  fixtures :entry, :author
+
+  controller do
+    def update
+      begin
+        entry = Entry.find(params[:id])
+        entry.update(params[:entry])
+      rescue => e
+        raise e
+      end
+
+      render :text => "OK"
+    end
+  end
+
+  it "request POST /create" do
+    post :update, :id => 1, :entry => { :author_id => 2, :name => "fuga" }
+    entry = Entry.find(1)
+    expect(entry).not_to be_nil
+
+    # fail: author_idがfilterされてないので通りそれがアップデートされる為
+    author = entry.author
+    expect(author).not_to be_nil
+  end
+end
+
+```
+
+
+※config/environments/test.rbにて「<span style="color: red">config.action\_controller.permit\_all_parameters = true</span>」をしておく。設定しない場合にはホワイトリスト化されてないパラメーター?に対してActiveModel::ForbiddenAttributesErrorが発生してエラーになる模様
+
+
+テスト実行する前にspec/fixturesに
+
+
+```yml
+entry1:
+  id: 1
+  author_id: 1
+  name: hoge
+```
+
+
+と
+
+
+```yml
+author1:
+  id: 1
+  name: author1
+```
+
+
+初期データを突っ込んでおく。で、このテストを実行すると
+
+
+<pre>
+F
+
+Failures:
+
+  1) ApplicationController request POST /create
+     Failure/Error: expect(author).not_to be_nil
+       expected: not nil
+            got: nil
+</pre>
+
+
+意図しないデータを送ってしまう事により改変されてしまうような事態になる。こういう事態になるのを防ぐのがStrong Parametersっていう機能な模様。てな訳でStrong Parametersを使ってみる
+
+
+```rb
+require "rails_helper"
+
+describe ApplicationController do
+  fixtures :entry, :author
+
+  controller do
+    def update
+      begin
+        entry_params = params.require(:entry).permit(:name)
+        entry = Entry.find(params[:id])
+        entry.update(entry_params)
+      rescue => e
+        raise e
+      end
+
+      render :text => "OK"
+    end
+  end
+
+  it "request POST /create" do
+    post :update, :id => 1, :entry => { :author_id => 2, :name => "fuga" }
+    entry = Entry.find(1)
+    expect(entry).not_to be_nil
+
+    author = entry.author
+    expect(author).not_to be_nil
+  end
+end
+```
+
+
+っていうように:nameは通すけど:author_idは通さないようにする。又、config/environments/test.rbにて「<span style="color: red">config.action_controller.action_on_unpermitted_parameters = :raise</span>」っていう設定をする事でpermitする段階において、許容されないパラメーターが含まれているような場合にはActionController::UnpermittedParametersのエラーが発生するようになる。なのでその設定をした状態で上記のテストを動かすと
+
+
+<pre>
+F
+
+Failures:
+
+  1) ApplicationController request POST /create
+     Failure/Error: entry_params = params.require(:entry).permit(:name)
+     ActionController::UnpermittedParameters:
+       found unpermitted parameters: author_id
+</pre>
+
+
+というようにauthor_idが許容されないパラメーターな為にエラーが発生するようになる。
+
+
+終わり。というのがStrong Parametersの機能概要的な感じかと。要はパラメーターをフィルターする事で不当な注入による処理をされないようにするっていう感じかと
+
+
+ [1]: http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters" />
     <title>strong parameters - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/07/angularjs-directive-multielement.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/07/rails-generate-factorygirl-fixtures.html" />

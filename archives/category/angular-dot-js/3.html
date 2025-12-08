@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/04/angularjs-17-broadcast.html">angular.jsをやってみる (17) - $broadcast -</a>
                 </h3>
-                公式リファレンス:http://docs.angularjs.org/api/ng/type/$rootScope.Scope※ややこしいので公式リファレンス読むかググった方が良いnode.jsのEv
+                公式リファレンス: <http://docs.angularjs.org/api/ng/type/$rootScope.Scope>
               </div>
             </div>
             <div id="e173e12cba9c983d9808da79a988827e8148bf70" class="card m-4 mb-5">
@@ -63,7 +63,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/04/angularjs-16-ng-animate-2.html">angular.jsをやってみる (16) - ngAnimate#2 -</a>
                 </h3>
-                angular.jsをやってみる(15)–ngAnimate-では単にng-enterやng-leaveなどのCSSを利用する事でアニメーションを利用する事が出来たわけだけど、これをJavaScrip
+                [angular.jsをやってみる (15) – ngAnimate -][1]では単にng-enterやng-leaveなどのCSSを利用する事でアニメーションを利用する事が出来たわけだけど、これをJavaScriptなangular.moduleによってコントロールする事も出来る模様。という事で前回同様なフェードイン・フェードアウトをやってみた
               </div>
             </div>
             <div id="2a2712cdb5b9ced811e1bab366db8e5bcf7c9cd5" class="card m-4 mb-5">
@@ -72,7 +72,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/04/angularjs-15-ng-animate.html">angular.jsをやってみる (15) - ngAnimate -</a>
                 </h3>
-                参考:AngularJSでちゃちゃっとアニメーションを試す-AngularJSNinja公式リファレンス:http://docs.angularjs.org/api/ngAnimateんまぁ名前からし
+                参考: [AngularJSでちゃちゃっとアニメーションを試す - AngularJS Ninja][1]
               </div>
             </div>
             <div id="68c73599a0f0a8bb9cdee01762e97f253ed8c5c3" class="card m-4 mb-5">
@@ -81,7 +81,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/03/angularjs-14-scope-apply.html">angular.jsをやってみる (14) - $scope.$apply -</a>
                 </h3>
-                参考:AngularJSのデータバインドを支える$apply公式リファレンス:http://docs.angularjs.org/api/ng/type/$rootScope.Scopeangular
+                参考: [AngularJS のデータバインドを支える $apply][1]
               </div>
             </div>
             <div id="03fa54e3c4becded9e36e3d07e8fd0823d69dccf" class="card m-4 mb-5">
@@ -90,7 +90,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/03/angularjs-13-sce-ng-sanitize.html">angular.jsをやってみる (13) - $sceとngSanitize -</a>
                 </h3>
-                ※ややこしいので公式ドキュメント読んだ方がいい&lt;divng-controller=&quot;SampleController&quot;&gt;&lt;span&gt;{%raw%}{{mes
+                ※ややこしいので公式ドキュメント読んだ方がいい
               </div>
             </div>
             <div id="43ee504bc9081e4a5533f5ea28bb7b691ec9679a" class="card m-4 mb-5">
@@ -99,7 +99,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/03/angularjs-11-interval.html">angular.jsをやってみる (11) - $interval -</a>
                 </h3>
-                window.setIntevalをangular.jsでラップした物らしい。http://docs.angularjs.org/api/ng/service/$intervalを見つつやってみたap
+                window.setIntevalをangular.jsでラップした物らしい。<http://docs.angularjs.org/api/ng/service/$interval> を見つつやってみた
               </div>
             </div>
             <div id="76c495738bc08dd67cbfb57ebb181e207c023c51" class="card m-4 mb-5">
@@ -108,7 +108,144 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/03/angularjs-12-angular-mocks-unit-testing.html">angular.jsをやってみる (12) - angular-mocks.jsを使ったテスト -</a>
                 </h3>
-                今まで[angular.jsのkarmaを使ったテスト][1][protractorを使ったangular.jsのe2eテスト][2]っていうのをやってたけど、angular-mocks.jsを使う事
+                今まで
+
+
+[angular.jsのkarmaを使ったテスト][1]  
+[protractorを使ったangular.jsのe2eテスト][2]
+
+
+っていうのをやってたけど、angular-mocks.jsを使う事での単体テストすることも可能な模様なので色々整理する辺りな所としてやってみた
+
+
+
+
+
+#### sample.js
+
+
+```js
+var SampleController = (function() {
+
+  function SampleController($scope, $http) {
+    $http.get("/samples").success(function(samples) {
+      $scope.samples = samples;
+    });
+  };
+
+  return SampleController;
+
+})();
+```
+
+
+っていう感じでangular.jsの$httpを使ってAPI呼び出しなりをしてデータを取得後$scopeに突っ込むという単純なangular.jsのコントローラーを定義
+
+
+まぁこれを単体テストしましょうってことなので(ry
+
+
+#### mocha.html
+
+
+テストにmochaを使う。なのでテストランナーなHTMLを作る
+
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Mocha</title>
+    <link rel="stylesheet" href="mocha.css" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular.js"></script>
+    <script type="text/javascript" src="mocha.js"></script>
+    <script type="text/javascript" src="chai.js"></script>
+    <script type="text/javascript">
+      chai.should();
+
+      var expect = chai.expect;
+      mocha.setup({ "ui": "bdd", "timeout": 3000, "ignoreLeaks": false });
+    </script>
+
+    <!-- 上記コントローラーなJS -->
+    <script type="text/javascript" src="sample.js"></script>
+  </head>
+  <body style="background: #bbb">
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular-mocks.js"></script>
+    <!-- テストスペック -->
+    <script src="test.js"></script>
+    <div id="mocha"></div>
+    <script>
+        mocha.run();
+    </script>
+  </body>
+</html>
+```
+
+
+な感じで。これでテストスペック上で<span style="color: red">inject</span>等が使えるのでこれを利用して$httpを利用して返されるレスポンスをテストしたり出来る
+
+
+#### test.js
+
+
+```js
+describe("Sample", function() {
+
+  var $controller;
+  var $httpBackend;
+
+  function createController(scope) {
+    return $controller("SampleController", { "$scope": scope });
+  }
+
+  beforeEach(
+    inject(function($injector) {
+        $controller = $injector.get("$controller");
+        $httpBackend = $injector.get("$httpBackend");
+        $httpBackend
+          .when("GET", "/samples")
+          .respond([{ name: "hoge" }, { name: "fuga" }]);
+    })
+  );
+
+  afterEach(function() {
+    // flushで呼ばれるので必要ないのでは?
+    // リクエスト発生してないのにflushするとthrow new Errorされる
+    // $httpBackend.verifyNoOutstandingExpectation();
+
+    // flushしてないとthrow new Errorされる
+    $httpBackend.verifyNoOutstandingRequest();
+  });
+
+  it("constructor", function() {
+    var scope = {};
+    var sample = createController(scope);
+    $httpBackend.flush();
+
+    expect(scope.samples).not.to.be.empty;
+    // 実際に返される値数は2 (when -> respondで返してる配列の要素数が2だから)
+    expect(scope.samples).to.have.length(3);
+  });
+});
+```
+
+
+っていう感じで。あとはテストランナーなHTMLを普通にブラウザで開けば良い。それをやると
+
+
+![](/images/2014/03/201403271433.jpg)
+
+
+っていうような結果が得られる。
+
+
+んまぁangular.jsなコントローラーとかの単体テストをする場合とかでangular.jsなproviderやserviceが必要になる要件な場合とかだとangular-mocks.jsを使う事で擬似オブジェクトを利用したテストを利用できるっていう感じかと
+
+
+ [1]: /angularjs-karma-e2e-testing.html
+ [2]: /angularjs-protractor-e2e-testing.html
               </div>
             </div>
             <div id="c455c483adfffe6fb54cfa2f95834c86303e8257" class="card m-4 mb-5">
@@ -117,7 +254,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/03/angularjs-10-ng-cookies.html">angular.jsをやってみる (10) - ngCookies -</a>
                 </h3>
-                http://docs.angularjs.org/api/ngCookiesを使えばCookie的な利用をする事も出来るらしい。っていう事で使ってみたindex.html&lt;!DOCTYPEht
+                <http://docs.angularjs.org/api/ngCookies> を使えばCookie的な利用をする事も出来るらしい。っていう事で使ってみた
               </div>
             </div>
             <div id="6fef9cb15ca1b6de2b041f9db953d348faf15ee7" class="card m-4 mb-5">
@@ -126,7 +263,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/03/angularjs-9-resource-paramsdefault-atmark-prefix.html">angular.jsをやってみる (9) - $resourceのparamsDefaultにおける@接頭辞 -</a>
                 </h3>
-                前回のangular.jsをやってみる(8)–$resource-でも述べているように、paramsDefaultのパラメーターには@な接頭辞を持つデータ指定を利用する事が出来る例えば以下ような感じで
+                前回の[angular.jsをやってみる (8) – $resource -][1]でも述べているように、paramsDefaultのパラメーターには@な接頭辞を持つデータ指定を利用する事が出来る
               </div>
             </div>
             <div id="cca98029b867880d9a1dab1f346d84393a1d0839" class="card m-4 mb-5">
@@ -135,7 +272,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/03/angularjs-8-resource.html">angular.jsをやってみる (8) - $resource -</a>
                 </h3>
-                RESTandCustomServicesを見つつやってみる。でRESTfulなWebサービス的なのが必要なので今回はRailsで適当なのでっち上げてやってみる。つまりangular.jsとかソッチ系
+                [REST and Custom Services][1]を見つつやってみる。でRESTfulなWebサービス的なのが必要なので今回はRailsで適当なのでっち上げてやってみる。つまりangular.jsとかソッチ系も全部Railsプロジェクト内に作る
               </div>
             </div>
             <div class="my-pagination my-5">

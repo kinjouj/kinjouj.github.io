@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/11/android-jsonpullparser.html">Android+JsonPullParser</a>
                 </h3>
-                AndroidでJsonPullParserを使うっていうネタ。まぁ公式にもサンプルあるしそれ参考にすれば良いんじゃねって所なんで※@JsonModel等は前回のをそのまま利用MainActivity
+                AndroidでJsonPullParserを使うっていうネタ。まぁ公式にもサンプルあるしそれ参考にすれば良いんじゃねって所なんで
               </div>
             </div>
             <div id="051d7509751a1fe7f047a5e65b13c87b8506e720" class="card m-4 mb-5">
@@ -63,7 +63,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/11/android-inputmethodservice.html">InputMethodServiceを使ってIMを作るメモ</a>
                 </h3>
-                ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをや
+                ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをやってた。とりあえず書いておこうかと
               </div>
             </div>
             <div id="e84fcab33fd53f48d13e418b9b9403973c00eee8" class="card m-4 mb-5">
@@ -72,7 +72,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/11/android-speechrecognizer-retrieve-text-and-voice-data.html">SpeechRecognizerを使って音声テキスト及び音声データを取得する方法</a>
                 </h3>
-                昔書いたネタをそのまま書く。※リソース開放方式まで考慮してないので、そこら辺は活用する場合にはそれなりに要修正必須※onBufferReceivedが機種依存により呼ばれないのもあるそうですandro
+                昔書いたネタをそのまま書く。
               </div>
             </div>
             <div id="a928c22c6fdb78dc0fdec261bba6fe0ff4f34b37" class="card m-4 mb-5">
@@ -81,7 +81,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/android-sherlocknavigationdrawer.html">SherlockNavigationDrawerを使ってみた</a>
                 </h3>
-                んまぁSlidingMenuだったりだとか色々あるのですけど、Googleが公開したNavigationDrawer方式をベースに使えるようにした物がSherlockNavigationDrawerら
+                んまぁSlidingMenuだったりだとか色々あるのですけど、[Googleが公開したNavigationDrawer][1]方式をベースに使えるようにした物が[SherlockNavigationDrawer][2]らしい、正しいかは微妙だけど。ちなみに[デモアプリ][3]もあるのでちょっとどんな感じかってのを見たければそれ入れて確認してみるってのも可能
               </div>
             </div>
             <div id="c36b330004ecdf7f1d5cfce3a416e1def52b809c" class="card m-4 mb-5">
@@ -90,7 +90,134 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/gradle-android-toolkit-robolectric-testing.html">gradle-android-toolkitでRobolectricを動かす</a>
                 </h3>
-                [Robolectricなテストプロジェクトをgradleで動かす][1]なネタと若干似てますけど、こっちではandroidtoolkitなgradleプラグインを用いてAndroidアプリをビルドす
+                [Robolectricなテストプロジェクトをgradleで動かす][1]なネタと若干似てますけど、こっちではandroid toolkitなgradleプラグインを用いてAndroidアプリをビルドする、testタスクを利用してsrc/test/javaにあるクラスをRobolectric利用でテストを実行するっていう方式をやってみた
+
+
+
+
+
+#### /app/src/test/java/sample/test/MainActivityTest.java
+
+
+```java
+package sample.test;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+import org.robolectric.util.ActivityController;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+@Config(manifest = Config.NONE)
+@RunWith(RobolectricTestRunner.class)
+public class MainActivityTest {
+
+    @Test
+    public void test1() {
+        ActivityController<MainActivity> controller = Robolectric.buildActivity(
+            MainActivity.class
+        );
+        MainActivity activity = controller.create().get();
+
+        assertThat(activity.toast, nullValue());
+
+        controller.start();
+
+        // わざとテストずっこけるようにしている。実際はNotNull
+        assertThat(activity.toast, nullValue());
+    }
+}
+```
+
+
+んなテストを用意しておいて、それをgradleで動かすだけ
+
+#### /app/build.gradle
+
+
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:0.6.1"
+    }
+}
+
+apply plugin: "android"
+
+sourceSets {
+    unitTest {
+        java.srcDir file("src/test/java")
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    unitTestCompile files("/opt/android/platforms/android-18/android.jar")
+    unitTestCompile files("${buildDir}/classes/release")
+    unitTestCompile "junit:junit:4.11"
+    unitTestCompile "org.hamcrest:hamcrest-all:1.3"
+    unitTestCompile "org.robolectric:robolectric:2.2"
+}
+
+android {
+    compileSdkVersion 18
+    buildToolsVersion "18.1.1"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 18
+    }
+}
+
+task test(type: Test, dependsOn: assemble) {
+    testClassesDir = sourceSets.unitTest.output.classesDir
+    classpath = sourceSets.unitTest.runtimeClasspath
+}
+
+check.dependsOn test
+```
+
+
+一応微妙な点を書くと
+
+
+* テストするにあたってのandroid.jarのクラスパスをしないといけない
+* src/test/javaがAndroid Studioでソースディレクトリとして認識してくれない
+
+
+2に関してはAndroid Studioでsrc/test/javaなところをSource Rootとして設定すれば問題無い模様
+
+
+という感じでtestタスクを動かすと
+
+
+![](/images/2014/01/2013102014001.png)
+
+
+以上。Robolectricプラグインはあるし普通にそれ使えば良くねっていう感じなんだがなって所
+
+
+#### 余談
+
+
+Androidの通常のテスト方式であるInstrumentationTestRunnerなテストはsrc/instrumentTest/javaに書けば良い模様。なんかドキュメントに「run instrumentTest」とかそんな感じで書いてるけどタスク一覧みてもそれが無い。「connectedInstrumentTest」かなって思って実行したら普通に実行できた
+
+
+ちなみにsrc/instrumentTestは変更できるっぽそう。sourceSets -> instrumentTest.setRoot辺りで設定すれば良いとか
+
+
+ [1]: /robolectric-project-gradle-test.html
               </div>
             </div>
             <div id="bdf057edf5a351b68d02fbc8fee235e521d9ae8f" class="card m-4 mb-5">
@@ -99,7 +226,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/gradle-android-toolkit-android-studio.html">gradle-android-toolkit+Android Studio (1)</a>
                 </h3>
-                普通ならAndroidStudioから「NewProject」-&gt;「NewModule」でAndroidプロジェクトなりモジュールなりどんどん作成していくだけで良いと思うんだけれども、Andro
+                普通ならAndroid Studioから「New Project」 -> 「New Module」でAndroidプロジェクトなりモジュールなりどんどん作成していくだけで良いと思うんだけれども、Android公式がサポートしているandroid-toolkitなgradle supportを使ってプロジェクト構成を作った場合なケースに関して検証してみた
               </div>
             </div>
             <div id="22d533ba80c91b7a60cc063e16129010445ea8db" class="card m-4 mb-5">
@@ -108,7 +235,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/robolectric-project-gradle-test.html">Robolectricなテストプロジェクトをgradleで動かす</a>
                 </h3>
-                但し、android用のgradlepluginだとかrobolectricなgradlepluginはある模様だけどそれを使わずに素のbuild.gradleだけでごちゃごちゃとやってみた構造的には
+                但し、android用のgradle pluginだとかrobolectricなgradle pluginはある模様だけどそれを使わずに素のbuild.gradleだけでごちゃごちゃとやってみた
               </div>
             </div>
             <div id="49b8af09fdff9612ae6c99ed0c9cc5abffce53e5" class="card m-4 mb-5">
@@ -117,7 +244,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/android-testing-robolectric-mockito.html">Robolectric+mockito</a>
                 </h3>
-                Robolectric+powermockitoでRobolectricを利用している際におけるstaticメソッドのモック化っていうのを書いたけど、単純にRobolectric+Mockitoを使っ
+                [Robolectric+powermockito][1]でRobolectricを利用している際におけるstaticメソッドのモック化っていうのを書いたけど、単純にRobolectric+Mockitoを使ったインスタンスメソッドのモック化に関してはスルーしてたので色々検証
               </div>
             </div>
             <div id="85ee31867416cccbd193221947d9d488dfe0a906" class="card m-4 mb-5">
@@ -126,7 +253,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/android-testing-robolectric-powermockito.html">Robolectric+powermockito</a>
                 </h3>
-                参考:http://addie9000.blogspot.jp/2012/12/robolectricpowermockandroidunit-test.htmlRobolectricを使ってJUni
+                参考: <http://addie9000.blogspot.jp/2012/12/robolectricpowermockandroidunit-test.html>
               </div>
             </div>
             <div id="2a71f04331b1abc001969bc8166ff09611384c5a" class="card m-4 mb-5">
@@ -135,7 +262,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/android-nativemethods-pattern.html">Android NativeMethods Pattern</a>
                 </h3>
-                Androidっていうか単純にJNIに関する事だと思うので(ryおそらくは通常だとJNIEXPORTJNICALLjstringJava_パッケージ_say(JNIEnv*env,jobjectthi
+                Androidっていうか単純にJNIに関する事だと思うので(ry
               </div>
             </div>
             <div class="my-pagination my-5">

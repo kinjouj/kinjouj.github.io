@@ -54,7 +54,277 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/swipelistview.html">SwipeListView</a>
                 </h3>
-                おおー>SwipeListViewDemo-GooglePlayのAndroidアプリhttps://t.co/VCQQ5I8c5n&mdash;kinjouj(@kinjou__j)2014,1月3
+                <blockquote class="twitter-tweet" lang="ja">
+<p>おおー > SwipeListView Demo - Google Play の Android アプリ <a href="https://t.co/VCQQ5I8c5n">https://t.co/VCQQ5I8c5n</a></p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/429094837170601985">2014, 1月 31</a>
+</blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+っていう事で使ってみた
+
+
+#### 準備
+
+
+どうやらSwipeListView自体がMaven方式とgradle方式なプロジェクト両方サポートしているらしいのだけど、今回どっちも使わずにライブラリプロジェクトをEclipseにインポートして使ったのでライブラリ関係がちょっと足りない。という事で
+
+
+*   nineoldandroids-2.4.0.jar
+*   android-support-v4.jar
+
+
+この2つが必要(別途、ActionBarSherlockも必要だったはず)。ライブラリプロジェクトのlibsディレクトリにこの2つを突っ込んでおいた
+
+
+まぁあとはドキュメント通りに
+
+
+#### MainActivity.java
+
+
+```java
+package sample.test;
+
+import android.os.Bundle;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+public class MainActivity extends SherlockFragmentActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+}
+```
+
+
+今回、ListViewって言ってもListFragmentでかつSwipeListViewを使うのでSherlockFragmentActivityを継承しておく
+
+
+#### res/layout/activity_main.xml
+
+
+```xml
+<?xml version="1.0" ?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <fragment
+        android:name="sample.test.SampleListFragment"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+</RelativeLayout>
+```
+
+
+#### SampleListFragment.java
+
+
+```java
+package sample.test;
+
+import com.fortysevendeg.swipelistview.BaseSwipeListViewListener;
+import com.fortysevendeg.swipelistview.SwipeListView;
+
+import android.os.Bundle;
+import android.support.v4.app.ListFragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+public class SampleListFragment extends ListFragment {
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.list, container);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setListAdapter(new SampleListAdapter(getActivity()));
+
+        ((SwipeListView)getListView()).setSwipeListViewListener(new BaseSwipeListViewListener() {
+            @Override
+            public void onClickFrontView(int position) {
+                Toast.makeText(
+                    getActivity(),
+                    getListAdapter().getItem(position).toString(),
+                    Toast.LENGTH_LONG
+                ).show();
+            }
+        });
+    }
+}
+```
+
+
+で普通ならListFragment#onListItemClick(ListView,View,int,long)なのをオーバーライドしてクリックイベントを取るんだけれども、今回のSwipeListViewを使うパターンではこの方式サポート出来ないっぽいようなのでSwipeListView#setSwipeListViewListenerでBaseSWipeListViewListener#onClickFrontViewっていうのを実装して利用する事がデキる模様(ソースはStackOverflow)
+
+
+で上記に書いてるlist.xmlとSampleListAdapter(extends BaseAdapter)を書く
+
+
+#### res/layout/list.xml
+
+
+```xml
+<?xml version="1.0" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.fortysevendeg.swipelistview.SwipeListView
+        xmlns:swipe="http://schemas.android.com/apk/res-auto"
+        android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:listSelector="#00000000"
+        android:layout_margin="0dp"
+        swipe:swipeFrontView="@+id/front"
+        swipe:swipeBackView="@+id/back" />
+
+</LinearLayout>
+```
+
+
+ほとんどマニュアル通りなのでパス
+
+
+#### SampleListAdapter.java
+
+
+```java
+package sample.test;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class SampleListAdapter extends BaseAdapter {
+
+    private static final String[] values = { "hoge", "fuga", "foobar" };
+    private Context context;
+
+    public SampleListAdapter(Context context) {
+        this.context = context;
+    }
+
+    @Override
+    public int getCount() {
+        return values.length;
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return values[position];
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        if (convertView == null) {
+            final int pos = position;
+
+            LayoutInflater inflater = LayoutInflater.from(context);
+            convertView = inflater.inflate(R.layout.row, parent, false);
+
+            ((TextView)convertView.findViewById(R.id.text)).setText((String)getItem(pos));
+
+            convertView.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(
+                        context,
+                        getItem(pos).toString(),
+                        Toast.LENGTH_LONG
+                    ).show();
+                }
+            });
+        }
+
+        return convertView;
+    }
+}
+```
+
+
+でフロントに出すViewとスワイプ(っていうかスライド)して出すViewを定義しているのがres/layout/rowなのでそれも書く
+
+
+#### res/layout/row.xml
+
+
+```xml
+<?xml version="1.0" ?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <LinearLayout
+        android:id="@+id/back"
+        android:tag="back"
+        android:layout_width="fill_parent"
+        android:layout_height="90dp"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="click" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/front"
+        android:tag="front"
+        android:layout_width="fill_parent"
+        android:layout_height="90dp"
+        android:background="@android:color/white">
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </RelativeLayout>
+
+</FrameLayout>
+```
+
+
+んまぁフロントのViewなレイアウトでスワイプする事でバックに表示されるViewを隠すっていう感じにする事であたかもスワイプする事でリストによるデータに対してアクションを起こさせるようなUIを実現できる感じかと
+
+
+以上でやってみると
+
+
+![](/images/2014/01/201401311552_1.png)
+
+
+な感じで普通にListViewとして出て
+
+
+![](/images/2014/01/201401311552_2.png)
+
+
+スワイプする事でビューが出てくるっていう感じなUIを実現できる
               </div>
             </div>
             <div id="95bb58a5f09a6bbcc8992677384521bcc3b804ea" class="card m-4 mb-5">
@@ -63,7 +333,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/refreshactionitem.html">RefreshActionItem</a>
                 </h3>
-                的な感じでChrome拡張機能にあるchrome.browserAction.setBadgeText的な事も出来るリロード機能に特化した?AndroidライブラリのRefreshActionItem
+                ![](/images/2014/01/201401311119.png)
               </div>
             </div>
             <div id="1127ba8394136d8435805680be0c321dcb9d7d76" class="card m-4 mb-5">
@@ -72,7 +342,177 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/android44-default-sms-app.html">Android4.4(Kitkat)のデフォルトSMSアプリに関して</a>
                 </h3>
-                参考1:[GettingYourSMSAppsReadyforKitKat][1]参考2:[AndroidKITKAT:デフォルトSMSアプリを作る-ブライテクノBlog][2]※非常に内容がざっくり
+                参考1: [Getting Your SMS Apps Ready for KitKat][1]  
+
+参考2: [Android KITKAT: デフォルトSMSアプリを作る - ブライテクノBlog][2]
+
+
+※非常に内容がざっくりとしてますので上記参考を(ry
+
+
+Android 4.4(Kitkat)からデフォルトなSMSのアプリを作って利用する事が出来るらしいとの事は知っていたのだけど検証的な辺りとかしてなかったので色々やってみた
+
+
+
+
+
+#### 要点
+
+
+ポイントはandroid.provider.Telephony.SmsなContent Providerのandroid.net.Uriに対してinsertしたりする事でどのアプリを使っても不整合になったりしないような仕組みを採用しているんじゃないかと。つまりはSMSを受信したらそのContent Providerにinsertしろ、見るアプリ側ではContent Providerでqueryして取得しろ的な事なのではと
+
+
+多分、android.provider.Telephony.Sms.CONTENT_URIは"[content://sms]()"だと思われる。ソースは読んでないけど
+
+
+#### AndroidManifest.xml
+
+
+公式ブログな参考読めば分かるけど適切な設定を行えばデフォルトSMSとして切り替える事が可能な模様。その条件は上記参考2に記載されている
+
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="sample.test"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="19"
+        android:targetSdkVersion="19" />
+
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.WRITE_SMS"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+
+        <receiver
+            android:name=".SmsReceiver"
+            android:permission="android.permission.BROADCAST_SMS">
+
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_DELIVER" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".MmsReceiver"
+            android:permission="android.permission.BROADCAST_WAP_PUSH">
+
+            <intent-filter>
+                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+                <data android:mimeType="application/vnd.wap.mms-message" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".ComposeSmsActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+                <data android:scheme="mms" />
+                <data android:scheme="mmsto" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".HeadlessSmsSendService"
+            android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+                <data android:scheme="mms" />
+                <data android:scheme="mmsto" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>
+```
+
+
+HeadlessSmsSendServiceとComposeSmsActivityは今回ノータッチだけど、さっきも書いた参考2の所にソースが記載されているのでそれ読めば良い。要はComposeSmsActivity自体はSMS関係のschemeに対応するメール送信フォーム的なのじゃないかと。で実際に送るのはHeadlessSmsSendServiceかと
+
+
+#### SmsReceiver.java
+
+
+MmsReceiverに関しては実験出来る環境が無いのでパス
+
+
+```java
+package sample.test;
+
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.Telephony.Sms;
+import android.telephony.SmsMessage;
+import android.util.Log;
+
+public class SmsReceiver extends BroadcastReceiver {
+
+    private static final String TAG = SmsReceiver.class.getName();
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.v(TAG, "onReceive: " + intent.getAction());
+
+        // ここでintent#getActionを評価して処理条件をパスするべき
+
+        Bundle extras = intent.getExtras();
+
+        if (extras == null)
+            return;
+
+        ContentResolver resolver = context.getContentResolver();
+
+        Object[] smsExtras = (Object[])extras.get("pdus");
+
+        for (Object smsExtra : smsExtras) {
+            SmsMessage sms = SmsMessage.createFromPdu((byte[])smsExtra);
+
+            ContentValues values = new ContentValues();
+            values.put("address", sms.getOriginatingAddress());
+            values.put("body", sms.getMessageBody());
+
+            @SuppressWarnings("unused")
+            Uri uri = resolver.insert(Sms.CONTENT_URI, values);
+        }
+    }
+}
+```
+
+
+っていう感じでさっきも書いたけど、SMSなContent Providerにinsertすりゃ良いみたいなので
+
+
+でそんなこんなで入れてみると
+
+
+![](/images/2014/01/201401291220.png)
+
+
+っていうように「設定」から「無線とネットワーク」「デフォルトSMSアプリ」で設定出来る模様
+
+
+ [1]: http://android-developers.blogspot.jp/2013/10/getting-your-sms-apps-ready-for-kitkat.html
+ [2]: http://brightechno.com/blog/archives/231
               </div>
             </div>
             <div id="44dd9d09c3d1f40d209eb204fe02655e6e479fd8" class="card m-4 mb-5">
@@ -81,7 +521,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/otto-library-and-activity-recognition.html">ottoとActivityRecognition</a>
                 </h3>
-                ottoな勉強をするにあたってそういう要件が必要にならないと例にならない気がしたので、ActivityRecognitionを使って行動認識をActivityへottoを使って通知する仕組み的な事やっ
+                ottoな勉強をするにあたってそういう要件が必要にならないと例にならない気がしたので、ActivityRecognitionを使って行動認識をActivityへottoを使って通知する仕組み的な事やってみた
               </div>
             </div>
             <div id="92c9a5862c169d618379ffcf9193956809342f9e" class="card m-4 mb-5">
@@ -90,7 +530,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/android-maven-plugin.html">android-maven-plugin</a>
                 </h3>
-                今更かって感じだけど、android-maven-pluginを使ってAndroidアプリプロジェクトを管理出来るようにしてみる事前事項どうやら最近のandroid-maven-pluginなバージョ
+                今更かって感じだけど、android-maven-pluginを使ってAndroidアプリプロジェクトを管理出来るようにしてみる
               </div>
             </div>
             <div id="ca198884c1dc59ed0581b3e6ba438325b37ee571" class="card m-4 mb-5">
@@ -99,7 +539,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/androidslidinguppanel.html">AndroidSlidingUpPanel</a>
                 </h3>
-                AndroidLibraryRankingで1位になっているAndroidSlidingUpPanelっていうのが気になったので使ってみた。んまぁAuthor見れば分かるがUmanoっていうアプリで使
+                [Android Library Ranking][1]で1位になっている[Android SlidingUpPanel][2]っていうのが気になったので使ってみた。んまぁAuthor見れば分かるが[Umano][3]っていうアプリで使われてるそうで
               </div>
             </div>
             <div id="e8d0e0d3517a6659f524ec1d51ed91bb7169aca6" class="card m-4 mb-5">
@@ -108,7 +548,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/picasso-android-imageview-library.html">Android ImageView Library?のPicassoが使えるんじゃないかって件</a>
                 </h3>
-                https://github.com/square/picassoっていうのがあるのを知り使ってみたんだが、これなかなか使えるのではとpackagesample.test;importandroid.
+                <https://github.com/square/picasso> っていうのがあるのを知り使ってみたんだが、これなかなか使えるのではと
               </div>
             </div>
             <div id="086da52f4835a64333aca45e1c6d81c402502914" class="card m-4 mb-5">
@@ -117,7 +557,92 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/android-times-square.html">android-times-square</a>
                 </h3>
-                CalendarっぽいViewなのでhttps://github.com/square/android-times-squareっていうのがある模様。ってな訳でちょいと使ってみたレイアウトはドキュメン
+                CalendarっぽいViewなので<https://github.com/square/android-times-square>っていうのがある模様。ってな訳でちょいと使ってみた
+
+
+
+
+
+レイアウトはドキュメントに書いてる通りで
+
+```xml
+<com.squareup.timessquare.CalendarPickerView
+    android:id="@+id/calendar_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+
+だけを単純につけただけ
+
+
+#### MainActivity.java
+
+
+```java
+package sample.test;
+
+import java.util.Date;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.Toast;
+
+import com.squareup.timessquare.CalendarPickerView;
+
+import org.joda.time.DateTime;
+
+
+public class MainActivity extends Activity implements
+    CalendarPickerView.OnDateSelectedListener,
+    CalendarPickerView.OnInvalidDateSelectedListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        DateTime today = DateTime.now();
+
+        CalendarPickerView calendar = (CalendarPickerView)findViewById(R.id.calendar_view);
+        calendar.setOnDateSelectedListener(this);
+        calendar.setOnInvalidDateSelectedListener(this);
+
+        calendar
+            .init(
+                today.toDate(),
+                today.plusWeeks(1).toDate()
+            )
+            .inMode(CalendarPickerView.SelectionMode.MULTIPLE);
+    }
+
+    @Override
+    public void onDateSelected(Date date) {
+        Toast.makeText(this, "OK(Selected): " + date.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    // inMode(SelectionMode.MULTIPLE)等?において日付選択が解除された場合に発生する
+    @Override
+    public void onDateUnselected(Date date) {
+        Toast.makeText(this, "OK(Unselected): " + date.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    // initで指定した範囲以外の日付をタップした場合等に発生
+    @Override
+    public void onInvalidDateSelected(Date date) {
+        Toast.makeText(this, "NG: " + date.toString(), Toast.LENGTH_LONG).show();
+    }
+}
+```
+
+
+てな感じにすると
+
+
+![](/images/2014/01/201401191725.png)
+
+
+てな感じのビューになると。単純にそういうのを必要とするようなケースであれば非常に有用に使えるのではという印象(UIデザインとかそこはおいといて)
               </div>
             </div>
             <div id="57b25fbee253425a9505be0250c430855ced903c" class="card m-4 mb-5">
@@ -126,7 +651,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/gradle-android-test-plugin.html">gradle-android-test-plugin</a>
                 </h3>
-                ActionBarSherlockの開発者(だはず)でもあるJakeWharton氏がgradle-android-test-pluginっていうのを開発している模様っていうのを知ったので使ってみた以
+                ActionBarSherlockの開発者(だはず)でもあるJake Wharton氏が[gradle-android-test-plugin][1]っていうのを開発している模様っていうのを知ったので使ってみた
               </div>
             </div>
             <div id="c457d206e97823d62053a12e6fe0ff43ca463c89" class="card m-4 mb-5">
@@ -135,7 +660,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/01/svg-rendering-bar-and-line-chart.html">SVGで(棒+線)チャートを描画してみる</a>
                 </h3>
-                そういう(JavaScriptな)ライブラリ的なのがあったはずだけどんな感じになる。んまぁ所感としては線が汚くないかなーって確かjqplotとか辺りは結果的にはSVGでレンダリングしているらしいとかの
+                そういう(JavaScriptな)ライブラリ的なのがあったはずだけど
               </div>
             </div>
             <div class="my-pagination my-5">

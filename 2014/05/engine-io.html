@@ -10,7 +10,112 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="参考:[Engine.IO単体でチャットを作った][1]上記の参考に触発されてやってみたserver.jsvarhttp=require(&quot;http&quot;),express=requi" />
+    <meta name="description" content="参考: [Engine.IO単体でチャットを作った][1]
+
+
+上記の参考に触発されてやってみた
+
+
+
+
+
+#### server.js
+
+```js
+var http    = require("http"),
+    express = require("express"),
+    engine  = require("engine.io");
+
+var app = express();
+app.use(express.static(__dirname + "/public"));
+app.get("/", function(req, res) {
+  res.sendfile("client.html");
+});
+
+var server = http.createServer(app);
+
+var io = engine.attach(server);
+io.on("connection", function(socket) {
+  socket.on("message", function(data) {
+    // 着信したデータを接続しているクライアント全部に送る
+    for (var key in io.clients) {
+      var client = io.clients[key];
+      client.send(key + " -> " + data);
+    }
+  });
+});
+io.on("error", function() {
+});
+
+server.listen(3000);
+```
+
+
+expressを使うようにしているのであれなのだけど、必要ないようなEngine.IOの単独サーバーとして稼働したりする要件な場合には <https://github.com/learnboost/engine.io> に書いてるコードを参考にすればいい
+
+
+それとSocket.IOとは違い、broadcastのような「自身以外へのバッファの送信」などには対応していないのでそれに対応するには自身でそういうような処理をしなければならない。又、engine.ioのsendで送れるデータはStringやBuffer(typed array)などがサポートされているけど、オブジェクトなどを送信するようなケースにおいては一度JSON.stringifyなどを用いて文字列正規化して送るっていう方法を取るしか無いっぽい
+
+
+んまぁざっくりしてるけどサーバー側はこんな感じで
+
+
+#### client.html
+
+```html
+<html>
+  <head>
+    <script src="/engine.io.js"></script>
+  </head>
+  <body>
+    <input id="message" />
+    <button onclick="send()">send</button>
+    <ul id="messages"></ul>
+    <script>
+var sock = new eio.Socket("ws://localhost:3000");
+sock.on("open", function() {
+  sock.on("message", function(data) {
+    var elm = document.createElement("li");
+    elm.innerText = data;
+
+    document.querySelector("#messages").appendChild(elm);
+  });
+
+  /*
+  あくまでemitは内部的なcallをするだけでサーバー側にイベント通知などを仕組みでは無い模様
+  sock.on("A", function() {
+    console.debug("A", arguments);
+  });
+  sock.emit("A");
+  */
+});
+
+function send() {
+  var text = document.querySelector("#message").value;
+  sock.send(text);
+}
+    </script>
+  </body>
+</html>
+```
+
+
+engine.ioのクライアントライブラリは <https://github.com/LearnBoost/engine.io-client> から取ってきて利用する(npmで入れてそのライブラリをコピーするなど)
+
+
+な感じで書いて<http://localhost:3000>にアクセスしテキストボックスになんか入れてボタンを押すとページにアクセスしているクライアント全部にメッセージがぶっ飛んでくる
+
+
+んまぁこっちもざっくりしているけど、こんな感じで使える模様げで
+
+
+#### 余談
+
+
+<https://github.com/nkzawa/engine.io-client.java> を使えばAndroidとかでも使える模様
+
+
+ [1]: http://shokai.org/blog/archives/8893" />
     <title>engine.io - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/05/angularjs-25-httpprovider-interceptors.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/05/android-engineio.html" />

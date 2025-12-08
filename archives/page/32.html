@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/struts2-2-action-testing.html">Struts2をやってみる (2) - Actionのテスト -</a>
                 </h3>
-                まぁサブタイトル?通り。struts2-junit-pluginっていうのを利用する事でorg.apache.struts2.StrutsTestCaseっていうのが利用できそれを使う事でコントローラ
+                まぁサブタイトル?通り。struts2-junit-pluginっていうのを利用する事でorg.apache.struts2.StrutsTestCaseっていうのが利用できそれを使う事でコントローラー部分なテストをする事が可能な模様
               </div>
             </div>
             <div id="30c689fc159134bc2ba0750ed292d7815e42e0c6" class="card m-4 mb-5">
@@ -63,7 +63,224 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/struts2-1.html">Struts2をやってみる (1)</a>
                 </h3>
-                まぁStruts1.xがEOLっていう事で代わりとなりえるだろうフレームワークを調査中で。でまぁStruts2とかもあるんじゃないかっていう事で色々勉強をしてみる事にセットアップまぁ本来どうやるのかは
+                まぁStruts1.xがEOLっていう事で代わりとなりえるだろうフレームワークを調査中で。でまぁStruts2とかもあるんじゃないかっていう事で色々勉強をしてみる事に
+
+
+#### セットアップ
+
+
+まぁ本来どうやるのかは微妙ですけど。gradleでプロジェクト管理してEclipseで開発したり、jettyで動かしてみたりしたいのでbuild.gradleを書く
+
+
+```groovy
+apply plugin: "java"
+apply plugin: "war"
+apply plugin: "jetty"
+apply plugin: "eclipse"
+
+ext {
+    targetDir = "target"
+}
+
+buildDir = targetDir
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.apache.struts:struts2-core:2.3.15.1"
+}
+
+sourceSets {
+    main {
+        output.classesDir = "${buildDir}/classes"
+        output.resourcesDir = "${buildDir}/classes"
+    }
+
+    test {
+        output.classesDir = "${buildDir}/classes"
+    }
+}
+
+eclipse.classpath.file {
+    whenMerged { classpath ->
+        classpath.entries.findAll { entry ->
+            entry.kind == "output"
+        }*.path = "/${project.name}/${targetDir}/classes"
+    }
+}
+```
+
+
+jettyとかで動かしたい時は
+
+
+```
+gradle jettyRun
+```
+
+
+まぁ構造とかは
+
+
+<pre>
+├── build.gradle
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── sample
+    │   │       └── action
+    │   │           └── IndexAction.java
+    │   ├── resources
+    │   │   └── struts.xml
+    │   └── webapp
+    │       └── WEB-INF
+    │           ├── jsp
+    │           │   └── index.jsp
+    │           └── web.xml
+    └── test
+        ├── java
+        └── resources
+</pre>
+
+
+んな感じ。で上記で書く必要のあるファイルを書いていく
+
+
+#### src/main/resources/struts.xml
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+    <!-- package name属性に指定するのはユニークな値であればなんでも良いっぽい -->
+    <!-- namespaceでプレフィックス的なが指定出来る模様 -->
+
+    <package name="sample" extends="struts-default" namespace="/sample">
+        <action name="index" class="sample.action.IndexAction">
+            <result>/WEB-INF/jsp/index.jsp</result>
+        </action>
+    </package>
+</struts>
+```
+
+
+Struts2にはZero Configuration的な機構なあれもあるらしいけどそこまでやってないので(ry
+
+
+#### src/main/webapp/WEB-INF/web.xml
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+    version="3.0">
+
+    <filter>
+        <filter-name>struts2</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts2</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+</web-app>
+```
+
+
+特に言う事無いと思うので
+
+
+んまぁこれでStruts2が動く環境を構築したのでJavaソース及びJSPを書いていく
+
+
+#### 要件
+
+
+名前入力してサブミットしたら表示するただそれだけ
+
+
+#### src/main/webapp/WEB-INF/jsp/index.jsp
+
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<html>
+  <head>
+  </head>
+  <body>
+    <s:form action="index">
+      <s:textfield name="name" />
+      <s:submit />
+    </s:form>
+
+    <s:if test="name != null">
+    <p>say: <s:property value="name" /></p>
+    <p>say: ${name}</p>
+    </s:if>
+  </body>
+</html>
+```
+
+
+#### src/main/java/sample/action/IndexAction.java
+
+
+```java
+package sample.action;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class IndexAction extends ActionSupport {
+
+    private static final long serialVersionUID = 1L;
+
+    private String name = null;
+
+    public String execute() {
+        return SUCCESS;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+
+デフォルトだとexecuteだと思いますが、struts.xmlにて
+
+
+```xml
+<action name="index" class="sample.action.IndexAction" method="execute">
+</action>
+```
+
+
+っていう感じで指定出来る模様。検証してないけど...
+
+
+JSP側からはActionのgetterメソッドをOGNL式として評価して利用できる模様。
+
+
+んでコンパイルしてサーバー起動。テキストボックスがあるのでそこに適当に入力してサブミット
+
+
+![](/images/2013/09/201309151600.jpg)
+
+
+っていう感じになる。んまぁファーストステップ的な所はこんな所で
               </div>
             </div>
             <div id="529082858bcbaec03250d7ab6206e16d05e54c52" class="card m-4 mb-5">
@@ -72,7 +289,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/testem-mocha-coverjs-code-coverage.html">testem+mocha+coverjsでコードカバレッジ</a>
                 </h3>
-                基本ベースは「mocha+coverjsでコードカバレッジ」まぁtestem環境上でそれをやるだけって話なんですが、そういう機能的なのがあるのかは定かじゃないですが上記先とどうようにやれば良いんじゃね
+                基本ベースは「[mocha+coverjsでコードカバレッジ][1]」
               </div>
             </div>
             <div id="232ab8c4134cf44841110d2164c1a75c65bdf4ee" class="card m-4 mb-5">
@@ -81,7 +298,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/angularjs-karma-e2e-testing.html">angular.jsのkarmaを使ったテスト</a>
                 </h3>
-                AngularJSなコントローラーとかの単体テストに関してはdescribe(&quot;...&quot;,function(){it(&quot;...&quot;,function(){vars
+                AngularJSなコントローラーとかの単体テストに関しては
               </div>
             </div>
             <div id="3cf82134f557b0e4de72deb8bc12499bd05204d5" class="card m-4 mb-5">
@@ -90,7 +307,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/android-live-wallpaper.html">Android Live Wallpaper</a>
                 </h3>
-                いわゆるライブ壁紙っていう機能。SurfaceView的な感じで壁紙に動的にレンダリングしたりとか出来るまぁ自宅のメモ用ブログには書いてたけどこっちに書いてなかったので、美人時計サービスを利用して1分
+                いわゆるライブ壁紙っていう機能。SurfaceView的な感じで壁紙に動的にレンダリングしたりとか出来る
               </div>
             </div>
             <div id="a65b417d410af26145bdef0673fbceb58585c0d0" class="card m-4 mb-5">
@@ -99,7 +316,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/android-accessibilityservice-legacy-firmware.html">AccessibilityServiceを古いAndroidバージョンで動かす</a>
                 </h3>
-                android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得するをAndroid4.x以下(3.x系を除く)な2.x系で動
+                [android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する][1]をAndroid4.x以下(3.x系を除く)な2.x系で動かす場合、&lt;meta-data&gt;によるAccessibityServiceInfoの構築?はサポートされてない模様。
               </div>
             </div>
             <div id="96898b9fde191236d080a92edc17d732a3182793" class="card m-4 mb-5">
@@ -108,7 +325,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/android-oauth-signpost-google-app-engine-oauth.html">oauth-signpost(Android)でGoogle App Engine(+OAuth)</a>
                 </h3>
-                タイトル通り。要件は以下※但し以下のソースがプロトタイプ段階な為、めちゃくちゃすぎるので注意要件Androidのブラウザ等から共有機能を使ってURLをGoogleAppEngine向けに送信する。でそ
+                タイトル通り。要件は以下
               </div>
             </div>
             <div id="29d3d0eb3d71a50c784211273c5a71521d5d6af3" class="card m-4 mb-5">
@@ -117,7 +334,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/git-repository-file-and-history-deletion.html">リポジトリのファイルを履歴もろとも削除する方法</a>
                 </h3>
-                リモートとかに要らんファイルとかがあってリビジョンとかで履歴として見れる場合とかだと思うけど、それをもろとも削除したい場合なケースに遭遇したのでメモ適当なgitリポジトリを作ってecho&quot;h
+                リモートとかに要らんファイルとかがあってリビジョンとかで履歴として見れる場合とかだと思うけど、それをもろとも削除したい場合なケースに遭遇したのでメモ
               </div>
             </div>
             <div id="7d2d5b11f50b13683372de5387649c1fae9930ab" class="card m-4 mb-5">
@@ -126,7 +343,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/android43-notificationlistenerservice.html">Android4.3 NotificationListenerServiceを使ってみる</a>
                 </h3>
-                タイトル通り、Android4.3から追加されたらしいNotificationListenerServiceっていうのがある模様。どうやらAccessibilityServiceを使って通知を取得する
+                タイトル通り、Android4.3から追加されたらしい[NotificationListenerService][1]っていうのがある模様。どうやらAccessibilityServiceを使って通知を取得するっていうのは[以前にやった][2]けれども、それと同等な事をサクッと出来るようになったっぽい
               </div>
             </div>
             <div id="663a474e492e3d038b4c44952fb1d3ea5d36eac6" class="card m-4 mb-5">
@@ -135,7 +352,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/09/android-intent-action-assist.html">android.intent.action.ASSIST</a>
                 </h3>
-                っていうのがあるらしい。ホームボタンからスライドするなりで起動(もしくは一覧から選択して起動)したり出来る模様。おそらくはAPILevel16から出来るらしいのでAndroid4.1辺りかなとんまぁA
+                っていうのがあるらしい。ホームボタンからスライドするなりで起動(もしくは一覧から選択して起動)したり出来る模様。おそらくはAPI Level 16から出来るらしいのでAndroid4.1辺りかなと
               </div>
             </div>
             <div class="my-pagination my-5">

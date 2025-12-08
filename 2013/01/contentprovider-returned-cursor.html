@@ -10,7 +10,216 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="例えば以下のようなAbstractCursorを継承したクラスを作ったとするpackagesample.test;importandroid.database.AbstractCursor;impor" />
+    <meta name="description" content="例えば以下のようなAbstractCursorを継承したクラスを作ったとする
+
+
+
+
+```java
+package sample.test;
+
+import android.database.AbstractCursor;
+import android.provider.BaseColumns;
+
+public class SampleCursor extends AbstractCursor implements BaseColumns {
+
+    @Override
+    public String[] getColumnNames() {
+        return null;
+    }
+
+    @Override
+    public int getCount() {
+        return 0;
+    }
+
+    @Override
+    public double getDouble(int column) {
+        return 0;
+    }
+
+    @Override
+    public float getFloat(int column) {
+        return 0;
+    }
+
+    @Override
+    public int getInt(int column) {
+        return 0;
+    }
+
+    @Override
+    public long getLong(int column) {
+        return 0;
+    }
+
+    @Override
+    public short getShort(int column) {
+        return 0;
+    }
+
+    @Override
+    public String getString(int column) {
+        return null;
+    }
+
+    @Override
+    public boolean isNull(int column) {
+        return false;
+    }
+}
+```
+
+
+あくまでネタとしてなんで実装はほとんど書いてません。それはおいといて
+
+
+でこれを返すContentProviderを作る
+
+
+```java
+package sample.test;
+
+import android.content.ContentProvider;
+import android.content.ContentValues;
+import android.content.UriMatcher;
+import android.database.Cursor;
+import android.net.Uri;
+
+public class SampleProvider extends ContentProvider {
+
+    private static UriMatcher matcher;
+
+    static {
+        matcher = new UriMatcher(UriMatcher.NO_MATCH);
+        matcher.addURI("sample.provider", "samples", 0);
+    }
+
+    @Override
+    public String getType(Uri uri) {
+        return "vnd.android.cursor.dir/sample.provider";
+    }
+
+    @Override
+    public boolean onCreate() {
+        return false;
+    }
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        // 作ったAbstractCursorを継承したクラスのインスタンスを返す
+        return new SampleCursor();
+    }
+
+    @Override
+    public Uri insert(Uri uri, ContentValues values) {
+        return null;
+    }
+
+    @Override
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        return 0;
+    }
+    @Override
+    public int delete(Uri arg0, String arg1, String[] arg2) {
+        return 0;
+    }
+}
+```
+
+
+でこれを Uri.parse("content://sample.provider/samples")をgetContentResolver().query した場合に実体クラスでキャストするとどうなるか。結果はClassCastException。理由としてgetContentResolver.queryが返すCursorクラスはContentResolver.CursorWrapperInnerにラップされてる。それはContentResolverのソースコードにもろ書いてる
+
+
+でこういう場合にqueryメソッドを使って返されるCursorクラスの実体を取得したい場合はどうなるかって話になる訳なのですが
+
+
+<pre>
+getContentResolver -> acquireContentProviderClient(uri) -> query
+</pre>
+
+
+っていうようにContentResolverのacquireContentProviderClientメソッドを使ってContentProviderClientクラスを取得する。でそのクラスからqueryをする事で、ラップされずにqueryメソッドから返される結果のCursor実体を取得する事が出来る
+
+
+実際それをやると
+
+
+```java
+package sample.test;
+
+import android.app.Activity;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.RemoteException;
+import android.widget.TextView;
+
+public class MainActivity extends Activity {
+
+    private Uri uri = Uri.parse("content://sample.provider/samples");
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        setContentView(R.layout.main);
+
+        fetch1();
+        fetch2();
+    }
+
+
+    private void fetch1() {
+        /* これをやるとClassCastExceptionになる
+        SampleCursor csr = (SampleCursor)getContentResolver().query(uri, null, null, null, null);
+        */
+
+        Cursor csr = getContentResolver().query(uri, null, null, null, null);
+
+        ((TextView)findViewById(R.id.text1)).setText(
+            "getContentResolver.query: " + csr.toString()
+        );
+    }
+
+    private void fetch2() {
+        ContentResolver resolver = getContentResolver();
+        ContentProviderClient client = resolver.acquireContentProviderClient(uri);
+
+        try {
+            Cursor csr = client.query(uri, null, null, null, null);
+
+            ((TextView)findViewById(R.id.text2)).setText(
+                "ContentProviderClient.query: " + csr.toString()
+            );
+        } catch(RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+
+これを実行すると
+
+
+![](/images/2013/01/20130109074052.png)
+
+
+というようになる。っていう感じ。だけどそんなにCursorの実体クラスが必要になるケースなんてあんまり無いような気もするけど
+
+
+もっと簡単に出来る方法あるのかなーって思うところなんだけど
+
+
+#### 追記
+
+
+<http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html>
+
+
+を見ておいた方がいいかも" />
     <title>ContentProviderから返されたCursor実装を取る - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/01/phpunit-selenium-and-tips.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/php-user-ini.html" />

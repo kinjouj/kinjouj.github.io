@@ -10,7 +10,213 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="公式ドキュメント:https://jersey.java.net/documentation/latest/user-guide.html#async例えば、Threadでなんか非同期に処理するような" />
+    <meta name="description" content="公式ドキュメント: <https://jersey.java.net/documentation/latest/user-guide.html#async>
+
+
+例えば、Threadでなんか非同期に処理するような場合にレスポンスを返す場合にはAsyncResponseを使えば良いとの事な模様で、他にもチャンクレスポンスを出す機能のChunkedOutputを利用する方法でも可能な模様
+
+
+
+
+
+#### Home.java
+
+
+```java
+package sample.controller;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.CompletionCallback;
+import javax.ws.rs.container.Suspended;
+
+@Path("/sample")
+public class Home {
+
+    @GET
+    public void indexAsync(@Suspended final AsyncResponse asyncResponse)
+        throws Throwable {
+
+        asyncResponse.register(new CompletionCallback() {
+            @Override
+            public void onComplete(Throwable throwable) {
+                // resumeでThrowableを指定しない限りはnullになる
+            }
+        });
+
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // 引数にはThrowableも指定出来る。その場合には500エラーになる模様
+                asyncResponse.resume("hoge");
+            }
+        }.start();
+    }
+}
+```
+
+
+っていう感じで引数に@Suspendedなアノテーションを付与したAsyncResponseを指定する。本来であればなんらかの値を返さなければならないけれどもAsyncResponseを通じてThreadからレスポンスをresumeメソッドで書き込みする事が出来るような仕組みかと
+
+
+でまぁテストは
+
+
+```java
+package sample.controller;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.SampleApplication;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new SampleApplication();
+    }
+
+    @Test
+    public void test_indexAsync() throws ExecutionException, InterruptedException {
+        Future<Response> entityFuture = target("/sample")
+            .request()
+            .async()
+            .get();
+
+        Response response = entityFuture.get();
+        assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("hoge"));
+    }
+}
+```
+
+
+的な感じで行える
+
+
+#### 余談: ChunkedOutputを使う
+
+
+```java
+package sample.controller;
+
+import java.io.IOException;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+
+import org.glassfish.jersey.server.ChunkedOutput;
+
+@Path("/sample")
+public class Home {
+
+    //private static Logger logger = LoggerFactory.getLogger(Home.class);
+
+    @GET
+    public ChunkedOutput<String> indexChunked() {
+        final ChunkedOutput<String> output = new ChunkedOutput<String>(String.class);
+
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    char[] s = new char[] { "h", "o", "g", "e" };
+
+                    for (char c : s) {
+                        output.write(String.valueOf(c));
+
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        output.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
+
+        return output;
+    }
+}
+```
+
+
+っていうような感じでChunkedOutputな型を返してスレッドでそれに対して書き込み処理をするような感じでも同様に非同期で処理されるような場合においてもレスポンスを送出する事が可能。ただ疑問なのがこれ非同期処理側で例外発生するような要件だとどうなるのだっていう所。例外発生する要件な場合に書き込み処理が行われないようだと空なレスポンスを送出する事になり非常にお行儀の悪い事になるのではっていう疑問が出てくる。ChunkedOutputを使う場合にはいかなるような要件でもそれなりのレスポンスを出すっていう前提という仕様組みが必要になるのではと
+
+
+とまぁ上記のテストを動かして同等な結果になるはず。ちなみにChunkedOutputなレスポンスはテスト側(クライアント側)ではChunkedInputを使って取る事も出来る(普通にreadEntity(String.class)しても出来る)
+
+
+```java
+package sample.controller;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.client.ChunkedInput;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.SampleApplication;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new SampleApplication();
+    }
+
+    @Test
+    public void test_indexAsync() throws ExecutionException, InterruptedException {
+        Future<Response> entityFuture = target("/sample")
+            .request()
+            .async()
+            .get();
+
+        Response response = entityFuture.get();
+        assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+        ChunkedInput<String> a = response.readEntity(new GenericType<ChunkedInput<String>>() {});
+        assertThat(a.read(), is("hoge"));
+    }
+}
+```
+
+
+んまぁほとんどドキュメントと書いてる事同じだと思うので(ry
+
+
+ちなみに他にもタイムアウトした場合にイベントハンドルするような仕組み(TimeoutHandler)もある" />
     <title>JAX-RSをやってみる (10) - AsyncResponse - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/06/jaxrs-9-container-filters.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/06/jaxrs-11-server-sent-events.html" />

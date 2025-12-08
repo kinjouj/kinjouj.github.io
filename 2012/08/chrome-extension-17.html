@@ -10,7 +10,339 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="タイトル通り。ChromeExtensionでoauth.jsを使いDropboxのアプリ領域なストレージにアクセスしてみるmanifest.json{&quot;name&quot;:&quot;c" />
+    <meta name="description" content="タイトル通り。Chrome Extensionでoauth.jsを使いDropboxのアプリ領域なストレージにアクセスしてみる
+
+
+
+
+
+#### manifest.json
+
+
+```json
+{
+  "name": "chrome-extension-dropbox-oauth-demo",
+  "description": "Chrome Extension Dropbox OAuth Demo (using oauth.js)",
+  "version": "0.1",
+  "manifest_version": 2,
+  "browser_action": {
+    "default_title": "Chrome Extension - Dropbox OAuth Demo -",
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "scripts": [
+      "library/jquery.js",
+      "library/sha1.js",
+      "library/oauth.js",
+      "const.js",
+      "dropbox.js",
+      "background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.dropbox.com/1/oauth/authorize"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["https://*.dropbox.com/"]
+}
+```
+
+
+#### const.js
+
+
+```js
+const OAUTH_CONSUMER_KEY = "";
+const OAUTH_CONSUMER_SECRET = "";
+```
+
+
+これもTwitterな件と同様にDropbox Developerからアプリを登録して、そのConsumer KeyとConsumer Secretをコピペする
+
+
+#### background.js
+
+
+```js
+// 認証完了後、もしくは認証済みな場合にブラウザアクションで表示されるコンテンツを設定する
+
+function registerPopup() {
+  chrome.browserAction.setPopup({ "popup": "popup.html" });
+  chrome.browserAction.setBadgeText({ "text": String() });
+}
+
+(function(undefined) {
+  var dropbox = new Dropbox();
+
+  if (dropbox.isAuthorized()) {
+    registerPopup();
+  } else {
+    chrome.browserAction.setBadgeText({ "text": "?" });
+
+    dropbox.login();
+  }
+
+  // ここはコンテントスクリプトから来る
+
+  chrome.extension.onRequest.addListener(function(req) {
+    if (req.event === "sign") {
+      dropbox.sign(function() {
+        registerPopup();
+      });
+    }
+  });
+})();
+```
+
+
+#### dropbox.js
+
+
+```js
+const OAUTH_TOKEN_KEY = "oauth_token";
+const OAUTH_TOKEN_SECRET_KEY = "oauth_token_secret";
+
+var Dropbox = function() {};
+
+Dropbox.prototype.getToken = function() {
+  return localStorage.getItem(OAUTH_TOKEN_KEY);
+};
+
+Dropbox.prototype.setToken = function(token) {
+  localStorage.setItem(OAUTH_TOKEN_KEY, token);
+};
+
+Dropbox.prototype.getTokenSecret = function() {
+  return localStorage.getItem(OAUTH_TOKEN_SECRET_KEY);
+};
+
+Dropbox.prototype.setTokenSecret = function(tokenSecret) {
+  return localStorage.setItem(OAUTH_TOKEN_SECRET_KEY, tokenSecret);
+};
+
+Dropbox.prototype.isAuthorized = function() {
+  var authorized = localStorage.getItem("authorized");
+
+  return Boolean(authorized);
+};
+
+Dropbox.prototype.getParameterToken = function(res) {
+  var param = OAuth.decodeForm(res);
+
+  return OAuth.getParameter(param, OAUTH_TOKEN_KEY);
+};
+
+Dropbox.prototype.getParameterTokenSecret = function(res) {
+  var param = OAuth.decodeForm(res);
+
+  return OAuth.getParameter(param, OAUTH_TOKEN_SECRET_KEY);
+};
+
+Dropbox.prototype.login = function() {
+  var message = {
+    "method": "POST",
+    "action": "https://api.dropbox.com/1/oauth/request_token",
+    "parameters": {
+      "oauth_consumer_key": OAUTH_CONSUMER_KEY,
+      "oauth_signature_method": "HMAC-SHA1"
+    }
+  };
+
+  var accessor = {
+    "consumerSecret": OAUTH_CONSUMER_SECRET
+  };
+
+  OAuth.setTimestampAndNonce(message);
+  OAuth.SignatureMethod.sign(message, accessor);
+
+  $.post(
+    OAuth.addToURL(message.action, message.parameters),
+    $.proxy(
+      function(res) {
+        var param = OAuth.decodeForm(res);
+
+        var token = OAuth.getParameter(param, OAUTH_TOKEN_KEY);
+        var tokenSecret = OAuth.getParameter(param, OAUTH_TOKEN_SECRET_KEY);
+
+        message.action = "https://api.dropbox.com/1/oauth/authorize";
+        message.parameters.oauth_token = token;
+
+        accessor.oauth_token_secret = tokenSecret;
+
+        OAuth.setTimestampAndNonce(message);
+        OAuth.SignatureMethod.sign(message, accessor);
+
+        this.setToken(token);
+        this.setTokenSecret(tokenSecret);
+
+        window.open(OAuth.addToURL(message.action, message.parameters));
+      },
+      this
+    )
+  );
+};
+
+Dropbox.prototype.sign = function(cb) {
+  if (this.isAuthorized()) {
+    return;
+  }
+
+  var message = {
+    "method": "POST",
+    "action": "https://api.dropbox.com/1/oauth/access_token",
+    "parameters": {
+      "oauth_consumer_key": OAUTH_CONSUMER_KEY,
+      "oauth_token": this.getToken(),
+      "oauth_signature_method": "HMAC-SHA1"
+    }
+  };
+
+  var accessor = {
+    "consumerSecret": OAUTH_CONSUMER_SECRET,
+    "tokenSecret": this.getTokenSecret()
+  };
+
+  OAuth.setTimestampAndNonce(message);
+  OAuth.SignatureMethod.sign(message, accessor);
+
+  $.post(
+    OAuth.addToURL(message.action, message.parameters),
+    $.proxy(
+      function(res) {
+        this.setToken(this.getParameterToken(res));
+        this.setTokenSecret(this.getParameterTokenSecret(res));
+
+        localStorage.setItem("authorized", true);
+
+        cb();
+      },
+      this
+    )
+  );
+};
+
+Dropbox.prototype.getThumbnails = function(cb) {
+  var message = {
+    "method": "GET",
+    "action": "https://api.dropbox.com/1/metadata/sandbox/",
+    "parameters": {
+      "oauth_consumer_key": OAUTH_CONSUMER_KEY,
+      "oauth_token": this.getToken(),
+      "oauth_signature_method": "HMAC-SHA1"
+    }
+  };
+
+  var accessor = {
+    "consumerSecret": OAUTH_CONSUMER_SECRET,
+    "tokenSecret": this.getTokenSecret()
+  };
+
+  OAuth.setTimestampAndNonce(message);
+  OAuth.SignatureMethod.sign(message, accessor);
+
+  $.getJSON(
+    OAuth.addToURL(message.action, message.parameters),
+    $.proxy(
+      function(res) {
+        res.contents.forEach(function(content) {
+          if (!content.is_dir) {
+            message.action = "https://api-content.dropbox.com/1/thumbnails/sandbox" + content.path;
+            message.parameters.size = "large";
+
+            OAuth.setTimestampAndNonce(message);
+            OAuth.SignatureMethod.sign(message, accessor);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", OAuth.addToURL(message.action, message.parameters));
+            xhr.responseType = "arraybuffer";
+            xhr.onload = function() {
+              cb(this.response);
+            };
+            xhr.send(null);
+          }
+        });
+      },
+      this
+    )
+  );
+};
+```
+
+
+#### content_script.js
+
+
+```js
+chrome.extension.sendRequest({ "event": "sign" });
+```
+
+
+ただBackground Page側に処理をまるなげするだけ
+
+
+#### popup.html
+
+
+```html
+<html>
+  <head>
+    <script type="text/javascript" src="library/jquery.js"></script>
+    <script type="text/javascript" src="library/sha1.js"></script>
+    <script type="text/javascript" src="library/oauth.js"></script>
+    <script type="text/javascript" src="const.js"></script>
+    <script type="text/javascript" src="dropbox.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript" src="popup.js"></script>
+  </body>
+</html>
+```
+
+
+#### popup.js
+
+
+```js
+(function(undefined) {
+  var root = $("body");
+
+  var dropbox = new Dropbox();
+  dropbox.getThumbnails(function(binaryData) {
+    var bb = new WebKitBlobBuilder();
+    bb.append(binaryData);
+
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+
+    var img = new Image();
+    img.src = webkitURL.createObjectURL(bb.getBlob());
+    img.onload = function() {
+      context.canvas.width = img.width;
+      context.canvas.height = img.height;
+      context.drawImage(img, 0, 0);
+
+      webkitURL.revokeObjectURL(this.src);
+    };
+
+    $(root).append($("<div>").css("margin", "15px").append($(canvas)));
+  });
+})();
+```
+
+
+まぁ取得した画像(サムネイルデータ)を取得して、それを&lt;canvas&gt;で云々するだけ(別にcanvasじゃなくても良い)
+
+
+まぁそんな感じ。ちょっとやりきった感全開なのでテキトウにかいちゃいましたがorz
+
+
+![](/images/2012/08/20120820210834.png)
+
+
+てな感じでDropboxのアプリフォルダ内に入れた画像が入る。但し、上記のコードで画像であるかのチェックまではしてないので画像以外をうｐするとエラーになるはずなので..." />
     <title>Chrome Extension開発を勉強してみる (17) - oauth.jsを使ってDropbox API - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/08/slim3-respond_to.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/08/native-client-4.html" />
