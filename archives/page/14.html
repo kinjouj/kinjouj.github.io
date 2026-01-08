@@ -48,13 +48,310 @@
       <div class="row g-0">
         <div class="col col-lg-8">
           <div id="content">
+            <div id="c66759aa33ec169eb8e1ee288fa31c26934757f2" class="card m-4 mb-5">
+              <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a name="article-link" href="/2014/08/activerecord-validation-1.html">ActiveRecord Validation #1</a>
+                </h3>
+                公式ドキュメント: [http://guides.rubyonrails.org/active\_record\_validations.html][1]
+
+
+公式ドキュメントを読みつつ進めてみようかと。ただやたらと長いので何回かに分けて書く予定
+
+
+
+
+
+#### 基本的な使い方
+
+
+```rb
+require &quot;rails_helper&quot;
+
+class Entry &lt; ActiveRecord::Base
+  validates :name, presence: true
+end
+
+describe Entry do
+  it &quot;(valid?|invalid?)メソッド&quot; do
+    entry = Entry.new
+
+    # valid等を実行する前だとerrosはempty
+    expect(entry.errors).to be_empty
+
+    expect(entry.valid?).to eq false
+    expect(entry.invalid?).to eq true
+
+    # valid等を処理した後だとerrorsには検証エラーが入る
+    errors = entry.errors
+    expect(errors).not_to be_empty
+
+    messages = errors.messages
+    expect(messages).not_to be_empty
+
+    message = messages.first
+    expect(message).not_to be_nil
+    expect(message).to eq([:name, [&quot;can&quot;t be blank&quot;]])
+  end
+end
+```
+
+
+っていうような感じになる。valid等を動かさなくてもsaveやupdate等のメソッドを実行すると検証エラーな場合はfalseが返り、破壊的メソッドとして実行するとActiveRecord::RecordInvalidがスローされる模様
+
+
+っていう感じで、基本的な事は終わり。presence等のValidation Helpersな所を進める
+
+
+#### [presence][2]
+
+
+.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど
+
+
+```rb
+require &quot;rails_helper&quot;
+
+class Entry &lt; ActiveRecord::Base
+  validates :name, presence: { message: &quot;can`t be empty&quot; }
+end
+
+describe Entry do
+  it &quot;presenceのテスト&quot; do
+    entry = Entry.new
+    expect(entry.save).to eq false
+
+    errors = entry.errors
+    expect(errors).not_to be_empty
+
+    messages = errors.messages
+    expect(messages).not_to be_empty
+
+    message = messages.first
+    expect(message).not_to be_nil
+    expect(message).to eq([:name, [&quot;can`t be empty&quot;]])
+  end
+end
+```
+
+
+っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry
+
+
+#### &lt;a href=&quot;http://guides.rubyonrails.org/active_record_validations.html#acceptance&quot;&gt;acceptance&lt;/a&gt;
+
+
+「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&amp;#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様
+
+
+```rb
+require &quot;rails_helper&quot;
+
+class Entry &lt; ActiveRecord::Base
+  validates :terms_of_service, acceptance: true
+end
+
+describe Entry do
+  it &quot;acceptanceのテスト&quot; do
+    entry = Entry.new({ terms_of_service: &quot;1&quot; })
+    expect(entry.valid?).to be true
+  end
+
+  it &quot;terms_of_serviceを指定しない場合&quot; do
+    expect(Entry.new.valid?).to eq true
+  end
+end
+```
+
+
+このテストは通る。2つ目のテストでterms\_of\_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので
+
+
+```rb
+class Entry &lt; ActiveRecord::Base
+  validates :terms_of_service, acceptance: true, allow_nil: false
+end
+```
+
+
+とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&amp;#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能
+
+
+```rb
+require &quot;rails_helper&quot;
+
+class Entry &lt; ActiveRecord::Base
+  validates :terms_of_service, acceptance: { accept: &quot;yes&quot; }, allow_nil: false
+end
+
+describe Entry do
+  it &quot;acceptanceのテスト&quot; do
+    entry = Entry.new({ terms_of_service: &quot;yes&quot; })
+    expect(entry.valid?).to be true
+  end
+
+  it &quot;terms_of_serviceを指定しない場合&quot; do
+    expect(Entry.new.valid?).to eq false
+  end
+end
+```
+
+
+っていうような感じでacceptanceオプションを修正することで&quot;1&amp;#8243;以外で作用させる事も可能
+
+
+んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)
+
+
+#### [confirmation][3]
+
+
+```rb
+require &quot;rails_helper&quot;
+
+class Entry &lt; ActiveRecord::Base
+  validates :email, confirmation: true
+end
+
+describe Entry do
+  it &quot;confirmationのテスト&quot; do
+    entry = Entry.new({
+      email: &quot;A@example.com&quot;,
+      email_confirmation: &quot;B@example.com&quot;
+    })
+    expect(entry.valid?).to eq false
+
+    errors = entry.errors
+    expect(errors).not_to be_empty
+
+    messages = errors.messages
+    expect(messages).not_to be_empty
+
+    message = messages.first
+    expect(message).not_to be_nil
+    expect(message).to eq [:email_confirmation, [&quot;doesn&quot;t match Email&quot;]]
+  end
+
+  it &quot;email_confirmationを指定しない場合&quot; do
+    entry = Entry.new({ email: &quot;A@example.com&quot; })
+    expect(entry.valid?).to eq true
+  end
+end
+```
+
+
+ってな感じでconfirmation validation helperを使っているのに対して、\_confirmationな仮想的属性の値を比較して同一かをチェック出来る。但しその仮想的属性がnilでは無い場合にのみチェックされる模様なので、2つ目のテストではemail\_confirmationを指定してない為にバリデーションが作用しない為trueが返るような感じかと
+
+
+#### [exclusion][4]
+
+
+指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion
+
+
+```rb
+require &quot;rails_helper&quot;
+
+class Entry &lt; ActiveRecord::Base
+  validates :subdomain, exclusion: { in: %w(www blog) }
+end
+
+describe Entry do
+  it &quot;exclusionのテスト&quot; do
+    expect(Entry.new({ subdomain: &quot;user&quot; }).valid?).to eq true
+    expect(Entry.new({ subdomain: &quot;www&quot; }).valid?).to eq false
+    expect(Entry.new({ subdomain: &quot;blog&quot; }).valid?).to eq false
+  end
+end
+```
+
+
+inで指定したリストに該当するのが入るとバリデーションとしては不整合という形になる模様。恐らくはnilな場合だと検証が作用しないんかと思われる
+
+
+#### [inclusion][5]
+
+
+上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい
+
+
+```rb
+require &quot;rails_helper&quot;
+
+class Entry &lt; ActiveRecord::Base
+  validates :subdomain, inclusion: { in: %w(www blog) }
+end
+
+describe Entry do
+  it &quot;inclusionのテスト&quot; do
+    expect(Entry.new({ subdomain: &quot;www&quot; }).valid?).to eq true
+    expect(Entry.new({ subdomain: &quot;blog&quot; }).valid?).to eq true
+    expect(Entry.new({ subdomain: &quot;user&quot; }).valid?).to eq false
+  end
+end
+```
+
+
+inで指定してあるのみ許容される。
+
+
+#### [format][6]
+
+
+正規表現とかで値の検証を行うようなパターンの場合に使う
+
+
+```rb
+require &quot;rails_helper&quot;
+
+class Entry &lt; ActiveRecord::Base
+  validates :postal_code, format: { with: /\A[\d]{3}\-[\d]{4}\z/ }
+end
+
+describe Entry do
+  it &quot;formatのテスト&quot; do
+    expect(Entry.new({ postal_code: &quot;123-4567&quot; }).valid?).to eq true
+
+    entry = Entry.new({ postal_code: &quot;123-456a&quot; })
+    expect(entry.errors).to be_empty
+    expect(entry.valid?).to eq false
+
+    errors = entry.errors
+    expect(errors).not_to be_empty
+
+    messages = errors.messages
+    expect(messages).not_to be_empty
+
+    message = messages.first
+    expect(message).not_to be_nil
+    expect(message).to eq([:postal_code, [&quot;is invalid&quot;]])
+  end
+end
+```
+
+
+てな感じでwithで指定した正規表現で値をチェック出来る。
+
+
+とりあえず今回は以上。続きは後日
+
+
+ [1]: http://guides.rubyonrails.org/active_record_validations.html
+ [2]: http://guides.rubyonrails.org/active_record_validations.html#presence
+ [3]: http://guides.rubyonrails.org/active_record_validations.html#confirmation
+ [4]: http://guides.rubyonrails.org/active_record_validations.html#exclusion
+ [5]: http://guides.rubyonrails.org/active_record_validations.html#inclusion
+ [6]: http://edgeguides.rubyonrails.org/active_record_validations.html#format
+              </div>
+            </div>
             <div id="fa65e7776556009cfa61476355026a3894a06224" class="card m-4 mb-5">
               <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
               <div class="card-body">
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/08/jaxrs-16-paramconverter.html">JAX-RSをやってみる (16) - ParamConverter -</a>
                 </h3>
-                参考: <http://backpaper0.github.io/2013/07/17/jaxrs_parameter.html>
+                参考: &lt;http://backpaper0.github.io/2013/07/17/jaxrs_parameter.html&gt;
               </div>
             </div>
             <div id="ec07acf1f849673807e128d015b6c452125d1c6a" class="card m-4 mb-5">
@@ -63,7 +360,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/08/activerecord-polymorphic-association.html">ActiveRecordのpolymorphic</a>
                 </h3>
-                公式ドキュメント(Guide): <http://guides.rubyonrails.org/association_basics.html#polymorphic-associations>
+                公式ドキュメント(Guide): &lt;http://guides.rubyonrails.org/association_basics.html#polymorphic-associations&gt;
               </div>
             </div>
             <div id="d37f3ce226a8df1e86f753ff617a634e3dfb009b" class="card m-4 mb-5">
@@ -81,7 +378,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/08/activerecord-optimistic-locking.html">ActiveRecord Optimistic Locking</a>
                 </h3>
-                参考: <http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html>
+                参考: &lt;http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html&gt;
               </div>
             </div>
             <div id="65129dd2a2a3118c0b1152f23b71493d16701b20" class="card m-4 mb-5">
@@ -110,9 +407,9 @@
                 </h3>
                 公式ドキュメント: [http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1]
 
-ActionController::Parametersリファレンス: <http://api.rubyonrails.org/classes/ActionController/Parameters.html> 
+ActionController::Parametersリファレンス: &lt;http://api.rubyonrails.org/classes/ActionController/Parameters.html&gt; 
 
-参考: <http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters>
+参考: &lt;http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters&gt;
 
 
 
@@ -122,7 +419,7 @@ ActionController::Parametersリファレンス: <http://api.rubyonrails.org/clas
 
 
 ```ruby
-require "rails_helper"
+require &quot;rails_helper&quot;
 
 describe ApplicationController do
   fixtures :entry, :author
@@ -132,16 +429,16 @@ describe ApplicationController do
       begin
         entry = Entry.find(params[:id])
         entry.update(params[:entry])
-      rescue => e
+      rescue =&gt; e
         raise e
       end
 
-      render :text => "OK"
+      render :text =&gt; &quot;OK&quot;
     end
   end
 
-  it "request POST /create" do
-    post :update, :id => 1, :entry => { :author_id => 2, :name => "fuga" }
+  it &quot;request POST /create&quot; do
+    post :update, :id =&gt; 1, :entry =&gt; { :author_id =&gt; 2, :name =&gt; &quot;fuga&quot; }
     entry = Entry.find(1)
     expect(entry).not_to be_nil
 
@@ -154,7 +451,7 @@ end
 ```
 
 
-※config/environments/test.rbにて「<span style="color: red">config.action\_controller.permit\_all_parameters = true</span>」をしておく。設定しない場合にはホワイトリスト化されてないパラメーター?に対してActiveModel::ForbiddenAttributesErrorが発生してエラーになる模様
+※config/environments/test.rbにて「&lt;span style=&quot;color: red&quot;&gt;config.action\_controller.permit\_all_parameters = true&lt;/span&gt;」をしておく。設定しない場合にはホワイトリスト化されてないパラメーター?に対してActiveModel::ForbiddenAttributesErrorが発生してエラーになる模様
 
 
 テスト実行する前にspec/fixturesに
@@ -181,7 +478,7 @@ author1:
 初期データを突っ込んでおく。で、このテストを実行すると
 
 
-<pre>
+&lt;pre&gt;
 F
 
 Failures:
@@ -190,14 +487,14 @@ Failures:
      Failure/Error: expect(author).not_to be_nil
        expected: not nil
             got: nil
-</pre>
+&lt;/pre&gt;
 
 
 意図しないデータを送ってしまう事により改変されてしまうような事態になる。こういう事態になるのを防ぐのがStrong Parametersっていう機能な模様。てな訳でStrong Parametersを使ってみる
 
 
 ```rb
-require "rails_helper"
+require &quot;rails_helper&quot;
 
 describe ApplicationController do
   fixtures :entry, :author
@@ -208,16 +505,16 @@ describe ApplicationController do
         entry_params = params.require(:entry).permit(:name)
         entry = Entry.find(params[:id])
         entry.update(entry_params)
-      rescue => e
+      rescue =&gt; e
         raise e
       end
 
-      render :text => "OK"
+      render :text =&gt; &quot;OK&quot;
     end
   end
 
-  it "request POST /create" do
-    post :update, :id => 1, :entry => { :author_id => 2, :name => "fuga" }
+  it &quot;request POST /create&quot; do
+    post :update, :id =&gt; 1, :entry =&gt; { :author_id =&gt; 2, :name =&gt; &quot;fuga&quot; }
     entry = Entry.find(1)
     expect(entry).not_to be_nil
 
@@ -228,10 +525,10 @@ end
 ```
 
 
-っていうように:nameは通すけど:author_idは通さないようにする。又、config/environments/test.rbにて「<span style="color: red">config.action_controller.action_on_unpermitted_parameters = :raise</span>」っていう設定をする事でpermitする段階において、許容されないパラメーターが含まれているような場合にはActionController::UnpermittedParametersのエラーが発生するようになる。なのでその設定をした状態で上記のテストを動かすと
+っていうように:nameは通すけど:author_idは通さないようにする。又、config/environments/test.rbにて「&lt;span style=&quot;color: red&quot;&gt;config.action_controller.action_on_unpermitted_parameters = :raise&lt;/span&gt;」っていう設定をする事でpermitする段階において、許容されないパラメーターが含まれているような場合にはActionController::UnpermittedParametersのエラーが発生するようになる。なのでその設定をした状態で上記のテストを動かすと
 
 
-<pre>
+&lt;pre&gt;
 F
 
 Failures:
@@ -240,7 +537,7 @@ Failures:
      Failure/Error: entry_params = params.require(:entry).permit(:name)
      ActionController::UnpermittedParameters:
        found unpermitted parameters: author_id
-</pre>
+&lt;/pre&gt;
 
 
 というようにauthor_idが許容されないパラメーターな為にエラーが発生するようになる。
@@ -259,17 +556,17 @@ Failures:
                   <a name="article-link" href="/2014/07/angularjs-directive-multielement.html">directiveのmultiElement</a>
                 </h3>
                 ```html
-<!DOCTYPE html>
-<html ng-app="sample">
-  <head>
-    <script src="https://code.angularjs.org/1.3.0-beta.16/angular.js"></script>
-    <script src="app.js"></script>
-  </head>
-  <body ng-controller="SampleCtrl">
-    <div directive1-start></div>
-    <div directive1-end></div>
-  </body>
-</html>
+&lt;!DOCTYPE html&gt;
+&lt;html ng-app=&quot;sample&quot;&gt;
+  &lt;head&gt;
+    &lt;script src=&quot;https://code.angularjs.org/1.3.0-beta.16/angular.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body ng-controller=&quot;SampleCtrl&quot;&gt;
+    &lt;div directive1-start&gt;&lt;/div&gt;
+    &lt;div directive1-end&gt;&lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
 ```
               </div>
             </div>
@@ -282,15 +579,6 @@ Failures:
                 モデルやらコントローラーでmixinすることで定義を分割するような仕組みみたいなのらしい。要はコントローラーやらモデルやらにずらーっと定義しなくてもconcernsに定義をする事でinlcudeして利用できる
               </div>
             </div>
-            <div id="fc6ea61ec94410e5245b2a96766a4e130d2095c1" class="card m-4 mb-5">
-              <img class="card-img-top" loading="lazy" src="/images/2014/07/201407201510_1.jpg" />
-              <div class="card-body">
-                <h3 class="card-title">
-                  <a name="article-link" href="/2014/07/angularjs-ng-directive-scope.html">ng-directiveのscope</a>
-                </h3>
-                参考: [AngularJSのdirectiveとは][1]
-              </div>
-            </div>
             <div class="my-pagination my-5">
                 <a href="/archives/page/13.html" class="float-start box-link">Prev</a>
               <a href="/archives/page/15.html" class="float-end box-link">Next</a>
@@ -301,6 +589,7 @@ Failures:
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
+  <li class="recent-post"><a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a></li>
   <li class="recent-post"><a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
@@ -310,7 +599,6 @@ Failures:
   <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
   <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
-  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
 </ul>
 
           </div>
@@ -391,7 +679,7 @@ Failures:
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
   <li>
-    <a href="/archives/category/react-dot-js">React.js (10)</a>
+    <a href="/archives/category/react-dot-js">React.js (11)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -409,10 +697,10 @@ Failures:
     <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
   <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
+    <a href="/archives/category/typescript">TypeScript (5)</a>
   </li>
   <li>
-    <a href="/archives/category/typescript">TypeScript (4)</a>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
   </li>
   <li>
     <a href="/archives/category/webpack">webpack (2)</a>

@@ -84,36 +84,36 @@
 #### server.js
 
 ```js
-var http    = require("http"),
-    express = require("express"),
-    engine  = require("engine.io");
+var http    = require(&quot;http&quot;),
+    express = require(&quot;express&quot;),
+    engine  = require(&quot;engine.io&quot;);
 
 var app = express();
-app.use(express.static(__dirname + "/public"));
-app.get("/", function(req, res) {
-  res.sendfile("client.html");
+app.use(express.static(__dirname + &quot;/public&quot;));
+app.get(&quot;/&quot;, function(req, res) {
+  res.sendfile(&quot;client.html&quot;);
 });
 
 var server = http.createServer(app);
 
 var io = engine.attach(server);
-io.on("connection", function(socket) {
-  socket.on("message", function(data) {
+io.on(&quot;connection&quot;, function(socket) {
+  socket.on(&quot;message&quot;, function(data) {
     // 着信したデータを接続しているクライアント全部に送る
     for (var key in io.clients) {
       var client = io.clients[key];
-      client.send(key + " -> " + data);
+      client.send(key + &quot; -&gt; &quot; + data);
     }
   });
 });
-io.on("error", function() {
+io.on(&quot;error&quot;, function() {
 });
 
 server.listen(3000);
 ```
 
 
-expressを使うようにしているのであれなのだけど、必要ないようなEngine.IOの単独サーバーとして稼働したりする要件な場合には <https://github.com/learnboost/engine.io> に書いてるコードを参考にすればいい
+expressを使うようにしているのであれなのだけど、必要ないようなEngine.IOの単独サーバーとして稼働したりする要件な場合には &lt;https://github.com/learnboost/engine.io&gt; に書いてるコードを参考にすればいい
 
 
 それとSocket.IOとは違い、broadcastのような「自身以外へのバッファの送信」などには対応していないのでそれに対応するには自身でそういうような処理をしなければならない。又、engine.ioのsendで送れるデータはStringやBuffer(typed array)などがサポートされているけど、オブジェクトなどを送信するようなケースにおいては一度JSON.stringifyなどを用いて文字列正規化して送るっていう方法を取るしか無いっぽい
@@ -125,47 +125,47 @@ expressを使うようにしているのであれなのだけど、必要ない�
 #### client.html
 
 ```html
-<html>
-  <head>
-    <script src="/engine.io.js"></script>
-  </head>
-  <body>
-    <input id="message" />
-    <button onclick="send()">send</button>
-    <ul id="messages"></ul>
-    <script>
-var sock = new eio.Socket("ws://localhost:3000");
-sock.on("open", function() {
-  sock.on("message", function(data) {
-    var elm = document.createElement("li");
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src=&quot;/engine.io.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;input id=&quot;message&quot; /&gt;
+    &lt;button onclick=&quot;send()&quot;&gt;send&lt;/button&gt;
+    &lt;ul id=&quot;messages&quot;&gt;&lt;/ul&gt;
+    &lt;script&gt;
+var sock = new eio.Socket(&quot;ws://localhost:3000&quot;);
+sock.on(&quot;open&quot;, function() {
+  sock.on(&quot;message&quot;, function(data) {
+    var elm = document.createElement(&quot;li&quot;);
     elm.innerText = data;
 
-    document.querySelector("#messages").appendChild(elm);
+    document.querySelector(&quot;#messages&quot;).appendChild(elm);
   });
 
   /*
   あくまでemitは内部的なcallをするだけでサーバー側にイベント通知などを仕組みでは無い模様
-  sock.on("A", function() {
-    console.debug("A", arguments);
+  sock.on(&quot;A&quot;, function() {
+    console.debug(&quot;A&quot;, arguments);
   });
-  sock.emit("A");
+  sock.emit(&quot;A&quot;);
   */
 });
 
 function send() {
-  var text = document.querySelector("#message").value;
+  var text = document.querySelector(&quot;#message&quot;).value;
   sock.send(text);
 }
-    </script>
-  </body>
-</html>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
 ```
 
 
-engine.ioのクライアントライブラリは <https://github.com/LearnBoost/engine.io-client> から取ってきて利用する(npmで入れてそのライブラリをコピーするなど)
+engine.ioのクライアントライブラリは &lt;https://github.com/LearnBoost/engine.io-client&gt; から取ってきて利用する(npmで入れてそのライブラリをコピーするなど)
 
 
-な感じで書いて<http://localhost:3000>にアクセスしテキストボックスになんか入れてボタンを押すとページにアクセスしているクライアント全部にメッセージがぶっ飛んでくる
+な感じで書いて&lt;http://localhost:3000&gt;にアクセスしテキストボックスになんか入れてボタンを押すとページにアクセスしているクライアント全部にメッセージがぶっ飛んでくる
 
 
 んまぁこっちもざっくりしているけど、こんな感じで使える模様げで
@@ -174,7 +174,7 @@ engine.ioのクライアントライブラリは <https://github.com/LearnBoost/
 #### 余談
 
 
-<https://github.com/nkzawa/engine.io-client.java> を使えばAndroidとかでも使える模様
+&lt;https://github.com/nkzawa/engine.io-client.java&gt; を使えばAndroidとかでも使える模様
 
 
  [1]: http://shokai.org/blog/archives/8893
@@ -195,7 +195,7 @@ engine.ioのクライアントライブラリは <https://github.com/LearnBoost/
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/02/supervisord-4-eventlistener.html">supervisord (4) - eventlistener -</a>
                 </h3>
-                参考: <http://blog.hakutoitoi.com/?p=396>
+                参考: &lt;http://blog.hakutoitoi.com/?p=396&gt;
               </div>
             </div>
             <div id="67bcfb6a79ca4ad3f3bc6d200f7b85323f172b5a" class="card m-4 mb-5">
@@ -241,37 +241,37 @@ sudo apt-get upgrade
 
 
 ```html
-<html>
-  <head>
-    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
-  </head>
-  <body>
-    <input type="text" id="message" />
-    <input type="button" id="send_btn" value="send" />
-    <div id="messages"></div>
-    <script type="text/javascript">
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;/socket.io/socket.io.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;input type=&quot;text&quot; id=&quot;message&quot; /&gt;
+    &lt;input type=&quot;button&quot; id=&quot;send_btn&quot; value=&quot;send&quot; /&gt;
+    &lt;div id=&quot;messages&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
 (function(undefined) {
-  "use strict";
+  &quot;use strict&quot;;
 
-  var messages = document.querySelector("#messages");
+  var messages = document.querySelector(&quot;#messages&quot;);
 
-  var socket = io.connect("http://server.name/");
-  socket.on("connect", function() {
-    socket.on("message", function(data) {
-      var elm = document.createElement("div");
+  var socket = io.connect(&quot;http://server.name/&quot;);
+  socket.on(&quot;connect&quot;, function() {
+    socket.on(&quot;message&quot;, function(data) {
+      var elm = document.createElement(&quot;div&quot;);
       elm.innerText = data;
 
       messages.appendChild(elm);
     });
 
-    document.querySelector("#send_btn").addEventListener("click", function() {
-      socket.send(document.querySelector("#message").value);
+    document.querySelector(&quot;#send_btn&quot;).addEventListener(&quot;click&quot;, function() {
+      socket.send(document.querySelector(&quot;#message&quot;).value);
     });
   });
 })();
-    </script>
-  </body>
-</html>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
 ```
 
 
@@ -279,20 +279,20 @@ sudo apt-get upgrade
 
 
 ```js
-var express = require("express");
+var express = require(&quot;express&quot;);
 
 var app = express();
 app.configure(function() {
   // クライアント側にあるファイルを静的ファイルで読み込めるように?
-  app.use(express.static(__dirname + "/../client"));
+  app.use(express.static(__dirname + &quot;/../client&quot;));
 });
 
-var server = require("http").createServer(app);
+var server = require(&quot;http&quot;).createServer(app);
 server.listen(3000);
 
-var io = require("socket.io").listen(server);
-io.sockets.on("connection", function(socket) {
-  socket.on("message", function(data) {
+var io = require(&quot;socket.io&quot;).listen(server);
+io.sockets.on(&quot;connection&quot;, function(socket) {
+  socket.on(&quot;message&quot;, function(data) {
     socket.broadcast.send(data);
   });
 });
@@ -312,7 +312,7 @@ server {
 
     location / {
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
+        proxy_set_header Connection &quot;Upgrade&quot;;
         proxy_pass http://socketio;
     }
 }
@@ -328,7 +328,7 @@ server {
 ![](/images/2014/01/20140112-182622.png)
 
 
-参考: <http://blog.geta6.net/post/45741693575/nginx-1-3-14-websocket-proxy>
+参考: &lt;http://blog.geta6.net/post/45741693575/nginx-1-3-14-websocket-proxy&gt;
 
  [1]: /android-socketio.html
               </div>
@@ -369,6 +369,7 @@ server {
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
+  <li class="recent-post"><a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a></li>
   <li class="recent-post"><a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
@@ -378,7 +379,6 @@ server {
   <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
   <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
-  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
 </ul>
 
           </div>
@@ -459,7 +459,7 @@ server {
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
   <li>
-    <a href="/archives/category/react-dot-js">React.js (10)</a>
+    <a href="/archives/category/react-dot-js">React.js (11)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -477,10 +477,10 @@ server {
     <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
   <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
+    <a href="/archives/category/typescript">TypeScript (5)</a>
   </li>
   <li>
-    <a href="/archives/category/typescript">TypeScript (4)</a>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
   </li>
   <li>
     <a href="/archives/category/webpack">webpack (2)</a>

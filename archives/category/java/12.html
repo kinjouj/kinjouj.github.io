@@ -154,7 +154,7 @@ public class MainActivityTest {
 
     @Test
     public void test1() {
-        ActivityController<MainActivity> controller = Robolectric.buildActivity(
+        ActivityController&lt;MainActivity&gt; controller = Robolectric.buildActivity(
             MainActivity.class
         );
         MainActivity activity = controller.create().get();
@@ -182,15 +182,15 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:0.6.1"
+        classpath &quot;com.android.tools.build:gradle:0.6.1&quot;
     }
 }
 
-apply plugin: "android"
+apply plugin: &quot;android&quot;
 
 sourceSets {
     unitTest {
-        java.srcDir file("src/test/java")
+        java.srcDir file(&quot;src/test/java&quot;)
     }
 }
 
@@ -199,16 +199,16 @@ repositories {
 }
 
 dependencies {
-    unitTestCompile files("/opt/android/platforms/android-18/android.jar")
-    unitTestCompile files("${buildDir}/classes/release")
-    unitTestCompile "junit:junit:4.11"
-    unitTestCompile "org.hamcrest:hamcrest-all:1.3"
-    unitTestCompile "org.robolectric:robolectric:2.2"
+    unitTestCompile files(&quot;/opt/android/platforms/android-18/android.jar&quot;)
+    unitTestCompile files(&quot;${buildDir}/classes/release&quot;)
+    unitTestCompile &quot;junit:junit:4.11&quot;
+    unitTestCompile &quot;org.hamcrest:hamcrest-all:1.3&quot;
+    unitTestCompile &quot;org.robolectric:robolectric:2.2&quot;
 }
 
 android {
     compileSdkVersion 18
-    buildToolsVersion "18.1.1"
+    buildToolsVersion &quot;18.1.1&quot;
 
     defaultConfig {
         minSdkVersion 8
@@ -250,7 +250,7 @@ check.dependsOn test
 Androidの通常のテスト方式であるInstrumentationTestRunnerなテストはsrc/instrumentTest/javaに書けば良い模様。なんかドキュメントに「run instrumentTest」とかそんな感じで書いてるけどタスク一覧みてもそれが無い。「connectedInstrumentTest」かなって思って実行したら普通に実行できた
 
 
-ちなみにsrc/instrumentTestは変更できるっぽそう。sourceSets -> instrumentTest.setRoot辺りで設定すれば良いとか
+ちなみにsrc/instrumentTestは変更できるっぽそう。sourceSets -&gt; instrumentTest.setRoot辺りで設定すれば良いとか
 
 
  [1]: /robolectric-project-gradle-test.html
@@ -276,7 +276,7 @@ package sample;
 
 public final class Sample {
     public String say() {
-        return "hoge fuga foobar";
+        return &quot;hoge fuga foobar&quot;;
     }
 }
 ```
@@ -298,8 +298,8 @@ public class SampleTest {
     @Test
     public void test() {
         Sample sample = mock(Sample.class);
-        when(sample.say()).thenReturn("hoge");
-        assertThat(sample.say(), is("hoge fuga foobar"));
+        when(sample.say()).thenReturn(&quot;hoge&quot;);
+        assertThat(sample.say(), is(&quot;hoge fuga foobar&quot;));
 
         verify(sample).say();
     }
@@ -310,14 +310,14 @@ public class SampleTest {
 なんていうテストを普通にぶちかますと
 
 
-<pre>
+&lt;pre&gt;
 org.mockito.exceptions.base.MockitoException:
 Cannot mock/spy class sample.Sample
 Mockito cannot mock/spy following:
   - final classes
   - anonymous classes
   - primitive types
-</pre>
+&lt;/pre&gt;
 
 
 っていうようにfinalクラスはモック化出来ねーよって怒られる訳ですが。で前回だと独自のクラスローダーを利用してjavassistを使ってfinal modifierを消したクラスバイトコードを動的にロードするっていう方式だったんですが、これだとこのクラスローダーからロードしないといけないとかめんどくさいよねっていう事で色々調べつつやってみた。無論上記のコードでテストは一切書き換えないっていう条件付き
@@ -372,20 +372,20 @@ public class SampleClassTransformer implements ClassFileTransformer {
     }
 
     @Override
-    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+    public byte[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined,
         ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
         byte[] b = null;
 
         try {
-            String name = className.replace("/", ".");
+            String name = className.replace(&quot;/&quot;, &quot;.&quot;);
             CtClass clazz = pool.get(name);
 
             if (clazz.hasAnnotation(FinalMock.class)) {
-                clazz.setModifiers(clazz.getModifiers() & ~Modifier.FINAL);
+                clazz.setModifiers(clazz.getModifiers() &amp; ~Modifier.FINAL);
                 b = clazz.toBytecode();
 
-                logger.info("processed: {}", clazz.getName());
+                logger.info(&quot;processed: {}&quot;, clazz.getName());
             }
         } catch (NotFoundException e) {
         } catch (CannotCompileException e) {
@@ -429,17 +429,17 @@ Premain-Class: JavaAgent
 終わり。あとは実行時に-javaagent:sample.jar(作成したjarファイル)でテストを実行すると
 
 
-<pre>
+&lt;pre&gt;
 java.lang.AssertionError:
-Expected: is "hoge fuga foobar"
-     but: was "hoge"
-</pre>
+Expected: is &quot;hoge fuga foobar&quot;
+     but: was &quot;hoge&quot;
+&lt;/pre&gt;
 
 
-っていうように「when(sample.say()).thenReturn("hoge")」としているのでまぁどっちにしろテストは成功しないけど、モック化してメソッドが返す値をfinalクラスでもぶち込んだり出来るっていう訳
+っていうように「when(sample.say()).thenReturn(&quot;hoge&quot;)」としているのでまぁどっちにしろテストは成功しないけど、モック化してメソッドが返す値をfinalクラスでもぶち込んだり出来るっていう訳
 
 
-参考: <http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class>
+参考: &lt;http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class&gt;
 
 
  [1]: /mockito-mocked-final-class.html
@@ -455,6 +455,7 @@ Expected: is "hoge fuga foobar"
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
+  <li class="recent-post"><a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a></li>
   <li class="recent-post"><a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
@@ -464,7 +465,6 @@ Expected: is "hoge fuga foobar"
   <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
   <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
-  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
 </ul>
 
           </div>
@@ -545,7 +545,7 @@ Expected: is "hoge fuga foobar"
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
   <li>
-    <a href="/archives/category/react-dot-js">React.js (10)</a>
+    <a href="/archives/category/react-dot-js">React.js (11)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -563,10 +563,10 @@ Expected: is "hoge fuga foobar"
     <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
   <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
+    <a href="/archives/category/typescript">TypeScript (5)</a>
   </li>
   <li>
-    <a href="/archives/category/typescript">TypeScript (4)</a>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
   </li>
   <li>
     <a href="/archives/category/webpack">webpack (2)</a>

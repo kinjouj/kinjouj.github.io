@@ -54,7 +54,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/gradle-android-toolkit-android-studio.html">gradle-android-toolkit+Android Studio (1)</a>
                 </h3>
-                普通ならAndroid Studioから「New Project」 -> 「New Module」でAndroidプロジェクトなりモジュールなりどんどん作成していくだけで良いと思うんだけれども、Android公式がサポートしているandroid-toolkitなgradle supportを使ってプロジェクト構成を作った場合なケースに関して検証してみた
+                普通ならAndroid Studioから「New Project」 -&gt; 「New Module」でAndroidプロジェクトなりモジュールなりどんどん作成していくだけで良いと思うんだけれども、Android公式がサポートしているandroid-toolkitなgradle supportを使ってプロジェクト構成を作った場合なケースに関して検証してみた
               </div>
             </div>
             <div id="22d533ba80c91b7a60cc063e16129010445ea8db" class="card m-4 mb-5">
@@ -86,7 +86,7 @@ package sample;
 
 public final class Sample {
     public String say() {
-        return "hoge fuga foobar";
+        return &quot;hoge fuga foobar&quot;;
     }
 }
 ```
@@ -108,8 +108,8 @@ public class SampleTest {
     @Test
     public void test() {
         Sample sample = mock(Sample.class);
-        when(sample.say()).thenReturn("hoge");
-        assertThat(sample.say(), is("hoge fuga foobar"));
+        when(sample.say()).thenReturn(&quot;hoge&quot;);
+        assertThat(sample.say(), is(&quot;hoge fuga foobar&quot;));
 
         verify(sample).say();
     }
@@ -120,14 +120,14 @@ public class SampleTest {
 なんていうテストを普通にぶちかますと
 
 
-<pre>
+&lt;pre&gt;
 org.mockito.exceptions.base.MockitoException:
 Cannot mock/spy class sample.Sample
 Mockito cannot mock/spy following:
   - final classes
   - anonymous classes
   - primitive types
-</pre>
+&lt;/pre&gt;
 
 
 っていうようにfinalクラスはモック化出来ねーよって怒られる訳ですが。で前回だと独自のクラスローダーを利用してjavassistを使ってfinal modifierを消したクラスバイトコードを動的にロードするっていう方式だったんですが、これだとこのクラスローダーからロードしないといけないとかめんどくさいよねっていう事で色々調べつつやってみた。無論上記のコードでテストは一切書き換えないっていう条件付き
@@ -182,20 +182,20 @@ public class SampleClassTransformer implements ClassFileTransformer {
     }
 
     @Override
-    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+    public byte[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined,
         ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
         byte[] b = null;
 
         try {
-            String name = className.replace("/", ".");
+            String name = className.replace(&quot;/&quot;, &quot;.&quot;);
             CtClass clazz = pool.get(name);
 
             if (clazz.hasAnnotation(FinalMock.class)) {
-                clazz.setModifiers(clazz.getModifiers() & ~Modifier.FINAL);
+                clazz.setModifiers(clazz.getModifiers() &amp; ~Modifier.FINAL);
                 b = clazz.toBytecode();
 
-                logger.info("processed: {}", clazz.getName());
+                logger.info(&quot;processed: {}&quot;, clazz.getName());
             }
         } catch (NotFoundException e) {
         } catch (CannotCompileException e) {
@@ -239,17 +239,17 @@ Premain-Class: JavaAgent
 終わり。あとは実行時に-javaagent:sample.jar(作成したjarファイル)でテストを実行すると
 
 
-<pre>
+&lt;pre&gt;
 java.lang.AssertionError:
-Expected: is "hoge fuga foobar"
-     but: was "hoge"
-</pre>
+Expected: is &quot;hoge fuga foobar&quot;
+     but: was &quot;hoge&quot;
+&lt;/pre&gt;
 
 
-っていうように「when(sample.say()).thenReturn("hoge")」としているのでまぁどっちにしろテストは成功しないけど、モック化してメソッドが返す値をfinalクラスでもぶち込んだり出来るっていう訳
+っていうように「when(sample.say()).thenReturn(&quot;hoge&quot;)」としているのでまぁどっちにしろテストは成功しないけど、モック化してメソッドが返す値をfinalクラスでもぶち込んだり出来るっていう訳
 
 
-参考: <http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class>
+参考: &lt;http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class&gt;
 
 
  [1]: /mockito-mocked-final-class.html
@@ -270,7 +270,7 @@ Expected: is "hoge fuga foobar"
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/android-testing-robolectric-powermockito.html">Robolectric+powermockito</a>
                 </h3>
-                参考: <http://addie9000.blogspot.jp/2012/12/robolectricpowermockandroidunit-test.html>
+                参考: &lt;http://addie9000.blogspot.jp/2012/12/robolectricpowermockandroidunit-test.html&gt;
               </div>
             </div>
             <div id="7c9a9216648b4091e2c84bedc2b120412bf912f7" class="card m-4 mb-5">
@@ -297,7 +297,7 @@ Expected: is "hoge fuga foobar"
                 <h3 class="card-title">
                   <a name="article-link" href="/2013/10/html5-canvas-rendering-chart.html">&lt;canvas&gt;でチャートを出力する</a>
                 </h3>
-                参考: <http://www.mdn.co.jp/di/articles/2366/?page=11>
+                参考: &lt;http://www.mdn.co.jp/di/articles/2366/?page=11&gt;
               </div>
             </div>
             <div id="a0668f136cd75b10737ae733a24682249985b2e8" class="card m-4 mb-5">
@@ -328,6 +328,7 @@ Expected: is "hoge fuga foobar"
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
+  <li class="recent-post"><a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a></li>
   <li class="recent-post"><a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
@@ -337,7 +338,6 @@ Expected: is "hoge fuga foobar"
   <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
   <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
-  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
 </ul>
 
           </div>
@@ -418,7 +418,7 @@ Expected: is "hoge fuga foobar"
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
   <li>
-    <a href="/archives/category/react-dot-js">React.js (10)</a>
+    <a href="/archives/category/react-dot-js">React.js (11)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -436,10 +436,10 @@ Expected: is "hoge fuga foobar"
     <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
   <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
+    <a href="/archives/category/typescript">TypeScript (5)</a>
   </li>
   <li>
-    <a href="/archives/category/typescript">TypeScript (4)</a>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
   </li>
   <li>
     <a href="/archives/category/webpack">webpack (2)</a>

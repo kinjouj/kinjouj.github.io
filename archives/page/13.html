@@ -48,6 +48,15 @@
       <div class="row g-0">
         <div class="col col-lg-8">
           <div id="content">
+            <div id="fbb0c811401dfed9469aead0fb71c3a7cbe05b90" class="card m-4 mb-5">
+              <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a name="article-link" href="/2014/10/jaxrs-17-securitycontext.html">JAX-RSをやってみる (17) - SecurityContext -</a>
+                </h3>
+                公式ドキュメント: https://jersey.java.net/documentation/latest/security.html
+              </div>
+            </div>
             <div id="acf4e75fc560f7518a5d1098dd2de53ecf38d7d0" class="card m-4 mb-5">
               <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
               <div class="card-body">
@@ -129,303 +138,6 @@
                 前回の「[ActiveRecord Validation #1][1]」の続き
               </div>
             </div>
-            <div id="c66759aa33ec169eb8e1ee288fa31c26934757f2" class="card m-4 mb-5">
-              <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
-              <div class="card-body">
-                <h3 class="card-title">
-                  <a name="article-link" href="/2014/08/activerecord-validation-1.html">ActiveRecord Validation #1</a>
-                </h3>
-                公式ドキュメント: [http://guides.rubyonrails.org/active\_record\_validations.html][1]
-
-
-公式ドキュメントを読みつつ進めてみようかと。ただやたらと長いので何回かに分けて書く予定
-
-
-
-
-
-#### 基本的な使い方
-
-
-```rb
-require "rails_helper"
-
-class Entry < ActiveRecord::Base
-  validates :name, presence: true
-end
-
-describe Entry do
-  it "(valid?|invalid?)メソッド" do
-    entry = Entry.new
-
-    # valid等を実行する前だとerrosはempty
-    expect(entry.errors).to be_empty
-
-    expect(entry.valid?).to eq false
-    expect(entry.invalid?).to eq true
-
-    # valid等を処理した後だとerrorsには検証エラーが入る
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq([:name, ["can"t be blank"]])
-  end
-end
-```
-
-
-っていうような感じになる。valid等を動かさなくてもsaveやupdate等のメソッドを実行すると検証エラーな場合はfalseが返り、破壊的メソッドとして実行するとActiveRecord::RecordInvalidがスローされる模様
-
-
-っていう感じで、基本的な事は終わり。presence等のValidation Helpersな所を進める
-
-
-#### [presence][2]
-
-
-.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど
-
-
-```rb
-require "rails_helper"
-
-class Entry < ActiveRecord::Base
-  validates :name, presence: { message: "can`t be empty" }
-end
-
-describe Entry do
-  it "presenceのテスト" do
-    entry = Entry.new
-    expect(entry.save).to eq false
-
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq([:name, ["can`t be empty"]])
-  end
-end
-```
-
-
-っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry
-
-
-#### <a href="http://guides.rubyonrails.org/active_record_validations.html#acceptance">acceptance</a>
-
-
-「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「"1&#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様
-
-
-```rb
-require "rails_helper"
-
-class Entry < ActiveRecord::Base
-  validates :terms_of_service, acceptance: true
-end
-
-describe Entry do
-  it "acceptanceのテスト" do
-    entry = Entry.new({ terms_of_service: "1" })
-    expect(entry.valid?).to be true
-  end
-
-  it "terms_of_serviceを指定しない場合" do
-    expect(Entry.new.valid?).to eq true
-  end
-end
-```
-
-
-このテストは通る。2つ目のテストでterms\_of\_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので
-
-
-```rb
-class Entry < ActiveRecord::Base
-  validates :terms_of_service, acceptance: true, allow_nil: false
-end
-```
-
-
-とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと"1&#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能
-
-
-```rb
-require "rails_helper"
-
-class Entry < ActiveRecord::Base
-  validates :terms_of_service, acceptance: { accept: "yes" }, allow_nil: false
-end
-
-describe Entry do
-  it "acceptanceのテスト" do
-    entry = Entry.new({ terms_of_service: "yes" })
-    expect(entry.valid?).to be true
-  end
-
-  it "terms_of_serviceを指定しない場合" do
-    expect(Entry.new.valid?).to eq false
-  end
-end
-```
-
-
-っていうような感じでacceptanceオプションを修正することで"1&#8243;以外で作用させる事も可能
-
-
-んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)
-
-
-#### [confirmation][3]
-
-
-```rb
-require "rails_helper"
-
-class Entry < ActiveRecord::Base
-  validates :email, confirmation: true
-end
-
-describe Entry do
-  it "confirmationのテスト" do
-    entry = Entry.new({
-      email: "A@example.com",
-      email_confirmation: "B@example.com"
-    })
-    expect(entry.valid?).to eq false
-
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq [:email_confirmation, ["doesn"t match Email"]]
-  end
-
-  it "email_confirmationを指定しない場合" do
-    entry = Entry.new({ email: "A@example.com" })
-    expect(entry.valid?).to eq true
-  end
-end
-```
-
-
-ってな感じでconfirmation validation helperを使っているのに対して、\_confirmationな仮想的属性の値を比較して同一かをチェック出来る。但しその仮想的属性がnilでは無い場合にのみチェックされる模様なので、2つ目のテストではemail\_confirmationを指定してない為にバリデーションが作用しない為trueが返るような感じかと
-
-
-#### [exclusion][4]
-
-
-指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion
-
-
-```rb
-require "rails_helper"
-
-class Entry < ActiveRecord::Base
-  validates :subdomain, exclusion: { in: %w(www blog) }
-end
-
-describe Entry do
-  it "exclusionのテスト" do
-    expect(Entry.new({ subdomain: "user" }).valid?).to eq true
-    expect(Entry.new({ subdomain: "www" }).valid?).to eq false
-    expect(Entry.new({ subdomain: "blog" }).valid?).to eq false
-  end
-end
-```
-
-
-inで指定したリストに該当するのが入るとバリデーションとしては不整合という形になる模様。恐らくはnilな場合だと検証が作用しないんかと思われる
-
-
-#### [inclusion][5]
-
-
-上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい
-
-
-```rb
-require "rails_helper"
-
-class Entry < ActiveRecord::Base
-  validates :subdomain, inclusion: { in: %w(www blog) }
-end
-
-describe Entry do
-  it "inclusionのテスト" do
-    expect(Entry.new({ subdomain: "www" }).valid?).to eq true
-    expect(Entry.new({ subdomain: "blog" }).valid?).to eq true
-    expect(Entry.new({ subdomain: "user" }).valid?).to eq false
-  end
-end
-```
-
-
-inで指定してあるのみ許容される。
-
-
-#### [format][6]
-
-
-正規表現とかで値の検証を行うようなパターンの場合に使う
-
-
-```rb
-require "rails_helper"
-
-class Entry < ActiveRecord::Base
-  validates :postal_code, format: { with: /\A[\d]{3}\-[\d]{4}\z/ }
-end
-
-describe Entry do
-  it "formatのテスト" do
-    expect(Entry.new({ postal_code: "123-4567" }).valid?).to eq true
-
-    entry = Entry.new({ postal_code: "123-456a" })
-    expect(entry.errors).to be_empty
-    expect(entry.valid?).to eq false
-
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq([:postal_code, ["is invalid"]])
-  end
-end
-```
-
-
-てな感じでwithで指定した正規表現で値をチェック出来る。
-
-
-とりあえず今回は以上。続きは後日
-
-
- [1]: http://guides.rubyonrails.org/active_record_validations.html
- [2]: http://guides.rubyonrails.org/active_record_validations.html#presence
- [3]: http://guides.rubyonrails.org/active_record_validations.html#confirmation
- [4]: http://guides.rubyonrails.org/active_record_validations.html#exclusion
- [5]: http://guides.rubyonrails.org/active_record_validations.html#inclusion
- [6]: http://edgeguides.rubyonrails.org/active_record_validations.html#format
-              </div>
-            </div>
             <div class="my-pagination my-5">
                 <a href="/archives/page/12.html" class="float-start box-link">Prev</a>
               <a href="/archives/page/14.html" class="float-end box-link">Next</a>
@@ -436,6 +148,7 @@ end
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
+  <li class="recent-post"><a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a></li>
   <li class="recent-post"><a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
@@ -445,7 +158,6 @@ end
   <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
   <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
-  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
 </ul>
 
           </div>
@@ -526,7 +238,7 @@ end
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
   <li>
-    <a href="/archives/category/react-dot-js">React.js (10)</a>
+    <a href="/archives/category/react-dot-js">React.js (11)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -544,10 +256,10 @@ end
     <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
   <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
+    <a href="/archives/category/typescript">TypeScript (5)</a>
   </li>
   <li>
-    <a href="/archives/category/typescript">TypeScript (4)</a>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
   </li>
   <li>
     <a href="/archives/category/webpack">webpack (2)</a>

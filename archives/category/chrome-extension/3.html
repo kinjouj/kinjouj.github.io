@@ -65,32 +65,32 @@
 
 ```json
 {
-  "name": "chrome-extension-dropbox-oauth-demo",
-  "description": "Chrome Extension Dropbox OAuth Demo (using oauth.js)",
-  "version": "0.1",
-  "manifest_version": 2,
-  "browser_action": {
-    "default_title": "Chrome Extension - Dropbox OAuth Demo -",
-    "default_icon": "icon.png"
+  &quot;name&quot;: &quot;chrome-extension-dropbox-oauth-demo&quot;,
+  &quot;description&quot;: &quot;Chrome Extension Dropbox OAuth Demo (using oauth.js)&quot;,
+  &quot;version&quot;: &quot;0.1&quot;,
+  &quot;manifest_version&quot;: 2,
+  &quot;browser_action&quot;: {
+    &quot;default_title&quot;: &quot;Chrome Extension - Dropbox OAuth Demo -&quot;,
+    &quot;default_icon&quot;: &quot;icon.png&quot;
   },
-  "background": {
-    "scripts": [
-      "library/jquery.js",
-      "library/sha1.js",
-      "library/oauth.js",
-      "const.js",
-      "dropbox.js",
-      "background.js"
+  &quot;background&quot;: {
+    &quot;scripts&quot;: [
+      &quot;library/jquery.js&quot;,
+      &quot;library/sha1.js&quot;,
+      &quot;library/oauth.js&quot;,
+      &quot;const.js&quot;,
+      &quot;dropbox.js&quot;,
+      &quot;background.js&quot;
     ]
   },
-  "content_scripts": [
+  &quot;content_scripts&quot;: [
     {
-      "matches": ["https://www.dropbox.com/1/oauth/authorize"],
-      "js": ["content_script.js"],
-      "run_at": "document_idle"
+      &quot;matches&quot;: [&quot;https://www.dropbox.com/1/oauth/authorize&quot;],
+      &quot;js&quot;: [&quot;content_script.js&quot;],
+      &quot;run_at&quot;: &quot;document_idle&quot;
     }
   ],
-  "permissions": ["https://*.dropbox.com/"]
+  &quot;permissions&quot;: [&quot;https://*.dropbox.com/&quot;]
 }
 ```
 
@@ -99,8 +99,8 @@
 
 
 ```js
-const OAUTH_CONSUMER_KEY = "";
-const OAUTH_CONSUMER_SECRET = "";
+const OAUTH_CONSUMER_KEY = &quot;&quot;;
+const OAUTH_CONSUMER_SECRET = &quot;&quot;;
 ```
 
 
@@ -114,8 +114,8 @@ const OAUTH_CONSUMER_SECRET = "";
 // 認証完了後、もしくは認証済みな場合にブラウザアクションで表示されるコンテンツを設定する
 
 function registerPopup() {
-  chrome.browserAction.setPopup({ "popup": "popup.html" });
-  chrome.browserAction.setBadgeText({ "text": String() });
+  chrome.browserAction.setPopup({ &quot;popup&quot;: &quot;popup.html&quot; });
+  chrome.browserAction.setBadgeText({ &quot;text&quot;: String() });
 }
 
 (function(undefined) {
@@ -124,7 +124,7 @@ function registerPopup() {
   if (dropbox.isAuthorized()) {
     registerPopup();
   } else {
-    chrome.browserAction.setBadgeText({ "text": "?" });
+    chrome.browserAction.setBadgeText({ &quot;text&quot;: &quot;?&quot; });
 
     dropbox.login();
   }
@@ -132,7 +132,7 @@ function registerPopup() {
   // ここはコンテントスクリプトから来る
 
   chrome.extension.onRequest.addListener(function(req) {
-    if (req.event === "sign") {
+    if (req.event === &quot;sign&quot;) {
       dropbox.sign(function() {
         registerPopup();
       });
@@ -146,8 +146,8 @@ function registerPopup() {
 
 
 ```js
-const OAUTH_TOKEN_KEY = "oauth_token";
-const OAUTH_TOKEN_SECRET_KEY = "oauth_token_secret";
+const OAUTH_TOKEN_KEY = &quot;oauth_token&quot;;
+const OAUTH_TOKEN_SECRET_KEY = &quot;oauth_token_secret&quot;;
 
 var Dropbox = function() {};
 
@@ -168,7 +168,7 @@ Dropbox.prototype.setTokenSecret = function(tokenSecret) {
 };
 
 Dropbox.prototype.isAuthorized = function() {
-  var authorized = localStorage.getItem("authorized");
+  var authorized = localStorage.getItem(&quot;authorized&quot;);
 
   return Boolean(authorized);
 };
@@ -187,16 +187,16 @@ Dropbox.prototype.getParameterTokenSecret = function(res) {
 
 Dropbox.prototype.login = function() {
   var message = {
-    "method": "POST",
-    "action": "https://api.dropbox.com/1/oauth/request_token",
-    "parameters": {
-      "oauth_consumer_key": OAUTH_CONSUMER_KEY,
-      "oauth_signature_method": "HMAC-SHA1"
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;action&quot;: &quot;https://api.dropbox.com/1/oauth/request_token&quot;,
+    &quot;parameters&quot;: {
+      &quot;oauth_consumer_key&quot;: OAUTH_CONSUMER_KEY,
+      &quot;oauth_signature_method&quot;: &quot;HMAC-SHA1&quot;
     }
   };
 
   var accessor = {
-    "consumerSecret": OAUTH_CONSUMER_SECRET
+    &quot;consumerSecret&quot;: OAUTH_CONSUMER_SECRET
   };
 
   OAuth.setTimestampAndNonce(message);
@@ -211,7 +211,7 @@ Dropbox.prototype.login = function() {
         var token = OAuth.getParameter(param, OAUTH_TOKEN_KEY);
         var tokenSecret = OAuth.getParameter(param, OAUTH_TOKEN_SECRET_KEY);
 
-        message.action = "https://api.dropbox.com/1/oauth/authorize";
+        message.action = &quot;https://api.dropbox.com/1/oauth/authorize&quot;;
         message.parameters.oauth_token = token;
 
         accessor.oauth_token_secret = tokenSecret;
@@ -235,18 +235,18 @@ Dropbox.prototype.sign = function(cb) {
   }
 
   var message = {
-    "method": "POST",
-    "action": "https://api.dropbox.com/1/oauth/access_token",
-    "parameters": {
-      "oauth_consumer_key": OAUTH_CONSUMER_KEY,
-      "oauth_token": this.getToken(),
-      "oauth_signature_method": "HMAC-SHA1"
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;action&quot;: &quot;https://api.dropbox.com/1/oauth/access_token&quot;,
+    &quot;parameters&quot;: {
+      &quot;oauth_consumer_key&quot;: OAUTH_CONSUMER_KEY,
+      &quot;oauth_token&quot;: this.getToken(),
+      &quot;oauth_signature_method&quot;: &quot;HMAC-SHA1&quot;
     }
   };
 
   var accessor = {
-    "consumerSecret": OAUTH_CONSUMER_SECRET,
-    "tokenSecret": this.getTokenSecret()
+    &quot;consumerSecret&quot;: OAUTH_CONSUMER_SECRET,
+    &quot;tokenSecret&quot;: this.getTokenSecret()
   };
 
   OAuth.setTimestampAndNonce(message);
@@ -259,7 +259,7 @@ Dropbox.prototype.sign = function(cb) {
         this.setToken(this.getParameterToken(res));
         this.setTokenSecret(this.getParameterTokenSecret(res));
 
-        localStorage.setItem("authorized", true);
+        localStorage.setItem(&quot;authorized&quot;, true);
 
         cb();
       },
@@ -270,18 +270,18 @@ Dropbox.prototype.sign = function(cb) {
 
 Dropbox.prototype.getThumbnails = function(cb) {
   var message = {
-    "method": "GET",
-    "action": "https://api.dropbox.com/1/metadata/sandbox/",
-    "parameters": {
-      "oauth_consumer_key": OAUTH_CONSUMER_KEY,
-      "oauth_token": this.getToken(),
-      "oauth_signature_method": "HMAC-SHA1"
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;action&quot;: &quot;https://api.dropbox.com/1/metadata/sandbox/&quot;,
+    &quot;parameters&quot;: {
+      &quot;oauth_consumer_key&quot;: OAUTH_CONSUMER_KEY,
+      &quot;oauth_token&quot;: this.getToken(),
+      &quot;oauth_signature_method&quot;: &quot;HMAC-SHA1&quot;
     }
   };
 
   var accessor = {
-    "consumerSecret": OAUTH_CONSUMER_SECRET,
-    "tokenSecret": this.getTokenSecret()
+    &quot;consumerSecret&quot;: OAUTH_CONSUMER_SECRET,
+    &quot;tokenSecret&quot;: this.getTokenSecret()
   };
 
   OAuth.setTimestampAndNonce(message);
@@ -293,15 +293,15 @@ Dropbox.prototype.getThumbnails = function(cb) {
       function(res) {
         res.contents.forEach(function(content) {
           if (!content.is_dir) {
-            message.action = "https://api-content.dropbox.com/1/thumbnails/sandbox" + content.path;
-            message.parameters.size = "large";
+            message.action = &quot;https://api-content.dropbox.com/1/thumbnails/sandbox&quot; + content.path;
+            message.parameters.size = &quot;large&quot;;
 
             OAuth.setTimestampAndNonce(message);
             OAuth.SignatureMethod.sign(message, accessor);
 
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", OAuth.addToURL(message.action, message.parameters));
-            xhr.responseType = "arraybuffer";
+            xhr.open(&quot;GET&quot;, OAuth.addToURL(message.action, message.parameters));
+            xhr.responseType = &quot;arraybuffer&quot;;
             xhr.onload = function() {
               cb(this.response);
             };
@@ -320,7 +320,7 @@ Dropbox.prototype.getThumbnails = function(cb) {
 
 
 ```js
-chrome.extension.sendRequest({ "event": "sign" });
+chrome.extension.sendRequest({ &quot;event&quot;: &quot;sign&quot; });
 ```
 
 
@@ -331,18 +331,18 @@ chrome.extension.sendRequest({ "event": "sign" });
 
 
 ```html
-<html>
-  <head>
-    <script type="text/javascript" src="library/jquery.js"></script>
-    <script type="text/javascript" src="library/sha1.js"></script>
-    <script type="text/javascript" src="library/oauth.js"></script>
-    <script type="text/javascript" src="const.js"></script>
-    <script type="text/javascript" src="dropbox.js"></script>
-  </head>
-  <body>
-    <script type="text/javascript" src="popup.js"></script>
-  </body>
-</html>
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;library/jquery.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;library/sha1.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;library/oauth.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;const.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;dropbox.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;popup.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
 ```
 
 
@@ -351,15 +351,15 @@ chrome.extension.sendRequest({ "event": "sign" });
 
 ```js
 (function(undefined) {
-  var root = $("body");
+  var root = $(&quot;body&quot;);
 
   var dropbox = new Dropbox();
   dropbox.getThumbnails(function(binaryData) {
     var bb = new WebKitBlobBuilder();
     bb.append(binaryData);
 
-    var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+    var canvas = document.createElement(&quot;canvas&quot;);
+    var context = canvas.getContext(&quot;2d&quot;);
 
     var img = new Image();
     img.src = webkitURL.createObjectURL(bb.getBlob());
@@ -371,13 +371,13 @@ chrome.extension.sendRequest({ "event": "sign" });
       webkitURL.revokeObjectURL(this.src);
     };
 
-    $(root).append($("<div>").css("margin", "15px").append($(canvas)));
+    $(root).append($(&quot;&lt;div&gt;&quot;).css(&quot;margin&quot;, &quot;15px&quot;).append($(canvas)));
   });
 })();
 ```
 
 
-まぁ取得した画像(サムネイルデータ)を取得して、それを&lt;canvas&gt;で云々するだけ(別にcanvasじゃなくても良い)
+まぁ取得した画像(サムネイルデータ)を取得して、それを&amp;lt;canvas&amp;gt;で云々するだけ(別にcanvasじゃなくても良い)
 
 
 まぁそんな感じ。ちょっとやりきった感全開なのでテキトウにかいちゃいましたがorz
@@ -431,7 +431,7 @@ chrome.extension.sendRequest({ "event": "sign" });
                 <h3 class="card-title">
                   <a name="article-link" href="/2012/08/chrome-extension-13.html">Chrome Extension開発を勉強してみる (13) - oauth.jsでTwitter API -</a>
                 </h3>
-                oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを<http://dev.twitter.com>から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる
+                oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを&lt;http://dev.twitter.com&gt;から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる
               </div>
             </div>
             <div id="ee421cfdc33aed45363b88ac96b3468911b9d064" class="card m-4 mb-5">
@@ -480,6 +480,7 @@ chrome.extension.sendRequest({ "event": "sign" });
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
+  <li class="recent-post"><a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a></li>
   <li class="recent-post"><a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
@@ -489,7 +490,6 @@ chrome.extension.sendRequest({ "event": "sign" });
   <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
   <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
-  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
 </ul>
 
           </div>
@@ -570,7 +570,7 @@ chrome.extension.sendRequest({ "event": "sign" });
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
   <li>
-    <a href="/archives/category/react-dot-js">React.js (10)</a>
+    <a href="/archives/category/react-dot-js">React.js (11)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -588,10 +588,10 @@ chrome.extension.sendRequest({ "event": "sign" });
     <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
   <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
+    <a href="/archives/category/typescript">TypeScript (5)</a>
   </li>
   <li>
-    <a href="/archives/category/typescript">TypeScript (4)</a>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
   </li>
   <li>
     <a href="/archives/category/webpack">webpack (2)</a>

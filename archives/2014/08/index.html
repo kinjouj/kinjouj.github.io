@@ -94,14 +94,14 @@
 
 
 ```rb
-require "rails_helper"
+require &quot;rails_helper&quot;
 
-class Entry < ActiveRecord::Base
+class Entry &lt; ActiveRecord::Base
   validates :name, presence: true
 end
 
 describe Entry do
-  it "(valid?|invalid?)メソッド" do
+  it &quot;(valid?|invalid?)メソッド&quot; do
     entry = Entry.new
 
     # valid等を実行する前だとerrosはempty
@@ -119,7 +119,7 @@ describe Entry do
 
     message = messages.first
     expect(message).not_to be_nil
-    expect(message).to eq([:name, ["can"t be blank"]])
+    expect(message).to eq([:name, [&quot;can&quot;t be blank&quot;]])
   end
 end
 ```
@@ -138,14 +138,14 @@ end
 
 
 ```rb
-require "rails_helper"
+require &quot;rails_helper&quot;
 
-class Entry < ActiveRecord::Base
-  validates :name, presence: { message: "can`t be empty" }
+class Entry &lt; ActiveRecord::Base
+  validates :name, presence: { message: &quot;can`t be empty&quot; }
 end
 
 describe Entry do
-  it "presenceのテスト" do
+  it &quot;presenceのテスト&quot; do
     entry = Entry.new
     expect(entry.save).to eq false
 
@@ -157,7 +157,7 @@ describe Entry do
 
     message = messages.first
     expect(message).not_to be_nil
-    expect(message).to eq([:name, ["can`t be empty"]])
+    expect(message).to eq([:name, [&quot;can`t be empty&quot;]])
   end
 end
 ```
@@ -166,26 +166,26 @@ end
 っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry
 
 
-#### <a href="http://guides.rubyonrails.org/active_record_validations.html#acceptance">acceptance</a>
+#### &lt;a href=&quot;http://guides.rubyonrails.org/active_record_validations.html#acceptance&quot;&gt;acceptance&lt;/a&gt;
 
 
-「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「"1&#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様
+「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&amp;#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様
 
 
 ```rb
-require "rails_helper"
+require &quot;rails_helper&quot;
 
-class Entry < ActiveRecord::Base
+class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: true
 end
 
 describe Entry do
-  it "acceptanceのテスト" do
-    entry = Entry.new({ terms_of_service: "1" })
+  it &quot;acceptanceのテスト&quot; do
+    entry = Entry.new({ terms_of_service: &quot;1&quot; })
     expect(entry.valid?).to be true
   end
 
-  it "terms_of_serviceを指定しない場合" do
+  it &quot;terms_of_serviceを指定しない場合&quot; do
     expect(Entry.new.valid?).to eq true
   end
 end
@@ -196,36 +196,36 @@ end
 
 
 ```rb
-class Entry < ActiveRecord::Base
+class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: true, allow_nil: false
 end
 ```
 
 
-とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと"1&#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能
+とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&amp;#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能
 
 
 ```rb
-require "rails_helper"
+require &quot;rails_helper&quot;
 
-class Entry < ActiveRecord::Base
-  validates :terms_of_service, acceptance: { accept: "yes" }, allow_nil: false
+class Entry &lt; ActiveRecord::Base
+  validates :terms_of_service, acceptance: { accept: &quot;yes&quot; }, allow_nil: false
 end
 
 describe Entry do
-  it "acceptanceのテスト" do
-    entry = Entry.new({ terms_of_service: "yes" })
+  it &quot;acceptanceのテスト&quot; do
+    entry = Entry.new({ terms_of_service: &quot;yes&quot; })
     expect(entry.valid?).to be true
   end
 
-  it "terms_of_serviceを指定しない場合" do
+  it &quot;terms_of_serviceを指定しない場合&quot; do
     expect(Entry.new.valid?).to eq false
   end
 end
 ```
 
 
-っていうような感じでacceptanceオプションを修正することで"1&#8243;以外で作用させる事も可能
+っていうような感じでacceptanceオプションを修正することで&quot;1&amp;#8243;以外で作用させる事も可能
 
 
 んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)
@@ -235,17 +235,17 @@ end
 
 
 ```rb
-require "rails_helper"
+require &quot;rails_helper&quot;
 
-class Entry < ActiveRecord::Base
+class Entry &lt; ActiveRecord::Base
   validates :email, confirmation: true
 end
 
 describe Entry do
-  it "confirmationのテスト" do
+  it &quot;confirmationのテスト&quot; do
     entry = Entry.new({
-      email: "A@example.com",
-      email_confirmation: "B@example.com"
+      email: &quot;A@example.com&quot;,
+      email_confirmation: &quot;B@example.com&quot;
     })
     expect(entry.valid?).to eq false
 
@@ -257,11 +257,11 @@ describe Entry do
 
     message = messages.first
     expect(message).not_to be_nil
-    expect(message).to eq [:email_confirmation, ["doesn"t match Email"]]
+    expect(message).to eq [:email_confirmation, [&quot;doesn&quot;t match Email&quot;]]
   end
 
-  it "email_confirmationを指定しない場合" do
-    entry = Entry.new({ email: "A@example.com" })
+  it &quot;email_confirmationを指定しない場合&quot; do
+    entry = Entry.new({ email: &quot;A@example.com&quot; })
     expect(entry.valid?).to eq true
   end
 end
@@ -278,17 +278,17 @@ end
 
 
 ```rb
-require "rails_helper"
+require &quot;rails_helper&quot;
 
-class Entry < ActiveRecord::Base
+class Entry &lt; ActiveRecord::Base
   validates :subdomain, exclusion: { in: %w(www blog) }
 end
 
 describe Entry do
-  it "exclusionのテスト" do
-    expect(Entry.new({ subdomain: "user" }).valid?).to eq true
-    expect(Entry.new({ subdomain: "www" }).valid?).to eq false
-    expect(Entry.new({ subdomain: "blog" }).valid?).to eq false
+  it &quot;exclusionのテスト&quot; do
+    expect(Entry.new({ subdomain: &quot;user&quot; }).valid?).to eq true
+    expect(Entry.new({ subdomain: &quot;www&quot; }).valid?).to eq false
+    expect(Entry.new({ subdomain: &quot;blog&quot; }).valid?).to eq false
   end
 end
 ```
@@ -304,17 +304,17 @@ inで指定したリストに該当するのが入るとバリデーションと
 
 
 ```rb
-require "rails_helper"
+require &quot;rails_helper&quot;
 
-class Entry < ActiveRecord::Base
+class Entry &lt; ActiveRecord::Base
   validates :subdomain, inclusion: { in: %w(www blog) }
 end
 
 describe Entry do
-  it "inclusionのテスト" do
-    expect(Entry.new({ subdomain: "www" }).valid?).to eq true
-    expect(Entry.new({ subdomain: "blog" }).valid?).to eq true
-    expect(Entry.new({ subdomain: "user" }).valid?).to eq false
+  it &quot;inclusionのテスト&quot; do
+    expect(Entry.new({ subdomain: &quot;www&quot; }).valid?).to eq true
+    expect(Entry.new({ subdomain: &quot;blog&quot; }).valid?).to eq true
+    expect(Entry.new({ subdomain: &quot;user&quot; }).valid?).to eq false
   end
 end
 ```
@@ -330,17 +330,17 @@ inで指定してあるのみ許容される。
 
 
 ```rb
-require "rails_helper"
+require &quot;rails_helper&quot;
 
-class Entry < ActiveRecord::Base
+class Entry &lt; ActiveRecord::Base
   validates :postal_code, format: { with: /\A[\d]{3}\-[\d]{4}\z/ }
 end
 
 describe Entry do
-  it "formatのテスト" do
-    expect(Entry.new({ postal_code: "123-4567" }).valid?).to eq true
+  it &quot;formatのテスト&quot; do
+    expect(Entry.new({ postal_code: &quot;123-4567&quot; }).valid?).to eq true
 
-    entry = Entry.new({ postal_code: "123-456a" })
+    entry = Entry.new({ postal_code: &quot;123-456a&quot; })
     expect(entry.errors).to be_empty
     expect(entry.valid?).to eq false
 
@@ -352,7 +352,7 @@ describe Entry do
 
     message = messages.first
     expect(message).not_to be_nil
-    expect(message).to eq([:postal_code, ["is invalid"]])
+    expect(message).to eq([:postal_code, [&quot;is invalid&quot;]])
   end
 end
 ```
@@ -378,7 +378,7 @@ end
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/08/jaxrs-16-paramconverter.html">JAX-RSをやってみる (16) - ParamConverter -</a>
                 </h3>
-                参考: <http://backpaper0.github.io/2013/07/17/jaxrs_parameter.html>
+                参考: &lt;http://backpaper0.github.io/2013/07/17/jaxrs_parameter.html&gt;
               </div>
             </div>
             <div id="ec07acf1f849673807e128d015b6c452125d1c6a" class="card m-4 mb-5">
@@ -387,7 +387,7 @@ end
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/08/activerecord-polymorphic-association.html">ActiveRecordのpolymorphic</a>
                 </h3>
-                公式ドキュメント(Guide): <http://guides.rubyonrails.org/association_basics.html#polymorphic-associations>
+                公式ドキュメント(Guide): &lt;http://guides.rubyonrails.org/association_basics.html#polymorphic-associations&gt;
               </div>
             </div>
             <div id="d37f3ce226a8df1e86f753ff617a634e3dfb009b" class="card m-4 mb-5">
@@ -405,7 +405,7 @@ end
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/08/activerecord-optimistic-locking.html">ActiveRecord Optimistic Locking</a>
                 </h3>
-                参考: <http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html>
+                参考: &lt;http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html&gt;
               </div>
             </div>
             <div id="65129dd2a2a3118c0b1152f23b71493d16701b20" class="card m-4 mb-5">
@@ -425,6 +425,7 @@ end
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
+  <li class="recent-post"><a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a></li>
   <li class="recent-post"><a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
@@ -434,7 +435,6 @@ end
   <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
   <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
-  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
 </ul>
 
           </div>
@@ -515,7 +515,7 @@ end
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
   <li>
-    <a href="/archives/category/react-dot-js">React.js (10)</a>
+    <a href="/archives/category/react-dot-js">React.js (11)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -533,10 +533,10 @@ end
     <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
   <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
+    <a href="/archives/category/typescript">TypeScript (5)</a>
   </li>
   <li>
-    <a href="/archives/category/typescript">TypeScript (4)</a>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
   </li>
   <li>
     <a href="/archives/category/webpack">webpack (2)</a>

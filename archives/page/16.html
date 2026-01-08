@@ -48,6 +48,15 @@
       <div class="row g-0">
         <div class="col col-lg-8">
           <div id="content">
+            <div id="9e3eacbe980078e7258177b86c8e45f01308dc5a" class="card m-4 mb-5">
+              <img class="card-img-top" loading="lazy" src="/images/2014/07/201407010050.jpg"" />
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a name="article-link" href="/2014/07/gradle-android-build-system-jacoco-code-coverage.html">gradle android build systemでjacoco</a>
+                </h3>
+                参考: &lt;http://ksoichiro.blogspot.jp/2014/05/androidgradle-jacoco.html&gt;
+              </div>
+            </div>
             <div id="3db1c7343ca386de3d8257fa2a44b7351c06d3ac" class="card m-4 mb-5">
               <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
               <div class="card-body">
@@ -63,7 +72,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-12-mvc.html">JAX-RSをやってみる (12) - MVC -</a>
                 </h3>
-                公式ドキュメント: <https://jersey.java.net/documentation/latest/user-guide.html#mvc>
+                公式ドキュメント: &lt;https://jersey.java.net/documentation/latest/user-guide.html#mvc&gt;
               </div>
             </div>
             <div id="836bf60f05f63346689faa21c65be9c87920efa1" class="card m-4 mb-5">
@@ -72,7 +81,7 @@
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-11-server-sent-events.html">JAX-RSをやってみる (11) - Server Sent Events -</a>
                 </h3>
-                公式ドキュメント: <https://jersey.java.net/documentation/latest/user-guide.html#sse>
+                公式ドキュメント: &lt;https://jersey.java.net/documentation/latest/user-guide.html#sse&gt;
 
 
 Server Sent Eventsにも対応している模様。んまぁドキュメントに書いてる通りにjersey-media-sseなライブラリを参照をすればAutoDiscoverableとかそれによりSseFeatureが作用してServer Sent Eventsなのを利用出来るようになる感じかと
@@ -96,10 +105,10 @@ import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
-    @Path("events")
+    @Path(&quot;events&quot;)
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     public EventOutput getServerSentEvents() {
@@ -110,8 +119,8 @@ public class Home {
             public void run() {
                 try {
                     OutboundEvent.Builder builder = new OutboundEvent.Builder();
-                    builder.name("sample_event");
-                    builder.data(String.class, "hoge");
+                    builder.name(&quot;sample_event&quot;);
+                    builder.data(String.class, &quot;hoge&quot;);
 
                     final OutboundEvent event = builder.build();
                     output.write(event);
@@ -168,9 +177,9 @@ public class HomeTest extends JerseyTest {
     @Test
     public void test_index() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final List<String> data = new ArrayList<String>(1);
+        final List&lt;String&gt; data = new ArrayList&lt;String&gt;(1);
 
-        EventSource es = EventSource.target(target("/sample/events")).build();
+        EventSource es = EventSource.target(target(&quot;/sample/events&quot;)).build();
         assertThat(es, notNullValue());
 
         es.register(
@@ -185,20 +194,20 @@ public class HomeTest extends JerseyTest {
                 }
             },
             // ここで起きないイベント名を指定するとテストはタイムアウトによりずっこける
-            "sample_event"
+            &quot;sample_event&quot;
         );
         es.open();
         latch.await(3, TimeUnit.SECONDS);
         es.close();
 
         assertThat(data, hasSize(1));
-        assertThat(data, hasItem("hoge"));
+        assertThat(data, hasItem(&quot;hoge&quot;));
     }
 }
 ```
 
 
-てな感じでEventSourceクラスなりEventListenerなりを使ってテストする事が出来る模様で。<https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java>とかにもあるのでそれ参考にすれば良いのではと
+てな感じでEventSourceクラスなりEventListenerなりを使ってテストする事が出来る模様で。&lt;https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java&gt;とかにもあるのでそれ参考にすれば良いのではと
 
 
 #### SseBroadcasterを使う
@@ -208,34 +217,34 @@ public class HomeTest extends JerseyTest {
 
 
 ```html
-<html>
-  <head>
-    <script src="jquery.js"></script>
-  </head>
-  <body>
-    <input type="text" id="message" />
-    <button onclick="send(document.querySelector("#message").value)">send</button>
-    <hr />
-    <div id="messages"></div>
-    <script>
-var messages = document.querySelector("#messages");
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src=&quot;jquery.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;input type=&quot;text&quot; id=&quot;message&quot; /&gt;
+    &lt;button onclick=&quot;send(document.querySelector(&quot;#message&quot;).value)&quot;&gt;send&lt;/button&gt;
+    &lt;hr /&gt;
+    &lt;div id=&quot;messages&quot;&gt;&lt;/div&gt;
+    &lt;script&gt;
+var messages = document.querySelector(&quot;#messages&quot;);
 
-var es = new EventSource("/jaxrs/resources/sample/events");
-es.addEventListener("sample_event", function(e) {
+var es = new EventSource(&quot;/jaxrs/resources/sample/events&quot;);
+es.addEventListener(&quot;sample_event&quot;, function(e) {
   console.log(e);
 
-  var elm = document.createElement("div");
+  var elm = document.createElement(&quot;div&quot;);
   elm.innerText = e.data;
 
   messages.appendChild(elm);
 }, false);
 
 function send(message) {
-  $.post("/jaxrs/resources/sample/push", { message: message });
+  $.post(&quot;/jaxrs/resources/sample/push&quot;, { message: message });
 }
-    </script>
-  </body>
-</html>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
 ```
 
 
@@ -261,12 +270,12 @@ import org.glassfish.jersey.media.sse.SseBroadcaster;
 import org.glassfish.jersey.media.sse.SseFeature;
 
 @Singleton
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     private final SseBroadcaster broadcaster = new SseBroadcaster();
 
-    @Path("events")
+    @Path(&quot;events&quot;)
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     public EventOutput getServerSentEvents() {
@@ -276,12 +285,12 @@ public class Home {
         return output;
     }
 
-    @Path("push")
+    @Path(&quot;push&quot;)
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response push(@FormParam("message") String message) {
+    public Response push(@FormParam(&quot;message&quot;) String message) {
         OutboundEvent event = new OutboundEvent.Builder()
-            .name("sample_event")
+            .name(&quot;sample_event&quot;)
             .data(String.class, message)
             .build();
 
@@ -332,9 +341,9 @@ public class HomeTest extends JerseyTest {
     @Test
     public void test_index() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
-        final List<String> data = new ArrayList<String>(1);
+        final List&lt;String&gt; data = new ArrayList&lt;String&gt;(1);
 
-        EventSource es = EventSource.target(target("/sample/events")).build();
+        EventSource es = EventSource.target(target(&quot;/sample/events&quot;)).build();
         assertThat(es, notNullValue());
 
         es.register(
@@ -348,16 +357,16 @@ public class HomeTest extends JerseyTest {
                     }
                 }
             },
-            "sample_event"
+            &quot;sample_event&quot;
         );
         es.open();
 
         // 送るデータを準備
         Form form = new Form();
-        form.param("message", "hoge");
+        form.param(&quot;message&quot;, &quot;hoge&quot;);
 
         // データを送信。んでステータスが正常に返ってくるかをテスト
-        Response response = target("/sample/push").request().post(Entity.form(form));
+        Response response = target(&quot;/sample/push&quot;).request().post(Entity.form(form));
         assertThat(response, notNullValue());
         assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
 
@@ -368,7 +377,7 @@ public class HomeTest extends JerseyTest {
 
         // その後にデータを検証
         assertThat(data, hasSize(1));
-        assertThat(data, hasItem("hoge"));
+        assertThat(data, hasItem(&quot;hoge&quot;));
     }
 }
 ```
@@ -383,7 +392,7 @@ public class HomeTest extends JerseyTest {
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-10-asyncresponse.html">JAX-RSをやってみる (10) - AsyncResponse -</a>
                 </h3>
-                公式ドキュメント: <https://jersey.java.net/documentation/latest/user-guide.html#async>
+                公式ドキュメント: &lt;https://jersey.java.net/documentation/latest/user-guide.html#async&gt;
 
 
 例えば、Threadでなんか非同期に処理するような場合にレスポンスを返す場合にはAsyncResponseを使えば良いとの事な模様で、他にもチャンクレスポンスを出す機能のChunkedOutputを利用する方法でも可能な模様
@@ -404,7 +413,7 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.CompletionCallback;
 import javax.ws.rs.container.Suspended;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     @GET
@@ -428,7 +437,7 @@ public class Home {
                 }
 
                 // 引数にはThrowableも指定出来る。その場合には500エラーになる模様
-                asyncResponse.resume("hoge");
+                asyncResponse.resume(&quot;hoge&quot;);
             }
         }.start();
     }
@@ -467,14 +476,14 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_indexAsync() throws ExecutionException, InterruptedException {
-        Future<Response> entityFuture = target("/sample")
+        Future&lt;Response&gt; entityFuture = target(&quot;/sample&quot;)
             .request()
             .async()
             .get();
 
         Response response = entityFuture.get();
         assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("hoge"));
+        assertThat(response.readEntity(String.class), is(&quot;hoge&quot;));
     }
 }
 ```
@@ -496,20 +505,20 @@ import javax.ws.rs.Path;
 
 import org.glassfish.jersey.server.ChunkedOutput;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     //private static Logger logger = LoggerFactory.getLogger(Home.class);
 
     @GET
-    public ChunkedOutput<String> indexChunked() {
-        final ChunkedOutput<String> output = new ChunkedOutput<String>(String.class);
+    public ChunkedOutput&lt;String&gt; indexChunked() {
+        final ChunkedOutput&lt;String&gt; output = new ChunkedOutput&lt;String&gt;(String.class);
 
         new Thread() {
             @Override
             public void run() {
                 try {
-                    char[] s = new char[] { "h", "o", "g", "e" };
+                    char[] s = new char[] { &quot;h&quot;, &quot;o&quot;, &quot;g&quot;, &quot;e&quot; };
 
                     for (char c : s) {
                         output.write(String.valueOf(c));
@@ -571,7 +580,7 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_indexAsync() throws ExecutionException, InterruptedException {
-        Future<Response> entityFuture = target("/sample")
+        Future&lt;Response&gt; entityFuture = target(&quot;/sample&quot;)
             .request()
             .async()
             .get();
@@ -579,8 +588,8 @@ public class HomeTest extends JerseyTest {
         Response response = entityFuture.get();
         assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
 
-        ChunkedInput<String> a = response.readEntity(new GenericType<ChunkedInput<String>>() {});
-        assertThat(a.read(), is("hoge"));
+        ChunkedInput&lt;String&gt; a = response.readEntity(new GenericType&lt;ChunkedInput&lt;String&gt;&gt;() {});
+        assertThat(a.read(), is(&quot;hoge&quot;));
     }
 }
 ```
@@ -598,7 +607,7 @@ public class HomeTest extends JerseyTest {
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-9-container-filters.html">JAX-RSをやってみる (9) - Container Filters -</a>
                 </h3>
-                公式ドキュメント: <https://jersey.java.net/documentation/latest/user-guide.html#d0e8119>
+                公式ドキュメント: &lt;https://jersey.java.net/documentation/latest/user-guide.html#d0e8119&gt;
               </div>
             </div>
             <div id="51dc372cb931806d8ece37f69df614fa52c73125" class="card m-4 mb-5">
@@ -607,7 +616,7 @@ public class HomeTest extends JerseyTest {
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-8-dynamicfeature.html">JAX-RSをやってみる (8)  - DynamicFeature -</a>
                 </h3>
-                公式ドキュメント先: <https://jersey.java.net/documentation/latest/user-guide.html#d0e8531>
+                公式ドキュメント先: &lt;https://jersey.java.net/documentation/latest/user-guide.html#d0e8531&gt;
               </div>
             </div>
             <div id="f75ffd638aecedd0167d499d939a7490712f8544" class="card m-4 mb-5">
@@ -616,7 +625,7 @@ public class HomeTest extends JerseyTest {
                 <h3 class="card-title">
                   <a name="article-link" href="/2014/06/jaxrs-7-reader-writer-interceptor.html">JAX-RSをやってみる (7) - Reader &#038; Writer interceptor -</a>
                 </h3>
-                公式ドキュメント先: <https://jersey.java.net/documentation/latest/user-guide.html#filters-and-interceptors>
+                公式ドキュメント先: &lt;https://jersey.java.net/documentation/latest/user-guide.html#filters-and-interceptors&gt;
               </div>
             </div>
             <div id="7d2c57c1fd286885a6e41bba7cef3f07f5231a12" class="card m-4 mb-5">
@@ -649,7 +658,7 @@ import javax.ws.rs.ext.Provider;
 
 //import static javax.ws.rs.core.MediaType.*;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     @GET
@@ -686,7 +695,7 @@ public class HomeTest extends JerseyTest {
 
     @Test
     public void test_index() {
-        Response response = target("/sample").request().get();
+        Response response = target(&quot;/sample&quot;).request().get();
         assertThat(response, notNullValue());
         assertThat(response.getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
     }
@@ -709,7 +718,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-@Path("/sample")
+@Path(&quot;/sample&quot;)
 public class Home {
 
     @GET
@@ -722,7 +731,7 @@ public class Home {
 
     // @Providerするか自明的にregisterしておけば良い
     @Provider
-    public static class SampleExceptionMapper implements ExceptionMapper<SampleException> {
+    public static class SampleExceptionMapper implements ExceptionMapper&lt;SampleException&gt; {
         @Override
         public Response toResponse(SampleException exception) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -744,207 +753,6 @@ public class Home {
                 んまぁJAX-RSの機能っていうわけでもないと思うのですが、Java EEな@Injectを使ってDependency Injectionするっていうだけな事
               </div>
             </div>
-            <div id="d28bf7a5bd91ef8365830eb8249767c47291847a" class="card m-4 mb-5">
-              <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
-              <div class="card-body">
-                <h3 class="card-title">
-                  <a name="article-link" href="/2014/06/jaxrs-4-messagebodyreader.html">JAX-RSをやってみる (4) - MessageBodyReader -</a>
-                </h3>
-                前回の「[JAX-RSをやってみる (3) – AutoDiscoverable -][1]」とかだと
-
-
-```java
-package sample.controller;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
-import sample.bean.SampleBean;
-import static javax.ws.rs.core.MediaType.*;
-
-@Path("/sample")
-public class Home {
-
-    @Path("save")
-    @POST
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
-    public SampleBean save(SampleBean bean) {
-        return bean;
-    }
-}
-```
-
-
-なんていうので
-
-
-```java
-package sample.controller;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-
-import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Test;
-
-import sample.SampleApplication;
-import sample.bean.SampleBean;
-
-import static javax.ws.rs.core.MediaType.*;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
-public class HomeTest extends JerseyTest {
-
-    @Override
-    protected Application configure() {
-        return new SampleApplication();
-    }
-
-    @Test
-    public void test_save() {
-        Entity<SampleBean> entity = Entity.entity(
-            new SampleBean("hoge"),
-            APPLICATION_JSON
-        );
-
-        SampleBean response = target("/sample/save").request().post(entity, SampleBean.class);
-        assertThat(response, notNullValue());
-    }
-}
-```
-
-
-なんていうテストをやってみると「not found MessageBodyReader」なんていうエラーになるわけで。もちろん前回のはMessageBodyWriterは実装してあるけど、MessageBodyReaderが実装されてないので。っていう事でMessageBodyReaderを実装してみた
-
-
-
-
-
-#### GsonReaderProvider.java
-
-
-```java
-package sample.provider;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
-import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-@Singleton
-@Consumes(MediaType.APPLICATION_JSON)
-public class GsonReaderProvider implements MessageBodyReader<Object> {
-
-    private Gson gson = new GsonBuilder().create();
-
-    @Override
-    public boolean isReadable(Class<?> type, Type genericType,
-        Annotation[] annotations, MediaType mediaType) {
-
-        return true;
-    }
-
-    @Override
-    public Object readFrom(Class<Object> type, Type genericType,
-        Annotation[] annotations, MediaType mediaType,
-        MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
-        throws IOException, WebApplicationException {
-
-        Object value = null;
-
-        try (Reader reader = new InputStreamReader(entityStream)) {
-            value = gson.fromJson(reader, genericType);
-        }
-
-        return value;
-    }
-}
-```
-
-
-んまぁMessageBodyReaderを実装するだけ。んでもって前回のSampleFeatureで
-
-
-```java
-package sample.internal;
-
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
-
-import org.glassfish.jersey.CommonProperties;
-import org.glassfish.jersey.internal.util.PropertiesHelper;
-
-import sample.provider.GsonReaderProvider;
-import sample.provider.GsonWriterProvider;
-import static org.glassfish.jersey.internal.InternalProperties.JSON_FEATURE;
-
-public class SampleFeature implements Feature {
-
-    private static final String SAMPLE_JSON_FEATURE = SampleFeature.class.getSimpleName();
-
-    @Override
-    public boolean configure(final FeatureContext context) {
-        final Configuration config = context.getConfiguration();
-        final String jsonFeature = CommonProperties.getValue(
-            config.getProperties(),
-            config.getRuntimeType(),
-            JSON_FEATURE,
-            null,
-            String.class
-        );
-
-        if (jsonFeature != null) {
-            return false;
-        }
-
-        context.property(
-            PropertiesHelper.getPropertyNameForRuntime(JSON_FEATURE, config.getRuntimeType()),
-            SAMPLE_JSON_FEATURE
-        );
-
-        if (!config.isRegistered(GsonWriterProvider.class)) {
-            context.register(GsonWriterProvider.class, MessageBodyWriter.class);
-        }
-
-        // 追加
-        if (!config.isRegistered(GsonReaderProvider.class)) {
-            context.register(GsonReaderProvider.class, MessageBodyReader.class);
-        }
-
-        return true;
-    }
-}
-```
-
-
-な感じでGsonReaderProviderをregisterしておく。あとは上記で書いてるテストをそのまま実行してテストがずっこけなければオッケー
-
-
-っていう感じでgsonを使ってJAX-RSなレスポンスをエンコードしたり、JSONデータなリクエストをデコードしたり等な件はひとまずこれにて終了
-
-
- [1]: /jaxrs-3-autodiscoverable.html
-              </div>
-            </div>
             <div class="my-pagination my-5">
                 <a href="/archives/page/15.html" class="float-start box-link">Prev</a>
               <a href="/archives/page/17.html" class="float-end box-link">Next</a>
@@ -955,6 +763,7 @@ public class SampleFeature implements Feature {
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
+  <li class="recent-post"><a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a></li>
   <li class="recent-post"><a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
@@ -964,7 +773,6 @@ public class SampleFeature implements Feature {
   <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
   <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
-  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
 </ul>
 
           </div>
@@ -1045,7 +853,7 @@ public class SampleFeature implements Feature {
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
   <li>
-    <a href="/archives/category/react-dot-js">React.js (10)</a>
+    <a href="/archives/category/react-dot-js">React.js (11)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -1063,10 +871,10 @@ public class SampleFeature implements Feature {
     <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
   <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
+    <a href="/archives/category/typescript">TypeScript (5)</a>
   </li>
   <li>
-    <a href="/archives/category/typescript">TypeScript (4)</a>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
   </li>
   <li>
     <a href="/archives/category/webpack">webpack (2)</a>

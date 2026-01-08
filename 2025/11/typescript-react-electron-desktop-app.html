@@ -120,49 +120,49 @@
   },
   &quot;include&quot;: [&quot;src/**/*&quot;]
 }
-</code></pre><p><mark>types</mark>でnodeとelectronの型定義を有効にしておく。あとは省略</p><h4>vite.config.js</h4><pre class="line-numbers"><code class="language-js">import { resolve } from &apos;node:path&apos;
-import { defineConfig } from &apos;vite&apos;
-import electron from &apos;vite-plugin-electron&apos;;
-import react from &apos;@vitejs/plugin-react-swc&apos;;
+</code></pre><p><mark>types</mark>でnodeとelectronの型定義を有効にしておく。あとは省略</p><h4>vite.config.js</h4><pre class="line-numbers"><code class="language-js">import { resolve } from &#39;node:path&#39;
+import { defineConfig } from &#39;vite&#39;
+import electron from &#39;vite-plugin-electron&#39;;
+import react from &#39;@vitejs/plugin-react-swc&#39;;
 
 export default defineConfig({
-  base: &apos;./&apos;,
+  base: &#39;./&#39;,
   plugins: [
     react(),
     electron([
       {
-        entry: &apos;src/main/main.ts&apos;,
+        entry: &#39;src/main/main.ts&#39;,
         vite: {
           build: {
-            outDir: &apos;dist&apos;
+            outDir: &#39;dist&#39;
           }
         }
       },
       {
-        entry: &apos;src/ipc/preload.ts&apos;,
+        entry: &#39;src/ipc/preload.ts&#39;,
         vite: {
           build: {
-            outDir: &apos;dist&apos;
+            outDir: &#39;dist&#39;
           }
         }
       }
     ])
   ],
   build: {
-    minify: &apos;esbuild&apos;,
-    outDir: &apos;./dist&apos;,
+    minify: &#39;esbuild&#39;,
+    outDir: &#39;./dist&#39;,
     emptyOutDir: true,
     copyPublicDir: false,
     rollupOptions: {
       onwarn(warning, warn) {
-        if (warning.code === &apos;MODULE_LEVEL_DIRECTIVE&apos;) {
+        if (warning.code === &#39;MODULE_LEVEL_DIRECTIVE&#39;) {
           return;
         }
 
         warn(warning);
       },
       input: {
-        index: resolve(__dirname, &apos;index.html&apos;),
+        index: resolve(__dirname, &#39;index.html&#39;),
       }
     },
   },
@@ -187,14 +187,14 @@ export default defineConfig({
     └── index.tsx
 </code></pre><h4>作るアプリについて</h4><p>ざっくりとElectronで画面を作ってそれをReactでレンダリング。でReactでレンダリングする際にReact側からElectronのプロセス側にデータを要求してElectron側からデータを返す。でそれを描画するだけ</p>
 <div class="note"><i class="fa-solid fa-circle-exclamation"></i>ちなみに逆(Electron側からReact側にデータをプッシュ)も可能なのでそれは余談で書く</div>
-<h4>src/main/main.ts</h4><p>Electronアプリケーションのエントリーポイントファイル</p><pre class="line-numbers"><code class="language-typescript">import { app, BrowserWindow, ipcMain } from &apos;electron&apos;;
-import * as path from &apos;node:path&apos;;
+<h4>src/main/main.ts</h4><p>Electronアプリケーションのエントリーポイントファイル</p><pre class="line-numbers"><code class="language-typescript">import { app, BrowserWindow, ipcMain } from &#39;electron&#39;;
+import * as path from &#39;node:path&#39;;
 
 app.disableHardwareAcceleration();
 
 const setupIPCListener = (): void =&gt; {
-  ipcMain.handle(&apos;file:request-file&apos;, async (event) =&gt; {
-    return &apos;/path/to/test/test.jpg&apos;;
+  ipcMain.handle(&#39;file:request-file&#39;, async (event) =&gt; {
+    return &#39;/path/to/test/test.jpg&#39;;
   });
 };
 
@@ -204,13 +204,13 @@ const createWindow = async (): Promise&lt;BrowserWindow&gt; =&gt; {
     autoHideMenuBar: true,
     center: true,
     webPreferences: {
-      preload: path.resolve(__dirname, &apos;preload.js&apos;),
+      preload: path.resolve(__dirname, &#39;preload.js&#39;),
       contextIsolation: true,
       nodeIntegration: false,
       webSecurity: true,
     },
   });
-  await win.loadFile(path.resolve(__dirname, &apos;index.html&apos;));
+  await win.loadFile(path.resolve(__dirname, &#39;index.html&#39;));
 
   return win;
 };
@@ -219,9 +219,9 @@ app.whenReady().then(async () =&gt; {
   setupIPCListener();
   const win = await createWindow();
 }).catch(() =&gt; app.quit());
-</code></pre><p><mark>file:request-file</mark>っていうのはReact側からElectronプロセス側にデータを要求する際に使うチャネル名</p><p>でElectronアプリプロセス側とReactでレンダリングしている側と繋げるためのipcスクリプトが必要なのでそれをipc/preload.tsに定義する</p><h4>src/ipc/preload.ts</h4><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &apos;electron&apos;;
+</code></pre><p><mark>file:request-file</mark>っていうのはReact側からElectronプロセス側にデータを要求する際に使うチャネル名</p><p>でElectronアプリプロセス側とReactでレンダリングしている側と繋げるためのipcスクリプトが必要なのでそれをipc/preload.tsに定義する</p><h4>src/ipc/preload.ts</h4><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &#39;electron&#39;;
 
-contextBridge.exposeInMainWorld(&apos;electronAPI&apos;, {
+contextBridge.exposeInMainWorld(&#39;electronAPI&#39;, {
   requestFile: (): Promise&lt;string&gt; =&gt; {
     return ipcRenderer.invoke(&quot;file:request-file&quot;);
   }
@@ -237,7 +237,7 @@ declare global {
 }
 
 export {}
-</code></pre><h4>src/renderer/app.tsx</h4><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &apos;react&apos;;
+</code></pre><h4>src/renderer/app.tsx</h4><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &#39;react&#39;;
 
 const App = (): React.JSX.Element =&gt; {
   const [ file, setFile ] = useState&lt;string | null&gt;(null);
@@ -260,11 +260,11 @@ const App = (): React.JSX.Element =&gt; {
 };
 
 export default App;
-</code></pre><p>終わり。これでビルドするとReact側で<mark>window.electronAPI.requestFile();</mark>でElectronメインプロセスにデータを要求する、そしてメインプロセス側のipcMain.handleが対応するチャネルで処理されて値がReact側に返されそれが描画される(今回はただ画像を表示しているだけなのでそれが表示されるだけ)</p><p>んまあという感じでElectronでデスクトップアプリを作ってそのUIとかをReactとかで作ったりすることもできるよ〜ってことで終わり</p><h4>余談１</h4><p>今回のは紹介用に一部を切り出して作ったやつなので切り出してないやつは<a href="https://github.com/kinjouj/typescript-react-electron-photoviewer" target="_blank" rel="noopener noreferrer">https://github.com/kinjouj/typescript-react-electron-photoviewer</a>にあります</p><h4>余談２: ElectronメインプロセスからReactレンダラープロセスに値をぶんなげる方法</h4><p>上記で書いた方法はReact側からメインプロセス側にデータ要求リスエストを出してそれを受け取るような形でやったがメインプロセス側からReactなどのレンダリング側にデータを受け取らせるようなこともできる。なのでそういう方法を取りたい場合は以下のように修正する</p><h5>src/ipc/preload.ts</h5><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &apos;electron&apos;;
+</code></pre><p>終わり。これでビルドするとReact側で<mark>window.electronAPI.requestFile();</mark>でElectronメインプロセスにデータを要求する、そしてメインプロセス側のipcMain.handleが対応するチャネルで処理されて値がReact側に返されそれが描画される(今回はただ画像を表示しているだけなのでそれが表示されるだけ)</p><p>んまあという感じでElectronでデスクトップアプリを作ってそのUIとかをReactとかで作ったりすることもできるよ〜ってことで終わり</p><h4>余談１</h4><p>今回のは紹介用に一部を切り出して作ったやつなので切り出してないやつは<a href="https://github.com/kinjouj/typescript-react-electron-photoviewer" target="_blank" rel="noopener noreferrer">https://github.com/kinjouj/typescript-react-electron-photoviewer</a>にあります</p><h4>余談２: ElectronメインプロセスからReactレンダラープロセスに値をぶんなげる方法</h4><p>上記で書いた方法はReact側からメインプロセス側にデータ要求リスエストを出してそれを受け取るような形でやったがメインプロセス側からReactなどのレンダリング側にデータを受け取らせるようなこともできる。なのでそういう方法を取りたい場合は以下のように修正する</p><h5>src/ipc/preload.ts</h5><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &#39;electron&#39;;
 
-contextBridge.exposeInMainWorld(&apos;electronAPI&apos;, {
+contextBridge.exposeInMainWorld(&#39;electronAPI&#39;, {
   onReceived: (callback: (data: string) =&gt; void): void =&gt; {
-    ipcRenderer.on(&apos;file:request-file&apos;, (event, data: string) =&gt; callback(data));
+    ipcRenderer.on(&#39;file:request-file&#39;, (event, data: string) =&gt; callback(data));
   }
 });
 </code></pre><p>んまあReact側からElectronメインプロセスから送られてくるデータを受信するAPIを定義</p><h5>src/renderer/electron.d.ts</h5><pre class="line-numbers"><code class="language-typescript">type ElectronAPI = {
@@ -278,7 +278,7 @@ declare global {
 }
 
 export {}
-</code></pre><p>単純に<mark>ElectronAPI</mark>側の定義を設定</p><h5>src/renderer/app.tsx</h5><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &apos;react&apos;;
+</code></pre><p>単純に<mark>ElectronAPI</mark>側の定義を設定</p><h5>src/renderer/app.tsx</h5><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &#39;react&#39;;
 
 const App = (): React.JSX.Element =&gt; {
   const [ file, setFile ] = useState&lt;string | null&gt;(null);
@@ -302,7 +302,7 @@ export default App;
 </code></pre><p>定義した<mark>onReceived</mark>を使ってデータを受信してそれを描画する</p><h5>src/main/main.ts</h5><pre class="line-numbers"><code class="language-typescript">app.whenReady().then(async () =&gt; {
   const win = await createWindow();
   setTimeout(() =&gt; {
-    win.webContents.send(&apos;file:request-file&apos;, &apos;/path/to/test/test.jpg&apos;);
+    win.webContents.send(&#39;file:request-file&#39;, &#39;/path/to/test/test.jpg&#39;);
   }, 3000);
 }).catch(() =&gt; app.quit());
 </code></pre><p><mark>BrowserWindow.webContents.send</mark>を使ってチェネル名でデータを送信。これでElectronアプリ側からReactなどで表示してるレンダラープロセス側でデータを受信したりできるようになる</p>
@@ -322,6 +322,7 @@ export default App;
           <div id="recent_posts">
               <h4>Recent Posts</h4>
               <ul id="recent_posts">
+  <li class="recent-post"><a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a></li>
   <li class="recent-post"><a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a></li>
   <li class="recent-post"><a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a></li>
@@ -331,7 +332,6 @@ export default App;
   <li class="recent-post"><a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a></li>
   <li class="recent-post"><a href="/2025/07/slick.html">slickを使ってみた</a></li>
   <li class="recent-post"><a href="/2025/06/ruby-json-convert-object.html">RubyでのJSONからオブジェクトに変換するっていう話</a></li>
-  <li class="recent-post"><a href="/2025/06/ruby-global-library.html">Globalっていうライブラリを使ってみた</a></li>
 </ul>
 
           </div>
@@ -412,7 +412,7 @@ export default App;
     <a href="/archives/category/node-dot-js">Node.js (17)</a>
   </li>
   <li>
-    <a href="/archives/category/react-dot-js">React.js (10)</a>
+    <a href="/archives/category/react-dot-js">React.js (11)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -430,10 +430,10 @@ export default App;
     <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
   </li>
   <li>
-    <a href="/archives/category/npapi">NPAPI (4)</a>
+    <a href="/archives/category/typescript">TypeScript (5)</a>
   </li>
   <li>
-    <a href="/archives/category/typescript">TypeScript (4)</a>
+    <a href="/archives/category/npapi">NPAPI (4)</a>
   </li>
   <li>
     <a href="/archives/category/webpack">webpack (2)</a>
