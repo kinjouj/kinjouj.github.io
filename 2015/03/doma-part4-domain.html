@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-03-22T00:00:00+09:00">
+                <time datetime="2015-03-22 00:00:00 +0900">
                   <a href="/archives/2015/03">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Sample.java (Entity)", "Name.java", "NameConverter.java", "NameConverterProvider.java"]-->
-                <p>ドキュメント: <a href="http://doma.readthedocs.org/ja/latest/domain" target="_blank" rel="noopener noreferrer">http://doma.readthedocs.org/ja/latest/domain</a></p><p>要はJavaオブジェクト的なのをデータベース上で表現できるようにする、逆も然りみたいな感じ?。まぁコンバーターみたいな所なんじゃないかと。正式な所は公式ドキュメントに書いてるので(ry</p><h4>Sample.java (Entity)</h4><pre class="line-numbers"><code class="language-java">package sample.entity;
+                <!--[&quot;Sample.java (Entity)&quot;, &quot;Name.java&quot;, &quot;NameConverter.java&quot;, &quot;NameConverterProvider.java&quot;]-->
+                <p>ドキュメント: <a href="http://doma.readthedocs.org/ja/latest/domain">http://doma.readthedocs.org/ja/latest/domain</a></p>
+
+<p>要はJavaオブジェクト的なのをデータベース上で表現できるようにする、逆も然りみたいな感じ?。まぁコンバーターみたいな所なんじゃないかと。正式な所は公式ドキュメントに書いてるので(ry</p>
+<h4>Sample.java (Entity)</h4><pre class="line-numbers"><code class="language-java">package sample.entity;
 
 import org.seasar.doma.Entity;
 import org.seasar.doma.GeneratedValue;
@@ -105,7 +109,9 @@ public class Sample {
         this.name = name;
     }
 }
-</code></pre><p>っていうようにsample.domain.NameっていうのをEntityで持つ場合にこれをDBに格納したりDBから取り出す場合にどうするかって所なんですが、そのオブジェクトに@Domainアノテーションで定義すれば良いとのこと</p><h4>Name.java</h4><pre class="line-numbers"><code class="language-java">package sample.domain;
+</code></pre>
+<p>っていうようにsample.domain.NameっていうのをEntityで持つ場合にこれをDBに格納したりDBから取り出す場合にどうするかって所なんですが、そのオブジェクトに@Domainアノテーションで定義すれば良いとのこと</p>
+<h4>Name.java</h4><pre class="line-numbers"><code class="language-java">package sample.domain;
 
 import org.seasar.doma.Domain;
 
@@ -132,7 +138,13 @@ public class Name {
         return new Name(value);
     }
 }
-</code></pre><p>まぁこんだけでEntityとかで使うフィールドとかの型をDBに格納するような場合には@Domainで定義しておけば良いみたいな感じ</p><p>まぁこれが公式ドキュメントでいう内部ドメインっていう所なので、外部ドメインもやってみるのでこのクラスの@Domainアノテーションをコメントしておく</p><h4>NameConverter.java</h4><p>@ExternalDomainアノテーションを付与するのとDomainConverterを実装したクラスを定義する</p><pre class="line-numbers"><code class="language-java">package sample.domain;
+</code></pre>
+<p>まぁこんだけでEntityとかで使うフィールドとかの型をDBに格納するような場合には@Domainで定義しておけば良いみたいな感じ</p>
+
+<p>まぁこれが公式ドキュメントでいう内部ドメインっていう所なので、外部ドメインもやってみるのでこのクラスの@Domainアノテーションをコメントしておく</p>
+<h4>NameConverter.java</h4>
+<p>@ExternalDomainアノテーションを付与するのとDomainConverterを実装したクラスを定義する</p>
+<pre class="line-numbers"><code class="language-java">package sample.domain;
 
 import org.seasar.doma.ExternalDomain;
 import org.seasar.doma.jdbc.domain.DomainConverter;
@@ -149,14 +161,18 @@ public class NameConverter implements DomainConverter&lt;Name, String&gt; {
         return value == null ? null : Name.of(value);
     }
 }
-</code></pre><h4>NameConverterProvider.java</h4><p>DomainConverterを処理するのに必要なのを登録する必要がある模様</p><pre class="line-numbers"><code class="language-java">package sample.domain;
+</code></pre><h4>NameConverterProvider.java</h4>
+<p>DomainConverterを処理するのに必要なのを登録する必要がある模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.domain;
 
 import org.seasar.doma.DomainConverters;
 
 @DomainConverters({ NameConverter.class })
 public class NameConverterProvider {
 }
-</code></pre><p>これだけ作るだけじゃダメで、gradleとかでビルドする際にオプションを指定する必要があるので</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+</code></pre>
+<p>これだけ作るだけじゃダメで、gradleとかでビルドする際にオプションを指定する必要があるので</p>
+<pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 
 processResources.destinationDir = compileJava.destinationDir
 compileJava.dependsOn processResources
@@ -185,7 +201,11 @@ dependencies {
     testCompile &quot;junit:junit:+&quot;
     testCompile &quot;org.hamcrest:hamcrest-all:+&quot;
 }
-</code></pre><p>複数ある場合にはカンマ区切りで指定すれば良いっぽい。詳しくは<a href="http://doma.readthedocs.org/ja/latest/annotation-processing" target="_blank" rel="noopener noreferrer">http://doma.readthedocs.org/ja/latest/annotation-processing</a></p>
+</code></pre>
+<p>複数ある場合にはカンマ区切りで指定すれば良いっぽい。詳しくは<a href="http://doma.readthedocs.org/ja/latest/annotation-processing">http://doma.readthedocs.org/ja/latest/annotation-processing</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -277,7 +297,7 @@ dependencies {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -298,9 +318,6 @@ dependencies {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -413,7 +430,7 @@ dependencies {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -436,20 +453,20 @@ dependencies {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -459,13 +476,15 @@ dependencies {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("ebfdc7c2f6c303acfcce596d605a2c54aabe6336");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -10,295 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="公式ドキュメント: [http://guides.rubyonrails.org/active\_record\_validations.html][1]
-
-
-公式ドキュメントを読みつつ進めてみようかと。ただやたらと長いので何回かに分けて書く予定
-
-
-
-
-
-#### 基本的な使い方
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :name, presence: true
-end
-
-describe Entry do
-  it &quot;(valid?|invalid?)メソッド&quot; do
-    entry = Entry.new
-
-    # valid等を実行する前だとerrosはempty
-    expect(entry.errors).to be_empty
-
-    expect(entry.valid?).to eq false
-    expect(entry.invalid?).to eq true
-
-    # valid等を処理した後だとerrorsには検証エラーが入る
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq([:name, [&quot;can&quot;t be blank&quot;]])
-  end
-end
-```
-
-
-っていうような感じになる。valid等を動かさなくてもsaveやupdate等のメソッドを実行すると検証エラーな場合はfalseが返り、破壊的メソッドとして実行するとActiveRecord::RecordInvalidがスローされる模様
-
-
-っていう感じで、基本的な事は終わり。presence等のValidation Helpersな所を進める
-
-
-#### [presence][2]
-
-
-.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :name, presence: { message: &quot;can`t be empty&quot; }
-end
-
-describe Entry do
-  it &quot;presenceのテスト&quot; do
-    entry = Entry.new
-    expect(entry.save).to eq false
-
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq([:name, [&quot;can`t be empty&quot;]])
-  end
-end
-```
-
-
-っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry
-
-
-#### &lt;a href=&quot;http://guides.rubyonrails.org/active_record_validations.html#acceptance&quot;&gt;acceptance&lt;/a&gt;
-
-
-「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&amp;#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :terms_of_service, acceptance: true
-end
-
-describe Entry do
-  it &quot;acceptanceのテスト&quot; do
-    entry = Entry.new({ terms_of_service: &quot;1&quot; })
-    expect(entry.valid?).to be true
-  end
-
-  it &quot;terms_of_serviceを指定しない場合&quot; do
-    expect(Entry.new.valid?).to eq true
-  end
-end
-```
-
-
-このテストは通る。2つ目のテストでterms\_of\_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので
-
-
-```rb
-class Entry &lt; ActiveRecord::Base
-  validates :terms_of_service, acceptance: true, allow_nil: false
-end
-```
-
-
-とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&amp;#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :terms_of_service, acceptance: { accept: &quot;yes&quot; }, allow_nil: false
-end
-
-describe Entry do
-  it &quot;acceptanceのテスト&quot; do
-    entry = Entry.new({ terms_of_service: &quot;yes&quot; })
-    expect(entry.valid?).to be true
-  end
-
-  it &quot;terms_of_serviceを指定しない場合&quot; do
-    expect(Entry.new.valid?).to eq false
-  end
-end
-```
-
-
-っていうような感じでacceptanceオプションを修正することで&quot;1&amp;#8243;以外で作用させる事も可能
-
-
-んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)
-
-
-#### [confirmation][3]
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :email, confirmation: true
-end
-
-describe Entry do
-  it &quot;confirmationのテスト&quot; do
-    entry = Entry.new({
-      email: &quot;A@example.com&quot;,
-      email_confirmation: &quot;B@example.com&quot;
-    })
-    expect(entry.valid?).to eq false
-
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq [:email_confirmation, [&quot;doesn&quot;t match Email&quot;]]
-  end
-
-  it &quot;email_confirmationを指定しない場合&quot; do
-    entry = Entry.new({ email: &quot;A@example.com&quot; })
-    expect(entry.valid?).to eq true
-  end
-end
-```
-
-
-ってな感じでconfirmation validation helperを使っているのに対して、\_confirmationな仮想的属性の値を比較して同一かをチェック出来る。但しその仮想的属性がnilでは無い場合にのみチェックされる模様なので、2つ目のテストではemail\_confirmationを指定してない為にバリデーションが作用しない為trueが返るような感じかと
-
-
-#### [exclusion][4]
-
-
-指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :subdomain, exclusion: { in: %w(www blog) }
-end
-
-describe Entry do
-  it &quot;exclusionのテスト&quot; do
-    expect(Entry.new({ subdomain: &quot;user&quot; }).valid?).to eq true
-    expect(Entry.new({ subdomain: &quot;www&quot; }).valid?).to eq false
-    expect(Entry.new({ subdomain: &quot;blog&quot; }).valid?).to eq false
-  end
-end
-```
-
-
-inで指定したリストに該当するのが入るとバリデーションとしては不整合という形になる模様。恐らくはnilな場合だと検証が作用しないんかと思われる
-
-
-#### [inclusion][5]
-
-
-上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :subdomain, inclusion: { in: %w(www blog) }
-end
-
-describe Entry do
-  it &quot;inclusionのテスト&quot; do
-    expect(Entry.new({ subdomain: &quot;www&quot; }).valid?).to eq true
-    expect(Entry.new({ subdomain: &quot;blog&quot; }).valid?).to eq true
-    expect(Entry.new({ subdomain: &quot;user&quot; }).valid?).to eq false
-  end
-end
-```
-
-
-inで指定してあるのみ許容される。
-
-
-#### [format][6]
-
-
-正規表現とかで値の検証を行うようなパターンの場合に使う
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :postal_code, format: { with: /\A[\d]{3}\-[\d]{4}\z/ }
-end
-
-describe Entry do
-  it &quot;formatのテスト&quot; do
-    expect(Entry.new({ postal_code: &quot;123-4567&quot; }).valid?).to eq true
-
-    entry = Entry.new({ postal_code: &quot;123-456a&quot; })
-    expect(entry.errors).to be_empty
-    expect(entry.valid?).to eq false
-
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq([:postal_code, [&quot;is invalid&quot;]])
-  end
-end
-```
-
-
-てな感じでwithで指定した正規表現で値をチェック出来る。
-
-
-とりあえず今回は以上。続きは後日
-
-
- [1]: http://guides.rubyonrails.org/active_record_validations.html
- [2]: http://guides.rubyonrails.org/active_record_validations.html#presence
- [3]: http://guides.rubyonrails.org/active_record_validations.html#confirmation
- [4]: http://guides.rubyonrails.org/active_record_validations.html#exclusion
- [5]: http://guides.rubyonrails.org/active_record_validations.html#inclusion
- [6]: http://edgeguides.rubyonrails.org/active_record_validations.html#format" />
+    <meta name="description" content="公式ドキュメント: [http://guides.rubyonrails.org/active\_record\_validations.html][1]" />
     <title>ActiveRecord Validation #1 - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/08/jaxrs-16-paramconverter.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/08/activerecord-validation-2.html" />
@@ -306,6 +18,7 @@ end
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -346,7 +59,7 @@ end
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-08-22T00:00:00+00:00">
+                <time datetime="2014-08-22 00:00:00 +0900">
                   <a href="/archives/2014/08">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -366,8 +79,11 @@ end
                 </span>
               </p>
               <div class="post-content">
-                <!--["基本的な使い方", "[presence][2]", "<a href=\"http://guides.rubyonrails.org/active_record_validations.html#acceptance\">acceptance</a>", "[confirmation][3]", "[exclusion][4]", "[inclusion][5]", "[format][6]"]-->
-                <p>公式ドキュメント: [<a href="http://guides.rubyonrails.org/active\_record\_validations.html][1" target="_blank" rel="noopener noreferrer">http://guides.rubyonrails.org/active\_record\_validations.html][1</a>]</p><p>公式ドキュメントを読みつつ進めてみようかと。ただやたらと長いので何回かに分けて書く予定</p><h4>基本的な使い方</h4><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+                <!--[&quot;基本的な使い方&quot;, &quot;[presence][2]&quot;, &quot;&lt;a href=\&quot;http://guides.rubyonrails.org/active_record_validations.html#acceptance\&quot;&gt;acceptance&lt;/a&gt;&quot;, &quot;[confirmation][3]&quot;, &quot;[exclusion][4]&quot;, &quot;[inclusion][5]&quot;, &quot;[format][6]&quot;]-->
+                <p>公式ドキュメント: [<a href="http://guides.rubyonrails.org/active%5C_record%5C_validations.html%5D%5B1">http://guides.rubyonrails.org/active\_record\_validations.html][1</a>]</p>
+
+<p>公式ドキュメントを読みつつ進めてみようかと。ただやたらと長いので何回かに分けて書く予定</p>
+<h4>基本的な使い方</h4><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :name, presence: true
@@ -395,7 +111,13 @@ describe Entry do
     expect(message).to eq([:name, [&quot;can&quot;t be blank&quot;]])
   end
 end
-</code></pre><p>っていうような感じになる。valid等を動かさなくてもsaveやupdate等のメソッドを実行すると検証エラーな場合はfalseが返り、破壊的メソッドとして実行するとActiveRecord::RecordInvalidがスローされる模様</p><p>っていう感じで、基本的な事は終わり。presence等のValidation Helpersな所を進める</p><h4>[presence][2]</h4><p>.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+</code></pre>
+<p>っていうような感じになる。valid等を動かさなくてもsaveやupdate等のメソッドを実行すると検証エラーな場合はfalseが返り、破壊的メソッドとして実行するとActiveRecord::RecordInvalidがスローされる模様</p>
+
+<p>っていう感じで、基本的な事は終わり。presence等のValidation Helpersな所を進める</p>
+<h4>[presence][2]</h4>
+<p>.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :name, presence: { message: &quot;can`t be empty&quot; }
@@ -417,7 +139,11 @@ describe Entry do
     expect(message).to eq([:name, [&quot;can`t be empty&quot;]])
   end
 end
-</code></pre><p>っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry</p><h4><a href="http://guides.rubyonrails.org/active_record_validations.html#acceptance">acceptance</a></h4><p>「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+</code></pre>
+<p>っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry</p>
+<h4><a href="http://guides.rubyonrails.org/active_record_validations.html#acceptance">acceptance</a></h4>
+<p>「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: true
@@ -433,10 +159,14 @@ describe Entry do
     expect(Entry.new.valid?).to eq true
   end
 end
-</code></pre><p>このテストは通る。2つ目のテストでterms_of_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので</p><pre class="line-numbers"><code class="language-rb">class Entry &lt; ActiveRecord::Base
+</code></pre>
+<p>このテストは通る。2つ目のテストでterms_of_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので</p>
+<pre class="line-numbers"><code class="language-rb">class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: true, allow_nil: false
 end
-</code></pre><p>とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+</code></pre>
+<p>とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :terms_of_service, acceptance: { accept: &quot;yes&quot; }, allow_nil: false
@@ -452,7 +182,11 @@ describe Entry do
     expect(Entry.new.valid?).to eq false
   end
 end
-</code></pre><p>っていうような感じでacceptanceオプションを修正することで&quot;1&#8243;以外で作用させる事も可能</p><p>んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)</p><h4>[confirmation][3]</h4><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+</code></pre>
+<p>っていうような感じでacceptanceオプションを修正することで&quot;1&#8243;以外で作用させる事も可能</p>
+
+<p>んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)</p>
+<h4>[confirmation][3]</h4><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :email, confirmation: true
@@ -482,7 +216,11 @@ describe Entry do
     expect(entry.valid?).to eq true
   end
 end
-</code></pre><p>ってな感じでconfirmation validation helperを使っているのに対して、_confirmationな仮想的属性の値を比較して同一かをチェック出来る。但しその仮想的属性がnilでは無い場合にのみチェックされる模様なので、2つ目のテストではemail_confirmationを指定してない為にバリデーションが作用しない為trueが返るような感じかと</p><h4>[exclusion][4]</h4><p>指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+</code></pre>
+<p>ってな感じでconfirmation validation helperを使っているのに対して、_confirmationな仮想的属性の値を比較して同一かをチェック出来る。但しその仮想的属性がnilでは無い場合にのみチェックされる模様なので、2つ目のテストではemail_confirmationを指定してない為にバリデーションが作用しない為trueが返るような感じかと</p>
+<h4>[exclusion][4]</h4>
+<p>指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :subdomain, exclusion: { in: %w(www blog) }
@@ -495,7 +233,11 @@ describe Entry do
     expect(Entry.new({ subdomain: &quot;blog&quot; }).valid?).to eq false
   end
 end
-</code></pre><p>inで指定したリストに該当するのが入るとバリデーションとしては不整合という形になる模様。恐らくはnilな場合だと検証が作用しないんかと思われる</p><h4>[inclusion][5]</h4><p>上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+</code></pre>
+<p>inで指定したリストに該当するのが入るとバリデーションとしては不整合という形になる模様。恐らくはnilな場合だと検証が作用しないんかと思われる</p>
+<h4>[inclusion][5]</h4>
+<p>上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :subdomain, inclusion: { in: %w(www blog) }
@@ -508,7 +250,11 @@ describe Entry do
     expect(Entry.new({ subdomain: &quot;user&quot; }).valid?).to eq false
   end
 end
-</code></pre><p>inで指定してあるのみ許容される。</p><h4>[format][6]</h4><p>正規表現とかで値の検証を行うようなパターンの場合に使う</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+</code></pre>
+<p>inで指定してあるのみ許容される。</p>
+<h4>[format][6]</h4>
+<p>正規表現とかで値の検証を行うようなパターンの場合に使う</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 class Entry &lt; ActiveRecord::Base
   validates :postal_code, format: { with: /\A[\d]{3}\-[\d]{4}\z/ }
@@ -533,12 +279,20 @@ describe Entry do
     expect(message).to eq([:postal_code, [&quot;is invalid&quot;]])
   end
 end
-</code></pre><p>てな感じでwithで指定した正規表現で値をチェック出来る。</p><p>とりあえず今回は以上。続きは後日</p><p> [1]: <a href="http://guides.rubyonrails.org/active_record_validations.html" target="_blank" rel="noopener noreferrer">http://guides.rubyonrails.org/active_record_validations.html</a>
- [2]: <a href="http://guides.rubyonrails.org/active_record_validations.html#presence" target="_blank" rel="noopener noreferrer">http://guides.rubyonrails.org/active_record_validations.html#presence</a>
- [3]: <a href="http://guides.rubyonrails.org/active_record_validations.html#confirmation" target="_blank" rel="noopener noreferrer">http://guides.rubyonrails.org/active_record_validations.html#confirmation</a>
- [4]: <a href="http://guides.rubyonrails.org/active_record_validations.html#exclusion" target="_blank" rel="noopener noreferrer">http://guides.rubyonrails.org/active_record_validations.html#exclusion</a>
- [5]: <a href="http://guides.rubyonrails.org/active_record_validations.html#inclusion" target="_blank" rel="noopener noreferrer">http://guides.rubyonrails.org/active_record_validations.html#inclusion</a>
- [6]: <a href="http://edgeguides.rubyonrails.org/active_record_validations.html#format" target="_blank" rel="noopener noreferrer">http://edgeguides.rubyonrails.org/active_record_validations.html#format</a></p>
+</code></pre>
+<p>てな感じでwithで指定した正規表現で値をチェック出来る。</p>
+
+<p>とりあえず今回は以上。続きは後日</p>
+
+<p>[1]: <a href="http://guides.rubyonrails.org/active_record_validations.html">http://guides.rubyonrails.org/active_record_validations.html</a><br>
+ [2]: <a href="http://guides.rubyonrails.org/active_record_validations.html#presence">http://guides.rubyonrails.org/active_record_validations.html#presence</a><br>
+ [3]: <a href="http://guides.rubyonrails.org/active_record_validations.html#confirmation">http://guides.rubyonrails.org/active_record_validations.html#confirmation</a><br>
+ [4]: <a href="http://guides.rubyonrails.org/active_record_validations.html#exclusion">http://guides.rubyonrails.org/active_record_validations.html#exclusion</a><br>
+ [5]: <a href="http://guides.rubyonrails.org/active_record_validations.html#inclusion">http://guides.rubyonrails.org/active_record_validations.html#inclusion</a><br>
+ [6]: <a href="http://edgeguides.rubyonrails.org/active_record_validations.html#format">http://edgeguides.rubyonrails.org/active_record_validations.html#format</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -630,7 +384,7 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -651,9 +405,6 @@ end
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -766,7 +517,7 @@ end
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -789,20 +540,20 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -812,13 +563,15 @@ end
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("c66759aa33ec169eb8e1ee288fa31c26934757f2");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="参考: &lt;http://blog.hakutoitoi.com/?p=396&gt;" />
+    <meta name="description" content="参考: &amp;lt;http://blog.hakutoitoi.com/?p=396&amp;gt;" />
     <title>supervisord (4) - eventlistener - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/02/gradle-android-test-plugin-robolectric-testing.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/02/gradle-android-toolkit-robolectric-plugin.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-02-17T00:00:00+00:00">
+                <time datetime="2014-02-17 00:00:00 +0900">
                   <a href="/archives/2014/02">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -78,8 +79,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["余談"]-->
-                <p>参考: <a href="http://blog.hakutoitoi.com/?p=396" target="_blank" rel="noopener noreferrer">http://blog.hakutoitoi.com/?p=396</a></p><p>supervisordで管理しているプロセスが落ちたりだとか(規定されている?)一定時間毎に何かコマンドを動かしたい時とかに使える模様</p><pre class="line-numbers"><code class="language-ini">[inet_http_server]
+                <!--[&quot;余談&quot;]-->
+                <p>参考: <a href="http://blog.hakutoitoi.com/?p=396">http://blog.hakutoitoi.com/?p=396</a></p>
+
+<p>supervisordで管理しているプロセスが落ちたりだとか(規定されている?)一定時間毎に何かコマンドを動かしたい時とかに使える模様</p>
+<pre class="line-numbers"><code class="language-ini">[inet_http_server]
 port=127.0.0.1:9001
 
 [unix_http_server]
@@ -99,13 +103,19 @@ events=PROCESS_STATE_STOPPED,PROCESS_STATE_EXITED,TICK_5
 [program:redmine]
 environment=BUNDLE_GEMFILE=/opt/www/sample/Gemfile
 command=/home/kinjouj/.anyenv/envs/rbenv/shims/bundle exec unicorn_rails -E production -c /opt/www/sample/config/unicorn.rb
-</code></pre><p><span style="color: red">[eventlistener:]</span>で設定を行う。commandとeventsを指定すれば良い。eventsに指定するのは上記参考に日本語訳されたのがあるのでそれを参考にすれば良い。上記の場合だと</p>
+</code></pre>
+<p><span style="color: red">[eventlistener:]</span>で設定を行う。commandとeventsを指定すれば良い。eventsに指定するのは上記参考に日本語訳されたのがあるのでそれを参考にすれば良い。上記の場合だと</p>
+
 <ul>
 <li>  プロセス(supervisord本体では無い)が何らかの理由により(正常)停止した (PROCESS_STATE_STOPPED)</li>
 <li>  プロセス(supervisord本体では無い)が何らかの理由により(異常)停止した (PROCESS_STATE_EXITED)</li>
 <li>  5秒毎</li>
 </ul>
-<p>っていう条件下においてcommandで指定したプログラムが起動される。正確にはプログラム自体はsupervisordが起動した時点で起動されているが、イベント等のバッファ?を読み取る事によりイベントを着信させる事が出来るような仕組みな模様。ちなみにPROCESS_STATE_EXITEDはkill -9等でも発生する</p><p>例えばPythonだと</p><pre class="line-numbers"><code class="language-py">#!/usr/bin/env python
+
+<p>っていう条件下においてcommandで指定したプログラムが起動される。正確にはプログラム自体はsupervisordが起動した時点で起動されているが、イベント等のバッファ?を読み取る事によりイベントを着信させる事が出来るような仕組みな模様。ちなみにPROCESS_STATE_EXITEDはkill -9等でも発生する</p>
+
+<p>例えばPythonだと</p>
+<pre class="line-numbers"><code class="language-py">#!/usr/bin/env python
 
 import sys
 from supervisor import childutils
@@ -126,13 +136,21 @@ def main():
 
 if __name__ == &quot;__main__&quot;:
     main()
-</code></pre><p>ていうような感じで使用出来る。着火したイベント名なログを取るだけっていうシンプルな物</p><p>んまぁそういう機能がある模様なのでメモ</p><h4>余談</h4><p>node.jsなモジュールにsupervisord-eventlistenerっていうのがある模様</p><pre class="line-numbers"><code class="language-js">#!/usr/bin/env node
+</code></pre>
+<p>ていうような感じで使用出来る。着火したイベント名なログを取るだけっていうシンプルな物</p>
+
+<p>んまぁそういう機能がある模様なのでメモ</p>
+<h4>余談</h4>
+<p>node.jsなモジュールにsupervisord-eventlistenerっていうのがある模様</p>
+<pre class="line-numbers"><code class="language-js">#!/usr/bin/env node
 
 var supervisor = require(&quot;supervisord-eventlistener&quot;);
 supervisor.on(&quot;PROCESS_STATE&quot;, function(type, headers, data) {
 });
 supervisor.listen(process.stdin, process.stdout);
 </code></pre>
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -224,7 +242,7 @@ supervisor.listen(process.stdin, process.stdout);
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -245,9 +263,6 @@ supervisor.listen(process.stdin, process.stdout);
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -360,7 +375,7 @@ supervisor.listen(process.stdin, process.stdout);
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -383,20 +398,20 @@ supervisor.listen(process.stdin, process.stdout);
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -406,13 +421,15 @@ supervisor.listen(process.stdin, process.stdout);
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("b0c2c5526704f11d248093fa5229c752ea79ecb6");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

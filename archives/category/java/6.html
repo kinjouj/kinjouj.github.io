@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -73,113 +72,6 @@
                   <a name="article-link" href="/2014/06/jaxrs-6-exception-mapping.html">JAX-RSをやってみる (6) - 例外処理 -</a>
                 </h3>
                 んまぁJAX-RSアプリケーション上における例外処理な所を
-
-
-
-
-
-#### WebApplicationExceptionを使う
-
-
-WebApplicationExceptionを使えばまぁ普通に引数にステータスコード指定したりだとかで
-
-
-```java
-package sample.controller;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-
-//import static javax.ws.rs.core.MediaType.*;
-
-@Path(&quot;/sample&quot;)
-public class Home {
-
-    @GET
-    public String index() {
-        throw new WebApplicationException(Response.Status.BAD_REQUEST);
-    }
-}
-```
-
-
-な感じでWebApplicationExceptionな例外でぶっ飛ばせば
-
-
-```java
-package sample.controller;
-
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Response;
-
-import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Test;
-
-import sample.SampleApplication;
-
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
-public class HomeTest extends JerseyTest {
-
-    @Override
-    protected Application configure() {
-        return new SampleApplication();
-    }
-
-    @Test
-    public void test_index() {
-        Response response = target(&quot;/sample&quot;).request().get();
-        assertThat(response, notNullValue());
-        assertThat(response.getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-    }
-}
-```
-
-
-てなことになるので
-
-
-#### 独自例外をResponseに変換するExceptionMapperを使う
-
-
-```java
-package sample.controller;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-
-@Path(&quot;/sample&quot;)
-public class Home {
-
-    @GET
-    public String index() {
-        throw new SampleException();
-    }
-
-    public static class SampleException extends RuntimeException {
-    }
-
-    // @Providerするか自明的にregisterしておけば良い
-    @Provider
-    public static class SampleExceptionMapper implements ExceptionMapper&lt;SampleException&gt; {
-        @Override
-        public Response toResponse(SampleException exception) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-    }
-}
-```
-
-
-てな感じで上記のWebApplicationExceptionセクションで書いてるテストをそのまま動かしてテストがコケないかを確認
               </div>
             </div>
             <div id="b4d6836b291e8461feaa7c65546e3c174251bf76" class="card m-4 mb-5">
@@ -198,198 +90,6 @@ public class Home {
                   <a name="article-link" href="/2014/06/jaxrs-4-messagebodyreader.html">JAX-RSをやってみる (4) - MessageBodyReader -</a>
                 </h3>
                 前回の「[JAX-RSをやってみる (3) – AutoDiscoverable -][1]」とかだと
-
-
-```java
-package sample.controller;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
-import sample.bean.SampleBean;
-import static javax.ws.rs.core.MediaType.*;
-
-@Path(&quot;/sample&quot;)
-public class Home {
-
-    @Path(&quot;save&quot;)
-    @POST
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
-    public SampleBean save(SampleBean bean) {
-        return bean;
-    }
-}
-```
-
-
-なんていうので
-
-
-```java
-package sample.controller;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-
-import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Test;
-
-import sample.SampleApplication;
-import sample.bean.SampleBean;
-
-import static javax.ws.rs.core.MediaType.*;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
-public class HomeTest extends JerseyTest {
-
-    @Override
-    protected Application configure() {
-        return new SampleApplication();
-    }
-
-    @Test
-    public void test_save() {
-        Entity&lt;SampleBean&gt; entity = Entity.entity(
-            new SampleBean(&quot;hoge&quot;),
-            APPLICATION_JSON
-        );
-
-        SampleBean response = target(&quot;/sample/save&quot;).request().post(entity, SampleBean.class);
-        assertThat(response, notNullValue());
-    }
-}
-```
-
-
-なんていうテストをやってみると「not found MessageBodyReader」なんていうエラーになるわけで。もちろん前回のはMessageBodyWriterは実装してあるけど、MessageBodyReaderが実装されてないので。っていう事でMessageBodyReaderを実装してみた
-
-
-
-
-
-#### GsonReaderProvider.java
-
-
-```java
-package sample.provider;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
-import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-@Singleton
-@Consumes(MediaType.APPLICATION_JSON)
-public class GsonReaderProvider implements MessageBodyReader&lt;Object&gt; {
-
-    private Gson gson = new GsonBuilder().create();
-
-    @Override
-    public boolean isReadable(Class&lt;?&gt; type, Type genericType,
-        Annotation[] annotations, MediaType mediaType) {
-
-        return true;
-    }
-
-    @Override
-    public Object readFrom(Class&lt;Object&gt; type, Type genericType,
-        Annotation[] annotations, MediaType mediaType,
-        MultivaluedMap&lt;String, String&gt; httpHeaders, InputStream entityStream)
-        throws IOException, WebApplicationException {
-
-        Object value = null;
-
-        try (Reader reader = new InputStreamReader(entityStream)) {
-            value = gson.fromJson(reader, genericType);
-        }
-
-        return value;
-    }
-}
-```
-
-
-んまぁMessageBodyReaderを実装するだけ。んでもって前回のSampleFeatureで
-
-
-```java
-package sample.internal;
-
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
-
-import org.glassfish.jersey.CommonProperties;
-import org.glassfish.jersey.internal.util.PropertiesHelper;
-
-import sample.provider.GsonReaderProvider;
-import sample.provider.GsonWriterProvider;
-import static org.glassfish.jersey.internal.InternalProperties.JSON_FEATURE;
-
-public class SampleFeature implements Feature {
-
-    private static final String SAMPLE_JSON_FEATURE = SampleFeature.class.getSimpleName();
-
-    @Override
-    public boolean configure(final FeatureContext context) {
-        final Configuration config = context.getConfiguration();
-        final String jsonFeature = CommonProperties.getValue(
-            config.getProperties(),
-            config.getRuntimeType(),
-            JSON_FEATURE,
-            null,
-            String.class
-        );
-
-        if (jsonFeature != null) {
-            return false;
-        }
-
-        context.property(
-            PropertiesHelper.getPropertyNameForRuntime(JSON_FEATURE, config.getRuntimeType()),
-            SAMPLE_JSON_FEATURE
-        );
-
-        if (!config.isRegistered(GsonWriterProvider.class)) {
-            context.register(GsonWriterProvider.class, MessageBodyWriter.class);
-        }
-
-        // 追加
-        if (!config.isRegistered(GsonReaderProvider.class)) {
-            context.register(GsonReaderProvider.class, MessageBodyReader.class);
-        }
-
-        return true;
-    }
-}
-```
-
-
-な感じでGsonReaderProviderをregisterしておく。あとは上記で書いてるテストをそのまま実行してテストがずっこけなければオッケー
-
-
-っていう感じでgsonを使ってJAX-RSなレスポンスをエンコードしたり、JSONデータなリクエストをデコードしたり等な件はひとまずこれにて終了
-
-
- [1]: /jaxrs-3-autodiscoverable.html
               </div>
             </div>
             <div id="5f66dd4f9f21d33fdab0671388688634bfb6a4ed" class="card m-4 mb-5">
@@ -524,7 +224,7 @@ public class SampleFeature implements Feature {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -545,9 +245,6 @@ public class SampleFeature implements Feature {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -660,7 +357,7 @@ public class SampleFeature implements Feature {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -683,20 +380,20 @@ public class SampleFeature implements Feature {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

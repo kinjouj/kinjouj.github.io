@@ -10,284 +10,18 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;blockquote class=&quot;twitter-tweet&quot; lang=&quot;ja&quot;&gt;
-&lt;p&gt;おおー &gt; SwipeListView Demo - Google Play の Android アプリ &lt;a href=&quot;https://t.co/VCQQ5I8c5n&quot;&gt;https://t.co/VCQQ5I8c5n&lt;/a&gt;&lt;/p&gt;&amp;mdash; kinjouj (@kinjou__j) &lt;a href=&quot;https://twitter.com/kinjou__j/status/429094837170601985&quot;&gt;2014, 1月 31&lt;/a&gt;
-&lt;/blockquote&gt;
-&lt;script async src=&quot;//platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
-
-
-っていう事で使ってみた
-
-
-#### 準備
-
-
-どうやらSwipeListView自体がMaven方式とgradle方式なプロジェクト両方サポートしているらしいのだけど、今回どっちも使わずにライブラリプロジェクトをEclipseにインポートして使ったのでライブラリ関係がちょっと足りない。という事で
-
-
-*   nineoldandroids-2.4.0.jar
-*   android-support-v4.jar
-
-
-この2つが必要(別途、ActionBarSherlockも必要だったはず)。ライブラリプロジェクトのlibsディレクトリにこの2つを突っ込んでおいた
-
-
-まぁあとはドキュメント通りに
-
-
-#### MainActivity.java
-
-
-```java
-package sample.test;
-
-import android.os.Bundle;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
-public class MainActivity extends SherlockFragmentActivity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
-}
-```
-
-
-今回、ListViewって言ってもListFragmentでかつSwipeListViewを使うのでSherlockFragmentActivityを継承しておく
-
-
-#### res/layout/activity_main.xml
-
-
-```xml
-&lt;?xml version=&quot;1.0&quot; ?&gt;
-&lt;RelativeLayout
-    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;&gt;
-
-    &lt;fragment
-        android:name=&quot;sample.test.SampleListFragment&quot;
-        android:layout_width=&quot;fill_parent&quot;
-        android:layout_height=&quot;fill_parent&quot; /&gt;
-
-&lt;/RelativeLayout&gt;
-```
-
-
-#### SampleListFragment.java
-
-
-```java
-package sample.test;
-
-import com.fortysevendeg.swipelistview.BaseSwipeListViewListener;
-import com.fortysevendeg.swipelistview.SwipeListView;
-
-import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
-
-public class SampleListFragment extends ListFragment {
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.list, container);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        setListAdapter(new SampleListAdapter(getActivity()));
-
-        ((SwipeListView)getListView()).setSwipeListViewListener(new BaseSwipeListViewListener() {
-            @Override
-            public void onClickFrontView(int position) {
-                Toast.makeText(
-                    getActivity(),
-                    getListAdapter().getItem(position).toString(),
-                    Toast.LENGTH_LONG
-                ).show();
-            }
-        });
-    }
-}
-```
-
-
-で普通ならListFragment#onListItemClick(ListView,View,int,long)なのをオーバーライドしてクリックイベントを取るんだけれども、今回のSwipeListViewを使うパターンではこの方式サポート出来ないっぽいようなのでSwipeListView#setSwipeListViewListenerでBaseSWipeListViewListener#onClickFrontViewっていうのを実装して利用する事がデキる模様(ソースはStackOverflow)
-
-
-で上記に書いてるlist.xmlとSampleListAdapter(extends BaseAdapter)を書く
-
-
-#### res/layout/list.xml
-
-
-```xml
-&lt;?xml version=&quot;1.0&quot; ?&gt;
-&lt;LinearLayout
-    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;&gt;
-
-    &lt;com.fortysevendeg.swipelistview.SwipeListView
-        xmlns:swipe=&quot;http://schemas.android.com/apk/res-auto&quot;
-        android:id=&quot;@android:id/list&quot;
-        android:layout_width=&quot;fill_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:listSelector=&quot;#00000000&quot;
-        android:layout_margin=&quot;0dp&quot;
-        swipe:swipeFrontView=&quot;@+id/front&quot;
-        swipe:swipeBackView=&quot;@+id/back&quot; /&gt;
-
-&lt;/LinearLayout&gt;
-```
-
-
-ほとんどマニュアル通りなのでパス
-
-
-#### SampleListAdapter.java
-
-
-```java
-package sample.test;
-
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
-
-public class SampleListAdapter extends BaseAdapter {
-
-    private static final String[] values = { &quot;hoge&quot;, &quot;fuga&quot;, &quot;foobar&quot; };
-    private Context context;
-
-    public SampleListAdapter(Context context) {
-        this.context = context;
-    }
-
-    @Override
-    public int getCount() {
-        return values.length;
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return values[position];
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            final int pos = position;
-
-            LayoutInflater inflater = LayoutInflater.from(context);
-            convertView = inflater.inflate(R.layout.row, parent, false);
-
-            ((TextView)convertView.findViewById(R.id.text)).setText((String)getItem(pos));
-
-            convertView.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(
-                        context,
-                        getItem(pos).toString(),
-                        Toast.LENGTH_LONG
-                    ).show();
-                }
-            });
-        }
-
-        return convertView;
-    }
-}
-```
-
-
-でフロントに出すViewとスワイプ(っていうかスライド)して出すViewを定義しているのがres/layout/rowなのでそれも書く
-
-
-#### res/layout/row.xml
-
-
-```xml
-&lt;?xml version=&quot;1.0&quot; ?&gt;
-&lt;FrameLayout
-    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:layout_width=&quot;fill_parent&quot;
-    android:layout_height=&quot;fill_parent&quot;&gt;
-
-    &lt;LinearLayout
-        android:id=&quot;@+id/back&quot;
-        android:tag=&quot;back&quot;
-        android:layout_width=&quot;fill_parent&quot;
-        android:layout_height=&quot;90dp&quot;
-        android:gravity=&quot;center_vertical&quot;&gt;
-
-        &lt;Button
-            android:id=&quot;@+id/btn&quot;
-            android:layout_width=&quot;fill_parent&quot;
-            android:layout_height=&quot;wrap_content&quot;
-            android:text=&quot;click&quot; /&gt;
-
-    &lt;/LinearLayout&gt;
-
-    &lt;RelativeLayout
-        android:id=&quot;@+id/front&quot;
-        android:tag=&quot;front&quot;
-        android:layout_width=&quot;fill_parent&quot;
-        android:layout_height=&quot;90dp&quot;
-        android:background=&quot;@android:color/white&quot;&gt;
-
-        &lt;TextView
-            android:id=&quot;@+id/text&quot;
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot; /&gt;
-
-    &lt;/RelativeLayout&gt;
-
-&lt;/FrameLayout&gt;
-```
-
-
-んまぁフロントのViewなレイアウトでスワイプする事でバックに表示されるViewを隠すっていう感じにする事であたかもスワイプする事でリストによるデータに対してアクションを起こさせるようなUIを実現できる感じかと
-
-
-以上でやってみると
-
-
-![](/images/2014/01/201401311552_1.png)
-
-
-な感じで普通にListViewとして出て
-
-
-![](/images/2014/01/201401311552_2.png)
-
-
-スワイプする事でビューが出てくるっていう感じなUIを実現できる" />
+    <meta name="description" content="&amp;lt;blockquote class=&amp;quot;twitter-tweet&amp;quot; lang=&amp;quot;ja&amp;quot;&amp;gt;
+&amp;lt;p&amp;gt;おおー &amp;gt; SwipeListView Demo - Google Play の Android アプリ &amp;lt;a href=&amp;quot;https://t.co/VCQQ5I8c5n&amp;quot;&amp;gt;https://t.co/VCQQ5I8c5n&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;&amp;amp;mdash; kinjouj (@kinjou__j) &amp;lt;a href=&amp;quot;https://twitter.com/kinjou__j/status/429094837170601985&amp;quot;&amp;gt;2014, 1月 31&amp;lt;/a&amp;gt;
+&amp;lt;/blockquote&amp;gt;
+&amp;lt;script async src=&amp;quot;//platform.twitter.com/widgets.js&amp;quot; charset=&amp;quot;utf-8&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;" />
     <title>SwipeListView - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2014/01/refreshactionitem.html" />
-    <link rel="next" href="https://kinjouj.github.io/2014/02/otto-produce-annotation.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2014/01/android44-default-sms-app.html" />
+    <link rel="next" href="https://kinjouj.github.io/2014/01/refreshactionitem.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2014/01/swipelistview.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -328,7 +62,7 @@ public class SampleListAdapter extends BaseAdapter {
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-01-31T00:00:00+00:00">
+                <time datetime="2014-01-31 00:00:00 +0900">
                   <a href="/archives/2014/01">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -347,18 +81,26 @@ public class SampleListAdapter extends BaseAdapter {
                 </span>
               </p>
               <div class="post-content">
-                <!--["準備", "MainActivity.java", "res/layout/activity_main.xml", "SampleListFragment.java", "res/layout/list.xml", "SampleListAdapter.java", "res/layout/row.xml"]-->
+                <!--[&quot;準備&quot;, &quot;MainActivity.java&quot;, &quot;res/layout/activity_main.xml&quot;, &quot;SampleListFragment.java&quot;, &quot;res/layout/list.xml&quot;, &quot;SampleListAdapter.java&quot;, &quot;res/layout/row.xml&quot;]-->
                 <blockquote class="twitter-tweet" lang="ja">
 <p>おおー > SwipeListView Demo - Google Play の Android アプリ <a href="https://t.co/VCQQ5I8c5n">https://t.co/VCQQ5I8c5n</a></p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/429094837170601985">2014, 1月 31</a>
 </blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<p>っていう事で使ってみた</p><h4>準備</h4><p>どうやらSwipeListView自体がMaven方式とgradle方式なプロジェクト両方サポートしているらしいのだけど、今回どっちも使わずにライブラリプロジェクトをEclipseにインポートして使ったのでライブラリ関係がちょっと足りない。という事で</p>
+
+<p>っていう事で使ってみた</p>
+<h4>準備</h4>
+<p>どうやらSwipeListView自体がMaven方式とgradle方式なプロジェクト両方サポートしているらしいのだけど、今回どっちも使わずにライブラリプロジェクトをEclipseにインポートして使ったのでライブラリ関係がちょっと足りない。という事で</p>
+
 <ul>
 <li>  nineoldandroids-2.4.0.jar</li>
 <li>  android-support-v4.jar</li>
 </ul>
-<p>この2つが必要(別途、ActionBarSherlockも必要だったはず)。ライブラリプロジェクトのlibsディレクトリにこの2つを突っ込んでおいた</p><p>まぁあとはドキュメント通りに</p><h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+
+<p>この2つが必要(別途、ActionBarSherlockも必要だったはず)。ライブラリプロジェクトのlibsディレクトリにこの2つを突っ込んでおいた</p>
+
+<p>まぁあとはドキュメント通りに</p>
+<h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.os.Bundle;
 
@@ -371,7 +113,9 @@ public class MainActivity extends SherlockFragmentActivity {
         setContentView(R.layout.activity_main);
     }
 }
-</code></pre><p>今回、ListViewって言ってもListFragmentでかつSwipeListViewを使うのでSherlockFragmentActivityを継承しておく</p><h4>res/layout/activity_main.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>今回、ListViewって言ってもListFragmentでかつSwipeListViewを使うのでSherlockFragmentActivityを継承しておく</p>
+<h4>res/layout/activity_main.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;RelativeLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;match_parent&quot;
@@ -419,7 +163,11 @@ public class SampleListFragment extends ListFragment {
         });
     }
 }
-</code></pre><p>で普通ならListFragment#onListItemClick(ListView,View,int,long)なのをオーバーライドしてクリックイベントを取るんだけれども、今回のSwipeListViewを使うパターンではこの方式サポート出来ないっぽいようなのでSwipeListView#setSwipeListViewListenerでBaseSWipeListViewListener#onClickFrontViewっていうのを実装して利用する事がデキる模様(ソースはStackOverflow)</p><p>で上記に書いてるlist.xmlとSampleListAdapter(extends BaseAdapter)を書く</p><h4>res/layout/list.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>で普通ならListFragment#onListItemClick(ListView,View,int,long)なのをオーバーライドしてクリックイベントを取るんだけれども、今回のSwipeListViewを使うパターンではこの方式サポート出来ないっぽいようなのでSwipeListView#setSwipeListViewListenerでBaseSWipeListViewListener#onClickFrontViewっていうのを実装して利用する事がデキる模様(ソースはStackOverflow)</p>
+
+<p>で上記に書いてるlist.xmlとSampleListAdapter(extends BaseAdapter)を書く</p>
+<h4>res/layout/list.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;LinearLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;match_parent&quot;
@@ -436,7 +184,9 @@ public class SampleListFragment extends ListFragment {
         swipe:swipeBackView=&quot;@+id/back&quot; /&gt;
 
 &lt;/LinearLayout&gt;
-</code></pre><p>ほとんどマニュアル通りなのでパス</p><h4>SampleListAdapter.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>ほとんどマニュアル通りなのでパス</p>
+<h4>SampleListAdapter.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -495,7 +245,9 @@ public class SampleListAdapter extends BaseAdapter {
         return convertView;
     }
 }
-</code></pre><p>でフロントに出すViewとスワイプ(っていうかスライド)して出すViewを定義しているのがres/layout/rowなのでそれも書く</p><h4>res/layout/row.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>でフロントに出すViewとスワイプ(っていうかスライド)して出すViewを定義しているのがres/layout/rowなのでそれも書く</p>
+<h4>res/layout/row.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;FrameLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;fill_parent&quot;
@@ -531,15 +283,29 @@ public class SampleListAdapter extends BaseAdapter {
     &lt;/RelativeLayout&gt;
 
 &lt;/FrameLayout&gt;
-</code></pre><p>んまぁフロントのViewなレイアウトでスワイプする事でバックに表示されるViewを隠すっていう感じにする事であたかもスワイプする事でリストによるデータに対してアクションを起こさせるようなUIを実現できる感じかと</p><p>以上でやってみると</p><p><img src="/images/2014/01/201401311552_1.png" class="img-fluid" alt="image" /></p><p>な感じで普通にListViewとして出て</p><p><img src="/images/2014/01/201401311552_2.png" class="img-fluid" alt="image" /></p><p>スワイプする事でビューが出てくるっていう感じなUIを実現できる</p>
+</code></pre>
+<p>んまぁフロントのViewなレイアウトでスワイプする事でバックに表示されるViewを隠すっていう感じにする事であたかもスワイプする事でリストによるデータに対してアクションを起こさせるようなUIを実現できる感じかと</p>
+
+<p>以上でやってみると</p>
+
+<p><img src="/images/2014/01/201401311552_1.png" class="img-fluid" alt="image" /></p>
+
+<p>な感じで普通にListViewとして出て</p>
+
+<p><img src="/images/2014/01/201401311552_2.png" class="img-fluid" alt="image" /></p>
+
+<p>スワイプする事でビューが出てくるっていう感じなUIを実現できる</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2014/02/otto-produce-annotation.html">&lt;&nbsp;ottoの@Produceに関して</a>
+            <a class="float-start box-link" href="/2014/01/refreshactionitem.html">&lt;&nbsp;RefreshActionItem</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2014/01/refreshactionitem.html">RefreshActionItem&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2014/01/android44-default-sms-app.html">Android4.4(Kitkat)のデフォルトSMSアプリに関して&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -623,7 +389,7 @@ public class SampleListAdapter extends BaseAdapter {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -644,9 +410,6 @@ public class SampleListAdapter extends BaseAdapter {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -759,7 +522,7 @@ public class SampleListAdapter extends BaseAdapter {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -782,20 +545,20 @@ public class SampleListAdapter extends BaseAdapter {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -805,13 +568,15 @@ public class SampleListAdapter extends BaseAdapter {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("9768079522cef02725c3bd7dbb1f035f6d58ea85");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

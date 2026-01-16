@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="公式リファレンス: &lt;https://jersey.java.net/documentation/latest/user-guide.html#bean-validation&gt;" />
+    <meta name="description" content="公式リファレンス: &amp;lt;https://jersey.java.net/documentation/latest/user-guide.html#bean-validation&amp;gt;" />
     <title>JAX-RSをやってみる (14) - Bean Validation - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/07/angularjs-26-ng-messages.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/07/scroll-contents-paging-2.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-07-07T00:00:00+00:00">
+                <time datetime="2014-07-07 00:00:00 +0900">
                   <a href="/archives/2014/07">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["SampleBean.java", "Home.java", "ValidationMessages.properties", "HomeTest.java", "検証アノテーションを自作する場合", "Hoge.java", "HogeValidator.java", "余談1: エラー情報を取得する必要が無いような場合", "余談2: バリデーションを自前で動かす方法"]-->
-                <p>公式リファレンス: <a href="https://jersey.java.net/documentation/latest/user-guide.html#bean-validation" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#bean-validation</a></p><p>単純にアノテーションベースで入力検証のルールを定義出来る。別に説明しなくても良いんじゃねって事で</p><h4>SampleBean.java</h4><pre class="line-numbers"><code class="language-java">package sample.bean;
+                <!--[&quot;SampleBean.java&quot;, &quot;Home.java&quot;, &quot;ValidationMessages.properties&quot;, &quot;HomeTest.java&quot;, &quot;検証アノテーションを自作する場合&quot;, &quot;Hoge.java&quot;, &quot;HogeValidator.java&quot;, &quot;余談1: エラー情報を取得する必要が無いような場合&quot;, &quot;余談2: バリデーションを自前で動かす方法&quot;]-->
+                <p>公式リファレンス: <a href="https://jersey.java.net/documentation/latest/user-guide.html#bean-validation">https://jersey.java.net/documentation/latest/user-guide.html#bean-validation</a></p>
+
+<p>単純にアノテーションベースで入力検証のルールを定義出来る。別に説明しなくても良いんじゃねって事で</p>
+<h4>SampleBean.java</h4><pre class="line-numbers"><code class="language-java">package sample.bean;
 
 import java.io.Serializable;
 import javax.validation.constraints.NotNull;
@@ -109,7 +113,9 @@ public class SampleBean implements Serializable {
         return name;
     }
 }
-</code></pre><p>んな感じでアノテーションベースで@NotNull等の検証ルール定義を付与する</p><h4>Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>んな感じでアノテーションベースで@NotNull等の検証ルール定義を付与する</p>
+<h4>Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
@@ -129,7 +135,11 @@ public class Home {
         return bean;
     }
 }
-</code></pre><p>な感じで@Validで指定している型のバリデーションを行い正常で無い場合にはValidationException(正確にはConstraiuntViolationException?)がスローされる(但し、ValidationExceptionMapperがあるのでレスポンスは変換される)</p><h4>ValidationMessages.properties</h4><p>Spring MVCと同様にバリデーションを行った際のエラーメッセージはカスタム化出来る</p><pre class="line-numbers"><code class="language-ini">javax.validation.constraints.NotNull.message=may not be null
+</code></pre>
+<p>な感じで@Validで指定している型のバリデーションを行い正常で無い場合にはValidationException(正確にはConstraiuntViolationException?)がスローされる(但し、ValidationExceptionMapperがあるのでレスポンスは変換される)</p>
+<h4>ValidationMessages.properties</h4>
+<p>Spring MVCと同様にバリデーションを行った際のエラーメッセージはカスタム化出来る</p>
+<pre class="line-numbers"><code class="language-ini">javax.validation.constraints.NotNull.message=may not be null
 </code></pre><h4>HomeTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.core.Application;
@@ -162,14 +172,18 @@ public class HomeTest extends JerseyTest {
         assertThat(response.getStatus(), is(200));
     }
 }
-</code></pre><p>上記の場合データ(QueryParam)が指定されてないのでテストはコケる。そしてエラーメッセージがJSONで取得できる(正確には要求したMediaTypeにより変わる)</p><pre class="line-numbers"><code class="language-json">[
+</code></pre>
+<p>上記の場合データ(QueryParam)が指定されてないのでテストはコケる。そしてエラーメッセージがJSONで取得できる(正確には要求したMediaTypeにより変わる)</p>
+<pre class="line-numbers"><code class="language-json">[
   {
     &quot;message&quot;: &quot;may not be null&quot;,
     &quot;messageTemplate&quot;: &quot;{javax.validation.constraints.NotNull.message}&quot;,
     &quot;path&quot;: &quot;Home.index.arg0.name&quot;
   }
 ]
-</code></pre><h4>検証アノテーションを自作する場合</h4><p>@ConstraintでvalidatedByに指定したConstraintValidatorクラスにてバリデーション実装を定義すればいい</p><h4>Hoge.java</h4><pre class="line-numbers"><code class="language-java">package sample.validator;
+</code></pre><h4>検証アノテーションを自作する場合</h4>
+<p>@ConstraintでvalidatedByに指定したConstraintValidatorクラスにてバリデーション実装を定義すればいい</p>
+<h4>Hoge.java</h4><pre class="line-numbers"><code class="language-java">package sample.validator;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -200,7 +214,9 @@ public @interface Hoge {
     }
     */
 }
-</code></pre><p>ってな感じでアノテーションを作る。messageを{}で囲う事でMessageResource周りでエラーメッセージ等を定義出来たりすると思われる</p><h4>HogeValidator.java</h4><pre class="line-numbers"><code class="language-java">package sample.validator;
+</code></pre>
+<p>ってな感じでアノテーションを作る。messageを{}で囲う事でMessageResource周りでエラーメッセージ等を定義出来たりすると思われる</p>
+<h4>HogeValidator.java</h4><pre class="line-numbers"><code class="language-java">package sample.validator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -226,7 +242,9 @@ public class HogeValidator implements ConstraintValidator&lt;Hoge, String&gt; {
         return false;
     }
 }
-</code></pre><p>isValidメソッドで検証を実装するだけ。あとは普通に</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>isValidメソッドで検証を実装するだけ。あとは普通に</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -249,7 +267,9 @@ public class Home {
         return name;
     }
 }
-</code></pre><p>な感じでアノテーションを付与して使うだけ</p><h4>余談1: エラー情報を取得する必要が無いような場合</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>な感じでアノテーションを付与して使うだけ</p>
+<h4>余談1: エラー情報を取得する必要が無いような場合</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -300,7 +320,13 @@ public class Home {
         return bean;
     }
 }
-</code></pre><p>てな感じで@Injectでjavax.validation.Validatorを使えば出来るっぽい。で上記でも書いたようにValidation ErrorなレスポンスはValidationExceptionMapperによってConstraintViolationExceptionが処理される?はずなのでそれをスローする形で良い。でその際の引数にvalidateをした結果のSet&lt;ConstraintViolation&lt;T&gt;&gt;を指定してやれば良い模様</p><p>とりあえずはこんな感じで。まだまだ曖昧な所あるので追記するか新しくネタ書くかも</p>
+</code></pre>
+<p>てな感じで@Injectでjavax.validation.Validatorを使えば出来るっぽい。で上記でも書いたようにValidation ErrorなレスポンスはValidationExceptionMapperによってConstraintViolationExceptionが処理される?はずなのでそれをスローする形で良い。でその際の引数にvalidateをした結果のSet&lt;ConstraintViolation&lt;T&gt;&gt;を指定してやれば良い模様</p>
+
+<p>とりあえずはこんな感じで。まだまだ曖昧な所あるので追記するか新しくネタ書くかも</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -392,7 +418,7 @@ public class Home {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -413,9 +439,6 @@ public class Home {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -528,7 +551,7 @@ public class Home {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -551,20 +574,20 @@ public class Home {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -574,13 +597,15 @@ public class Home {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("24561232399c4469f776535e5303db996e21f36e");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

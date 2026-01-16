@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-10-08T00:00:00+00:00">
+                <time datetime="2014-10-08 00:00:00 +0900">
                   <a href="/archives/2014/10">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -78,8 +79,19 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["SampleApplication.java", "OAuth.java", "API.java", "余談: Rubyでクライアント書いてアクセスしてみる"]-->
-                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/security.html#d0e11010" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/security.html#d0e11010</a></p><p>参考: <a href="https://github.com/jersey/jersey/blob/master/tests/e2e/src/test/java/org/glassfish/jersey/tests/e2e/oauth/OAuthClientServerTest.java" target="_blank" rel="noopener noreferrer">https://github.com/jersey/jersey/blob/master/tests/e2e/src/test/java/org/glassfish/jersey/tests/e2e/oauth/OAuthClientServerTest.java</a></p><p>※暫定なので大幅修正する可能性あり</p><p>org.glassfish.jersey.securityのoaut1-serverパッケージを使えばOAuth1Providerが使えるようになる模様。っていう事でやってみた</p><p>※事前にorg.glassfish.jersey.security:oauth1-serverな依存性参照をしておく</p><p>※基本的に上記のサンプルコードを参考にしているので実用的では無いと思われる</p><h4>SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+                <!--[&quot;SampleApplication.java&quot;, &quot;OAuth.java&quot;, &quot;API.java&quot;, &quot;余談: Rubyでクライアント書いてアクセスしてみる&quot;]-->
+                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/security.html#d0e11010">https://jersey.java.net/documentation/latest/security.html#d0e11010</a></p>
+
+<p>参考: <a href="https://github.com/jersey/jersey/blob/master/tests/e2e/src/test/java/org/glassfish/jersey/tests/e2e/oauth/OAuthClientServerTest.java">https://github.com/jersey/jersey/blob/master/tests/e2e/src/test/java/org/glassfish/jersey/tests/e2e/oauth/OAuthClientServerTest.java</a></p>
+
+<p>※暫定なので大幅修正する可能性あり</p>
+
+<p>org.glassfish.jersey.securityのoaut1-serverパッケージを使えばOAuth1Providerが使えるようになる模様。っていう事でやってみた</p>
+
+<p>※事前にorg.glassfish.jersey.security:oauth1-serverな依存性参照をしておく</p>
+
+<p>※基本的に上記のサンプルコードを参考にしているので実用的では無いと思われる</p>
+<h4>SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 
@@ -132,13 +144,21 @@ public class SampleApplication extends ResourceConfig {
         packages(&quot;sample&quot;);
     }
 }
-</code></pre><p>本来addAccessTokenはこっちでやるべき事ではない気がしますが(ユーザー登録などの処理をする際にユーザーに対してaddAccessTokenなどをするべきなのでは)</p><p>で一般的にOAuth1な処理フロー的には</p>
+</code></pre>
+<p>本来addAccessTokenはこっちでやるべき事ではない気がしますが(ユーザー登録などの処理をする際にユーザーに対してaddAccessTokenなどをするべきなのでは)</p>
+
+<p>で一般的にOAuth1な処理フロー的には</p>
+
 <ul>
 <li>/request_tokenにてリクエストトークンを取得</li>
 <li>/authorizeして検証コードなどを取得</li>
 <li>/access_tokenにてAPIにアクセスするのに必要なアクセストークンを取得</li>
 </ul>
-<p>というようなフローが必要なのだけど、上記のOAuth1ServerFeatureのコンストラクタで指定している引数で、そのURLのパスを指定出来る。なのでリクエストトークンを取得する場合には/[コンテキストルート]/resources/oauth/reuqest_tokenっていうような形になる。authorizeに関しては自身で実装する必要があるので(これは後記するので)</p><h4>OAuth.java</h4><p>/authorizeでリクエストトークンから認可する際に当たる検証コードを出力するだけのリソースアクションを定義する</p><pre class="line-numbers"><code class="language-java">package sample;
+
+<p>というようなフローが必要なのだけど、上記のOAuth1ServerFeatureのコンストラクタで指定している引数で、そのURLのパスを指定出来る。なのでリクエストトークンを取得する場合には/[コンテキストルート]/resources/oauth/reuqest_tokenっていうような形になる。authorizeに関しては自身で実装する必要があるので(これは後記するので)</p>
+<h4>OAuth.java</h4>
+<p>/authorizeでリクエストトークンから認可する際に当たる検証コードを出力するだけのリソースアクションを定義する</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
 
@@ -185,7 +205,9 @@ public class OAuth {
         );
     }
 }
-</code></pre><p>authorizeする際にユーザーを特定するには、そこをsecurity-constraint等によって保護してアクセスする人を特定した後にauthorizeする必要がある。あとはコメントで書いてる通り</p><h4>API.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>authorizeする際にユーザーを特定するには、そこをsecurity-constraint等によって保護してアクセスする人を特定した後にauthorizeする必要がある。あとはコメントで書いてる通り</p>
+<h4>API.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
@@ -203,7 +225,15 @@ public class API {
         return &quot;Hello World &quot; + sc.getUserPrincipal().getName();
     }
 }
-</code></pre><p>っていう感じでやれば、OAuthリクエストを認可されアクセストークンを使ってRolesAllowedされたリソースにもアクセスする事が可能になる。</p><p>上記のOAuth.javaにはちょろっと書いてるけど、@TokenResourceっていうアノテーションを使うとOAuth1ServerFilterによってOAuthアクセストークンを利用した保護領域へのアクセスに対してユーザー処理等が行われない。その為、このリソースクラスのメソッドに@TokenResourceを使ってしまうとOAuthによるユーザー処理されずに認証できない状態になるのでHTTP/403エラーとなる</p><p>まぁざっくりとした使い方はこんな感じなんだけど、DefaultOAuth1Providerの実装自体がアクセストークンをインスタンスによる管理が行われる為にサーバーを再起動したりすると既に発行されているアクセストークンを利用してもアクセス出来なくなると思われる。なのでがっつりやるのであればOAuth1Providerインターフェースを実装したクラスでもって処理する必要があるのではないかと</p><p>んまぁテストケースに関しては一番上の参考のリンク先がテストケースになっているのでテスト書いたりする際にはそれを参考にすれば良いのではないかと</p><h4>余談: Rubyでクライアント書いてアクセスしてみる</h4><pre class="line-numbers"><code class="language-ruby">require &#39;oauth&#39;
+</code></pre>
+<p>っていう感じでやれば、OAuthリクエストを認可されアクセストークンを使ってRolesAllowedされたリソースにもアクセスする事が可能になる。</p>
+
+<p>上記のOAuth.javaにはちょろっと書いてるけど、@TokenResourceっていうアノテーションを使うとOAuth1ServerFilterによってOAuthアクセストークンを利用した保護領域へのアクセスに対してユーザー処理等が行われない。その為、このリソースクラスのメソッドに@TokenResourceを使ってしまうとOAuthによるユーザー処理されずに認証できない状態になるのでHTTP/403エラーとなる</p>
+
+<p>まぁざっくりとした使い方はこんな感じなんだけど、DefaultOAuth1Providerの実装自体がアクセストークンをインスタンスによる管理が行われる為にサーバーを再起動したりすると既に発行されているアクセストークンを利用してもアクセス出来なくなると思われる。なのでがっつりやるのであればOAuth1Providerインターフェースを実装したクラスでもって処理する必要があるのではないかと</p>
+
+<p>んまぁテストケースに関しては一番上の参考のリンク先がテストケースになっているのでテスト書いたりする際にはそれを参考にすれば良いのではないかと</p>
+<h4>余談: Rubyでクライアント書いてアクセスしてみる</h4><pre class="line-numbers"><code class="language-ruby">require &#39;oauth&#39;
 
 consumer = OAuth::Consumer.new(
   &#39;key1&#39;,
@@ -225,7 +255,9 @@ puts &quot;access_token_secret: #{access_token.secret}&quot;
 
 response = access_token.get(&#39;/api/greet&#39;)
 puts &quot;response: #{response.body}&quot;
-</code></pre><p>っていう感じで書いて実行するとauthorizeするURLが表示されるので、そこにブラウザ等でアクセスして表示されるベリファイコードをコピーするとAPIにアクセス出来るような感じ。その際にアクセストークンが表示されるので</p><pre class="line-numbers"><code class="language-ruby">require &#39;oauth&#39;
+</code></pre>
+<p>っていう感じで書いて実行するとauthorizeするURLが表示されるので、そこにブラウザ等でアクセスして表示されるベリファイコードをコピーするとAPIにアクセス出来るような感じ。その際にアクセストークンが表示されるので</p>
+<pre class="line-numbers"><code class="language-ruby">require &#39;oauth&#39;
 
 consumer = OAuth::Consumer.new(
   &#39;key1&#39;,
@@ -241,7 +273,11 @@ access_token = OAuth::AccessToken.new(
 
 response = access_token.get(&#39;/api/greet&#39;)
 puts &quot;response: #{response.body}&quot;
-</code></pre><p>っていう感じでやればアクセストークンを使ってAPIにアクセスする事も出来る。もちろん上記で書いてるようにDefaultOAuth1Providerをそのまま使ってる場合にはサーバーを落とすとそのアクセストークンは使えなくなる</p>
+</code></pre>
+<p>っていう感じでやればアクセストークンを使ってAPIにアクセスする事も出来る。もちろん上記で書いてるようにDefaultOAuth1Providerをそのまま使ってる場合にはサーバーを落とすとそのアクセストークンは使えなくなる</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -333,7 +369,7 @@ puts &quot;response: #{response.body}&quot;
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -354,9 +390,6 @@ puts &quot;response: #{response.body}&quot;
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -469,7 +502,7 @@ puts &quot;response: #{response.body}&quot;
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -492,20 +525,20 @@ puts &quot;response: #{response.body}&quot;
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -515,13 +548,15 @@ puts &quot;response: #{response.body}&quot;
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("b6a7094830cb988b3b40c6b683d6bdc51f868097");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

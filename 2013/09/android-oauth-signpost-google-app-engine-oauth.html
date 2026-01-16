@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-06T00:00:00+00:00">
+                <time datetime="2013-09-06 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,8 +79,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["要件", "セットアップ", "AndroidManifest.xml", "ShareroidActivity.java", "OAuthActivity.java", "OAuthCallbackActivity.java"]-->
-                <p>タイトル通り。要件は以下</p><p>※但し以下のソースがプロトタイプ段階な為、めちゃくちゃすぎるので注意</p><h4>要件</h4><p>Androidのブラウザ等から共有機能を使ってURLをGoogle App Engine向けに送信する。でその際にGoogle App Engine側はOAuthServiceによりOAuth認可が必要な為、oauth-signpostを利用して共有機能から得られたURLを送出する</p><p>でActivityな流れ的には</p>
+                <!--[&quot;要件&quot;, &quot;セットアップ&quot;, &quot;AndroidManifest.xml&quot;, &quot;ShareroidActivity.java&quot;, &quot;OAuthActivity.java&quot;, &quot;OAuthCallbackActivity.java&quot;]-->
+                <p>タイトル通り。要件は以下</p>
+
+<p>※但し以下のソースがプロトタイプ段階な為、めちゃくちゃすぎるので注意</p>
+<h4>要件</h4>
+<p>Androidのブラウザ等から共有機能を使ってURLをGoogle App Engine向けに送信する。でその際にGoogle App Engine側はOAuthServiceによりOAuth認可が必要な為、oauth-signpostを利用して共有機能から得られたURLを送出する</p>
+
+<p>でActivityな流れ的には</p>
+
 <ul>
 <li>共有機能からURLをシェアする</li>
 <li>OAuthに関するトークン等が取得されているのであれば、それを利用してそのままクラウド側にOAuthパラメーターを付与する形式でリクエスト(POST)する</li>
@@ -87,12 +95,20 @@
 <li>↑でコールバックされたActivityでoauth_verifierを取得して、アクセストークンを取得。その後SharedPreferencesに格納しておく</li>
 <li>上記のコールバック先に認証前に取得しておいたURLなクエリーを付与しておいて、認証後にそれを処理する</li>
 </ul>
-<p>っていう事。あくまで3以降なのは3に特有する。から1や2の状態で4や5な所を意識する必要は無い(かも)</p><p>Androidでoauth-signpostを使ってゴニョゴニョ利用するにはどうするかって所をやってみる</p><h4>セットアップ</h4><p>oauth-signpostなライブラリが必要なので <a href="https://code.google.com/p/oauth-signpost" target="_blank" rel="noopener noreferrer">https://code.google.com/p/oauth-signpost</a> からダウンロードしてくる。ダウンロードしてくるファイルは</p>
+
+<p>っていう事。あくまで3以降なのは3に特有する。から1や2の状態で4や5な所を意識する必要は無い(かも)</p>
+
+<p>Androidでoauth-signpostを使ってゴニョゴニョ利用するにはどうするかって所をやってみる</p>
+<h4>セットアップ</h4>
+<p>oauth-signpostなライブラリが必要なので <a href="https://code.google.com/p/oauth-signpost">https://code.google.com/p/oauth-signpost</a> からダウンロードしてくる。ダウンロードしてくるファイルは</p>
+
 <ul>
 <li>  signpost-core-バージョン.jar</li>
 <li>  signpost-commonshttp4-バージョン.jar</li>
 </ul>
-<p>の2つだけで良い。でAndroidアプリプロジェクトのlibsディレクトリに突っ込んでおく</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest
+
+<p>の2つだけで良い。でAndroidアプリプロジェクトのlibsディレクトリに突っ込んでおく</p>
+<h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;shareroid.app&quot;
     android:versionCode=&quot;1&quot;
@@ -209,7 +225,11 @@ public class ShareroidActivity extends OAuthActivity {
         return url;
     }
 }
-</code></pre><p>共有機能(android.intent.action.SEND)からぶっ飛んでくるActviity。でその共有から送信されたデータ(URL)を取得、んでサーバーに投げる前に認可状態をチェックして認可してればそのままぶん投げる、認可してなければoauth-signpostな機能を使ってぶん投げる。でそのAPI自体はOAuthActivityっていう基底Activityクラスでメソッド定義してある。それは後術</p><h4>OAuthActivity.java</h4><p>上記で書いた基底Activityクラス</p><pre class="line-numbers"><code class="language-java">package shareroid.app;
+</code></pre>
+<p>共有機能(android.intent.action.SEND)からぶっ飛んでくるActviity。でその共有から送信されたデータ(URL)を取得、んでサーバーに投げる前に認可状態をチェックして認可してればそのままぶん投げる、認可してなければoauth-signpostな機能を使ってぶん投げる。でそのAPI自体はOAuthActivityっていう基底Activityクラスでメソッド定義してある。それは後術</p>
+<h4>OAuthActivity.java</h4>
+<p>上記で書いた基底Activityクラス</p>
+<pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -369,7 +389,11 @@ public class OAuthCallbackActivity extends OAuthActivity {
         finish();
     }
 }
-</code></pre><p>終わり。分かりづらいけど(ry</p>
+</code></pre>
+<p>終わり。分かりづらいけど(ry</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -461,7 +485,7 @@ public class OAuthCallbackActivity extends OAuthActivity {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -482,9 +506,6 @@ public class OAuthCallbackActivity extends OAuthActivity {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -597,7 +618,7 @@ public class OAuthCallbackActivity extends OAuthActivity {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -620,20 +641,20 @@ public class OAuthCallbackActivity extends OAuthActivity {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -643,13 +664,15 @@ public class OAuthCallbackActivity extends OAuthActivity {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("96898b9fde191236d080a92edc17d732a3182793");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -55,215 +54,6 @@
                   <a name="article-link" href="/2013/01/contentprovider-returned-cursor.html">ContentProviderから返されたCursor実装を取る</a>
                 </h3>
                 例えば以下のようなAbstractCursorを継承したクラスを作ったとする
-
-
-
-
-```java
-package sample.test;
-
-import android.database.AbstractCursor;
-import android.provider.BaseColumns;
-
-public class SampleCursor extends AbstractCursor implements BaseColumns {
-
-    @Override
-    public String[] getColumnNames() {
-        return null;
-    }
-
-    @Override
-    public int getCount() {
-        return 0;
-    }
-
-    @Override
-    public double getDouble(int column) {
-        return 0;
-    }
-
-    @Override
-    public float getFloat(int column) {
-        return 0;
-    }
-
-    @Override
-    public int getInt(int column) {
-        return 0;
-    }
-
-    @Override
-    public long getLong(int column) {
-        return 0;
-    }
-
-    @Override
-    public short getShort(int column) {
-        return 0;
-    }
-
-    @Override
-    public String getString(int column) {
-        return null;
-    }
-
-    @Override
-    public boolean isNull(int column) {
-        return false;
-    }
-}
-```
-
-
-あくまでネタとしてなんで実装はほとんど書いてません。それはおいといて
-
-
-でこれを返すContentProviderを作る
-
-
-```java
-package sample.test;
-
-import android.content.ContentProvider;
-import android.content.ContentValues;
-import android.content.UriMatcher;
-import android.database.Cursor;
-import android.net.Uri;
-
-public class SampleProvider extends ContentProvider {
-
-    private static UriMatcher matcher;
-
-    static {
-        matcher = new UriMatcher(UriMatcher.NO_MATCH);
-        matcher.addURI(&quot;sample.provider&quot;, &quot;samples&quot;, 0);
-    }
-
-    @Override
-    public String getType(Uri uri) {
-        return &quot;vnd.android.cursor.dir/sample.provider&quot;;
-    }
-
-    @Override
-    public boolean onCreate() {
-        return false;
-    }
-
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        // 作ったAbstractCursorを継承したクラスのインスタンスを返す
-        return new SampleCursor();
-    }
-
-    @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        return null;
-    }
-
-    @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
-    }
-    @Override
-    public int delete(Uri arg0, String arg1, String[] arg2) {
-        return 0;
-    }
-}
-```
-
-
-でこれを Uri.parse(&quot;content://sample.provider/samples&quot;)をgetContentResolver().query した場合に実体クラスでキャストするとどうなるか。結果はClassCastException。理由としてgetContentResolver.queryが返すCursorクラスはContentResolver.CursorWrapperInnerにラップされてる。それはContentResolverのソースコードにもろ書いてる
-
-
-でこういう場合にqueryメソッドを使って返されるCursorクラスの実体を取得したい場合はどうなるかって話になる訳なのですが
-
-
-&lt;pre&gt;
-getContentResolver -&gt; acquireContentProviderClient(uri) -&gt; query
-&lt;/pre&gt;
-
-
-っていうようにContentResolverのacquireContentProviderClientメソッドを使ってContentProviderClientクラスを取得する。でそのクラスからqueryをする事で、ラップされずにqueryメソッドから返される結果のCursor実体を取得する事が出来る
-
-
-実際それをやると
-
-
-```java
-package sample.test;
-
-import android.app.Activity;
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.RemoteException;
-import android.widget.TextView;
-
-public class MainActivity extends Activity {
-
-    private Uri uri = Uri.parse(&quot;content://sample.provider/samples&quot;);
-
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        setContentView(R.layout.main);
-
-        fetch1();
-        fetch2();
-    }
-
-
-    private void fetch1() {
-        /* これをやるとClassCastExceptionになる
-        SampleCursor csr = (SampleCursor)getContentResolver().query(uri, null, null, null, null);
-        */
-
-        Cursor csr = getContentResolver().query(uri, null, null, null, null);
-
-        ((TextView)findViewById(R.id.text1)).setText(
-            &quot;getContentResolver.query: &quot; + csr.toString()
-        );
-    }
-
-    private void fetch2() {
-        ContentResolver resolver = getContentResolver();
-        ContentProviderClient client = resolver.acquireContentProviderClient(uri);
-
-        try {
-            Cursor csr = client.query(uri, null, null, null, null);
-
-            ((TextView)findViewById(R.id.text2)).setText(
-                &quot;ContentProviderClient.query: &quot; + csr.toString()
-            );
-        } catch(RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
-
-
-これを実行すると
-
-
-![](/images/2013/01/20130109074052.png)
-
-
-というようになる。っていう感じ。だけどそんなにCursorの実体クラスが必要になるケースなんてあんまり無いような気もするけど
-
-
-もっと簡単に出来る方法あるのかなーって思うところなんだけど
-
-
-#### 追記
-
-
-&lt;http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html&gt;
-
-
-を見ておいた方がいいかも
               </div>
             </div>
             <div id="85721a9012ba753888a617add2ed1acdc1269ef6" class="card m-4 mb-5">
@@ -300,299 +90,6 @@ public class MainActivity extends Activity {
                   <a name="article-link" href="/2013/01/android-search-hardware-key-suggestion.html">Androidアプリ上でのサーチハードウェアキーによる振る舞い機能を実装</a>
                 </h3>
                 まだ微妙だけどメモる。一応、テストケースとかで色々してませんので
-
-
-
-
-
-#### 概要
-
-
-![](/images/2013/01/20130101000110.png)
-
-
-というような画面があって、サーチハードウェアキーを押して「h」を入力した後に
-
-
-![](/images/2013/01/20130101000217.png)
-
-
-というようなフィルタリングを行ったり
-
-
-![](/images/2013/01/20130101001319.png)
-
-
-というようにサーチハードウェアキーを押してキーワードでインクレメンタル検索のようなのを実装したい場合にはSearchRecentSuggestionProvider等を駆使する事で出来る模様
-
-
-ただ結果をフィルタリングする機能自体はただのAdapterのFilterを実装するだけ
-
-
-#### AndroidManifest.xml
-
-
-```xml
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;manifest
-    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    package=&quot;sample.test&quot;
-    android:versionCode=&quot;1&quot;
-    android:versionName=&quot;1.0&quot; &gt;
-
-    &lt;uses-sdk android:minSdkVersion=&quot;8&quot; /&gt;
-
-    &lt;application android:icon=&quot;@drawable/ic_launcher&quot; android:label=&quot;@string/app_name&quot;&gt;
-        &lt;activity android:name=&quot;.MainActivity&quot; android:label=&quot;@string/app_name&quot; android:launchMode=&quot;singleTop&quot;&gt;
-            &lt;intent-filter&gt;
-                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
-                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
-            &lt;/intent-filter&gt;
-            &lt;intent-filter&gt;
-                &lt;action android:name=&quot;android.intent.action.SEARCH&quot; /&gt;
-            &lt;/intent-filter&gt;
-            &lt;meta-data android:name=&quot;android.app.default_searchable&quot; android:value=&quot;.MainActivity&quot; /&gt;
-            &lt;meta-data android:name=&quot;android.app.searchable&quot; android:resource=&quot;@xml/searchable&quot; /&gt;
-        &lt;/activity&gt;
-        &lt;provider android:name=&quot;.SearchSuggestionProvider&quot; android:authorities=&quot;sample.test.provider&quot; /&gt;
-    &lt;/application&gt;
-&lt;/manifest&gt;
-```
-
-#### res/xml/searchable.xml
-
-
-```xml
-&lt;?xml version=&quot;1.0&quot; ?&gt;
-&lt;searchable
-    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:label=&quot;@string/app_name&quot;
-    android:searchSuggestAuthority=&quot;sample.test.provider&quot;
-    android:searchSuggestSelection=&quot; ? &quot;
-    android:searchSuggestIntentAction=&quot;sample.test.action.SEARCH_SUGGEST&quot; /&gt;
-```
-
-
-#### SampleArrayAdapter.java
-
-
-ListViewの結果な部分をフィルタするのに必要なArrayAdapter
-
-
-```java
-package sample.test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-
-import android.content.Context;
-import android.widget.ArrayAdapter;
-import android.widget.Filter;
-
-public class SampleArrayAdapter extends ArrayAdapter&lt;String&gt; {
-
-    private Filter filter;
-    private List&lt;String&gt; items = new ArrayList&lt;String&gt;();
-
-    public SampleArrayAdapter(Context ctx) {
-        super(ctx, android.R.layout.simple_list_item_1);
-
-        String[] items = ctx.getResources().getStringArray(R.array.values);
-
-        // API Level11からならaddAllメソッドで対応可能かも
-
-        for (String item : items) {
-            add(item);
-
-            this.items.add(item);
-        }
-    }
-
-    @Override
-    public Filter getFilter() {
-        if (filter == null) {
-            filter = new SampleFilter();
-        }
-
-        return filter;
-    }
-
-    private class SampleFilter extends Filter {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            FilterResults results = new FilterResults();
-
-            // 検索クエリーから
-            SortedSet&lt;String&gt; filterItems = new TreeSet&lt;String&gt;();
-
-            if (constraint != null &amp;&amp; constraint.toString().length() &gt; 0) {
-                StringTokenizer tokens = new StringTokenizer(constraint.toString());
-
-                while(tokens.hasMoreTokens()) {
-                    String token = tokens.nextToken();
-
-                    for (String item : items) {
-                        if (item.contains(token)) {
-                            filterItems.add(item);
-                        }
-                    }
-                }
-            } else {
-                filterItems = new TreeSet&lt;String&gt;(items);
-            }
-
-            results.values = filterItems;
-            results.count = filterItems.size();
-
-            return results;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint,FilterResults results) {
-            @SuppressWarnings(&quot;unchecked&quot;)
-            SortedSet&lt;String&gt; filters = (SortedSet&lt;String&gt;)results.values;
-
-            clear();
-
-            for (String filter : filters) {
-                add(filter);
-            }
-        }
-    }
-}
-```
-
-
-#### SearchSuggestionProvider.java
-
-
-検索項目からフィルターしてサジェストする項目をCursorで出す
-
-
-```java
-package sample.test;
-
-import android.content.SearchRecentSuggestionsProvider;
-import android.database.Cursor;
-import android.database.MatrixCursor;
-import android.net.Uri;
-
-public class SearchSuggestionProvider extends SearchRecentSuggestionsProvider {
-
-    public SearchSuggestionProvider() {
-        setupSuggestions(&quot;sample.test.provider&quot;, SearchSuggestionProvider.DATABASE_MODE_QUERIES);
-    }
-
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        if (selectionArgs.length &gt; 0) {
-            MatrixCursor csr = new MatrixCursor(
-                new String[] { &quot;_id&quot;, &quot;suggest_text_1&quot;, &quot;suggest_intent_query&quot; }
-            );
-
-            String[] values = getContext().getResources().getStringArray(R.array.values);
-
-            String query = selectionArgs[0];
-            String[] queries = query.split(&quot;s&quot;);
-
-            for (int i = 0;i &lt; values.length;i++) {
-                String value = values[i];
-
-                for (String splitedQuery : queries) {
-                    if (value.contains(splitedQuery)) {
-                        csr.addRow(new Object[] { i, value, value });
-                    }
-                }
-            }
-
-            return csr;
-        }
-
-        return super.query(uri,projection,selection,selectionArgs,sortOrder);
-    }
-}
-```
-
-
-#### MainActivity.java
-
-
-```java
-package sample.test;
-
-import android.app.ListActivity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.Filter;
-import android.widget.Toast;
-
-import static android.app.SearchManager.QUERY;
-import static android.app.SearchManager.APP_DATA;
-
-public class MainActivity extends ListActivity {
-
-    public static final String ACTION_SEARCH_SUGGEST = &quot;sample.test.action.SEARCH_SUGGEST&quot;;
-
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-
-        getListView().setTextFilterEnabled(true);
-        setListAdapter(new SampleArrayAdapter(this));
-
-        // onSearchRequested();
-    }
-
-    @Override
-    public void onNewIntent(Intent intent) {
-        String action = intent.getAction();
-
-        // startSearch際に指定されたBundleを取得できる模様
-        Bundle  bundle = intent.getBundleExtra(APP_DATA);
-
-        if (Intent.ACTION_SEARCH.equals(action)) {
-            final Filter textFilter = ((SampleArrayAdapter)getListAdapter()).getFilter();
-
-            textFilter.filter(intent.getStringExtra(QUERY), new Filter.FilterListener() {
-                public void onFilterComplete(int count) {
-                    if (count &lt;= 0) {
-                        // もしマッチせず見つからなかった場合にListAdapterにバインドされてるフィルターを無効にしないと元のデータ一覧が表示されなくなる
-                        textFilter.filter(null);
-                    }
-                }
-            });
-        } else if (ACTION_SEARCH_SUGGEST.equals(action)) {
-            Bundle b = intent.getExtras();
-
-            // サーチハードウェア上の項目をクリックした際の項目はsuggest_intent_queryから取れる模様
-            String selectedValue = b.getString(QUERY);
-
-            if (selectedValue != null) {
-                Toast.makeText(this, &quot;selected: &quot; + selectedValue, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    @Override
-    public boolean onSearchRequested() {
-        Bundle bundle = new Bundle();
-        bundle.putString(&quot;message&quot;, &quot;hoge fuga foobar&quot;);
-
-        startSearch(null, false, bundle, false);
-
-        return true;
-    }
-}
-```
-
-
-ACTION\_SEARCHはサーチハードウェアを押してキーワードを入力して検索した際に、ACTION\_SEARCH_SUGGEST(searchabel.xmlで設定したIntentAction)は検索候補をタッチした際に返ってくる模様
-
-
-んまぁざっくり書いたけど、 &lt;http://y-anz-m.blogspot.jp/2010/03/android-searchmanager.html&gt; が参考になるんじゃねーかなって所
               </div>
             </div>
             <div id="c425f942c894457f36e4fa433849e24b86dcb569" class="card m-4 mb-5">
@@ -727,7 +224,7 @@ ACTION\_SEARCHはサーチハードウェアを押してキーワードを入力
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -748,9 +245,6 @@ ACTION\_SEARCHはサーチハードウェアを押してキーワードを入力
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -863,7 +357,7 @@ ACTION\_SEARCHはサーチハードウェアを押してキーワードを入力
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -886,20 +380,20 @@ ACTION\_SEARCHはサーチハードウェアを押してキーワードを入力
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

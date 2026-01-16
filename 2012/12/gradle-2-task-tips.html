@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-12-12T00:00:00+00:00">
+                <time datetime="2012-12-12 00:00:00 +0900">
                   <a href="/archives/2012/12">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -76,25 +77,36 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["タスクをスキップする", "タスクのパターンマッチ"]-->
-                <p>ひとまずちょいとGroovyな勉強が必要だったので間が開いちゃいましたが進めてみる。ちなみにこのgradle使ってみるに関しては基本的に公式ドキュメント(と思われる)のを見てやってるのでそっち見た方が良いかと</p><p>前の続き的な感じでGradleのタスク定義なちょっとしたメモ的なのを</p><h4>タスクをスキップする</h4><p>色々方法がある模様で</p><pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
+                <!--[&quot;タスクをスキップする&quot;, &quot;タスクのパターンマッチ&quot;]-->
+                <p>ひとまずちょいとGroovyな勉強が必要だったので間が開いちゃいましたが進めてみる。ちなみにこのgradle使ってみるに関しては基本的に公式ドキュメント(と思われる)のを見てやってるのでそっち見た方が良いかと</p>
+
+<p>前の続き的な感じでGradleのタスク定義なちょっとしたメモ的なのを</p>
+<h4>タスクをスキップする</h4>
+<p>色々方法がある模様で</p>
+<pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
     println &quot;test&quot;
 }
 
 test.onlyIf {
     project.hasProperty(&quot;ok&quot;)
 }
-</code></pre><p>上記の場合onlyIfに指定されているクロージャ部分がtrueを返さない限りはタスクはスキップされる模様。なので</p><pre class="line-numbers"><code class="language-sh"># スキップされる
+</code></pre>
+<p>上記の場合onlyIfに指定されているクロージャ部分がtrueを返さない限りはタスクはスキップされる模様。なので</p>
+<pre class="line-numbers"><code class="language-sh"># スキップされる
 gradle test
 
 # 実行される
 gradle test -Pok
-</code></pre><p>な感じ。で2つ目の方法として、gradleのタスクにはenabledっていうプロパティが存在する、デフォルトではtrueになっているけどこれをfalseにするとタスクはスキップされる模様</p><pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
+</code></pre>
+<p>な感じ。で2つ目の方法として、gradleのタスクにはenabledっていうプロパティが存在する、デフォルトではtrueになっているけどこれをfalseにするとタスクはスキップされる模様</p>
+<pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
     println &quot;test&quot;
 }
 
 test.enabled = false
-</code></pre><p>という感じになる。この場合testタスクを実行してもスキップされる。一定の理由でタスクを実行させる場合にはenabledを切り替えて実行させるようにすれば良い模様</p><pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
+</code></pre>
+<p>という感じになる。この場合testタスクを実行してもスキップされる。一定の理由でタスクを実行させる場合にはenabledを切り替えて実行させるようにすれば良い模様</p>
+<pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
     println &quot;test&quot;
 }
 
@@ -107,7 +119,9 @@ task test2 &lt;&lt; {
 }
 
 test.enabled = false
-</code></pre><p>でさらに、StopExecutionExceptionをスローする事で以降のタスクが実行されなくなる。但し、あくまでタスク単位な話っぽい</p><pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
+</code></pre>
+<p>でさらに、StopExecutionExceptionをスローする事で以降のタスクが実行されなくなる。但し、あくまでタスク単位な話っぽい</p>
+<pre class="line-numbers"><code class="language-groovy">task test &lt;&lt; {
     println &quot;test&quot;
 }
 
@@ -120,16 +134,28 @@ test.doFirst {
         throw new StopExecutionException()
     }
 }
-</code></pre><p>こうするとtest2タスクを実行するとtestタスクを依存性としているので実行されるが-Pokしない限りはStopExecutionExceptionがスローされる。でこれはdoFirstでスローしているけど、あくまでtestタスク内でのみ限る模様。test2タスクは普通に実行される。ちょっとtest2のタスクまで止める方法は判明してない...orz</p><p>とりあえずはタスクをスキップする方法はこんな感じの方法がある模様</p><h4>タスクのパターンマッチ</h4><p>task.addRule使えば出来る模様</p><pre class="line-numbers"><code class="language-groovy">tasks.addRule(&quot;Pattern: test&lt;ID&gt;&quot;) { name -&gt;
+</code></pre>
+<p>こうするとtest2タスクを実行するとtestタスクを依存性としているので実行されるが-Pokしない限りはStopExecutionExceptionがスローされる。でこれはdoFirstでスローしているけど、あくまでtestタスク内でのみ限る模様。test2タスクは普通に実行される。ちょっとtest2のタスクまで止める方法は判明してない...orz</p>
+
+<p>とりあえずはタスクをスキップする方法はこんな感じの方法がある模様</p>
+<h4>タスクのパターンマッチ</h4>
+<p>task.addRule使えば出来る模様</p>
+<pre class="line-numbers"><code class="language-groovy">tasks.addRule(&quot;Pattern: test&lt;ID&gt;&quot;) { name -&gt;
     if (name.startsWith(&quot;test&quot;)) {
         task(name) &lt;&lt; {
             println &quot;task: &quot; + (name - &quot;test&quot;)
         }
     }
 }
-</code></pre><p>例えば</p><pre class="line-numbers"><code class="language-sh"># 出力は「task: 123」
+</code></pre>
+<p>例えば</p>
+<pre class="line-numbers"><code class="language-sh"># 出力は「task: 123」
 gradle test123
-</code></pre><p>になる。という感じとかで使える模様</p>
+</code></pre>
+<p>になる。という感じとかで使える模様</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -221,7 +247,7 @@ gradle test123
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -242,9 +268,6 @@ gradle test123
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -357,7 +380,7 @@ gradle test123
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -380,20 +403,20 @@ gradle test123
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -403,13 +426,15 @@ gradle test123
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("16e3abdba457f0702cc51245e05f63f1b5052988");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

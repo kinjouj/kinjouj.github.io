@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-11-18T00:00:00+00:00">
+                <time datetime="2013-11-18 00:00:00 +0900">
                   <a href="/archives/2013/11">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,8 +79,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["manifest.json", "popup.html", "popup.js", "background.js", "callback.html", "callback.js", "content_script.js", "chrome_ex_oauth.jsの修正"]-->
-                <p>angular.jsを使いつつ、chrome_ex_oauthを使ってTwitter APIを使うデモとか出来るんじゃないかなーって思ってやってみた</p><h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+                <!--[&quot;manifest.json&quot;, &quot;popup.html&quot;, &quot;popup.js&quot;, &quot;background.js&quot;, &quot;callback.html&quot;, &quot;callback.js&quot;, &quot;content_script.js&quot;, &quot;chrome_ex_oauth.jsの修正&quot;]-->
+                <p>angular.jsを使いつつ、chrome_ex_oauthを使ってTwitter APIを使うデモとか出来るんじゃないかなーって思ってやってみた</p>
+<h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;sample&quot;,
   &quot;version&quot;: &quot;0.1&quot;,
   &quot;manifest_version&quot;: 2,
@@ -106,7 +108,9 @@
   &quot;permissions&quot;: [&quot;https://api.twitter.com/*&quot;],
   &quot;content_security_policy&quot;: &quot;script-src &#39;self&#39; &#39;unsafe-eval&#39;;object-src &#39;self&#39;&quot;
 }
-</code></pre><p>Twitter APIだとoauth_callback?でchrome-extension://な方式が使えない以前に、通常のアプリケーション方式だとリクエストトークンを取得する時点でoauth_callbackパラメーターが許容されない為、authorizeからのアクセストークンを取得する流れをコントロールする必要がある。そこはコンテントスクリプトを使ってアクセストークンを取得して保管する</p><h4>popup.html</h4><pre class="line-numbers"><code class="language-html">&lt;html ng-app&gt;
+</code></pre>
+<p>Twitter APIだとoauth_callback?でchrome-extension://な方式が使えない以前に、通常のアプリケーション方式だとリクエストトークンを取得する時点でoauth_callbackパラメーターが許容されない為、authorizeからのアクセストークンを取得する流れをコントロールする必要がある。そこはコンテントスクリプトを使ってアクセストークンを取得して保管する</p>
+<h4>popup.html</h4><pre class="line-numbers"><code class="language-html">&lt;html ng-app&gt;
   &lt;head&gt;
     &lt;script src=&quot;js/angular.js&quot;&gt;&lt;/script&gt;
     &lt;script src=&quot;js/chrome_ex_oauth.js&quot;&gt;&lt;/script&gt;
@@ -127,7 +131,9 @@
     &lt;/div&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>まぁ特にangular.js特有なの以外は無いので(ry</p><h4>popup.js</h4><pre class="line-numbers"><code class="language-js">var TwitterController = (function() {
+</code></pre>
+<p>まぁ特にangular.js特有なの以外は無いので(ry</p>
+<h4>popup.js</h4><pre class="line-numbers"><code class="language-js">var TwitterController = (function() {
 
   function TwitterController($scope, $http) {
     var bgPage = chrome.extension.getBackgroundPage();
@@ -147,7 +153,11 @@
 
   return TwitterController;
 })();
-</code></pre><p>angular.jsなコントローラーにchrome API依存するのもどうかとは思いますけど...</p><p>要は認証されていればTwitter APIからタイムラインを取得する。認証されてなければChromeExOAuth方式の認証フローに入るっていう感じ</p><h4>background.js</h4><pre class="line-numbers"><code class="language-js">var oauth = ChromeExOAuth.initBackgroundPage({
+</code></pre>
+<p>angular.jsなコントローラーにchrome API依存するのもどうかとは思いますけど...</p>
+
+<p>要は認証されていればTwitter APIからタイムラインを取得する。認証されてなければChromeExOAuth方式の認証フローに入るっていう感じ</p>
+<h4>background.js</h4><pre class="line-numbers"><code class="language-js">var oauth = ChromeExOAuth.initBackgroundPage({
   consumer_key: CONSUMER_KEY,
   consumer_secret: CONSUMER_SECRET,
   request_url: &quot;https://api.twitter.com/oauth/request_token&quot;,
@@ -173,7 +183,9 @@ chrome.runtime.onMessage.addListener(function(req, sender, res) {
 
   return true;
 });
-</code></pre><p>コンテントスクリプトから来たauthorizeをverifyするPINコードを受け取ったらそれを利用してアクセストークンを取得する</p><h4>callback.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre>
+<p>コンテントスクリプトから来たauthorizeをverifyするPINコードを受け取ったらそれを利用してアクセストークンを取得する</p>
+<h4>callback.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;script src=&quot;js/chrome_ex_oauth.js&quot;&gt;&lt;/script&gt;
     &lt;script src=&quot;js/chrome_ex_oauthsimple.js&quot;&gt;&lt;/script&gt;
@@ -183,20 +195,44 @@ chrome.runtime.onMessage.addListener(function(req, sender, res) {
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre><h4>callback.js</h4><pre class="line-numbers"><code class="language-js">ChromeExOAuth.initCallbackPage();
-</code></pre><p>ただのChromeExOAuthによる認証フロー開始するだけなので(ry</p><h4>content_script.js</h4><pre class="line-numbers"><code class="language-js">var pin = prompt(&quot;Enter the PIN displayed by Twitter&quot;);
+</code></pre>
+<p>ただのChromeExOAuthによる認証フロー開始するだけなので(ry</p>
+<h4>content_script.js</h4><pre class="line-numbers"><code class="language-js">var pin = prompt(&quot;Enter the PIN displayed by Twitter&quot;);
 chrome.runtime.sendMessage({ &quot;verifier&quot;: pin }, function(isSuccess) {
   if (isSuccess === true) {
     alert(&quot;Authorized, woot!&quot;);
   }
 });
-</code></pre><p>とここまでがChrome拡張になる訳。あとはビルド(crx生成)するなりで使う訳ですが、そのままでは動かない。chrome_ex_oauth.jsに所々問題があって動かない箇所があるので修正する必要がある</p><h4>chrome_ex_oauth.jsの修正</h4><p>487行目辺り</p><pre class="line-numbers"><code class="language-js">parameters: {
+</code></pre>
+<p>とここまでがChrome拡張になる訳。あとはビルド(crx生成)するなりで使う訳ですが、そのままでは動かない。chrome_ex_oauth.jsに所々問題があって動かない箇所があるので修正する必要がある</p>
+<h4>chrome_ex_oauth.jsの修正</h4>
+<p>487行目辺り</p>
+<pre class="line-numbers"><code class="language-js">parameters: {
   &quot;xoauth_displayname&quot; : this.app_name,
   &quot;scope&quot; : this.oauth_scope,
   // &quot;oauth_callback&quot; : url_callback
 }
-</code></pre><p>oauth_callbackが入ってるとリクエストトークンを取得する時点でエラー起こすのでoauth_callbackをパラメーターとして入れないように</p><p>514行目辺り</p><pre class="line-numbers"><code class="language-js">var token = params[&quot;oauth_token&quot;];
+</code></pre>
+<p>oauth_callbackが入ってるとリクエストトークンを取得する時点でエラー起こすのでoauth_callbackをパラメーターとして入れないように</p>
+
+<p>514行目辺り</p>
+<pre class="line-numbers"><code class="language-js">var token = params[&quot;oauth_token&quot;];
 this.setToken(token);
-</code></pre><p>コンテントスクリプトからバックグランドページにsendMessageを行なってアクセストークンを取得するフローにおいてトークンが必要となるがトークン鍵はlocalStorageに保管されているが、トークン自体は保管されていないのでフロー上でundefinedになってしまう。なのでトークンもlocalStorageに保管しておく</p><p>但し、認証状態がtrueになるのはlocalStorageにトークンとトークン鍵があるかがチェックされるので、認証フローが途中で失敗した場合等にはChromeExOAuth#clearTokensを利用して取得しているリクエストトークンを保管しておかない等の工夫が若干必要になる</p><p>あくまでこの修正が必要なのはchrome_ex_oauthでTwitter APIを使う場合にのみ限られるのでは無いかと(もしかしたらDropboxも)</p><p>以上を行なって拡張機能をインストールして認証すると</p><p><img src="/images/2013/11/201311172300.jpg" class="img-fluid" alt="image" /></p><p>っていうようにchrome_ex_oauthでOAuthを利用したREST API等をChrome Extensionでangular.jsを使いつつ出来るっていう感じで</p>
+</code></pre>
+<p>コンテントスクリプトからバックグランドページにsendMessageを行なってアクセストークンを取得するフローにおいてトークンが必要となるがトークン鍵はlocalStorageに保管されているが、トークン自体は保管されていないのでフロー上でundefinedになってしまう。なのでトークンもlocalStorageに保管しておく</p>
+
+<p>但し、認証状態がtrueになるのはlocalStorageにトークンとトークン鍵があるかがチェックされるので、認証フローが途中で失敗した場合等にはChromeExOAuth#clearTokensを利用して取得しているリクエストトークンを保管しておかない等の工夫が若干必要になる</p>
+
+<p>あくまでこの修正が必要なのはchrome_ex_oauthでTwitter APIを使う場合にのみ限られるのでは無いかと(もしかしたらDropboxも)</p>
+
+<p>以上を行なって拡張機能をインストールして認証すると</p>
+
+<p><img src="/images/2013/11/201311172300.jpg" class="img-fluid" alt="image" /></p>
+
+<p>っていうようにchrome_ex_oauthでOAuthを利用したREST API等をChrome Extensionでangular.jsを使いつつ出来るっていう感じで</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -288,7 +324,7 @@ this.setToken(token);
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -309,9 +345,6 @@ this.setToken(token);
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -424,7 +457,7 @@ this.setToken(token);
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -447,20 +480,20 @@ this.setToken(token);
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -470,13 +503,15 @@ this.setToken(token);
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("3d5922b162a99751a89515197b08b46312d16ff2");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

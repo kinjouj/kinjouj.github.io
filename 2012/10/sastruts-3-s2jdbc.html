@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-10-04T00:00:00+00:00">
+                <time datetime="2012-10-04 00:00:00 +0900">
                   <a href="/archives/2012/10">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["pom.xml", "src/main/resources/s2jdbc.dicon", "src/main/resources/jdbc.dicon", "sample.entity.Sample", "sample.service.SampleService", "sample.form.Sample2Form", "sample.action.Sample2Action", "src/main/webapp/WEB-INF/views/sample2/index.jsp", "追記"]-->
-                <p>タイトル通り。S2JDBCを使ってMySQLデータベースに接続してテーブルにアクセスしてみる</p><h4>pom.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;dependency&gt;
+                <!--[&quot;pom.xml&quot;, &quot;src/main/resources/s2jdbc.dicon&quot;, &quot;src/main/resources/jdbc.dicon&quot;, &quot;sample.entity.Sample&quot;, &quot;sample.service.SampleService&quot;, &quot;sample.form.Sample2Form&quot;, &quot;sample.action.Sample2Action&quot;, &quot;src/main/webapp/WEB-INF/views/sample2/index.jsp&quot;, &quot;追記&quot;]-->
+                <p>タイトル通り。S2JDBCを使ってMySQLデータベースに接続してテーブルにアクセスしてみる</p>
+<h4>pom.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;dependency&gt;
   &lt;groupId&gt;mysql&lt;/groupId&gt;
   &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
   &lt;version&gt;5.1.21&lt;/version&gt;
@@ -110,7 +112,9 @@
         &lt;property name=&quot;dialect&quot;&gt;mysqlDialect&lt;/property&gt;
     &lt;/component&gt;
 &lt;/components&gt;
-</code></pre><p>dialectはMySQL以外とかだとそれに応じた値を設定する。んでJDBC接続な情報はjdbc.diconに設定する</p><h4>src/main/resources/jdbc.dicon</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</code></pre>
+<p>dialectはMySQL以外とかだとそれに応じた値を設定する。んでJDBC接続な情報はjdbc.diconに設定する</p>
+<h4>src/main/resources/jdbc.dicon</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;!DOCTYPE components PUBLIC &quot;-//SEASAR2.1//DTD S2Container//EN&quot; &quot;http://www.seasar.org/dtd/components21.dtd&quot;&gt;
 &lt;components namespace=&quot;jdbc&quot;&gt;
     &lt;include path=&quot;jta.dicon&quot;/&gt;
@@ -134,12 +138,16 @@
         class=&quot;org.seasar.extension.dbcp.impl.DataSourceImpl&quot;
     /&gt;
 &lt;/components&gt;
-</code></pre><p>んまぁxaDataSourceな所をいじれば良いみたい。でMySQLで</p><pre class="line-numbers"><code class="language-sql">CREATE TABLE sample(
+</code></pre>
+<p>んまぁxaDataSourceな所をいじれば良いみたい。でMySQLで</p>
+<pre class="line-numbers"><code class="language-sql">CREATE TABLE sample(
   id int auto_increment primary key,
   data varchar(255) NOT NULL UNIQUE,
   created_at datetime NOT NULL
 ) ENGINE=InnoDB
-</code></pre><p>とかをデータベースにテーブルを作っておく。あとはクラス群を作る</p><h4>sample.entity.Sample</h4><pre class="line-numbers"><code class="language-java">package sample.entity;
+</code></pre>
+<p>とかをデータベースにテーブルを作っておく。あとはクラス群を作る</p>
+<h4>sample.entity.Sample</h4><pre class="line-numbers"><code class="language-java">package sample.entity;
 
 import java.util.Date;
 
@@ -172,7 +180,13 @@ public class Sample {
         return String.format(&quot;[%s]: %s&quot;, id, data);
     }
 }
-</code></pre><p>publicにしたくなければ普通にgetter/setterを書けば良いみたい</p><p><a href="http://s2container.seasar.org/2.4/ja/s2jdbc_abstract.html#%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%81%AA%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3">参照</a></p><h4>sample.service.SampleService</h4><p>まぁService系を使ってデータベースとの手続きに関する処理を定義すれば良いのかも</p><pre class="line-numbers"><code class="language-java">package sample.service;
+</code></pre>
+<p>publicにしたくなければ普通にgetter/setterを書けば良いみたい</p>
+
+<p><a href="http://s2container.seasar.org/2.4/ja/s2jdbc_abstract.html#%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%81%AA%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3">参照</a></p>
+<h4>sample.service.SampleService</h4>
+<p>まぁService系を使ってデータベースとの手続きに関する処理を定義すれば良いのかも</p>
+<pre class="line-numbers"><code class="language-java">package sample.service;
 
 import java.util.List;
 import javax.annotation.Resource;
@@ -351,7 +365,13 @@ public class Sample2Action {
     &lt;/s:form&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>てな感じかと。</p><h4>追記</h4><p>Entityなサービスに関してはS2AbstractServiceを継承して使うのを推奨しているらしい。なので自前でServiceクラスな所でJdbcServiceを注入させるようなのは必要ない模様</p>
+</code></pre>
+<p>てな感じかと。</p>
+<h4>追記</h4>
+<p>Entityなサービスに関してはS2AbstractServiceを継承して使うのを推奨しているらしい。なので自前でServiceクラスな所でJdbcServiceを注入させるようなのは必要ない模様</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -443,7 +463,7 @@ public class Sample2Action {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -464,9 +484,6 @@ public class Sample2Action {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -579,7 +596,7 @@ public class Sample2Action {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -602,20 +619,20 @@ public class Sample2Action {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -625,13 +642,15 @@ public class Sample2Action {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("5f0573309947841c09af05d2d60282f9929c3fbc");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

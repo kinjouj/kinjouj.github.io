@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-09-13T00:00:00+00:00">
+                <time datetime="2012-09-13 00:00:00 +0900">
                   <a href="/archives/2012/09">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -76,10 +77,19 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["インストール", "Rubyのライブラリをインストール", "worker.rb", "client.rb", "追記"]-->
-                <p>※Amazon Elastic Beanstalkは関係ありません</p><p><a href="http://kr.github.com/beanstalkd" target="_blank" rel="noopener noreferrer">http://kr.github.com/beanstalkd</a> がちょっと気になったので使ってみた</p><h4>インストール</h4><pre class="line-numbers"><code class="language-sh">sudo apt-get install beanstalkd
-</code></pre><p>でインストール出来る。 もちディストリビューションによって違うと思うので、そこら辺はドキュメント参照するかapt-getなりyumなりで検索して探してインストールする</p><p>んでその後起動しておく。デフォルト推奨ポート番号は11300な模様</p><h4>Rubyのライブラリをインストール</h4><pre class="line-numbers"><code class="language-sh">gem install beanstalk-client
-</code></pre><p>まぁ色々クライアントライブラリはあるみたいですが、とりあえずbeanstalk-clientってのを使う</p><h4>worker.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;beanstalk-client&quot;
+                <!--[&quot;インストール&quot;, &quot;Rubyのライブラリをインストール&quot;, &quot;worker.rb&quot;, &quot;client.rb&quot;, &quot;追記&quot;]-->
+                <p>※Amazon Elastic Beanstalkは関係ありません</p>
+
+<p><a href="http://kr.github.com/beanstalkd">http://kr.github.com/beanstalkd</a> がちょっと気になったので使ってみた</p>
+<h4>インストール</h4><pre class="line-numbers"><code class="language-sh">sudo apt-get install beanstalkd
+</code></pre>
+<p>でインストール出来る。 もちディストリビューションによって違うと思うので、そこら辺はドキュメント参照するかapt-getなりyumなりで検索して探してインストールする</p>
+
+<p>んでその後起動しておく。デフォルト推奨ポート番号は11300な模様</p>
+<h4>Rubyのライブラリをインストール</h4><pre class="line-numbers"><code class="language-sh">gem install beanstalk-client
+</code></pre>
+<p>まぁ色々クライアントライブラリはあるみたいですが、とりあえずbeanstalk-clientってのを使う</p>
+<h4>worker.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;beanstalk-client&quot;
 
 beanstalk = Beanstalk::Pool.new([&quot;127.0.0.1:11300&quot;])
 beanstalk.watch(&quot;sample&quot;)
@@ -93,7 +103,11 @@ loop do
 
   job.delete
 end
-</code></pre><p>watchでキュー名(beanstalk的にはtubeというべきなのかも)を指定出来る。デフォルトは<q>default</q>な模様。でworker側でクライアント側から来たキュー名を特定するにはstatsで参照可能な模様</p><p>んでソース上で</p><pre class="line-numbers"><code class="language-rb">class Beanstalk::Job
+</code></pre>
+<p>watchでキュー名(beanstalk的にはtubeというべきなのかも)を指定出来る。デフォルトは<q>default</q>な模様。でworker側でクライアント側から来たキュー名を特定するにはstatsで参照可能な模様</p>
+
+<p>んでソース上で</p>
+<pre class="line-numbers"><code class="language-rb">class Beanstalk::Job
 
   def [](name)
     ybody[name]
@@ -105,12 +119,20 @@ end
 
   # 以下省略
 end
-</code></pre><p>っていうふうになってるので普通にjob[name]で参照可能。だけどこれyputされた際に限るものだと思われるので、普通の文字列なようなのがputでぶっこんで来られた場合にはjob.bodyで取得できる</p><h4>client.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;beanstalk-client&quot;
+</code></pre>
+<p>っていうふうになってるので普通にjob[name]で参照可能。だけどこれyputされた際に限るものだと思われるので、普通の文字列なようなのがputでぶっこんで来られた場合にはjob.bodyで取得できる</p>
+<h4>client.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;beanstalk-client&quot;
 
 beanstalk = Beanstalk::Pool.new([&quot;127.0.0.1:11300&quot;])
 beanstalk.use(&quot;sample&quot;)
 beanstalk.yput({ :name =&gt; &quot;hoge&quot; })
-</code></pre><p>まぁ上でも書いたようにyputを使えばHashとかでも流せる。一応シリアライザー的なのはYAMLな模様。まぁだから接頭辞にyが付いてるんだと思うけど</p><h4>追記</h4><p>beanstalkのEM(EventMachine)なライブラリもある模様で</p><p>worker.rbが</p><pre class="line-numbers"><code class="language-rb">require &quot;em-beanstalk&quot;
+</code></pre>
+<p>まぁ上でも書いたようにyputを使えばHashとかでも流せる。一応シリアライザー的なのはYAMLな模様。まぁだから接頭辞にyが付いてるんだと思うけど</p>
+<h4>追記</h4>
+<p>beanstalkのEM(EventMachine)なライブラリもある模様で</p>
+
+<p>worker.rbが</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;em-beanstalk&quot;
 
 EM.run do
   beanstalk = EM::Beanstalk.new
@@ -131,7 +153,9 @@ EM.run do
     end
   end
 end
-</code></pre><p>な感じで、client.rbが</p><pre class="line-numbers"><code class="language-rb">require &quot;em-beanstalk&quot;
+</code></pre>
+<p>な感じで、client.rbが</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;em-beanstalk&quot;
 
 EM.run do
   beanstalk = EM::Beanstalk.new
@@ -141,7 +165,13 @@ EM.run do
     EM.stop
   end
 end
-</code></pre><p>な感じ。だがクライアントまでEventMachineにする必要あるのかは分からないけど。又、putの引数にオブジェクトとか指定するとワーカー側で取る際にはinspectされてる模様。それをevalするのもどうかと思うのでJSONなりYAMLなりでダンプして流した方が良いのではと思う所</p><p>ちなみにWorkerがEMでClientがbeanstalk-clientでも問題無いみたい。ただシリアライズ的な所は未確認</p>
+</code></pre>
+<p>な感じ。だがクライアントまでEventMachineにする必要あるのかは分からないけど。又、putの引数にオブジェクトとか指定するとワーカー側で取る際にはinspectされてる模様。それをevalするのもどうかと思うのでJSONなりYAMLなりでダンプして流した方が良いのではと思う所</p>
+
+<p>ちなみにWorkerがEMでClientがbeanstalk-clientでも問題無いみたい。ただシリアライズ的な所は未確認</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -233,7 +263,7 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -254,9 +284,6 @@ end
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -369,7 +396,7 @@ end
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -392,20 +419,20 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -415,13 +442,15 @@ end
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("cea09e14993ceea77f5f0832d67995fd42be5755");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

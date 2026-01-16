@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="[前回のActiveRecord Optimistic Locking][1]のような同一のページのインスタンスを持つセッションが複数あり、一方のセッションで処理した後で他のセッションで処理するとエラーになるっていう振る舞いをテストするにはどうしたら良いのかっていう件" />
     <title>Capybaraで複数のセッションを使う - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2014/07/rails-generate-factorygirl-fixtures.html" />
-    <link rel="next" href="https://kinjouj.github.io/2014/08/activerecord-optimistic-locking.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2014/08/activerecord-optimistic-locking.html" />
+    <link rel="next" href="https://kinjouj.github.io/2014/08/factorygirl-fixture-loading-architecture.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2014/08/multiple-capybara-session-testing.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-08-02T00:00:00+00:00">
+                <time datetime="2014-08-02 00:00:00 +0900">
                   <a href="/archives/2014/08">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -79,7 +80,12 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p><a href="/activerecord-optimistic-locking.html">前回のActiveRecord Optimistic Locking</a>のような同一のページのインスタンスを持つセッションが複数あり、一方のセッションで処理した後で他のセッションで処理するとエラーになるっていう振る舞いをテストするにはどうしたら良いのかっていう件</p><p>という事でやってみた</p><p>とりあえずOptimistic Lockなエラーはデフォルトだと409 Conflictになる模様?なので、エラーが起きたら500エラーにする方向で処理を修正しておく(正常な場合はredirect_toされるので302)</p><pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+                <p><a href="/activerecord-optimistic-locking.html">前回のActiveRecord Optimistic Locking</a>のような同一のページのインスタンスを持つセッションが複数あり、一方のセッションで処理した後で他のセッションで処理するとエラーになるっていう振る舞いをテストするにはどうしたら良いのかっていう件</p>
+
+<p>という事でやってみた</p>
+
+<p>とりあえずOptimistic Lockなエラーはデフォルトだと409 Conflictになる模様?なので、エラーが起きたら500エラーにする方向で処理を修正しておく(正常な場合はredirect_toされるので302)</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
 
 describe EntriesController do
   fixtures :entry
@@ -107,7 +113,9 @@ def create_session
 
   session
 end
-</code></pre><p>っていう感じで一つのテストでCapybara::Sessionを複数生成して処理をテストする的な感じかと。でこれを実行すると</p>
+</code></pre>
+<p>っていう感じで一つのテストでCapybara::Sessionを複数生成して処理をテストする的な感じかと。でこれを実行すると</p>
+
 <pre>
 F
 
@@ -124,15 +132,21 @@ Failures:
        `expect(actual).to eq(expected)` if you don"t care about
        object identity in this example.
 </pre>
-<p>っていうように最初のセッションでclick_buttonでアップデートされた後に既に開いる別のセッションにてclick_buttonでアップデート処理しようとするとエラーになり返ってくるステータスコードは302では無くなる</p><p>ってな感じでテストする事が出来るっぽい。このやり方が正しいかどうかは微妙だけど</p>
+
+<p>っていうように最初のセッションでclick_buttonでアップデートされた後に既に開いる別のセッションにてclick_buttonでアップデート処理しようとするとエラーになり返ってくるステータスコードは302では無くなる</p>
+
+<p>ってな感じでテストする事が出来るっぽい。このやり方が正しいかどうかは微妙だけど</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2014/08/activerecord-optimistic-locking.html">&lt;&nbsp;ActiveRecord Optimistic Locking</a>
+            <a class="float-start box-link" href="/2014/08/factorygirl-fixture-loading-architecture.html">&lt;&nbsp;FactoryGirlのロードの仕組み</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2014/07/rails-generate-factorygirl-fixtures.html">rails generateでFactoryGirl Fixtures&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2014/08/activerecord-optimistic-locking.html">ActiveRecord Optimistic Locking&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -216,7 +230,7 @@ Failures:
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -237,9 +251,6 @@ Failures:
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -352,7 +363,7 @@ Failures:
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -375,20 +386,20 @@ Failures:
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -398,13 +409,15 @@ Failures:
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("65129dd2a2a3118c0b1152f23b71493d16701b20");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

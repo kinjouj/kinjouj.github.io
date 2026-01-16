@@ -10,14 +10,15 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;http://laravel.com/docs/mail&gt; のドキュメント読み。まぁ名前の通りなんでセクション的な所辺りをこなしてみる" />
+    <meta name="description" content="&amp;lt;http://laravel.com/docs/mail&amp;gt; のドキュメント読み。まぁ名前の通りなんでセクション的な所辺りをこなしてみる" />
     <title>Laravel使ってみた (20) - Mail - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/07/laravel-password-reminder-expiration.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/08/codemodel-annotation-processing-java-sourcecode-generation.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/07/laravel-19-security-password-reminder.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/07/laravel-password-reminder-expiration.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/07/laravel-20-mail.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-07-30T00:00:00+00:00">
+                <time datetime="2013-07-30 00:00:00 +0900">
                   <a href="/archives/2013/07">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Mail APIが使えるように設定", "メールを送る", "余談"]-->
-                <p><a href="http://laravel.com/docs/mail" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/mail</a> のドキュメント読み。まぁ名前の通りなんでセクション的な所辺りをこなしてみる</p><h4>Mail APIが使えるように設定</h4><p>app/config内にmail.phpを設定しろっつーことで</p><h4>メールを送る</h4><p>メールを送るにはsendメソッドを使えば良い</p><pre class="line-numbers"><code class="language-php">Mail::send(
+                <!--[&quot;Mail APIが使えるように設定&quot;, &quot;メールを送る&quot;, &quot;余談&quot;]-->
+                <p><a href="http://laravel.com/docs/mail">http://laravel.com/docs/mail</a> のドキュメント読み。まぁ名前の通りなんでセクション的な所辺りをこなしてみる</p>
+<h4>Mail APIが使えるように設定</h4>
+<p>app/config内にmail.phpを設定しろっつーことで</p>
+<h4>メールを送る</h4>
+<p>メールを送るにはsendメソッドを使えば良い</p>
+<pre class="line-numbers"><code class="language-php">Mail::send(
     // 送るメール内容のビュー
     &quot;emails/sample&quot;,
     // メール内容ビューにバインドするデータ。messageっていう変数名は避ける事
@@ -87,21 +93,35 @@
         $msg-&gt;to(&quot;hoge@example.com&quot;)-&gt;subject(&quot;hello&quot;);
     }
 );
-</code></pre><p>的な感じで使うんだけれども、これデフォルトだとtext/htmlな形式なメールで送られるらしい。テキストメール(text/plain)で送る場合には</p><pre class="line-numbers"><code class="language-php">Mail::send(
+</code></pre>
+<p>的な感じで使うんだけれども、これデフォルトだとtext/htmlな形式なメールで送られるらしい。テキストメール(text/plain)で送る場合には</p>
+<pre class="line-numbers"><code class="language-php">Mail::send(
     [&quot;text&quot; =&gt; &quot;emails.sample&quot;]
     // 以下省略
 );
-</code></pre><p>っていう感じにすれば良いらしい。又、ドキュメントには書いてないけどAPI Referenceにはplainっていうメソッドが使える模様。上記のtext/plainで送りたいのならば</p><pre class="line-numbers"><code class="language-php">Mail::plain(
+</code></pre>
+<p>っていう感じにすれば良いらしい。又、ドキュメントには書いてないけどAPI Referenceにはplainっていうメソッドが使える模様。上記のtext/plainで送りたいのならば</p>
+<pre class="line-numbers"><code class="language-php">Mail::plain(
     &quot;emails.sample&quot;
     // 以下省略
 );
-</code></pre><p>と同じな模様。なのでこっち使えば良いかと。で上記のメール送信なAPIは送信されるまでwaitされる訳なんだが、queue的な事でメールを送る事も出来る。そのAPIが</p>
+</code></pre>
+<p>と同じな模様。なのでこっち使えば良いかと。で上記のメール送信なAPIは送信されるまでwaitされる訳なんだが、queue的な事でメールを送る事も出来る。そのAPIが</p>
+
 <ul>
 <li>  queue: 指定したメールをキューサーバーを用いて処理する</li>
 <li>  later: 第一引数に指定した秒数だけをwaitして後に送信する?</li>
 <li>  queueOn: 第1引数に指定したキュー名でメールを処理する</li>
 </ul>
-<p>ちなみにlaterOnっていうのもある模様</p><p>まー大体な使い方はこんな感じ。attachとかで添付ファイルとかをつけたりとかも出来る訳なんだけど、例えばデータベースにあるBLOBなデータとかの場合には<a href="http://laravel.com/api/class-Illuminate.Mail.Message.html">Illuminate\Mail\Message</a>にattachDataやembedDataっていうAPI等を利用する事で可能なのかも。そこんとこは未検証</p><p>とりあえずドキュメント読み終わり。今回は結構あっさりしてた</p><h4>余談</h4><p>Mail::pretendを使う事でメールを送らずにログに書きだすっていう方式が利用できる模様。Mail::pretendをするか、app/config/mail.php等の設定でpretendをtrueにすれば良い模様。pretendするとログに書き込まれるがそのメッセージ自体は送信先?のメールアドレスは記載されている模様。テストする名目とかであればそこチェックすればいいのかって所なのか</p><pre class="line-numbers"><code class="language-php">&lt;?php
+
+<p>ちなみにlaterOnっていうのもある模様</p>
+
+<p>まー大体な使い方はこんな感じ。attachとかで添付ファイルとかをつけたりとかも出来る訳なんだけど、例えばデータベースにあるBLOBなデータとかの場合には<a href="http://laravel.com/api/class-Illuminate.Mail.Message.html">Illuminate\Mail\Message</a>にattachDataやembedDataっていうAPI等を利用する事で可能なのかも。そこんとこは未検証</p>
+
+<p>とりあえずドキュメント読み終わり。今回は結構あっさりしてた</p>
+<h4>余談</h4>
+<p>Mail::pretendを使う事でメールを送らずにログに書きだすっていう方式が利用できる模様。Mail::pretendをするか、app/config/mail.php等の設定でpretendをtrueにすれば良い模様。pretendするとログに書き込まれるがそのメッセージ自体は送信先?のメールアドレスは記載されている模様。テストする名目とかであればそこチェックすればいいのかって所なのか</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class HogeControllerTest extends TestCase {
     public function test_send_email() {
@@ -114,15 +134,21 @@ class HogeControllerTest extends TestCase {
         $this-&gt;call(&quot;GET&quot;, &quot;/&quot;);
     }
 }
-</code></pre><p>Mail::prentedなログ書き込みはINFOレベルで入る模様。それでテスト十分ですっては正直言い切れない感はハンパない気がしますけど、んまぁテスト時に至らんメール大量発動しちゃうよりは良いかなと</p><p>とりあえずはMail::pretend使えばメールをログに書き出せる。但しアドレスだけ的な感じかと</p>
+</code></pre>
+<p>Mail::prentedなログ書き込みはINFOレベルで入る模様。それでテスト十分ですっては正直言い切れない感はハンパない気がしますけど、んまぁテスト時に至らんメール大量発動しちゃうよりは良いかなと</p>
+
+<p>とりあえずはMail::pretend使えばメールをログに書き出せる。但しアドレスだけ的な感じかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/08/codemodel-annotation-processing-java-sourcecode-generation.html">&lt;&nbsp;codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成</a>
+            <a class="float-start box-link" href="/2013/07/laravel-password-reminder-expiration.html">&lt;&nbsp;Laravelのパスワードリマインダーに有効期限設定が出来るようになったらしい件</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/07/laravel-password-reminder-expiration.html">Laravelのパスワードリマインダーに有効期限設定が出来るようになったらしい件&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/07/laravel-19-security-password-reminder.html">Laravel使ってみた (19) - Security(パスワードリマインダーとその他) -&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -206,7 +232,7 @@ class HogeControllerTest extends TestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -227,9 +253,6 @@ class HogeControllerTest extends TestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -342,7 +365,7 @@ class HogeControllerTest extends TestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -365,20 +388,20 @@ class HogeControllerTest extends TestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -388,13 +411,15 @@ class HogeControllerTest extends TestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("c86e6b9df9cba915c4b7407f41c041510be771bc");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

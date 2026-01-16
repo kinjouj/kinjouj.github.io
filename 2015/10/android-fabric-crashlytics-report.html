@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-10-19T17:44:05+09:00">
+                <time datetime="2015-10-19 17:44:05 +0900">
                   <a href="/archives/2015/10">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["fabric.ioの流れ", "project/build.gradleを修正", "project/app/build.gradleを修正", "App.java", "余談", "デバッグビルド時にはCrashlyticsを有効にしない場合"]-->
-                <p>fabric.io を使ってCrashlyticsでクラッシュレポートを送信するメモ</p><h4>fabric.ioの流れ</h4>
+                <!--[&quot;fabric.ioの流れ&quot;, &quot;project/build.gradleを修正&quot;, &quot;project/app/build.gradleを修正&quot;, &quot;App.java&quot;, &quot;余談&quot;, &quot;デバッグビルド時にはCrashlyticsを有効にしない場合&quot;]-->
+                <p>fabric.io を使ってCrashlyticsでクラッシュレポートを送信するメモ</p>
+<h4>fabric.ioの流れ</h4>
 <ol>
 <li>Android Studioにfabricプラグインを導入
 <ol>
@@ -86,9 +88,13 @@
 <li>android.app.Applicationを継承したクラスでfabricによるCrashlyticsでクラッシュトラッキングする方向な設定コードを組み込む</li>
 <li>project/build.gradle及びapp/build.gradleに依存性などの定義を修正する</li>
 </ol>
-<p><li>fabricを導入したアプリを端末へインストール・起動</li>
-<li>起動後に fabric.io にアクセスするとダッシュボードへアクセス可能になる</li>
-</ol></p><p>っていう流れで導入する。1に関しては fabric.io にアクセスした際にプラグインがダウンロード出来るのでそれをAndroid Studioでロードしておく。書いてある通りAndroidManifest.xmlにapiKeyが入ってるけどこれはfabric.propertiesで定義する。</p><h4>project/build.gradleを修正</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
+
+<p><li>fabricを導入したアプリを端末へインストール・起動</li><br>
+<li>起動後に fabric.io にアクセスするとダッシュボードへアクセス可能になる</li><br>
+</ol></p>
+
+<p>っていう流れで導入する。1に関しては fabric.io にアクセスした際にプラグインがダウンロード出来るのでそれをAndroid Studioでロードしておく。書いてある通りAndroidManifest.xmlにapiKeyが入ってるけどこれはfabric.propertiesで定義する。</p>
+<h4>project/build.gradleを修正</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         jcenter()
         maven { url &#39;https://maven.fabric.io/public&#39; }
@@ -111,7 +117,9 @@ allprojects {
         }
     }
 }
-</code></pre><h4>project/app/build.gradleを修正</h4><p>※長いので一部だけ</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;io.fabric&quot;
+</code></pre><h4>project/app/build.gradleを修正</h4>
+<p>※長いので一部だけ</p>
+<pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;io.fabric&quot;
 
 dependencies {
     // 追加
@@ -119,7 +127,9 @@ dependencies {
         transitive = true;
     }
 }
-</code></pre><p>を追加</p><h4>App.java</h4><pre class="line-numbers"><code class="language-groovy">package kinjouj.app.oretter;
+</code></pre>
+<p>を追加</p>
+<h4>App.java</h4><pre class="line-numbers"><code class="language-groovy">package kinjouj.app.oretter;
 
 import android.app.Application;
 import com.crashlytics.android.Crashlytics;
@@ -131,9 +141,25 @@ public class App extends Application {
         Fabric.with(this, new Crashlytics());
     }
 }
-</code></pre><p>これで上記のセクション1は終わり。あとはこれをビルドしてインストール後起動するとfabric.ioからダッシュボードへアクセスする出来るようになる</p><p>んで適当にアプリをバグらせて確認すると</p><p><img src="/images/2015/10/201510191830.png" class="img-fluid" alt="image" /></p><p>というようなクラッシュエラーをfabricダッシュボードのCrashlyticsから確認する事が出来るようになる</p><h4>余談</h4><p>proguardを有効にしている場合は</p><pre class="line-numbers"><code class="language-">-keep class com.crashlytics.** { *; }
+</code></pre>
+<p>これで上記のセクション1は終わり。あとはこれをビルドしてインストール後起動するとfabric.ioからダッシュボードへアクセスする出来るようになる</p>
+
+<p>んで適当にアプリをバグらせて確認すると</p>
+
+<p><img src="/images/2015/10/201510191830.png" class="img-fluid" alt="image" /></p>
+
+<p>というようなクラッシュエラーをfabricダッシュボードのCrashlyticsから確認する事が出来るようになる</p>
+<h4>余談</h4>
+<p>proguardを有効にしている場合は</p>
+<pre class="line-numbers"><code class="language-">-keep class com.crashlytics.** { *; }
 -keep class com.crashlytics.android.**
-</code></pre><p>の記述が必要。詳しくは <a href="https://docs.fabric.io/android/crashlytics/dex-and-proguard.html" target="_blank" rel="noopener noreferrer">https://docs.fabric.io/android/crashlytics/dex-and-proguard.html</a></p><h4>デバッグビルド時にはCrashlyticsを有効にしない場合</h4><p>詳しくは <a href="https://docs.fabric.io/android/crashlytics/build-tools.html#disabling-crashlytics-for-debug-builds" target="_blank" rel="noopener noreferrer">https://docs.fabric.io/android/crashlytics/build-tools.html#disabling-crashlytics-for-debug-builds</a></p>
+</code></pre>
+<p>の記述が必要。詳しくは <a href="https://docs.fabric.io/android/crashlytics/dex-and-proguard.html">https://docs.fabric.io/android/crashlytics/dex-and-proguard.html</a></p>
+<h4>デバッグビルド時にはCrashlyticsを有効にしない場合</h4>
+<p>詳しくは <a href="https://docs.fabric.io/android/crashlytics/build-tools.html#disabling-crashlytics-for-debug-builds">https://docs.fabric.io/android/crashlytics/build-tools.html#disabling-crashlytics-for-debug-builds</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -225,7 +251,7 @@ public class App extends Application {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -246,9 +272,6 @@ public class App extends Application {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -361,7 +384,7 @@ public class App extends Application {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -384,20 +407,20 @@ public class App extends Application {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -407,13 +430,15 @@ public class App extends Application {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("8abe6e70496b148f36d20ef1c8281e467bb16b89");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

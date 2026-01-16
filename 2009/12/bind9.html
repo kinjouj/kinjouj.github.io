@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2009-12-05T09:00:00+09:00">
+                <time datetime="2009-12-05 09:00:00 +0900">
                   <a href="/archives/2009/12">
                   <span class="post-date-year">2009</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["/etc/named.confを作成", "rndc.keyを作成", "named.caを作成", "localhost.zoneを作成", "localhost-rev.zoneを作成", "3brains.zone", "3brains-rev.zoneを作成", "/etc/resolv.confを設定"]-->
-                <p>bind9(+chroot)でDNSサーバーを構築してみる</p><p>※サーバーのIPは192.168.1.10と定義</p><h4>/etc/named.confを作成</h4><pre class="line-numbers"><code class="language-conf">options {
+                <!--[&quot;/etc/named.confを作成&quot;, &quot;rndc.keyを作成&quot;, &quot;named.caを作成&quot;, &quot;localhost.zoneを作成&quot;, &quot;localhost-rev.zoneを作成&quot;, &quot;3brains.zone&quot;, &quot;3brains-rev.zoneを作成&quot;, &quot;/etc/resolv.confを設定&quot;]-->
+                <p>bind9(+chroot)でDNSサーバーを構築してみる</p>
+
+<p>※サーバーのIPは192.168.1.10と定義</p>
+<h4>/etc/named.confを作成</h4><pre class="line-numbers"><code class="language-conf">options {
     directory &quot;/var/named&quot;;
     dump-file &quot;/var/named/data/cache.db&quot;;
     statistics-file &quot;/var/named/data/stats.txt&quot;;
@@ -122,9 +126,13 @@ zone &quot;1.168.192.in-addr.arpa&quot; IN {
 };
 
 include &quot;rndc.key&quot;;
-</code></pre><p>以上のファイルを作成していく</p><h4>rndc.keyを作成</h4><pre class="line-numbers"><code class="language-">rndc-confgen &gt; /etc/rndc.key
+</code></pre>
+<p>以上のファイルを作成していく</p>
+<h4>rndc.keyを作成</h4><pre class="line-numbers"><code class="language-">rndc-confgen &gt; /etc/rndc.key
 </code></pre><h4>named.caを作成</h4><pre class="line-numbers"><code class="language-">dig @a.root-servers.net . ns &gt; /var/named/named.ca
-</code></pre><h4>localhost.zoneを作成</h4><p>ローカルネットワーク?の正引きゾーン</p><pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
+</code></pre><h4>localhost.zoneを作成</h4>
+<p>ローカルネットワーク?の正引きゾーン</p>
+<pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    localhost.    postmaster.3brains.net. (
     20080720 ;
     28800 ;
@@ -134,7 +142,9 @@ include &quot;rndc.key&quot;;
 
     IN    NS    @
     IN    A      127.0.0.1
-</code></pre><h4>localhost-rev.zoneを作成</h4><p>ローカルネットワークの逆引きゾーン</p><pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
+</code></pre><h4>localhost-rev.zoneを作成</h4>
+<p>ローカルネットワークの逆引きゾーン</p>
+<pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    localhost.    postmaster.3brains.net. (
     20080720 ;
     28800 ;
@@ -144,7 +154,9 @@ include &quot;rndc.key&quot;;
 
     IN    NS    localhost.
 1   IN    PTR   localhost.
-</code></pre><h4>3brains.zone</h4><p>3brains.netドメインの正引きゾーン</p><pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
+</code></pre><h4>3brains.zone</h4>
+<p>3brains.netドメインの正引きゾーン</p>
+<pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    3brains.net.    postmaster.3brains.net. (
     20080720 ;
     28800 ;
@@ -156,7 +168,11 @@ include &quot;rndc.key&quot;;
 @        IN    A      192.168.1.10
 ns1      IN    A      192.168.1.10
          IN    MX    10    mail.3brains.net.
-</code></pre><p>サブドメインを利用する場合はAレコードとして定義しておくこと</p><h4>3brains-rev.zoneを作成</h4><p>3brains.netの逆引きゾーン</p><pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
+</code></pre>
+<p>サブドメインを利用する場合はAレコードとして定義しておくこと</p>
+<h4>3brains-rev.zoneを作成</h4>
+<p>3brains.netの逆引きゾーン</p>
+<pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    3brains.net.    postmaster.3brains.net. (
     20080720 ;
     28800 ;
@@ -167,7 +183,11 @@ ns1      IN    A      192.168.1.10
       IN    NS    3brains.net.
 10    IN    PTR    3brains.net.
 </code></pre><h4>/etc/resolv.confを設定</h4><pre class="line-numbers"><code class="language-">nameserver 192.168.1.10
-</code></pre><p>終わり。サーバーを起動しエラーが出ていない事をチェック。その後外部からドメインがちゃんと引けるかチェック</p>
+</code></pre>
+<p>終わり。サーバーを起動しエラーが出ていない事をチェック。その後外部からドメインがちゃんと引けるかチェック</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -259,7 +279,7 @@ ns1      IN    A      192.168.1.10
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -280,9 +300,6 @@ ns1      IN    A      192.168.1.10
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -395,7 +412,7 @@ ns1      IN    A      192.168.1.10
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -418,20 +435,20 @@ ns1      IN    A      192.168.1.10
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -441,13 +458,15 @@ ns1      IN    A      192.168.1.10
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("b9e27b9e2a5e6f87dbe331800f4613a7057ab911");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

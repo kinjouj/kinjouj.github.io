@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-03-24T00:00:00+00:00">
+                <time datetime="2013-03-24 00:00:00 +0900">
                   <a href="/archives/2013/03">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,15 +78,28 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["インストール", "Google Maps APIのAPI Keyを取得する", "AndroidManifest.xml", "res/layout/main.xml", "MainActivity.java"]-->
-                <p>タイトル通り。今更ながらMapFragmentを使ってGoogle MapsをAndroidアプリ上に表示させてみた</p><h4>インストール</h4><p>Google Play Serviceが必要になる。Android Package Manager?で入れておく。で自分の場合はAndroid SDKが/opt/androidにあるので/opt/android/extras/google/google_play_services/libproject/google-play-services_libをEclipseのライブラリプロジェクトとしてインポートする</p><p>これがどうも「ファイル」-&gt;「インポート」で出来なかったので、「ファイル」-&gt;「新規」から「Android Project from Existing Code」からインポート処理をする。でどうやらこれが必要な理由としてcom.google.android.gcm.Rっていうクラスが必要なのだけど、これがこのプロジェクトしか入ってないので必要っぽい</p><h4>Google Maps APIのAPI Keyを取得する</h4><p><a href="https://code.google.com/apis/console" target="_blank" rel="noopener noreferrer">https://code.google.com/apis/console</a> から</p>
+                <!--[&quot;インストール&quot;, &quot;Google Maps APIのAPI Keyを取得する&quot;, &quot;AndroidManifest.xml&quot;, &quot;res/layout/main.xml&quot;, &quot;MainActivity.java&quot;]-->
+                <p>タイトル通り。今更ながらMapFragmentを使ってGoogle MapsをAndroidアプリ上に表示させてみた</p>
+<h4>インストール</h4>
+<p>Google Play Serviceが必要になる。Android Package Manager?で入れておく。で自分の場合はAndroid SDKが/opt/androidにあるので/opt/android/extras/google/google_play_services/libproject/google-play-services_libをEclipseのライブラリプロジェクトとしてインポートする</p>
+
+<p>これがどうも「ファイル」-&gt;「インポート」で出来なかったので、「ファイル」-&gt;「新規」から「Android Project from Existing Code」からインポート処理をする。でどうやらこれが必要な理由としてcom.google.android.gcm.Rっていうクラスが必要なのだけど、これがこのプロジェクトしか入ってないので必要っぽい</p>
+<h4>Google Maps APIのAPI Keyを取得する</h4>
+<p><a href="https://code.google.com/apis/console">https://code.google.com/apis/console</a> から</p>
+
 <ul>
 <li>Servicesで「Google Maps Android API v2」をonにする</li>
 <li>API Accessにて「Create new Android Key」でAPI Keyを取得する</li>
 </ul>
-<p>1は問題無いけど2ではキーストアのフィンガープリントが必要なので</p><pre class="line-numbers"><code class="language-">keytool -list -v -keystore debug.keystore
-</code></pre><p>で出力されたSHA1なフィンガープリントをコピーして「フィンガープリント内容;パッケージ名」<br>
-でAPI Access時に指定して取得。ちなみにデバッグ用(Eclipseでやる場合)のキーストアは$HOME/.android/debug.keystoreっぽい。Windowsは知らん</p><p>これで準備完了、あとはコードを書くだけ</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest
+
+<p>1は問題無いけど2ではキーストアのフィンガープリントが必要なので</p>
+<pre class="line-numbers"><code class="language-">keytool -list -v -keystore debug.keystore
+</code></pre>
+<p>で出力されたSHA1なフィンガープリントをコピーして「フィンガープリント内容;パッケージ名」<br><br>
+でAPI Access時に指定して取得。ちなみにデバッグ用(Eclipseでやる場合)のキーストアは$HOME/.android/debug.keystoreっぽい。Windowsは知らん</p>
+
+<p>これで準備完了、あとはコードを書くだけ</p>
+<h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;sample.test&quot;
     android:versionCode=&quot;1&quot;
@@ -121,14 +135,18 @@
         &lt;/activity&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><p>com.google.android.maps.v2.API_KEYが必要なくらいであとはパーミッションとかちょこちょこな事が必要なくらい</p><h4>res/layout/main.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>com.google.android.maps.v2.API_KEYが必要なくらいであとはパーミッションとかちょこちょこな事が必要なくらい</p>
+<h4>res/layout/main.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;fragment
     class=&quot;com.google.android.gms.maps.SupportMapFragment&quot;
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:id=&quot;@+id/map&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot; /&gt;
-</code></pre><p>古い端末で実検証したのでcom.google.android.gms.maps.SupportMapFragmentを使ってますが、新しめな場合はcom.google.android.gms.maps.MapFragmentでいいのかも</p><h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>古い端末で実検証したのでcom.google.android.gms.maps.SupportMapFragmentを使ってますが、新しめな場合はcom.google.android.gms.maps.MapFragmentでいいのかも</p>
+<h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -247,7 +265,33 @@ public class MainActivity extends FragmentActivity {
         });
     }
 }
-</code></pre><p>でおおまかな動作概要</p><p><img src="/images/2013/03/20130324011541.png" class="img-fluid" alt="image" /></p><p>ソースに書いてる通り現在地と東京スカイツリーをPolylineで線を繋ぐ。で東京スカイツリーにマーカーを設置している</p><p>でちょいとズームしてマーカーをタップする</p><p><img src="/images/2013/03/20130324011755.png" class="img-fluid" alt="image" /></p><p>で出た吹き出しもタップすると</p><p><img src="/images/2013/03/20130324011820.png" class="img-fluid" alt="image" /></p><p>これがGoogleMap.OnInfoWindowClickListenerな模様。まぁ上で出てるけど、円なマーカーも付けてる。で最後にPolygonなマーカー</p><p><img src="/images/2013/03/20130324012033.png" class="img-fluid" alt="image" /></p><p>な感じでマーカーをつけれたりする</p><p>んまぁあとは以下に記載している参考サイトを見る+公式ドキュメントに書いているのでそれ読めば良いかと</p><p>参考: <a href="http://dev.classmethod.jp/smartphone/android/android-tips-25-google-maps-android-api-v2" target="_blank" rel="noopener noreferrer">http://dev.classmethod.jp/smartphone/android/android-tips-25-google-maps-android-api-v2</a></p>
+</code></pre>
+<p>でおおまかな動作概要</p>
+
+<p><img src="/images/2013/03/20130324011541.png" class="img-fluid" alt="image" /></p>
+
+<p>ソースに書いてる通り現在地と東京スカイツリーをPolylineで線を繋ぐ。で東京スカイツリーにマーカーを設置している</p>
+
+<p>でちょいとズームしてマーカーをタップする</p>
+
+<p><img src="/images/2013/03/20130324011755.png" class="img-fluid" alt="image" /></p>
+
+<p>で出た吹き出しもタップすると</p>
+
+<p><img src="/images/2013/03/20130324011820.png" class="img-fluid" alt="image" /></p>
+
+<p>これがGoogleMap.OnInfoWindowClickListenerな模様。まぁ上で出てるけど、円なマーカーも付けてる。で最後にPolygonなマーカー</p>
+
+<p><img src="/images/2013/03/20130324012033.png" class="img-fluid" alt="image" /></p>
+
+<p>な感じでマーカーをつけれたりする</p>
+
+<p>んまぁあとは以下に記載している参考サイトを見る+公式ドキュメントに書いているのでそれ読めば良いかと</p>
+
+<p>参考: <a href="http://dev.classmethod.jp/smartphone/android/android-tips-25-google-maps-android-api-v2">http://dev.classmethod.jp/smartphone/android/android-tips-25-google-maps-android-api-v2</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -339,7 +383,7 @@ public class MainActivity extends FragmentActivity {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -360,9 +404,6 @@ public class MainActivity extends FragmentActivity {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -475,7 +516,7 @@ public class MainActivity extends FragmentActivity {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -498,20 +539,20 @@ public class MainActivity extends FragmentActivity {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -521,13 +562,15 @@ public class MainActivity extends FragmentActivity {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("b0a92fefe1fa6d7ab4671d336a1138b3b4c96ec1");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

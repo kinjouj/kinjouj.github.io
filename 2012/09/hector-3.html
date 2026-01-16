@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-09-23T00:00:00+00:00">
+                <time datetime="2012-09-23 00:00:00 +0900">
                   <a href="/archives/2012/09">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["BaseTable.java", "Sample.java", "Color.java", "HectorClient.java"]-->
-                <p>さらにちょっと進めてみた。やってみる項目として、継承・AnonymousPropertyHandling(ドキュメントではAnonymousPropertyAddHandler)・Listなデータを突っ込んでみる</p><h4>BaseTable.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+                <!--[&quot;BaseTable.java&quot;, &quot;Sample.java&quot;, &quot;Color.java&quot;, &quot;HectorClient.java&quot;]-->
+                <p>さらにちょっと進めてみた。やってみる項目として、継承・AnonymousPropertyHandling(ドキュメントではAnonymousPropertyAddHandler)・Listなデータを突っ込んでみる</p>
+<h4>BaseTable.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -126,7 +128,13 @@ public abstract class BaseTable {
         return anonymousProperties.entrySet();
     }
 }
-</code></pre><p>例えば、毎回テーブルマッピングを行う度にIdアノテーションなの定義するのめんどくさい。なのでこれを外部クラスで提供して継承することで実装をしない方向で</p><p>Inheritanceアノテーションとabstract classに関しては省略。でDiscriminatorColumnアノテーションによって、クラスを識別するにあたって必要な情報を格納するカラムを指定する模様。で値になるのはDiscriminatorValueアノテーションになる</p><p>んでAnonymousPropertyHandlingアノテーションによって、Columnアノテーションで指定してない等のプロパティもCassandraに突っ込みたい場合にadderに対応するメソッドを介してデータをつっこみ、getterに対応するメソッドが返すCollection<Map.Entry>によって返されたデータがCassandraに突っ込まれる模様</p><h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>例えば、毎回テーブルマッピングを行う度にIdアノテーションなの定義するのめんどくさい。なのでこれを外部クラスで提供して継承することで実装をしない方向で</p>
+
+<p>Inheritanceアノテーションとabstract classに関しては省略。でDiscriminatorColumnアノテーションによって、クラスを識別するにあたって必要な情報を格納するカラムを指定する模様。で値になるのはDiscriminatorValueアノテーションになる</p>
+
+<p>んでAnonymousPropertyHandlingアノテーションによって、Columnアノテーションで指定してない等のプロパティもCassandraに突っ込みたい場合にadderに対応するメソッドを介してデータをつっこみ、getterに対応するメソッドが返すCollection<Map.Entry>によって返されたデータがCassandraに突っ込まれる模様</p>
+<h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,7 +174,9 @@ public class Sample extends BaseTable {
         colors.add(color);
     }
 }
-</code></pre><p>前回の記事で違うのは、BaseTableを継承する・(set/get)Colorでは無く、(get/set)ColorsでList&lt;Color&gt;を使う点。もちろん前回で書いたColor.javaももろもろ修正する</p><h4>Color.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>前回の記事で違うのは、BaseTableを継承する・(set/get)Colorでは無く、(get/set)ColorsでList&lt;Color&gt;を使う点。もちろん前回で書いたColor.javaももろもろ修正する</p>
+<h4>Color.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -258,7 +268,9 @@ public class HectorClient {
         em.persist(sample);
     }
 }
-</code></pre><p>これは前回とほとんど変わらない。ただputする際にsetColorからaddColorに変わったのと、addAnonymousPropertyでカラム指定無しなデータを突っ込むところだけは異なる。で実行後にCassandra側のデータを確認すると</p>
+</code></pre>
+<p>これは前回とほとんど変わらない。ただputする際にsetColorからaddColorに変わったのと、addAnonymousPropertyでカラム指定無しなデータを突っ込むところだけは異なる。で実行後にCassandra側のデータを確認すると</p>
+
 <pre>
 RowKey: 1348330541878
 => (column=class, value=sample, timestamp=1348330541907000)
@@ -267,6 +279,8 @@ RowKey: 1348330541878
 => (column=test, value=hoge fuga foobar, timestamp=1348330541907001)
 </pre>
 
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -358,7 +372,7 @@ RowKey: 1348330541878
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -379,9 +393,6 @@ RowKey: 1348330541878
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -494,7 +505,7 @@ RowKey: 1348330541878
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -517,20 +528,20 @@ RowKey: 1348330541878
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -540,13 +551,15 @@ RowKey: 1348330541878
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("132d3ee125f22d080f830d7e527ea0a695666ba4");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

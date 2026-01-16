@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="以前から何度かはRailsとRSpecに関する事書いてるけど、ちゃんとドキュメント読みましょうって事で、 &lt;https://www.relishapp.com/rspec/rspec-rails/docs&gt; を読み進めてみる" />
+    <meta name="description" content="以前から何度かはRailsとRSpecに関する事書いてるけど、ちゃんとドキュメント読みましょうって事で、 &amp;lt;https://www.relishapp.com/rspec/rspec-rails/docs&amp;gt; を読み進めてみる" />
     <title>rspec-railsのドキュメント読み - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/06/laravel-2-configuration.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/06/laravel-3-routing.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-10T00:00:00+00:00">
+                <time datetime="2013-06-10 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,8 +79,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Anonymous Controller", "bypass_rescue", "Capybara-WebKitを使う", "ヘルパーのテスト", "モデルのテスト"]-->
-                <p>以前から何度かはRailsとRSpecに関する事書いてるけど、ちゃんとドキュメント読みましょうって事で、 <a href="https://www.relishapp.com/rspec/rspec-rails/docs" target="_blank" rel="noopener noreferrer">https://www.relishapp.com/rspec/rspec-rails/docs</a> を読み進めてみる</p><h4>Anonymous Controller</h4><p>Anonymous Controllerは要はコントローラーにメソッド定義しちゃったりしてテストするって感じなのかと。例えばapplication_controller.rbが</p><pre class="line-numbers"><code class="language-rb">class AccessDenied &lt; StandardError; end
+                <!--[&quot;Anonymous Controller&quot;, &quot;bypass_rescue&quot;, &quot;Capybara-WebKitを使う&quot;, &quot;ヘルパーのテスト&quot;, &quot;モデルのテスト&quot;]-->
+                <p>以前から何度かはRailsとRSpecに関する事書いてるけど、ちゃんとドキュメント読みましょうって事で、 <a href="https://www.relishapp.com/rspec/rspec-rails/docs">https://www.relishapp.com/rspec/rspec-rails/docs</a> を読み進めてみる</p>
+<h4>Anonymous Controller</h4>
+<p>Anonymous Controllerは要はコントローラーにメソッド定義しちゃったりしてテストするって感じなのかと。例えばapplication_controller.rbが</p>
+<pre class="line-numbers"><code class="language-rb">class AccessDenied &lt; StandardError; end
 
 class ApplicationController &lt; ActionController::Base
   protect_from_forgery
@@ -90,7 +94,9 @@ class ApplicationController &lt; ActionController::Base
       render :status =&gt; :forbidden, :nothing =&gt; true
     end
 end
-</code></pre><p>まぁAccessDeniedがraiseされたらHTTP403を出すような感じ。でテストを</p><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
+</code></pre>
+<p>まぁAccessDeniedがraiseされたらHTTP403を出すような感じ。でテストを</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 describe ApplicationController do
   controller do
@@ -105,7 +111,9 @@ describe ApplicationController do
     expect(response.status).to be(403)
   end
 end
-</code></pre><p>っていう感じでコントローラーにアクションぶち込んでそれにアクセスしてテストする。ちなみに</p><pre class="line-numbers"><code class="language-rb">it &quot;GET #index&quot; do
+</code></pre>
+<p>っていう感じでコントローラーにアクションぶち込んでそれにアクセスしてテストする。ちなみに</p>
+<pre class="line-numbers"><code class="language-rb">it &quot;GET #index&quot; do
   def controller.index
     render :status =&gt; :not_found, :nothing =&gt; true
   end
@@ -114,7 +122,11 @@ end
   expect(response).not_to be_success
   expect(response.status).to be(404)
 end
-</code></pre><p>っていう風に書く事も可能っぽい</p><h4>bypass_rescue</h4><p>んでbypass_rescueはrescue_fromを無視しちゃう感じな表現でええんやろか。んまぁそんな感じだろうとは思うんですが、要はrescue_fromで指定した:withに飛ばさずに例外を発生させられるっていう所なんだと思われる。実体をソースを読んだ所だと</p><pre class="line-numbers"><code class="language-rb">module ByPassRescue
+</code></pre>
+<p>っていう風に書く事も可能っぽい</p>
+<h4>bypass_rescue</h4>
+<p>んでbypass_rescueはrescue_fromを無視しちゃう感じな表現でええんやろか。んまぁそんな感じだろうとは思うんですが、要はrescue_fromで指定した:withに飛ばさずに例外を発生させられるっていう所なんだと思われる。実体をソースを読んだ所だと</p>
+<pre class="line-numbers"><code class="language-rb">module ByPassRescue
   def rescue_with_handler(exception)
     raise exception
   end
@@ -123,7 +135,9 @@ end
 def bypass_rescue
   controller.extend(ByPassRescue)
 end
-</code></pre><p>みたいな感じになってた。</p><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
+</code></pre>
+<p>みたいな感じになってた。</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 describe ApplicationController do
   controller do
@@ -137,7 +151,19 @@ describe ApplicationController do
     expect { get :index }.to raise_error(AccessDenied)
   end
 end
-</code></pre><p>みたいにbypass_rescueをしない場合だと、rescue_fromで指定されたように403エラーになる。bypass_rescueをした場合だとraiseされたエラーがそのまま送出されるっていう感じかと</p><h4>Capybara-WebKitを使う</h4><p><a href="/2012/09/rails3-rspec-testing-3.html">Rails3+RSpecでのテストを勉強してみる (3) – capybara-webkitを使ってみる -</a>で書いてるので(ry</p><h4>ヘルパーのテスト</h4><p><a href="/2012/09/rails3-rspec-testing-4.html">Rails3+RSpecでのテストを勉強してみる (4) – コントローラー及びヘルパーのテスト -</a>を参照</p><h4>モデルのテスト</h4><p><a href="/2012/09/rails3-rspec-testing-1.html">Rails3+RSpecでのテストを勉強してみる (1)</a>で書いてるので(ry</p><p>以上。とりまぁまだActionMailerとかまで進んでないので部分的な所は省略。まだ読んでない所もあるので逐一追記したりする予定</p>
+</code></pre>
+<p>みたいにbypass_rescueをしない場合だと、rescue_fromで指定されたように403エラーになる。bypass_rescueをした場合だとraiseされたエラーがそのまま送出されるっていう感じかと</p>
+<h4>Capybara-WebKitを使う</h4>
+<p><a href="/2012/09/rails3-rspec-testing-3.html">Rails3+RSpecでのテストを勉強してみる (3) – capybara-webkitを使ってみる -</a>で書いてるので(ry</p>
+<h4>ヘルパーのテスト</h4>
+<p><a href="/2012/09/rails3-rspec-testing-4.html">Rails3+RSpecでのテストを勉強してみる (4) – コントローラー及びヘルパーのテスト -</a>を参照</p>
+<h4>モデルのテスト</h4>
+<p><a href="/2012/09/rails3-rspec-testing-1.html">Rails3+RSpecでのテストを勉強してみる (1)</a>で書いてるので(ry</p>
+
+<p>以上。とりまぁまだActionMailerとかまで進んでないので部分的な所は省略。まだ読んでない所もあるので逐一追記したりする予定</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -229,7 +255,7 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -250,9 +276,6 @@ end
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -365,7 +388,7 @@ end
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -388,20 +411,20 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -411,13 +434,15 @@ end
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("798caf01c34210072045b02b87307c6303f5dab1");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2025-05-27T09:00:00+09:00">
+                <time datetime="2025-05-27 09:00:00 +0900">
                   <a href="/archives/2025/05">
                   <span class="post-date-year">2025</span>
                   <span class="hyphen">-</span>
@@ -76,29 +77,56 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Server A(リバースプロキシ側)", "Server B(バックエンド側)", "docker networkでDocker Networkを作成", "Server Bの起動", "Server A側のnginx.conf", "Server Aを起動", "まとめ"]-->
-                <p>まず前提として２つのnginxサーバーをDockerコンテナを使って起動する。あえてnginxの設定とかは省略するが</p><h4>Server A(リバースプロキシ側)</h4><pre class="line-numbers"><code class="language-bash">docker run -d -p 80:80 -t server-a
+                <!--[&quot;Server A(リバースプロキシ側)&quot;, &quot;Server B(バックエンド側)&quot;, &quot;docker networkでDocker Networkを作成&quot;, &quot;Server Bの起動&quot;, &quot;Server A側のnginx.conf&quot;, &quot;Server Aを起動&quot;, &quot;まとめ&quot;]-->
+                <p>まず前提として２つのnginxサーバーをDockerコンテナを使って起動する。あえてnginxの設定とかは省略するが</p>
+<h4>Server A(リバースプロキシ側)</h4><pre class="line-numbers"><code class="language-bash">docker run -d -p 80:80 -t server-a
 </code></pre><h4>Server B(バックエンド側)</h4><pre class="line-numbers"><code class="language-bash">docker run -d -p 8080:80 -t server-b
-</code></pre><p>というようにServer AからServer Bにリバースプロキシをするように設定した場合、通常であればバックエンド側は外部からはアクセスできないはずだ。しかし</p><pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
+</code></pre>
+<p>というようにServer AからServer Bにリバースプロキシをするように設定した場合、通常であればバックエンド側は外部からはアクセスできないはずだ。しかし</p>
+<pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
 server b
 
 # おい！！！
 kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100:8080
 server b
-</code></pre><p>まあリバースプロキシでポート指定無しなところでアクセスできるのはそれはわかるがなんでバックエンドまで普通に外部からアクセスできるのかっていうこと</p><p>-pを使ってコンテナポートとホストポートだけをマッピングしてしまうとそれが全面公開設定になってしまう模様なので上記のようにServer B側で8080をホストでマッピングしてると外部からでも普通にアクセスできちゃうっていうらしい</p><p>でそれを解決する方法としてコンテナポートのみを開放する方法があるのでそれをやってみる</p><h4>docker networkでDocker Networkを作成</h4><pre class="line-numbers"><code class="language-bash">docker network create --subnet 172.16.0.0/16 --attachable mynet
-</code></pre><p>mynetっていう名前でDocker Networkを作成する。どうやらDockerでコンテナを作成した際に使用されるDocker Networkはおそらく最初からあるbridgeを使用するらしいのだがこのbridgeネットワークどうやらDNSによる名前解決を行わないらしい</p><p>なので新しくDocker Networkを作成して以下で作るコンテナで同一のネットワークを使用するように起動する</p><h4>Server Bの起動</h4><pre class="line-numbers"><code class="language-bash">docker run --name server-b -d --expose=8080 --net=mynet -t server-b
-</code></pre><p>--nameでコンテナに名前をつける。これはServer Aでproxy_passを指定する際にコンテナ名で指定できるようになるのでそれを利用するためにコンテナ名を指定しておく。-pではなく--exposeでコンテナポートを開放、んで--netでそのコンテナが所属するネットワークを指定</p><h4>Server A側のnginx.conf</h4><pre class="line-numbers"><code class="language-nginx">listen 80;
+</code></pre>
+<p>まあリバースプロキシでポート指定無しなところでアクセスできるのはそれはわかるがなんでバックエンドまで普通に外部からアクセスできるのかっていうこと</p>
+
+<p>-pを使ってコンテナポートとホストポートだけをマッピングしてしまうとそれが全面公開設定になってしまう模様なので上記のようにServer B側で8080をホストでマッピングしてると外部からでも普通にアクセスできちゃうっていうらしい</p>
+
+<p>でそれを解決する方法としてコンテナポートのみを開放する方法があるのでそれをやってみる</p>
+<h4>docker networkでDocker Networkを作成</h4><pre class="line-numbers"><code class="language-bash">docker network create --subnet 172.16.0.0/16 --attachable mynet
+</code></pre>
+<p>mynetっていう名前でDocker Networkを作成する。どうやらDockerでコンテナを作成した際に使用されるDocker Networkはおそらく最初からあるbridgeを使用するらしいのだがこのbridgeネットワークどうやらDNSによる名前解決を行わないらしい</p>
+
+<p>なので新しくDocker Networkを作成して以下で作るコンテナで同一のネットワークを使用するように起動する</p>
+<h4>Server Bの起動</h4><pre class="line-numbers"><code class="language-bash">docker run --name server-b -d --expose=8080 --net=mynet -t server-b
+</code></pre>
+<p>--nameでコンテナに名前をつける。これはServer Aでproxy_passを指定する際にコンテナ名で指定できるようになるのでそれを利用するためにコンテナ名を指定しておく。-pではなく--exposeでコンテナポートを開放、んで--netでそのコンテナが所属するネットワークを指定</p>
+<h4>Server A側のnginx.conf</h4><pre class="line-numbers"><code class="language-nginx">listen 80;
 server_name localhost;
 location / {
     proxy_pass http://server-b;
     proxy_redirect off;
 }
-</code></pre><p>上記で指定したコンテナ名をproxy_passに指定することができる。ただし同一のDocker Networkに所属してないとhost not found in upstreamって言われるので注意</p><h4>Server Aを起動</h4><pre class="line-numbers"><code class="language-bash">docker run -p 80:80 --net=mynet -t server-a
-</code></pre><p>接続できるかやってみる</p><pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
+</code></pre>
+<p>上記で指定したコンテナ名をproxy_passに指定することができる。ただし同一のDocker Networkに所属してないとhost not found in upstreamって言われるので注意</p>
+<h4>Server Aを起動</h4><pre class="line-numbers"><code class="language-bash">docker run -p 80:80 --net=mynet -t server-a
+</code></pre>
+<p>接続できるかやってみる</p>
+<pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
 server b
 kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100:8080
 curl: (28) Connection timed out after 1001 milliseconds
-</code></pre><p>以上！長い！ややこしい！</p><p>んまあ安直に-pオプションでポートオープンにするのは止めようねっていうオチなんかなと</p><h4>まとめ</h4><h3>安易に-pを使用しない</h3><h3>コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</h3><p>てな感じかな</p>
+</code></pre>
+<p>以上！長い！ややこしい！</p>
+
+<p>んまあ安直に-pオプションでポートオープンにするのは止めようねっていうオチなんかなと</p>
+<h4>まとめ</h4><h3>安易に-pを使用しない</h3><h3>コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</h3>
+<p>てな感じかな</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -190,7 +218,7 @@ curl: (28) Connection timed out after 1001 milliseconds
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -211,9 +239,6 @@ curl: (28) Connection timed out after 1001 milliseconds
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -326,7 +351,7 @@ curl: (28) Connection timed out after 1001 milliseconds
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -349,20 +374,20 @@ curl: (28) Connection timed out after 1001 milliseconds
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -372,13 +397,15 @@ curl: (28) Connection timed out after 1001 milliseconds
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("169d8cf11d26824ae387c1147aa0f5b4c785c512");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

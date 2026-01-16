@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-07T00:00:00+00:00">
+                <time datetime="2013-06-07 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["追記"]-->
+                <!--[&quot;追記&quot;]-->
                 <p>ふと思って</p>
+
 <blockquote class="twitter-tweet">
   <p>
     そういや、AccountManager.getAuthTokenで返されるトークンってキャッシュされなかったっけ?
@@ -87,19 +89,31 @@
     &mdash; kinjouj (@kinjou_j) <a href="https://twitter.com/kinjou_j/statuses/342824075351183360">June 7, 2013</a>
   </p>
 </blockquote>
-<p>って書いちゃったので調べた</p><p><a href="http://d.hatena.ne.jp/adsaria/20101012/1286886888" target="_blank" rel="noopener noreferrer">http://d.hatena.ne.jp/adsaria/20101012/1286886888</a> に書かれている通り、一定期間で持ってアクセストークンは有効期限切れで失効するような場合だといくらgetAuthTokenを実行してもキャッシュされているアクセストークンを取ってくる。つまりサーバー側にアクセストークンをくれと要求する事が無い模様。まぁ端末内にどれくらいの期間アクセストークンをキャッシュするのかは要調査。フロー的には</p>
+
+<p>って書いちゃったので調べた</p>
+
+<p><a href="http://d.hatena.ne.jp/adsaria/20101012/1286886888">http://d.hatena.ne.jp/adsaria/20101012/1286886888</a> に書かれている通り、一定期間で持ってアクセストークンは有効期限切れで失効するような場合だといくらgetAuthTokenを実行してもキャッシュされているアクセストークンを取ってくる。つまりサーバー側にアクセストークンをくれと要求する事が無い模様。まぁ端末内にどれくらいの期間アクセストークンをキャッシュするのかは要調査。フロー的には</p>
+
 <ul>
 <li>getAuthTokenを最初に呼び出した際にサーバーからアクセストークンを取得 (この時点でキャッシュされる?)</li>
 <li>APIコールしたりとか(ry</li>
 <li>再度getAuthTokenで取得する (この際にはサーバーへリクエスト送信されずキャッシュされたのが返される?)</li>
 <li>APIコールする。この際アクセストークンが失効しているとエラーになる</li>
 </ul>
-<p>っていう感じじゃないかと。で上記参考先にも書いてあるけど、失効しているアクセストークンをキャッシュから取り除くにはAccountManager#invalidateAuthTokenメソッドを使ってキャッシュから取り除く必要がある。例えば、一定のインターバルを過ぎた場合にはAccountManagerのgetAuthTokenを実行する処理のfinally辺りでAccountManager.invlaidateAuthToken実行するとか</p><h4>追記</h4><p>doorkeeperのaccess_token_expires_inで有効期限を小さくして、以下のような検証してみた</p>
+
+<p>っていう感じじゃないかと。で上記参考先にも書いてあるけど、失効しているアクセストークンをキャッシュから取り除くにはAccountManager#invalidateAuthTokenメソッドを使ってキャッシュから取り除く必要がある。例えば、一定のインターバルを過ぎた場合にはAccountManagerのgetAuthTokenを実行する処理のfinally辺りでAccountManager.invlaidateAuthToken実行するとか</p>
+<h4>追記</h4>
+<p>doorkeeperのaccess_token_expires_inで有効期限を小さくして、以下のような検証してみた</p>
+
 <ul>
 <li>AccountManager.invalidateAuthTokenをしない場合: 初回時にアクセストークンを取得。AccountManagerによりキャッシュされる。その後サーバー側でアクセストークンが破棄されるまで放置し、有効期限切れになるとそこ後はアクセストークンがキャッシュされているのしか出ないのでWeb API通信が失敗する</li>
 <li>AccountManager.invalidateAuthTokenをした場合、上記同様だが、アクセストークンは通信される際に毎回取得するのでクライアント側で以前に使ったアクセストークンなどは使用されず、新しくアクセストークンを取り直す。但し、有効期限で執行しない限りはアクセストークンは変わらない。執行すると新しいアクセストークンが取得できる。とりあえずは通信は失敗しない</li>
 </ul>
+
 <p>というような感じ。インターバルとかで(クライアント側)キャッシュを破棄されるような仕組みっていうは時と場合によっては同期が無効になってたりすると不整合を招く恐れがあるので、通信自体の間隔を大きくして低減させる方が望ましいのかも</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -107,7 +121,7 @@
             <!-- next post -->
             <a class="float-start box-link" href="/2013/06/doorkeeper-protection-controller-testing.html">&lt;&nbsp;doorkeeperでプロテクトされているコントローラーのテスト</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/06/rubyonrails-doorkeeper-grant_type-password.html">doorkeeperのgrant_type=&quot;password&quot;を使ってみる&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/06/rubyonrails-doorkeeper-grant_type-password.html">doorkeeperのgrant_type=&amp;quot;password&amp;quot;を使ってみる&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -191,7 +205,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -212,9 +226,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -327,7 +338,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -350,20 +361,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -373,13 +384,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("176e06e47c210fac76665548d2e30289e06833f4");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

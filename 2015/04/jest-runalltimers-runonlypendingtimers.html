@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-04-12T00:00:00+09:00">
+                <time datetime="2015-04-12 00:00:00 +0900">
                   <a href="/archives/2015/04">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -76,12 +77,19 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["シンプルにsetTimeoutするパターン", "setTimeoutが再帰する場合"]-->
-                <p>参考1: <a href="https://facebook.github.io/jest/docs/timer-mocks.html" target="_blank" rel="noopener noreferrer">https://facebook.github.io/jest/docs/timer-mocks.html</a></p><p>参考2: <a href="http://qiita.com/koba04/items/2f97904b3ca247fc1917" target="_blank" rel="noopener noreferrer">http://qiita.com/koba04/items/2f97904b3ca247fc1917</a></p><p>以前に出した上記の参考資料2にも書いてるけど</p>
+                <!--[&quot;シンプルにsetTimeoutするパターン&quot;, &quot;setTimeoutが再帰する場合&quot;]-->
+                <p>参考1: <a href="https://facebook.github.io/jest/docs/timer-mocks.html">https://facebook.github.io/jest/docs/timer-mocks.html</a></p>
+
+<p>参考2: <a href="http://qiita.com/koba04/items/2f97904b3ca247fc1917">http://qiita.com/koba04/items/2f97904b3ca247fc1917</a></p>
+
+<p>以前に出した上記の参考資料2にも書いてるけど</p>
+
 <blockquote>
 runAllTimersは全てのTimerで待っている処理を実行させて、runOnlyPendingTimersはその時点でPendingになっているものだけを実行します。 setTimeoutで再帰しているような実装の場合、runAllTimersを使ってしまうと無限ループになるのでその時はrunOnlyPendingTimersを使って1つずつ進めながらテストを書いていきます。
 </blockquote>
-<p>っていう事で検証してみた</p><h4>シンプルにsetTimeoutするパターン</h4><pre class="line-numbers"><code class="language-js">var React = require(&quot;react&quot;);
+
+<p>っていう事で検証してみた</p>
+<h4>シンプルにsetTimeoutするパターン</h4><pre class="line-numbers"><code class="language-js">var React = require(&quot;react&quot;);
 
 var Timer = React.createClass({
   getInitialState: function() {
@@ -100,7 +108,9 @@ var Timer = React.createClass({
 });
 
 module.exports = Timer;
-</code></pre><p>っていう感じでcomponentDidMountでsetTimeoutしてそこからsetStateするようなパターンとかであればrunAllTimersを呼び出す事でそこの部分をテストする事が可能</p><pre class="line-numbers"><code class="language-js">jest.dontMock(&quot;../Timer&quot;);
+</code></pre>
+<p>っていう感じでcomponentDidMountでsetTimeoutしてそこからsetStateするようなパターンとかであればrunAllTimersを呼び出す事でそこの部分をテストする事が可能</p>
+<pre class="line-numbers"><code class="language-js">jest.dontMock(&quot;../Timer&quot;);
 
 var React = require(&quot;react/addons&quot;),
     TestUtils = React.addons.TestUtils;
@@ -118,7 +128,9 @@ describe(&quot;Timer&quot;, function() {
     expect(timer.state.text).toEqual(&quot;hello&quot;);
   });
 });
-</code></pre><p>まぁシンプルなのでこんくらいやれば分かると思うんで終わり</p><h4>setTimeoutが再帰する場合</h4><pre class="line-numbers"><code class="language-js">var React = require(&quot;react&quot;);
+</code></pre>
+<p>まぁシンプルなのでこんくらいやれば分かると思うんで終わり</p>
+<h4>setTimeoutが再帰する場合</h4><pre class="line-numbers"><code class="language-js">var React = require(&quot;react&quot;);
 
 var Timer = React.createClass({
   getInitialState: function() {
@@ -145,7 +157,9 @@ module.exports = Timer;
 <li>そこでまずsetStateして</li>
 <li>同メソッドをsetTimeoutで呼び出すように再帰する事で定期レンダリングみたいな事する</li>
 </ul>
-<p>ような場合、上記でも書いたようにrunAllTimersを使うと無限ループしてテストが終わらない。そういうケースにおいてはrunOnlyPendingTimersを使ってタイマースタック?を一個づつ進めていきながらテストする</p><pre class="line-numbers"><code class="language-js">jest.dontMock(&quot;../Timer&quot;);
+
+<p>ような場合、上記でも書いたようにrunAllTimersを使うと無限ループしてテストが終わらない。そういうケースにおいてはrunOnlyPendingTimersを使ってタイマースタック?を一個づつ進めていきながらテストする</p>
+<pre class="line-numbers"><code class="language-js">jest.dontMock(&quot;../Timer&quot;);
 
 var React = require(&quot;react/addons&quot;),
     TestUtils = React.addons.TestUtils;
@@ -162,12 +176,20 @@ describe(&quot;Timer&quot;, function() {
     console.log(&quot;text: &quot; + timer.state.text);
   });
 });
-</code></pre><p>ケースが微妙なだけに検証するようなコード書いてないけど、テスト実行すると</p>
+</code></pre>
+<p>ケースが微妙なだけに検証するようなコード書いてないけど、テスト実行すると</p>
+
 <pre>
 text: hello 1428830029317
 text: hello 1428830029320
 </pre>
-<p>っていうような結果が得られる。まぁ上記で書いてるように再帰するようなケースの場合にはrunOnlyPendingTimersを使って一つづつ処理を行いながら検証していくような感じかと。まぁ今回はReact Componentに全て書いちゃってるのであれなんですが、jest.genMockFunctionなりを使いつつタイマーがコールバックを呼び出したか等までの検証は必要かと思われる</p><p>とりあえずはjestなドキュメント読みなネタは今回で終了。まぁ一応ドキュメントとか読みながら使ってみた感想としては非常に良いテスト環境だとは思うんですが幾分テストの実行速度等が若干遅めなのがちょいと気になる所なので、今後それが解決されていけば良いなっていう思う所(自分の検証環境が悪いのかどうかは分からないけど)。でもモックオブジェクトとか利用してテストするっていう前提であればすごい使えるんじゃないかなと</p>
+
+<p>っていうような結果が得られる。まぁ上記で書いてるように再帰するようなケースの場合にはrunOnlyPendingTimersを使って一つづつ処理を行いながら検証していくような感じかと。まぁ今回はReact Componentに全て書いちゃってるのであれなんですが、jest.genMockFunctionなりを使いつつタイマーがコールバックを呼び出したか等までの検証は必要かと思われる</p>
+
+<p>とりあえずはjestなドキュメント読みなネタは今回で終了。まぁ一応ドキュメントとか読みながら使ってみた感想としては非常に良いテスト環境だとは思うんですが幾分テストの実行速度等が若干遅めなのがちょいと気になる所なので、今後それが解決されていけば良いなっていう思う所(自分の検証環境が悪いのかどうかは分からないけど)。でもモックオブジェクトとか利用してテストするっていう前提であればすごい使えるんじゃないかなと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -259,7 +281,7 @@ text: hello 1428830029320
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -280,9 +302,6 @@ text: hello 1428830029320
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -395,7 +414,7 @@ text: hello 1428830029320
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -418,20 +437,20 @@ text: hello 1428830029320
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -441,13 +460,15 @@ text: hello 1428830029320
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("f7db8a4a09cbdced9ab41437bb4f6b6f3b820df7");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-09-02T00:00:00+00:00">
+                <time datetime="2014-09-02 00:00:00 +0900">
                   <a href="/archives/2014/09">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,13 +78,22 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["追記"]-->
-                <p>参考: <a href="http://soundtricker.blogspot.jp/2014/08/angular13ng-strict-diminify.html">angular1.3から追加されるng-strict-diを使ってminifyに強くする。</a></p><p><iframe src="http://rcm-fe.amazon-adsystem.com/e/cm?lt1=_blank&bc1=000000&IS2=1&bg1=FFFFFF&fc1=000000&lc1=0000FF&t=kane05-22&o=9&p=8&l=as4&m=amazon&f=ifr&ref=ss_til&asins=4844336681" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe><p /></p><p>っていう本が出るそうで、その関連でng-strict-diっていうのがあるとのことを知ったので色々検証してみた。詳しくは上記の参考サイト見りゃいい</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
+                <!--[&quot;追記&quot;]-->
+                <p>参考: <a href="http://soundtricker.blogspot.jp/2014/08/angular13ng-strict-diminify.html">angular1.3から追加されるng-strict-diを使ってminifyに強くする。</a></p>
+
+<p><iframe src="http://rcm-fe.amazon-adsystem.com/e/cm?lt1=_blank&bc1=000000&IS2=1&bg1=FFFFFF&fc1=000000&lc1=0000FF&t=kane05-22&o=9&p=8&l=as4&m=amazon&f=ifr&ref=ss_til&asins=4844336681" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe><p /></p>
+
+<p>っていう本が出るそうで、その関連でng-strict-diっていうのがあるとのことを知ったので色々検証してみた。詳しくは上記の参考サイト見りゃいい</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
   .controller(&quot;SampleCtrl&quot;, function($scope) {
     $scope.message = &quot;hoge&quot;;
   });
-</code></pre><p>適当だけど、こういうコードがあった場合にもし使ってるJavaScriptを圧縮するようなツールを使って</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, []).controller(&quot;SampleCtrl&quot;, function($a) {$a.message = &quot;hoge&quot;;});
-</code></pre><p>みたいに圧縮されたような場合が出たらまず引数の依存性注入を解決できない。そこで何を注入するのかを示すDependency Annotationっていうのがある模様。ng-strict-diは依存性注入等?においてDependency Annotationを指定されていないとエラーになるようになる。つまりは</p><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+</code></pre>
+<p>適当だけど、こういうコードがあった場合にもし使ってるJavaScriptを圧縮するようなツールを使って</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, []).controller(&quot;SampleCtrl&quot;, function($a) {$a.message = &quot;hoge&quot;;});
+</code></pre>
+<p>みたいに圧縮されたような場合が出たらまず引数の依存性注入を解決できない。そこで何を注入するのかを示すDependency Annotationっていうのがある模様。ng-strict-diは依存性注入等?においてDependency Annotationを指定されていないとエラーになるようになる。つまりは</p>
+<pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html ng-app=&quot;sample&quot; ng-strict-di&gt;
   &lt;head&gt;
     &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.0/angular.min.js&quot;&gt;&lt;/script&gt;
@@ -93,20 +103,42 @@
     {% raw %}{{ message }}{% endraw %}
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>っていうようなHTML側な場合に上記(1つ目)のJavaScriptを利用するような場合だと、<a href="https://docs.angularjs.org/error/$injector/strictdi?p0=SampleCtrl">「Error: $injector:strictdi Explicit annotation required」</a>というようなエラーになる。要はDependency Annotationを入れれば良いので</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
+</code></pre>
+<p>っていうようなHTML側な場合に上記(1つ目)のJavaScriptを利用するような場合だと、<a href="https://docs.angularjs.org/error/$injector/strictdi?p0=SampleCtrl">「Error: $injector:strictdi Explicit annotation required」</a>というようなエラーになる。要はDependency Annotationを入れれば良いので</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
   .controller(&quot;SampleCtrl&quot;, [&quot;$scope&quot;, function($scope) {
     // 以下省略
   }]);
-</code></pre><p>っていうように何を注入するのかを明確に示すようにDependency Annotationを指定するべきだっていうのを明確化させる為に使う物かと</p><p>んまぁわかりづらいけど要は「何を注入するのか明確にしろバカヤロー」って事なんじゃないかと(※ソース読んで理論付けしてない)</p><p>んまぁangular.jsリファレンス欲しい</p><h4>追記</h4><p>ngminを使ってminifyする場合にはDependency Annotationは指定される模様。但し、現時点でngminはdeprecatedみたいな感じでng-annotateを使うように促される。</p><p>ng-annotateを使うと</p><pre class="line-numbers"><code class="language-js">function hoge($scope) {
+</code></pre>
+<p>っていうように何を注入するのかを明確に示すようにDependency Annotationを指定するべきだっていうのを明確化させる為に使う物かと</p>
+
+<p>んまぁわかりづらいけど要は「何を注入するのか明確にしろバカヤロー」って事なんじゃないかと(※ソース読んで理論付けしてない)</p>
+
+<p>んまぁangular.jsリファレンス欲しい</p>
+<h4>追記</h4>
+<p>ngminを使ってminifyする場合にはDependency Annotationは指定される模様。但し、現時点でngminはdeprecatedみたいな感じでng-annotateを使うように促される。</p>
+
+<p>ng-annotateを使うと</p>
+<pre class="line-numbers"><code class="language-js">function hoge($scope) {
 }
-</code></pre><p>みたいなコード書いて</p><pre class="line-numbers"><code class="language-">ng-annotate -a main.js -o main.annotate.js
-</code></pre><p>なんてやっても変わらないんだけど</p><pre class="line-numbers"><code class="language-js">/\*@ngInject*/
+</code></pre>
+<p>みたいなコード書いて</p>
+<pre class="line-numbers"><code class="language-">ng-annotate -a main.js -o main.annotate.js
+</code></pre>
+<p>なんてやっても変わらないんだけど</p>
+<pre class="line-numbers"><code class="language-js">/\*@ngInject*/
 function hoge($scope) {
 }
-</code></pre><p>みたいなアノテーションを付けてやれば</p><pre class="line-numbers"><code class="language-js">function hoge($scope) {
+</code></pre>
+<p>みたいなアノテーションを付けてやれば</p>
+<pre class="line-numbers"><code class="language-js">function hoge($scope) {
 }
 hoge.$inject = [&quot;$scope&quot;];
-</code></pre><p>な感じでDependecy Annotationが生成されるような感じかと</p>
+</code></pre>
+<p>な感じでDependecy Annotationが生成されるような感じかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -198,7 +230,7 @@ hoge.$inject = [&quot;$scope&quot;];
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -219,9 +251,6 @@ hoge.$inject = [&quot;$scope&quot;];
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -334,7 +363,7 @@ hoge.$inject = [&quot;$scope&quot;];
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -357,20 +386,20 @@ hoge.$inject = [&quot;$scope&quot;];
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -380,13 +409,15 @@ hoge.$inject = [&quot;$scope&quot;];
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("e00da5bf79db4cc8a721d9431fc22fa41c4edc1b");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

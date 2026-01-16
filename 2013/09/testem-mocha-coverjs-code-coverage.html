@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-13T00:00:00+00:00">
+                <time datetime="2013-09-13 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,11 +77,20 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["必要な物", "src/sample.js", "tests/spec/sample_spec.js", "tests/runner.html"]-->
-                <p>基本ベースは「<a href="/mocha-coverjs-code-coverage.html">mocha+coverjsでコードカバレッジ</a>」</p><p>まぁtestem環境上でそれをやるだけって話なんですが、そういう機能的なのがあるのかは定かじゃないですが上記先とどうようにやれば良いんじゃねかと</p><pre class="line-numbers"><code class="language-json">{
+                <!--[&quot;必要な物&quot;, &quot;src/sample.js&quot;, &quot;tests/spec/sample_spec.js&quot;, &quot;tests/runner.html&quot;]-->
+                <p>基本ベースは「<a href="/mocha-coverjs-code-coverage.html">mocha+coverjsでコードカバレッジ</a>」</p>
+
+<p>まぁtestem環境上でそれをやるだけって話なんですが、そういう機能的なのがあるのかは定かじゃないですが上記先とどうようにやれば良いんじゃねかと</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;test_page&quot;: &quot;tests/runner.html&quot;
 }
-</code></pre><p>っていうtestem.jsonな設定ファイルを作っておいて、後は同様な感じでやれば出来る。めんどくさいけど、一応書いとくか</p><h4>必要な物</h4><p>mochaとchaiと上記リンク先で書いてあるJSCovReporter関係なファイル辺り一式が必要。testem.jsはtestemプロセッサー?的な所から取得出来るのでわざわざ取ってくる必要は無い</p><h4>src/sample.js</h4><p>テストする対象のJavaScript</p><pre class="line-numbers"><code class="language-js">var Sample = (function() {
+</code></pre>
+<p>っていうtestem.jsonな設定ファイルを作っておいて、後は同様な感じでやれば出来る。めんどくさいけど、一応書いとくか</p>
+<h4>必要な物</h4>
+<p>mochaとchaiと上記リンク先で書いてあるJSCovReporter関係なファイル辺り一式が必要。testem.jsはtestemプロセッサー?的な所から取得出来るのでわざわざ取ってくる必要は無い</p>
+<h4>src/sample.js</h4>
+<p>テストする対象のJavaScript</p>
+<pre class="line-numbers"><code class="language-js">var Sample = (function() {
   function Sample() {
   };
 
@@ -93,8 +103,12 @@
 
   return Sample;
 })();
-</code></pre><p>書いたあとに</p><pre class="line-numbers"><code class="language-">coverjs src/*.js --output src-cov
-</code></pre><p>あたりをやっておく</p><h4>tests/spec/sample_spec.js</h4><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
+</code></pre>
+<p>書いたあとに</p>
+<pre class="line-numbers"><code class="language-">coverjs src/*.js --output src-cov
+</code></pre>
+<p>あたりをやっておく</p>
+<h4>tests/spec/sample_spec.js</h4><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
 
   var sample;
 
@@ -107,7 +121,9 @@
     expect(sample.pow(2)).to.be.eq(4);
   });
 });
-</code></pre><p>特に言う事ナッシング</p><h4>tests/runner.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre>
+<p>特に言う事ナッシング</p>
+<h4>tests/runner.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;vendor/mocha.css&quot; /&gt;
     &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;vendor/reporter.css&quot; /&gt;
@@ -150,7 +166,25 @@ mocha.run(function() {
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>でtestemを実行してtestemなサーバーポートにブラウザでアクセスすると</p><p><img src="/images/2013/09/201309131445_1.png" class="img-fluid" alt="image" /></p><p>ってな感じで実行されて、ターミナル上では</p><p><img src="/images/2013/09/201309131445_2.png" class="img-fluid" alt="image" /></p><p>っていう感じで実行される。まぁブラウザで見てる側にカバレッジが出力される</p><p>まぁ要件なポイントはtestem.json辺りでテスト実行なフロントエンドなランナーを指定して、自分で書いて実行するっていうだけな所。それをやるだけっていうだけで記事が長くなっただけなので...</p><p>ちなみに余談だけれども、JSCovReporterに関わる所辺りで(記事投稿時点での)最新なunderscore.jsを使ってるとbindAllエラーが出てカバレッジが出力されないっていうのがあるが、underscore.jsのバージョンを下げるか_.bindAllな記述な部分を消しても良い模様</p><p>あとcoverjsだと微妙に引数の状態チェックなテストが無視されてるっていうのがあるのでこのカバレッジが正しいとは限らないので要注意</p>
+</code></pre>
+<p>でtestemを実行してtestemなサーバーポートにブラウザでアクセスすると</p>
+
+<p><img src="/images/2013/09/201309131445_1.png" class="img-fluid" alt="image" /></p>
+
+<p>ってな感じで実行されて、ターミナル上では</p>
+
+<p><img src="/images/2013/09/201309131445_2.png" class="img-fluid" alt="image" /></p>
+
+<p>っていう感じで実行される。まぁブラウザで見てる側にカバレッジが出力される</p>
+
+<p>まぁ要件なポイントはtestem.json辺りでテスト実行なフロントエンドなランナーを指定して、自分で書いて実行するっていうだけな所。それをやるだけっていうだけで記事が長くなっただけなので...</p>
+
+<p>ちなみに余談だけれども、JSCovReporterに関わる所辺りで(記事投稿時点での)最新なunderscore.jsを使ってるとbindAllエラーが出てカバレッジが出力されないっていうのがあるが、underscore.jsのバージョンを下げるか_.bindAllな記述な部分を消しても良い模様</p>
+
+<p>あとcoverjsだと微妙に引数の状態チェックなテストが無視されてるっていうのがあるのでこのカバレッジが正しいとは限らないので要注意</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -242,7 +276,7 @@ mocha.run(function() {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -263,9 +297,6 @@ mocha.run(function() {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -378,7 +409,7 @@ mocha.run(function() {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -401,20 +432,20 @@ mocha.run(function() {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -424,13 +455,15 @@ mocha.run(function() {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("529082858bcbaec03250d7ab6206e16d05e54c52");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

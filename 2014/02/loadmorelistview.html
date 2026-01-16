@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-02-26T00:00:00+00:00">
+                <time datetime="2014-02-26 00:00:00 +0900">
                   <a href="/archives/2014/02">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["構造", "res/layout/list_fragment_layout.xml", "MainListFragment.java", "追記"]-->
-                <p>まぁ要はListViewの末尾に達したら新しいデータをロードする等の仕組みを提供する機能的なやつ。Android PullToRefreshにはそういう機能があったけど、何回かふれているけどActionBar PullToRefreshを使うべきという形になっているので、それっぽい機能をどうするかって所なんですが</p><p>調べた所によると、<a href="https://github.com/shontauro/android-pulltorefresh-and-loadmore">LoadMoreListView</a>っていうのを利用する事で出来るっぽい。という事で使ってみた</p><h4>構造</h4>
+                <!--[&quot;構造&quot;, &quot;res/layout/list_fragment_layout.xml&quot;, &quot;MainListFragment.java&quot;, &quot;追記&quot;]-->
+                <p>まぁ要はListViewの末尾に達したら新しいデータをロードする等の仕組みを提供する機能的なやつ。Android PullToRefreshにはそういう機能があったけど、何回かふれているけどActionBar PullToRefreshを使うべきという形になっているので、それっぽい機能をどうするかって所なんですが</p>
+
+<p>調べた所によると、<a href="https://github.com/shontauro/android-pulltorefresh-and-loadmore">LoadMoreListView</a>っていうのを利用する事で出来るっぽい。という事で使ってみた</p>
+<h4>構造</h4>
 <pre>
 ├── app
 │   ├── build.gradle
@@ -106,7 +110,11 @@
 ├── local.properties
 └── settings.gradle
 </pre>
-<p>pulltorefresh-and-loadmoreなやつは内容を省略してますが、要はgradle-android-toolkitベースなプロジェクトで利用する。恐らくはEclipseなプロジェクトだとライブラリプロジェクトをインポートすりゃ良さそうな気がする</p><p>まぁ見て分かるようにListFragmentがあるんだけれども、pulltorefresh-and-loadmoreのListView実装を使う必要があるのでレイアウトを定義しなきゃならん。activity_mainなレイアウトはただ<fragment>しているだけなので(ry</p><h4>res/layout/list_fragment_layout.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+
+<p>pulltorefresh-and-loadmoreなやつは内容を省略してますが、要はgradle-android-toolkitベースなプロジェクトで利用する。恐らくはEclipseなプロジェクトだとライブラリプロジェクトをインポートすりゃ良さそうな気がする</p>
+
+<p>まぁ見て分かるようにListFragmentがあるんだけれども、pulltorefresh-and-loadmoreのListView実装を使う必要があるのでレイアウトを定義しなきゃならん。activity_mainなレイアウトはただ<fragment>しているだけなので(ry</p>
+<h4>res/layout/list_fragment_layout.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;LinearLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;fill_parent&quot;
@@ -118,7 +126,9 @@
         android:layout_height=&quot;fill_parent&quot; /&gt;
 
 &lt;/LinearLayout&gt;
-</code></pre><p>android:id/emptyは省略してますが(ry android.R.id.listで参照できるやつをLoadMoreListViewを使うようにするだけ</p><h4>MainListFragment.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>android:id/emptyは省略してますが(ry android.R.id.listで参照できるやつをLoadMoreListViewを使うようにするだけ</p>
+<h4>MainListFragment.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -180,9 +190,13 @@ public class MainListFragment extends SherlockListFragment {
         // データをロードする処理
     }
 }
-</code></pre><p>っていう感じで、ListViewのデータ終端に達したらLoadMoreListView.OnLoadMoreListener#onLoadMoreが発生するのでそこでデータをロードする処理を実装すりゃ良いってだけ</p>
+</code></pre>
+<p>っていう感じで、ListViewのデータ終端に達したらLoadMoreListView.OnLoadMoreListener#onLoadMoreが発生するのでそこでデータをロードする処理を実装すりゃ良いってだけ</p>
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/Zl-hlqMvdig?si=-5Ez8Yz5l9Fcgwy2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<h4>追記</h4><p>LoadMoreListViewが生成するフッターなProgressなレイアウトを修正したりしたいのであれば、res/layout/load_more_footer.xmlを作って修正なりすれば良い模様。ちなみにデフォルトでは以下のようになっている模様</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<h4>追記</h4>
+<p>LoadMoreListViewが生成するフッターなProgressなレイアウトを修正したりしたいのであれば、res/layout/load_more_footer.xmlを作って修正なりすれば良い模様。ちなみにデフォルトでは以下のようになっている模様</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:id=&quot;@+id/load_more_footer&quot;
     android:layout_width=&quot;fill_parent&quot;
@@ -223,7 +237,9 @@ public class MainListFragment extends SherlockListFragment {
         android:visibility=&quot;gone&quot; /&gt;
 
 &lt;/RelativeLayout&gt;
-</code></pre><p>あと実装では</p><pre class="line-numbers"><code class="language-java">mFooterView = (RelativeLayout) mInflater.inflate(R.layout.load_more_footer, this, false);
+</code></pre>
+<p>あと実装では</p>
+<pre class="line-numbers"><code class="language-java">mFooterView = (RelativeLayout) mInflater.inflate(R.layout.load_more_footer, this, false);
 
 /*
  * mLabLoadMore = (TextView) mFooterView
@@ -233,7 +249,11 @@ public class MainListFragment extends SherlockListFragment {
 mProgressBarLoadMore = (ProgressBar) mFooterView.findViewById(R.id.load_more_progressBar);
 
 addFooterView(mFooterView);
-</code></pre><p>っていうようになっているのでProgressじゃなくてテキストを出したいとかはここを修正すりゃいいのではと</p>
+</code></pre>
+<p>っていうようになっているのでProgressじゃなくてテキストを出したいとかはここを修正すりゃいいのではと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -325,7 +345,7 @@ addFooterView(mFooterView);
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -346,9 +366,6 @@ addFooterView(mFooterView);
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -461,7 +478,7 @@ addFooterView(mFooterView);
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -484,20 +501,20 @@ addFooterView(mFooterView);
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -507,13 +524,15 @@ addFooterView(mFooterView);
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("4a72c946e7a06908861669339045d82c3523cc08");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

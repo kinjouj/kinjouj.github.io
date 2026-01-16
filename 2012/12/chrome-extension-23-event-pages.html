@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-12-17T00:00:00+00:00">
+                <time datetime="2012-12-17 00:00:00 +0900">
                   <a href="/archives/2012/12">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["追記1: chrome.extension.getBackgroundPageに関して"]-->
-                <p>何やらそういう仕様がある模様で。詳しい概要は省略するけど、要は「常に常駐しないバックグラウンドページ」っていう感じな模様</p><p>でこれ使うには専用のAPIがある訳でも無い模様。通常のバックグラウンドページの仕様に設定をするだけでバックグラウンドページがイベントページとして認識するようになる模様。例えば前回のchrome.alarmsなmanifest.jsonをEvent Pagesとして扱う場合には</p><pre class="line-numbers"><code class="language-json">{
+                <!--[&quot;追記1: chrome.extension.getBackgroundPageに関して&quot;]-->
+                <p>何やらそういう仕様がある模様で。詳しい概要は省略するけど、要は「常に常駐しないバックグラウンドページ」っていう感じな模様</p>
+
+<p>でこれ使うには専用のAPIがある訳でも無い模様。通常のバックグラウンドページの仕様に設定をするだけでバックグラウンドページがイベントページとして認識するようになる模様。例えば前回のchrome.alarmsなmanifest.jsonをEvent Pagesとして扱う場合には</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;experimental&quot;,
   &quot;version&quot;: &quot;0.1&quot;,
   &quot;manifest_version&quot;: 2,
@@ -89,8 +93,24 @@
   &quot;permissions&quot;: [&quot;alarms&quot;],
   &quot;minimum_chrome_version&quot;: &quot;23&quot;
 }
-</code></pre><p>というように<span style="color: red">persistent: false</span>をするだけ。この一行を付けるだけで可能。</p><p>でこれどういう感じなのかと簡単に言うと上記な設定を行った場合、バックグラウンドページプロセスを見ると、一旦は起動されているがちょっとたつとプロセスが消える。で必要になった際に応じてイベントページのプロセスが常駐するようになったりする。つまりアイドル状態にあるバックグラウンドページを開放して常駐してリソースを食い込んだりしないような感じになる模様。表現合ってるかは微妙ですけど</p><p>んで後述する参考に書いてあるけど、一定の条件下の場合バックグラウンドページが正しく実行されないケースがある模様なのでそれは注意。</p><p>参考1: <a href="http://developer.chrome.com/extensions/event_pages.html" target="_blank" rel="noopener noreferrer">http://developer.chrome.com/extensions/event_pages.html</a></p><p>参考2: <a href="http://blog.monoweb.info/blog/2012/11/08/chrome-event-pages" target="_blank" rel="noopener noreferrer">http://blog.monoweb.info/blog/2012/11/08/chrome-event-pages</a></p><h4>追記1: chrome.extension.getBackgroundPageに関して</h4><p>Event Pagesな状態で使ってる場合にchrome.extension.getBackgroundPageをEvent Pagesなプロセスが落ちてる時にやるとnullが返ってくる模様。なのでchrome.runtime.getBackgroundPageを使うべきらしい。ただし使い方が従来のと違う</p><pre class="line-numbers"><code class="language-js">chrome.runtime.getBackgroundPage(function(bgPage) {});
-</code></pre><p>という感じになる。ちなみにこれをやった際にはEvent Pagesなプロセスが起きる模様</p>
+</code></pre>
+<p>というように<span style="color: red">persistent: false</span>をするだけ。この一行を付けるだけで可能。</p>
+
+<p>でこれどういう感じなのかと簡単に言うと上記な設定を行った場合、バックグラウンドページプロセスを見ると、一旦は起動されているがちょっとたつとプロセスが消える。で必要になった際に応じてイベントページのプロセスが常駐するようになったりする。つまりアイドル状態にあるバックグラウンドページを開放して常駐してリソースを食い込んだりしないような感じになる模様。表現合ってるかは微妙ですけど</p>
+
+<p>んで後述する参考に書いてあるけど、一定の条件下の場合バックグラウンドページが正しく実行されないケースがある模様なのでそれは注意。</p>
+
+<p>参考1: <a href="http://developer.chrome.com/extensions/event_pages.html">http://developer.chrome.com/extensions/event_pages.html</a></p>
+
+<p>参考2: <a href="http://blog.monoweb.info/blog/2012/11/08/chrome-event-pages">http://blog.monoweb.info/blog/2012/11/08/chrome-event-pages</a></p>
+<h4>追記1: chrome.extension.getBackgroundPageに関して</h4>
+<p>Event Pagesな状態で使ってる場合にchrome.extension.getBackgroundPageをEvent Pagesなプロセスが落ちてる時にやるとnullが返ってくる模様。なのでchrome.runtime.getBackgroundPageを使うべきらしい。ただし使い方が従来のと違う</p>
+<pre class="line-numbers"><code class="language-js">chrome.runtime.getBackgroundPage(function(bgPage) {});
+</code></pre>
+<p>という感じになる。ちなみにこれをやった際にはEvent Pagesなプロセスが起きる模様</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -182,7 +202,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -203,9 +223,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -318,7 +335,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -341,20 +358,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -364,13 +381,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("32ec4186ab810b377eabeaa94f9ff56fe1f4d611");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

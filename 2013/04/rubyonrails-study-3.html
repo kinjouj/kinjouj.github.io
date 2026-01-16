@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-04-25T00:00:00+00:00">
+                <time datetime="2013-04-25 00:00:00 +0900">
                   <a href="/archives/2013/04">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,11 +78,24 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["ページングなライブラリ", "app/controllers/entry_controller.rb", "app/views/entry/index.erb", "app/views/sidebar/_index.erb", "app/views/sidebar/_category.erb"]-->
-                <p>ページング及びカテゴリーの親子関係のネスト構造をrender :partial等を用いて出力出来るようにしてみた</p><h4>ページングなライブラリ</h4><p>昔Rails使ってた時とかはwill_paginateとか使ってたような記憶があるのだけど、kaminariっていうライブラリがあるらしいのでそれを使う事にする</p><p>Gemfileに</p><pre class="line-numbers"><code class="language-rb">gem &quot;kaminari&quot;
-</code></pre><p>を記述。</p><pre class="line-numbers"><code class="language-">rails g kaminari:views [THEME]
-</code></pre><p>でkaminariが使うページングなUIなテンプレートを出力できる。別に出さなくても出来るんだけど、色々修正したいだとかTwitter Bootstrap方式なページングで出したいっていうのであれば</p><pre class="line-numbers"><code class="language-">rails g kaminari:views bootstrap
-</code></pre><p>等で出せる。app/views/kaminariに出力されるのでそれをいじればページングなUIを修正出来るっていう感じ。んまぁkaminariに関してはドキュメント読んだ方が良さそうなんで以降はある程度省略</p><h4>app/controllers/entry_controller.rb</h4><p>サイドバー的なところにカテゴリーをネストして出力出来るようにする為に、特定のアクションが起きる前に事前にカテゴリーデータを取得をおこなっておく。それはbefore_filterとかで良いと思う。利用されるアクションが1特定であれば普通にそのアクションでも良いとは思うけど、そうじゃないケースがあると思うので</p><pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
+                <!--[&quot;ページングなライブラリ&quot;, &quot;app/controllers/entry_controller.rb&quot;, &quot;app/views/entry/index.erb&quot;, &quot;app/views/sidebar/_index.erb&quot;, &quot;app/views/sidebar/_category.erb&quot;]-->
+                <p>ページング及びカテゴリーの親子関係のネスト構造をrender :partial等を用いて出力出来るようにしてみた</p>
+<h4>ページングなライブラリ</h4>
+<p>昔Rails使ってた時とかはwill_paginateとか使ってたような記憶があるのだけど、kaminariっていうライブラリがあるらしいのでそれを使う事にする</p>
+
+<p>Gemfileに</p>
+<pre class="line-numbers"><code class="language-rb">gem &quot;kaminari&quot;
+</code></pre>
+<p>を記述。</p>
+<pre class="line-numbers"><code class="language-">rails g kaminari:views [THEME]
+</code></pre>
+<p>でkaminariが使うページングなUIなテンプレートを出力できる。別に出さなくても出来るんだけど、色々修正したいだとかTwitter Bootstrap方式なページングで出したいっていうのであれば</p>
+<pre class="line-numbers"><code class="language-">rails g kaminari:views bootstrap
+</code></pre>
+<p>等で出せる。app/views/kaminariに出力されるのでそれをいじればページングなUIを修正出来るっていう感じ。んまぁkaminariに関してはドキュメント読んだ方が良さそうなんで以降はある程度省略</p>
+<h4>app/controllers/entry_controller.rb</h4>
+<p>サイドバー的なところにカテゴリーをネストして出力出来るようにする為に、特定のアクションが起きる前に事前にカテゴリーデータを取得をおこなっておく。それはbefore_filterとかで良いと思う。利用されるアクションが1特定であれば普通にそのアクションでも良いとは思うけど、そうじゃないケースがあると思うので</p>
+<pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
   before_filter :load_sidebar, :only =&gt; :index
 
   def load_sidebar
@@ -92,7 +106,9 @@
     @entries = Entry.page(params[:page])
   end
 end
-</code></pre><p>とりあえず関係無い所なアクションは省略。load_sidebarでparentカラムが0(ルートカテゴリー)なデータを取得。それはrender :partialで利用する</p><h4>app/views/entry/index.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;div class=&quot;row&quot;&gt;
+</code></pre>
+<p>とりあえず関係無い所なアクションは省略。load_sidebarでparentカラムが0(ルートカテゴリー)なデータを取得。それはrender :partialで利用する</p>
+<h4>app/views/entry/index.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;div class=&quot;row&quot;&gt;
   &lt;div class=&quot;span4&quot;&gt;
     &lt;!-- app/views/sidebar/_index.erbな部分テンプレートを読み込み --&gt;
     &lt;%= render :partial =&gt; &quot;sidebar/index&quot; %&gt;
@@ -110,10 +126,14 @@ end
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;
-</code></pre><p>今回関係ない所は省略。paginateなView Helperでページングなビューを表示。恐らくはapp/views/kaminari/_paginator.html.erbがレンダリングされるんだと</p><h4>app/views/sidebar/_index.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;% @categories.each do |category| %&gt;
+</code></pre>
+<p>今回関係ない所は省略。paginateなView Helperでページングなビューを表示。恐らくはapp/views/kaminari/_paginator.html.erbがレンダリングされるんだと</p>
+<h4>app/views/sidebar/_index.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;% @categories.each do |category| %&gt;
   &lt;%= render :partial =&gt; &quot;sidebar/category&quot;, :locals =&gt; { :category =&gt; category } %&gt;
 &lt;% end %&gt;
-</code></pre><p>load_sidebarで取得したカテゴリーなデータをレンダリングする。ここから更にapp/views/sidebar_category.erbに部分レンダリングされる</p><h4>app/views/sidebar/_category.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;!-- エントリー数が無いカテゴリーもあるけど、そのカテゴリーがサブカテゴリーを持ってないとは限らない --&gt;
+</code></pre>
+<p>load_sidebarで取得したカテゴリーなデータをレンダリングする。ここから更にapp/views/sidebar_category.erbに部分レンダリングされる</p>
+<h4>app/views/sidebar/_category.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;!-- エントリー数が無いカテゴリーもあるけど、そのカテゴリーがサブカテゴリーを持ってないとは限らない --&gt;
 &lt;% if category.entry.size &gt; 0 || category.sub_category.size &gt; 0 %&gt;
 &lt;ul&gt;
   &lt;li style=&quot;list-style: none;padding: 3px&quot;&gt;
@@ -124,7 +144,13 @@ end
   &lt;/li&gt;
 &lt;/ul&gt;
 &lt;% end %&gt;
-</code></pre><p>んまぁ再帰でrender :partialをしてネスト構造を出力するような感じ。あんまりよくないケースだとは思いますが(遅い為)</p><p>ってな感じで、render :partialを使う事で部分的なテンプレートを差し込めたり出来るっていう事と、kaminariっていうページングライブラリを使う事でページングのビューをカスタマイズ出来る</p>
+</code></pre>
+<p>んまぁ再帰でrender :partialをしてネスト構造を出力するような感じ。あんまりよくないケースだとは思いますが(遅い為)</p>
+
+<p>ってな感じで、render :partialを使う事で部分的なテンプレートを差し込めたり出来るっていう事と、kaminariっていうページングライブラリを使う事でページングのビューをカスタマイズ出来る</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -216,7 +242,7 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -237,9 +263,6 @@ end
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -352,7 +375,7 @@ end
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -375,20 +398,20 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -398,13 +421,15 @@ end
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("04f00bcf195f0813cc5a321be91b816be9599fd8");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

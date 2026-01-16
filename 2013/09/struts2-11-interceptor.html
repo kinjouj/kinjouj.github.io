@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-23T00:00:00+00:00">
+                <time datetime="2013-09-23 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,13 +78,20 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["SampleInterceptor.java", "struts.xml", "インターセプターをテスト"]-->
-                <p>Interceptorの利用法は今まで何度と無く書いてきたので(ry</p><p>とりあえず自分でInterceptorを作って利用してみる</p><p>要件として</p><pre class="line-numbers"><code class="language-java">package sample.service;
+                <!--[&quot;SampleInterceptor.java&quot;, &quot;struts.xml&quot;, &quot;インターセプターをテスト&quot;]-->
+                <p>Interceptorの利用法は今まで何度と無く書いてきたので(ry</p>
+
+<p>とりあえず自分でInterceptorを作って利用してみる</p>
+
+<p>要件として</p>
+<pre class="line-numbers"><code class="language-java">package sample.service;
 
 public interface ServiceAware&lt;T&gt; {
     public void setService(T service);
 }
-</code></pre><p>的なインターフェースがあって</p><pre class="line-numbers"><code class="language-java">package sample.action;
+</code></pre>
+<p>的なインターフェースがあって</p>
+<pre class="line-numbers"><code class="language-java">package sample.action;
 
 import sample.service.SampleService;
 import sample.service.ServiceAware;
@@ -103,7 +111,9 @@ public class IndexAction extends ActionSupport implements ServiceAware&lt;Sample
         return service;
     }
 }
-</code></pre><p>的な感じでインターセプターからsetServiceを通じてアクションが発生する前に注入してやる的な事をやってみる</p><h4>SampleInterceptor.java</h4><pre class="line-numbers"><code class="language-java">package sample.interceptor;
+</code></pre>
+<p>的な感じでインターセプターからsetServiceを通じてアクションが発生する前に注入してやる的な事をやってみる</p>
+<h4>SampleInterceptor.java</h4><pre class="line-numbers"><code class="language-java">package sample.interceptor;
 
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionInvocation;
@@ -135,7 +145,9 @@ public class SampleInterceptor extends AbstractInterceptor {
         return result;
     }
 }
-</code></pre><p>セッターメソッドを定義しておけばstruts.xmlで&lt;param name=&quot;&quot;&gt;を利用して値を設定したりとかも出来る</p><h4>struts.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</code></pre>
+<p>セッターメソッドを定義しておけばstruts.xmlで&lt;param name=&quot;&quot;&gt;を利用して値を設定したりとかも出来る</p>
+<h4>struts.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.3.dtd&quot;&gt;
 &lt;struts&gt;
     &lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
@@ -154,7 +166,11 @@ public class SampleInterceptor extends AbstractInterceptor {
 
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre><p>以上。特にややこしい事をやってる訳でもないので</p><h4>インターセプターをテスト</h4><p>普通にActionProxy#executeをするとインターセプターも通る。でインターセプターなクラスを単体でテストしたい時とか</p><pre class="line-numbers"><code class="language-java">package sample.interceptor;
+</code></pre>
+<p>以上。特にややこしい事をやってる訳でもないので</p>
+<h4>インターセプターをテスト</h4>
+<p>普通にActionProxy#executeをするとインターセプターも通る。でインターセプターなクラスを単体でテストしたい時とか</p>
+<pre class="line-numbers"><code class="language-java">package sample.interceptor;
 
 import org.apache.struts2.StrutsTestCase;
 import org.junit.Test;
@@ -190,7 +206,13 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
         assertThat(action.getService(), notNullValue());
     }
 }
-</code></pre><p>でさっきコメントで書いたけど、invokeActionOnlyで無い場合だと上記のテストではSampleInterceptorが2回通る。既にインターセプタースタックに載ってる状態で更にインターセプターを追加しちゃってるからだと思われるのだけど</p><p>んまぁアクションが実行されるかされないかを許容しないのであれば別にMockActionInvocationでやれば良いだけかと</p>
+</code></pre>
+<p>でさっきコメントで書いたけど、invokeActionOnlyで無い場合だと上記のテストではSampleInterceptorが2回通る。既にインターセプタースタックに載ってる状態で更にインターセプターを追加しちゃってるからだと思われるのだけど</p>
+
+<p>んまぁアクションが実行されるかされないかを許容しないのであれば別にMockActionInvocationでやれば良いだけかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -282,7 +304,7 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -303,9 +325,6 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -418,7 +437,7 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -441,20 +460,20 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -464,13 +483,15 @@ public class SampleInterceptorTestCase extends StrutsTestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("0caba34b59b06c1016555ff8c72921981e626965");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

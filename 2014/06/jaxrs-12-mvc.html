@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="公式ドキュメント: &lt;https://jersey.java.net/documentation/latest/user-guide.html#mvc&gt;" />
+    <meta name="description" content="公式ドキュメント: &amp;lt;https://jersey.java.net/documentation/latest/user-guide.html#mvc&amp;gt;" />
     <title>JAX-RSをやってみる (12) - MVC - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/06/jaxrs-11-server-sent-events.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/06/jaxrs-13-ref-dependey-injection.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-06-25T00:00:00+00:00">
+                <time datetime="2014-06-25 00:00:00 +0900">
                   <a href="/archives/2014/06">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,19 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["その前に", "依存性", "ThymeleafFeature.java", "ThymeleafTemplateProcessor.java", "web.xml", "beans.xml", "SampleApplication.java", "Home.java", "HomeTest.java"]-->
-                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#mvc" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#mvc</a></p><p>参考: <a href="http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743" target="_blank" rel="noopener noreferrer">http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743</a></p><p>jersey-mvcなAPIを使えばViewableをぶん投げたりする事によりテンプレートエンジンによりレスポンスを出したりする事も出来る。※現時点で公式でサポートされているテンプレートエンジンがfreemarkerとmustacheとjsp</p><p>っていう事でやってみる</p><h4>その前に</h4><p>jersey-mvc-jspなJSPをレンダリングする仕組みを使う場合にテスト書くとエラーを引き起こす。※freemarkerとmustacheでは起きない(HttpServletRequest等をマッピングしない為かと)</p><p>っていう事でthymeleafを使ってテンプレートエンジンによりレスポンスを送信する仕組みのTemplateProcessorを作りながらやる</p><h4>依存性</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+                <!--[&quot;その前に&quot;, &quot;依存性&quot;, &quot;ThymeleafFeature.java&quot;, &quot;ThymeleafTemplateProcessor.java&quot;, &quot;web.xml&quot;, &quot;beans.xml&quot;, &quot;SampleApplication.java&quot;, &quot;Home.java&quot;, &quot;HomeTest.java&quot;]-->
+                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#mvc">https://jersey.java.net/documentation/latest/user-guide.html#mvc</a></p>
+
+<p>参考: <a href="http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743">http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743</a></p>
+
+<p>jersey-mvcなAPIを使えばViewableをぶん投げたりする事によりテンプレートエンジンによりレスポンスを出したりする事も出来る。※現時点で公式でサポートされているテンプレートエンジンがfreemarkerとmustacheとjsp</p>
+
+<p>っていう事でやってみる</p>
+<h4>その前に</h4>
+<p>jersey-mvc-jspなJSPをレンダリングする仕組みを使う場合にテスト書くとエラーを引き起こす。※freemarkerとmustacheでは起きない(HttpServletRequest等をマッピングしない為かと)</p>
+
+<p>っていう事でthymeleafを使ってテンプレートエンジンによりレスポンスを送信する仕組みのTemplateProcessorを作りながらやる</p>
+<h4>依存性</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;jetty&quot;
 apply plugin: &quot;eclipse&quot;
 
@@ -102,7 +114,9 @@ dependencies {
     testCompile &quot;org.springframework:spring-test:+&quot;
     testCompile &quot;org.hamcrest:hamcrest-all:+&quot;
 }
-</code></pre><p>んでまずThymeleafなテンプレートエンジンを使ってレスポンスを処理するのを作る</p><h4>ThymeleafFeature.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>んでまずThymeleafなテンプレートエンジンを使ってレスポンスを処理するのを作る</p>
+<h4>ThymeleafFeature.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ConstrainedTo;
 import javax.ws.rs.RuntimeType;
@@ -216,7 +230,13 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
         return templatePath;
     }
 }
-</code></pre><p>@Injectで注入するのが正しいかは微妙。mvc-jspな奴はProvider&lt;Ref&lt;HttpServletRequest&gt;&gt;的な感じなのを注入しているが、これだとどうもテスト時の注入でAbstractBinder使っても上手く作用してくれないので</p><p>んまぁてな感じでThymeleafを使ってテンプレートエンジンによるレスポンスの処理なところはこれだけ。設定しないと使えませんが</p><h4>web.xml</h4><p>MVCによる処理を利用する場合においてはweb.xmlでfilter周りを設定しないといけないみたいな制約がある模様なので</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</code></pre>
+<p>@Injectで注入するのが正しいかは微妙。mvc-jspな奴はProvider&lt;Ref&lt;HttpServletRequest&gt;&gt;的な感じなのを注入しているが、これだとどうもテスト時の注入でAbstractBinder使っても上手く作用してくれないので</p>
+
+<p>んまぁてな感じでThymeleafを使ってテンプレートエンジンによるレスポンスの処理なところはこれだけ。設定しないと使えませんが</p>
+<h4>web.xml</h4>
+<p>MVCによる処理を利用する場合においてはweb.xmlでfilter周りを設定しないといけないみたいな制約がある模様なので</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;web-app
     xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -238,7 +258,11 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
         &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
     &lt;/filter-mapping&gt;
 &lt;/web-app&gt;
-</code></pre><p>な感じで</p><h4>beans.xml</h4><p>glassfishとかで動かす場合に</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>な感じで</p>
+<h4>beans.xml</h4>
+<p>glassfishとかで動かす場合に</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
     xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -246,7 +270,9 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
     version=&quot;1.1&quot;
     bean-discovery-mode=&quot;all&quot;&gt;
 &lt;/beans&gt;
-</code></pre><p>となっているとデプロイエラーを起こすので、<span style="color: red">bean-discovery-mode=<q>annotated</q></span>にしておく</p><h4>SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>となっているとデプロイエラーを起こすので、<span style="color: red">bean-discovery-mode=<q>annotated</q></span>にしておく</p>
+<h4>SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -266,7 +292,9 @@ public class SampleApplication extends ResourceConfig {
         packages(&quot;sample&quot;);
     }
 }
-</code></pre><p>あとはリソースで使うだけ。</p><h4>Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>あとはリソースで使うだけ。</p>
+<h4>Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -350,7 +378,11 @@ public class Home {
         throw new Exception(&quot;hoge&quot;);
     }
 }
-</code></pre><p>んまぁという感じで大体どういうレスポンスになるかは想像出来るのはないかと</p><h4>HomeTest.java</h4><p>テストする際にHttpServletRequest等の@Injectは行われないのでエラーになる。なのでSpring Framework Testingに入ってるMockHttpServletRequest等をAbstractBinderを使って差し込む的な事をする事で対処出来る模様</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>んまぁという感じで大体どういうレスポンスになるかは想像出来るのはないかと</p>
+<h4>HomeTest.java</h4>
+<p>テストする際にHttpServletRequest等の@Injectは行われないのでエラーになる。なのでSpring Framework Testingに入ってるMockHttpServletRequest等をAbstractBinderを使って差し込む的な事をする事で対処出来る模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -410,7 +442,13 @@ public class HomeTest extends JerseyTest {
         assertThat(response, containsString(&quot;error: hoge&quot;));
     }
 }
-</code></pre><p>終わり。まぁテスト出来ないとか難がちょいとあったけど、リソースメソッドでViewableを返す事でテンプレートエンジンを利用してレスポンスを出したり出来る仕組みを利用するのであればこれ使えば良い</p><p>あとテスト動いてもglassfishとかじゃ動かないとかあるあるなのでちゃんと確認した方が良い。ちなみにそういうテストをサポートするTestContainerFactoryがあるっぽいので</p>
+</code></pre>
+<p>終わり。まぁテスト出来ないとか難がちょいとあったけど、リソースメソッドでViewableを返す事でテンプレートエンジンを利用してレスポンスを出したり出来る仕組みを利用するのであればこれ使えば良い</p>
+
+<p>あとテスト動いてもglassfishとかじゃ動かないとかあるあるなのでちゃんと確認した方が良い。ちなみにそういうテストをサポートするTestContainerFactoryがあるっぽいので</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -502,7 +540,7 @@ public class HomeTest extends JerseyTest {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -523,9 +561,6 @@ public class HomeTest extends JerseyTest {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -638,7 +673,7 @@ public class HomeTest extends JerseyTest {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -661,20 +696,20 @@ public class HomeTest extends JerseyTest {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -684,13 +719,15 @@ public class HomeTest extends JerseyTest {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("89c66a5b6016989e83ae86696e1faf6a887e60b8");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

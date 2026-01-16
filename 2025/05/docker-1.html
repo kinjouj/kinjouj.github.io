@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2025-05-22T00:00:00+09:00">
+                <time datetime="2025-05-22 00:00:00 +0900">
                   <a href="/archives/2025/05">
                   <span class="post-date-year">2025</span>
                   <span class="hyphen">-</span>
@@ -76,30 +77,69 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["インストール", "Dockerfileを作成", "build", "起動", "コンテナの停止", "イメージの削除", "余談"]-->
-                <p>とりまDockerを使ってみる。公式イメージのnginxを使ってこのサイトをデプロイして見れるまでに</p><h4>インストール</h4><p><a href="https://docs.docker.com/engine/install/ubuntu" target="_blank" rel="noopener noreferrer">https://docs.docker.com/engine/install/ubuntu</a>を参考にしてaptリポジトリを追加してdocker-ceとか入れる。多分、docker-buildx-pluginとかは普通に入るはず</p><p>※別サーバーとかにあるDocker Daemonとかを使うのであればdocker-ce-cliだけでいい</p><h4>Dockerfileを作成</h4><pre class="line-numbers"><code class="language-docker">FROM nginx
+                <!--[&quot;インストール&quot;, &quot;Dockerfileを作成&quot;, &quot;build&quot;, &quot;起動&quot;, &quot;コンテナの停止&quot;, &quot;イメージの削除&quot;, &quot;余談&quot;]-->
+                <p>とりまDockerを使ってみる。公式イメージのnginxを使ってこのサイトをデプロイして見れるまでに</p>
+<h4>インストール</h4>
+<p><a href="https://docs.docker.com/engine/install/ubuntu">https://docs.docker.com/engine/install/ubuntu</a>を参考にしてaptリポジトリを追加してdocker-ceとか入れる。多分、docker-buildx-pluginとかは普通に入るはず</p>
+
+<p>※別サーバーとかにあるDocker Daemonとかを使うのであればdocker-ce-cliだけでいい</p>
+<h4>Dockerfileを作成</h4><pre class="line-numbers"><code class="language-docker">FROM nginx
 WORKDIR /usr/share/nginx/html
 COPY docs .
 EXPOSE 80
 </code></pre><h4>build</h4><pre class="line-numbers"><code class="language-bash">docker buildx build -t web .
-</code></pre><p>なんやらダウンロードなどが完了したあとで</p><pre class="line-numbers"><code class="language-bash">docker images -a
-</code></pre><p>をすると</p><pre class="line-numbers"><code class="language-">REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
+</code></pre>
+<p>なんやらダウンロードなどが完了したあとで</p>
+<pre class="line-numbers"><code class="language-bash">docker images -a
+</code></pre>
+<p>をすると</p>
+<pre class="line-numbers"><code class="language-">REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
 web          latest    a305d54525f8   29 seconds ago   328MB
-</code></pre><p>という感じでDocker Imageが作られるのでこれを起動する</p><h4>起動</h4><pre class="line-numbers"><code class="language-bash">docker run -d -p 8080:80 -t web
-</code></pre><p>完了するとDocker側の80番ポートがこっち側では8080番ポートでアクセスできるので見れるか確認してみる</p><p>やったあとで</p><pre class="line-numbers"><code class="language-bash">docker container ls
-</code></pre><p>をすると起動したコンテナが以下のように表示される</p><pre class="line-numbers"><code class="language-">CONTAINER ID   IMAGE     COMMAND                   CREATED              STATUS              PORTS                                   NAMES
+</code></pre>
+<p>という感じでDocker Imageが作られるのでこれを起動する</p>
+<h4>起動</h4><pre class="line-numbers"><code class="language-bash">docker run -d -p 8080:80 -t web
+</code></pre>
+<p>完了するとDocker側の80番ポートがこっち側では8080番ポートでアクセスできるので見れるか確認してみる</p>
+
+<p>やったあとで</p>
+<pre class="line-numbers"><code class="language-bash">docker container ls
+</code></pre>
+<p>をすると起動したコンテナが以下のように表示される</p>
+<pre class="line-numbers"><code class="language-">CONTAINER ID   IMAGE     COMMAND                   CREATED              STATUS              PORTS                                   NAMES
 54702b792684   web       &quot;/docker-entrypoint.…&quot;   About a minute ago   Up About a minute   0.0.0.0:8080-&gt;80/tcp, :::8080-&gt;80/tcp   objective_torvalds
 </code></pre><h4>コンテナの停止</h4><pre class="line-numbers"><code class="language-bash">docker container ls
-</code></pre><p>でコンテナIDを取得して</p><pre class="line-numbers"><code class="language-bash">docker stop 54702b792684
-</code></pre><p>でコンテナを停止することができる。でその際停止した使用してないコンテナを消す場合には</p><pre class="line-numbers"><code class="language-bash">docker container prune
-</code></pre><p>で削除できる。特定のだけ消したい場合には</p><pre class="line-numbers"><code class="language-bash">docker container rm [container ID]
-</code></pre><p>で削除できる。又、存在しているコンテナをすべて一括で止める場合には</p><pre class="line-numbers"><code class="language-bash">docker stop $(docker container ls -qa)
-</code></pre><p>というようにやってもできる</p><h4>イメージの削除</h4><pre class="line-numbers"><code class="language-bash">docker images -a
-</code></pre><p>を実行すると以下のように存在しているDocker Image一覧が出る</p><pre class="line-numbers"><code class="language-">REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
+</code></pre>
+<p>でコンテナIDを取得して</p>
+<pre class="line-numbers"><code class="language-bash">docker stop 54702b792684
+</code></pre>
+<p>でコンテナを停止することができる。でその際停止した使用してないコンテナを消す場合には</p>
+<pre class="line-numbers"><code class="language-bash">docker container prune
+</code></pre>
+<p>で削除できる。特定のだけ消したい場合には</p>
+<pre class="line-numbers"><code class="language-bash">docker container rm [container ID]
+</code></pre>
+<p>で削除できる。又、存在しているコンテナをすべて一括で止める場合には</p>
+<pre class="line-numbers"><code class="language-bash">docker stop $(docker container ls -qa)
+</code></pre>
+<p>というようにやってもできる</p>
+<h4>イメージの削除</h4><pre class="line-numbers"><code class="language-bash">docker images -a
+</code></pre>
+<p>を実行すると以下のように存在しているDocker Image一覧が出る</p>
+<pre class="line-numbers"><code class="language-">REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
 web          latest    a305d54525f8   4 minutes ago   328MB
 kinjouj:/home/kinjouj/docker:$ docker image rm a305d54525f8
-</code></pre><p>あとは</p><pre class="line-numbers"><code class="language-bash">docker image rm web
-</code></pre><p>docker rmiでもいいっぽい</p><p>という感じでDocker Imageを削除できる</p><h4>余談</h4><p>Docker Desktopを使いましょう！！</p>
+</code></pre>
+<p>あとは</p>
+<pre class="line-numbers"><code class="language-bash">docker image rm web
+</code></pre>
+<p>docker rmiでもいいっぽい</p>
+
+<p>という感じでDocker Imageを削除できる</p>
+<h4>余談</h4>
+<p>Docker Desktopを使いましょう！！</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -191,7 +231,7 @@ kinjouj:/home/kinjouj/docker:$ docker image rm a305d54525f8
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -212,9 +252,6 @@ kinjouj:/home/kinjouj/docker:$ docker image rm a305d54525f8
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -327,7 +364,7 @@ kinjouj:/home/kinjouj/docker:$ docker image rm a305d54525f8
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -350,20 +387,20 @@ kinjouj:/home/kinjouj/docker:$ docker image rm a305d54525f8
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -373,13 +410,15 @@ kinjouj:/home/kinjouj/docker:$ docker image rm a305d54525f8
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("14de92da3787473eb789f442dd3ac228002e1ebb");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

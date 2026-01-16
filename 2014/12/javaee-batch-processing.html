@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-12-28T00:00:00+00:00">
+                <time datetime="2014-12-28 00:00:00 +0900">
                   <a href="/archives/2014/12">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["SampleItemReader.java", "SampleItemWriter.java", "Main.java", "META-INF/batch-jobs/sample.xml", "baseContext.xml", "実行"]-->
-                <p>公式リファレンス: <a href="http://www.oracle.com/technetwork/articles/java/batch-1965499.html" target="_blank" rel="noopener noreferrer">http://www.oracle.com/technetwork/articles/java/batch-1965499.html</a></p><p>参考(jBatch): <a href="http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf" target="_blank" rel="noopener noreferrer">http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf</a></p><p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p><p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p><h4>SampleItemReader.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+                <!--[&quot;SampleItemReader.java&quot;, &quot;SampleItemWriter.java&quot;, &quot;Main.java&quot;, &quot;META-INF/batch-jobs/sample.xml&quot;, &quot;baseContext.xml&quot;, &quot;実行&quot;]-->
+                <p>公式リファレンス: <a href="http://www.oracle.com/technetwork/articles/java/batch-1965499.html">http://www.oracle.com/technetwork/articles/java/batch-1965499.html</a></p>
+
+<p>参考(jBatch): <a href="http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf">http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf</a></p>
+
+<p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p>
+
+<p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p>
+<h4>SampleItemReader.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.batch.api.chunk.ItemReader;
 import javax.batch.api.chunk.AbstractItemReader;
@@ -95,7 +103,13 @@ public class SampleItemReader extends AbstractItemReader {
         return count &lt; 10 ? &quot;hoge&quot; : null;
     }
 }
-</code></pre><p>上記のjBatch参考に書いてけど、後々設定ファイルで参照するクラスは@Namedで指定した名前でも参照させる事が可能な模様。あと公式ではItemReaderっていうインターフェースを実装しているけど、今回はそれの抽象クラスにあたると思われるAbstractItemReaderを継承して実装</p><p>おそらくはここでnullを返す事をすればバッチチャンク終了となり、すでにあるバッチチャンクをItemWriterに流して終了的な感じになるのではと</p><p>**** SampleItemProcessor.java</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>上記のjBatch参考に書いてけど、後々設定ファイルで参照するクラスは@Namedで指定した名前でも参照させる事が可能な模様。あと公式ではItemReaderっていうインターフェースを実装しているけど、今回はそれの抽象クラスにあたると思われるAbstractItemReaderを継承して実装</p>
+
+<p>おそらくはここでnullを返す事をすればバッチチャンク終了となり、すでにあるバッチチャンクをItemWriterに流して終了的な感じになるのではと</p>
+
+<p>**** SampleItemProcessor.java</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.batch.api.chunk.ItemProcessor;
 
@@ -105,7 +119,9 @@ public class SampleItemProcessor implements ItemProcessor {
         return ((String)item).toUpperCase();
     }
 }
-</code></pre><p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p><h4>SampleItemWriter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p>
+<h4>SampleItemWriter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 import javax.batch.api.chunk.AbstractItemWriter;
@@ -116,7 +132,9 @@ public class SampleItemWriter extends AbstractItemWriter {
         // ItemProcessor側で処理したデータをチャンクサイズに応じてたまった分がこちらで処理出来るので、書き出し処理等を実装
     }
 }
-</code></pre><p>とまぁBatch Processingを動かすのに必要なのは書いたので</p><h4>Main.java</h4><pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
+</code></pre>
+<p>とまぁBatch Processingを動かすのに必要なのは書いたので</p>
+<h4>Main.java</h4><pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 
 public class Main {
@@ -125,7 +143,9 @@ public class Main {
         job.start(&quot;sample&quot;, new java.util.Properties());
     }
 }
-</code></pre><p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p><h4>META-INF/batch-jobs/sample.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</code></pre>
+<p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p>
+<h4>META-INF/batch-jobs/sample.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;job id=&quot;sample&quot; xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;  version=&quot;1.0&quot;&gt;
     &lt;step id=&quot;sample-chunk&quot;&gt;
         &lt;chunk item-count=&quot;5&quot;&gt;
@@ -137,7 +157,11 @@ public class Main {
         &lt;/chunk&gt;
     &lt;/step&gt;
 &lt;/job&gt;
-</code></pre><p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p><p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p><h4>baseContext.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p>
+
+<p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p>
+<h4>baseContext.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
     xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
     xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
@@ -172,7 +196,9 @@ public class Main {
         p:isolationLevelForCreate=&quot;ISOLATION_SERIALIZABLE&quot; /&gt;
 
 &lt;/beans&gt;
-</code></pre><p>database.xmlは</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>database.xmlは</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
     xmlns=&quot;http://www.springframework.org/schema/beans&quot;
     xmlns:jdbc=&quot;http://www.springframework.org/schema/jdbc&quot;
@@ -200,7 +226,11 @@ public class Main {
         &lt;jdbc:script location=&quot;org/springframework/batch/core/schema-mysql.sql&quot; /&gt;
     &lt;/jdbc:initialize-database&gt;
 &lt;/beans&gt;
-</code></pre><p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p><h4>実行</h4><p>実装して処理の流れなログとってみると</p>
+</code></pre>
+<p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p>
+<h4>実行</h4>
+<p>実装して処理の流れなログとってみると</p>
+
 <pre>
 情報: Executing step: [sample-chunk]
 
@@ -248,7 +278,13 @@ public class Main {
 12 28, 2014 4:32:26 午後 sample.SampleItemWriter writeItems
 情報: writeItems: 9
 </pre>
-<p>てな感じで実行結果になる。item-countで指定した分のチャンクサイズに応じてItemWriter#writeItemsが作用するようになっている模様。またreadItemがnullを返した場合にはprocessItemは発生せずにすでにたまっているチャンクをそのままwriteItemsに作用するように受け流している模様</p><p>んまぁそんなざっくりとした感じでやってみた。まだざっくりとした調査しかしてないので今後も色々勉強しつつ書く予定。今回はこんくらいで</p>
+
+<p>てな感じで実行結果になる。item-countで指定した分のチャンクサイズに応じてItemWriter#writeItemsが作用するようになっている模様。またreadItemがnullを返した場合にはprocessItemは発生せずにすでにたまっているチャンクをそのままwriteItemsに作用するように受け流している模様</p>
+
+<p>んまぁそんなざっくりとした感じでやってみた。まだざっくりとした調査しかしてないので今後も色々勉強しつつ書く予定。今回はこんくらいで</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -340,7 +376,7 @@ public class Main {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -361,9 +397,6 @@ public class Main {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -476,7 +509,7 @@ public class Main {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -499,20 +532,20 @@ public class Main {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -522,13 +555,15 @@ public class Main {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("aa9830eb2f46ad90db56e12255ce981a2b3f839d");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

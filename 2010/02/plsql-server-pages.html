@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2010-02-04T09:00:00+09:00">
+                <time datetime="2010-02-04 09:00:00 +0900">
                   <a href="/archives/2010/02">
                   <span class="post-date-year">2010</span>
                   <span class="hyphen">-</span>
@@ -78,14 +79,21 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Database Access Descriptorを作成", "PL/SQLの作成", "デプロイ", "備考", "備考"]-->
-                <p>OracleのPL/SQL Server Pagesを使ってみた</p><p>※環境はOracleXE for Linuxで行っています</p><h4>Database Access Descriptorを作成</h4><pre class="line-numbers"><code class="language-plsql">begin
+                <!--[&quot;Database Access Descriptorを作成&quot;, &quot;PL/SQLの作成&quot;, &quot;デプロイ&quot;, &quot;備考&quot;, &quot;備考&quot;]-->
+                <p>OracleのPL/SQL Server Pagesを使ってみた</p>
+
+<p>※環境はOracleXE for Linuxで行っています</p>
+<h4>Database Access Descriptorを作成</h4><pre class="line-numbers"><code class="language-plsql">begin
     DBMS_EPG.create_dad(
         dad_name =&gt; &quot;test&quot;,
         path =&gt; &quot;/test/*&quot;
     );
 end;
-</code></pre><p>これで<a href="http://localhost:8080/test/(PL/SQLプロシージャ名)" target="_blank" rel="noopener noreferrer">http://localhost:8080/test/(PL/SQLプロシージャ名)</a>でアクセスできるようになる</p><h4>PL/SQLの作成</h4><p>SQLPlus上から作成するのではなく、以下をどっかにtest.pspとして作成する</p><pre class="line-numbers"><code class="language-jsp">&lt;%@ page language=&quot;PL/SQL&quot; %&gt;
+</code></pre>
+<p>これで<a href="http://localhost:8080/test/(PL/SQL%E3%83%97%E3%83%AD%E3%82%B7%E3%83%BC%E3%82%B8%E3%83%A3%E5%90%8D)">http://localhost:8080/test/(PL/SQLプロシージャ名)</a>でアクセスできるようになる</p>
+<h4>PL/SQLの作成</h4>
+<p>SQLPlus上から作成するのではなく、以下をどっかにtest.pspとして作成する</p>
+<pre class="line-numbers"><code class="language-jsp">&lt;%@ page language=&quot;PL/SQL&quot; %&gt;
 &lt;%@ plsql procedure=&quot;sample_proc&quot; %&gt;
 &lt;%@ plsql parameter=&quot;id&quot; type=&quot;number&quot; default=&quot;0&quot; %&gt;
 &lt;html&gt;
@@ -108,15 +116,33 @@ end;
         &lt;/table&gt;
     &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>FORの部分は</p><pre class="line-numbers"><code class="language-jsp">&lt;% FOR smp IN (SELECT ID,NAME FROM sample) %&gt;
-</code></pre><p>にしても大丈夫っぽい</p><h4>デプロイ</h4><pre class="line-numbers"><code class="language-shell">loadpsp -replace -user hoge/hoge@xe test.psp
-</code></pre><p>を実行するとユーザー内にsample_procっていうプロシージャが作成される。</p><p>あとは<a href="http://localhost:8080/test/sample_proc" target="_blank" rel="noopener noreferrer">http://localhost:8080/test/sample_proc</a>にアクセスする</p><h4>備考</h4><p>ちなみに以下のように作成も可能</p><pre class="line-numbers"><code class="language-sql">create or replace procedure sample is
+</code></pre>
+<p>FORの部分は</p>
+<pre class="line-numbers"><code class="language-jsp">&lt;% FOR smp IN (SELECT ID,NAME FROM sample) %&gt;
+</code></pre>
+<p>にしても大丈夫っぽい</p>
+<h4>デプロイ</h4><pre class="line-numbers"><code class="language-shell">loadpsp -replace -user hoge/hoge@xe test.psp
+</code></pre>
+<p>を実行するとユーザー内にsample_procっていうプロシージャが作成される。</p>
+
+<p>あとは<a href="http://localhost:8080/test/sample_proc">http://localhost:8080/test/sample_proc</a>にアクセスする</p>
+<h4>備考</h4>
+<p>ちなみに以下のように作成も可能</p>
+<pre class="line-numbers"><code class="language-sql">create or replace procedure sample is
     HTP.print(&quot;hogehoge&quot;);
 end;
-</code></pre><p>あとloadpspユーティリティを利用する場合はORACLE_HOMEとORACLE_SIDが設定されてないと実行できない</p><h4>備考</h4><p><a href="http://localhost:8080/test/sample_proc" target="_blank" rel="noopener noreferrer">http://localhost:8080/test/sample_proc</a>にアクセスせずに<a href="http://localhost:8080/test" target="_blank" rel="noopener noreferrer">http://localhost:8080/test</a>にアクセスするとsample_procを利用するようにしたい場合は以下のように設定する</p><pre class="line-numbers"><code class="language-sql">begin
+</code></pre>
+<p>あとloadpspユーティリティを利用する場合はORACLE_HOMEとORACLE_SIDが設定されてないと実行できない</p>
+<h4>備考</h4>
+<p><a href="http://localhost:8080/test/sample_proc">http://localhost:8080/test/sample_proc</a>にアクセスせずに<a href="http://localhost:8080/test">http://localhost:8080/test</a>にアクセスするとsample_procを利用するようにしたい場合は以下のように設定する</p>
+<pre class="line-numbers"><code class="language-sql">begin
     dbms_epg.set_dad_attribute(&quot;test&quot;, &quot;default-page&quot;, &quot;sample_proc&quot;);
 end;
-</code></pre><p>testの部分はDatabase Access Descriptor Nameを指定し、default-page属性値に実行されるPL/SQLプロシージャを指定すればいいっぽい</p>
+</code></pre>
+<p>testの部分はDatabase Access Descriptor Nameを指定し、default-page属性値に実行されるPL/SQLプロシージャを指定すればいいっぽい</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -208,7 +234,7 @@ end;
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -229,9 +255,6 @@ end;
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -344,7 +367,7 @@ end;
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -367,20 +390,20 @@ end;
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -390,13 +413,15 @@ end;
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("772f87b9f6ea0bf3172be32066b5697d5b22adac");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

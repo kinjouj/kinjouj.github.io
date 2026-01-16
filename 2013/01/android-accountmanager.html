@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="んまぁAndroid端末使ってる人とかだと見た事あるし、触った事もある人もいるだろう" />
     <title>Android AccountManagerで使えるカスタムアカウントを開発する方法 - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/01/android-appwidget-listview.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-8-user-configuration.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-9-js.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/01/android-accountmanager.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-19T00:00:00+00:00">
+                <time datetime="2013-01-19 00:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,19 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["認証方式", "AndroidManifest.xml", "res/values/strings.xml", "res/xml/authenticator.xml", "res/xml/prefs.xml", "AuthenticatorPreferenceActivity.java", "res/xml/pref.xml", "MainActivity.java", "AuthenticatorService.java", "SampleAccountAuthenticator.java", "AuthenticatorActivity.java"]-->
-                <p>んまぁAndroid端末使ってる人とかだと見た事あるし、触った事もある人もいるだろう</p><p><img src="/images/2013/01/20130119095120.png" class="img-fluid" alt="image" /></p><p>まぁWebサービスとかのアカウントを端末内に保管して、認証要求だとかをAccountManagerな機能を通じて行えたり出来るAPIが存在する訳ですが、これの独自のを作る方法。まぁ結構書く量が多いので</p><h4>認証方式</h4><p>OAuthとか使って権限管理の元で色々出来たりするのが一番良いんですが、今回は適当にトークン取得リクエストしたらトークン返して、でAPIを実行する際にトークンをヘッダーにぶち込んでリクエストしたら結果が返ってくる的な感じ</p><p>まぁ良くあるかどうかは定かじゃないけど、RailsとかだとDeviseとかそういうのがあったりもする訳で。これもとりあえずおいといて</p><p>という事で本題な所のAndroidの方を実装する。もっかいいうけどクソ長いんでww</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+                <!--[&quot;認証方式&quot;, &quot;AndroidManifest.xml&quot;, &quot;res/values/strings.xml&quot;, &quot;res/xml/authenticator.xml&quot;, &quot;res/xml/prefs.xml&quot;, &quot;AuthenticatorPreferenceActivity.java&quot;, &quot;res/xml/pref.xml&quot;, &quot;MainActivity.java&quot;, &quot;AuthenticatorService.java&quot;, &quot;SampleAccountAuthenticator.java&quot;, &quot;AuthenticatorActivity.java&quot;]-->
+                <p>んまぁAndroid端末使ってる人とかだと見た事あるし、触った事もある人もいるだろう</p>
+
+<p><img src="/images/2013/01/20130119095120.png" class="img-fluid" alt="image" /></p>
+
+<p>まぁWebサービスとかのアカウントを端末内に保管して、認証要求だとかをAccountManagerな機能を通じて行えたり出来るAPIが存在する訳ですが、これの独自のを作る方法。まぁ結構書く量が多いので</p>
+<h4>認証方式</h4>
+<p>OAuthとか使って権限管理の元で色々出来たりするのが一番良いんですが、今回は適当にトークン取得リクエストしたらトークン返して、でAPIを実行する際にトークンをヘッダーにぶち込んでリクエストしたら結果が返ってくる的な感じ</p>
+
+<p>まぁ良くあるかどうかは定かじゃないけど、RailsとかだとDeviseとかそういうのがあったりもする訳で。これもとりあえずおいといて</p>
+
+<p>という事で本題な所のAndroidの方を実装する。もっかいいうけどクソ長いんでww</p>
+<h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;net.kinjouj.test&quot;
@@ -121,7 +133,9 @@
         &lt;/service&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><p>な感じ。で必要な設定リソースから作る</p><h4>res/values/strings.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>な感じ。で必要な設定リソースから作る</p>
+<h4>res/values/strings.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;resources&gt;
     &lt;string name=&quot;app_name&quot;&gt;Sample&lt;/string&gt;
 
@@ -135,7 +149,9 @@
     &lt;string name=&quot;preference_category_extra_nickname_title&quot;&gt;ニックネーム&lt;/string&gt;
     &lt;string name=&quot;preference_category_extra_nickname_summary&quot;&gt;ニックネームを設定&lt;/string&gt;
 &lt;/resources&gt;
-</code></pre><p>でAccountAuthenticatorを使う際に必要となる設定リソース(AndroidManifest.xmlだとres/xml/authenticator.xml)を作る</p><h4>res/xml/authenticator.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>でAccountAuthenticatorを使う際に必要となる設定リソース(AndroidManifest.xmlだとres/xml/authenticator.xml)を作る</p>
+<h4>res/xml/authenticator.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;account-authenticator
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:accountType=&quot;@string/account_type&quot;
@@ -143,7 +159,9 @@
     android:smallIcon=&quot;@drawable/icon&quot;
     android:label=&quot;@string/account_label&quot;
     android:accountPreferences=&quot;@xml/prefs&quot; /&gt;
-</code></pre><p>でアカウント設定でオプションで設定出来るPreferenceな設定ファイルも必要</p><h4>res/xml/prefs.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>でアカウント設定でオプションで設定出来るPreferenceな設定ファイルも必要</p>
+<h4>res/xml/prefs.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
     &lt;PreferenceCategory android:title=&quot;設定&quot; /&gt;
     &lt;PreferenceScreen android:key=&quot;account_settings&quot; android:title=&quot;Account Settings&quot;&gt;
@@ -152,7 +170,11 @@
             android:targetClass=&quot;net.kinjouj.test.AuthenticatorPreferenceActivity&quot; /&gt;
     &lt;/PreferenceScreen&gt;
 &lt;/PreferenceScreen&gt;
-</code></pre><p>な感じ。設定画面はAuthenticatorPreferenceActivityにintentする方向で</p><p>んでPreferenceな所からちょっと作っておく</p><h4>AuthenticatorPreferenceActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre>
+<p>な感じ。設定画面はAuthenticatorPreferenceActivityにintentする方向で</p>
+
+<p>んでPreferenceな所からちょっと作っておく</p>
+<h4>AuthenticatorPreferenceActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.preference.PreferenceActivity;
 import android.preference.Preference;
@@ -174,7 +196,11 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
         });
     }
 }
-</code></pre><p>でPreferenceで参照するリソースが必要</p><h4>res/xml/pref.xml</h4><p>prefs.xmlでは無いので注意</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>でPreferenceで参照するリソースが必要</p>
+<h4>res/xml/pref.xml</h4>
+<p>prefs.xmlでは無いので注意</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
     &lt;PreferenceCategory android:title=&quot;@string/preference_category_extra_title&quot;&gt;
         &lt;EditTextPreference
@@ -184,7 +210,11 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
             android:summary=&quot;@string/preference_category_extra_nickname_summary&quot; /&gt;
     &lt;/PreferenceCategory&gt;
 &lt;/PreferenceScreen&gt;
-</code></pre><p>まぁニックネームを設定出来るようにするだけ</p><p>あとはアプリのActivity(MainActivity)とか認証要求を行うActivity(AuthenticatorActivity)とService(AuthenticatorService)とかをもろもろ作る</p><h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre>
+<p>まぁニックネームを設定出来るようにするだけ</p>
+
+<p>あとはアプリのActivity(MainActivity)とか認証要求を行うActivity(AuthenticatorActivity)とService(AuthenticatorService)とかをもろもろ作る</p>
+<h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -328,7 +358,13 @@ public class MainActivity extends Activity {
         }
     }
 }
-</code></pre><p>アカウントがあれば、そのアカウントでgetAuthTokenしてそのトークンを使ってWeb APIにヘッダーをつけてリクエストしレスポンスをパースしてListViewにバインド</p><p>アカウントがなければAndroidのアカウント設定画面にintentしてアカウントを作るように要求</p><p>でアカウントを追加する際に今回の独自のアカウントを選択した場合にはAuthenticatorServiceが作用するのでそれを作る</p><h4>AuthenticatorService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre>
+<p>アカウントがあれば、そのアカウントでgetAuthTokenしてそのトークンを使ってWeb APIにヘッダーをつけてリクエストしレスポンスをパースしてListViewにバインド</p>
+
+<p>アカウントがなければAndroidのアカウント設定画面にintentしてアカウントを作るように要求</p>
+
+<p>でアカウントを追加する際に今回の独自のアカウントを選択した場合にはAuthenticatorServiceが作用するのでそれを作る</p>
+<h4>AuthenticatorService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.accounts.AccountManager;
 import android.app.Service;
@@ -346,7 +382,9 @@ public class AuthenticatorService extends Service {
         return null;
     }
 }
-</code></pre><p>でonBindでAbstractAccountAuthenticatorを継承したクラスをnewしでgetIBinderを返す</p><h4>SampleAccountAuthenticator.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre>
+<p>でonBindでAbstractAccountAuthenticatorを継承したクラスをnewしでgetIBinderを返す</p>
+<h4>SampleAccountAuthenticator.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -483,7 +521,13 @@ class SampleAccountAuthenticator extends AbstractAccountAuthenticator {
         return null;
     }
 }
-</code></pre><p>AccountManager.getAuthTokenをするとコールバックでAccountManagerFuture<Bundle>.getResultsでgetAuthTokenから返したBundleを取得できる。</p><p>でアカウント追加から来た時にはaddAccountが呼び出されて、そこからAuthenticatorActivity.ACTION(AuthenticatorActivityを発生させるアクションintent)が投げられて、登録に伴う認証開始が行われるという感じ</p><p>でそのAuthenticatorActivityを作る</p><h4>AuthenticatorActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+</code></pre>
+<p>AccountManager.getAuthTokenをするとコールバックでAccountManagerFuture<Bundle>.getResultsでgetAuthTokenから返したBundleを取得できる。</p>
+
+<p>でアカウント追加から来た時にはaddAccountが呼び出されて、そこからAuthenticatorActivity.ACTION(AuthenticatorActivityを発生させるアクションintent)が投げられて、登録に伴う認証開始が行われるという感じ</p>
+
+<p>でそのAuthenticatorActivityを作る</p>
+<h4>AuthenticatorActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -544,7 +588,11 @@ public class AuthenticatorActivity extends Activity {
         return null;
     }
 }
-</code></pre><p>AccountManager.addAccountExplicitlyでアカウントを登録できる模様。という感じで作れる</p><p>で流れをまとめると</p>
+</code></pre>
+<p>AccountManager.addAccountExplicitlyでアカウントを登録できる模様。という感じで作れる</p>
+
+<p>で流れをまとめると</p>
+
 <ul>
 <li>MainActivityが起動する。この時点でアカウントが無いので、アカウント設定画面にintentを送出される</li>
 <li>アカウント設定画面が開き、今回定義したアカウントを選択するとAuthenticatorServiceが呼ばれる</li>
@@ -553,7 +601,27 @@ public class AuthenticatorActivity extends Activity {
 <li>AuthenticatorActivityからAccountManager.addAccountExplicitlyを使ってアカウントを登録する。この際フォームなどを使ってユーザーIDやパスワード等を利用して認証させるっていうのが本式かも(今回はやってない)</li>
 <li>アカウント登録が終わったらAccountManager.getAuthTokenを使ってトークンを取得、その後Web APIへリクエストしてレスポンスのデータをListViewへバインド</li>
 </ul>
-<p>大体はこういう流れかと。で実際に動作させてみると</p><p><img src="/images/2013/01/20130119175902.png" class="img-fluid" alt="image" /></p><p>まずアカウント無いので登録を促される。でそのままOKするとアカウント登録画面に行くので</p><p><img src="/images/2013/01/20130119175939.png" class="img-fluid" alt="image" /></p><p>今回作ったアカウント方式を選択する。この際にAuthenticatorActivityでフォームとか出してるのならそれをごにょごにょしてやって終わると</p><p><img src="/images/2013/01/20130119180044.png" class="img-fluid" alt="image" /></p><p>という風にアカウントを使って取得したトークンを使ってWeb APIからデータを取得してバインド</p><p>まぁこんな感じ。すっごいややこしいですけど</p><p>ちなみに、 <a href="http://www.c99.org/2010/01/23/writing-an-android-sync-provider-part-1/" target="_blank" rel="noopener noreferrer">http://www.c99.org/2010/01/23/writing-an-android-sync-provider-part-1/</a> というLast.fmのサービスのアカウントをAndroidで使うデモ・方式、そしてソースも公開されてたはずなのでそれも参考にすると良いかも</p>
+
+<p>大体はこういう流れかと。で実際に動作させてみると</p>
+
+<p><img src="/images/2013/01/20130119175902.png" class="img-fluid" alt="image" /></p>
+
+<p>まずアカウント無いので登録を促される。でそのままOKするとアカウント登録画面に行くので</p>
+
+<p><img src="/images/2013/01/20130119175939.png" class="img-fluid" alt="image" /></p>
+
+<p>今回作ったアカウント方式を選択する。この際にAuthenticatorActivityでフォームとか出してるのならそれをごにょごにょしてやって終わると</p>
+
+<p><img src="/images/2013/01/20130119180044.png" class="img-fluid" alt="image" /></p>
+
+<p>という風にアカウントを使って取得したトークンを使ってWeb APIからデータを取得してバインド</p>
+
+<p>まぁこんな感じ。すっごいややこしいですけど</p>
+
+<p>ちなみに、 <a href="http://www.c99.org/2010/01/23/writing-an-android-sync-provider-part-1/">http://www.c99.org/2010/01/23/writing-an-android-sync-provider-part-1/</a> というLast.fmのサービスのアカウントをAndroidで使うデモ・方式、そしてソースも公開されてたはずなのでそれも参考にすると良いかも</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -561,7 +629,7 @@ public class AuthenticatorActivity extends Activity {
             <!-- next post -->
             <a class="float-start box-link" href="/2013/01/mongodb-9-js.html">&lt;&nbsp;mongodbを使ってみる (9) - JSファイルでごにょごにょ -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/01/android-appwidget-listview.html">AppWidgetでListView&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/01/mongodb-8-user-configuration.html">mongodbを使ってみる (8) - ユーザー設定 -&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -645,7 +713,7 @@ public class AuthenticatorActivity extends Activity {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -666,9 +734,6 @@ public class AuthenticatorActivity extends Activity {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -781,7 +846,7 @@ public class AuthenticatorActivity extends Activity {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -804,20 +869,20 @@ public class AuthenticatorActivity extends Activity {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -827,13 +892,15 @@ public class AuthenticatorActivity extends Activity {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("dba3c984095616e3c5918c2e3b4b629a1022059e");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

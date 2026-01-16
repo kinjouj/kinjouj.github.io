@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="とあるチャットにて、「クラスについたアノテーションからJavaソース生成させるとかどうやるの」っていう相談を受けたんだが、まぁ出来るんだろうけどやった事が無いっていう事でやってみた" />
     <title>codemodelを使ってアノテーションプロセッサ利用によるJavaコードの生成 - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/07/laravel-20-mail.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/07/laravel-password-reminder-expiration.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/08/chrome-extension-google-app-engine-oauth.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/08/codemodel-annotation-processing-java-sourcecode-generation.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-08-10T00:00:00+00:00">
+                <time datetime="2013-08-10 00:00:00 +0900">
                   <a href="/archives/2013/08">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,20 +79,33 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p>とあるチャットにて、「クラスについたアノテーションからJavaソース生成させるとかどうやるの」っていう相談を受けたんだが、まぁ出来るんだろうけどやった事が無いっていう事でやってみた</p><p>でJavaコード(.java)を生成させる方法としてまず思いついたのが、codemodelっていうのを使う。多分これSun Microsystems時代にそこが公式的に作ったのじゃないのかなーって。まぁパッケージ名もそうなってとるしね、そんなことはおいといてアノテーションプロセッサから得られたクラスに対するアノテートを処理させ、その情報を元にcodemodelを使ってコードを生成させる事は出来るのではっていう事</p><p>んまぁグダグダ言ってないでコード書けよハゲっておこられそうなので(ry</p><p>※いろいろとイケてないのでネタとして</p><pre class="line-numbers"><code class="language-java">package sample;
+                <p>とあるチャットにて、「クラスについたアノテーションからJavaソース生成させるとかどうやるの」っていう相談を受けたんだが、まぁ出来るんだろうけどやった事が無いっていう事でやってみた</p>
+
+<p>でJavaコード(.java)を生成させる方法としてまず思いついたのが、codemodelっていうのを使う。多分これSun Microsystems時代にそこが公式的に作ったのじゃないのかなーって。まぁパッケージ名もそうなってとるしね、そんなことはおいといてアノテーションプロセッサから得られたクラスに対するアノテートを処理させ、その情報を元にcodemodelを使ってコードを生成させる事は出来るのではっていう事</p>
+
+<p>んまぁグダグダ言ってないでコード書けよハゲっておこられそうなので(ry</p>
+
+<p>※いろいろとイケてないのでネタとして</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 public class Sample {
     @Attribute
     protected String name;
 }
-</code></pre><p>的な事やれば</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>的な事やれば</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 public class SampleBean extends Sample {
     public String getName() {
         return name;
     }
 }
-</code></pre><p>的なJavaコードを出力できるように。んじゃアノテーションプロセッサーを書く</p><p>簡単に言うと@Attributeのアノテーションがついてるフィールドを走査してcodemodelを使ってメソッドを作り、ソースを生成させる</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>的なJavaコードを出力できるように。んじゃアノテーションプロセッサーを書く</p>
+
+<p>簡単に言うと@Attributeのアノテーションがついてるフィールドを走査してcodemodelを使ってメソッドを作り、ソースを生成させる</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -236,7 +250,9 @@ public class SampleAnnotationProcessor extends AbstractProcessor {
         }
     }
 }
-</code></pre><p>ていう感じで、ビルドしてjarに突っ込んでおく。で別プロジェクトでこのjarを参照して利用するんだけど、Eclipseとか使わずに単純にgradleでbuildタスクでAPT処理をお願いする形で使ってみる</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+</code></pre>
+<p>ていう感じで、ビルドしてjarに突っ込んでおく。で別プロジェクトでこのjarを参照して利用するんだけど、Eclipseとか使わずに単純にgradleでbuildタスクでAPT処理をお願いする形で使ってみる</p>
+<pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 
 repositories {
     mavenCentral()
@@ -265,7 +281,15 @@ task compileAptJava(type: Compile, group: &quot;build&quot;, overwrite: true) {
 
 compileJava.dependsOn compileAptJava
 sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
-</code></pre><p>んな感じ。でやってみて思ったのが、通常アノテーションを処理する際にはアノテーション自体がどこに付与出来るかは@Target等で指定出来る。でもそのチェック処理等の前にアノテーションプロセッサが働いてしまってるので、そのバリデーションを行う前に処理される為にフィールドに付与出来るのをクラスに付与したりしてもソースが生成されちゃう。そこら辺のチェックやる方法がちょっと微妙に分かってない</p><p>んまぁとりあえずはアノテーションプロセッサとcodemodelを使ってソースを生成しちゃったりする的な事は出来なくも無いって模様。ただ、それをやるにはアノテーションプロセッサのかなりな知識が必要になりそう。んまぁこういうの普通にJavaでWebシステム開発とかやってるだけならまず出会わないだろうなぁっと</p><p>んまぁ、良い体験できた気がする</p>
+</code></pre>
+<p>んな感じ。でやってみて思ったのが、通常アノテーションを処理する際にはアノテーション自体がどこに付与出来るかは@Target等で指定出来る。でもそのチェック処理等の前にアノテーションプロセッサが働いてしまってるので、そのバリデーションを行う前に処理される為にフィールドに付与出来るのをクラスに付与したりしてもソースが生成されちゃう。そこら辺のチェックやる方法がちょっと微妙に分かってない</p>
+
+<p>んまぁとりあえずはアノテーションプロセッサとcodemodelを使ってソースを生成しちゃったりする的な事は出来なくも無いって模様。ただ、それをやるにはアノテーションプロセッサのかなりな知識が必要になりそう。んまぁこういうの普通にJavaでWebシステム開発とかやってるだけならまず出会わないだろうなぁっと</p>
+
+<p>んまぁ、良い体験できた気がする</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -273,7 +297,7 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
             <!-- next post -->
             <a class="float-start box-link" href="/2013/08/chrome-extension-google-app-engine-oauth.html">&lt;&nbsp;Chrome Extension+Google App Engine(+OAuth)</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/07/laravel-20-mail.html">Laravel使ってみた (20) - Mail -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/07/laravel-password-reminder-expiration.html">Laravelのパスワードリマインダーに有効期限設定が出来るようになったらしい件&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -357,7 +381,7 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -378,9 +402,6 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -493,7 +514,7 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -516,20 +537,20 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -539,13 +560,15 @@ sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("6196b8be0a461ae808393412c6c4df318d0b054b");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

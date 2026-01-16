@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;http://d.hatena.ne.jp/idesaku/20081226/1230263190&gt; をそのまま試してみる。まぁちょっとだけ違いますけど" />
+    <meta name="description" content="&amp;lt;http://d.hatena.ne.jp/idesaku/20081226/1230263190&amp;gt; をそのまま試してみる。まぁちょっとだけ違いますけど" />
     <title>SAStrutsを勉強してみる (6) - LoginInterceptor - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/10/android-support-v13-dreams-basicdream.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/10/android-connectivity-manager-isactivenetworkmetered.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-10-07T00:00:00+00:00">
+                <time datetime="2012-10-07 00:00:00 +0900">
                   <a href="/archives/2012/10">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["要件", "User.java", "UserDto.java", "LoginInterceptor.java", "customizer.dicon", "IndexAction.java", "LoginAction.java", "余談"]-->
-                <p><a href="http://d.hatena.ne.jp/idesaku/20081226/1230263190" target="_blank" rel="noopener noreferrer">http://d.hatena.ne.jp/idesaku/20081226/1230263190</a> をそのまま試してみる。まぁちょっとだけ違いますけど</p><h4>要件</h4><p>sample.action.dashboardなパッケージにあるアクションを参照する場合にはログインが必要なのでLoginActionに飛ばす。但し、sample.action.dashboard.LoginActionだけは非認証でアクセス出来るようにしないといけないので(ry</p><p>んまぁ上記のリンクにあるようにインターセプタでそこら辺をコントロールする。で、必要なのはインターセプタ及びその設定と各種アクションクラスとビュー、んでユーザー情報を参照するEntityとその情報をセッションで管理するDtoオブジェクトクラス</p><h4>User.java</h4><p>ユーザー情報を参照するエンティティクラス</p><pre class="line-numbers"><code class="language-java">package sample.entity;
+                <!--[&quot;要件&quot;, &quot;User.java&quot;, &quot;UserDto.java&quot;, &quot;LoginInterceptor.java&quot;, &quot;customizer.dicon&quot;, &quot;IndexAction.java&quot;, &quot;LoginAction.java&quot;, &quot;余談&quot;]-->
+                <p><a href="http://d.hatena.ne.jp/idesaku/20081226/1230263190">http://d.hatena.ne.jp/idesaku/20081226/1230263190</a> をそのまま試してみる。まぁちょっとだけ違いますけど</p>
+<h4>要件</h4>
+<p>sample.action.dashboardなパッケージにあるアクションを参照する場合にはログインが必要なのでLoginActionに飛ばす。但し、sample.action.dashboard.LoginActionだけは非認証でアクセス出来るようにしないといけないので(ry</p>
+
+<p>んまぁ上記のリンクにあるようにインターセプタでそこら辺をコントロールする。で、必要なのはインターセプタ及びその設定と各種アクションクラスとビュー、んでユーザー情報を参照するEntityとその情報をセッションで管理するDtoオブジェクトクラス</p>
+<h4>User.java</h4>
+<p>ユーザー情報を参照するエンティティクラス</p>
+<pre class="line-numbers"><code class="language-java">package sample.entity;
 
 import java.io.Serializable;
 
@@ -105,7 +113,11 @@ public class User implements Serializable {
     @Column(name = &quot;password&quot;)
     public String password;
 }
-</code></pre><p>というような感じでテーブルも作っておく</p><h4>UserDto.java</h4><p>ユーザー情報を保持しているEntityから情報をセッションで管理するクラス</p><pre class="line-numbers"><code class="language-java">package sample.dto;
+</code></pre>
+<p>というような感じでテーブルも作っておく</p>
+<h4>UserDto.java</h4>
+<p>ユーザー情報を保持しているEntityから情報をセッションで管理するクラス</p>
+<pre class="line-numbers"><code class="language-java">package sample.dto;
 
 import java.io.Serializable;
 
@@ -121,7 +133,9 @@ public class UserDto implements Serializable {
     public String userName;
 
 }
-</code></pre><p><a href="http://sastruts.seasar.org/featureReference.html#Action" target="_blank" rel="noopener noreferrer">http://sastruts.seasar.org/featureReference.html#Action</a> によると「ログインしたユーザに関する情報など、 アクションフォーム以外をセッションで管理する場合、 ルートパッケージ.dtoにXxxDto作成し、@Componentでセッションで管理されるように定義します」との事らしい。でこれを下にインターセプタで認証済みユーザーセッションがあるかないかとかをチェックする</p><h4>LoginInterceptor.java</h4><pre class="line-numbers"><code class="language-java">package sample.interceptor;
+</code></pre>
+<p><a href="http://sastruts.seasar.org/featureReference.html#Action">http://sastruts.seasar.org/featureReference.html#Action</a> によると「ログインしたユーザに関する情報など、 アクションフォーム以外をセッションで管理する場合、 ルートパッケージ.dtoにXxxDto作成し、@Componentでセッションで管理されるように定義します」との事らしい。でこれを下にインターセプタで認証済みユーザーセッションがあるかないかとかをチェックする</p>
+<h4>LoginInterceptor.java</h4><pre class="line-numbers"><code class="language-java">package sample.interceptor;
 
 import javax.annotation.Resource;
 
@@ -155,7 +169,9 @@ public class LoginInterceptor extends AbstractInterceptor {
         return null;
     }
 }
-</code></pre><p>nullを返すべきかで悩んだのですが、とりあえずそのままにしておく。でこれのパッケージ名なんすけど、「NamingContextImpl.addRootPackageName(convension.dicon) + <q>.interceptor</q>」という感じにすれば、規約に沿って注入される模様げ。でこいつを作動させる為にcustomizer.diconをいじる</p><h4>customizer.dicon</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+</code></pre>
+<p>nullを返すべきかで悩んだのですが、とりあえずそのままにしておく。でこれのパッケージ名なんすけど、「NamingContextImpl.addRootPackageName(convension.dicon) + <q>.interceptor</q>」という感じにすれば、規約に沿って注入される模様げ。でこいつを作動させる為にcustomizer.diconをいじる</p>
+<h4>customizer.dicon</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;!DOCTYPE components PUBLIC &quot;-//SEASAR//DTD S2Container 2.4//EN&quot; &quot;http://www.seasar.org/dtd/components24.dtd&quot;&gt;
 &lt;components&gt;
     &lt;include path=&quot;default-customizer.dicon&quot; /&gt;
@@ -221,7 +237,9 @@ public class IndexAction {
         return &quot;&quot;;
     }
 }
-</code></pre><p>sample.action.dashboard.IndexActionなんでLoginInterceptorをもろにくらうので非認証状態でアクセスしてもLoginActionにぶっ飛ばされる事を確認する</p><h4>LoginAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
+</code></pre>
+<p>sample.action.dashboard.IndexActionなんでLoginInterceptorをもろにくらうので非認証状態でアクセスしてもLoginActionにぶっ飛ばされる事を確認する</p>
+<h4>LoginAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
 
 import javax.annotation.Resource;
 
@@ -277,7 +295,11 @@ public class LoginAction {
         return &quot;/dashboard&quot;;
     }
 }
-</code></pre><p>セッション管理されているDtoオブジェクトは値をぶち込むだけで良いみたい。という感じで作ればセッション管理による認証な所を作る事は可能な模様。まぁインターセプタなテスト法とかまだ調べてないんすけど</p><h4>余談</h4><p>UserService.javaはこんな感じ</p><pre class="line-numbers"><code class="language-java">package sample.service;
+</code></pre>
+<p>セッション管理されているDtoオブジェクトは値をぶち込むだけで良いみたい。という感じで作ればセッション管理による認証な所を作る事は可能な模様。まぁインターセプタなテスト法とかまだ調べてないんすけど</p>
+<h4>余談</h4>
+<p>UserService.javaはこんな感じ</p>
+<pre class="line-numbers"><code class="language-java">package sample.service;
 
 import org.seasar.extension.jdbc.service.S2AbstractService;
 import org.seasar.extension.jdbc.where.SimpleWhere;
@@ -303,6 +325,8 @@ public class UserService extends S2AbstractService&lt;User&gt; {
     }
 }
 </code></pre>
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -394,7 +418,7 @@ public class UserService extends S2AbstractService&lt;User&gt; {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -415,9 +439,6 @@ public class UserService extends S2AbstractService&lt;User&gt; {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -530,7 +551,7 @@ public class UserService extends S2AbstractService&lt;User&gt; {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -553,20 +574,20 @@ public class UserService extends S2AbstractService&lt;User&gt; {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -576,13 +597,15 @@ public class UserService extends S2AbstractService&lt;User&gt; {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("22634249922cf0410aeec421b901f62b80526852");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

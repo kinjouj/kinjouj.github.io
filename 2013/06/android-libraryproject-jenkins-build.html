@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="んまぁライブラリプロジェクト自体をJenkinsのビルドプロジェクト(フリースタイル)とかで定義しちゃっても良いとは思いますけど、ActionBarSherlockとかだったりだとか公開されている有用なAndroidライブラリとかを伴うプロジェクトをビルドするとなると定義するかプロジェクト内にぶち込んじゃうかっていう所だと思うのですが、その後者側の「参照するライブラリプロジェクト自体をビルドプロジェクトとして定義せずにアプリプロジェクトにぶち込んでビルド」するっていう方式的なのを検証してみた" />
     <title>ライブラリプロジェクトを伴うAndroidアプリをJenkinsでビルド - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/06/laravel-4-routing-filter.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/06/downloaded-program-ubuntu-application-menu-registration.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/06/android-robotium-actionbarsherlock.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/06/android-libraryproject-jenkins-build.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-13T00:00:00+00:00">
+                <time datetime="2013-06-13 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,21 +78,44 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Jenkins側の事前設定", "アプリプロジェクトの構造", "ビルドの設定", "ビルドログ"]-->
-                <p>んまぁライブラリプロジェクト自体をJenkinsのビルドプロジェクト(フリースタイル)とかで定義しちゃっても良いとは思いますけど、ActionBarSherlockとかだったりだとか公開されている有用なAndroidライブラリとかを伴うプロジェクトをビルドするとなると定義するかプロジェクト内にぶち込んじゃうかっていう所だと思うのですが、その後者側の「参照するライブラリプロジェクト自体をビルドプロジェクトとして定義せずにアプリプロジェクトにぶち込んでビルド」するっていう方式的なのを検証してみた</p><h4>Jenkins側の事前設定</h4><p>Jenkins Git Pluginを使う。入れたのは <a href="https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin" target="_blank" rel="noopener noreferrer">https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin</a></p><h4>アプリプロジェクトの構造</h4><p>ディレクトリ内にアプリプロジェクトディレクトリと参照するライブラリプロジェクトのディレクトリは分けてる。</p>
+                <!--[&quot;Jenkins側の事前設定&quot;, &quot;アプリプロジェクトの構造&quot;, &quot;ビルドの設定&quot;, &quot;ビルドログ&quot;]-->
+                <p>んまぁライブラリプロジェクト自体をJenkinsのビルドプロジェクト(フリースタイル)とかで定義しちゃっても良いとは思いますけど、ActionBarSherlockとかだったりだとか公開されている有用なAndroidライブラリとかを伴うプロジェクトをビルドするとなると定義するかプロジェクト内にぶち込んじゃうかっていう所だと思うのですが、その後者側の「参照するライブラリプロジェクト自体をビルドプロジェクトとして定義せずにアプリプロジェクトにぶち込んでビルド」するっていう方式的なのを検証してみた</p>
+<h4>Jenkins側の事前設定</h4>
+<p>Jenkins Git Pluginを使う。入れたのは <a href="https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin">https://wiki.jenkins-ci.org/display/JENKINS/Git%2BPlugin</a></p>
+<h4>アプリプロジェクトの構造</h4>
+<p>ディレクトリ内にアプリプロジェクトディレクトリと参照するライブラリプロジェクトのディレクトリは分けてる。</p>
+
 <pre>
 root:
   - ActionBarSherlock
   - SlidingMenu
   - アプリプロジェクト
 </pre>
-<p>っていう感じなのだけど。ActionBarSherlockとSlidingMenu自体はgithubで提供されているので、git submoduleを使って取得する。でこの構造をgitサーバー辺りにpushしておく</p><p>git submoduleなやつはJenkinsでワークスペースをビルドする際にフェッチされる模様なのでこっちで何かするとかは無い模様。但し、android update [lib-]projectとかは必要</p><p>まぁ構造的なのはそんくらい</p><h4>ビルドの設定</h4><p>ソースコード管理からgitを選択して、pushしたgitサーバーのリポジトリを指定する。上記にも書いたけど、これでワークスペースにgitからチェックアウトされて格納される模様</p><p>で上記の注釈でも書いたけど、gitから取ってきてもupdate project関係は必要な模様。なのでビルド手順の追加でantでビルドする前にシェルスクリプトの実行で</p><pre class="line-numbers"><code class="language-">android update lib-project -p ActionBarSherlock/actionbarsherlock -t [Android Build Target]
+
+<p>っていう感じなのだけど。ActionBarSherlockとSlidingMenu自体はgithubで提供されているので、git submoduleを使って取得する。でこの構造をgitサーバー辺りにpushしておく</p>
+
+<p>git submoduleなやつはJenkinsでワークスペースをビルドする際にフェッチされる模様なのでこっちで何かするとかは無い模様。但し、android update [lib-]projectとかは必要</p>
+
+<p>まぁ構造的なのはそんくらい</p>
+<h4>ビルドの設定</h4>
+<p>ソースコード管理からgitを選択して、pushしたgitサーバーのリポジトリを指定する。上記にも書いたけど、これでワークスペースにgitからチェックアウトされて格納される模様</p>
+
+<p>で上記の注釈でも書いたけど、gitから取ってきてもupdate project関係は必要な模様。なのでビルド手順の追加でantでビルドする前にシェルスクリプトの実行で</p>
+<pre class="line-numbers"><code class="language-">android update lib-project -p ActionBarSherlock/actionbarsherlock -t [Android Build Target]
 android update lib-project -p SlidingMenu/library -t [Android Build Target]
 android update project -p sample -l ../ActionBarSherlock/actionbarsherlock
 android update project -p sample -l ../SlidingMenu/library
-</code></pre><p>等ような初期設定が必要。あともうひとつ難点があって、Androidの場合android-support-v4だとかが組み込まれているケースがある。ファイルのハッシュサムがマッチしないとAndroidのビルドがずっこけるっていうのがあるので、アプリプロジェクトにベースとなるandroid-support-v4を入れておいて</p><pre class="line-numbers"><code class="language-">cp sample/libs/android-support-v4.jar ActionBarSherlock/actionbarsherlock/libs/
+</code></pre>
+<p>等ような初期設定が必要。あともうひとつ難点があって、Androidの場合android-support-v4だとかが組み込まれているケースがある。ファイルのハッシュサムがマッチしないとAndroidのビルドがずっこけるっていうのがあるので、アプリプロジェクトにベースとなるandroid-support-v4を入れておいて</p>
+<pre class="line-numbers"><code class="language-">cp sample/libs/android-support-v4.jar ActionBarSherlock/actionbarsherlock/libs/
 cp sample/libs/android-support-v4.jar SlidingMenu/library/libs/
-</code></pre><p>っていうように同一の物を使うようにする等でビルドするようにする。まぁ上記の2つのビルドスクリプトを合わせれば良い</p><p>でその後にantビルド方式を「clean release」辺りを行うように設定。あとは普通にJenkinsでビルド</p><h4>ビルドログ</h4><p>クソ長いので省略</p>
+</code></pre>
+<p>っていうように同一の物を使うようにする等でビルドするようにする。まぁ上記の2つのビルドスクリプトを合わせれば良い</p>
+
+<p>でその後にantビルド方式を「clean release」辺りを行うように設定。あとは普通にJenkinsでビルド</p>
+<h4>ビルドログ</h4>
+<p>クソ長いので省略</p>
+
 <pre>
 コンソール出力
 ビルドします。 ワークスペース: /home/kinjouj/.jenkins/jobs/sample/workspace
@@ -124,7 +148,11 @@ BUILD SUCCESSFUL
 Total time: 1 minute 8 seconds
 Finished: SUCCESS
 </pre>
+
 <p>という感じか。んまぁ公開されているライブラリとかを使う場合において、Jenkinsでビルドする場合にどうするかって所な件を検証してみただけで、実際にどうやるかはまぁケースバイケースだろうなって所かと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -132,7 +160,7 @@ Finished: SUCCESS
             <!-- next post -->
             <a class="float-start box-link" href="/2013/06/android-robotium-actionbarsherlock.html">&lt;&nbsp;robotium(+ActionBarSherlock)を使ってみた</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/06/laravel-4-routing-filter.html">Laravel使ってみた (4) - Routing Filter -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/06/downloaded-program-ubuntu-application-menu-registration.html">ダウンロードしてきたプログラムとかをUbuntuのアプリケーションに登録する方法&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -216,7 +244,7 @@ Finished: SUCCESS
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -237,9 +265,6 @@ Finished: SUCCESS
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -352,7 +377,7 @@ Finished: SUCCESS
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -375,20 +400,20 @@ Finished: SUCCESS
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -398,13 +423,15 @@ Finished: SUCCESS
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("aee30c66ec05f2beca0c84bb0c47e718b27038d4");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

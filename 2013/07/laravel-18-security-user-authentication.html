@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;http://laravel.com/docs/security&gt; のドキュメント読み。なんだがユーザー認証的な所だけを書く。っていう事でフォーム認証な所をやってみる。パスワードリマインダー的な所は次回に書く。まとめて書くとわけわかめになるので" />
+    <meta name="description" content="&amp;lt;http://laravel.com/docs/security&amp;gt; のドキュメント読み。なんだがユーザー認証的な所だけを書く。っていう事でフォーム認証な所をやってみる。パスワードリマインダー的な所は次回に書く。まとめて書くとわけわかめになるので" />
     <title>Laravel使ってみた (18) - Security(ユーザー認証) - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/07/laravel-17-queue.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/07/laravel-19-security-password-reminder.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-07-28T00:00:00+00:00">
+                <time datetime="2013-07-28 00:00:00 +0900">
                   <a href="/archives/2013/07">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,16 +78,29 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["フォーム認証な辺りに関して", "Authを使う為の使用準備", "ルーティングを定義", "余談: authフィルターのコントローラーテストをする"]-->
-                <p><a href="http://laravel.com/docs/security" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/security</a> のドキュメント読み。なんだがユーザー認証的な所だけを書く。っていう事でフォーム認証な所をやってみる。パスワードリマインダー的な所は次回に書く。まとめて書くとわけわかめになるので</p><p>あとめんどくさいのでクラス作らずにroutes.phpにClosureでダラ書き</p><h4>フォーム認証な辺りに関して</h4><p>単純にルーティングフィルターでauthっていうのが提供されている。んまぁコード的には</p><pre class="line-numbers"><code class="language-php">Route::filter(&quot;auth&quot;, function() {
+                <!--[&quot;フォーム認証な辺りに関して&quot;, &quot;Authを使う為の使用準備&quot;, &quot;ルーティングを定義&quot;, &quot;余談: authフィルターのコントローラーテストをする&quot;]-->
+                <p><a href="http://laravel.com/docs/security">http://laravel.com/docs/security</a> のドキュメント読み。なんだがユーザー認証的な所だけを書く。っていう事でフォーム認証な所をやってみる。パスワードリマインダー的な所は次回に書く。まとめて書くとわけわかめになるので</p>
+
+<p>あとめんどくさいのでクラス作らずにroutes.phpにClosureでダラ書き</p>
+<h4>フォーム認証な辺りに関して</h4>
+<p>単純にルーティングフィルターでauthっていうのが提供されている。んまぁコード的には</p>
+<pre class="line-numbers"><code class="language-php">Route::filter(&quot;auth&quot;, function() {
     if (Auth::guest()) return Redirect::guest(&quot;login&quot;);
 });
-</code></pre><p>的な感じになっててログインしてなきゃログインフォームなページにリダイレクトな感じな事しているっぽい訳で。でログインを行わせるには</p>
+</code></pre>
+<p>的な感じになっててログインしてなきゃログインフォームなページにリダイレクトな感じな事しているっぽい訳で。でログインを行わせるには</p>
+
 <ul>
 <li>Auth::attemptで認証処理を行う</li>
 <li>Auth::login(User)で認証処理を行う</li>
 </ul>
-<p>とか。Auth::loginUsingIdっていうAPIがあって、引数にユーザーのID(int?)辺りを指定する事でもログイン出来るらしいけど、これはこれでどうなのっていう所なので特に使わない</p><p>まぁという感じな概要になってる訳で。とにかくやってみる</p><h4>Authを使う為の使用準備</h4><p>まぁUserっていうモデルが必要。まぁデフォルトで入ってる気がするけどマイグレーションが無いっていう訳で</p>
+
+<p>とか。Auth::loginUsingIdっていうAPIがあって、引数にユーザーのID(int?)辺りを指定する事でもログイン出来るらしいけど、これはこれでどうなのっていう所なので特に使わない</p>
+
+<p>まぁという感じな概要になってる訳で。とにかくやってみる</p>
+<h4>Authを使う為の使用準備</h4>
+<p>まぁUserっていうモデルが必要。まぁデフォルトで入ってる気がするけどマイグレーションが無いっていう訳で</p>
+
 <ul>
 <li>usernameカラムを持つ</li>
 <li>passwordカラムを持つ</li>
@@ -94,7 +108,9 @@
 <li>created_atカラムを持つ</li>
 <li>updated_atカラムを持つ</li>
 </ul>
-<p>なテーブルを作る。んまぁセットアップな感じはこんなもんかと。</p><h4>ルーティングを定義</h4><pre class="line-numbers"><code class="language-php">// /dashboardと/logoutはログインしてないとダメって事でフィルターを付ける
+
+<p>なテーブルを作る。んまぁセットアップな感じはこんなもんかと。</p>
+<h4>ルーティングを定義</h4><pre class="line-numbers"><code class="language-php">// /dashboardと/logoutはログインしてないとダメって事でフィルターを付ける
 Route::group([&quot;before&quot; =&gt; &quot;auth&quot;], function() {
 
     Route::resource(&quot;/dashboard&quot;, &quot;DashboardController&quot;);
@@ -132,13 +148,21 @@ Route::post(
         }
     )
 );
-</code></pre><p>っていう感じで。ちなみに</p>
+</code></pre>
+<p>っていう感じで。ちなみに</p>
+
 <ul>
 <li>  Auth::attemptを使うとauth.attemptなイベントが発生</li>
 <li>  ログインされたら?auth.loginなイベントが発生</li>
 </ul>
-<p>っていうのがあるのでEvent::listenとかで拾う事が出来る模様</p><h4>余談: authフィルターのコントローラーテストをする</h4><p>何やら普通にコントローラーテストとかで</p><pre class="line-numbers"><code class="language-php">$this-&gt;call(&quot;GET&quot;, &quot;/dashboard&quot;);
-</code></pre><p>とかやってもフィルターが作用しないっぽい? Route::enableFiltersを明示的に呼ぶ必要性があるっぽい事をとあるフォーラムに書かれてたので</p><pre class="line-numbers"><code class="language-php">&lt;?php
+
+<p>っていうのがあるのでEvent::listenとかで拾う事が出来る模様</p>
+<h4>余談: authフィルターのコントローラーテストをする</h4>
+<p>何やら普通にコントローラーテストとかで</p>
+<pre class="line-numbers"><code class="language-php">$this-&gt;call(&quot;GET&quot;, &quot;/dashboard&quot;);
+</code></pre>
+<p>とかやってもフィルターが作用しないっぽい? Route::enableFiltersを明示的に呼ぶ必要性があるっぽい事をとあるフォーラムに書かれてたので</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class DashboardControllerTest extends TestCase {
 
@@ -154,7 +178,13 @@ class DashboardControllerTest extends TestCase {
         $this-&gt;assertResponseStatus(200);
     }
 }
-</code></pre><p>上記のAuth::onceな所をコメントすると認証状態が保護されてない為にレスポンスステータスが302を返すのでこのテストはずっこける</p><p>っていう感じかなと</p>
+</code></pre>
+<p>上記のAuth::onceな所をコメントすると認証状態が保護されてない為にレスポンスステータスが302を返すのでこのテストはずっこける</p>
+
+<p>っていう感じかなと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -246,7 +276,7 @@ class DashboardControllerTest extends TestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -267,9 +297,6 @@ class DashboardControllerTest extends TestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -382,7 +409,7 @@ class DashboardControllerTest extends TestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -405,20 +432,20 @@ class DashboardControllerTest extends TestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -428,13 +455,15 @@ class DashboardControllerTest extends TestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("4df6d76ab32ec93eaa422c6d83f0d76d06262f2e");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

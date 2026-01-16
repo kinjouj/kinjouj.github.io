@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -73,186 +72,6 @@
                   <a name="article-link" href="/2013/10/mockito-mocked-final-class-2.html">Mockitoでfinalクラスをモック化 (2)</a>
                 </h3>
                 [Mockitoでfinalクラスをモック化][1]の続き
-
-
-
-
-
-例えば
-
-
-```java
-package sample;
-
-public final class Sample {
-    public String say() {
-        return &quot;hoge fuga foobar&quot;;
-    }
-}
-```
-
-
-なんていうfinalクラスがあったとして
-
-
-```java
-package sample;
-
-import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
-
-public class SampleTest {
-
-    @Test
-    public void test() {
-        Sample sample = mock(Sample.class);
-        when(sample.say()).thenReturn(&quot;hoge&quot;);
-        assertThat(sample.say(), is(&quot;hoge fuga foobar&quot;));
-
-        verify(sample).say();
-    }
-}
-```
-
-
-なんていうテストを普通にぶちかますと
-
-
-&lt;pre&gt;
-org.mockito.exceptions.base.MockitoException:
-Cannot mock/spy class sample.Sample
-Mockito cannot mock/spy following:
-  - final classes
-  - anonymous classes
-  - primitive types
-&lt;/pre&gt;
-
-
-っていうようにfinalクラスはモック化出来ねーよって怒られる訳ですが。で前回だと独自のクラスローダーを利用してjavassistを使ってfinal modifierを消したクラスバイトコードを動的にロードするっていう方式だったんですが、これだとこのクラスローダーからロードしないといけないとかめんどくさいよねっていう事で色々調べつつやってみた。無論上記のコードでテストは一切書き換えないっていう条件付き
-
-
-その前に「このクラスはfinalクラスでモック出来るようにするよ」っていうのを識別させる為にアノテーションを利用
-
-
-```java
-package sample;
-
-public @interface FinalMock {
-}
-```
-
-
-なアノテーションインターフェースを作ってSampleクラスにこのアノテーションを付与しておく
-
-
-あとはクラスロードな仕組み辺りでこのアノテーションが付与されてるのだけfinal modifierを消して動的にロードするっていう方式を採用する
-
-
-#### ClassFileTransformerを実装したクラスを作る
-
-
-簡単に言うと-javaagentな仕組みを使ってクラスからfinal modifierを消してロードするっていう仕組みを作るだけ
-
-
-```java
-import java.io.IOException;
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
-import java.lang.reflect.Modifier;
-import java.security.ProtectionDomain;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import sample.FinalMock;
-import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.NotFoundException;
-
-public class SampleClassTransformer implements ClassFileTransformer {
-
-    private static final Logger logger = LoggerFactory.getLogger(SampleClassTransformer.class);
-    private ClassPool pool;
-
-    public SampleClassTransformer() {
-        pool = ClassPool.getDefault();
-    }
-
-    @Override
-    public byte[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined,
-        ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-
-        byte[] b = null;
-
-        try {
-            String name = className.replace(&quot;/&quot;, &quot;.&quot;);
-            CtClass clazz = pool.get(name);
-
-            if (clazz.hasAnnotation(FinalMock.class)) {
-                clazz.setModifiers(clazz.getModifiers() &amp; ~Modifier.FINAL);
-                b = clazz.toBytecode();
-
-                logger.info(&quot;processed: {}&quot;, clazz.getName());
-            }
-        } catch (NotFoundException e) {
-        } catch (CannotCompileException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return b;
-    }
-}
-```
-
-
-で-javaagentな仕組みを使うので
-
-
-```java
-import java.lang.instrument.Instrumentation;
-
-public class JavaAgent {
-    public static void premain(String args, Instrumentation inst) {
-        inst.addTransformer(new SampleClassTransformer(), inst.isRetransformClassesSupported());
-    }
-}
-```
-
-
-っていうようなクラスを作る。んでMETA-INF/MANIFEST.MFで
-
-
-```mf
-Manifest-Version: 1.0
-Premain-Class: JavaAgent
-```
-
-
-を定義して、上記のJavaAgentクラスとSampleClassTransformerクラスをぶち込んでjar化する
-
-
-終わり。あとは実行時に-javaagent:sample.jar(作成したjarファイル)でテストを実行すると
-
-
-&lt;pre&gt;
-java.lang.AssertionError:
-Expected: is &quot;hoge fuga foobar&quot;
-     but: was &quot;hoge&quot;
-&lt;/pre&gt;
-
-
-っていうように「when(sample.say()).thenReturn(&quot;hoge&quot;)」としているのでまぁどっちにしろテストは成功しないけど、モック化してメソッドが返す値をfinalクラスでもぶち込んだり出来るっていう訳
-
-
-参考: &lt;http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class&gt;
-
-
- [1]: /mockito-mocked-final-class.html
               </div>
             </div>
             <div id="49b8af09fdff9612ae6c99ed0c9cc5abffce53e5" class="card m-4 mb-5">
@@ -405,7 +224,7 @@ Expected: is &quot;hoge fuga foobar&quot;
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -426,9 +245,6 @@ Expected: is &quot;hoge fuga foobar&quot;
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -541,7 +357,7 @@ Expected: is &quot;hoge fuga foobar&quot;
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -564,20 +380,20 @@ Expected: is &quot;hoge fuga foobar&quot;
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

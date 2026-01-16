@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -99,157 +98,6 @@
     &amp;mdash; なかざん＠ミラ・イース現象だ！！！ (@Nkzn) &lt;a href=&quot;https://twitter.com/Nkzn/statuses/435417429317935106&quot;&gt;2014, 2月 17&lt;/a&gt;
   &lt;/p&gt;
 &lt;/blockquote&gt;
-
-
-っていう事でrobolectric-pluginっていうのがあるっては知ってはいたんですが、どうも上手く行かなずな感じで。まぁ一回は挫折したんですが再チャレンジでようやくテストの実行が出来たのでメモっておく
-
-
-
-
-
-#### 構成
-
-
-構成は前回の[gradle-android-test-plugin+Robolectricでテスト][1]のをそのまま利用する。build.gradle等を色々書き換えしたりとかをする
-
-
-#### 公式のrobolectric-pluginが動かない
-
-
-どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 &lt;http://qiita.com/turugina/items/972f46b40bb972c180f0&gt; にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど
-
-
-まぁ &lt;https://github.com/turugina/robolectric-plugin&gt; からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る
-
-
-#### build.gradle
-
-
-```groovy
-buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-
-        maven {
-            url &quot;https://oss.sonatype.org/content/repositories/snapshots&quot;
-        }
-    }
-
-    dependencies {
-        classpath &quot;com.android.tools.build:gradle:0.8.+&quot;
-        // ローカルにインストールしたのを使うのでSNAPSHOTサフィックスは要らない
-        classpath &quot;com.novoda.gradle:robolectric-plugin:0.0.1&quot;
-    }
-}
-
-allprojects {
-    repositories {
-        mavenCentral()
-
-        maven {
-            url &quot;https://oss.sonatype.org/content/repositories/snapshots&quot;
-        }
-    }
-}
-```
-
-
-#### app/build.gradle
-
-
-```groovy
-apply plugin: &quot;android&quot;
-// robolectric-pluginをロード
-apply plugin: &quot;robolectric&quot;
-
-dependencies {
-    compile project(&quot;:libraries:sample_library&quot;)
-    compile &quot;com.actionbarsherlock:actionbarsherlock:4.4.0@aar&quot;
-
-    robolectricCompile &quot;junit:junit:4.11&quot;
-    robolectricCompile &quot;org.hamcrest:hamcrest-all:1.3&quot;
-    robolectricCompile &quot;org.robolectric:robolectric:2.3-SNAPSHOT&quot;
-}
-
-android {
-    compileSdkVersion 19
-    buildToolsVersion &quot;19.0.1&quot;
-}
-
-tasks.withType(Test) {
-    scanForTestClasses = false
-    include &quot;**/*Test.class&quot;
-}
-```
-
-
-あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない
-
-
-#### android.content.res.Resources$NotFoundException が出る
-
-
-まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る
-
-
-で記事トップに書いてる[robolectric-pluginを使うサンプル][2]は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと
-
-
-んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で
-
-
-```java
-package sample.test;
-
-import org.junit.runners.model.InitializationError;
-import org.robolectric.AndroidManifest;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-import org.robolectric.res.Fs;
-
-public class RobolectricGradleTestRunner extends RobolectricTestRunner {
-
-    public RobolectricGradleTestRunner(Class&lt;?&gt; testClass) throws InitializationError {
-        super(testClass);
-    }
-
-    @Override
-    protected AndroidManifest getAppManifest(Config config) {
-        String myAppPath = RobolectricGradleTestRunner.class
-            .getProtectionDomain()
-            .getCodeSource()
-            .getLocation()
-            .getPath();
-
-        // myAppPathはbuild/classes/robolectricにスコープされている
-
-        String manifestPath = myAppPath + &quot;../../../src/main/AndroidManifest.xml&quot;;
-
-        // build/res/allにライブラリプロジェクトを含むリソースがマージされた集約されるっぽいのでそっちを指定する
-        String resPath = myAppPath + &quot;../../res/all/debug&quot;;
-
-        // こっちも上記のresPath同様にしないといけないのかも
-        String assetPath = myAppPath + &quot;../../../src/main/assets&quot;;
-
-        return new AndroidManifest(
-            Fs.fileFromPath(manifestPath),
-            Fs.fileFromPath(resPath),
-            Fs.fileFromPath(assetPath)
-        );
-    }
-}
-```
-
-
-![](/images/2014/02/201402160218.jpg)
-
-
-結果前回どうようのAssertionErrorが出る (これはわざと出している)
-
-
- [1]: /gradle-android-test-plugin-robolectric-testing.html
- [2]: http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments　
               </div>
             </div>
             <div id="b0c2c5526704f11d248093fa5229c752ea79ecb6" class="card m-4 mb-5">
@@ -279,15 +127,6 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
                 以前に[「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植する][1]っていうのをやったのですが、それのgulp版
               </div>
             </div>
-            <div id="6dde6df36b1d294aaeed17ecea521816320498d6" class="card m-4 mb-5">
-              <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
-              <div class="card-body">
-                <h3 class="card-title">
-                  <a name="article-link" href="/2014/02/actionbar-pulltorefresh-reload-menu-button.html">ActionBar-PullToRefreshをメニューボタン等で連動させる</a>
-                </h3>
-                っていうActionBar-PullToRefreshを使っている場合において、メニューでリフレッシュボタンとかでActionBar-PullToRefreshを発生させるような要件を実現したい場合にはどうすれば良いのか。簡単に言えば上記画像中の右上にあるリフレッシュボタンをクリックする事でonRefreshStartedメソッドを発生させたいっていう所
-              </div>
-            </div>
             <div id="6f8b29c25953743c4d322a57744ce18ac76fa335" class="card m-4 mb-5">
               <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
               <div class="card-body">
@@ -295,6 +134,15 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
                   <a name="article-link" href="/2014/02/gradle-android-toolkit-allprojects.html">gradle-android-toolkitのallprojects</a>
                 </h3>
                 例えばapp/build.gradleがあって
+              </div>
+            </div>
+            <div id="6dde6df36b1d294aaeed17ecea521816320498d6" class="card m-4 mb-5">
+              <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a name="article-link" href="/2014/02/actionbar-pulltorefresh-reload-menu-button.html">ActionBar-PullToRefreshをメニューボタン等で連動させる</a>
+                </h3>
+                っていうActionBar-PullToRefreshを使っている場合において、メニューでリフレッシュボタンとかでActionBar-PullToRefreshを発生させるような要件を実現したい場合にはどうすれば良いのか。簡単に言えば上記画像中の右上にあるリフレッシュボタンをクリックする事でonRefreshStartedメソッドを発生させたいっていう所
               </div>
             </div>
             <div class="my-pagination my-5">
@@ -384,7 +232,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -405,9 +253,6 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -520,7 +365,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -543,20 +388,20 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

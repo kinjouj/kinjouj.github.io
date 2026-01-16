@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;https://github.com/kinjouj/chrome-extension-twify&gt;をベースにTypeScriptビルド環境をメモ" />
+    <meta name="description" content="&amp;lt;https://github.com/kinjouj/chrome-extension-twify&amp;gt;をベースにTypeScriptビルド環境をメモ" />
     <title>TypeScriptのビルド環境を構築する - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2025/07/zsh-gitkeep-ignore.html" />
     <link rel="next" href="https://kinjouj.github.io/2025/10/ffmpeg-rtmp-streaming.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2025-08-19T00:00:00+09:00">
+                <time datetime="2025-08-19 00:00:00 +0900">
                   <a href="/archives/2025/08">
                   <span class="post-date-year">2025</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["TypeScriptをJavaScriptにトランスパイルする環境を作る", "src/app.ts", "package.json", "tsconfig.json", "vite.config.js", "ESLintでLintできる環境を作る", "余談", "追記"]-->
-                <p><a href="https://github.com/kinjouj/chrome-extension-twify" target="_blank" rel="noopener noreferrer">https://github.com/kinjouj/chrome-extension-twify</a>をベースにTypeScriptビルド環境をメモ</p><h4>TypeScriptをJavaScriptにトランスパイルする環境を作る</h4><pre class="line-numbers"><code class="language-treeview">├── eslint.config.mjs
+                <!--[&quot;TypeScriptをJavaScriptにトランスパイルする環境を作る&quot;, &quot;src/app.ts&quot;, &quot;package.json&quot;, &quot;tsconfig.json&quot;, &quot;vite.config.js&quot;, &quot;ESLintでLintできる環境を作る&quot;, &quot;余談&quot;, &quot;追記&quot;]-->
+                <p><a href="https://github.com/kinjouj/chrome-extension-twify">https://github.com/kinjouj/chrome-extension-twify</a>をベースにTypeScriptビルド環境をメモ</p>
+<h4>TypeScriptをJavaScriptにトランスパイルする環境を作る</h4><pre class="line-numbers"><code class="language-treeview">├── eslint.config.mjs
 ├── package.json
 ├── public
 　　   └── manifest.json
@@ -85,7 +87,9 @@
 　　   ├── app.ts
 ├── tsconfig.json
 └── vite.config.js
-</code></pre><p>TypeScriptをビルドするのに必要なのは</p>
+</code></pre>
+<p>TypeScriptをビルドするのに必要なのは</p>
+
 <ul>
 <li>package.json</li>
 <li>tsconfig.json</li>
@@ -115,7 +119,9 @@ console.log(sample.say());
     &quot;vite&quot;: &quot;^7.1.1&quot;
   }
 }
-</code></pre><p>ビルドに必要な依存性とビルドスクリプトを定義するだけ</p><h4>tsconfig.json</h4><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>ビルドに必要な依存性とビルドスクリプトを定義するだけ</p>
+<h4>tsconfig.json</h4><pre class="line-numbers"><code class="language-json">{
   &quot;compilerOptions&quot;: {
     &quot;target&quot;: &quot;es2024&quot;,
     &quot;module&quot;: &quot;ESNext&quot;,
@@ -123,7 +129,9 @@ console.log(sample.say());
   },
   &quot;include&quot;: [&quot;src/**/*.ts&quot;]
 }
-</code></pre><p>必要最小限で。詳しくは<a href="https://www.typescriptlang.org/docs/handbook/tsconfig-json.html" target="_blank" rel="noopener noreferrer">https://www.typescriptlang.org/docs/handbook/tsconfig-json.html</a></p><h4>vite.config.js</h4><pre class="line-numbers"><code class="language-js">import { resolve } from &#39;node:path&#39;
+</code></pre>
+<p>必要最小限で。詳しくは<a href="https://www.typescriptlang.org/docs/handbook/tsconfig-json.html">https://www.typescriptlang.org/docs/handbook/tsconfig-json.html</a></p>
+<h4>vite.config.js</h4><pre class="line-numbers"><code class="language-js">import { resolve } from &#39;node:path&#39;
 import { defineConfig } from &#39;vite&#39;
 
 export default defineConfig((opt) =&gt; {
@@ -146,16 +154,28 @@ export default defineConfig((opt) =&gt; {
     },
   }
 });
-</code></pre><p>publicディレクトリにあるファイルをbuild内にコピーしてsrc/app.tsをトランスパイルしたのをbuild/app.jsとしてビルドする</p><p>詳しいことは<a href="https://vite.dev/config/" target="_blank" rel="noopener noreferrer">https://vite.dev/config/</a></p><p>ここまででビルドする環境自体はできたので</p><pre class="line-numbers"><code class="language-shell">npm run build # or vite build
-</code></pre><p>でビルドしてみるとbuild/app.jsは以下のようにトランスパイルされる</p><pre class="line-numbers"><code class="language-js">class Sample {
+</code></pre>
+<p>publicディレクトリにあるファイルをbuild内にコピーしてsrc/app.tsをトランスパイルしたのをbuild/app.jsとしてビルドする</p>
+
+<p>詳しいことは<a href="https://vite.dev/config/">https://vite.dev/config/</a></p>
+
+<p>ここまででビルドする環境自体はできたので</p>
+<pre class="line-numbers"><code class="language-shell">npm run build # or vite build
+</code></pre>
+<p>でビルドしてみるとbuild/app.jsは以下のようにトランスパイルされる</p>
+<pre class="line-numbers"><code class="language-js">class Sample {
   say() {
     return &quot;Hello World&quot;;
   }
 }
 const sample = new Sample();
 console.log(sample.say());
-</code></pre><p>これでビルドするだけな環境はおｋってことで(ry</p><h4>ESLintでLintできる環境を作る</h4><pre class="line-numbers"><code class="language-shell">npx eslint --init
-</code></pre><p>でeslint.config.mjs(場合によって拡張子が異なる)が生成される。今回はtypescript-eslintの設定を利用するので以下のように修正</p><pre class="line-numbers"><code class="language-js">import eslint from &#39;@eslint/js&#39;;
+</code></pre>
+<p>これでビルドするだけな環境はおｋってことで(ry</p>
+<h4>ESLintでLintできる環境を作る</h4><pre class="line-numbers"><code class="language-shell">npx eslint --init
+</code></pre>
+<p>でeslint.config.mjs(場合によって拡張子が異なる)が生成される。今回はtypescript-eslintの設定を利用するので以下のように修正</p>
+<pre class="line-numbers"><code class="language-js">import eslint from &#39;@eslint/js&#39;;
 import globals from &#39;globals&#39;;
 import stylistic from &#39;@stylistic/eslint-plugin&#39;;
 import tseslint from &#39;typescript-eslint&#39;;
@@ -192,11 +212,19 @@ export default tseslint.config(
     ignores: [&#39;**/*.js&#39;, &#39;**/*.mjs&#39;]
   }
 );
-</code></pre><p>詳しくは<a href="https://eslint.org/docs/latest/use/configure/configuration-files" target="_blank" rel="noopener noreferrer">https://eslint.org/docs/latest/use/configure/configuration-files</a></p><p>ちょっとわざとエラーを起こさせたいので先程のapp.tsを</p><pre class="line-numbers"><code class="language-typescript">say() {
+</code></pre>
+<p>詳しくは<a href="https://eslint.org/docs/latest/use/configure/configuration-files">https://eslint.org/docs/latest/use/configure/configuration-files</a></p>
+
+<p>ちょっとわざとエラーを起こさせたいので先程のapp.tsを</p>
+<pre class="line-numbers"><code class="language-typescript">say() {
     return &quot;Hello World&quot;
 }
-</code></pre><p>のように返り値の型の指定を削除してeslintを実行してみると</p><pre class="line-numbers"><code class="language-shell">npx eslint
-</code></pre><p>以下のようにエラーになる</p><pre class="line-numbers"><code class="language-">&gt; test@0.0.1 build
+</code></pre>
+<p>のように返り値の型の指定を削除してeslintを実行してみると</p>
+<pre class="line-numbers"><code class="language-shell">npx eslint
+</code></pre>
+<p>以下のようにエラーになる</p>
+<pre class="line-numbers"><code class="language-">&gt; test@0.0.1 build
 &gt; npx eslint &amp;&amp; vite build
 
 
@@ -204,10 +232,22 @@ export default tseslint.config(
   2:3  error  Missing return type on function  @typescript-eslint/explicit-function-return-type
 
 ✖ 1 problem (1 error, 0 warnings)
-</code></pre><p>という感じでビルド前にLintでチェックしたりすることもできるようにする</p><p>以上終わり</p><h4>余談</h4><p>本番で使ったりするのであればもっと細かい設定とか色々必要なんだろうけどめんどくさいんで自分で調べろと</p><p>あとESLintのrulesとか色々設定しないと有効にならなかったりするのもあるんでそこが色々めんどくさいなって思ったりはした。
-それとESLintはやたらと古い情報が多いので最近のFlat Config形式で書くみたいなのがあんまりなかったりとか
-あっても現在は使えなかったりとか色々あるんでそういう前方互換をあっさり壊していくJS界隈のスタイルは如何なものかとｗｗ</p><h4>追記</h4><p>上記のeslint.config.mjsとかでもESLintでは問題なくてもtscするとエラーになる場合のケースがあるのでビルドスクリプトにコンパイルはしないけどチェックだけはするみたいに仕込んだほうがいいのかもしれない(ESLintだけで解決する方法が不明)</p><pre class="line-numbers"><code class="language-shell">tsc --noEmit &amp;&amp; npx eslint &amp;&amp; vite build
 </code></pre>
+<p>という感じでビルド前にLintでチェックしたりすることもできるようにする</p>
+
+<p>以上終わり</p>
+<h4>余談</h4>
+<p>本番で使ったりするのであればもっと細かい設定とか色々必要なんだろうけどめんどくさいんで自分で調べろと</p>
+
+<p>あとESLintのrulesとか色々設定しないと有効にならなかったりするのもあるんでそこが色々めんどくさいなって思ったりはした。<br>
+それとESLintはやたらと古い情報が多いので最近のFlat Config形式で書くみたいなのがあんまりなかったりとか<br>
+あっても現在は使えなかったりとか色々あるんでそういう前方互換をあっさり壊していくJS界隈のスタイルは如何なものかとｗｗ</p>
+<h4>追記</h4>
+<p>上記のeslint.config.mjsとかでもESLintでは問題なくてもtscするとエラーになる場合のケースがあるのでビルドスクリプトにコンパイルはしないけどチェックだけはするみたいに仕込んだほうがいいのかもしれない(ESLintだけで解決する方法が不明)</p>
+<pre class="line-numbers"><code class="language-shell">tsc --noEmit &amp;&amp; npx eslint &amp;&amp; vite build
+</code></pre>
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -299,7 +339,7 @@ export default tseslint.config(
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -320,9 +360,6 @@ export default tseslint.config(
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -435,7 +472,7 @@ export default tseslint.config(
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -458,20 +495,20 @@ export default tseslint.config(
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -481,13 +518,15 @@ export default tseslint.config(
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("9a60f0352a7354a3bdf2f7fe1cbc228e8f35deaf");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

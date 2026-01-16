@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="タイトル通り、Hadoop MapReduce上でReducer側から処理したデータをHBaseにぶっこむ為にTableReducerを使う事が出来る。やってみた" />
     <title>HBaseのTableReducer - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/09/struts2-5-action-test-dynamic-definition.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/09/hbase-tablemapper.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/09/hbase-tablemapper.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/09/struts2-6-form-validation-1.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/09/hbase-tablereducer.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-18T00:00:00+00:00">
+                <time datetime="2013-09-18 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -79,13 +80,20 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["セットアップ", "SampleMapper.java", "SampleReducer.java", "SampleTaskRunner.java", "Client.java", "build.gradle"]-->
-                <p>タイトル通り、Hadoop MapReduce上でReducer側から処理したデータをHBaseにぶっこむ為にTableReducerを使う事が出来る。やってみた</p><h4>セットアップ</h4><p>Hadoop(1.2.1)は既にあるのでHBase(0.94.11)を構築する。んまぁ特筆する事も無いけど</p>
+                <!--[&quot;セットアップ&quot;, &quot;SampleMapper.java&quot;, &quot;SampleReducer.java&quot;, &quot;SampleTaskRunner.java&quot;, &quot;Client.java&quot;, &quot;build.gradle&quot;]-->
+                <p>タイトル通り、Hadoop MapReduce上でReducer側から処理したデータをHBaseにぶっこむ為にTableReducerを使う事が出来る。やってみた</p>
+<h4>セットアップ</h4>
+<p>Hadoop(1.2.1)は既にあるのでHBase(0.94.11)を構築する。んまぁ特筆する事も無いけど</p>
+
 <pre>
 [/bin/sh] hbase shell
 hbase(main) > create "output", "score"
 </pre>
-<p>的な事を行なってHadoopで処理したデータをHBaseに突っ込む為の所を作っておく。あとHDFS上にデータ突っ込んでおくのも忘れずに。んまぁこんかいは「hoge fuga foobar」が含まれるテキストを適当に書いて突っ込んだけ</p><p>あとはクラスをだらだらと書く</p><h4>SampleMapper.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+
+<p>的な事を行なってHadoopで処理したデータをHBaseに突っ込む為の所を作っておく。あとHDFS上にデータ突っ込んでおくのも忘れずに。んまぁこんかいは「hoge fuga foobar」が含まれるテキストを適当に書いて突っ込んだけ</p>
+
+<p>あとはクラスをだらだらと書く</p>
+<h4>SampleMapper.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
@@ -108,7 +116,9 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
         }
     }
 }
-</code></pre><p>とりあえずスルー</p><h4>SampleReducer.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>とりあえずスルー</p>
+<h4>SampleReducer.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import org.apache.hadoop.hbase.client.Put;
@@ -146,7 +156,9 @@ public class SampleReducer extends TableReducer&lt;Text, IntWritable, NullWritab
         }
     }
 }
-</code></pre><p>ReducerクラスじゃなくてHBaseのTableReducerを継承する。公式ではwriteの第1引数の型がImmutableByteWritable的なのになってるけど、まぁnullしか指定してないならNullWritableでええんじゃないのかという事で</p><h4>SampleTaskRunner.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>ReducerクラスじゃなくてHBaseのTableReducerを継承する。公式ではwriteの第1引数の型がImmutableByteWritable的なのになってるけど、まぁnullしか指定してないならNullWritableでええんじゃないのかという事で</p>
+<h4>SampleTaskRunner.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -181,8 +193,12 @@ public class SampleTaskRunner {
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
 }
-</code></pre><p>っていう感じで。あとはjar化して</p><pre class="line-numbers"><code class="language-">hadoop jar sample.jar sample.SampleTaskRunner
-</code></pre><p>辺りすれば良いんだけど依存性関係でめんどくさい。という事でgradleのJavaExecを使いつつのProgramDriverで処理する方向で</p><h4>Client.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>っていう感じで。あとはjar化して</p>
+<pre class="line-numbers"><code class="language-">hadoop jar sample.jar sample.SampleTaskRunner
+</code></pre>
+<p>辺りすれば良いんだけど依存性関係でめんどくさい。という事でgradleのJavaExecを使いつつのProgramDriverで処理する方向で</p>
+<h4>Client.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.util.ProgramDriver;
 
@@ -200,8 +216,12 @@ public class Client {
         System.exit(0);
     }
 }
-</code></pre><p>つまりは</p><pre class="line-numbers"><code class="language-">java sample.Client sample
-</code></pre><p>っていう感じでやれば動かせられますよっていう事で</p><h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+</code></pre>
+<p>つまりは</p>
+<pre class="line-numbers"><code class="language-">java sample.Client sample
+</code></pre>
+<p>っていう感じでやれば動かせられますよっていう事で</p>
+<h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;eclipse&quot;
 
 repositories {
@@ -218,7 +238,9 @@ task run(type: JavaExec) {
     main = &quot;sample.Runner&quot;
     args = [&quot;sample&quot;]
 }
-</code></pre><p>runタスクを実行するだけで良い。んまぁこれで終わり。実行し、HBaseシェル側で見てみる</p>
+</code></pre>
+<p>runタスクを実行するだけで良い。んまぁこれで終わり。実行し、HBaseシェル側で見てみる</p>
+
 <pre>
 hbase(main) > scan "output"
 ROW                    COLUMN+CELL
@@ -226,15 +248,21 @@ ROW                    COLUMN+CELL
  fuga                  column=score:count, timestamp=1379472861619, value=2
  hoge                  column=score:count, timestamp=1379472861619, value=3
 </pre>
-<p>という感じでHadoop MapReduceで処理されて最終的にHBaseにぶっこまれるっていう感じ</p><p>参考: <a href="http://hbase.apache.org/book/mapreduce.example.html" target="_blank" rel="noopener noreferrer">http://hbase.apache.org/book/mapreduce.example.html</a></p>
+
+<p>という感じでHadoop MapReduceで処理されて最終的にHBaseにぶっこまれるっていう感じ</p>
+
+<p>参考: <a href="http://hbase.apache.org/book/mapreduce.example.html">http://hbase.apache.org/book/mapreduce.example.html</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/09/hbase-tablemapper.html">&lt;&nbsp;HBaseのTableMapper</a>
+            <a class="float-start box-link" href="/2013/09/struts2-6-form-validation-1.html">&lt;&nbsp;Struts2をやってみる (6) - フォームバリデーション (1) -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/09/struts2-5-action-test-dynamic-definition.html">Struts2をやってみる (5) - struts.xmlに定義する事なくActionをテストする -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/09/hbase-tablemapper.html">HBaseのTableMapper&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -318,7 +346,7 @@ ROW                    COLUMN+CELL
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -339,9 +367,6 @@ ROW                    COLUMN+CELL
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -454,7 +479,7 @@ ROW                    COLUMN+CELL
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -477,20 +502,20 @@ ROW                    COLUMN+CELL
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -500,13 +525,15 @@ ROW                    COLUMN+CELL
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("a70e278619d2e7a064da2b82cdfb9fb15a04b4c6");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

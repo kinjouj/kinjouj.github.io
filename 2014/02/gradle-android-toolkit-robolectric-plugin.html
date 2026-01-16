@@ -10,166 +10,15 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;blockquote class=&quot;twitter-tweet&quot; lang=&quot;ja&quot;&gt;
-  &lt;p&gt;
-    GradleのRobolectricテスト用プラグインとして、非推奨になったJake氏のgradle-android-test-pluginではなくNovoda氏のrobolectric-pluginを使っているサンプル &lt;a href=&quot;http://t.co/lgPqRqbHHE&quot;&gt;http://t.co/lgPqRqbHHE&lt;/a&gt; …
-  &lt;/p&gt;
+    <meta name="description" content="&amp;lt;blockquote class=&amp;quot;twitter-tweet&amp;quot; lang=&amp;quot;ja&amp;quot;&amp;gt;
+  &amp;lt;p&amp;gt;
+    GradleのRobolectricテスト用プラグインとして、非推奨になったJake氏のgradle-android-test-pluginではなくNovoda氏のrobolectric-pluginを使っているサンプル &amp;lt;a href=&amp;quot;http://t.co/lgPqRqbHHE&amp;quot;&amp;gt;http://t.co/lgPqRqbHHE&amp;lt;/a&amp;gt; …
+  &amp;lt;/p&amp;gt;
   
-  &lt;p&gt;
-    &amp;mdash; なかざん＠ミラ・イース現象だ！！！ (@Nkzn) &lt;a href=&quot;https://twitter.com/Nkzn/statuses/435417429317935106&quot;&gt;2014, 2月 17&lt;/a&gt;
-  &lt;/p&gt;
-&lt;/blockquote&gt;
-
-
-っていう事でrobolectric-pluginっていうのがあるっては知ってはいたんですが、どうも上手く行かなずな感じで。まぁ一回は挫折したんですが再チャレンジでようやくテストの実行が出来たのでメモっておく
-
-
-
-
-
-#### 構成
-
-
-構成は前回の[gradle-android-test-plugin+Robolectricでテスト][1]のをそのまま利用する。build.gradle等を色々書き換えしたりとかをする
-
-
-#### 公式のrobolectric-pluginが動かない
-
-
-どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 &lt;http://qiita.com/turugina/items/972f46b40bb972c180f0&gt; にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど
-
-
-まぁ &lt;https://github.com/turugina/robolectric-plugin&gt; からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る
-
-
-#### build.gradle
-
-
-```groovy
-buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-
-        maven {
-            url &quot;https://oss.sonatype.org/content/repositories/snapshots&quot;
-        }
-    }
-
-    dependencies {
-        classpath &quot;com.android.tools.build:gradle:0.8.+&quot;
-        // ローカルにインストールしたのを使うのでSNAPSHOTサフィックスは要らない
-        classpath &quot;com.novoda.gradle:robolectric-plugin:0.0.1&quot;
-    }
-}
-
-allprojects {
-    repositories {
-        mavenCentral()
-
-        maven {
-            url &quot;https://oss.sonatype.org/content/repositories/snapshots&quot;
-        }
-    }
-}
-```
-
-
-#### app/build.gradle
-
-
-```groovy
-apply plugin: &quot;android&quot;
-// robolectric-pluginをロード
-apply plugin: &quot;robolectric&quot;
-
-dependencies {
-    compile project(&quot;:libraries:sample_library&quot;)
-    compile &quot;com.actionbarsherlock:actionbarsherlock:4.4.0@aar&quot;
-
-    robolectricCompile &quot;junit:junit:4.11&quot;
-    robolectricCompile &quot;org.hamcrest:hamcrest-all:1.3&quot;
-    robolectricCompile &quot;org.robolectric:robolectric:2.3-SNAPSHOT&quot;
-}
-
-android {
-    compileSdkVersion 19
-    buildToolsVersion &quot;19.0.1&quot;
-}
-
-tasks.withType(Test) {
-    scanForTestClasses = false
-    include &quot;**/*Test.class&quot;
-}
-```
-
-
-あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない
-
-
-#### android.content.res.Resources$NotFoundException が出る
-
-
-まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る
-
-
-で記事トップに書いてる[robolectric-pluginを使うサンプル][2]は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと
-
-
-んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で
-
-
-```java
-package sample.test;
-
-import org.junit.runners.model.InitializationError;
-import org.robolectric.AndroidManifest;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-import org.robolectric.res.Fs;
-
-public class RobolectricGradleTestRunner extends RobolectricTestRunner {
-
-    public RobolectricGradleTestRunner(Class&lt;?&gt; testClass) throws InitializationError {
-        super(testClass);
-    }
-
-    @Override
-    protected AndroidManifest getAppManifest(Config config) {
-        String myAppPath = RobolectricGradleTestRunner.class
-            .getProtectionDomain()
-            .getCodeSource()
-            .getLocation()
-            .getPath();
-
-        // myAppPathはbuild/classes/robolectricにスコープされている
-
-        String manifestPath = myAppPath + &quot;../../../src/main/AndroidManifest.xml&quot;;
-
-        // build/res/allにライブラリプロジェクトを含むリソースがマージされた集約されるっぽいのでそっちを指定する
-        String resPath = myAppPath + &quot;../../res/all/debug&quot;;
-
-        // こっちも上記のresPath同様にしないといけないのかも
-        String assetPath = myAppPath + &quot;../../../src/main/assets&quot;;
-
-        return new AndroidManifest(
-            Fs.fileFromPath(manifestPath),
-            Fs.fileFromPath(resPath),
-            Fs.fileFromPath(assetPath)
-        );
-    }
-}
-```
-
-
-![](/images/2014/02/201402160218.jpg)
-
-
-結果前回どうようのAssertionErrorが出る (これはわざと出している)
-
-
- [1]: /gradle-android-test-plugin-robolectric-testing.html
- [2]: http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments　" />
+  &amp;lt;p&amp;gt;
+    &amp;amp;mdash; なかざん＠ミラ・イース現象だ！！！ (@Nkzn) &amp;lt;a href=&amp;quot;https://twitter.com/Nkzn/statuses/435417429317935106&amp;quot;&amp;gt;2014, 2月 17&amp;lt;/a&amp;gt;
+  &amp;lt;/p&amp;gt;
+&amp;lt;/blockquote&amp;gt;" />
     <title>gradle-android-toolkit+robolectric-plugin - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/02/supervisord-4-eventlistener.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/02/maven-android-archive.html" />
@@ -177,6 +26,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -217,7 +67,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-02-18T00:00:00+00:00">
+                <time datetime="2014-02-18 00:00:00 +0900">
                   <a href="/archives/2014/02">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -237,7 +87,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
                 </span>
               </p>
               <div class="post-content">
-                <!--["構成", "公式のrobolectric-pluginが動かない", "build.gradle", "app/build.gradle", "android.content.res.Resources$NotFoundException が出る"]-->
+                <!--[&quot;構成&quot;, &quot;公式のrobolectric-pluginが動かない&quot;, &quot;build.gradle&quot;, &quot;app/build.gradle&quot;, &quot;android.content.res.Resources$NotFoundException が出る&quot;]-->
                 <blockquote class="twitter-tweet" lang="ja">
   <p>
     GradleのRobolectricテスト用プラグインとして、非推奨になったJake氏のgradle-android-test-pluginではなくNovoda氏のrobolectric-pluginを使っているサンプル <a href="http://t.co/lgPqRqbHHE">http://t.co/lgPqRqbHHE</a> …
@@ -247,7 +97,15 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
     &mdash; なかざん＠ミラ・イース現象だ！！！ (@Nkzn) <a href="https://twitter.com/Nkzn/statuses/435417429317935106">2014, 2月 17</a>
   </p>
 </blockquote>
-<p>っていう事でrobolectric-pluginっていうのがあるっては知ってはいたんですが、どうも上手く行かなずな感じで。まぁ一回は挫折したんですが再チャレンジでようやくテストの実行が出来たのでメモっておく</p><h4>構成</h4><p>構成は前回の[gradle-android-test-plugin+Robolectricでテスト][1]のをそのまま利用する。build.gradle等を色々書き換えしたりとかをする</p><h4>公式のrobolectric-pluginが動かない</h4><p>どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 <a href="http://qiita.com/turugina/items/972f46b40bb972c180f0" target="_blank" rel="noopener noreferrer">http://qiita.com/turugina/items/972f46b40bb972c180f0</a> にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど</p><p>まぁ <a href="https://github.com/turugina/robolectric-plugin" target="_blank" rel="noopener noreferrer">https://github.com/turugina/robolectric-plugin</a> からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る</p><h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
+
+<p>っていう事でrobolectric-pluginっていうのがあるっては知ってはいたんですが、どうも上手く行かなずな感じで。まぁ一回は挫折したんですが再チャレンジでようやくテストの実行が出来たのでメモっておく</p>
+<h4>構成</h4>
+<p>構成は前回の[gradle-android-test-plugin+Robolectricでテスト][1]のをそのまま利用する。build.gradle等を色々書き換えしたりとかをする</p>
+<h4>公式のrobolectric-pluginが動かない</h4>
+<p>どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 <a href="http://qiita.com/turugina/items/972f46b40bb972c180f0">http://qiita.com/turugina/items/972f46b40bb972c180f0</a> にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど</p>
+
+<p>まぁ <a href="https://github.com/turugina/robolectric-plugin">https://github.com/turugina/robolectric-plugin</a> からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る</p>
+<h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
         mavenLocal()
@@ -295,7 +153,15 @@ tasks.withType(Test) {
     scanForTestClasses = false
     include &quot;**/*Test.class&quot;
 }
-</code></pre><p>あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない</p><h4>android.content.res.Resources$NotFoundException が出る</h4><p>まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る</p><p>で記事トップに書いてる[robolectric-pluginを使うサンプル][2]は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと</p><p>んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない</p>
+<h4>android.content.res.Resources$NotFoundException が出る</h4>
+<p>まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る</p>
+
+<p>で記事トップに書いてる[robolectric-pluginを使うサンプル][2]は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと</p>
+
+<p>んまぁ長ったらしく書きましたが要はそこら辺を修正したRobolectricGradleTestRunnerにすれば動くって事で</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import org.junit.runners.model.InitializationError;
 import org.robolectric.AndroidManifest;
@@ -334,8 +200,16 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
         );
     }
 }
-</code></pre><p><img src="/images/2014/02/201402160218.jpg" class="img-fluid" alt="image" /></p><p>結果前回どうようのAssertionErrorが出る (これはわざと出している)</p><p> [1]: /gradle-android-test-plugin-robolectric-testing.html
- [2]: <a href="http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments　" target="_blank" rel="noopener noreferrer">http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments　</a></p>
+</code></pre>
+<p><img src="/images/2014/02/201402160218.jpg" class="img-fluid" alt="image" /></p>
+
+<p>結果前回どうようのAssertionErrorが出る (これはわざと出している)</p>
+
+<p>[1]: /gradle-android-test-plugin-robolectric-testing.html<br>
+ [2]: <a href="http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments%E3%80%80">http://blog.futurice.com/android_unit_testing_in_ides_and_ci_environments　</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -427,7 +301,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -448,9 +322,6 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -563,7 +434,7 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -586,20 +457,20 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -609,13 +480,15 @@ public class RobolectricGradleTestRunner extends RobolectricTestRunner {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("b06ca4643785716d7c309589e03d213627aba7a4");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

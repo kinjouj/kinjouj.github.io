@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-05-15T00:00:00+09:00">
+                <time datetime="2015-05-15 00:00:00 +0900">
                   <a href="/archives/2015/05">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -77,14 +78,21 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["サービス関連の設定", "build.gradle", "AnalyticsController.java"]-->
-                <p>Google AppEngineにはAppIdentityっていうAPIがあってこれを使ってGoogleのサービスをAppEngine側から利用できる(※あくまでクライアント依存ではなくサーバーを利用しているユーザー依存かと)</p><p>っていう事で、このAppIdentity APIを使って自分が登録しているGoogle Analyticsのレポートデータを簡単に取得できるようにしてみた</p><h4>サービス関連の設定</h4>
+                <!--[&quot;サービス関連の設定&quot;, &quot;build.gradle&quot;, &quot;AnalyticsController.java&quot;]-->
+                <p>Google AppEngineにはAppIdentityっていうAPIがあってこれを使ってGoogleのサービスをAppEngine側から利用できる(※あくまでクライアント依存ではなくサーバーを利用しているユーザー依存かと)</p>
+
+<p>っていう事で、このAppIdentity APIを使って自分が登録しているGoogle Analyticsのレポートデータを簡単に取得できるようにしてみた</p>
+<h4>サービス関連の設定</h4>
 <ul>
 <li>Google AppEngineのアプリケーションを取得する。でそこのApplication SettingsにあるService Account Nameに記載されているメールアドレスをコピーしておく</li>
-<li><a href="http://console.developers.google.com" target="_blank" rel="noopener noreferrer">http://console.developers.google.com</a> にアクセスしてGoogle AppEngineアプリケーションのプロジェクトを選んでAPIセクションにてGoogle Analytics APIを使えるように許可を設定しておく</li>
+<li><a href="http://console.developers.google.com">http://console.developers.google.com</a> にアクセスしてGoogle AppEngineアプリケーションのプロジェクトを選んでAPIセクションにてGoogle Analytics APIを使えるように許可を設定しておく</li>
 <li>Google Analyticsにアクセスして設定画面にてユーザー管理にて先ほどコピーしたメールアドレスでのアクセスを許可するようにしておく(権限まで指定できるけど表示と分析程度でいいはず。設定するところはアカウント・プロパティ・ビューの3つ)</li>
 </ul>
-<p>サービス関連の設定は以上。これをAppIdentity APIを使ってデータを取得して表示する</p><h4>build.gradle</h4><p>色々ライブラリを使うので(dependencies以外は無視してオッケー)</p><pre class="line-numbers"><code class="language-groovy">ext {
+
+<p>サービス関連の設定は以上。これをAppIdentity APIを使ってデータを取得して表示する</p>
+<h4>build.gradle</h4>
+<p>色々ライブラリを使うので(dependencies以外は無視してオッケー)</p>
+<pre class="line-numbers"><code class="language-groovy">ext {
     targetDir = &quot;target&quot;
 }
 
@@ -156,7 +164,9 @@ compileAptJava.outputs.dir sourceSets.apt.output.resourcesDir
 
 compileJava.dependsOn compileAptJava
 sourceSets.main.java.srcDirs += sourceSets.apt.output.resourcesDir
-</code></pre><h4>AnalyticsController.java</h4><p>Slim3を使ってるので(ry</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><h4>AnalyticsController.java</h4>
+<p>Slim3を使ってるので(ry</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.Arrays;
 
@@ -211,7 +221,21 @@ public class AnalyticsController extends Controller {
         return null;
     }
 }
-</code></pre><p>AppIdentityCredentialっていうを使う事でGoogle AppEngine AppIdentityを使ってリクエストできる模様。あとはGoogle API ClientとGoogle APIs Service Clientのクラスリファレンスに沿って書いていく</p><p>一応、AppIdentityService.getAccessToken(SCOPES).getAccessTokenでアクセストークンを取得する事自体は可能なので、別にクライアントライブラリ使わないならそのアクセストークンを使ってAPIをコールするような実装を行えば良い</p><p>っていう感じでビルドしてGoogle AppEngine側にデプロイしてアクセスしてみると</p><p><img src="/images/2015/05/201505151800.jpg" class="img-fluid" alt="image" /></p><p>※必要の無い情報を修正してあります</p><p>っていうような感じでGoogle AppEngineが持つアカウントがGoogle Analytics Core Reporting APIにアクセスしてデータを取得して表示するような事をやろうと思えばできるっぽい。自分のサイトとかのアクセス解析でもってランキングとかを作成したいような場合にクライアントサイドからデータを取得したいような要件とかにはこういうサーバーを作っておけばさらっとできちゃうのではないかと</p>
+</code></pre>
+<p>AppIdentityCredentialっていうを使う事でGoogle AppEngine AppIdentityを使ってリクエストできる模様。あとはGoogle API ClientとGoogle APIs Service Clientのクラスリファレンスに沿って書いていく</p>
+
+<p>一応、AppIdentityService.getAccessToken(SCOPES).getAccessTokenでアクセストークンを取得する事自体は可能なので、別にクライアントライブラリ使わないならそのアクセストークンを使ってAPIをコールするような実装を行えば良い</p>
+
+<p>っていう感じでビルドしてGoogle AppEngine側にデプロイしてアクセスしてみると</p>
+
+<p><img src="/images/2015/05/201505151800.jpg" class="img-fluid" alt="image" /></p>
+
+<p>※必要の無い情報を修正してあります</p>
+
+<p>っていうような感じでGoogle AppEngineが持つアカウントがGoogle Analytics Core Reporting APIにアクセスしてデータを取得して表示するような事をやろうと思えばできるっぽい。自分のサイトとかのアクセス解析でもってランキングとかを作成したいような場合にクライアントサイドからデータを取得したいような要件とかにはこういうサーバーを作っておけばさらっとできちゃうのではないかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -303,7 +327,7 @@ public class AnalyticsController extends Controller {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -324,9 +348,6 @@ public class AnalyticsController extends Controller {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -439,7 +460,7 @@ public class AnalyticsController extends Controller {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -462,20 +483,20 @@ public class AnalyticsController extends Controller {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -485,13 +506,15 @@ public class AnalyticsController extends Controller {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("0195f0f3a74531a5e3d77bb8adc9677aacc1478f");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

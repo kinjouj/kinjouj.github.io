@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-11-09T00:00:00+00:00">
+                <time datetime="2012-11-09 00:00:00 +0900">
                   <a href="/archives/2012/11">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["fuel/app/classes/controller/home.php", "fuel/app/tests/controller/test_home.php", "fuel/app/classes/http_request.php"]-->
-                <p>前にも書いたんですが、コントローラーテスト時にset_methodとかしても結局ルーティングに合わない場合等にはHttpNotFoundExceptionがスローされたりして結局レスポンス取れないっていう事があったのですが、んまぁ大体の言語には「このテストでは例外が出る」っていうのを前提にテストを書く(expectedException)というケースがありきたりだとは思いますが</p><p>例外うっせぇ、それでもレスポンスをちゃんとチェックしてえんだよ<s>クソが</s></p><p>って思う人もいるでしょう。という事でごちゃごちゃでまだ理解出来た訳じゃないのですが、いろいろ調べてみた。という事で例題的なサンプルのコントローラーが</p><h4>fuel/app/classes/controller/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
+                <!--[&quot;fuel/app/classes/controller/home.php&quot;, &quot;fuel/app/tests/controller/test_home.php&quot;, &quot;fuel/app/classes/http_request.php&quot;]-->
+                <p>前にも書いたんですが、コントローラーテスト時にset_methodとかしても結局ルーティングに合わない場合等にはHttpNotFoundExceptionがスローされたりして結局レスポンス取れないっていう事があったのですが、んまぁ大体の言語には「このテストでは例外が出る」っていうのを前提にテストを書く(expectedException)というケースがありきたりだとは思いますが</p>
+
+<p>例外うっせぇ、それでもレスポンスをちゃんとチェックしてえんだよ<s>クソが</s></p>
+
+<p>って思う人もいるでしょう。という事でごちゃごちゃでまだ理解出来た訳じゃないのですが、いろいろ調べてみた。という事で例題的なサンプルのコントローラーが</p>
+<h4>fuel/app/classes/controller/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
     public function get_index() {
@@ -91,14 +97,22 @@ class Controller_Home extends Controller {
         // return View::forge(&quot;home/index&quot;, $data);
     }
 }
-</code></pre><p>メソッドがget_indexになっているので、このリクエスト自体はHTTP/GETしか容認しないと思うのですが。で前にも書いたけど、このコントローラーテストする場合</p><h4>fuel/app/tests/controller/test_home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre>
+<p>メソッドがget_indexになっているので、このリクエスト自体はHTTP/GETしか容認しないと思うのですが。で前にも書いたけど、このコントローラーテストする場合</p>
+<h4>fuel/app/tests/controller/test_home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Controller_Home extends TestCase {
     public function test_action_index() {
         $response = Request::forge(&quot;home/index&quot;)-&gt;set_method(&quot;POST&quot;)-&gt;execute()-&gt;response();
     }
 }
-</code></pre><p>としてもexecuteの時点でHttpNotFoundExceptionが発生する(本来は403エラーになるべきだと思うのだけど)。こっちが要求したいのは例外を起こさせる事ではなく例外が起きてもFurlCoreResponseが返ってきて欲しい場合。</p><p>で更にproduction環境上はExceptionを例外を発生させた場合にはHTTP/500エラーになる。そこら辺をテストするには現状のRequestクラスでは出来ないはず。恐らくはcurlドライバーでテストしても変わらない。本質はFuelCoreRequest#executeにあるはずなので。</p><p>という事でこれの例外をすべてラップしちゃってレスポンスを取るRequestクラスをでっち上げる</p><h4>fuel/app/classes/http_request.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre>
+<p>としてもexecuteの時点でHttpNotFoundExceptionが発生する(本来は403エラーになるべきだと思うのだけど)。こっちが要求したいのは例外を起こさせる事ではなく例外が起きてもFurlCoreResponseが返ってきて欲しい場合。</p>
+
+<p>で更にproduction環境上はExceptionを例外を発生させた場合にはHTTP/500エラーになる。そこら辺をテストするには現状のRequestクラスでは出来ないはず。恐らくはcurlドライバーでテストしても変わらない。本質はFuelCoreRequest#executeにあるはずなので。</p>
+
+<p>という事でこれの例外をすべてラップしちゃってレスポンスを取るRequestクラスをでっち上げる</p>
+<h4>fuel/app/classes/http_request.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class HttpRequest extends Request {
     public function execute($method_params = null) {
@@ -117,7 +131,9 @@ class HttpRequest extends Request {
         return $this;
     }
 }
-</code></pre><p>ようはRequest#executeで実行する際に例外を処理しないから例外スローされちゃう訳だからそれをラップして例外をチェック。fuel/core/classes/httpexceptions.phpに定義されている例外クラスを確認すると</p><pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre>
+<p>ようはRequest#executeで実行する際に例外を処理しないから例外スローされちゃう訳だからそれをラップして例外をチェック。fuel/core/classes/httpexceptions.phpに定義されている例外クラスを確認すると</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 namespace Fuel\Core;
 
@@ -137,7 +153,15 @@ class HttpServerErrorException extends HttpException
         return new Response(View::forge(&quot;500&quot;), 500);
     }
 }
-</code></pre><p>っつー感じになってる模様げなので、発生した例外がHttpException基底であるかをチャックして、それであればそのままレスポンスメソッドをRequest-&gt;responseにぶち込む。そうじゃなければ、HttpServerErrorExceptionでレスポンスを設定する</p><p>っていう方法を取る事でたとえHttpNotFoundExceptionなどによる例外発生が出た場合にでもレスポンスをチェック出来る(はず)</p><p>もちろん上に書いたように例外スローでもその例外スローをexpectedすれば良い。だけど、例外発生時のレスポンスのテストを行う際にはこういう手法を用いるとかで代用出来るのかも</p>
+</code></pre>
+<p>っつー感じになってる模様げなので、発生した例外がHttpException基底であるかをチャックして、それであればそのままレスポンスメソッドをRequest-&gt;responseにぶち込む。そうじゃなければ、HttpServerErrorExceptionでレスポンスを設定する</p>
+
+<p>っていう方法を取る事でたとえHttpNotFoundExceptionなどによる例外発生が出た場合にでもレスポンスをチェック出来る(はず)</p>
+
+<p>もちろん上に書いたように例外スローでもその例外スローをexpectedすれば良い。だけど、例外発生時のレスポンスのテストを行う際にはこういう手法を用いるとかで代用出来るのかも</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -229,7 +253,7 @@ class HttpServerErrorException extends HttpException
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -250,9 +274,6 @@ class HttpServerErrorException extends HttpException
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -365,7 +386,7 @@ class HttpServerErrorException extends HttpException
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -388,20 +409,20 @@ class HttpServerErrorException extends HttpException
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -411,13 +432,15 @@ class HttpServerErrorException extends HttpException
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("8fdc8e7bcd9662a61b275402414d5ba58dbc4a3e");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

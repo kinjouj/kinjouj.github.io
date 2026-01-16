@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2025-05-30T12:00:00+09:00">
+                <time datetime="2025-05-30 12:00:00 +0900">
                   <a href="/archives/2025/05">
                   <span class="post-date-year">2025</span>
                   <span class="hyphen">-</span>
@@ -76,20 +77,27 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Dockerdの設定ファイルに関して", "/etc/docker/daemon.json", "systemd/dockerの設定", "まとめ"]-->
-                <p>以前にやったDockerに接続する際にTLSを使っての接続をするためにサーバー側の設定をしたけどこれ/usr/lib/systemd/system/docker.serviceとかに書くのはどうなの？っていう話</p><h4>Dockerdの設定ファイルに関して</h4>
+                <!--[&quot;Dockerdの設定ファイルに関して&quot;, &quot;/etc/docker/daemon.json&quot;, &quot;systemd/dockerの設定&quot;, &quot;まとめ&quot;]-->
+                <p>以前にやったDockerに接続する際にTLSを使っての接続をするためにサーバー側の設定をしたけどこれ/usr/lib/systemd/system/docker.serviceとかに書くのはどうなの？っていう話</p>
+<h4>Dockerdの設定ファイルに関して</h4>
 <ol>
 <li><p>/usr/lib/systemd/system/docker.serviceのExecStartに記述する方法(場合によって場所が異なる)</p></li>
 <li><p>/etc/docker/daemon.jsonに記述する方法</p></li>
 </ol>
-<p>1の場合だとDockerがアップデートしたりしてしまった場合に設定が初期化されてしまうため問題になる場合もある。一応公式的には基本的なものに関しては2の方式で設定するのがいいっぽい？ただしdaemon.jsonで設定できないのもあるらしいので</p><h4>/etc/docker/daemon.json</h4><pre class="line-numbers"><code class="language-json">{
+
+<p>1の場合だとDockerがアップデートしたりしてしまった場合に設定が初期化されてしまうため問題になる場合もある。一応公式的には基本的なものに関しては2の方式で設定するのがいいっぽい？ただしdaemon.jsonで設定できないのもあるらしいので</p>
+<h4>/etc/docker/daemon.json</h4><pre class="line-numbers"><code class="language-json">{
   &quot;hosts&quot;: [ &quot;tcp://0.0.0.0:2376&quot; ],
   &quot;tlsverify&quot;: true,
   &quot;tlscacert&quot;: &quot;/etc/docker/ca.pem&quot;,
   &quot;tlscert&quot;: &quot;/etc/docker/server-cert.pem&quot;,
   &quot;tlskey&quot;: &quot;/etc/docker/server-key.pem&quot;
 }
-</code></pre><p>今までは/usr/lib/systemd/system/docker.serviceのExecStartにオプションを追加してTLS関連設定をしていたが/etc/docker/daemon.jsonでも設定は可能</p><p>ただし、hostsに関してはdaemon.jsonで記述したうえで/usr/lib/systemd/system/docker.serviceでも-Hオプションを使用していたりするとDockerdの起動に失敗する。なのでそういう場合には以下を設定する</p><h4>systemd/dockerの設定</h4>
+</code></pre>
+<p>今までは/usr/lib/systemd/system/docker.serviceのExecStartにオプションを追加してTLS関連設定をしていたが/etc/docker/daemon.jsonでも設定は可能</p>
+
+<p>ただし、hostsに関してはdaemon.jsonで記述したうえで/usr/lib/systemd/system/docker.serviceでも-Hオプションを使用していたりするとDockerdの起動に失敗する。なのでそういう場合には以下を設定する</p>
+<h4>systemd/dockerの設定</h4>
 <ol>
 <li><p>/usr/lib/systemd/system/docker.serivce.dディレクトリを作る</p></li>
 <li><p>/usr/lib/systemd/system/docker.service.d/docker.confファイルを以下のように作成</p></li>
@@ -97,7 +105,13 @@
 <pre class="line-numbers"><code class="language-">[Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd
-</code></pre><h4>まとめ</h4><p>Docker Daemonの設定するときは可能な限りは/etc/docker/daemon.jsonで設定する方がいいっぽい？</p><p>hostsと-Hの設定を共存するには別途なsystemd側の設定が必要</p>
+</code></pre><h4>まとめ</h4>
+<p>Docker Daemonの設定するときは可能な限りは/etc/docker/daemon.jsonで設定する方がいいっぽい？</p>
+
+<p>hostsと-Hの設定を共存するには別途なsystemd側の設定が必要</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -189,7 +203,7 @@ ExecStart=/usr/bin/dockerd
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -210,9 +224,6 @@ ExecStart=/usr/bin/dockerd
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -325,7 +336,7 @@ ExecStart=/usr/bin/dockerd
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -348,20 +359,20 @@ ExecStart=/usr/bin/dockerd
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -371,13 +382,15 @@ ExecStart=/usr/bin/dockerd
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("c58b305beccd2b67bb925ce6e322485bea8b5f1f");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

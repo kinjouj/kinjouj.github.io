@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="EclipseでAPT処理を使ってソースを生成したりする場合においては" />
     <title>Eclipseの.factorypathでのAPT処理に関して - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/05/android-viewpagerindicator.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/05/simplecov-spork-environment-trouble.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/06/rspec-1-getting-start.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/06/eclipse-factorypath-apt.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-01T00:00:00+00:00">
+                <time datetime="2013-06-01 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,19 +79,24 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p>EclipseでAPT処理を使ってソースを生成したりする場合においては</p><pre class="line-numbers"><code class="language-xml">&lt;factorypath&gt;
+                <p>EclipseでAPT処理を使ってソースを生成したりする場合においては</p>
+<pre class="line-numbers"><code class="language-xml">&lt;factorypath&gt;
   &lt;factorypathentry
     kind=&quot;WKSPJAR&quot;
     id=&quot;/{PROJECT_NAME}/libs/slim3-gen-1.0.16.jar&quot;
     enabled=&quot;true&quot;
     runInBatchMode=&quot;false&quot; /&gt;
 &lt;/factorypath&gt;
-</code></pre><p>っていうような.factorypathが設定を行う事で作られるようになる。で例えばgradleとかを使ってeclipseタスクを実行する際にこれを生成するには自力でなんとかしないといけない。実はそういうネタではなくてポイントは、「指定されているJARをプロジェクトワークスペース内にコピーしないと出来ない」っていうのがあったけど、それそもそもが設定を間違ってたというオチだったようで。上記だと</p><pre class="line-numbers"><code class="language-xml">&lt;factorypath&gt;
+</code></pre>
+<p>っていうような.factorypathが設定を行う事で作られるようになる。で例えばgradleとかを使ってeclipseタスクを実行する際にこれを生成するには自力でなんとかしないといけない。実はそういうネタではなくてポイントは、「指定されているJARをプロジェクトワークスペース内にコピーしないと出来ない」っていうのがあったけど、それそもそもが設定を間違ってたというオチだったようで。上記だと</p>
+<pre class="line-numbers"><code class="language-xml">&lt;factorypath&gt;
   &lt;factorypathenty
     kind=&quot;EXTJAR&quot;
     id=&quot;/path/to/slim3-gen.jar&quot; /&gt;
 &lt;/factorypath&gt;
-</code></pre><p>というようにWKSPJARではなくて、EXTJARを使わないとプロジェクトワークスペース外からのJARの参照が出来ない模様。という事で以前作ったSlim3プロジェクトをgradleベースなビルドツールで出来るようにしたテンプレートを修正</p><pre class="line-numbers"><code class="language-groovy">def slim3Gen = configurations.aptCompile.find {
+</code></pre>
+<p>というようにWKSPJARではなくて、EXTJARを使わないとプロジェクトワークスペース外からのJARの参照が出来ない模様。という事で以前作ったSlim3プロジェクトをgradleベースなビルドツールで出来るようにしたテンプレートを修正</p>
+<pre class="line-numbers"><code class="language-groovy">def slim3Gen = configurations.aptCompile.find {
   it.name.startsWith(&quot;slim3-gen&quot;)
 }
 
@@ -108,7 +114,11 @@ xml.&quot;factorypath&quot;() {
     )
 }
 w.close()
-</code></pre><p>というような感じですかねと。以前はWKSPJARを指定して、slim3-gen.jarをlibにコピーしてからプロジェクトワークスペースから参照っていう形を取ってたけど、これでEXTJARを使えばコピーしなくてもパスさえ分かってれば可能な感じ</p>
+</code></pre>
+<p>というような感じですかねと。以前はWKSPJARを指定して、slim3-gen.jarをlibにコピーしてからプロジェクトワークスペースから参照っていう形を取ってたけど、これでEXTJARを使えばコピーしなくてもパスさえ分かってれば可能な感じ</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -116,7 +126,7 @@ w.close()
             <!-- next post -->
             <a class="float-start box-link" href="/2013/06/rspec-1-getting-start.html">&lt;&nbsp;rspecを勉強してみる</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/05/android-viewpagerindicator.html">Android ViewPagerIndicatorを使ってみた&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/05/simplecov-spork-environment-trouble.html">simplecovをspork環境下で動かすとレポートが生成されない件&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -200,7 +210,7 @@ w.close()
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -221,9 +231,6 @@ w.close()
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -336,7 +343,7 @@ w.close()
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -359,20 +366,20 @@ w.close()
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -382,13 +389,15 @@ w.close()
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("befa0412df036373d73984f334115633082afeba");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

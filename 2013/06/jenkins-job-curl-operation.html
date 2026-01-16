@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-18T00:00:00+00:00">
+                <time datetime="2013-06-18 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Jenkinsジョブをcurlで登録", "Jenkinsジョブのビルドを開始する"]-->
-                <p>例えばの話として、gitにプッシュ(コミット)されたらフックさせるとか使えると思うのですが(subversionでもある)。それを使ってプッシュされたらJenkinsでビルドさせるとか出来るのかなっていう事で調べてみた</p><h4>Jenkinsジョブをcurlで登録</h4><p><a href="http://localhost:8080/jenkins" target="_blank" rel="noopener noreferrer">http://localhost:8080/jenkins</a> とかでアクセス出来る場合には <a href="http://localhost:8080/jenkins/createItem?name=" target="_blank" rel="noopener noreferrer">http://localhost:8080/jenkins/createItem?name=</a>ジョブ名 でぶん投げれば良いらしい。</p><p>その際にジョブの設定ファイル(config.xml)が必要になる。で既に作ってるとかの場合にはJENKINS_HOME?/job/ジョブ名/config.xmlにあるのでそれをコピーするなりで</p><p>例えば以前で書いたジョブとかだと長いけど</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+                <!--[&quot;Jenkinsジョブをcurlで登録&quot;, &quot;Jenkinsジョブのビルドを開始する&quot;]-->
+                <p>例えばの話として、gitにプッシュ(コミット)されたらフックさせるとか使えると思うのですが(subversionでもある)。それを使ってプッシュされたらJenkinsでビルドさせるとか出来るのかなっていう事で調べてみた</p>
+<h4>Jenkinsジョブをcurlで登録</h4>
+<p><a href="http://localhost:8080/jenkins">http://localhost:8080/jenkins</a> とかでアクセス出来る場合には <a href="http://localhost:8080/jenkins/createItem?name=">http://localhost:8080/jenkins/createItem?name=</a>ジョブ名 でぶん投げれば良いらしい。</p>
+
+<p>その際にジョブの設定ファイル(config.xml)が必要になる。で既に作ってるとかの場合にはJENKINS_HOME?/job/ジョブ名/config.xmlにあるのでそれをコピーするなりで</p>
+
+<p>例えば以前で書いたジョブとかだと長いけど</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;project&gt;
   &lt;actions/&gt;
   &lt;description&gt;&lt;/description&gt;
@@ -145,7 +153,9 @@ cp sample/libs/android-support-v4.jar SlidingMenu/library/libs&lt;/command&gt;
   &lt;publishers/&gt;
   &lt;buildWrappers/&gt;
 &lt;/project&gt;
-</code></pre><p>というような感じになってる。これをボディとしてURLにぶん投げれば良い</p><pre class="line-numbers"><code class="language-">curl \
+</code></pre>
+<p>というような感じになってる。これをボディとしてURLにぶん投げれば良い</p>
+<pre class="line-numbers"><code class="language-">curl \
   -s \
   -X POST \
   &quot;http://localhost:8080/jenkins/createItem?name=sample&quot; \
@@ -153,8 +163,18 @@ cp sample/libs/android-support-v4.jar SlidingMenu/library/libs&lt;/command&gt;
   -H &quot;Content-Type: text/xml&quot; \
   -w &quot;%{http_code}&quot; \
   -o /dev/null
-</code></pre><p>sampleっていうジョブ名で作成する。でその際にレスポンスは取らないけど、結果のステータスコードだけ取る。で成功時には200のステータスコードが返ってくるけど、失敗時・既に存在するなどは400エラーが返ってくる模様</p><h4>Jenkinsジョブのビルドを開始する</h4><pre class="line-numbers"><code class="language-">curl http://localhost:8080/jenkins/job/ジョブ名/build
-</code></pre><p>をぶん投げれば良い模様。っていう感じな工程をやれば出来なくも無い模様。ただJenkins側の設定とかしてないのでそのままやると問題は少なからず出てきそうな気もする</p><p>んまぁとりあえずはそんな感じな事も出来るよ的な感じで</p><p>参考: <a href="http://benkiew.wordpress.com/2012/01/12/automating-hudsonjenkins-via-rest-and-curl-a-very-small-cookbook" target="_blank" rel="noopener noreferrer">http://benkiew.wordpress.com/2012/01/12/automating-hudsonjenkins-via-rest-and-curl-a-very-small-cookbook</a></p>
+</code></pre>
+<p>sampleっていうジョブ名で作成する。でその際にレスポンスは取らないけど、結果のステータスコードだけ取る。で成功時には200のステータスコードが返ってくるけど、失敗時・既に存在するなどは400エラーが返ってくる模様</p>
+<h4>Jenkinsジョブのビルドを開始する</h4><pre class="line-numbers"><code class="language-">curl http://localhost:8080/jenkins/job/ジョブ名/build
+</code></pre>
+<p>をぶん投げれば良い模様。っていう感じな工程をやれば出来なくも無い模様。ただJenkins側の設定とかしてないのでそのままやると問題は少なからず出てきそうな気もする</p>
+
+<p>んまぁとりあえずはそんな感じな事も出来るよ的な感じで</p>
+
+<p>参考: <a href="http://benkiew.wordpress.com/2012/01/12/automating-hudsonjenkins-via-rest-and-curl-a-very-small-cookbook">http://benkiew.wordpress.com/2012/01/12/automating-hudsonjenkins-via-rest-and-curl-a-very-small-cookbook</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -246,7 +266,7 @@ cp sample/libs/android-support-v4.jar SlidingMenu/library/libs&lt;/command&gt;
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -267,9 +287,6 @@ cp sample/libs/android-support-v4.jar SlidingMenu/library/libs&lt;/command&gt;
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -382,7 +399,7 @@ cp sample/libs/android-support-v4.jar SlidingMenu/library/libs&lt;/command&gt;
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -405,20 +422,20 @@ cp sample/libs/android-support-v4.jar SlidingMenu/library/libs&lt;/command&gt;
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -428,13 +445,15 @@ cp sample/libs/android-support-v4.jar SlidingMenu/library/libs&lt;/command&gt;
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("80fd6eec8d56cd5d8aa7f65886b74f44b040cb49");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="タイトル通り。ActionSupportなクラスにvalidateメソッドを定義する事で入力検証な機能を実装出来る。こいつの実体自体はValidateableインターフェースが作用している模様。" />
     <title>Struts2をやってみる (6) - フォームバリデーション (1) - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/09/hbase-hfile-reading.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/09/hbase-tablereducer.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/09/struts2-7-form-validation-2.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/09/struts2-6-form-validation-1.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-19T00:00:00+00:00">
+                <time datetime="2013-09-19 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["画面転移仕様", "WEB-INF/jsp/index.jsp", "IndexAction.java", "struts.xml"]-->
-                <p>タイトル通り。ActionSupportなクラスにvalidateメソッドを定義する事で入力検証な機能を実装出来る。こいつの実体自体はValidateableインターフェースが作用している模様。</p><h4>画面転移仕様</h4><p><img src="/images/2013/09/201309191345_1.png" class="img-fluid" alt="image" /></p><p>っていうような感じ</p><h4>WEB-INF/jsp/index.jsp</h4><pre class="line-numbers"><code class="language-jsp">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;utf-8&quot; %&gt;
+                <!--[&quot;画面転移仕様&quot;, &quot;WEB-INF/jsp/index.jsp&quot;, &quot;IndexAction.java&quot;, &quot;struts.xml&quot;]-->
+                <p>タイトル通り。ActionSupportなクラスにvalidateメソッドを定義する事で入力検証な機能を実装出来る。こいつの実体自体はValidateableインターフェースが作用している模様。</p>
+<h4>画面転移仕様</h4>
+<p><img src="/images/2013/09/201309191345_1.png" class="img-fluid" alt="image" /></p>
+
+<p>っていうような感じ</p>
+<h4>WEB-INF/jsp/index.jsp</h4><pre class="line-numbers"><code class="language-jsp">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;utf-8&quot; %&gt;
 &lt;%@ taglib prefix=&quot;s&quot; uri=&quot;/struts-tags&quot; %&gt;
 &lt;html&gt;
   &lt;head&gt;
@@ -93,7 +99,15 @@
     &lt;s:fielderror key=&quot;name&quot; theme=&quot;simple&quot; /&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>&lt;s:textfield&gt;に<span style="color: red">errorPosition=<q>false</q></span>をしているが、これを指定しなかった場合</p><p><img src="/images/2013/09/201309191345_2.jpg" class="img-fluid" alt="image" /></p><p>というように&lt;s:fielderror&gt;でエラー表示の場所を指定したい場合にはこれを指定しないとフレームワークレベルで行われるエラー表示が出てしまう</p><p>んまぁあとは上記処理フローで書いているようにindex.actionでこれがレンダリングされてサブミットした際にsay.actionが発生、その際にバリデーションを行いエラー発生時にはこのビュー側に移動してエラーを表示するという事を行う</p><h4>IndexAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action;
+</code></pre>
+<p>&lt;s:textfield&gt;に<span style="color: red">errorPosition=<q>false</q></span>をしているが、これを指定しなかった場合</p>
+
+<p><img src="/images/2013/09/201309191345_2.jpg" class="img-fluid" alt="image" /></p>
+
+<p>というように&lt;s:fielderror&gt;でエラー表示の場所を指定したい場合にはこれを指定しないとフレームワークレベルで行われるエラー表示が出てしまう</p>
+
+<p>んまぁあとは上記処理フローで書いているようにindex.actionでこれがレンダリングされてサブミットした際にsay.actionが発生、その際にバリデーションを行いエラー発生時にはこのビュー側に移動してエラーを表示するという事を行う</p>
+<h4>IndexAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -136,8 +150,16 @@ public class IndexAction extends ActionSupport {
         this.name = name;
     }
 }
-</code></pre><p>addFieldErrorを使ってエラー情報を格納する。でgetTextっていうメソッドを使っているけど、src/main/resources/クラスパッケージ/クラス名.properties辺りに</p><pre class="line-numbers"><code class="language-ini">name=名前
-</code></pre><p>的なのを作っておけば取得出来るようになる模様</p><p>でsayの時点でバリデーションがずっこけたら、inputなresultに向かう模様なのでそれをもろもろ設定を行う</p><h4>struts.xml</h4><p>でここでとある問題として上記の処理フロー的な所としては</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</code></pre>
+<p>addFieldErrorを使ってエラー情報を格納する。でgetTextっていうメソッドを使っているけど、src/main/resources/クラスパッケージ/クラス名.properties辺りに</p>
+<pre class="line-numbers"><code class="language-ini">name=名前
+</code></pre>
+<p>的なのを作っておけば取得出来るようになる模様</p>
+
+<p>でsayの時点でバリデーションがずっこけたら、inputなresultに向かう模様なのでそれをもろもろ設定を行う</p>
+<h4>struts.xml</h4>
+<p>でここでとある問題として上記の処理フロー的な所としては</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
     &lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
@@ -155,7 +177,11 @@ public class IndexAction extends ActionSupport {
 
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre><p>っていうような設定を行った場合には、index.actionからsay.actionへPOSTした場合にバリデーションがずっこけたらindex.jspが普通にforward(RequestDispatcher#forward)的な事が行われると思われるのだけど、これやるとリロード時にPOSTの状態が維持されたままなので所々問題になる場合もあるとは思う</p><p>そこでsay.actionからのinputなresultを&lt;result name=<q>input</q> type=<q>redirectAction</q>&gt;を利用してアクションへリダイレクトされるようにした場合だとエラー情報をセッションなどに格納しない限りはバリデーションを行ったエラー情報が保持されない。でそれを解決する為にinterceptorを利用する事で可能らしいので上記のstruts.xmlではなく</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</code></pre>
+<p>っていうような設定を行った場合には、index.actionからsay.actionへPOSTした場合にバリデーションがずっこけたらindex.jspが普通にforward(RequestDispatcher#forward)的な事が行われると思われるのだけど、これやるとリロード時にPOSTの状態が維持されたままなので所々問題になる場合もあるとは思う</p>
+
+<p>そこでsay.actionからのinputなresultを&lt;result name=<q>input</q> type=<q>redirectAction</q>&gt;を利用してアクションへリダイレクトされるようにした場合だとエラー情報をセッションなどに格納しない限りはバリデーションを行ったエラー情報が保持されない。でそれを解決する為にinterceptorを利用する事で可能らしいので上記のstruts.xmlではなく</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
     &lt;constant name=&quot;struts.devMode&quot; value=&quot;true&quot; /&gt;
@@ -183,7 +209,17 @@ public class IndexAction extends ActionSupport {
 
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre><p>というようにstore interceptorを利用する事でメッセージングストアな機能を利用してエラーメッセージを保持出来るらしい</p><p>詳しくは <a href="http://struts.apache.org/release/2.1.x/docs/message-store-interceptor.html" target="_blank" rel="noopener noreferrer">http://struts.apache.org/release/2.1.x/docs/message-store-interceptor.html</a></p><p>終わり。というような感じでバリデーションな機能を利用する事が出来ると</p><p>色々方式があるようなのでバリデーションな機能に関してはまだ続くって事で</p>
+</code></pre>
+<p>というようにstore interceptorを利用する事でメッセージングストアな機能を利用してエラーメッセージを保持出来るらしい</p>
+
+<p>詳しくは <a href="http://struts.apache.org/release/2.1.x/docs/message-store-interceptor.html">http://struts.apache.org/release/2.1.x/docs/message-store-interceptor.html</a></p>
+
+<p>終わり。というような感じでバリデーションな機能を利用する事が出来ると</p>
+
+<p>色々方式があるようなのでバリデーションな機能に関してはまだ続くって事で</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -191,7 +227,7 @@ public class IndexAction extends ActionSupport {
             <!-- next post -->
             <a class="float-start box-link" href="/2013/09/struts2-7-form-validation-2.html">&lt;&nbsp;Struts2をやってみる (7) - フォームバリデーション (2) -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/09/hbase-hfile-reading.html">HBaseのHFileをコマンドで読み取る方法&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/09/hbase-tablereducer.html">HBaseのTableReducer&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -275,7 +311,7 @@ public class IndexAction extends ActionSupport {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -296,9 +332,6 @@ public class IndexAction extends ActionSupport {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -411,7 +444,7 @@ public class IndexAction extends ActionSupport {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -434,20 +467,20 @@ public class IndexAction extends ActionSupport {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -457,13 +490,15 @@ public class IndexAction extends ActionSupport {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("5d04e5568f58b639aec58772692c6b4f00678527");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

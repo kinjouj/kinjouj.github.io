@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-03-19T00:00:00+00:00">
+                <time datetime="2014-03-19 00:00:00 +0900">
                   <a href="/archives/2014/03">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,12 +78,19 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Railsプロジェクトの構築", "public/index.html", "app/assets/javascripts/app-module.js"]-->
-                <p><a href="http://docs.angularjs.org/tutorial/step_11">REST and Custom Services</a>を見つつやってみる。でRESTfulなWebサービス的なのが必要なので今回はRailsで適当なのでっち上げてやってみる。つまりangular.jsとかソッチ系も全部Railsプロジェクト内に作る</p><h4>Railsプロジェクトの構築</h4><p>以前に<a href="/rails-assets-pipeline.html">Rails assets pipeline</a>っていうネタでやってた事あるけど、それと同様でGemfileに</p><pre class="line-numbers"><code class="language-rb">gem &quot;angularjs-rails&quot;
-</code></pre><p>辺りを追加する。でapp/assets/javascripts/application.jsで</p><pre class="line-numbers"><code class="language-">//= require angular
+                <!--[&quot;Railsプロジェクトの構築&quot;, &quot;public/index.html&quot;, &quot;app/assets/javascripts/app-module.js&quot;]-->
+                <p><a href="http://docs.angularjs.org/tutorial/step_11">REST and Custom Services</a>を見つつやってみる。でRESTfulなWebサービス的なのが必要なので今回はRailsで適当なのでっち上げてやってみる。つまりangular.jsとかソッチ系も全部Railsプロジェクト内に作る</p>
+<h4>Railsプロジェクトの構築</h4>
+<p>以前に<a href="/rails-assets-pipeline.html">Rails assets pipeline</a>っていうネタでやってた事あるけど、それと同様でGemfileに</p>
+<pre class="line-numbers"><code class="language-rb">gem &quot;angularjs-rails&quot;
+</code></pre>
+<p>辺りを追加する。でapp/assets/javascripts/application.jsで</p>
+<pre class="line-numbers"><code class="language-">//= require angular
 //= require angular-resource
 //= require angular-route
-</code></pre><p>辺りを追加。あとは適当にJSONレスポンスを返すリソースルーティングによるコントローラーを実装しておく。ここは(ry</p><h4>public/index.html</h4><pre class="line-numbers"><code class="language-html">&lt;html ng-app=&quot;app&quot;&gt;
+</code></pre>
+<p>辺りを追加。あとは適当にJSONレスポンスを返すリソースルーティングによるコントローラーを実装しておく。ここは(ry</p>
+<h4>public/index.html</h4><pre class="line-numbers"><code class="language-html">&lt;html ng-app=&quot;app&quot;&gt;
   &lt;head&gt;
     &lt;script src=&quot;assets/application.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
@@ -90,7 +98,11 @@
     &lt;div ng-view /&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>的な感じで作る。前回のngRouteを使ってやるのでng-viewにディレクティブを追加するだけ</p><p>あとはapp/assets/javascripts/app-module.js辺りを書く</p><h4>app/assets/javascripts/app-module.js</h4><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngResource&quot;, &quot;ngRoute&quot;])
+</code></pre>
+<p>的な感じで作る。前回のngRouteを使ってやるのでng-viewにディレクティブを追加するだけ</p>
+
+<p>あとはapp/assets/javascripts/app-module.js辺りを書く</p>
+<h4>app/assets/javascripts/app-module.js</h4><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngResource&quot;, &quot;ngRoute&quot;])
   .config(function($routeProvider) {
     $routeProvider
       .when(&quot;/sample&quot;, {
@@ -120,7 +132,9 @@
   .controller(&quot;ShowCtrl&quot;, function($scope, $routeParams, Sample) {
     $scope.sample = Sample.get({ id: $routeParams.id });
   });
-</code></pre><p><a href="http://docs.angularjs.org/api/ngResource/service/$resource">$resourceの公式リファレンス</a>を見れば分かるけど</p>
+</code></pre>
+<p><a href="http://docs.angularjs.org/api/ngResource/service/$resource">$resourceの公式リファレンス</a>を見れば分かるけど</p>
+
 <ul>
 <li>  get</li>
 <li>  save</li>
@@ -128,7 +142,17 @@
 <li>  remove</li>
 <li>  delete</li>
 </ul>
-<p>っていうメソッドを持ったオブジェクトが返される模様。で第3引数のactionsにてそのリクエストに伴う設定等を行う事も出来る模様。</p><p>ちなみに$が付いたアクションもあるけど、これ英語の解釈が正しいかは不明だが「インスタンスメソッドかそうじゃないかの違い」なんじゃないかと。$が接頭辞でついてるactionsに関してはインスタンスメソッドとして利用可能な模様</p><p>あとこれも公式リファレンスに書いてるけど、paramDefaultsにおいて@な接頭辞が付くパラメーターに関しては後日別途で書く予定なのでここでは省略</p><p>ていう事でRESTfulなリソースAPIと連携して利用するようなケースであればangular-resource.jsな$resourceを使うと便利っていう事で</p>
+
+<p>っていうメソッドを持ったオブジェクトが返される模様。で第3引数のactionsにてそのリクエストに伴う設定等を行う事も出来る模様。</p>
+
+<p>ちなみに$が付いたアクションもあるけど、これ英語の解釈が正しいかは不明だが「インスタンスメソッドかそうじゃないかの違い」なんじゃないかと。$が接頭辞でついてるactionsに関してはインスタンスメソッドとして利用可能な模様</p>
+
+<p>あとこれも公式リファレンスに書いてるけど、paramDefaultsにおいて@な接頭辞が付くパラメーターに関しては後日別途で書く予定なのでここでは省略</p>
+
+<p>ていう事でRESTfulなリソースAPIと連携して利用するようなケースであればangular-resource.jsな$resourceを使うと便利っていう事で</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -220,7 +244,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -241,9 +265,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -356,7 +377,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -379,20 +400,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -402,13 +423,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("cca98029b867880d9a1dab1f346d84393a1d0839");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

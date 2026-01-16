@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2011-04-23T09:00:00+09:00">
+                <time datetime="2011-04-23 09:00:00 +0900">
                   <a href="/archives/2011/04">
                   <span class="post-date-year">2011</span>
                   <span class="hyphen">-</span>
@@ -76,11 +77,14 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["サーバー情報", "hbase-site.xmlを設定(マスター側)", "regionserverを作成(マスター側)", "hbase-site.xmlを作成(スレーブ側)", "動作確認", "マスター側", "スレーブ側"]-->
-                <p>HBaseをクラスタ構成で構築してみる</p><h4>サーバー情報</h4><pre class="line-numbers"><code class="language-">Hadoop HDFSサーバー: ホスト名 dfserver (192.168.1.1)
+                <!--[&quot;サーバー情報&quot;, &quot;hbase-site.xmlを設定(マスター側)&quot;, &quot;regionserverを作成(マスター側)&quot;, &quot;hbase-site.xmlを作成(スレーブ側)&quot;, &quot;動作確認&quot;, &quot;マスター側&quot;, &quot;スレーブ側&quot;]-->
+                <p>HBaseをクラスタ構成で構築してみる</p>
+<h4>サーバー情報</h4><pre class="line-numbers"><code class="language-">Hadoop HDFSサーバー: ホスト名 dfserver (192.168.1.1)
 HBase Master: ホスト名 test1 (192.168.1.2)
 HBase Slave: ホスト名 test2 (192.168.1.3)
-</code></pre><p>上記のホスト名の設定をHBase関連サーバーに行っておく。又、HDFSサーバーは外部からアクセスできるようにバインドするアドレス及びポート開放を行っておく</p><h4>hbase-site.xmlを設定(マスター側)</h4><pre class="line-numbers"><code class="language-xml">&lt;configuration&gt;
+</code></pre>
+<p>上記のホスト名の設定をHBase関連サーバーに行っておく。又、HDFSサーバーは外部からアクセスできるようにバインドするアドレス及びポート開放を行っておく</p>
+<h4>hbase-site.xmlを設定(マスター側)</h4><pre class="line-numbers"><code class="language-xml">&lt;configuration&gt;
     &lt;property&gt;
         &lt;name&gt;hbase.rootdir&lt;/name&gt;
         &lt;value&gt;hdfs://dfserver:9000/hbase&lt;/value&gt;
@@ -94,9 +98,13 @@ HBase Slave: ホスト名 test2 (192.168.1.3)
         &lt;value&gt;192.168.1.2,192.168.1.3&lt;/value&gt;
     &lt;/property&gt;
 &lt;/configuration&gt;
-</code></pre><p>hbase.zookeeper.quorumを指定しておかないとzookeeperのポートが開放されないので必ず指定する。これにはregionserverで管理するサーバーを指定する</p><h4>regionserverを作成(マスター側)</h4><pre class="line-numbers"><code class="language-">192.168.1.2
+</code></pre>
+<p>hbase.zookeeper.quorumを指定しておかないとzookeeperのポートが開放されないので必ず指定する。これにはregionserverで管理するサーバーを指定する</p>
+<h4>regionserverを作成(マスター側)</h4><pre class="line-numbers"><code class="language-">192.168.1.2
 192.168.1.3
-</code></pre><p>マスター及びスレーブサーバーのIPを列挙しておく。この設定はマスター側のみで行う</p><h4>hbase-site.xmlを作成(スレーブ側)</h4><pre class="line-numbers"><code class="language-xml">&lt;configuration&gt;
+</code></pre>
+<p>マスター及びスレーブサーバーのIPを列挙しておく。この設定はマスター側のみで行う</p>
+<h4>hbase-site.xmlを作成(スレーブ側)</h4><pre class="line-numbers"><code class="language-xml">&lt;configuration&gt;
     &lt;property&gt;
         &lt;name&gt;hbase.rootdir&lt;/name&gt;
         &lt;value&gt;hdfs://dfserver:9000/hbase&lt;/value&gt;
@@ -106,16 +114,24 @@ HBase Slave: ホスト名 test2 (192.168.1.3)
         &lt;value&gt;true&lt;/value&gt;
     &lt;/property&gt;
 &lt;/configuration&gt;
-</code></pre><h4>動作確認</h4><p>マスターサーバー側でHBaseを起動すると指定したHDFSにディレクトリが作成され、マスター・スレーブサーバーに必要なサーバーアプリケーションが起動される。jpsコマンドで確認すると</p><h4>マスター側</h4><pre class="line-numbers"><code class="language-">HMaster
+</code></pre><h4>動作確認</h4>
+<p>マスターサーバー側でHBaseを起動すると指定したHDFSにディレクトリが作成され、マスター・スレーブサーバーに必要なサーバーアプリケーションが起動される。jpsコマンドで確認すると</p>
+<h4>マスター側</h4><pre class="line-numbers"><code class="language-">HMaster
 HRegionServer
 HQuorumPeer
 </code></pre><h4>スレーブ側</h4><pre class="line-numbers"><code class="language-">HRegionServer
 HQuorumPeer
-</code></pre><p>というようになっているのを確認する。その後、マスターサーバー側でhbase shellで</p><pre class="line-numbers"><code class="language-">create &quot;smaples&quot;,&quot;score&quot;
+</code></pre>
+<p>というようになっているのを確認する。その後、マスターサーバー側でhbase shellで</p>
+<pre class="line-numbers"><code class="language-">create &quot;smaples&quot;,&quot;score&quot;
 
 # 表示されるか確認
 list
-</code></pre><p>を実行した後にスレーブサーバー側でlistコマンドを実行するとマスター側で行った操作がスレーブ側でも問題無く反映されている事を確認する</p>
+</code></pre>
+<p>を実行した後にスレーブサーバー側でlistコマンドを実行するとマスター側で行った操作がスレーブ側でも問題無く反映されている事を確認する</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -207,7 +223,7 @@ list
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -228,9 +244,6 @@ list
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -343,7 +356,7 @@ list
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -366,20 +379,20 @@ list
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -389,13 +402,15 @@ list
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("b93f1750c0d182276236a8fa61499f8b220f022b");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

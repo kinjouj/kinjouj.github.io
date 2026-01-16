@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -73,111 +72,6 @@
                   <a name="article-link" href="/2014/05/engine-io.html">engine.io</a>
                 </h3>
                 参考: [Engine.IO単体でチャットを作った][1]
-
-
-上記の参考に触発されてやってみた
-
-
-
-
-
-#### server.js
-
-```js
-var http    = require(&quot;http&quot;),
-    express = require(&quot;express&quot;),
-    engine  = require(&quot;engine.io&quot;);
-
-var app = express();
-app.use(express.static(__dirname + &quot;/public&quot;));
-app.get(&quot;/&quot;, function(req, res) {
-  res.sendfile(&quot;client.html&quot;);
-});
-
-var server = http.createServer(app);
-
-var io = engine.attach(server);
-io.on(&quot;connection&quot;, function(socket) {
-  socket.on(&quot;message&quot;, function(data) {
-    // 着信したデータを接続しているクライアント全部に送る
-    for (var key in io.clients) {
-      var client = io.clients[key];
-      client.send(key + &quot; -&gt; &quot; + data);
-    }
-  });
-});
-io.on(&quot;error&quot;, function() {
-});
-
-server.listen(3000);
-```
-
-
-expressを使うようにしているのであれなのだけど、必要ないようなEngine.IOの単独サーバーとして稼働したりする要件な場合には &lt;https://github.com/learnboost/engine.io&gt; に書いてるコードを参考にすればいい
-
-
-それとSocket.IOとは違い、broadcastのような「自身以外へのバッファの送信」などには対応していないのでそれに対応するには自身でそういうような処理をしなければならない。又、engine.ioのsendで送れるデータはStringやBuffer(typed array)などがサポートされているけど、オブジェクトなどを送信するようなケースにおいては一度JSON.stringifyなどを用いて文字列正規化して送るっていう方法を取るしか無いっぽい
-
-
-んまぁざっくりしてるけどサーバー側はこんな感じで
-
-
-#### client.html
-
-```html
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;script src=&quot;/engine.io.js&quot;&gt;&lt;/script&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;input id=&quot;message&quot; /&gt;
-    &lt;button onclick=&quot;send()&quot;&gt;send&lt;/button&gt;
-    &lt;ul id=&quot;messages&quot;&gt;&lt;/ul&gt;
-    &lt;script&gt;
-var sock = new eio.Socket(&quot;ws://localhost:3000&quot;);
-sock.on(&quot;open&quot;, function() {
-  sock.on(&quot;message&quot;, function(data) {
-    var elm = document.createElement(&quot;li&quot;);
-    elm.innerText = data;
-
-    document.querySelector(&quot;#messages&quot;).appendChild(elm);
-  });
-
-  /*
-  あくまでemitは内部的なcallをするだけでサーバー側にイベント通知などを仕組みでは無い模様
-  sock.on(&quot;A&quot;, function() {
-    console.debug(&quot;A&quot;, arguments);
-  });
-  sock.emit(&quot;A&quot;);
-  */
-});
-
-function send() {
-  var text = document.querySelector(&quot;#message&quot;).value;
-  sock.send(text);
-}
-    &lt;/script&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-```
-
-
-engine.ioのクライアントライブラリは &lt;https://github.com/LearnBoost/engine.io-client&gt; から取ってきて利用する(npmで入れてそのライブラリをコピーするなど)
-
-
-な感じで書いて&lt;http://localhost:3000&gt;にアクセスしテキストボックスになんか入れてボタンを押すとページにアクセスしているクライアント全部にメッセージがぶっ飛んでくる
-
-
-んまぁこっちもざっくりしているけど、こんな感じで使える模様げで
-
-
-#### 余談
-
-
-&lt;https://github.com/nkzawa/engine.io-client.java&gt; を使えばAndroidとかでも使える模様
-
-
- [1]: http://shokai.org/blog/archives/8893
               </div>
             </div>
             <div id="0f324510fc620c2f4167e40bde19cf15f197f13a" class="card m-4 mb-5">
@@ -214,123 +108,6 @@ engine.ioのクライアントライブラリは &lt;https://github.com/LearnBoo
                   <a name="article-link" href="/2014/01/nginx-websocket.html">nginxでwebsocket</a>
                 </h3>
                 nginx1.3から正式サポートされたらしいのでやった事無かった為やってみただけ。前回の[Androidでsocket.io][1]で使ったのをちょいと修正して使う
-
-
-
-
-
-#### nginx1.3のインストール
-
-
-検証マシンに入ってるnginxが1.2系だったので、nginx公式のPPAを使えば1.3系以降なのもインストール出来る模様
-
-
-```sh
-sudo add-apt-repository ppa:nginx/stable
-sudo apt-get update
-
-# 既に入ってるnginxをアップグレードする。もしくはnginxを一回消してから再度入れるとか
-sudo apt-get upgrade
-```
-
-
-#### クライアント
-
-
-前回、socket.io.js辺りなやつはコピペして使うって書いたけど、socket.ioなサーバー上で/socket.io/socket.io.jsなURLで利用できるっぽい
-
-
-```html
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;/socket.io/socket.io.js&quot;&gt;&lt;/script&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;input type=&quot;text&quot; id=&quot;message&quot; /&gt;
-    &lt;input type=&quot;button&quot; id=&quot;send_btn&quot; value=&quot;send&quot; /&gt;
-    &lt;div id=&quot;messages&quot;&gt;&lt;/div&gt;
-    &lt;script type=&quot;text/javascript&quot;&gt;
-(function(undefined) {
-  &quot;use strict&quot;;
-
-  var messages = document.querySelector(&quot;#messages&quot;);
-
-  var socket = io.connect(&quot;http://server.name/&quot;);
-  socket.on(&quot;connect&quot;, function() {
-    socket.on(&quot;message&quot;, function(data) {
-      var elm = document.createElement(&quot;div&quot;);
-      elm.innerText = data;
-
-      messages.appendChild(elm);
-    });
-
-    document.querySelector(&quot;#send_btn&quot;).addEventListener(&quot;click&quot;, function() {
-      socket.send(document.querySelector(&quot;#message&quot;).value);
-    });
-  });
-})();
-    &lt;/script&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-```
-
-
-#### サーバー側
-
-
-```js
-var express = require(&quot;express&quot;);
-
-var app = express();
-app.configure(function() {
-  // クライアント側にあるファイルを静的ファイルで読み込めるように?
-  app.use(express.static(__dirname + &quot;/../client&quot;));
-});
-
-var server = require(&quot;http&quot;).createServer(app);
-server.listen(3000);
-
-var io = require(&quot;socket.io&quot;).listen(server);
-io.sockets.on(&quot;connection&quot;, function(socket) {
-  socket.on(&quot;message&quot;, function(data) {
-    socket.broadcast.send(data);
-  });
-});
-```
-
-
-#### nginx.conf
-
-
-```nginx
-upstream socketio {
-    server 127.0.0.1:3000;
-}
-
-server {
-    server_name server.name;
-
-    location / {
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection &quot;Upgrade&quot;;
-        proxy_pass http://socketio;
-    }
-}
-```
-
-
-最小限で、proxy\_Set\_headerでUpgradeとConnectionを指定しておけば良いっぽい。んまぁ詳しくは以下参考にすりゃ良いっぽい
-
-
-で外部からnginxにアクセスしても問題無いかどうかをAndroidのブラウザでサーバーにアクセスして、PCから入力したデータが表示されるかの検証してみた所だと
-
-
-![](/images/2014/01/20140112-182622.png)
-
-
-参考: &lt;http://blog.geta6.net/post/45741693575/nginx-1-3-14-websocket-proxy&gt;
-
- [1]: /android-socketio.html
               </div>
             </div>
             <div id="2f182c89ae5419cc6b9c7d6c883d21096235718b" class="card m-4 mb-5">
@@ -446,7 +223,7 @@ server {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -467,9 +244,6 @@ server {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -582,7 +356,7 @@ server {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -605,20 +379,20 @@ server {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

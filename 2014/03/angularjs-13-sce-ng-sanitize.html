@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-03-28T00:00:00+00:00">
+                <time datetime="2014-03-28 00:00:00 +0900">
                   <a href="/archives/2014/03">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,37 +78,62 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["余談: linkyフィルターについて"]-->
-                <p>※ややこしいので公式ドキュメント読んだ方がいい</p><pre class="line-numbers"><code class="language-html">&lt;div ng-controller=&quot;SampleController&quot;&gt;
+                <!--[&quot;余談: linkyフィルターについて&quot;]-->
+                <p>※ややこしいので公式ドキュメント読んだ方がいい</p>
+<pre class="line-numbers"><code class="language-html">&lt;div ng-controller=&quot;SampleController&quot;&gt;
   &lt;span&gt;{% raw %}{{message}}{% endraw %}&lt;/span&gt;
 &lt;/div&gt;
-</code></pre><p>的な感じになってて</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
+</code></pre>
+<p>的な感じになってて</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
   .controller(&quot;SampleController&quot;, function($scope) {
     $scope.message = &#39;&lt;span style=&quot;color: red&quot;&gt;hoge&lt;/span&gt;&#39;;
   });
-</code></pre><p>みたいにすると、$scopeとかに含まれるHTMLとかはエスケープされて出力されるらしい</p><pre class="line-numbers"><code class="language-html">&lt;div ng-controller=&quot;SampleController&quot;&gt;
+</code></pre>
+<p>みたいにすると、$scopeとかに含まれるHTMLとかはエスケープされて出力されるらしい</p>
+<pre class="line-numbers"><code class="language-html">&lt;div ng-controller=&quot;SampleController&quot;&gt;
   &lt;span ng-bind-html=&quot;message&quot; /&gt;
 &lt;/div&gt;
-</code></pre><p>みたいにすると「Error: $sce:unsafe」っていうエラーになる模様。但し、このエラーが発生するのはangular-sanitize.jsが参照されていない場合であって参照されている場合などにおいては物によっては出力は許可されるがCSP(Content Security Policy)に反するようなインラインなスタイルやスクリプトは除去される模様。あくまで汚染物を除去する的な所かと</p><p>ちょっと余談が多いけど、それの出力を許可するようにするには$sce(Strict Contextual Escaping)を使う事で出来る模様。あくまで$sceはangular-sanitizeに含まれる物では無い模様</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
+</code></pre>
+<p>みたいにすると「Error: $sce:unsafe」っていうエラーになる模様。但し、このエラーが発生するのはangular-sanitize.jsが参照されていない場合であって参照されている場合などにおいては物によっては出力は許可されるがCSP(Content Security Policy)に反するようなインラインなスタイルやスクリプトは除去される模様。あくまで汚染物を除去する的な所かと</p>
+
+<p>ちょっと余談が多いけど、それの出力を許可するようにするには$sce(Strict Contextual Escaping)を使う事で出来る模様。あくまで$sceはangular-sanitizeに含まれる物では無い模様</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
   .controller(&quot;SampleController&quot;, function($scope, $sce) {
     var text = &#39;&lt;span style=&quot;color: red&quot;&gt;hoge&lt;/span&gt;&#39;;
     $scope.message = $sce.trustAsHtml($text);
   });
-</code></pre><p>$sceで使えるAPIについては<a href="http://docs.angularjs.org/api/ng/service/$sce" target="_blank" rel="noopener noreferrer">http://docs.angularjs.org/api/ng/service/$sce</a>を参照</p><p>若干ややこしいが</p>
+</code></pre>
+<p>$sceで使えるAPIについては<a href="http://docs.angularjs.org/api/ng/service/$sce">http://docs.angularjs.org/api/ng/service/$sce</a>を参照</p>
+
+<p>若干ややこしいが</p>
+
 <ul>
 <li>  $scopeに突っ込んだHTMLはエスケープされて出力される</li>
 <li>  angular-sanitize.jsを参照せずにng-bind-htmlでHTMLをバインドしようとするとエラーが出る</li>
 <li>  angular-sanitize.jsを参照してng-bind-htmlでHTMLをバインドすると出力されるが、CSPに反するような部分は除去される</li>
 <li>  $sceのAPIを使う事でCSPに反するようなのを除去せずにHTMLとして出力する事が可能(但し、許可されないのもある)</li>
 </ul>
-<p>っていう感じかと。んまぁセキュリティ観点からするとむやみに$sce.trustAsHtmlとかしないようにするべきなのが一番良いのだろうと。</p><h4>余談: linkyフィルターについて</h4><p>angular-sanitize.jsのドキュメントによるとデータ中のURL等をマークアップ化する方法としてはlinkyフィルターを使えば良い模様</p><pre class="line-numbers"><code class="language-html">&lt;div ng-controller=&quot;SampleController&quot;&gt;
+
+<p>っていう感じかと。んまぁセキュリティ観点からするとむやみに$sce.trustAsHtmlとかしないようにするべきなのが一番良いのだろうと。</p>
+<h4>余談: linkyフィルターについて</h4>
+<p>angular-sanitize.jsのドキュメントによるとデータ中のURL等をマークアップ化する方法としてはlinkyフィルターを使えば良い模様</p>
+<pre class="line-numbers"><code class="language-html">&lt;div ng-controller=&quot;SampleController&quot;&gt;
   &lt;span ng-bind-html=&quot;message | linky&quot; /&gt;
 &lt;/div&gt;
-</code></pre><p>的な感じにして</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngSanitize&quot;])
+</code></pre>
+<p>的な感じにして</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngSanitize&quot;])
   .controller(&quot;SampleController&quot;, function($scope) {
     $scope.message = &quot;http://localhost&quot;;
   });
-</code></pre><p>的な感じでURL等が含まれるデータはlinkyフィルターによってマークアップされる模様</p><p>んまぁ詳しいことはドキュメント(<a href="http://docs.angularjs.org/api/ngSanitize/filter/linky)" target="_blank" rel="noopener noreferrer">http://docs.angularjs.org/api/ngSanitize/filter/linky)</a>読めって事で</p>
+</code></pre>
+<p>的な感じでURL等が含まれるデータはlinkyフィルターによってマークアップされる模様</p>
+
+<p>んまぁ詳しいことはドキュメント(<a href="http://docs.angularjs.org/api/ngSanitize/filter/linky)">http://docs.angularjs.org/api/ngSanitize/filter/linky)</a>読めって事で</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -199,7 +225,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -220,9 +246,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -335,7 +358,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -358,20 +381,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -381,13 +404,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("03fa54e3c4becded9e36e3d07e8fd0823d69dccf");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

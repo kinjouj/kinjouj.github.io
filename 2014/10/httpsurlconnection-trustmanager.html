@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-10-05T00:00:00+00:00">
+                <time datetime="2014-10-05 00:00:00 +0900">
                   <a href="/archives/2014/10">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["キーストアを作る", "クライアント", "余談: X509証明書からKeyStoreなインスタンスを作る方法", "余談: TrustManagerを独自実装してチェックする場合"]-->
-                <p>参考: <a href="https://developer.android.com/training/articles/security-ssl.html" target="_blank" rel="noopener noreferrer">https://developer.android.com/training/articles/security-ssl.html</a></p><p>※セキュリティ対策を前提としたネタではないので</p><p>以前にオレオレHTTPSにJavaから接続するメモというネタで書いてる。そこでTrustManagerを使用するがnullを返すだけなパターンが色々と問題なのでそういう手法を使わない方法をちょっと調べてみたのでメモ</p><h4>キーストアを作る</h4><pre class="line-numbers"><code class="language-sh"># JKSなキーストアを作る
+                <!--[&quot;キーストアを作る&quot;, &quot;クライアント&quot;, &quot;余談: X509証明書からKeyStoreなインスタンスを作る方法&quot;, &quot;余談: TrustManagerを独自実装してチェックする場合&quot;]-->
+                <p>参考: <a href="https://developer.android.com/training/articles/security-ssl.html">https://developer.android.com/training/articles/security-ssl.html</a></p>
+
+<p>※セキュリティ対策を前提としたネタではないので</p>
+
+<p>以前にオレオレHTTPSにJavaから接続するメモというネタで書いてる。そこでTrustManagerを使用するがnullを返すだけなパターンが色々と問題なのでそういう手法を使わない方法をちょっと調べてみたのでメモ</p>
+<h4>キーストアを作る</h4><pre class="line-numbers"><code class="language-sh"># JKSなキーストアを作る
 keytool \
   -importcert \
   -v \
@@ -98,7 +104,9 @@ keytool \
   -keystore server.bks \
   -storetype BKS \
   -storepass abcdef
-</code></pre><p>JKSとBKSのアルゴリズムの２つなパターンを検証してみるので(ただし以下ソースではJKSのみ)</p><h4>クライアント</h4><pre class="line-numbers"><code class="language-java">import java.io.IOException;
+</code></pre>
+<p>JKSとBKSのアルゴリズムの２つなパターンを検証してみるので(ただし以下ソースではJKSのみ)</p>
+<h4>クライアント</h4><pre class="line-numbers"><code class="language-java">import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -151,7 +159,13 @@ public class Main {
         }
     }
 }
-</code></pre><p>っていう感じで作って、上記でプロキシを介してリクエストするのでmitmproxyを使ってサーバーから送られてくる証明書等?を偽装出来るようなプロキシを使うと使用しているキーストアとサーバーから送られてくる不適切な証明書を検証して問題があれば例外が発生してリクエストが成立しなくなる(もちろんプロキシする部分のコードを消してプロキシを介さないようにした場合はサーバー側の証明書とキーストアを検証して問題は起きないのでリクエストは成立する)</p><p>で上記コードだとJKSを使ってるだけなので、BKSを使う場合にはserver.bksを使うのとKeyStore.getInstanceの引数にBKSを指定するだけでほかは特に変わらないので省略(※ただし、BKSの場合はキーストアパスを空にしてもロード出来る模様。詳しくは <a href="https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786" target="_blank" rel="noopener noreferrer">https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786</a> )</p><p>っていうような感じでHTTPS通信するのはいいけど証明書周りの検証をやらないで問答無用ですっ飛ばすような実装するべきじゃないってことで。ちなみにそういう系の専門な人がいうにはサーバーから来た証明書とかのコモンネームなどもちゃんと検証するべきだとのこと</p><h4>余談: X509証明書からKeyStoreなインスタンスを作る方法</h4><pre class="line-numbers"><code class="language-java">import java.io.IOException;
+</code></pre>
+<p>っていう感じで作って、上記でプロキシを介してリクエストするのでmitmproxyを使ってサーバーから送られてくる証明書等?を偽装出来るようなプロキシを使うと使用しているキーストアとサーバーから送られてくる不適切な証明書を検証して問題があれば例外が発生してリクエストが成立しなくなる(もちろんプロキシする部分のコードを消してプロキシを介さないようにした場合はサーバー側の証明書とキーストアを検証して問題は起きないのでリクエストは成立する)</p>
+
+<p>で上記コードだとJKSを使ってるだけなので、BKSを使う場合にはserver.bksを使うのとKeyStore.getInstanceの引数にBKSを指定するだけでほかは特に変わらないので省略(※ただし、BKSの場合はキーストアパスを空にしてもロード出来る模様。詳しくは <a href="https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786">https://github.com/bcgit/bc-java/blob/master/prov/src/main/java/org/bouncycastle/jcajce/provider/keystore/bc/BcKeyStoreSpi.java#L786</a> )</p>
+
+<p>っていうような感じでHTTPS通信するのはいいけど証明書周りの検証をやらないで問答無用ですっ飛ばすような実装するべきじゃないってことで。ちなみにそういう系の専門な人がいうにはサーバーから来た証明書とかのコモンネームなどもちゃんと検証するべきだとのこと</p>
+<h4>余談: X509証明書からKeyStoreなインスタンスを作る方法</h4><pre class="line-numbers"><code class="language-java">import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -210,7 +224,9 @@ public class Main {
         }
     }
 }
-</code></pre><p>っていうような感じでCertificateFactoryを使って生成出来る</p><h4>余談: TrustManagerを独自実装してチェックする場合</h4><pre class="line-numbers"><code class="language-java">import java.io.IOException;
+</code></pre>
+<p>っていうような感じでCertificateFactoryを使って生成出来る</p>
+<h4>余談: TrustManagerを独自実装してチェックする場合</h4><pre class="line-numbers"><code class="language-java">import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -291,7 +307,11 @@ public class Main {
         }
     }
 }
-</code></pre><p>この方法がいいのかは微妙。まだ曖昧な部分も若干あるのでまたネタを色々書くかもしれないってことで終わり</p>
+</code></pre>
+<p>この方法がいいのかは微妙。まだ曖昧な部分も若干あるのでまたネタを色々書くかもしれないってことで終わり</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -383,7 +403,7 @@ public class Main {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -404,9 +424,6 @@ public class Main {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -519,7 +536,7 @@ public class Main {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -542,20 +559,20 @@ public class Main {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -565,13 +582,15 @@ public class Main {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("acf4e75fc560f7518a5d1098dd2de53ecf38d7d0");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-03-21T00:00:00+09:00">
+                <time datetime="2012-03-21 00:00:00 +0900">
                   <a href="/archives/2012/03">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,12 +78,23 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["インストール", "起動とその他もろもろ", "pom.xml", "Client.java"]-->
-                <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p><h4>インストール</h4><p><a href="http://cassandra.apache.org" target="_blank" rel="noopener noreferrer">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p><h4>起動とその他もろもろ</h4><p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p><pre class="line-numbers"><code class="language-sh">mkdir -p /var/{log,lib}/cassandra
+                <!--[&quot;インストール&quot;, &quot;起動とその他もろもろ&quot;, &quot;pom.xml&quot;, &quot;Client.java&quot;]-->
+                <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p>
+<h4>インストール</h4>
+<p><a href="http://cassandra.apache.org">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p>
+<h4>起動とその他もろもろ</h4>
+<p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p>
+<pre class="line-numbers"><code class="language-sh">mkdir -p /var/{log,lib}/cassandra
 
 # ※各ディレクトリの所有者関係も設定する
-</code></pre><p>まずサーバーを起動。</p><pre class="line-numbers"><code class="language-sh">cassandra -f
-</code></pre><p>で起動出来る。-fは-foregroundの略称っぽい、指定しなかった場合にはCassandraDaemonがバックグランド動作になる模様。で起動すると、サーバーが9160なポートを開放する。これはAPI通信を行う際に利用するThriftサーバーのポートな模様。詳しくはログを嫁ということにしときます</p><p>んでクライアントから</p><pre class="line-numbers"><code class="language-sh">cassandra-cli -h localhost```
+</code></pre>
+<p>まずサーバーを起動。</p>
+<pre class="line-numbers"><code class="language-sh">cassandra -f
+</code></pre>
+<p>で起動出来る。-fは-foregroundの略称っぽい、指定しなかった場合にはCassandraDaemonがバックグランド動作になる模様。で起動すると、サーバーが9160なポートを開放する。これはAPI通信を行う際に利用するThriftサーバーのポートな模様。詳しくはログを嫁ということにしときます</p>
+
+<p>んでクライアントから</p>
+<pre class="line-numbers"><code class="language-sh">cassandra-cli -h localhost```
 
 
 な感じでcassandra-cliを使って接続する。でデータモデルを理解しないといけないが今回は詳細をぶっ飛ばして、とりあえずこんな感じになるっぽい↓
@@ -97,8 +109,14 @@
 とりあえずColumn Familyを作ってみる
 
 
-</code></pre><h1>Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</h1><p>use Keyspace1;</p><h1>Column Familyを作る</h1><p>create column family Sample with comparator = UTF8Type and key_validation_class = UTF8Type and default_validation_class = UTF8Type
-```</p><p>まぁこんな感じで作る。で最後の所ですが、作ったColumn Familyをdescribeしてみると</p>
+</code></pre><h1>Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</h1>
+<p>use Keyspace1;</p>
+<h1>Column Familyを作る</h1>
+<p>create column family Sample with comparator = UTF8Type and key_validation_class = UTF8Type and default_validation_class = UTF8Type<br>
+```</p>
+
+<p>まぁこんな感じで作る。で最後の所ですが、作ったColumn Familyをdescribeしてみると</p>
+
 <pre>
 ColumnFamily: Sample
   Key Validation Class: org.apache.cassandra.db.marshal.UTF8Type
@@ -115,7 +133,9 @@ ColumnFamily: Sample
   Built indexes: []
   Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
 </pre>
+
 <p>な感じになる(自分の環境の場合は)。でオプションを指定せずに「create column family Sample」だけにすると</p>
+
 <pre>ColumnFamily: Sample
   Key Validation Class: org.apache.cassandra.db.marshal.BytesType
   Default column value validator: org.apache.cassandra.db.marshal.BytesType
@@ -125,13 +145,19 @@ ColumnFamily: Sample
   Key cache size / save period in seconds: 200000.0/14400
   GC grace seconds: 864000  Compaction min/max thresholds: 4/32  Read repair chance: 1.0  Replicate on write: true  Bloom Filter FP chance: default  Built indexes: []  Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
 </pre>
-<p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p><pre class="line-numbers"><code class="language-">use Keyspace1;
+
+<p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p>
+<pre class="line-numbers"><code class="language-">use Keyspace1;
 set Sample[test1][name] = &quot;hoge&quot;;
-</code></pre><p>で突っ込んだので</p><pre class="line-numbers"><code class="language-">use Keyspace1;
+</code></pre>
+<p>で突っ込んだので</p>
+<pre class="line-numbers"><code class="language-">use Keyspace1;
 get Sample[test1];
 
 # 出力 =&gt; (column=name, value=hoge, timestamp=省略)
-</code></pre><p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p><h4>pom.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p>
+<h4>pom.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;project
     xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -172,7 +198,9 @@ get Sample[test1];
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/project&gt;
-</code></pre><p>んじゃJava側のClientクラスを書く</p><h4>Client.java</h4><pre class="line-numbers"><code class="language-java">import java.nio.ByteBuffer;
+</code></pre>
+<p>んじゃJava側のClientクラスを書く</p>
+<h4>Client.java</h4><pre class="line-numbers"><code class="language-java">import java.nio.ByteBuffer;
 import java.io.UnsupportedEncodingException;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -249,7 +277,13 @@ public class Client {
         return new String(b, &quot;UTF-8&quot;);
     }
 }
-</code></pre><p>(ByteBufferな変換あれこれはCassandraにByteBufferUtilっていうのがあるのでそれを使うべきかと思われる)</p><p>あとはmvn compileしたあとにmvn exec:javaで実行してみる。現時点で勉強しているのはここまでなので終了乙</p>
+</code></pre>
+<p>(ByteBufferな変換あれこれはCassandraにByteBufferUtilっていうのがあるのでそれを使うべきかと思われる)</p>
+
+<p>あとはmvn compileしたあとにmvn exec:javaで実行してみる。現時点で勉強しているのはここまでなので終了乙</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -341,7 +375,7 @@ public class Client {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -362,9 +396,6 @@ public class Client {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -477,7 +508,7 @@ public class Client {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -500,20 +531,20 @@ public class Client {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -523,13 +554,15 @@ public class Client {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("fa49941a6c1b9b53649a627f936a6755d12a805d");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -19,6 +19,7 @@ package server_director.model;" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -59,7 +60,7 @@ package server_director.model;" />
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-08-18T09:00:00+09:00">
+                <time datetime="2012-08-18 09:00:00 +0900">
                   <a href="/archives/2012/08">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -129,7 +130,11 @@ public class Profile implements Serializable {
         return servers;
     }
 }
-</code></pre><p>みたいなのがあって、これをmodelToJsonを使ってJSON化するとInverseModelListRefなのはエンコードしたJSONに含まれない(ModelRefの場合はKeyが出るらしい)</p><p>でこれをやる方法がちゃんとあるみたいで以下のようにJsonアノテーションを設定する</p><pre class="line-numbers"><code class="language-java">package server_director.model;
+</code></pre>
+<p>みたいなのがあって、これをmodelToJsonを使ってJSON化するとInverseModelListRefなのはエンコードしたJSONに含まれない(ModelRefの場合はKeyが出るらしい)</p>
+
+<p>でこれをやる方法がちゃんとあるみたいで以下のようにJsonアノテーションを設定する</p>
+<pre class="line-numbers"><code class="language-java">package server_director.model;
 
 import java.io.Serializable;
 
@@ -184,7 +189,17 @@ public class Profile implements Serializable {
         return servers;
     }
 }
-</code></pre><p>Userなのはignore=trueでJSONに含ませない、んでInverseModelListRefなのはignore=falseでcoderをExpanded(デフォルトはorg.slim3.datastore.json.Default?)にする</p><p>な感じでmodelToJsonに流せばよろしい模様。但し、modelToJson(Object model, int maxDepth)を使用してmaxDepthを1以上にする事らしい</p><p>参考1: <a href="http://groups.google.com/group/slim3-developer/browse_thread/thread/25d8c86791381877" target="_blank" rel="noopener noreferrer">http://groups.google.com/group/slim3-developer/browse_thread/thread/25d8c86791381877</a></p><p>参考2: <a href="https://plus.google.com/101049791196889453404/posts/DM6CP3grMo5" target="_blank" rel="noopener noreferrer">https://plus.google.com/101049791196889453404/posts/DM6CP3grMo5</a></p>
+</code></pre>
+<p>Userなのはignore=trueでJSONに含ませない、んでInverseModelListRefなのはignore=falseでcoderをExpanded(デフォルトはorg.slim3.datastore.json.Default?)にする</p>
+
+<p>な感じでmodelToJsonに流せばよろしい模様。但し、modelToJson(Object model, int maxDepth)を使用してmaxDepthを1以上にする事らしい</p>
+
+<p>参考1: <a href="http://groups.google.com/group/slim3-developer/browse_thread/thread/25d8c86791381877">http://groups.google.com/group/slim3-developer/browse_thread/thread/25d8c86791381877</a></p>
+
+<p>参考2: <a href="https://plus.google.com/101049791196889453404/posts/DM6CP3grMo5">https://plus.google.com/101049791196889453404/posts/DM6CP3grMo5</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -276,7 +291,7 @@ public class Profile implements Serializable {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -297,9 +312,6 @@ public class Profile implements Serializable {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -412,7 +424,7 @@ public class Profile implements Serializable {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -435,20 +447,20 @@ public class Profile implements Serializable {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -458,13 +470,15 @@ public class Profile implements Serializable {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("686e17ef31fcd024fcae2e4f398af52fedd6c2dc");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

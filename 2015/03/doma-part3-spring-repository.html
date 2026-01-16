@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-03-16T00:00:00+09:00">
+                <time datetime="2015-03-16 00:00:00 +0900">
                   <a href="/archives/2015/03">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -78,8 +79,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["SampleRepository.java", "SampleDaoTest.java", "applicationContext.xml", "SampleRepository.java (修正)"]-->
-                <p>doma2の機能ではなくSpring Frameworkの@Repositoryで定義した場合どうなるのか気になったのでやってみた</p><h4>SampleRepository.java</h4><p>正式的?だと@Repositoryを付けるのはインターフェースだという概念があるっぽいけど、めんどくさいので普通にクラスにつけちゃう</p><pre class="line-numbers"><code class="language-java">package sample.repository;
+                <!--[&quot;SampleRepository.java&quot;, &quot;SampleDaoTest.java&quot;, &quot;applicationContext.xml&quot;, &quot;SampleRepository.java (修正)&quot;]-->
+                <p>doma2の機能ではなくSpring Frameworkの@Repositoryで定義した場合どうなるのか気になったのでやってみた</p>
+<h4>SampleRepository.java</h4>
+<p>正式的?だと@Repositoryを付けるのはインターフェースだという概念があるっぽいけど、めんどくさいので普通にクラスにつけちゃう</p>
+<pre class="line-numbers"><code class="language-java">package sample.repository;
 
 import java.util.List;
 
@@ -120,7 +124,11 @@ public class SampleRepository {
         return status;
     }
 }
-</code></pre><p>まぁ@Repositoryを付けてDAOとのやりとりをした結果を返すだけのしょうもないのを作っておく(前回は@Serviceにそういうのをやってたけど、あれはあれで微妙なんじゃないかって思う所もあるので)</p><p>でこの状態のまま前回のテストをちょいと書き換えてテストを実行する</p><h4>SampleDaoTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
+</code></pre>
+<p>まぁ@Repositoryを付けてDAOとのやりとりをした結果を返すだけのしょうもないのを作っておく(前回は@Serviceにそういうのをやってたけど、あれはあれで微妙なんじゃないかって思う所もあるので)</p>
+
+<p>でこの状態のまま前回のテストをちょいと書き換えてテストを実行する</p>
+<h4>SampleDaoTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 
@@ -153,16 +161,24 @@ public class SampleDaoTest {
         dao.save(sample);
     }
 }
-</code></pre><p>まぁsave側でExceptionをスローしているからテストは落ちる。でもその例外が</p>
+</code></pre>
+<p>まぁsave側でExceptionをスローしているからテストは落ちる。でもその例外が</p>
+
 <blockquote>
 org.springframework.transaction.UnexpectedRollbackException: Transaction rolled back because it has been marked as rollback-only
 </blockquote>
-<p>となる。詳解な原因がちゃんと特定できた訳じゃないのだけど、恐らくはTransactionInterceptor等によるトランザクションが重なってしまっているのではないかと。要は&lt;tx:annotation-driven /&gt;によるTransactionInterceptorと&lt;aop:advice/&gt;によるTransactionInterceptorによってトランザクションが重なりメソッドで例外を創出するとsetRollbackOnlyはしているので問題なくロールバックはされるが結果的にその上のトランザクションスコープによってcommit実行しようとして結果上記のような例外が送出されてしまうのではないかという予測(あくまで予測なので確証はありません)</p><p>っていうことでこれを回避するには</p>
+
+<p>となる。詳解な原因がちゃんと特定できた訳じゃないのだけど、恐らくはTransactionInterceptor等によるトランザクションが重なってしまっているのではないかと。要は&lt;tx:annotation-driven /&gt;によるTransactionInterceptorと&lt;aop:advice/&gt;によるTransactionInterceptorによってトランザクションが重なりメソッドで例外を創出するとsetRollbackOnlyはしているので問題なくロールバックはされるが結果的にその上のトランザクションスコープによってcommit実行しようとして結果上記のような例外が送出されてしまうのではないかという予測(あくまで予測なので確証はありません)</p>
+
+<p>っていうことでこれを回避するには</p>
+
 <ul>
 <li>&lt;tx:annotation-driven /&gt;を止める (@Transactionalは効かなくなる?)</li>
 <li>&lt;aop:advice&gt;によるトランザクション属性のインターセプトをしない (@Transactionalで属性を自前で定義する必要性が出てくる)</li>
 </ul>
-<p>のどっちかをやれば良い</p><h4>applicationContext.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+
+<p>のどっちかをやれば良い</p>
+<h4>applicationContext.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
     xmlns=&quot;http://www.springframework.org/schema/beans&quot;
     xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
@@ -200,7 +216,9 @@ org.springframework.transaction.UnexpectedRollbackException: Transaction rolled 
     &lt;tx:annotation-driven /&gt;
 
 &lt;/beans&gt;
-</code></pre><p>んまぁ&lt;aop:advice&gt;を使わないので@Transactionalには適切な属性を設定する必要がある</p><h4>SampleRepository.java (修正)</h4><pre class="line-numbers"><code class="language-java">package sample.repository;
+</code></pre>
+<p>んまぁ&lt;aop:advice&gt;を使わないので@Transactionalには適切な属性を設定する必要がある</p>
+<h4>SampleRepository.java (修正)</h4><pre class="line-numbers"><code class="language-java">package sample.repository;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -243,7 +261,15 @@ public class SampleRepository {
         return status;
     }
 }
-</code></pre><p>てな感じで実行すれば上記のUnexpectedRollbackExceptionは発生しなくなる。一応、上記でのエラーの時点でTransaction PropagationをREQUIREDからREQUIRES_NEW等にすればこの問題は出なくなる。でも例えばひとつのメソッドで他のトランザクションを実行する処理をやる場合にその他のメソッド単位でトランザクションが管理される為部分的に例外等が発生しても部分的にロールバックされなくなるのではないかと</p><p>まぁとりあえずそういう問題でちょっとハマってたのでメモ。</p><p>ちなみに@Serviceならこういう問題は出てこない</p>
+</code></pre>
+<p>てな感じで実行すれば上記のUnexpectedRollbackExceptionは発生しなくなる。一応、上記でのエラーの時点でTransaction PropagationをREQUIREDからREQUIRES_NEW等にすればこの問題は出なくなる。でも例えばひとつのメソッドで他のトランザクションを実行する処理をやる場合にその他のメソッド単位でトランザクションが管理される為部分的に例外等が発生しても部分的にロールバックされなくなるのではないかと</p>
+
+<p>まぁとりあえずそういう問題でちょっとハマってたのでメモ。</p>
+
+<p>ちなみに@Serviceならこういう問題は出てこない</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -335,7 +361,7 @@ public class SampleRepository {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -356,9 +382,6 @@ public class SampleRepository {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -471,7 +494,7 @@ public class SampleRepository {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -494,20 +517,20 @@ public class SampleRepository {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -517,13 +540,15 @@ public class SampleRepository {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("c828b9f6d2829f39669aff3f68c9869eb8c555ff");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-10-01T00:00:00+00:00">
+                <time datetime="2013-10-01 00:00:00 +0900">
                   <a href="/archives/2013/10">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,14 +78,23 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["struts.xml", "Page.java", "TopAction.java", "PageConverter.java", "src/main/resources/sample/controllers/samppe/TopAction-conversion.properties", "src/main/resources/xwork-conversion.properties", "TopActionTestCase.java"]-->
-                <p>何やらアクションで評価されるパラメーターとか?を指定した型で変換する仕組みが備わってるようで。<a href="http://struts.apache.org/release/2.0.x/docs/type-conversion.html">公式ドキュメント</a></p><p>とりまぁ読みつつ進めてみるかってことで</p><h2>概要</h2><p>この型変換の仕組みを利用する方法は3つ</p>
+                <!--[&quot;struts.xml&quot;, &quot;Page.java&quot;, &quot;TopAction.java&quot;, &quot;PageConverter.java&quot;, &quot;src/main/resources/sample/controllers/samppe/TopAction-conversion.properties&quot;, &quot;src/main/resources/xwork-conversion.properties&quot;, &quot;TopActionTestCase.java&quot;]-->
+                <p>何やらアクションで評価されるパラメーターとか?を指定した型で変換する仕組みが備わってるようで。<a href="http://struts.apache.org/release/2.0.x/docs/type-conversion.html">公式ドキュメント</a></p>
+
+<p>とりまぁ読みつつ進めてみるかってことで</p>
+<h2>概要</h2>
+<p>この型変換の仕組みを利用する方法は3つ</p>
+
 <ul>
 <li>com.opensymphony.xwork2.conversion.annotations.Conversion(アノテーション)をActionに指定する</li>
 <li>アクションクラス名-conversion.propertiesで指定する</li>
 <li>もしくはクラスパスルートにxwork-conversion.propertiesで指定する</li>
 </ul>
-<p>全てやり方的なのは紹介するけど、2と3の違いに関しては「型で指定するか」「変数名的な感じで指定するか」って所なのではと</p><h4>struts.xml</h4><p><a href="http://localhost:8080/struts2/top/page/1" target="_blank" rel="noopener noreferrer">http://localhost:8080/struts2/top/page/1</a> 的なURLを表現するにはどうすれば良いのかって所としては</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+<p>全てやり方的なのは紹介するけど、2と3の違いに関しては「型で指定するか」「変数名的な感じで指定するか」って所なのではと</p>
+<h4>struts.xml</h4>
+<p><a href="http://localhost:8080/struts2/top/page/1">http://localhost:8080/struts2/top/page/1</a> 的なURLを表現するにはどうすれば良いのかって所としては</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
     &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot;&gt;
@@ -109,7 +119,13 @@
         &lt;/action&gt;
     &lt;/package&gt;
 &lt;/struts&gt;
-</code></pre><p>/topと/top/page/(.*)的なののマッピングが2つ必要になるだろうと思ってやってるけど、これをひとまとめに出来ないものかと。んまぁそれはおいといて</p><p>通常だと&lt;action&gt;で指定出来るname属性にスラッシュを組み込む事は出来ない模様だけど、<span style="color: red">struts.enable.SlashesInActionNames</span>な設定をtrueにしておくと認識させる事が出来る模様</p><h4>Page.java</h4><p>上記でパラメーターとして認識するpageパラメーターは元はStringになってるはず。それをもとにPageオブジェクトで変換してアクションにマッピングする。でそのクラス</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>/topと/top/page/(.*)的なののマッピングが2つ必要になるだろうと思ってやってるけど、これをひとまとめに出来ないものかと。んまぁそれはおいといて</p>
+
+<p>通常だと&lt;action&gt;で指定出来るname属性にスラッシュを組み込む事は出来ない模様だけど、<span style="color: red">struts.enable.SlashesInActionNames</span>な設定をtrueにしておくと認識させる事が出来る模様</p>
+<h4>Page.java</h4>
+<p>上記でパラメーターとして認識するpageパラメーターは元はStringになってるはず。それをもとにPageオブジェクトで変換してアクションにマッピングする。でそのクラス</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.Serializable;
 
@@ -130,7 +146,9 @@ public class Page implements Serializable {
         return page;
     }
 }
-</code></pre><p>(ry</p><h4>TopAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.controllers.sample;
+</code></pre>
+<p>(ry</p>
+<h4>TopAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.controllers.sample;
 
 import java.util.Date;
 import java.util.List;
@@ -206,7 +224,13 @@ public class TopAction extends ActionSupport {
         this.date = date;
     }
 }
-</code></pre><p>っていう感じで上記で説明したようにPageオブジェクトで受け取るという形なので、それに伴うセッターメソッドを定義。あと他にも書いてるけどそれは公式ドキュメント上の「Built in Type Conversion Support」セクションに書いてあるようにデフォルトでサポートされている型変換っていうのもちょっと利用してみる的な感じで書いておいた</p><p>でこのアクションでPageオブジェクトを変換する仕組みのコンバータークラスを作ってないので作る</p><h4>PageConverter.java</h4><p>適当に書いたのでorz (ていうかテストすら書いてない)</p><pre class="line-numbers"><code class="language-java">package sample.converters;
+</code></pre>
+<p>っていう感じで上記で説明したようにPageオブジェクトで受け取るという形なので、それに伴うセッターメソッドを定義。あと他にも書いてるけどそれは公式ドキュメント上の「Built in Type Conversion Support」セクションに書いてあるようにデフォルトでサポートされている型変換っていうのもちょっと利用してみる的な感じで書いておいた</p>
+
+<p>でこのアクションでPageオブジェクトを変換する仕組みのコンバータークラスを作ってないので作る</p>
+<h4>PageConverter.java</h4>
+<p>適当に書いたのでorz (ていうかテストすら書いてない)</p>
+<pre class="line-numbers"><code class="language-java">package sample.converters;
 
 import java.lang.reflect.Member;
 import java.util.Map;
@@ -258,15 +282,29 @@ public class PageConverter implements TypeConverter {
         return new Page(page);
     }
 }
-</code></pre><p>公式ドキュメントではStrutsTypeConverterっていうのを継承する形でやってますけど、これ実体はTypeConverterインターフェースを実装したものなので、それを使ってやってる</p><p>で上記のアクションでアノテーション方式でのをコメントアウトしていたのでプロパティファイルを使って処理する</p><h4>src/main/resources/sample/controllers/samppe/TopAction-conversion.properties</h4><pre class="line-numbers"><code class="language-ini">page = sample.converters.PageConverter
-</code></pre><p>的な感じで作れば良い。方式は&lt;propertyName&gt;=&lt;Converter Class&gt;ってドキュメント書いてるので</p><h4>src/main/resources/xwork-conversion.properties</h4><p>アノテーションで指定するか上記のプロパティファイルを利用するなら良い。型で指定するのであれば</p><pre class="line-numbers"><code class="language-ini">sample.Page = sample.converters.PageConverter
-</code></pre><p>的な感じで書けば良い。</p><p>以上で必要な</p>
+</code></pre>
+<p>公式ドキュメントではStrutsTypeConverterっていうのを継承する形でやってますけど、これ実体はTypeConverterインターフェースを実装したものなので、それを使ってやってる</p>
+
+<p>で上記のアクションでアノテーション方式でのをコメントアウトしていたのでプロパティファイルを使って処理する</p>
+<h4>src/main/resources/sample/controllers/samppe/TopAction-conversion.properties</h4><pre class="line-numbers"><code class="language-ini">page = sample.converters.PageConverter
+</code></pre>
+<p>的な感じで作れば良い。方式は&lt;propertyName&gt;=&lt;Converter Class&gt;ってドキュメント書いてるので</p>
+<h4>src/main/resources/xwork-conversion.properties</h4>
+<p>アノテーションで指定するか上記のプロパティファイルを利用するなら良い。型で指定するのであれば</p>
+<pre class="line-numbers"><code class="language-ini">sample.Page = sample.converters.PageConverter
+</code></pre>
+<p>的な感じで書けば良い。</p>
+
+<p>以上で必要な</p>
+
 <ul>
 <li>  Action: TopAction</li>
 <li>  Convert Object: Page</li>
 <li>  Converter: PageCovnerter</li>
 </ul>
-<p>あと上記のプロパティファイルを作成が終わったので検証してみる。まぁテスト書いた方が楽なので</p><h4>TopActionTestCase.java</h4><pre class="line-numbers"><code class="language-java">package sample.actions;
+
+<p>あと上記のプロパティファイルを作成が終わったので検証してみる。まぁテスト書いた方が楽なので</p>
+<h4>TopActionTestCase.java</h4><pre class="line-numbers"><code class="language-java">package sample.actions;
 
 import com.opensymphony.xwork2.ActionProxy;
 import com.opensymphony.xwork2.ActionSupport;
@@ -310,7 +348,11 @@ public class TopActionTestCase extends StrutsSpringTestCase {
         assertThat(action.getPage().getPage(), is(2));
     }
 }
-</code></pre><p>終わり。まだ微妙な所もあるし色々追記するかと</p>
+</code></pre>
+<p>終わり。まだ微妙な所もあるし色々追記するかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -402,7 +444,7 @@ public class TopActionTestCase extends StrutsSpringTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -423,9 +465,6 @@ public class TopActionTestCase extends StrutsSpringTestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -538,7 +577,7 @@ public class TopActionTestCase extends StrutsSpringTestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -561,20 +600,20 @@ public class TopActionTestCase extends StrutsSpringTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -584,13 +623,15 @@ public class TopActionTestCase extends StrutsSpringTestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("0d3ac3d164a6608a108c489826091750d04e4da5");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

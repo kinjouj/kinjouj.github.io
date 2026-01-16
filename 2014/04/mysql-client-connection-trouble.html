@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="※内部的な所としては微妙なのでネタとして" />
     <title>「Can&#8217;t connect to local MySQL server through socket」について - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2014/04/angularjs-22-exceptionhandler.html" />
-    <link rel="next" href="https://kinjouj.github.io/2014/04/angularjs-23-ng-touch-swipe-event.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2014/04/angularjs-23-ng-touch-swipe-event.html" />
+    <link rel="next" href="https://kinjouj.github.io/2014/04/android-espresso-ui-testing.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2014/04/mysql-client-connection-trouble.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-04-14T00:00:00+00:00">
+                <time datetime="2014-04-14 00:00:00 +0900">
                   <a href="/archives/2014/04">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -68,7 +69,7 @@
                   </a>
                 </time>
               </div>
-              <h1 class="post-title">「Can&#8217;t connect to local MySQL server through socket」について</h1>
+              <h1 class="post-title">「Can&amp;#8217;t connect to local MySQL server through socket」について</h1>
               <hr />
               <p class="meta">
                 <span class="categories">
@@ -76,32 +77,53 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["追記"]-->
-                <p>※内部的な所としては微妙なのでネタとして</p><p>,よくMySQLに接続してなんかするパターン(RailsのようなActiveRecordとかも含む)において、「Can&#39;t connect to local MySQL server through socket」っていうのが出るケースに関して</p><p>これ<q>localhost</q>って指定するとソケットを見に行くのではと。例えばmy.cnfが</p><pre class="line-numbers"><code class="language-ini">
+                <!--[&quot;追記&quot;]-->
+                <p>※内部的な所としては微妙なのでネタとして</p>
+
+<p>,よくMySQLに接続してなんかするパターン(RailsのようなActiveRecordとかも含む)において、「Can&#39;t connect to local MySQL server through socket」っていうのが出るケースに関して</p>
+
+<p>これ<q>localhost</q>って指定するとソケットを見に行くのではと。例えばmy.cnfが</p>
+<pre class="line-numbers"><code class="language-ini">
 [mysqld]
 socket=/tmp/mysqld.sock
 
 [client]
 socket=/var/run/mysql/mysql.sock
-</code></pre><p>みたいになってる場合にクライアントライブラリにおいてlocalhostで接続するとTCP/IP接続されずに、ソケットを利用した接続になる。それが原因となり上記のようなソケットエラーになる</p><p>で昔良くあるパターンの注意としてPHPのmysql_connectのドキュメント(<a href="http://php.net/manual/ja/function.mysql-connect.php" target="_blank" rel="noopener noreferrer">http://php.net/manual/ja/function.mysql-connect.php</a>)には</p>
+</code></pre>
+<p>みたいになってる場合にクライアントライブラリにおいてlocalhostで接続するとTCP/IP接続されずに、ソケットを利用した接続になる。それが原因となり上記のようなソケットエラーになる</p>
+
+<p>で昔良くあるパターンの注意としてPHPのmysql_connectのドキュメント(<a href="http://php.net/manual/ja/function.mysql-connect.php">http://php.net/manual/ja/function.mysql-connect.php</a>)には</p>
+
 <blockquote>
 サーバー名に "localhost" や "localhost:port" を指定した場合、MySQL クライアントライブラリはそれをオーバーライドし、 ローカルソケット（Windows では名前つきパイプ）に接続しようとします。 TCP/IP を用いたい場合は、"localhost" のかわりに "127.0.0.1" を用いてください。
 </blockquote>
-<p>っていうのがある。でMySQL側的にこれどういう所なのかっていうのを昨日ちょっと調べてみると、MySQLのソース中のsql-common/client.c辺りにLOCALHOSTだなんだらかんだらしている所がある。とまぁ理論的じゃないのでなんとも言いがたいが、MySQLに接続する場合にはlocalhostは無駄に指定するのは止めといた方が良い。別にソケット接続しても良いようなケースなら良いとは思うんだけど、無駄に設定を書き換えるようなケースになるようなくらいなら使わない方が良いのではと</p><p>っていうかこれ常識的じゃないのかなって思うんですが</p><p>要点だけまとめると</p>
+
+<p>っていうのがある。でMySQL側的にこれどういう所なのかっていうのを昨日ちょっと調べてみると、MySQLのソース中のsql-common/client.c辺りにLOCALHOSTだなんだらかんだらしている所がある。とまぁ理論的じゃないのでなんとも言いがたいが、MySQLに接続する場合にはlocalhostは無駄に指定するのは止めといた方が良い。別にソケット接続しても良いようなケースなら良いとは思うんだけど、無駄に設定を書き換えるようなケースになるようなくらいなら使わない方が良いのではと</p>
+
+<p>っていうかこれ常識的じゃないのかなって思うんですが</p>
+
+<p>要点だけまとめると</p>
+
 <ul>
 <li>  localhostを指定するとclient設定されているソケットを見るようになる</li>
 <li>  127.0.0.1を指定するとソケットをLLAであってもTCP/IP接続をする</li>
 <li>  特に理由が無いのであれば127.0.0.1を使うべき</li>
 </ul>
-<p>っていう事なんじゃないでしょうかねって事で終わり</p><h4>追記</h4><p>my.iniにprotocol=tcpって追加してもいいっぽい</p>
+
+<p>っていう事なんじゃないでしょうかねって事で終わり</p>
+<h4>追記</h4>
+<p>my.iniにprotocol=tcpって追加してもいいっぽい</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2014/04/angularjs-23-ng-touch-swipe-event.html">&lt;&nbsp;angular.jsをやってみる (23) - ngTouchを使ってスワイプイベントを利用 -</a>
+            <a class="float-start box-link" href="/2014/04/android-espresso-ui-testing.html">&lt;&nbsp;Espressoを使ったUIテスト</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2014/04/angularjs-22-exceptionhandler.html">angular.jsをやってみる (22) - $exceptionHandler -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2014/04/angularjs-23-ng-touch-swipe-event.html">angular.jsをやってみる (23) - ngTouchを使ってスワイプイベントを利用 -&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -185,7 +207,7 @@ socket=/var/run/mysql/mysql.sock
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -206,9 +228,6 @@ socket=/var/run/mysql/mysql.sock
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -321,7 +340,7 @@ socket=/var/run/mysql/mysql.sock
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -344,20 +363,20 @@ socket=/var/run/mysql/mysql.sock
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -367,13 +386,15 @@ socket=/var/run/mysql/mysql.sock
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("fb5d56c14fafe06962d9686a07f85350567382d4");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="コントローラー等によりが渡る前などに前後処理等を行ったり出来る。まぁ良くあるパターンとして、コントローラーに処理が回る前に認証状態をチェックしたりとか" />
     <title>Laravel使ってみた (4) - Routing Filter - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/06/downloaded-program-ubuntu-application-menu-registration.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/06/android-libraryproject-jenkins-build.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/06/laravel-3-routing.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/06/downloaded-program-ubuntu-application-menu-registration.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/06/laravel-4-routing-filter.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-12T00:00:00+00:00">
+                <time datetime="2013-06-12 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,18 +79,25 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p>コントローラー等によりが渡る前などに前後処理等を行ったり出来る。まぁ良くあるパターンとして、コントローラーに処理が回る前に認証状態をチェックしたりとか</p><p>フィルター自体の定義はapp/filters.phpに行う</p><pre class="line-numbers"><code class="language-php">&lt;?php
+                <p>コントローラー等によりが渡る前などに前後処理等を行ったり出来る。まぁ良くあるパターンとして、コントローラーに処理が回る前に認証状態をチェックしたりとか</p>
+
+<p>フィルター自体の定義はapp/filters.phpに行う</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 Router::filter(&quot;filterName&quot;, function() {
 });
-</code></pre><p>っていう感じでフィルターを定義する。beforeFilterとafterAfterで使用する場合、引数の数が異なる</p>
+</code></pre>
+<p>っていう感じでフィルターを定義する。beforeFilterとafterAfterで使用する場合、引数の数が異なる</p>
+
 <ul>
 <li>  beforeFilterの場合: function($route, $request[, $value])</li> </li>
 <li>  afterFilterの場合: function($route, $request, $response[, $value])</li>
 <li>  $requestはIlluminate\HttpRequest</li>
 <li>  $responseはIlluminate\HttpResponse</li>
 </ul>
-<p>で定義するだけじゃ利用されない。ルーティング定義時に指定することも出来る。もしくは</p><pre class="line-numbers"><code class="language-php">&lt;?php
+
+<p>で定義するだけじゃ利用されない。ルーティング定義時に指定することも出来る。もしくは</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class HomeController extends BaseController {
     public function __construct() {
@@ -97,30 +105,46 @@ class HomeController extends BaseController {
         // $this-&gt;afterFilter(&quot;filterName&quot;);
     }
 }
-</code></pre><p>な感じでコンストラクタで指定も出来る模様。又、beforeFilterをURLで大きく適応したい場合とかには</p><pre class="line-numbers"><code class="language-php">Route::when(&quot;*&quot;, &quot;filterName&quot;);
-</code></pre><p>っていうのを使えば領域にフィルターを一括適応出来る模様</p><p>更に、filterはapp/filters.phpに実体を実装する他にfilterメソッドを持つクラスを利用する事も出来る</p><pre class="line-numbers"><code class="language-php">Route::filter(&quot;filterName&quot;, &quot;filterClass&quot;);
-</code></pre><p>でそのクラスをどこに置くかって所ですが、デフォルトで</p>
+</code></pre>
+<p>な感じでコンストラクタで指定も出来る模様。又、beforeFilterをURLで大きく適応したい場合とかには</p>
+<pre class="line-numbers"><code class="language-php">Route::when(&quot;*&quot;, &quot;filterName&quot;);
+</code></pre>
+<p>っていうのを使えば領域にフィルターを一括適応出来る模様</p>
+
+<p>更に、filterはapp/filters.phpに実体を実装する他にfilterメソッドを持つクラスを利用する事も出来る</p>
+<pre class="line-numbers"><code class="language-php">Route::filter(&quot;filterName&quot;, &quot;filterClass&quot;);
+</code></pre>
+<p>でそのクラスをどこに置くかって所ですが、デフォルトで</p>
+
 <ul>
 <li>  app/commands</li>
 <li>  app/controllers</li>
 <li>  app/models</li>
 <li>  app/database/seeds</li>
 </ul>
-<p>なディレクトリがLaravelのクラスローダー機構を利用してロードされるので、それを登録すれば独自のディレクトリをロードさせることも出来る模様。app/start/global.phpで</p><pre class="line-numbers"><code class="language-php">&lt;?php
+
+<p>なディレクトリがLaravelのクラスローダー機構を利用してロードされるので、それを登録すれば独自のディレクトリをロードさせることも出来る模様。app/start/global.phpで</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 ClassLoader::addDirectories(array(
     // 省略
     app_path().&quot;/filters&quot;
 ));
-</code></pre><p>って定義すりゃapp/filtersっていうディレクトリ置けば参照できるようになる</p><p>ドキュメント読む限りはそんな感じかね</p>
+</code></pre>
+<p>って定義すりゃapp/filtersっていうディレクトリ置けば参照できるようになる</p>
+
+<p>ドキュメント読む限りはそんな感じかね</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/06/android-libraryproject-jenkins-build.html">&lt;&nbsp;ライブラリプロジェクトを伴うAndroidアプリをJenkinsでビルド</a>
+            <a class="float-start box-link" href="/2013/06/downloaded-program-ubuntu-application-menu-registration.html">&lt;&nbsp;ダウンロードしてきたプログラムとかをUbuntuのアプリケーションに登録する方法</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/06/downloaded-program-ubuntu-application-menu-registration.html">ダウンロードしてきたプログラムとかをUbuntuのアプリケーションに登録する方法&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/06/laravel-3-routing.html">Laravel使ってみた (3) - Routing -&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -204,7 +228,7 @@ ClassLoader::addDirectories(array(
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -225,9 +249,6 @@ ClassLoader::addDirectories(array(
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -340,7 +361,7 @@ ClassLoader::addDirectories(array(
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -363,20 +384,20 @@ ClassLoader::addDirectories(array(
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -386,13 +407,15 @@ ClassLoader::addDirectories(array(
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("29a90a32abe66ca8ab0926154fe1a3b8cb810248");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

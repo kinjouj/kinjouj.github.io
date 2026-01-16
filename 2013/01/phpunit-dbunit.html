@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-06T00:00:00+00:00">
+                <time datetime="2013-01-06 00:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,9 +78,14 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["phpunit.xml", "fixture1.xml", "fixture2.xml", "fixture.yaml", "tests/sample.php"]-->
-                <p>引き続きPHPUnitドキュメント読みつつ進めてみる</p><p>とにかくPHPUnit_Extensions_Database_TestCaseを使えるようにしないといけないのだけど、こいつ自体はDbUnitに入ってる模様なので、DbUnitを入れる</p><pre class="line-numbers"><code class="language-">pear install phpunit/DbUnit
-</code></pre><p>んでディレクトリ構造</p>
+                <!--[&quot;phpunit.xml&quot;, &quot;fixture1.xml&quot;, &quot;fixture2.xml&quot;, &quot;fixture.yaml&quot;, &quot;tests/sample.php&quot;]-->
+                <p>引き続きPHPUnitドキュメント読みつつ進めてみる</p>
+
+<p>とにかくPHPUnit_Extensions_Database_TestCaseを使えるようにしないといけないのだけど、こいつ自体はDbUnitに入ってる模様なので、DbUnitを入れる</p>
+<pre class="line-numbers"><code class="language-">pear install phpunit/DbUnit
+</code></pre>
+<p>んでディレクトリ構造</p>
+
 <pre>├── fixture.yaml
 ├── fixture1.xml
 ├── fixture2.xml
@@ -87,14 +93,18 @@
 └── tests
     └── sample.php
 </pre>
+
 <p>でディレクトリ構造にあるようにデータベースにテストデータを注入するfixture自体が色々種類がある</p>
+
 <ul>
 <li>通常のXMLファイル</li>
 <li>フラットなXMLファイル</li>
 <li>YAMLファイル</li>
 <li>CSVファイル</li>
 </ul>
-<p>他にも色々あるけど、今回はフラットなXMLファイルとYAMLファイルの2つをやってみる</p><h4>phpunit.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+
+<p>他にも色々あるけど、今回はフラットなXMLファイルとYAMLファイルの2つをやってみる</p>
+<h4>phpunit.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;phpunit&gt;
     &lt;php&gt;
         &lt;var name=&quot;DB_DSN&quot; value=&quot;mysql:dbname=sample&quot; /&gt;
@@ -107,21 +117,29 @@
         &lt;/testsuite&gt;
     &lt;/testsuites&gt;
 &lt;/phpunit&gt;
-</code></pre><p>な感じでデータベース接続に必要な情報をphpunit.xml側に設定する。これでスーパーグローバル変数から参照出来る模様</p><h4>fixture1.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>な感じでデータベース接続に必要な情報をphpunit.xml側に設定する。これでスーパーグローバル変数から参照出来る模様</p>
+<h4>fixture1.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;dataset&gt;
     &lt;sample id=&quot;1&quot; name=&quot;hoge&quot; created=&quot;2013-01-01 00:00:00&quot; /&gt;
     &lt;sample id=&quot;2&quot; name=&quot;fuga&quot; created=&quot;2013-01-02 00:00:00&quot; /&gt;
 &lt;/dataset&gt;
-</code></pre><p>&lt;dataset&gt;内のノードはノード名がテーブル名、属性がカラム名とその値になるようなのでそのフォーマット方式に従って定義する</p><h4>fixture2.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>&lt;dataset&gt;内のノードはノード名がテーブル名、属性がカラム名とその値になるようなのでそのフォーマット方式に従って定義する</p>
+<h4>fixture2.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;dataset&gt;
     &lt;item id=&quot;3&quot; name=&quot;foobar&quot; price=&quot;100&quot; /&gt;
 &lt;/dataset&gt;
-</code></pre><p>fixture1.xmlと同様なフラット方式なXMLファイル。PHPUnit_Extensions_Database_DataSet_CompositeDataSetを使う事でfixtureを複数使う事が出来る模様</p><h4>fixture.yaml</h4><pre class="line-numbers"><code class="language-yml">sample:
+</code></pre>
+<p>fixture1.xmlと同様なフラット方式なXMLファイル。PHPUnit_Extensions_Database_DataSet_CompositeDataSetを使う事でfixtureを複数使う事が出来る模様</p>
+<h4>fixture.yaml</h4><pre class="line-numbers"><code class="language-yml">sample:
   - name: hoge
     created: &quot;2013-01-01 00:00:00&quot;
   - name: fuga
     created: &quot;2012-01-01 00:00:00&quot;
-</code></pre><p>あとは上記のをテストケース上で使うだけ</p><h4>tests/sample.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre>
+<p>あとは上記のをテストケース上で使うだけ</p>
+<h4>tests/sample.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 // 普通のXML FixtureはcreateXMLDataSet
 // フラットなXML FixtureはcreateFlatXmlDataSet
 // mysqldump --xmlな場合はcreateMySQLXMLDataSet
@@ -177,7 +195,11 @@ class SampleTestCase extends PHPUnit_Extensions_Database_TestCase {
         );
     }
 }
-</code></pre><p>ってな感じかなと。個人的にはあくまでfixture的な扱いを使う前提だけで良いのではと思う所(モデルとかテストする名目であれば別にDbUnitな機能を使う必要性があるのかが微妙)</p>
+</code></pre>
+<p>ってな感じかなと。個人的にはあくまでfixture的な扱いを使う前提だけで良いのではと思う所(モデルとかテストする名目であれば別にDbUnitな機能を使う必要性があるのかが微妙)</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -269,7 +291,7 @@ class SampleTestCase extends PHPUnit_Extensions_Database_TestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -290,9 +312,6 @@ class SampleTestCase extends PHPUnit_Extensions_Database_TestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -405,7 +424,7 @@ class SampleTestCase extends PHPUnit_Extensions_Database_TestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -428,20 +447,20 @@ class SampleTestCase extends PHPUnit_Extensions_Database_TestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -451,13 +470,15 @@ class SampleTestCase extends PHPUnit_Extensions_Database_TestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("0c71d635a2fc03e8230b5218dea1535b36181663");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

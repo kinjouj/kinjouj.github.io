@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-04T00:00:00+00:00">
+                <time datetime="2013-06-04 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,26 +78,41 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["サーバー側にOAuth Providerの機能を追加", "Androidアプリ側のAccountManagerにOAuth2のアクセストークン取得処理を実装する"]-->
+                <!--[&quot;サーバー側にOAuth Providerの機能を追加&quot;, &quot;Androidアプリ側のAccountManagerにOAuth2のアクセストークン取得処理を実装する&quot;]-->
                 <p>今まで書いたAccountManager及びSyncAdapterなやつは認証トークンを適当に作ってそれを利用してAPIにリクエストを投げるという方式だったのですが、そのサーバー側の問題が色々あるのでそこら辺をRailsで組み直し、Android AccountManager+SyncAdapterではOAuthを使ってAPIリクエストを行う方式というのを採用してみた。要は</p>
+
 <ul>
 <li>アカウント作成時にユーザー・パスワードを入力させてアカウントを作る</li>
 <li>アプリがgetAuthTokenでアクセストークンを要求する際に、アカウントでログインを行いそのアカウントのアクセストークンを取得する</li>
 <li>取得したアクセストークンを使ってSyncAdapter側でサーバー側とやり取りを行いデータをContent Provider経由でSQLiteに保管する</li>
 </ul>
-<p>っていうような手順になる</p><h4>サーバー側にOAuth Providerの機能を追加</h4><p>サーバー側はタイトル通りRailsを使用する。で適当にAPIを利用できるようにして、ログイン処理等の機能を実装する。でOAuth Providerな所は <a href="https://github.com/applicake/doorkeeper" target="_blank" rel="noopener noreferrer">https://github.com/applicake/doorkeeper</a> を使用する事でサクッと出来る模様。でdoorkeeperのドキュメント読めば分かるんだけど <a href="http://d.hatena.ne.jp/camelmasa/20121005/1349459738" target="_blank" rel="noopener noreferrer">http://d.hatena.ne.jp/camelmasa/20121005/1349459738</a> っていう超参考になるのがあるのでそれ読むと良い。とりあえずここであーだらこーだら書くのは避ける</p><p>でRails側の <a href="http://localhost:3000/oauth/applications" target="_blank" rel="noopener noreferrer">http://localhost:3000/oauth/applications</a> にアクセスしてアプリケーション登録を行いClient IDとClient Secretを取得する。でAPI側にはOAuth経由でリクエストされるのを期待させなければならないのでそういうところも盛り込む(doorkeeper_for :allとbefore_filterとか使って)</p><p>サーバー側はこんな感じ</p><h4>Androidアプリ側のAccountManagerにOAuth2のアクセストークン取得処理を実装する</h4><p>流れ的には</p>
+
+<p>っていうような手順になる</p>
+<h4>サーバー側にOAuth Providerの機能を追加</h4>
+<p>サーバー側はタイトル通りRailsを使用する。で適当にAPIを利用できるようにして、ログイン処理等の機能を実装する。でOAuth Providerな所は <a href="https://github.com/applicake/doorkeeper">https://github.com/applicake/doorkeeper</a> を使用する事でサクッと出来る模様。でdoorkeeperのドキュメント読めば分かるんだけど <a href="http://d.hatena.ne.jp/camelmasa/20121005/1349459738">http://d.hatena.ne.jp/camelmasa/20121005/1349459738</a> っていう超参考になるのがあるのでそれ読むと良い。とりあえずここであーだらこーだら書くのは避ける</p>
+
+<p>でRails側の <a href="http://localhost:3000/oauth/applications">http://localhost:3000/oauth/applications</a> にアクセスしてアプリケーション登録を行いClient IDとClient Secretを取得する。でAPI側にはOAuth経由でリクエストされるのを期待させなければならないのでそういうところも盛り込む(doorkeeper_for :allとbefore_filterとか使って)</p>
+
+<p>サーバー側はこんな感じ</p>
+<h4>Androidアプリ側のAccountManagerにOAuth2のアクセストークン取得処理を実装する</h4>
+<p>流れ的には</p>
+
 <ul>
 <li>アカウント作成時に呼ばれるActivityにおいてDialogを表示させてユーザーIDとパスワードを入力させる</li>
 <li>登録処理が開始したらAccountManager#addAccountExplicitly等を使ってアカウント登録処理を行う</li>
 <li>AbstractAccountAuthenticatorを継承しているクラスにおいて、getAuthTokenメソッドをサーバーからアクセストークンを取得するように実装する。そのトークンをBundleにAccountManager.KEY_AUTHTOKENで返させる。</li>
 <li>そのアクセストークンを使って(ry</li>
 </ul>
+
 <p>な感じかと。でOAuthのアクセストークンを取る方法が</p>
+
 <ul>
-<li>(GET) <a href="http://localhost:3000/oauth/authorize?client_id={Client" target="_blank" rel="noopener noreferrer">http://localhost:3000/oauth/authorize?client_id={Client</a> ID}&amp;redirect_uri={Redirect URI}&amp;response_type=code</li>
-<li>(POST) <a href="http://localhost:3000/oauth/token" target="_blank" rel="noopener noreferrer">http://localhost:3000/oauth/token</a></li>
+<li>(GET) <a href="http://localhost:3000/oauth/authorize?client_id=%7BClient">http://localhost:3000/oauth/authorize?client_id={Client</a> ID}&amp;redirect_uri={Redirect URI}&amp;response_type=code</li>
+<li>(POST) <a href="http://localhost:3000/oauth/token">http://localhost:3000/oauth/token</a></li>
 </ul>
+
 <p>パラメーターが</p>
+
 <ul>
 <li>  client_id</li>
 <li>  client_secret</li>
@@ -104,13 +120,41 @@
 <li>  grant_Type</li>
 <li>  redirect_uri</li>
 </ul>
-<p>なパラメーターをセットしてリクエスト。で結果がJSONでアクセストークン・リフレッシュトークン等を含んで出力されるので(ry</p><p>な感じな処理をgetAuthTokenに実装する。でアクセストークンに有効期限がある模様だけど、 <a href="https://github.com/applicake/doorkeeper/wiki/Customizing-Token-Expiration" target="_blank" rel="noopener noreferrer">https://github.com/applicake/doorkeeper/wiki/Customizing-Token-Expiration</a> によると期間を指定出来る模様。なのでサーバーの仕様に合わせてそこら辺をうまくキャッシュしたりすれば良いんじゃないかなーっと</p><p>とりあえずフロー的なのうｐする</p><p><img src="/images/2013/06/20130604203044.png" class="img-fluid" alt="image" /></p><p>まぁアカウントが無いので作れよーって言われるのでOKを押して独自アカウントを選択すると</p><p><img src="/images/2013/06/20130604203118.png" class="img-fluid" alt="image" /></p><p>というようにユーザーIDとパスワードが要求される。でオッケーを押すとアカウントが作られる。んでアプリに戻る前に</p><p><img src="/images/2013/06/20130604203214.png" class="img-fluid" alt="image" /></p><p>同期を有効にする。でアプリに戻ると</p><p><img src="/images/2013/06/20130604203251.png" class="img-fluid" alt="image" /></p><p>というようにSyncAdapter側でサーバーと通信を行なって取得したデータをContent Providerを通じてSQLiteに保管される</p><p>まぁそんな感じ</p><p>でやってみて思ったのが結構ややこしい。あとサーバー側のOAuthじゃない所の認証システム辺りが素で自分で組んだんだけど、そこら辺はやはりdeviseとか使って認証システム組んだ方が良さそうな気もする</p>
+
+<p>なパラメーターをセットしてリクエスト。で結果がJSONでアクセストークン・リフレッシュトークン等を含んで出力されるので(ry</p>
+
+<p>な感じな処理をgetAuthTokenに実装する。でアクセストークンに有効期限がある模様だけど、 <a href="https://github.com/applicake/doorkeeper/wiki/Customizing-Token-Expiration">https://github.com/applicake/doorkeeper/wiki/Customizing-Token-Expiration</a> によると期間を指定出来る模様。なのでサーバーの仕様に合わせてそこら辺をうまくキャッシュしたりすれば良いんじゃないかなーっと</p>
+
+<p>とりあえずフロー的なのうｐする</p>
+
+<p><img src="/images/2013/06/20130604203044.png" class="img-fluid" alt="image" /></p>
+
+<p>まぁアカウントが無いので作れよーって言われるのでOKを押して独自アカウントを選択すると</p>
+
+<p><img src="/images/2013/06/20130604203118.png" class="img-fluid" alt="image" /></p>
+
+<p>というようにユーザーIDとパスワードが要求される。でオッケーを押すとアカウントが作られる。んでアプリに戻る前に</p>
+
+<p><img src="/images/2013/06/20130604203214.png" class="img-fluid" alt="image" /></p>
+
+<p>同期を有効にする。でアプリに戻ると</p>
+
+<p><img src="/images/2013/06/20130604203251.png" class="img-fluid" alt="image" /></p>
+
+<p>というようにSyncAdapter側でサーバーと通信を行なって取得したデータをContent Providerを通じてSQLiteに保管される</p>
+
+<p>まぁそんな感じ</p>
+
+<p>でやってみて思ったのが結構ややこしい。あとサーバー側のOAuthじゃない所の認証システム辺りが素で自分で組んだんだけど、そこら辺はやはりdeviseとか使って認証システム組んだ方が良さそうな気もする</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/06/rubyonrails-doorkeeper-grant_type-password.html">&lt;&nbsp;doorkeeperのgrant_type=&quot;password&quot;を使ってみる</a>
+            <a class="float-start box-link" href="/2013/06/rubyonrails-doorkeeper-grant_type-password.html">&lt;&nbsp;doorkeeperのgrant_type=&amp;quot;password&amp;quot;を使ってみる</a>
             <!-- prev post -->
             <a class="float-end box-link" href="/2013/06/android-accountmanager-syncadapter.html">Android AccountManager+SyncAdapter&nbsp;&gt;</a>
           </div>
@@ -196,7 +240,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -217,9 +261,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -332,7 +373,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -355,20 +396,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -378,13 +419,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("4d40322a5158064b295bd9c2fa81a1006c30c540");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

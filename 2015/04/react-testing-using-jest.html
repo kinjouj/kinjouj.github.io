@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-04-11T12:00:00+09:00">
+                <time datetime="2015-04-11 12:00:00 +0900">
                   <a href="/archives/2015/04">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,21 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["環境設定", "js/app.js", "js/components/Echo.js", "js/components/_<em>tests</em>_/Echo-test.js", "余談"]-->
-                <p>公式ドキュメント: <a href="https://facebook.github.io/jest/docs/tutorial-react.html" target="_blank" rel="noopener noreferrer">https://facebook.github.io/jest/docs/tutorial-react.html</a></p><p>参考: <a href="http://qiita.com/koba04/items/2f97904b3ca247fc1917" target="_blank" rel="noopener noreferrer">http://qiita.com/koba04/items/2f97904b3ca247fc1917</a></p><p>参考資料1: <a href="https://facebook.github.io/react/docs/test-utils.html" target="_blank" rel="noopener noreferrer">https://facebook.github.io/react/docs/test-utils.html</a></p><p>参考資料2: <a href="https://facebook.github.io/jest/docs/mock-functions.html" target="_blank" rel="noopener noreferrer">https://facebook.github.io/jest/docs/mock-functions.html</a></p><p>React.jsで書かれたコンポーネントをjestを使ってテストしてみる。ただそれだけ</p><h4>環境設定</h4><p>jest自体がnode0.8系か0.10系でしか動かない模様(node0.12系でやるとSEGVする)のでnodeのバージョンは0.10系を使う</p><p>で例のごとくpackage.jsonを設定する</p><pre class="line-numbers"><code class="language-json">{
+                <!--[&quot;環境設定&quot;, &quot;js/app.js&quot;, &quot;js/components/Echo.js&quot;, &quot;js/components/_&lt;em&gt;tests&lt;/em&gt;_/Echo-test.js&quot;, &quot;余談&quot;]-->
+                <p>公式ドキュメント: <a href="https://facebook.github.io/jest/docs/tutorial-react.html">https://facebook.github.io/jest/docs/tutorial-react.html</a></p>
+
+<p>参考: <a href="http://qiita.com/koba04/items/2f97904b3ca247fc1917">http://qiita.com/koba04/items/2f97904b3ca247fc1917</a></p>
+
+<p>参考資料1: <a href="https://facebook.github.io/react/docs/test-utils.html">https://facebook.github.io/react/docs/test-utils.html</a></p>
+
+<p>参考資料2: <a href="https://facebook.github.io/jest/docs/mock-functions.html">https://facebook.github.io/jest/docs/mock-functions.html</a></p>
+
+<p>React.jsで書かれたコンポーネントをjestを使ってテストしてみる。ただそれだけ</p>
+<h4>環境設定</h4>
+<p>jest自体がnode0.8系か0.10系でしか動かない模様(node0.12系でやるとSEGVする)のでnodeのバージョンは0.10系を使う</p>
+
+<p>で例のごとくpackage.jsonを設定する</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;sample&quot;,
   &quot;version&quot;: &quot;0.0.1&quot;,
   &quot;main&quot;: &quot;js/app.js&quot;,
@@ -112,18 +126,28 @@
     ]
   }
 }
-</code></pre><p>devDependenciesにてjest-cliの依存性を追加して、testでjestが動く似用に設定。んでjestの設定部分ではscriptProcessorで指定したpreprocessor.jsを使って、jestがテストを行う際にJSX構文が認識出来るように事前にコンパイルするような形で提供してテストを実行出来るようにしておかないといけない模様。っていう事で以下をpreprocessor.jsとして作成しておく</p><pre class="line-numbers"><code class="language-js">var ReactTools = require(&#39;react-tools&#39;);
+</code></pre>
+<p>devDependenciesにてjest-cliの依存性を追加して、testでjestが動く似用に設定。んでjestの設定部分ではscriptProcessorで指定したpreprocessor.jsを使って、jestがテストを行う際にJSX構文が認識出来るように事前にコンパイルするような形で提供してテストを実行出来るようにしておかないといけない模様。っていう事で以下をpreprocessor.jsとして作成しておく</p>
+<pre class="line-numbers"><code class="language-js">var ReactTools = require(&#39;react-tools&#39;);
 
 module.exports = {
   process: function(src) {
     return ReactTools.transform(src);
   }
 };
-</code></pre><p>公式ドキュメントにも同様に書いてたはずなのでそのまま使う。ちなみにbabel.jsを使ってES6で書いてるようなケースの場合は普通にscriptProcessorにbabel-nodeを指定すれば良い模様(詳しくは上記参考のkoba04さんが書いてるreact-boilerplateを参照)</p><p>でunmockedModulePathPatternsはjestでテストする際にあたって読み込まれるスクリプトがまるごとモック化される模様。React.jsをモック化されても困るのでそういうのを除外する対象とするのがこの設定っぽい(自動でそういうふうにされないようにするにはjest.autoMockOffなりをテスト上でやればイケるっぽいらしい)</p><p>でこれからReactを使ったアプリケーションを作っていく</p><h4>js/app.js</h4><pre class="line-numbers"><code class="language-js">var React = require(&quot;react&quot;),
+</code></pre>
+<p>公式ドキュメントにも同様に書いてたはずなのでそのまま使う。ちなみにbabel.jsを使ってES6で書いてるようなケースの場合は普通にscriptProcessorにbabel-nodeを指定すれば良い模様(詳しくは上記参考のkoba04さんが書いてるreact-boilerplateを参照)</p>
+
+<p>でunmockedModulePathPatternsはjestでテストする際にあたって読み込まれるスクリプトがまるごとモック化される模様。React.jsをモック化されても困るのでそういうのを除外する対象とするのがこの設定っぽい(自動でそういうふうにされないようにするにはjest.autoMockOffなりをテスト上でやればイケるっぽいらしい)</p>
+
+<p>でこれからReactを使ったアプリケーションを作っていく</p>
+<h4>js/app.js</h4><pre class="line-numbers"><code class="language-js">var React = require(&quot;react&quot;),
     Echo  = require(&quot;./components/Echo.js&quot;);
 
 React.render(&lt;Echo /&gt;, document.body);
-</code></pre><p>んまぁここは今回関係無いので省略</p><h4>js/components/Echo.js</h4><pre class="line-numbers"><code class="language-js">// AppActionCreators.sayは引数をtoUpperCaseされるだけのメソッドが定義されたオブジェクト
+</code></pre>
+<p>んまぁここは今回関係無いので省略</p>
+<h4>js/components/Echo.js</h4><pre class="line-numbers"><code class="language-js">// AppActionCreators.sayは引数をtoUpperCaseされるだけのメソッドが定義されたオブジェクト
 
 var React             = require(&quot;react/addons&quot;),
     AppActionCreators = require(&quot;../actions/AppActionCreators&quot;);
@@ -157,13 +181,17 @@ var Echo = React.createClass({
 });
 
 module.exports = Echo;
-</code></pre><p>っていう感じで</p>
+</code></pre>
+<p>っていう感じで</p>
+
 <ul>
 <li>デフォルトのstate.msgはhoge</li>
 <li>&lt;input type=“text&quot;&gt;でvalueLinkを設定してchangeイベントをfire出来るようにする</li>
 <li>&lt;button&gt;でAppActionCreators.sayした結果をmsgに突っ込む</li>
 </ul>
-<p>的な要件なだけなのだけど、これが意図した動作になるかどうかをテストする</p><h4>js/components/_<em>tests</em>_/Echo-test.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+<p>的な要件なだけなのだけど、これが意図した動作になるかどうかをテストする</p>
+<h4>js/components/_<em>tests</em>_/Echo-test.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 jest.dontMock(&quot;../Echo&quot;);
 
@@ -250,9 +278,19 @@ describe(&quot;Echo&quot;, function() {
     expect(child4.type).toEqual(&quot;button&quot;);
   });
 });
-</code></pre><p>button click event testだけはテストがfailする。&lt;input&gt;にchange eventでfireしているのにも関わらず&lt;button&gt;をクリックした場合に発生するAppActionCreators.sayがモックされてAしか返さないようになっているので</p><p>んまぁjasmineベースなテストを書く事で出来る。ただ上記でも書いてるけど特定していないスクリプト等のオブジェクトは全てモック化されるので呼び出されるメソッド等に適切にreturnValue等を返すか、特定の処理をするようにする(mockImplementationとか)ような感じな事しなければならない(現在モック化されたメソッドのオリジナルをコールする方法は判明してない)</p><p>結構長ったらしく書いたけどこれでもReact.js+jestでのテストのほんの一部にしかすぎないので色々今後も使って分かった事とか色々書くと思う</p><h4>余談</h4>
+</code></pre>
+<p>button click event testだけはテストがfailする。&lt;input&gt;にchange eventでfireしているのにも関わらず&lt;button&gt;をクリックした場合に発生するAppActionCreators.sayがモックされてAしか返さないようになっているので</p>
+
+<p>んまぁjasmineベースなテストを書く事で出来る。ただ上記でも書いてるけど特定していないスクリプト等のオブジェクトは全てモック化されるので呼び出されるメソッド等に適切にreturnValue等を返すか、特定の処理をするようにする(mockImplementationとか)ような感じな事しなければならない(現在モック化されたメソッドのオリジナルをコールする方法は判明してない)</p>
+
+<p>結構長ったらしく書いたけどこれでもReact.js+jestでのテストのほんの一部にしかすぎないので色々今後も使って分かった事とか色々書くと思う</p>
+<h4>余談</h4>
 <blockquote class="twitter-tweet" lang="ja" data-twttr-rendered="true"><p>ほう &gt; モジュールの実装をテスト時に常に差し替えておきたい場合は、__mocks__を作りその中にmoduleの実装を置いておくことで可能</p>— kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/586492732924760065">2015, 4月 10</a></blockquote>
+
 <p>っていう事らしい。詳しくはやってみてから書く</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -344,7 +382,7 @@ describe(&quot;Echo&quot;, function() {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -365,9 +403,6 @@ describe(&quot;Echo&quot;, function() {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -480,7 +515,7 @@ describe(&quot;Echo&quot;, function() {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -503,20 +538,20 @@ describe(&quot;Echo&quot;, function() {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -526,13 +561,15 @@ describe(&quot;Echo&quot;, function() {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("59264704d30e1f0fecb99fda64af036a4f1e5a8e");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

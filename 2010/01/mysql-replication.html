@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2010-01-07T09:00:00+09:00">
+                <time datetime="2010-01-07 09:00:00 +0900">
                   <a href="/archives/2010/01">
                   <span class="post-date-year">2010</span>
                   <span class="hyphen">-</span>
@@ -76,13 +77,20 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["my.cnfを設定 (レプリケーション元)", "my.cnfを設定 (レプリケーション先)", "レプリケーション元の情報を設定 (レプリケーション先)", "SSHトンネリング側の設定 (レプリケーション先)"]-->
-                <p>MySQLでデータベースをレプリケーションさせてみる</p><h4>my.cnfを設定 (レプリケーション元)</h4><pre class="line-numbers"><code class="language-conf">[mysqld]
+                <!--[&quot;my.cnfを設定 (レプリケーション元)&quot;, &quot;my.cnfを設定 (レプリケーション先)&quot;, &quot;レプリケーション元の情報を設定 (レプリケーション先)&quot;, &quot;SSHトンネリング側の設定 (レプリケーション先)&quot;]-->
+                <p>MySQLでデータベースをレプリケーションさせてみる</p>
+<h4>my.cnfを設定 (レプリケーション元)</h4><pre class="line-numbers"><code class="language-conf">[mysqld]
 log_bin = /var/log/mysql/mysql-bin.log
 server-id = 1
-</code></pre><p>上を追加しておく。ついでにMySQL上のレプリケーションを行うユーザーを作っておいた方が良い</p><pre class="line-numbers"><code class="language-sql">GRANT REPLICATION SLAVE,REPLICATION CLIENT ON *.* TO repl@&#39;%&#39; IDENTIFIED BY &#39;pass&#39;;
-</code></pre><p>あと</p><pre class="line-numbers"><code class="language-sql">SHOW MASTER STATUS
-</code></pre><p>を実行した結果のPositionとログファイル名は記憶しておく</p><h4>my.cnfを設定 (レプリケーション先)</h4><pre class="line-numbers"><code class="language-conf">[mysqld]
+</code></pre>
+<p>上を追加しておく。ついでにMySQL上のレプリケーションを行うユーザーを作っておいた方が良い</p>
+<pre class="line-numbers"><code class="language-sql">GRANT REPLICATION SLAVE,REPLICATION CLIENT ON *.* TO repl@&#39;%&#39; IDENTIFIED BY &#39;pass&#39;;
+</code></pre>
+<p>あと</p>
+<pre class="line-numbers"><code class="language-sql">SHOW MASTER STATUS
+</code></pre>
+<p>を実行した結果のPositionとログファイル名は記憶しておく</p>
+<h4>my.cnfを設定 (レプリケーション先)</h4><pre class="line-numbers"><code class="language-conf">[mysqld]
 server-id = 2
 </code></pre><h4>レプリケーション元の情報を設定 (レプリケーション先)</h4><pre class="line-numbers"><code class="language-sql">CHANGE MASTER TO
   MASTER_HOST=&#39;localhost&#39;,
@@ -91,8 +99,16 @@ server-id = 2
   MASTER_PASSWORD=&#39;pass&#39;,
   MASTER_LOG_FILE=&#39;mysql-bin.000001&#39;,
   MASTER_LOG_POS=106;
-</code></pre><p>MASTER_LOG_FILEとMASTER_LOG_POSはレプリケーション元側で取得したスレーブログ情報を指定する</p><h4>SSHトンネリング側の設定 (レプリケーション先)</h4><p>んでマスターサーバー側のMySQLポートのファイアウォール設定を変えるのはまずいので、とりあえずSSHトンネリングを設定する</p><pre class="line-numbers"><code class="language-bash">ssh -f -N -N 13306:192.168.3.1:3306 kinjouj@192.168.3.1
-</code></pre><p>レプリケーション元でSSHサーバーを起動しておき、このSSHポートフォワーディングを利用する事でマスターサーバーのSSHを利用してレプリケーションを実行する事ができるようになる</p>
+</code></pre>
+<p>MASTER_LOG_FILEとMASTER_LOG_POSはレプリケーション元側で取得したスレーブログ情報を指定する</p>
+<h4>SSHトンネリング側の設定 (レプリケーション先)</h4>
+<p>んでマスターサーバー側のMySQLポートのファイアウォール設定を変えるのはまずいので、とりあえずSSHトンネリングを設定する</p>
+<pre class="line-numbers"><code class="language-bash">ssh -f -N -N 13306:192.168.3.1:3306 kinjouj@192.168.3.1
+</code></pre>
+<p>レプリケーション元でSSHサーバーを起動しておき、このSSHポートフォワーディングを利用する事でマスターサーバーのSSHを利用してレプリケーションを実行する事ができるようになる</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -184,7 +200,7 @@ server-id = 2
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -205,9 +221,6 @@ server-id = 2
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -320,7 +333,7 @@ server-id = 2
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -343,20 +356,20 @@ server-id = 2
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -366,13 +379,15 @@ server-id = 2
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("a3aa4d93402b9388cddc5492afd07c411a36e14d");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-04-02T00:00:00+00:00">
+                <time datetime="2014-04-02 00:00:00 +0900">
                   <a href="/archives/2014/04">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["index.html", "style.css"]-->
-                <p>参考: <a href="http://angularjsninja.com/blog/2013/12/08/angularjs-nganimate/">AngularJSでちゃちゃっとアニメーションを試す - AngularJS Ninja</a>  </p><p>公式リファレンス: <a href="http://docs.angularjs.org/api/ngAnimate" target="_blank" rel="noopener noreferrer">http://docs.angularjs.org/api/ngAnimate</a></p><p>んまぁ名前からしてCSS3?なアニメーションな機能をサポートするものっぽい。単純にng-repeatしている部分なエントリーをフィルターし、出る際にフェードインさせたり、消えたりする際にフェードアウトさせたりをやってみる</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+                <!--[&quot;index.html&quot;, &quot;style.css&quot;]-->
+                <p>参考: <a href="http://angularjsninja.com/blog/2013/12/08/angularjs-nganimate/">AngularJSでちゃちゃっとアニメーションを試す - AngularJS Ninja</a>  </p>
+
+<p>公式リファレンス: <a href="http://docs.angularjs.org/api/ngAnimate">http://docs.angularjs.org/api/ngAnimate</a></p>
+
+<p>んまぁ名前からしてCSS3?なアニメーションな機能をサポートするものっぽい。単純にng-repeatしている部分なエントリーをフィルターし、出る際にフェードインさせたり、消えたりする際にフェードアウトさせたりをやってみる</p>
+<h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html ng-app=&quot;app&quot;&gt;
   &lt;head&gt;
     &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.4/angular.min.js&quot;&gt;&lt;/script&gt;
@@ -95,11 +101,15 @@
     &lt;/div&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>ngAnimateを使うには別途angular-animate.jsな参照が必要。でangular.moduleでngAnimateを使うようにしなきゃならん。単純なので</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngAnimate&quot;])
+</code></pre>
+<p>ngAnimateを使うには別途angular-animate.jsな参照が必要。でangular.moduleでngAnimateを使うようにしなきゃならん。単純なので</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngAnimate&quot;])
   .controller(&quot;SampleController&quot;, function($scope) {
     $scope.samples = [&quot;hoge&quot;, &quot;fuga&quot;, &quot;foobar&quot;];
   });
-</code></pre><p>的な感じで。あとはそのアニメーションで使用されるスタイルシートを書くだけ</p><h4>style.css</h4><pre class="line-numbers"><code class="language-css">.item.ng-enter, .item.ng-leave {
+</code></pre>
+<p>的な感じで。あとはそのアニメーションで使用されるスタイルシートを書くだけ</p>
+<h4>style.css</h4><pre class="line-numbers"><code class="language-css">.item.ng-enter, .item.ng-leave {
   -webkit-transition: 3s linear all;
   transition: 3s linear all;
 }
@@ -119,17 +129,27 @@
 .item.ng-leave-active {
   opacity: 0;
 }
-</code></pre><p>的な感じで流れ的には</p>
+</code></pre>
+<p>的な感じで流れ的には</p>
+
 <ul>
 <li>  フィルターされて非表示状態になる際には.ng-leaveから.ng-leave-activeにクラスが転移?されて最終的にノードが一時的?に削除される</li>
 <li>  フィルターされた状態を解除されて表示状態になる際には.ng-enterから.ng-enter-activeにクラスが転移されて、削除されていたノードが復活する</li>
 </ul>
+
 <p>上記のスタイルシートだと以下ようになるかと</p>
+
 <ul>
 <li>  非表示状態により.ng-leaveが発生しopacityが1になり、その後.ng-leave-activeが発生してopacityが0になる。その際にtransitionのディレイにより遅延?</li>
 <li>  表示状態により.ng-enterが発生しopacityが0になり、その後.ng-enter-leaveが発生してopacityが1になる。その際にtransitionのディレイにより遅延</li>
 </ul>
-<p>っていう感じかと。詳しくは上記参考先のclass属性の変化を読めばわかりやすいかと思われる。他にも.ng-moveっていうのもあるらしいけど、これは今回使ってないので(ry</p><p>ちなみに公式リファレンスによるとそこら辺をangular.module辺りで処理させる事も可能らしい。今回まだ検証とかしてないので後日書くかも知れない</p>
+
+<p>っていう感じかと。詳しくは上記参考先のclass属性の変化を読めばわかりやすいかと思われる。他にも.ng-moveっていうのもあるらしいけど、これは今回使ってないので(ry</p>
+
+<p>ちなみに公式リファレンスによるとそこら辺をangular.module辺りで処理させる事も可能らしい。今回まだ検証とかしてないので後日書くかも知れない</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -221,7 +241,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -242,9 +262,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -357,7 +374,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -380,20 +397,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -403,13 +420,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("2a2712cdb5b9ced811e1bab366db8e5bcf7c9cd5");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

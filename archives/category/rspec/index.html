@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -91,294 +90,6 @@
                   <a name="article-link" href="/2014/08/activerecord-validation-1.html">ActiveRecord Validation #1</a>
                 </h3>
                 公式ドキュメント: [http://guides.rubyonrails.org/active\_record\_validations.html][1]
-
-
-公式ドキュメントを読みつつ進めてみようかと。ただやたらと長いので何回かに分けて書く予定
-
-
-
-
-
-#### 基本的な使い方
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :name, presence: true
-end
-
-describe Entry do
-  it &quot;(valid?|invalid?)メソッド&quot; do
-    entry = Entry.new
-
-    # valid等を実行する前だとerrosはempty
-    expect(entry.errors).to be_empty
-
-    expect(entry.valid?).to eq false
-    expect(entry.invalid?).to eq true
-
-    # valid等を処理した後だとerrorsには検証エラーが入る
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq([:name, [&quot;can&quot;t be blank&quot;]])
-  end
-end
-```
-
-
-っていうような感じになる。valid等を動かさなくてもsaveやupdate等のメソッドを実行すると検証エラーな場合はfalseが返り、破壊的メソッドとして実行するとActiveRecord::RecordInvalidがスローされる模様
-
-
-っていう感じで、基本的な事は終わり。presence等のValidation Helpersな所を進める
-
-
-#### [presence][2]
-
-
-.blank?でチェックされるバリデーションルール。上記の基本的な所なセクションでほとんど買いちゃってるけど
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :name, presence: { message: &quot;can`t be empty&quot; }
-end
-
-describe Entry do
-  it &quot;presenceのテスト&quot; do
-    entry = Entry.new
-    expect(entry.save).to eq false
-
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq([:name, [&quot;can`t be empty&quot;]])
-  end
-end
-```
-
-
-っていうようにエラーメッセージ辺りを変える事も可能。特にpresenceに限った機能じゃないはずなので(ry
-
-
-#### &lt;a href=&quot;http://guides.rubyonrails.org/active_record_validations.html#acceptance&quot;&gt;acceptance&lt;/a&gt;
-
-
-「規約に同意する」等の機能があるようなチェックボックス等によるデータ処理を検証するバリデーションヘルパーな模様。デフォルトであれば「&quot;1&amp;#8243;」を挿入しているかどうかで検証される(変更可能)。又、オプションで指定しない限りはnilじゃない場合にのみバリデーションが作用するようになる模様
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :terms_of_service, acceptance: true
-end
-
-describe Entry do
-  it &quot;acceptanceのテスト&quot; do
-    entry = Entry.new({ terms_of_service: &quot;1&quot; })
-    expect(entry.valid?).to be true
-  end
-
-  it &quot;terms_of_serviceを指定しない場合&quot; do
-    expect(Entry.new.valid?).to eq true
-  end
-end
-```
-
-
-このテストは通る。2つ目のテストでterms\_of\_serviceを指定しなくてもvalid?がtrueになるのはnilな状態であればバリデーションが作用しない為かと。なので
-
-
-```rb
-class Entry &lt; ActiveRecord::Base
-  validates :terms_of_service, acceptance: true, allow_nil: false
-end
-```
-
-
-とした場合には上記でテストは成功する2つ目が成功しなくなる。allow_nilはグローバルオプション?だと思われるのでacceptanceに限って指定出来る物ではないのではと。でデフォルトだと&quot;1&amp;#8243;を入れなければならないが、acceptanceオプションを設定する事で変更可能
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :terms_of_service, acceptance: { accept: &quot;yes&quot; }, allow_nil: false
-end
-
-describe Entry do
-  it &quot;acceptanceのテスト&quot; do
-    entry = Entry.new({ terms_of_service: &quot;yes&quot; })
-    expect(entry.valid?).to be true
-  end
-
-  it &quot;terms_of_serviceを指定しない場合&quot; do
-    expect(Entry.new.valid?).to eq false
-  end
-end
-```
-
-
-っていうような感じでacceptanceオプションを修正することで&quot;1&amp;#8243;以外で作用させる事も可能
-
-
-んまぁ規約に同意するような機能とかなら同意してないならDB処理しないような仕組みをやれば良いだけなので、こういうのをする必要性はあんま無いと思うけど「メールによるお知らせを受け取る」ような設定オプションとかであればこういうのを使えば良いのではと(そういう場合はallow_nilを設定するべきではないはず)
-
-
-#### [confirmation][3]
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :email, confirmation: true
-end
-
-describe Entry do
-  it &quot;confirmationのテスト&quot; do
-    entry = Entry.new({
-      email: &quot;A@example.com&quot;,
-      email_confirmation: &quot;B@example.com&quot;
-    })
-    expect(entry.valid?).to eq false
-
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq [:email_confirmation, [&quot;doesn&quot;t match Email&quot;]]
-  end
-
-  it &quot;email_confirmationを指定しない場合&quot; do
-    entry = Entry.new({ email: &quot;A@example.com&quot; })
-    expect(entry.valid?).to eq true
-  end
-end
-```
-
-
-ってな感じでconfirmation validation helperを使っているのに対して、\_confirmationな仮想的属性の値を比較して同一かをチェック出来る。但しその仮想的属性がnilでは無い場合にのみチェックされる模様なので、2つ目のテストではemail\_confirmationを指定してない為にバリデーションが作用しない為trueが返るような感じかと
-
-
-#### [exclusion][4]
-
-
-指定した項目が入ってはいけない場合のようなケースを検証出来る。逆がinclusion
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :subdomain, exclusion: { in: %w(www blog) }
-end
-
-describe Entry do
-  it &quot;exclusionのテスト&quot; do
-    expect(Entry.new({ subdomain: &quot;user&quot; }).valid?).to eq true
-    expect(Entry.new({ subdomain: &quot;www&quot; }).valid?).to eq false
-    expect(Entry.new({ subdomain: &quot;blog&quot; }).valid?).to eq false
-  end
-end
-```
-
-
-inで指定したリストに該当するのが入るとバリデーションとしては不整合という形になる模様。恐らくはnilな場合だと検証が作用しないんかと思われる
-
-
-#### [inclusion][5]
-
-
-上記にあるexclusionの反対であるinclusion。リストにマッチする値のみが許可されるようなケースで使うっぽい
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :subdomain, inclusion: { in: %w(www blog) }
-end
-
-describe Entry do
-  it &quot;inclusionのテスト&quot; do
-    expect(Entry.new({ subdomain: &quot;www&quot; }).valid?).to eq true
-    expect(Entry.new({ subdomain: &quot;blog&quot; }).valid?).to eq true
-    expect(Entry.new({ subdomain: &quot;user&quot; }).valid?).to eq false
-  end
-end
-```
-
-
-inで指定してあるのみ許容される。
-
-
-#### [format][6]
-
-
-正規表現とかで値の検証を行うようなパターンの場合に使う
-
-
-```rb
-require &quot;rails_helper&quot;
-
-class Entry &lt; ActiveRecord::Base
-  validates :postal_code, format: { with: /\A[\d]{3}\-[\d]{4}\z/ }
-end
-
-describe Entry do
-  it &quot;formatのテスト&quot; do
-    expect(Entry.new({ postal_code: &quot;123-4567&quot; }).valid?).to eq true
-
-    entry = Entry.new({ postal_code: &quot;123-456a&quot; })
-    expect(entry.errors).to be_empty
-    expect(entry.valid?).to eq false
-
-    errors = entry.errors
-    expect(errors).not_to be_empty
-
-    messages = errors.messages
-    expect(messages).not_to be_empty
-
-    message = messages.first
-    expect(message).not_to be_nil
-    expect(message).to eq([:postal_code, [&quot;is invalid&quot;]])
-  end
-end
-```
-
-
-てな感じでwithで指定した正規表現で値をチェック出来る。
-
-
-とりあえず今回は以上。続きは後日
-
-
- [1]: http://guides.rubyonrails.org/active_record_validations.html
- [2]: http://guides.rubyonrails.org/active_record_validations.html#presence
- [3]: http://guides.rubyonrails.org/active_record_validations.html#confirmation
- [4]: http://guides.rubyonrails.org/active_record_validations.html#exclusion
- [5]: http://guides.rubyonrails.org/active_record_validations.html#inclusion
- [6]: http://edgeguides.rubyonrails.org/active_record_validations.html#format
               </div>
             </div>
             <div id="ec07acf1f849673807e128d015b6c452125d1c6a" class="card m-4 mb-5">
@@ -415,147 +126,6 @@ end
                   <a name="article-link" href="/2014/07/rails-strong-parameters.html">strong parameters</a>
                 </h3>
                 公式ドキュメント: [http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1]
-
-ActionController::Parametersリファレンス: &lt;http://api.rubyonrails.org/classes/ActionController/Parameters.html&gt; 
-
-参考: &lt;http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters&gt;
-
-
-
-
-
-例えば以下のようなテストを実行したらどうなるか
-
-
-```ruby
-require &quot;rails_helper&quot;
-
-describe ApplicationController do
-  fixtures :entry, :author
-
-  controller do
-    def update
-      begin
-        entry = Entry.find(params[:id])
-        entry.update(params[:entry])
-      rescue =&gt; e
-        raise e
-      end
-
-      render :text =&gt; &quot;OK&quot;
-    end
-  end
-
-  it &quot;request POST /create&quot; do
-    post :update, :id =&gt; 1, :entry =&gt; { :author_id =&gt; 2, :name =&gt; &quot;fuga&quot; }
-    entry = Entry.find(1)
-    expect(entry).not_to be_nil
-
-    # fail: author_idがfilterされてないので通りそれがアップデートされる為
-    author = entry.author
-    expect(author).not_to be_nil
-  end
-end
-
-```
-
-
-※config/environments/test.rbにて「&lt;span style=&quot;color: red&quot;&gt;config.action\_controller.permit\_all_parameters = true&lt;/span&gt;」をしておく。設定しない場合にはホワイトリスト化されてないパラメーター?に対してActiveModel::ForbiddenAttributesErrorが発生してエラーになる模様
-
-
-テスト実行する前にspec/fixturesに
-
-
-```yml
-entry1:
-  id: 1
-  author_id: 1
-  name: hoge
-```
-
-
-と
-
-
-```yml
-author1:
-  id: 1
-  name: author1
-```
-
-
-初期データを突っ込んでおく。で、このテストを実行すると
-
-
-&lt;pre&gt;
-F
-
-Failures:
-
-  1) ApplicationController request POST /create
-     Failure/Error: expect(author).not_to be_nil
-       expected: not nil
-            got: nil
-&lt;/pre&gt;
-
-
-意図しないデータを送ってしまう事により改変されてしまうような事態になる。こういう事態になるのを防ぐのがStrong Parametersっていう機能な模様。てな訳でStrong Parametersを使ってみる
-
-
-```rb
-require &quot;rails_helper&quot;
-
-describe ApplicationController do
-  fixtures :entry, :author
-
-  controller do
-    def update
-      begin
-        entry_params = params.require(:entry).permit(:name)
-        entry = Entry.find(params[:id])
-        entry.update(entry_params)
-      rescue =&gt; e
-        raise e
-      end
-
-      render :text =&gt; &quot;OK&quot;
-    end
-  end
-
-  it &quot;request POST /create&quot; do
-    post :update, :id =&gt; 1, :entry =&gt; { :author_id =&gt; 2, :name =&gt; &quot;fuga&quot; }
-    entry = Entry.find(1)
-    expect(entry).not_to be_nil
-
-    author = entry.author
-    expect(author).not_to be_nil
-  end
-end
-```
-
-
-っていうように:nameは通すけど:author_idは通さないようにする。又、config/environments/test.rbにて「&lt;span style=&quot;color: red&quot;&gt;config.action_controller.action_on_unpermitted_parameters = :raise&lt;/span&gt;」っていう設定をする事でpermitする段階において、許容されないパラメーターが含まれているような場合にはActionController::UnpermittedParametersのエラーが発生するようになる。なのでその設定をした状態で上記のテストを動かすと
-
-
-&lt;pre&gt;
-F
-
-Failures:
-
-  1) ApplicationController request POST /create
-     Failure/Error: entry_params = params.require(:entry).permit(:name)
-     ActionController::UnpermittedParameters:
-       found unpermitted parameters: author_id
-&lt;/pre&gt;
-
-
-というようにauthor_idが許容されないパラメーターな為にエラーが発生するようになる。
-
-
-終わり。というのがStrong Parametersの機能概要的な感じかと。要はパラメーターをフィルターする事で不当な注入による処理をされないようにするっていう感じかと
-
-
- [1]: http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters
               </div>
             </div>
             <div id="892d465429e6bb66d44bcafb5a6fa5160862de4b" class="card m-4 mb-5">
@@ -653,7 +223,7 @@ Failures:
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -674,9 +244,6 @@ Failures:
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -789,7 +356,7 @@ Failures:
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -812,20 +379,20 @@ Failures:
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

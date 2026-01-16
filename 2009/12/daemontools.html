@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2009-12-26T09:00:00+09:00">
+                <time datetime="2009-12-26 09:00:00 +0900">
                   <a href="/archives/2009/12">
                   <span class="post-date-year">2009</span>
                   <span class="hyphen">-</span>
@@ -76,26 +77,39 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["インストール", "管理するサービスの設定", "qmail_home/service/runの作成", "qmail-home/service/log/run", "権限の設定", "リンクを生成", "起動・停止できるかテスト", "小メモ: サービスを自動起動させないようにする"]-->
-                <p>daemontoolsを使用して、/etc/rc.dとは違う方法でサービスを管理してみる</p><h4>インストール</h4><p><a href="http://cr.yp.to/daemontools/install.htmlからダウンロードする。但し、daemontoolsは解凍後のアーカイブを利用するので削除しない事。更にqmail同様にerror.hは修正する事" target="_blank" rel="noopener noreferrer">http://cr.yp.to/daemontools/install.htmlからダウンロードする。但し、daemontoolsは解凍後のアーカイブを利用するので削除しない事。更にqmail同様にerror.hは修正する事</a></p><pre class="line-numbers"><code class="language-bash">tar zxvf daemontools-VERSION.tar.gz
+                <!--[&quot;インストール&quot;, &quot;管理するサービスの設定&quot;, &quot;qmail_home/service/runの作成&quot;, &quot;qmail-home/service/log/run&quot;, &quot;権限の設定&quot;, &quot;リンクを生成&quot;, &quot;起動・停止できるかテスト&quot;, &quot;小メモ: サービスを自動起動させないようにする&quot;]-->
+                <p>daemontoolsを使用して、/etc/rc.dとは違う方法でサービスを管理してみる</p>
+<h4>インストール</h4>
+<p><a href="http://cr.yp.to/daemontools/install.html%E3%81%8B%E3%82%89%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E3%81%99%E3%82%8B%E3%80%82%E4%BD%86%E3%81%97%E3%80%81daemontools%E3%81%AF%E8%A7%A3%E5%87%8D%E5%BE%8C%E3%81%AE%E3%82%A2%E3%83%BC%E3%82%AB%E3%82%A4%E3%83%96%E3%82%92%E5%88%A9%E7%94%A8%E3%81%99%E3%82%8B%E3%81%AE%E3%81%A7%E5%89%8A%E9%99%A4%E3%81%97%E3%81%AA%E3%81%84%E4%BA%8B%E3%80%82%E6%9B%B4%E3%81%ABqmail%E5%90%8C%E6%A7%98%E3%81%ABerror.h%E3%81%AF%E4%BF%AE%E6%AD%A3%E3%81%99%E3%82%8B%E4%BA%8B">http://cr.yp.to/daemontools/install.htmlからダウンロードする。但し、daemontoolsは解凍後のアーカイブを利用するので削除しない事。更にqmail同様にerror.hは修正する事</a></p>
+<pre class="line-numbers"><code class="language-bash">tar zxvf daemontools-VERSION.tar.gz
 mv admin /opt/daemontools
 cd /opt/daemontools/daemontools-VERSION
 package/install
-</code></pre><p>これが終わると/etc/inittabの末尾にsvscanbootが追加される</p><h4>管理するサービスの設定</h4><p>とりあえずqmailを追加してみる。以下のようなディレクトリ構造を作成</p><pre class="line-numbers"><code class="language-">- qmail_home [DIR]
+</code></pre>
+<p>これが終わると/etc/inittabの末尾にsvscanbootが追加される</p>
+<h4>管理するサービスの設定</h4>
+<p>とりあえずqmailを追加してみる。以下のようなディレクトリ構造を作成</p>
+<pre class="line-numbers"><code class="language-">- qmail_home [DIR]
   - service [DIR]
     - run [FILE]
     - log [DIR]
       - run [FILE]
-</code></pre><p>上のrunを作成していく</p><h4>qmail_home/service/runの作成</h4><pre class="line-numbers"><code class="language-bash">#!/bin/sh
+</code></pre>
+<p>上のrunを作成していく</p>
+<h4>qmail_home/service/runの作成</h4><pre class="line-numbers"><code class="language-bash">#!/bin/sh
 
 exec /path/to/qmail/rc &amp;
-</code></pre><p>この際に注意として、rc内にqmailサーバー関連を起動させている場合のsploggerを使っている場合は削除する事</p><h4>qmail-home/service/log/run</h4><pre class="line-numbers"><code class="language-bash">#!/bin/sh
+</code></pre>
+<p>この際に注意として、rc内にqmailサーバー関連を起動させている場合のsploggerを使っている場合は削除する事</p>
+<h4>qmail-home/service/log/run</h4><pre class="line-numbers"><code class="language-bash">#!/bin/sh
 
 exec /usr/local/bin/setuidgid qmail /usr/local/bin/multilog t /var/log/qmail
 </code></pre><h4>権限の設定</h4><pre class="line-numbers"><code class="language-bash">chmod +t /path/to/qmail/service/qmail
 chmod +x /path/to/qmail/service/qmail/run
 chmod +x /path/to/qmail/service/qmail/log/run
-</code></pre><h4>リンクを生成</h4><p>作成したサービス設定をdaemontoolsが使用する/serviceにリンクさせる</p><pre class="line-numbers"><code class="language-bash">ln -s /path/to/qmail/service/qmail /service/qmail
+</code></pre><h4>リンクを生成</h4>
+<p>作成したサービス設定をdaemontoolsが使用する/serviceにリンクさせる</p>
+<pre class="line-numbers"><code class="language-bash">ln -s /path/to/qmail/service/qmail /service/qmail
 </code></pre><h4>起動・停止できるかテスト</h4><pre class="line-numbers"><code class="language-bash"># 起動
 svc -u /service/qmail
 
@@ -104,7 +118,11 @@ svc -d /service/qmail
 
 # 状態を表示
 svstat /service/qmail
-</code></pre><h4>小メモ: サービスを自動起動させないようにする</h4><p>/service/サービス名/downというファイルがあると、再起動時に自動で起動しなくなる</p>
+</code></pre><h4>小メモ: サービスを自動起動させないようにする</h4>
+<p>/service/サービス名/downというファイルがあると、再起動時に自動で起動しなくなる</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -196,7 +214,7 @@ svstat /service/qmail
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -217,9 +235,6 @@ svstat /service/qmail
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -332,7 +347,7 @@ svstat /service/qmail
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -355,20 +370,20 @@ svstat /service/qmail
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -378,13 +393,15 @@ svstat /service/qmail
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("e979bf94125a8b717a767b409ed1ddc68e7653e9");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

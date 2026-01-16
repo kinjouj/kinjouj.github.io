@@ -10,199 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="前回の「[JAX-RSをやってみる (3) – AutoDiscoverable -][1]」とかだと
-
-
-```java
-package sample.controller;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
-import sample.bean.SampleBean;
-import static javax.ws.rs.core.MediaType.*;
-
-@Path(&quot;/sample&quot;)
-public class Home {
-
-    @Path(&quot;save&quot;)
-    @POST
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
-    public SampleBean save(SampleBean bean) {
-        return bean;
-    }
-}
-```
-
-
-なんていうので
-
-
-```java
-package sample.controller;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-
-import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Test;
-
-import sample.SampleApplication;
-import sample.bean.SampleBean;
-
-import static javax.ws.rs.core.MediaType.*;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
-public class HomeTest extends JerseyTest {
-
-    @Override
-    protected Application configure() {
-        return new SampleApplication();
-    }
-
-    @Test
-    public void test_save() {
-        Entity&lt;SampleBean&gt; entity = Entity.entity(
-            new SampleBean(&quot;hoge&quot;),
-            APPLICATION_JSON
-        );
-
-        SampleBean response = target(&quot;/sample/save&quot;).request().post(entity, SampleBean.class);
-        assertThat(response, notNullValue());
-    }
-}
-```
-
-
-なんていうテストをやってみると「not found MessageBodyReader」なんていうエラーになるわけで。もちろん前回のはMessageBodyWriterは実装してあるけど、MessageBodyReaderが実装されてないので。っていう事でMessageBodyReaderを実装してみた
-
-
-
-
-
-#### GsonReaderProvider.java
-
-
-```java
-package sample.provider;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
-import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-@Singleton
-@Consumes(MediaType.APPLICATION_JSON)
-public class GsonReaderProvider implements MessageBodyReader&lt;Object&gt; {
-
-    private Gson gson = new GsonBuilder().create();
-
-    @Override
-    public boolean isReadable(Class&lt;?&gt; type, Type genericType,
-        Annotation[] annotations, MediaType mediaType) {
-
-        return true;
-    }
-
-    @Override
-    public Object readFrom(Class&lt;Object&gt; type, Type genericType,
-        Annotation[] annotations, MediaType mediaType,
-        MultivaluedMap&lt;String, String&gt; httpHeaders, InputStream entityStream)
-        throws IOException, WebApplicationException {
-
-        Object value = null;
-
-        try (Reader reader = new InputStreamReader(entityStream)) {
-            value = gson.fromJson(reader, genericType);
-        }
-
-        return value;
-    }
-}
-```
-
-
-んまぁMessageBodyReaderを実装するだけ。んでもって前回のSampleFeatureで
-
-
-```java
-package sample.internal;
-
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
-
-import org.glassfish.jersey.CommonProperties;
-import org.glassfish.jersey.internal.util.PropertiesHelper;
-
-import sample.provider.GsonReaderProvider;
-import sample.provider.GsonWriterProvider;
-import static org.glassfish.jersey.internal.InternalProperties.JSON_FEATURE;
-
-public class SampleFeature implements Feature {
-
-    private static final String SAMPLE_JSON_FEATURE = SampleFeature.class.getSimpleName();
-
-    @Override
-    public boolean configure(final FeatureContext context) {
-        final Configuration config = context.getConfiguration();
-        final String jsonFeature = CommonProperties.getValue(
-            config.getProperties(),
-            config.getRuntimeType(),
-            JSON_FEATURE,
-            null,
-            String.class
-        );
-
-        if (jsonFeature != null) {
-            return false;
-        }
-
-        context.property(
-            PropertiesHelper.getPropertyNameForRuntime(JSON_FEATURE, config.getRuntimeType()),
-            SAMPLE_JSON_FEATURE
-        );
-
-        if (!config.isRegistered(GsonWriterProvider.class)) {
-            context.register(GsonWriterProvider.class, MessageBodyWriter.class);
-        }
-
-        // 追加
-        if (!config.isRegistered(GsonReaderProvider.class)) {
-            context.register(GsonReaderProvider.class, MessageBodyReader.class);
-        }
-
-        return true;
-    }
-}
-```
-
-
-な感じでGsonReaderProviderをregisterしておく。あとは上記で書いてるテストをそのまま実行してテストがずっこけなければオッケー
-
-
-っていう感じでgsonを使ってJAX-RSなレスポンスをエンコードしたり、JSONデータなリクエストをデコードしたり等な件はひとまずこれにて終了
-
-
- [1]: /jaxrs-3-autodiscoverable.html" />
+    <meta name="description" content="前回の「[JAX-RSをやってみる (3) – AutoDiscoverable -][1]」とかだと" />
     <title>JAX-RSをやってみる (4) - MessageBodyReader - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/06/jaxrs-3-autodiscoverable.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/06/jaxrs-5-context-dependency-injection.html" />
@@ -210,6 +18,7 @@ public class SampleFeature implements Feature {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -250,7 +59,7 @@ public class SampleFeature implements Feature {
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-06-11T00:00:00+00:00">
+                <time datetime="2014-06-11 00:00:00 +0900">
                   <a href="/archives/2014/06">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -269,8 +78,9 @@ public class SampleFeature implements Feature {
                 </span>
               </p>
               <div class="post-content">
-                <!--["GsonReaderProvider.java"]-->
-                <p>前回の「[JAX-RSをやってみる (3) – AutoDiscoverable -][1]」とかだと</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+                <!--[&quot;GsonReaderProvider.java&quot;]-->
+                <p>前回の「[JAX-RSをやってみる (3) – AutoDiscoverable -][1]」とかだと</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -291,7 +101,9 @@ public class Home {
         return bean;
     }
 }
-</code></pre><p>なんていうので</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>なんていうので</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -324,7 +136,9 @@ public class HomeTest extends JerseyTest {
         assertThat(response, notNullValue());
     }
 }
-</code></pre><p>なんていうテストをやってみると「not found MessageBodyReader」なんていうエラーになるわけで。もちろん前回のはMessageBodyWriterは実装してあるけど、MessageBodyReaderが実装されてないので。っていう事でMessageBodyReaderを実装してみた</p><h4>GsonReaderProvider.java</h4><pre class="line-numbers"><code class="language-java">package sample.provider;
+</code></pre>
+<p>なんていうテストをやってみると「not found MessageBodyReader」なんていうエラーになるわけで。もちろん前回のはMessageBodyWriterは実装してあるけど、MessageBodyReaderが実装されてないので。っていう事でMessageBodyReaderを実装してみた</p>
+<h4>GsonReaderProvider.java</h4><pre class="line-numbers"><code class="language-java">package sample.provider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -371,7 +185,9 @@ public class GsonReaderProvider implements MessageBodyReader&lt;Object&gt; {
         return value;
     }
 }
-</code></pre><p>んまぁMessageBodyReaderを実装するだけ。んでもって前回のSampleFeatureで</p><pre class="line-numbers"><code class="language-java">package sample.internal;
+</code></pre>
+<p>んまぁMessageBodyReaderを実装するだけ。んでもって前回のSampleFeatureで</p>
+<pre class="line-numbers"><code class="language-java">package sample.internal;
 
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Feature;
@@ -422,7 +238,15 @@ public class SampleFeature implements Feature {
         return true;
     }
 }
-</code></pre><p>な感じでGsonReaderProviderをregisterしておく。あとは上記で書いてるテストをそのまま実行してテストがずっこけなければオッケー</p><p>っていう感じでgsonを使ってJAX-RSなレスポンスをエンコードしたり、JSONデータなリクエストをデコードしたり等な件はひとまずこれにて終了</p><p> [1]: /jaxrs-3-autodiscoverable.html</p>
+</code></pre>
+<p>な感じでGsonReaderProviderをregisterしておく。あとは上記で書いてるテストをそのまま実行してテストがずっこけなければオッケー</p>
+
+<p>っていう感じでgsonを使ってJAX-RSなレスポンスをエンコードしたり、JSONデータなリクエストをデコードしたり等な件はひとまずこれにて終了</p>
+
+<p>[1]: /jaxrs-3-autodiscoverable.html</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -514,7 +338,7 @@ public class SampleFeature implements Feature {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -535,9 +359,6 @@ public class SampleFeature implements Feature {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -650,7 +471,7 @@ public class SampleFeature implements Feature {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -673,20 +494,20 @@ public class SampleFeature implements Feature {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -696,13 +517,15 @@ public class SampleFeature implements Feature {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("d28bf7a5bd91ef8365830eb8249767c47291847a");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-05-17T00:00:00+09:00">
+                <time datetime="2015-05-17 00:00:00 +0900">
                   <a href="/archives/2015/05">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -76,15 +77,32 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["その前に", "必要なのを揃える", "manifest.json", "index.html", "main.js", "push.js", "send.sh"]-->
-                <p>公式ドラフトドキュメント?: <a href="http://www.w3.org/TR/push-api/" target="_blank" rel="noopener noreferrer">http://www.w3.org/TR/push-api/</a></p><p>参考1: <a href="http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web" target="_blank" rel="noopener noreferrer">http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web</a></p><p>参考2: <a href="http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d" target="_blank" rel="noopener noreferrer">http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d</a></p><p>前から気になってたServiceWorkerを使ってPush APIを実装するっていうのが話題になってた気がするので、ざっくりと参考を読みつつやってみた</p><h4>その前に</h4><p>以前にChrome Extensionで使えるchrome.gcmっていうのがあるネタを書いたけど、今回はこれをChrome Extensionではなく普通のWebアプリケーションから使える基盤的な仕組みみたいなのっぽい</p><h4>必要なのを揃える</h4><p>GoogleのPush Messagingサービスを使うので、まず必要なのが</p>
+                <!--[&quot;その前に&quot;, &quot;必要なのを揃える&quot;, &quot;manifest.json&quot;, &quot;index.html&quot;, &quot;main.js&quot;, &quot;push.js&quot;, &quot;send.sh&quot;]-->
+                <p>公式ドラフトドキュメント?: <a href="http://www.w3.org/TR/push-api/">http://www.w3.org/TR/push-api/</a></p>
+
+<p>参考1: <a href="http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web">http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web</a></p>
+
+<p>参考2: <a href="http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d">http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d</a></p>
+
+<p>前から気になってたServiceWorkerを使ってPush APIを実装するっていうのが話題になってた気がするので、ざっくりと参考を読みつつやってみた</p>
+<h4>その前に</h4>
+<p>以前にChrome Extensionで使えるchrome.gcmっていうのがあるネタを書いたけど、今回はこれをChrome Extensionではなく普通のWebアプリケーションから使える基盤的な仕組みみたいなのっぽい</p>
+<h4>必要なのを揃える</h4>
+<p>GoogleのPush Messagingサービスを使うので、まず必要なのが</p>
+
 <ul>
 <li>Cloud Messaging for Chromeを有効にする</li>
 <li>Cloud Messaging for Androidを有効にする</li>
 <li>Google APIsのAPI Key</li>
 <li>Google APIsのプロジェクト識別番号</li>
 </ul>
-<p>の4つが最低限でも必要っぽいので取得しておく。上記で書いたchrome.gcmのネタ中にも多分書いてるはずなので省略(APIへのアクセス権の設定項目)</p><h4>manifest.json</h4><p>※Chrome Extensionのmanifest.jsonでは無い</p><p>Push Notification APIを使う際に必要となる情報を定義したJSONファイル</p><pre class="line-numbers"><code class="language-json">{
+
+<p>の4つが最低限でも必要っぽいので取得しておく。上記で書いたchrome.gcmのネタ中にも多分書いてるはずなので省略(APIへのアクセス権の設定項目)</p>
+<h4>manifest.json</h4>
+<p>※Chrome Extensionのmanifest.jsonでは無い</p>
+
+<p>Push Notification APIを使う際に必要となる情報を定義したJSONファイル</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;sample&quot;,
   &quot;short_name&quot;: &quot;sample&quot;,
   &quot;start_url&quot;: &quot;http://localhost:8000/index.html&quot;,
@@ -92,7 +110,9 @@
   &quot;gcm_sender_id&quot;: &quot;上記で取得したGoogle APIsプロジェクトのプロジェクト番号&quot;,
   &quot;gcm_user_visible_only&quot;: true
 }
-</code></pre><p>これに関するリファレンスがちょっとどこにあるのか分かってないので省略</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+</code></pre>
+<p>これに関するリファレンスがちょっとどこにあるのか分かってないので省略</p>
+<h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;link rel=&quot;manifest&quot; href=&quot;manifest.json&quot; /&gt;
@@ -103,7 +123,9 @@
     &lt;script src=&quot;main.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>上記で書いたmanifest.jsonを&lt;link rel=“manifest”&gt;で読み込む。んまぁあとはJSをダラっと書くだけ</p><h4>main.js</h4><pre class="line-numbers"><code class="language-js">window.addEventListener(&quot;load&quot;, function() {
+</code></pre>
+<p>上記で書いたmanifest.jsonを&lt;link rel=“manifest”&gt;で読み込む。んまぁあとはJSをダラっと書くだけ</p>
+<h4>main.js</h4><pre class="line-numbers"><code class="language-js">window.addEventListener(&quot;load&quot;, function() {
   var el = document.querySelector(&quot;.js-push-button&quot;);
   el.addEventListener(&quot;click&quot;, function() {
     subscribe();
@@ -158,7 +180,25 @@ self.addEventListener(&quot;push&quot;, function(event) {
     )
   );
 }, false);
-</code></pre><p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p><p>でとりあえず今までの流れを確認すると</p><p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p><p><img src="/images/2015/05/201505171800_1.jpg" class="img-fluid" alt="image" /></p><p>んな感じになってる。でregisterボタンを押すと</p><p><img src="/images/2015/05/201505171800_2.jpg" class="img-fluid" alt="image" /></p><p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p><p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p><p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p><h4>send.sh</h4><pre class="line-numbers"><code class="language-sh">#!/bin/sh
+</code></pre>
+<p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p>
+
+<p>でとりあえず今までの流れを確認すると</p>
+
+<p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p>
+
+<p><img src="/images/2015/05/201505171800_1.jpg" class="img-fluid" alt="image" /></p>
+
+<p>んな感じになってる。でregisterボタンを押すと</p>
+
+<p><img src="/images/2015/05/201505171800_2.jpg" class="img-fluid" alt="image" /></p>
+
+<p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p>
+
+<p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p>
+
+<p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p>
+<h4>send.sh</h4><pre class="line-numbers"><code class="language-sh">#!/bin/sh
 
 ID=&quot;上記のSubscription ID&quot;
 KEY=&quot;Google Consoleで取得したGoogle Apis Key&quot;
@@ -169,13 +209,27 @@ curl \
     -H &quot;Authorization: key=$KEY&quot; \
     -d &quot;{ \&quot;registration_ids\&quot;: [\&quot;$ID\&quot;] }&quot; \
     https://android.googleapis.com/gcm/send
-</code></pre><p>を実行すると</p><p><img src="/images/2015/05/201505171800_3.jpg" class="img-fluid" alt="image" /></p><p>みたいにデスクトップ通知が出るようになる。何やら通知をクリックした時のイベントがどうたらとかもあるらしい</p><p>まぁざっくり書きましたが現状でもまだ策定中な所もあるようだし実装もまだできてなくて制限が一部あるんですが</p>
+</code></pre>
+<p>を実行すると</p>
+
+<p><img src="/images/2015/05/201505171800_3.jpg" class="img-fluid" alt="image" /></p>
+
+<p>みたいにデスクトップ通知が出るようになる。何やら通知をクリックした時のイベントがどうたらとかもあるらしい</p>
+
+<p>まぁざっくり書きましたが現状でもまだ策定中な所もあるようだし実装もまだできてなくて制限が一部あるんですが</p>
+
 <ul>
 <li>pushを受信したらshowNotificationしないといけないらしい</li>
 <li>データを現時点では受信出来ない(Chrome拡張のchrome.gcmはデータを受信することは可能)</li>
 <li>もしサービスに導入するならHTTPS環境にデプロイしないと出来ない(海外のHTML5のスペシャリストな人の記事では受信したらサーバーに通知情報をとりに行くみたいな事しているようなケースもある模様)</li>
 </ul>
-<p>他にも色々あるらしいので、詳しい事は上記の参考URLを見た方が良いかと</p><p>んまぁとりあえず今後色々出来る事が増えると思うので分かった事なりを書いたり追記したりするとは思うって事で</p>
+
+<p>他にも色々あるらしいので、詳しい事は上記の参考URLを見た方が良いかと</p>
+
+<p>んまぁとりあえず今後色々出来る事が増えると思うので分かった事なりを書いたり追記したりするとは思うって事で</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -267,7 +321,7 @@ curl \
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -288,9 +342,6 @@ curl \
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -403,7 +454,7 @@ curl \
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -426,20 +477,20 @@ curl \
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -449,13 +500,15 @@ curl \
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("2c266ff082b53dc23a47d932116ca3e2df6257ed");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

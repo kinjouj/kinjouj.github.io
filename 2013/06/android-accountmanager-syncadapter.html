@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-04T00:00:00+00:00">
+                <time datetime="2013-06-04 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,26 +78,41 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["SyncAdapterを使う手順", "AndroidManifest.xmlを修正する", "res/xml/sync.xmlを作成", "SampleSyncService.java", "SampleSyncAdapter.java"]-->
-                <p>以前Android AccountManagerで使えるアカウントを開発する方法を書きましたが同期的な機能のSyncAdapterをすっぽかしてたのでやってみた</p><p>その前に現状だとSyncAdapterを使える仕様じゃないので、そこら辺をまず修正しなければならない。SyncAdapterを使う為にはContent Providerが必要な模様、なのでアクティビティ等のアプリに関わる部分(AccountAuthenticator以外)からサーバーに通信してデータを取る部分を全てContent Provider経由で取る。でバックグラウンドで同期が行われる際に、サーバー側から取得したデータをSQLiteデータベースに保管しておいて、それをContent Providerでやり取りをする</p><p>という感じな仕様に変えないといけない。んまぁそこら辺はちゃちゃっと修正して、SyncAdapterの本体辺りな所だけ書く</p><h4>SyncAdapterを使う手順</h4>
+                <!--[&quot;SyncAdapterを使う手順&quot;, &quot;AndroidManifest.xmlを修正する&quot;, &quot;res/xml/sync.xmlを作成&quot;, &quot;SampleSyncService.java&quot;, &quot;SampleSyncAdapter.java&quot;]-->
+                <p>以前Android AccountManagerで使えるアカウントを開発する方法を書きましたが同期的な機能のSyncAdapterをすっぽかしてたのでやってみた</p>
+
+<p>その前に現状だとSyncAdapterを使える仕様じゃないので、そこら辺をまず修正しなければならない。SyncAdapterを使う為にはContent Providerが必要な模様、なのでアクティビティ等のアプリに関わる部分(AccountAuthenticator以外)からサーバーに通信してデータを取る部分を全てContent Provider経由で取る。でバックグラウンドで同期が行われる際に、サーバー側から取得したデータをSQLiteデータベースに保管しておいて、それをContent Providerでやり取りをする</p>
+
+<p>という感じな仕様に変えないといけない。んまぁそこら辺はちゃちゃっと修正して、SyncAdapterの本体辺りな所だけ書く</p>
+<h4>SyncAdapterを使う手順</h4>
 <ul>
 <li>  AndroidManifest.xmlにandroid.content.SyncAdapterを持つ<service>を定義。さらにSyncAdapterから使うContent Providerの定義(<provider>)も必要</li>
 <li>  SyncAdapterなXMLリソース定義を作成</li>
 <li>  SyncAdapterなandroid.app.Serviceを実装</li>
 <li>  SyncAdapterなandroid.content.AbstractThreadedSyncAdapterを実装</li>
 </ul>
+
 <p>以上。これだけの追加が必要。でアプリ側の処理フロー的な流れ的には</p>
+
 <ul>
 <li>  SyncAdapterによるサーバーとのデータの同期を行う。その際そこからContent Providerを通じてSQLiteにデータを保管</li>
 <li>  Activity等からデータを利用するにはサーバーに通信せずにContent Providerを仲介する。でその際に必要になるのがCursorの扱いだが、そこはCursorLoader等を用いて利用する</li>
 </ul>
-<p>っていう感じ。これは上でも書いてるので</p><p>又、SyncAdapterな機能を使う際には</p>
+
+<p>っていう感じ。これは上でも書いてるので</p>
+
+<p>又、SyncAdapterな機能を使う際には</p>
+
 <ul>
 <li>  android.permission.READ_SYNC_STATS</li>
 <li>  android.permission.READ_SYNC_SETTINGS</li>
 <li>  android.permission.WRITE_SYNC_SETTINGS</li>
 </ul>
-<p>っていう権限が必要になる模様</p><h4>AndroidManifest.xmlを修正する</h4><p>SyncAdapterな所を追加する。上記でも書いてるようにパーミッションな所はすっ飛ばす</p><pre class="line-numbers"><code class="language-xml">&lt;service android:name=&quot;.SampleSyncService&quot; android:exported=&quot;true&quot;&gt;
+
+<p>っていう権限が必要になる模様</p>
+<h4>AndroidManifest.xmlを修正する</h4>
+<p>SyncAdapterな所を追加する。上記でも書いてるようにパーミッションな所はすっ飛ばす</p>
+<pre class="line-numbers"><code class="language-xml">&lt;service android:name=&quot;.SampleSyncService&quot; android:exported=&quot;true&quot;&gt;
     &lt;intent-filter&gt;
         &lt;action android:name=&quot;android.content.SyncAdapter&quot; /&gt;
     &lt;/intent-filter&gt;
@@ -116,7 +132,9 @@
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:accountType=&quot;@string/account_type&quot;
     android:contentAuthority=&quot;@string/provider_name&quot; /&gt;
-</code></pre><p><a href="http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html" target="_blank" rel="noopener noreferrer">http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html</a> に書いてるのでそれ参考に</p><h4>SampleSyncService.java</h4><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
+</code></pre>
+<p><a href="http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html">http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html</a> に書いてるのでそれ参考に</p>
+<h4>SampleSyncService.java</h4><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
 
 import android.app.Service;
 import android.content.Intent;
@@ -141,7 +159,9 @@ public class SampleSyncService extends Service {
         return mSyncAdadter.getSyncAdapterBinder();
     }
 }
-</code></pre><p>AbstractThreadedSyncAdapter#getSyncAdapterBinderを返すだけ</p><h4>SampleSyncAdapter.java</h4><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
+</code></pre>
+<p>AbstractThreadedSyncAdapter#getSyncAdapterBinderを返すだけ</p>
+<h4>SampleSyncAdapter.java</h4><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
 
 import java.io.IOException;
 import java.util.Date;
@@ -195,7 +215,19 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
         return authToken;
     }
 }
-</code></pre><p>で大量のデータを登録するような場合だと、ContentProvider.applyBatch辺りを使えば良いんじゃないかなーっと</p><p>以上。アプリ入れてアカウント作ると</p><p><img src="/images/2013/06/20130604092943.png" class="img-fluid" alt="image" /></p><p>というように同期なチェックが出来るようになる。チェック入れると30秒毎にonPerformSyncが実行されてデータの同期が行われる。でこの間隔を設定にはどうしたらいいのかっていう所はまだ判明してない</p><p>んまぁAndroid公式のサンプルにあるSampleSyncAdapterのソース読んだ方が早いかも</p>
+</code></pre>
+<p>で大量のデータを登録するような場合だと、ContentProvider.applyBatch辺りを使えば良いんじゃないかなーっと</p>
+
+<p>以上。アプリ入れてアカウント作ると</p>
+
+<p><img src="/images/2013/06/20130604092943.png" class="img-fluid" alt="image" /></p>
+
+<p>というように同期なチェックが出来るようになる。チェック入れると30秒毎にonPerformSyncが実行されてデータの同期が行われる。でこの間隔を設定にはどうしたらいいのかっていう所はまだ判明してない</p>
+
+<p>んまぁAndroid公式のサンプルにあるSampleSyncAdapterのソース読んだ方が早いかも</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -287,7 +319,7 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -308,9 +340,6 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -423,7 +452,7 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -446,20 +475,20 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -469,13 +498,15 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("9281e891e99128c12d87f39127826bf7289774ae");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

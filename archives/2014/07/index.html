@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -64,147 +63,6 @@
                   <a name="article-link" href="/2014/07/rails-strong-parameters.html">strong parameters</a>
                 </h3>
                 公式ドキュメント: [http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1]
-
-ActionController::Parametersリファレンス: &lt;http://api.rubyonrails.org/classes/ActionController/Parameters.html&gt; 
-
-参考: &lt;http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters&gt;
-
-
-
-
-
-例えば以下のようなテストを実行したらどうなるか
-
-
-```ruby
-require &quot;rails_helper&quot;
-
-describe ApplicationController do
-  fixtures :entry, :author
-
-  controller do
-    def update
-      begin
-        entry = Entry.find(params[:id])
-        entry.update(params[:entry])
-      rescue =&gt; e
-        raise e
-      end
-
-      render :text =&gt; &quot;OK&quot;
-    end
-  end
-
-  it &quot;request POST /create&quot; do
-    post :update, :id =&gt; 1, :entry =&gt; { :author_id =&gt; 2, :name =&gt; &quot;fuga&quot; }
-    entry = Entry.find(1)
-    expect(entry).not_to be_nil
-
-    # fail: author_idがfilterされてないので通りそれがアップデートされる為
-    author = entry.author
-    expect(author).not_to be_nil
-  end
-end
-
-```
-
-
-※config/environments/test.rbにて「&lt;span style=&quot;color: red&quot;&gt;config.action\_controller.permit\_all_parameters = true&lt;/span&gt;」をしておく。設定しない場合にはホワイトリスト化されてないパラメーター?に対してActiveModel::ForbiddenAttributesErrorが発生してエラーになる模様
-
-
-テスト実行する前にspec/fixturesに
-
-
-```yml
-entry1:
-  id: 1
-  author_id: 1
-  name: hoge
-```
-
-
-と
-
-
-```yml
-author1:
-  id: 1
-  name: author1
-```
-
-
-初期データを突っ込んでおく。で、このテストを実行すると
-
-
-&lt;pre&gt;
-F
-
-Failures:
-
-  1) ApplicationController request POST /create
-     Failure/Error: expect(author).not_to be_nil
-       expected: not nil
-            got: nil
-&lt;/pre&gt;
-
-
-意図しないデータを送ってしまう事により改変されてしまうような事態になる。こういう事態になるのを防ぐのがStrong Parametersっていう機能な模様。てな訳でStrong Parametersを使ってみる
-
-
-```rb
-require &quot;rails_helper&quot;
-
-describe ApplicationController do
-  fixtures :entry, :author
-
-  controller do
-    def update
-      begin
-        entry_params = params.require(:entry).permit(:name)
-        entry = Entry.find(params[:id])
-        entry.update(entry_params)
-      rescue =&gt; e
-        raise e
-      end
-
-      render :text =&gt; &quot;OK&quot;
-    end
-  end
-
-  it &quot;request POST /create&quot; do
-    post :update, :id =&gt; 1, :entry =&gt; { :author_id =&gt; 2, :name =&gt; &quot;fuga&quot; }
-    entry = Entry.find(1)
-    expect(entry).not_to be_nil
-
-    author = entry.author
-    expect(author).not_to be_nil
-  end
-end
-```
-
-
-っていうように:nameは通すけど:author_idは通さないようにする。又、config/environments/test.rbにて「&lt;span style=&quot;color: red&quot;&gt;config.action_controller.action_on_unpermitted_parameters = :raise&lt;/span&gt;」っていう設定をする事でpermitする段階において、許容されないパラメーターが含まれているような場合にはActionController::UnpermittedParametersのエラーが発生するようになる。なのでその設定をした状態で上記のテストを動かすと
-
-
-&lt;pre&gt;
-F
-
-Failures:
-
-  1) ApplicationController request POST /create
-     Failure/Error: entry_params = params.require(:entry).permit(:name)
-     ActionController::UnpermittedParameters:
-       found unpermitted parameters: author_id
-&lt;/pre&gt;
-
-
-というようにauthor_idが許容されないパラメーターな為にエラーが発生するようになる。
-
-
-終わり。というのがStrong Parametersの機能概要的な感じかと。要はパラメーターをフィルターする事で不当な注入による処理をされないようにするっていう感じかと
-
-
- [1]: http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters
               </div>
             </div>
             <div id="4b42a36cd91375e12aee41ccda9d87ba65c5dfdd" class="card m-4 mb-5">
@@ -377,7 +235,7 @@ Failures:
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -398,9 +256,6 @@ Failures:
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -513,7 +368,7 @@ Failures:
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -536,20 +391,20 @@ Failures:
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

@@ -10,14 +10,15 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="参考: &lt;http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html&gt;" />
+    <meta name="description" content="参考: &amp;lt;http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html&amp;gt;" />
     <title>ActiveRecord Optimistic Locking - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2014/08/multiple-capybara-session-testing.html" />
-    <link rel="next" href="https://kinjouj.github.io/2014/08/factorygirl-fixture-loading-architecture.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2014/07/rails-generate-factorygirl-fixtures.html" />
+    <link rel="next" href="https://kinjouj.github.io/2014/08/multiple-capybara-session-testing.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2014/08/activerecord-optimistic-locking.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-08-02T00:00:00+00:00">
+                <time datetime="2014-08-02 00:00:00 +0900">
                   <a href="/archives/2014/08">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["app/controllers/entries_controller.rb", "app/views/entries/show.erb", "app/views/entries/edit.erb", "Entryモデルのマイグレーションを修正", "app/controllers/entries_controller.rbを修正", "app/views/entries/edit.erbを修正"]-->
-                <p>参考: <a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html" target="_blank" rel="noopener noreferrer">http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html</a></p><p>Rails(っていうかActiveRecord)での楽観的ロックを使う場合のドキュメント見ながらやってみた</p><p>とりあえず実検証でのアプリケーションを作る必要があるので(ry</p><h4>app/controllers/entries_controller.rb</h4><pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
+                <!--[&quot;app/controllers/entries_controller.rb&quot;, &quot;app/views/entries/show.erb&quot;, &quot;app/views/entries/edit.erb&quot;, &quot;Entryモデルのマイグレーションを修正&quot;, &quot;app/controllers/entries_controller.rbを修正&quot;, &quot;app/views/entries/edit.erbを修正&quot;]-->
+                <p>参考: <a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html">http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html</a></p>
+
+<p>Rails(っていうかActiveRecord)での楽観的ロックを使う場合のドキュメント見ながらやってみた</p>
+
+<p>とりあえず実検証でのアプリケーションを作る必要があるので(ry</p>
+<h4>app/controllers/entries_controller.rb</h4><pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
   def show
     @entries = Entry.all
   end
@@ -103,7 +109,11 @@ end
   &lt;%= f.text_field :name  %&gt;
   &lt;%= f.submit &quot;update&quot; %&gt;
 &lt;% end %&gt;
-</code></pre><p>な感じで作ったとして、/entry/editに複数からアクセスしてアップデート処理を行った場合、一方が処理したのを他でアップデートされてデータが破壊されるっていうオチになる</p><p>でそういう風にならないようにデータをロックするなりで一方がアップデートして他が同時にアップデートしようとしたような場合にはエラーが起こるように出来る</p><h4>Entryモデルのマイグレーションを修正</h4><pre class="line-numbers"><code class="language-rb">class CreateEntries &lt; ActiveRecord::Migration
+</code></pre>
+<p>な感じで作ったとして、/entry/editに複数からアクセスしてアップデート処理を行った場合、一方が処理したのを他でアップデートされてデータが破壊されるっていうオチになる</p>
+
+<p>でそういう風にならないようにデータをロックするなりで一方がアップデートして他が同時にアップデートしようとしたような場合にはエラーが起こるように出来る</p>
+<h4>Entryモデルのマイグレーションを修正</h4><pre class="line-numbers"><code class="language-rb">class CreateEntries &lt; ActiveRecord::Migration
   def change
     create_table :entries do |t|
       t.string :name
@@ -112,10 +122,16 @@ end
     end
   end
 end
-</code></pre><p>lock_versionっていう名前のカラムを作っておけばそれを利用して楽観的ロックな機能を利用する事が出来る模様。又、モデルにて</p><pre class="line-numbers"><code class="language-rb">class Entry &lt; ActiveRecord::Base
+</code></pre>
+<p>lock_versionっていう名前のカラムを作っておけばそれを利用して楽観的ロックな機能を利用する事が出来る模様。又、モデルにて</p>
+<pre class="line-numbers"><code class="language-rb">class Entry &lt; ActiveRecord::Base
   self.locking_column = &quot;lock_entry&quot;
 end
-</code></pre><p>のようにlocking_columnでロックに使用するカラムを指定出来る。だから別にlock_versionじゃなきゃダメっていうわけでもない模様</p><p>これやれば良いだけのとちょっとアプリケーション自体を修正する必要もある</p><h4>app/controllers/entries_controller.rbを修正</h4><pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
+</code></pre>
+<p>のようにlocking_columnでロックに使用するカラムを指定出来る。だから別にlock_versionじゃなきゃダメっていうわけでもない模様</p>
+
+<p>これやれば良いだけのとちょっとアプリケーション自体を修正する必要もある</p>
+<h4>app/controllers/entries_controller.rbを修正</h4><pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
   def show
     @entries = Entry.all
   end
@@ -142,15 +158,21 @@ end
   &lt;%= f.text_field :name  %&gt;
   &lt;%= f.submit &quot;update&quot; %&gt;
 &lt;% end %&gt;
-</code></pre><p>ってな感じでやると、一方がアップデート処理をした後にもう一方側でアップデート処理等を使用とすると「ActiveRecord::StaleObjectError」というようなエラーになる</p><p>っていう感じ。疑問なのがこういうテストをどう書くのかっていう所。分かり次第追記する</p>
+</code></pre>
+<p>ってな感じでやると、一方がアップデート処理をした後にもう一方側でアップデート処理等を使用とすると「ActiveRecord::StaleObjectError」というようなエラーになる</p>
+
+<p>っていう感じ。疑問なのがこういうテストをどう書くのかっていう所。分かり次第追記する</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2014/08/factorygirl-fixture-loading-architecture.html">&lt;&nbsp;FactoryGirlのロードの仕組み</a>
+            <a class="float-start box-link" href="/2014/08/multiple-capybara-session-testing.html">&lt;&nbsp;Capybaraで複数のセッションを使う</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2014/08/multiple-capybara-session-testing.html">Capybaraで複数のセッションを使う&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2014/07/rails-generate-factorygirl-fixtures.html">rails generateでFactoryGirl Fixtures&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -234,7 +256,7 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -255,9 +277,6 @@ end
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -370,7 +389,7 @@ end
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -393,20 +412,20 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -416,13 +435,15 @@ end
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("f83c88c8b435a4df404681c50d94abacebe873b3");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

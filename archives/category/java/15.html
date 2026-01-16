@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -55,223 +54,6 @@
                   <a name="article-link" href="/2013/09/struts2-1.html">Struts2をやってみる (1)</a>
                 </h3>
                 まぁStruts1.xがEOLっていう事で代わりとなりえるだろうフレームワークを調査中で。でまぁStruts2とかもあるんじゃないかっていう事で色々勉強をしてみる事に
-
-
-#### セットアップ
-
-
-まぁ本来どうやるのかは微妙ですけど。gradleでプロジェクト管理してEclipseで開発したり、jettyで動かしてみたりしたいのでbuild.gradleを書く
-
-
-```groovy
-apply plugin: &quot;java&quot;
-apply plugin: &quot;war&quot;
-apply plugin: &quot;jetty&quot;
-apply plugin: &quot;eclipse&quot;
-
-ext {
-    targetDir = &quot;target&quot;
-}
-
-buildDir = targetDir
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile &quot;org.apache.struts:struts2-core:2.3.15.1&quot;
-}
-
-sourceSets {
-    main {
-        output.classesDir = &quot;${buildDir}/classes&quot;
-        output.resourcesDir = &quot;${buildDir}/classes&quot;
-    }
-
-    test {
-        output.classesDir = &quot;${buildDir}/classes&quot;
-    }
-}
-
-eclipse.classpath.file {
-    whenMerged { classpath -&gt;
-        classpath.entries.findAll { entry -&gt;
-            entry.kind == &quot;output&quot;
-        }*.path = &quot;/${project.name}/${targetDir}/classes&quot;
-    }
-}
-```
-
-
-jettyとかで動かしたい時は
-
-
-```
-gradle jettyRun
-```
-
-
-まぁ構造とかは
-
-
-&lt;pre&gt;
-├── build.gradle
-└── src
-    ├── main
-    │   ├── java
-    │   │   └── sample
-    │   │       └── action
-    │   │           └── IndexAction.java
-    │   ├── resources
-    │   │   └── struts.xml
-    │   └── webapp
-    │       └── WEB-INF
-    │           ├── jsp
-    │           │   └── index.jsp
-    │           └── web.xml
-    └── test
-        ├── java
-        └── resources
-&lt;/pre&gt;
-
-
-んな感じ。で上記で書く必要のあるファイルを書いていく
-
-
-#### src/main/resources/struts.xml
-
-
-```xml
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
-&lt;struts&gt;
-
-    &lt;!-- package name属性に指定するのはユニークな値であればなんでも良いっぽい --&gt;
-    &lt;!-- namespaceでプレフィックス的なが指定出来る模様 --&gt;
-
-    &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot; namespace=&quot;/sample&quot;&gt;
-        &lt;action name=&quot;index&quot; class=&quot;sample.action.IndexAction&quot;&gt;
-            &lt;result&gt;/WEB-INF/jsp/index.jsp&lt;/result&gt;
-        &lt;/action&gt;
-    &lt;/package&gt;
-&lt;/struts&gt;
-```
-
-
-Struts2にはZero Configuration的な機構なあれもあるらしいけどそこまでやってないので(ry
-
-
-#### src/main/webapp/WEB-INF/web.xml
-
-
-```xml
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;web-app
-    xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
-    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-    xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;
-    version=&quot;3.0&quot;&gt;
-
-    &lt;filter&gt;
-        &lt;filter-name&gt;struts2&lt;/filter-name&gt;
-        &lt;filter-class&gt;org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter&lt;/filter-class&gt;
-    &lt;/filter&gt;
-    &lt;filter-mapping&gt;
-        &lt;filter-name&gt;struts2&lt;/filter-name&gt;
-        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-    &lt;/filter-mapping&gt;
-&lt;/web-app&gt;
-```
-
-
-特に言う事無いと思うので
-
-
-んまぁこれでStruts2が動く環境を構築したのでJavaソース及びJSPを書いていく
-
-
-#### 要件
-
-
-名前入力してサブミットしたら表示するただそれだけ
-
-
-#### src/main/webapp/WEB-INF/jsp/index.jsp
-
-
-```jsp
-&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; %&gt;
-&lt;%@ taglib prefix=&quot;s&quot; uri=&quot;/struts-tags&quot; %&gt;
-&lt;html&gt;
-  &lt;head&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;s:form action=&quot;index&quot;&gt;
-      &lt;s:textfield name=&quot;name&quot; /&gt;
-      &lt;s:submit /&gt;
-    &lt;/s:form&gt;
-
-    &lt;s:if test=&quot;name != null&quot;&gt;
-    &lt;p&gt;say: &lt;s:property value=&quot;name&quot; /&gt;&lt;/p&gt;
-    &lt;p&gt;say: ${name}&lt;/p&gt;
-    &lt;/s:if&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-```
-
-
-#### src/main/java/sample/action/IndexAction.java
-
-
-```java
-package sample.action;
-
-import com.opensymphony.xwork2.ActionSupport;
-
-public class IndexAction extends ActionSupport {
-
-    private static final long serialVersionUID = 1L;
-
-    private String name = null;
-
-    public String execute() {
-        return SUCCESS;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-}
-```
-
-
-デフォルトだとexecuteだと思いますが、struts.xmlにて
-
-
-```xml
-&lt;action name=&quot;index&quot; class=&quot;sample.action.IndexAction&quot; method=&quot;execute&quot;&gt;
-&lt;/action&gt;
-```
-
-
-っていう感じで指定出来る模様。検証してないけど...
-
-
-JSP側からはActionのgetterメソッドをOGNL式として評価して利用できる模様。
-
-
-んでコンパイルしてサーバー起動。テキストボックスがあるのでそこに適当に入力してサブミット
-
-
-![](/images/2013/09/201309151600.jpg)
-
-
-っていう感じになる。んまぁファーストステップ的な所はこんな所で
               </div>
             </div>
             <div id="3cf82134f557b0e4de72deb8bc12499bd05204d5" class="card m-4 mb-5">
@@ -442,7 +224,7 @@ JSP側からはActionのgetterメソッドをOGNL式として評価して利用�
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -463,9 +245,6 @@ JSP側からはActionのgetterメソッドをOGNL式として評価して利用�
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -578,7 +357,7 @@ JSP側からはActionのgetterメソッドをOGNL式として評価して利用�
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -601,20 +380,20 @@ JSP側からはActionのgetterメソッドをOGNL式として評価して利用�
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

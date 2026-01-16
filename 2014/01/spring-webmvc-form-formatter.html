@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-01-10T00:00:00+00:00">
+                <time datetime="2014-01-10 00:00:00 +0900">
                   <a href="/archives/2014/01">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,12 +78,19 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Sample.java", "SampleFormatter.java", "SampleFormatterFactory", "SampleForm.java", "SampleController.java"]-->
-                <p>※おそらくは書いてる内容は自分以外は理解しにくいと思いますので興味ないならCTRL+Wしてください(笑)</p><p><a href="/spring-webmvc-18-annotationformatterfactory.html">Spring WebMVCをやってみる (18) – AnnotationFormatterFactory -</a>でも書いてるけど</p>
+                <!--[&quot;Sample.java&quot;, &quot;SampleFormatter.java&quot;, &quot;SampleFormatterFactory&quot;, &quot;SampleForm.java&quot;, &quot;SampleController.java&quot;]-->
+                <p>※おそらくは書いてる内容は自分以外は理解しにくいと思いますので興味ないならCTRL+Wしてください(笑)</p>
+
+<p><a href="/spring-webmvc-18-annotationformatterfactory.html">Spring WebMVCをやってみる (18) – AnnotationFormatterFactory -</a>でも書いてるけど</p>
+
 <blockquote>
 「getPrinter実装してもどういう作用で発生するのかが謎」。普通にFormatterを使う場合とかだと<spring:bind expression=”…” />等で作用されるっていうはあるのだけど、このAnnotationFormatterFactoryの事象だけはgetPrinterメソッドが作用する事が無い
 </blockquote>
-<p>っていう件に関して。結論から言うと「やり方が悪い」っていうだけだった模様</p><p>いわゆる@ModelAttributeなオブジェクトにプッシュしてやる事で発生する模様。単純に</p><pre class="line-numbers"><code class="language-jsp">&lt;form:form action=&quot;/swmvc/sample/save.action&quot; method=&quot;post&quot; modelAttribute=&quot;sample_form&quot;&gt;
+
+<p>っていう件に関して。結論から言うと「やり方が悪い」っていうだけだった模様</p>
+
+<p>いわゆる@ModelAttributeなオブジェクトにプッシュしてやる事で発生する模様。単純に</p>
+<pre class="line-numbers"><code class="language-jsp">&lt;form:form action=&quot;/swmvc/sample/save.action&quot; method=&quot;post&quot; modelAttribute=&quot;sample_form&quot;&gt;
 
     &lt;!-- java.util.Dateを@DateTimeFormatterでフォーマット出力をする --&gt;
     &lt;form:input path=&quot;createdAt&quot; /&gt;
@@ -92,7 +100,13 @@
 
     &lt;input type=&quot;submit&quot; value=&quot;save&quot; /&gt;
 &lt;/form:form&gt;
-</code></pre><p>で前回のだとURLから受け取ったデータをそのままModelMapに突っ込んでJSPで参照するっていう方式でやったけれども、それをやるといざform:input等で利用してもフォーマット出力されない</p><p>で検証してみた所だと@ModelAttributeで使用されるクラスでゲッターセッターを持ち、そのフィールドでアノテーションを付与しておいてそれを利用する事でgetPrinterを利用したフォーマット出力を利用できる模様</p><p>という事で長いけどやってみる。要件は上記でも書いてるようにEnumをフォーマット出力するAnnotationFormatterFactoryを利用する</p><h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>で前回のだとURLから受け取ったデータをそのままModelMapに突っ込んでJSPで参照するっていう方式でやったけれども、それをやるといざform:input等で利用してもフォーマット出力されない</p>
+
+<p>で検証してみた所だと@ModelAttributeで使用されるクラスでゲッターセッターを持ち、そのフィールドでアノテーションを付与しておいてそれを利用する事でgetPrinterを利用したフォーマット出力を利用できる模様</p>
+
+<p>という事で長いけどやってみる。要件は上記でも書いてるようにEnumをフォーマット出力するAnnotationFormatterFactoryを利用する</p>
+<h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 public enum Sample {
 
@@ -127,7 +141,9 @@ public class SampleFormatter implements Formatter&lt;Sample&gt; {
         return Sample.valueOf(text.toUpperCase());
     }
 }
-</code></pre><p>前回のだとURLのクエリーからこのparseメソッドを使ってStringからEnumへ変換するっていうのをやったけど、printが発生しない(正確にはAnnotationFormatterFactory#getPrinterが発生しない)</p><h4>SampleFormatterFactory</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>前回のだとURLのクエリーからこのparseメソッドを使ってStringからEnumへ変換するっていうのをやったけど、printが発生しない(正確にはAnnotationFormatterFactory#getPrinterが発生しない)</p>
+<h4>SampleFormatterFactory</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -154,7 +170,9 @@ public class SampleFormatterFactory implements AnnotationFormatterFactory&lt;Sam
         return new SampleFormatter();
     }
 }
-</code></pre><p>おそらくは前回のとまったく変わってないはずなので(ry</p><h4>SampleForm.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>おそらくは前回のとまったく変わってないはずなので(ry</p>
+<h4>SampleForm.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -221,7 +239,13 @@ public class SampleController {
         return &quot;index&quot;;
     }
 }
-</code></pre><p>っていう感じで@ModelAttributeなコマンドオブジェクトにリクエストからparseされたSampleなenumをセットする。でそのコマンドオブジェクトなSampleFormでSampleなenumは@SampleFormatがついてるので、それがAnnotationFormatterFactory#getPrinterからFormatter#printに処理が発生するっていう感じ</p><p>ちなみにSampleFormの@SampleFormatなアノテーションを外すとSampleFormatterでは処理されないがEnum#nameメソッドが表記で出力される模様</p>
+</code></pre>
+<p>っていう感じで@ModelAttributeなコマンドオブジェクトにリクエストからparseされたSampleなenumをセットする。でそのコマンドオブジェクトなSampleFormでSampleなenumは@SampleFormatがついてるので、それがAnnotationFormatterFactory#getPrinterからFormatter#printに処理が発生するっていう感じ</p>
+
+<p>ちなみにSampleFormの@SampleFormatなアノテーションを外すとSampleFormatterでは処理されないがEnum#nameメソッドが表記で出力される模様</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -313,7 +337,7 @@ public class SampleController {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -334,9 +358,6 @@ public class SampleController {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -449,7 +470,7 @@ public class SampleController {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -472,20 +493,20 @@ public class SampleController {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -495,13 +516,15 @@ public class SampleController {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("f0601abf3641417a8c3b928d14f1b8fd97eaccd7");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

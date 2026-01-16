@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="公式ドキュメント(Guide): &lt;http://guides.rubyonrails.org/association_basics.html#polymorphic-associations&gt;" />
+    <meta name="description" content="公式ドキュメント(Guide): &amp;lt;http://guides.rubyonrails.org/association_basics.html#polymorphic-associations&amp;gt;" />
     <title>ActiveRecordのpolymorphic - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/08/factorygirl-fixture-loading-architecture.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/08/jaxrs-16-paramconverter.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-08-07T00:00:00+00:00">
+                <time datetime="2014-08-07 00:00:00 +0900">
                   <a href="/archives/2014/08">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -78,20 +79,37 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["lib/product.rb", "lib/employee.rb", "lib/picture.rb", "spec/spec_helper.rb", "spec/factories/fixture.rb", "spec/models/product_spec.rb", "spec/models/employee_spec.rb", "ログに出力したSQL"]-->
-                <p>公式ドキュメント(Guide): <a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations" target="_blank" rel="noopener noreferrer">http://guides.rubyonrails.org/association_basics.html#polymorphic-associations</a></p><p>公式ドキュメントの日本語翻訳: <a href="http://wiki.usagee.co.jp/ruby/rails/RailsGuides%E3%82%92%E3%82%86%E3%81%A3%E3%81%8F%E3%82%8A%E5%92%8C%E8%A8%B3%E3%81%97%E3%81%A6%E3%81%BF%E3%81%9F%E3%82%88/Active%20Record%20Associations#t758e640">ruby/rails/RailsGuidesをゆっくり和訳してみたよ/Active Record Associations</a></p><p>ちょいちょい公式ドキュメントをざっくり見ながらやってみてる。今回はActiveRecordのpolymorphic association</p><p>公式的なのをそのまま使うと、ProductとEmployeeとPictureモデルがあるけど、ProductとEmployee両方がPictureモデルを使うような場合になるとPictureモデル側が所有するデータ自体がどこのモデルに所属する物か判別する目的としてpolymorphicを使用する事で、アソシエーション名_typeのカラムによってどこに所属するのかっていう識別を出来るようになる。まぁそんな感じで一つのモデル(テーブル)で複数のモデル等でレコードを参照するような多様性を持つモデルとして機能させる事が出来る仕様みたいな感じかな</p><p>やってみた結果を見た方が分かりやすいような気がするので(※プロジェクト自体はRailsプロジェクトじゃない方で検証)</p><h4>lib/product.rb</h4><pre class="line-numbers"><code class="language-rb">class Product &lt; ActiveRecord::Base
+                <!--[&quot;lib/product.rb&quot;, &quot;lib/employee.rb&quot;, &quot;lib/picture.rb&quot;, &quot;spec/spec_helper.rb&quot;, &quot;spec/factories/fixture.rb&quot;, &quot;spec/models/product_spec.rb&quot;, &quot;spec/models/employee_spec.rb&quot;, &quot;ログに出力したSQL&quot;]-->
+                <p>公式ドキュメント(Guide): <a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations">http://guides.rubyonrails.org/association_basics.html#polymorphic-associations</a></p>
+
+<p>公式ドキュメントの日本語翻訳: <a href="http://wiki.usagee.co.jp/ruby/rails/RailsGuides%E3%82%92%E3%82%86%E3%81%A3%E3%81%8F%E3%82%8A%E5%92%8C%E8%A8%B3%E3%81%97%E3%81%A6%E3%81%BF%E3%81%9F%E3%82%88/Active%20Record%20Associations#t758e640">ruby/rails/RailsGuidesをゆっくり和訳してみたよ/Active Record Associations</a></p>
+
+<p>ちょいちょい公式ドキュメントをざっくり見ながらやってみてる。今回はActiveRecordのpolymorphic association</p>
+
+<p>公式的なのをそのまま使うと、ProductとEmployeeとPictureモデルがあるけど、ProductとEmployee両方がPictureモデルを使うような場合になるとPictureモデル側が所有するデータ自体がどこのモデルに所属する物か判別する目的としてpolymorphicを使用する事で、アソシエーション名_typeのカラムによってどこに所属するのかっていう識別を出来るようになる。まぁそんな感じで一つのモデル(テーブル)で複数のモデル等でレコードを参照するような多様性を持つモデルとして機能させる事が出来る仕様みたいな感じかな</p>
+
+<p>やってみた結果を見た方が分かりやすいような気がするので(※プロジェクト自体はRailsプロジェクトじゃない方で検証)</p>
+<h4>lib/product.rb</h4><pre class="line-numbers"><code class="language-rb">class Product &lt; ActiveRecord::Base
   has_many :pictures, :as =&gt; :imageable
 end
 </code></pre><h4>lib/employee.rb</h4><pre class="line-numbers"><code class="language-rb">class Employee &lt; ActiveRecord::Base
   has_many :pictures, :as =&gt; :imageable
 end
-</code></pre><h4>lib/picture.rb</h4><p><code>rbclass Picture &lt; ActiveRecord::Base
-  belongs_to :imageable, polymorphic: true
-end
-</code></p><p>んまぁ公式ドキュメントのやつをそのまま使う。上記で書いたけどRailsプロジェクトじゃないでやってるので</p><pre class="line-numbers"><code class="language-sql">CREATE TABLE products(id integer primary key, name varchar(30) not null);
+</code></pre><h4>lib/picture.rb</h4>
+<p><code>rbclass Picture &lt; ActiveRecord::Base<br>
+  belongs_to :imageable, polymorphic: true<br>
+end<br>
+</code></p>
+
+<p>んまぁ公式ドキュメントのやつをそのまま使う。上記で書いたけどRailsプロジェクトじゃないでやってるので</p>
+<pre class="line-numbers"><code class="language-sql">CREATE TABLE products(id integer primary key, name varchar(30) not null);
 CREATE TABLE pictures(id integer primary key, imageable_id integer, imageable_type varchar(50) not null);
 CREATE TABLE employees(id integer primary key, name varchar(30) not null);
-</code></pre><p>な感じでデータベースを作っておく(SQLite)。でその際にpicturesテーブルにはアソシエーション名_idとアソシエーション名_typeのカラムが必要になる</p><p>ちなみにActiveRecord::Migration辺りを使う場合には</p><pre class="line-numbers"><code class="language-rb">class CreatePictures &lt; ActiveRecord::Migration
+</code></pre>
+<p>な感じでデータベースを作っておく(SQLite)。でその際にpicturesテーブルにはアソシエーション名_idとアソシエーション名_typeのカラムが必要になる</p>
+
+<p>ちなみにActiveRecord::Migration辺りを使う場合には</p>
+<pre class="line-numbers"><code class="language-rb">class CreatePictures &lt; ActiveRecord::Migration
   def self.up
     create_table :pictures do |t|
       t.string :name
@@ -104,7 +122,11 @@ CREATE TABLE employees(id integer primary key, name varchar(30) not null);
     drop_table :pictures
   end
 end
-</code></pre><p>な感じで作れる模様</p><p>んじゃ必要なのは定義したんでテストなり書いてる方向で検証</p><h4>spec/spec_helper.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;logger&quot;
+</code></pre>
+<p>な感じで作れる模様</p>
+
+<p>んじゃ必要なのは定義したんでテストなり書いてる方向で検証</p>
+<h4>spec/spec_helper.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;logger&quot;
 require &quot;database_cleaner&quot;
 require &quot;active_record&quot;
 require &quot;factory_girl&quot;
@@ -140,7 +162,9 @@ RSpec.configure do |config|
 
   # 以降省略
 end
-</code></pre><p>な感じでActiveRecord及びFactoryGirl、あとテスト時に処理したデータベースのクリーンアップ関係を設定しておく</p><h4>spec/factories/fixture.rb</h4><pre class="line-numbers"><code class="language-rb">FactoryGirl.define do
+</code></pre>
+<p>な感じでActiveRecord及びFactoryGirl、あとテスト時に処理したデータベースのクリーンアップ関係を設定しておく</p>
+<h4>spec/factories/fixture.rb</h4><pre class="line-numbers"><code class="language-rb">FactoryGirl.define do
   factory :product, :class =&gt; Product do
     name &quot;hoge&quot;
     after :create do |product|
@@ -160,7 +184,9 @@ end
     # 特に別なカラムを定義してないので
   end
 end
-</code></pre><p>な感じで、ProductとEmployeeなレコードを一つづつ定義。そしてPictureにそれぞれの参照するレコードを定義(この場合はPictureには2つのレコードが入る)</p><h4>spec/models/product_spec.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
+</code></pre>
+<p>な感じで、ProductとEmployeeなレコードを一つづつ定義。そしてPictureにそれぞれの参照するレコードを定義(この場合はPictureには2つのレコードが入る)</p>
+<h4>spec/models/product_spec.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 describe Product do
   it &quot;product test&quot; do
@@ -177,7 +203,9 @@ describe Product do
     expect(picture.imageable).to eq(product)
   end
 end
-</code></pre><p>というようにProductを取って、そのpicturesなアソシエーションからPictureの参照(has_manyなので配列)を取る。で上記でPictureには2つ突っ込んだけど参照されてるのは1つというのはimageable_typeによってモデルの型により取れるレコードが限られるので</p><h4>spec/models/employee_spec.rb</h4><pre class="line-numbers"><code class="language-rb">describe Employee do
+</code></pre>
+<p>というようにProductを取って、そのpicturesなアソシエーションからPictureの参照(has_manyなので配列)を取る。で上記でPictureには2つ突っ込んだけど参照されてるのは1つというのはimageable_typeによってモデルの型により取れるレコードが限られるので</p>
+<h4>spec/models/employee_spec.rb</h4><pre class="line-numbers"><code class="language-rb">describe Employee do
   it &quot;employee test&quot; do
     create(:employee)
 
@@ -192,7 +220,11 @@ end
     expect(picture.imageable).to eq(employee)
   end
 end
-</code></pre><p>Productの時と同様なので説明不要</p><h4>ログに出力したSQL</h4><p>※説明不明なログは省略(部分的な値は埋め込みで記載)</p><pre class="line-numbers"><code class="language-sql">[Employeeのfixture投入]
+</code></pre>
+<p>Productの時と同様なので説明不要</p>
+<h4>ログに出力したSQL</h4>
+<p>※説明不明なログは省略(部分的な値は埋め込みで記載)</p>
+<pre class="line-numbers"><code class="language-sql">[Employeeのfixture投入]
 begin transaction
   INSERT INTO &quot;employees&quot; (&quot;name&quot;) VALUES (?)  [[&quot;name&quot;, &quot;fuga&quot;]]
 commit transaction
@@ -249,7 +281,11 @@ AND
     &quot;pictures&quot;.&quot;imageable_type&quot; = &quot;Product&quot;
 ORDER BY &quot;pictures&quot;.&quot;id&quot; ASC
 LIMIT 1
-</code></pre><p>モデル間で関係を結びつける場合はid等が使われるが、polymorphicを使う事でアソシエーション名_typeなカラムによってどのモデルと結びつけが行われてるかを示す事で多数のモデルでのアソシエーションを可能にする多様性のあるモデルとして利用出来るような感じかと(アソシエーション名_idはレコードとの結びつけかと)</p>
+</code></pre>
+<p>モデル間で関係を結びつける場合はid等が使われるが、polymorphicを使う事でアソシエーション名_typeなカラムによってどのモデルと結びつけが行われてるかを示す事で多数のモデルでのアソシエーションを可能にする多様性のあるモデルとして利用出来るような感じかと(アソシエーション名_idはレコードとの結びつけかと)</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -341,7 +377,7 @@ LIMIT 1
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -362,9 +398,6 @@ LIMIT 1
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -477,7 +510,7 @@ LIMIT 1
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -500,20 +533,20 @@ LIMIT 1
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -523,13 +556,15 @@ LIMIT 1
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("ec07acf1f849673807e128d015b6c452125d1c6a");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

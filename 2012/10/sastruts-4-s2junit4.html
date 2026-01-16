@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-10-05T09:00:00+09:00">
+                <time datetime="2012-10-05 09:00:00 +0900">
                   <a href="/archives/2012/10">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["s2junit4.dicon", "SampleTestCase.xls", "SampleService.java", "Sample2Action.java", "SampleTestCase.java", "備考1", "未解決要件1 (Txなメソッドがついてるとコミットされずにロールバックされる件)"]-->
-                <p>タイトル通り。まだ(調査が)微妙なんですが、S2Unit4を使ってテストをしてみる</p><h4>s2junit4.dicon</h4><p>が必要な模様なのですが、 <a href="http://s2container.seasar.org/2.4/ja/S2JUnit4.html" target="_blank" rel="noopener noreferrer">http://s2container.seasar.org/2.4/ja/S2JUnit4.html</a> に普通に書いてあるのでそのまま抜粋する。ちょっと削ってる</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+                <!--[&quot;s2junit4.dicon&quot;, &quot;SampleTestCase.xls&quot;, &quot;SampleService.java&quot;, &quot;Sample2Action.java&quot;, &quot;SampleTestCase.java&quot;, &quot;備考1&quot;, &quot;未解決要件1 (Txなメソッドがついてるとコミットされずにロールバックされる件)&quot;]-->
+                <p>タイトル通り。まだ(調査が)微妙なんですが、S2Unit4を使ってテストをしてみる</p>
+<h4>s2junit4.dicon</h4>
+<p>が必要な模様なのですが、 <a href="http://s2container.seasar.org/2.4/ja/S2JUnit4.html">http://s2container.seasar.org/2.4/ja/S2JUnit4.html</a> に普通に書いてあるのでそのまま抜粋する。ちょっと削ってる</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;!DOCTYPE components PUBLIC &quot;-//SEASAR//DTD S2Container 2.4//EN&quot;
   &quot;http://www.seasar.org/dtd/components24.dtd&quot;&gt;
 &lt;components namespace=&quot;s2junit4&quot;&gt;
@@ -105,7 +109,17 @@
     &lt;/initMethod&gt;
   &lt;/component&gt;
 &lt;/components&gt;
-</code></pre><p>ってな感じで、テストクラス名.xlsもしくはテストクラス名_テストメソッド名.xlsを使えばテストデータをぶち込める模様</p><h4>SampleTestCase.xls</h4><p>上で書いたようにテストデータをぶち込めるExcelファイルを作成する</p><p><img src="/images/2012/10/20121005174933.jpg" class="img-fluid" alt="image" /></p><p>っていう感じで1行目にテーブルのカラム名、それ以降にそれに対応するデータをぶち込む(Date系の場合、列書式を日付にすれば挿入できるらしいですけど未だ成功せず)</p><p>また、シート名はテーブル名にしておく(初期時の要らないシートは消しておく)</p><h4>SampleService.java</h4><pre class="line-numbers"><code class="language-java">package sample.service;
+</code></pre>
+<p>ってな感じで、テストクラス名.xlsもしくはテストクラス名_テストメソッド名.xlsを使えばテストデータをぶち込める模様</p>
+<h4>SampleTestCase.xls</h4>
+<p>上で書いたようにテストデータをぶち込めるExcelファイルを作成する</p>
+
+<p><img src="/images/2012/10/20121005174933.jpg" class="img-fluid" alt="image" /></p>
+
+<p>っていう感じで1行目にテーブルのカラム名、それ以降にそれに対応するデータをぶち込む(Date系の場合、列書式を日付にすれば挿入できるらしいですけど未だ成功せず)</p>
+
+<p>また、シート名はテーブル名にしておく(初期時の要らないシートは消しておく)</p>
+<h4>SampleService.java</h4><pre class="line-numbers"><code class="language-java">package sample.service;
 
 import java.util.List;
 import javax.annotation.Resource;
@@ -146,7 +160,9 @@ public class SampleService {
         return createdSample;
     }
 }
-</code></pre><p>この2つのメソッドをテストで使うので定義しておく。あくまで例で、前回のS2JDBCな記事がベース(但し、Date系のカラムは修正)</p><h4>Sample2Action.java</h4><pre class="line-numbers"><code class="language-java">package sample.action;
+</code></pre>
+<p>この2つのメソッドをテストで使うので定義しておく。あくまで例で、前回のS2JDBCな記事がベース(但し、Date系のカラムは修正)</p>
+<h4>Sample2Action.java</h4><pre class="line-numbers"><code class="language-java">package sample.action;
 
 import java.util.List;
 
@@ -234,7 +250,19 @@ public class SampleTestCase {
         assertSame(session.getAttribute(&quot;test&quot;), &quot;hoge fuga foobar&quot;);
     }
 }
-</code></pre><p>とりあえずフィールドに定義しとけば、S2Containerで注入される模様。んでテスト側でMockHttpServletRequest等を介する事でアクションメソッド実行のリクエストヘッダーなども注入されるっていう感じなのかも</p><p>んで、実行すると上で書いたテストデータがテスト前にぶち込まれる事を確認する。</p><h4>備考1</h4><p>ドキュメントではs2junit4.diconでjavaee.diconをインクルードしているけど、これだと何やら依存関係の注入でコケる。 <a href="http://blog.roundrop.jp/show/21" target="_blank" rel="noopener noreferrer">http://blog.roundrop.jp/show/21</a> を参考にjavaee5.diconではなく、app.diconをインクルードする事で解決出来る模様</p><h4>未解決要件1 (Txなメソッドがついてるとコミットされずにロールバックされる件)</h4><p>何やらテストメソッドの接尾辞にTxがついてるとコミットされずにロールバックされるらしいが、つけようがつけまいがロールバックされてる模様げ</p><p>な感じでちょっとまだ微妙な所が多いので、分かり次第レポートする予定</p>
+</code></pre>
+<p>とりあえずフィールドに定義しとけば、S2Containerで注入される模様。んでテスト側でMockHttpServletRequest等を介する事でアクションメソッド実行のリクエストヘッダーなども注入されるっていう感じなのかも</p>
+
+<p>んで、実行すると上で書いたテストデータがテスト前にぶち込まれる事を確認する。</p>
+<h4>備考1</h4>
+<p>ドキュメントではs2junit4.diconでjavaee.diconをインクルードしているけど、これだと何やら依存関係の注入でコケる。 <a href="http://blog.roundrop.jp/show/21">http://blog.roundrop.jp/show/21</a> を参考にjavaee5.diconではなく、app.diconをインクルードする事で解決出来る模様</p>
+<h4>未解決要件1 (Txなメソッドがついてるとコミットされずにロールバックされる件)</h4>
+<p>何やらテストメソッドの接尾辞にTxがついてるとコミットされずにロールバックされるらしいが、つけようがつけまいがロールバックされてる模様げ</p>
+
+<p>な感じでちょっとまだ微妙な所が多いので、分かり次第レポートする予定</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -326,7 +354,7 @@ public class SampleTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -347,9 +375,6 @@ public class SampleTestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -462,7 +487,7 @@ public class SampleTestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -485,20 +510,20 @@ public class SampleTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -508,13 +533,15 @@ public class SampleTestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("f549be37fa78c7c47d96b5dab6c55d8be7b69016");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

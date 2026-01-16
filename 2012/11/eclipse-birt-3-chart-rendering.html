@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-11-02T00:00:00+00:00">
+                <time datetime="2012-11-02 00:00:00 +0900">
                   <a href="/archives/2012/11">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["下準備", "データセットの作成", "チャートをマッピングする"]-->
-                <p>今回コードはまったくありません(SQL以外は)。ほぼ操作方法的な感じになる。</p><h4>下準備</h4><p>とりあえず今回以下のようなテーブル構造を使用する</p><pre class="line-numbers"><code class="language-sql">CREATE TABLE `items` (
+                <!--[&quot;下準備&quot;, &quot;データセットの作成&quot;, &quot;チャートをマッピングする&quot;]-->
+                <p>今回コードはまったくありません(SQL以外は)。ほぼ操作方法的な感じになる。</p>
+<h4>下準備</h4>
+<p>とりあえず今回以下のようなテーブル構造を使用する</p>
+<pre class="line-numbers"><code class="language-sql">CREATE TABLE `items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `item_name` varchar(50) NOT NULL,
   `price` int(11) DEFAULT NULL,
@@ -89,7 +93,9 @@ CREATE TABLE `sales` (
   `item_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-</code></pre><p>てな感じ。ID、アイテム名、値段、販売数、値段*販売数の5つのデータをバインディングする</p><h4>データセットの作成</h4><pre class="line-numbers"><code class="language-sql">SELECT
+</code></pre>
+<p>てな感じ。ID、アイテム名、値段、販売数、値段*販売数の5つのデータをバインディングする</p>
+<h4>データセットの作成</h4><pre class="line-numbers"><code class="language-sql">SELECT
   i.id,
   i.item_name,
   i.price,
@@ -101,7 +107,39 @@ INNER JOIN
 ON
   i.id = s.item_id
 GROUP BY i.id
-</code></pre><p>をクエリーで参照する。で計算例な所に値段*販売数をバインドする(以下参照)</p><p><img src="/images/2012/11/20121102020512.jpg" class="img-fluid" alt="image" /></p><p>で結果プレビューすると</p><p><img src="/images/2012/11/20121102020606.jpg" class="img-fluid" alt="image" /></p><p>てな感じになる。これでデータセットは完了</p><h4>チャートをマッピングする</h4><p>パレットビューからグラフをDnDしてレイアウトに設定する。ダイアログが出るので、とりあえず今回は棒グラフを生成する。で次にデータ選択画面にて、データをバインドする設定を行う</p><p>まずデータ選択から「Use Data from」で作成したデータセットを選択する。んで左側にある値系列を押して、値としてバインドするデータカラムを設定。今回はsales_sumを設定する</p><p>でカテゴリー系列でラベルを設定する。でその隣のソート画面で</p><p><img src="/images/2012/11/20121102023802.jpg" class="img-fluid" alt="image" /></p><p>てな感じで設定する。特にグルーピングする必要が無ければチェック外しておく事(外さないとデータがグルーピングされる)</p><p>で右側のY系のグループ設定は必要ないなら設定しなくて良いので今回はやらない。あとはグラフの書式設定だけど、値系列設定で「Show Series Labels」をチェックしておくとグラフに対応する値がグラフにレンダリング出来る。</p><p>これで設定終わり。保存してプレビューして見てみる</p><p>んで、プレビューで成功しても以前同様にJavaから実行して行う場合ではエラーになる事があるのでそこでもチェックしてみる</p><p>でこんな感じになる</p><p><img src="/images/2012/11/20121102023930.jpg" class="img-fluid" alt="image" /></p>
+</code></pre>
+<p>をクエリーで参照する。で計算例な所に値段*販売数をバインドする(以下参照)</p>
+
+<p><img src="/images/2012/11/20121102020512.jpg" class="img-fluid" alt="image" /></p>
+
+<p>で結果プレビューすると</p>
+
+<p><img src="/images/2012/11/20121102020606.jpg" class="img-fluid" alt="image" /></p>
+
+<p>てな感じになる。これでデータセットは完了</p>
+<h4>チャートをマッピングする</h4>
+<p>パレットビューからグラフをDnDしてレイアウトに設定する。ダイアログが出るので、とりあえず今回は棒グラフを生成する。で次にデータ選択画面にて、データをバインドする設定を行う</p>
+
+<p>まずデータ選択から「Use Data from」で作成したデータセットを選択する。んで左側にある値系列を押して、値としてバインドするデータカラムを設定。今回はsales_sumを設定する</p>
+
+<p>でカテゴリー系列でラベルを設定する。でその隣のソート画面で</p>
+
+<p><img src="/images/2012/11/20121102023802.jpg" class="img-fluid" alt="image" /></p>
+
+<p>てな感じで設定する。特にグルーピングする必要が無ければチェック外しておく事(外さないとデータがグルーピングされる)</p>
+
+<p>で右側のY系のグループ設定は必要ないなら設定しなくて良いので今回はやらない。あとはグラフの書式設定だけど、値系列設定で「Show Series Labels」をチェックしておくとグラフに対応する値がグラフにレンダリング出来る。</p>
+
+<p>これで設定終わり。保存してプレビューして見てみる</p>
+
+<p>んで、プレビューで成功しても以前同様にJavaから実行して行う場合ではエラーになる事があるのでそこでもチェックしてみる</p>
+
+<p>でこんな感じになる</p>
+
+<p><img src="/images/2012/11/20121102023930.jpg" class="img-fluid" alt="image" /></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -193,7 +231,7 @@ GROUP BY i.id
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -214,9 +252,6 @@ GROUP BY i.id
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -329,7 +364,7 @@ GROUP BY i.id
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -352,20 +387,20 @@ GROUP BY i.id
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -375,13 +410,15 @@ GROUP BY i.id
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("b03b3d11bdd6255f361c2fb8ce32ea38324716cb");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

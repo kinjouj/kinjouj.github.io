@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-11-22T00:00:00+00:00">
+                <time datetime="2012-11-22 00:00:00 +0900">
                   <a href="/archives/2012/11">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["セットアップ", "WebHDFS Rest APIを使って操作する", "ユーザーディレクトリ内にdataディレクトリを作る", "作ったディレクトリのステータスを見る", "ディレクトリにファイルを突っ込んでみる", "ディレクトリにあるファイルステータスを取る", "ファイルを読み取る", "ファイル等を消す", "追記1", "追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす"]-->
-                <p>WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた</p><p>(Hadoopのバージョンは1.0.4です)</p><h4>セットアップ</h4><p>デフォルトでWebHDFSはサポートしてないので設定しないと使えない模様。なのでhdfs-site.xmlに追加する</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+                <!--[&quot;セットアップ&quot;, &quot;WebHDFS Rest APIを使って操作する&quot;, &quot;ユーザーディレクトリ内にdataディレクトリを作る&quot;, &quot;作ったディレクトリのステータスを見る&quot;, &quot;ディレクトリにファイルを突っ込んでみる&quot;, &quot;ディレクトリにあるファイルステータスを取る&quot;, &quot;ファイルを読み取る&quot;, &quot;ファイル等を消す&quot;, &quot;追記1&quot;, &quot;追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす&quot;]-->
+                <p>WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた</p>
+
+<p>(Hadoopのバージョンは1.0.4です)</p>
+<h4>セットアップ</h4>
+<p>デフォルトでWebHDFSはサポートしてないので設定しないと使えない模様。なのでhdfs-site.xmlに追加する</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
 &lt;configuration&gt;
     &lt;!-- 追加 --&gt;
@@ -86,13 +92,25 @@
         &lt;value&gt;true&lt;/value&gt;
     &lt;/property&gt;
 &lt;/configuration&gt;
-</code></pre><p>設定はこんだけです。あとは</p><pre class="line-numbers"><code class="language-">sudo -u hadoop /opt/hadoop/bin/hadoop namenode -format
+</code></pre>
+<p>設定はこんだけです。あとは</p>
+<pre class="line-numbers"><code class="language-">sudo -u hadoop /opt/hadoop/bin/hadoop namenode -format
 sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start namenode
 sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
-</code></pre><p>でデータノードが立ち上がったら、初期時は何も無いのでユーザーディレクトリを作っておく。でユーザーディレクトリな所の所有者権限とかも直しておく。それは昨日の記事で書いたので省略</p><h4>WebHDFS Rest APIを使って操作する</h4><p>WebHDFS Rest APIのエントリーポイントとなるURLのベースが、「 <a href="http://host:port/webhdfs/v1" target="_blank" rel="noopener noreferrer">http://host:port/webhdfs/v1</a> 」になる。でポートっていうのはネームノードフロントエンドページとなる、恐らくはデフォルトでは50070のポート番号になる。そこにリクエストをぶっ飛ばす</p><h4>ユーザーディレクトリ内にdataディレクトリを作る</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&amp;user.name=kinjouj&quot;
-</code></pre><p>user.nameっていうのは指定しない場合はデフォルトの「webuser」っていうのが使用されるので、所有者関係上がある場合には指定しておく。この場合は自分のkinjoujアカウント。レスポンスが</p><pre class="line-numbers"><code class="language-json">{&quot;boolean&quot;: true}
-</code></pre><p>な感じでJSONで返ってくる</p><h4>作ったディレクトリのステータスを見る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS&quot;
-</code></pre><p>結果として</p><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>でデータノードが立ち上がったら、初期時は何も無いのでユーザーディレクトリを作っておく。でユーザーディレクトリな所の所有者権限とかも直しておく。それは昨日の記事で書いたので省略</p>
+<h4>WebHDFS Rest APIを使って操作する</h4>
+<p>WebHDFS Rest APIのエントリーポイントとなるURLのベースが、「 <a href="http://host:port/webhdfs/v1">http://host:port/webhdfs/v1</a> 」になる。でポートっていうのはネームノードフロントエンドページとなる、恐らくはデフォルトでは50070のポート番号になる。そこにリクエストをぶっ飛ばす</p>
+<h4>ユーザーディレクトリ内にdataディレクトリを作る</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&amp;user.name=kinjouj&quot;
+</code></pre>
+<p>user.nameっていうのは指定しない場合はデフォルトの「webuser」っていうのが使用されるので、所有者関係上がある場合には指定しておく。この場合は自分のkinjoujアカウント。レスポンスが</p>
+<pre class="line-numbers"><code class="language-json">{&quot;boolean&quot;: true}
+</code></pre>
+<p>な感じでJSONで返ってくる</p>
+<h4>作ったディレクトリのステータスを見る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS&quot;
+</code></pre>
+<p>結果として</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;FileStatus&quot;: {
     &quot;accessTime&quot;:0,
     &quot;blockSize&quot;:0,
@@ -106,9 +124,15 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
     &quot;type&quot;:&quot;DIRECTORY&quot;
   }
 }
-</code></pre><p>なレスポンスが返ってくる</p><h4>ディレクトリにファイルを突っ込んでみる</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&amp;user.name=kinjouj&quot; -T accesslog.json
-</code></pre><p>ここポートが50075ってなってるのが50070で投げると50075に要求しろみたいにHTTP/307が出る。まぁ実際はそのLocationヘッダーに投げれば良い</p><h4>ディレクトリにあるファイルステータスを取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus&quot;
-</code></pre><p>レスポンスとして</p><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>なレスポンスが返ってくる</p>
+<h4>ディレクトリにファイルを突っ込んでみる</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&amp;user.name=kinjouj&quot; -T accesslog.json
+</code></pre>
+<p>ここポートが50075ってなってるのが50070で投げると50075に要求しろみたいにHTTP/307が出る。まぁ実際はそのLocationヘッダーに投げれば良い</p>
+<h4>ディレクトリにあるファイルステータスを取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus&quot;
+</code></pre>
+<p>レスポンスとして</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;FileStatuses&quot;:{
     &quot;FileStatus&quot;:[
       {
@@ -138,9 +162,21 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
     ]
   }
 }
-</code></pre><p>な感じで返ってくるくる。そこに更にディレクトリがあったらどうなるのかの検証のためにテストなディレクトリを作ってる</p><h4>ファイルを読み取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open&quot;
-</code></pre><p>こちらも50070なNamenodeな所のポートにぶん投げるとDatanode側にアクセスしろっと要求される。ちょっと気になるのがブロックサイズでチャンクされてるファイルとかどうなるんだっけと。ビッグデータが無いんでそこ未確認</p><h4>ファイル等を消す</h4><pre class="line-numbers"><code class="language-">curl -i -X DELETE &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&amp;user.name=kinjouj&quot;
-</code></pre><p>な感じでファイル・ディレクトリ等を削除可能</p><p>という感じでHTTPリクエストぶん投げるだけでHDFS操作が出来る模様。まぁ詳しい事は <a href="http://hadoop.apache.org/docs/r1.1.0/webhdfs.html" target="_blank" rel="noopener noreferrer">http://hadoop.apache.org/docs/r1.1.0/webhdfs.html</a> 見た方が良いかも</p><p>ちなみにPerlでWebHDFSを利用する場合にNet::Hadoop::WebHDFSっていうモジュールがある模様</p><h4>追記1</h4><p>appendサポートをするにはhdfs-site.xmlに設定が必要な模様</p><pre class="line-numbers"><code class="language-xml">&lt;property&gt;
+</code></pre>
+<p>な感じで返ってくるくる。そこに更にディレクトリがあったらどうなるのかの検証のためにテストなディレクトリを作ってる</p>
+<h4>ファイルを読み取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open&quot;
+</code></pre>
+<p>こちらも50070なNamenodeな所のポートにぶん投げるとDatanode側にアクセスしろっと要求される。ちょっと気になるのがブロックサイズでチャンクされてるファイルとかどうなるんだっけと。ビッグデータが無いんでそこ未確認</p>
+<h4>ファイル等を消す</h4><pre class="line-numbers"><code class="language-">curl -i -X DELETE &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&amp;user.name=kinjouj&quot;
+</code></pre>
+<p>な感じでファイル・ディレクトリ等を削除可能</p>
+
+<p>という感じでHTTPリクエストぶん投げるだけでHDFS操作が出来る模様。まぁ詳しい事は <a href="http://hadoop.apache.org/docs/r1.1.0/webhdfs.html">http://hadoop.apache.org/docs/r1.1.0/webhdfs.html</a> 見た方が良いかも</p>
+
+<p>ちなみにPerlでWebHDFSを利用する場合にNet::Hadoop::WebHDFSっていうモジュールがある模様</p>
+<h4>追記1</h4>
+<p>appendサポートをするにはhdfs-site.xmlに設定が必要な模様</p>
+<pre class="line-numbers"><code class="language-xml">&lt;property&gt;
   &lt;name&gt;dfs.support.append&lt;/name&gt;
   &lt;value&gt;true&lt;/value&gt;
 &lt;/property&gt;
@@ -161,6 +197,8 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
     flush_interval 1s
 &lt;/match&gt;
 </code></pre>
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -252,7 +290,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -273,9 +311,6 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -388,7 +423,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -411,20 +446,20 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -434,13 +469,15 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("b801983468100d68bb131f487daeec9a90fc9c31");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

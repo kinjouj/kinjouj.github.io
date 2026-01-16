@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-03-10T00:00:00+09:00">
+                <time datetime="2015-03-10 00:00:00 +0900">
                   <a href="/archives/2015/03">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["構造", "build.gradle", "AppConfig.java", "Sample.java", "SampleDao.java", "resources/META-INF/sample/dao/SampleDao/findAll.sql", "resources/META-INF/sample/dao/SampleDao/find.sql", "SampleDaoTest.java"]-->
-                <p><a href="http://doma.readthedocs.org/ja/latest/getting-started" target="_blank" rel="noopener noreferrer">http://doma.readthedocs.org/ja/latest/getting-started</a> を見ながらやってみた</p><p>※ターゲットバージョンは2.x</p><h4>構造</h4>
+                <!--[&quot;構造&quot;, &quot;build.gradle&quot;, &quot;AppConfig.java&quot;, &quot;Sample.java&quot;, &quot;SampleDao.java&quot;, &quot;resources/META-INF/sample/dao/SampleDao/findAll.sql&quot;, &quot;resources/META-INF/sample/dao/SampleDao/find.sql&quot;, &quot;SampleDaoTest.java&quot;]-->
+                <p><a href="http://doma.readthedocs.org/ja/latest/getting-started">http://doma.readthedocs.org/ja/latest/getting-started</a> を見ながらやってみた</p>
+
+<p>※ターゲットバージョンは2.x</p>
+<h4>構造</h4>
 <pre>
 .
 ├── build.gradle
@@ -119,7 +123,13 @@ dependencies {
     testCompile &quot;junit:junit:+&quot;
     testCompile &quot;org.hamcrest:hamcrest-all:+&quot;
 }
-</code></pre><p>公式ドキュメントにはEclipseを使う際の設定なりが記述されてるけど、使わないのですこは全面的にスキップで(詳しくは <a href="https://github.com/domaframework/simple-boilerplate" target="_blank" rel="noopener noreferrer">https://github.com/domaframework/simple-boilerplate</a> を読めばいい)</p><p>でdomaの方式としてはDAO(インターフェース)とSQLを書いてそのソースから実装をアノテーションプロセッサー周りを使ってクラスを生成する仕組みになっている模様</p><p>で実行環境はこんなもんで、DAO(とエンティティクラスを含む)とSQLとデータソースなり回りなAppConfigクラスを作成する</p><h4>AppConfig.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>公式ドキュメントにはEclipseを使う際の設定なりが記述されてるけど、使わないのですこは全面的にスキップで(詳しくは <a href="https://github.com/domaframework/simple-boilerplate">https://github.com/domaframework/simple-boilerplate</a> を読めばいい)</p>
+
+<p>でdomaの方式としてはDAO(インターフェース)とSQLを書いてそのソースから実装をアノテーションプロセッサー周りを使ってクラスを生成する仕組みになっている模様</p>
+
+<p>で実行環境はこんなもんで、DAO(とエンティティクラスを含む)とSQLとデータソースなり回りなAppConfigクラスを作成する</p>
+<h4>AppConfig.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.sql.DataSource;
 
@@ -165,7 +175,9 @@ public class AppConfig implements Config {
         return INSTANCE;
     }
 }
-</code></pre><p>大体な所を <a href="http://doma.readthedocs.org/ja/latest/config/#id20" target="_blank" rel="noopener noreferrer">http://doma.readthedocs.org/ja/latest/config/#id20</a> を参考にして作成。DIコンテナ依存するような場合のケースは今後検証するので今回はパス</p><h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample.entity;
+</code></pre>
+<p>大体な所を <a href="http://doma.readthedocs.org/ja/latest/config/#id20">http://doma.readthedocs.org/ja/latest/config/#id20</a> を参考にして作成。DIコンテナ依存するような場合のケースは今後検証するので今回はパス</p>
+<h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample.entity;
 
 import java.util.Date;
 import org.seasar.doma.Column;
@@ -207,7 +219,11 @@ public class Sample {
         return createdAt;
     }
 }
-</code></pre><p>変数名がそのままカラム名になるのでマッピングする際にあたって名称によって問題なる場合には@Columnアノテーションで紐付けするカラム名をマッピングするようにすれば良い。あとテーブル名もデフォルトではクラス名同等の名前になる模様。そういう問題が出るような場合(insert等のSQLを自動生成して実行するような場合)にはnamingパラメーターでクラス内で実行するSQLを生成する際に参照するテーブル名などの方式を設定すれば良い。上記だとクラス名をlowercaseした値でSQLを実行する</p><p>※@Tableアノテーションで指定した名前で利用することも可能っぽい</p><h4>SampleDao.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
+</code></pre>
+<p>変数名がそのままカラム名になるのでマッピングする際にあたって名称によって問題なる場合には@Columnアノテーションで紐付けするカラム名をマッピングするようにすれば良い。あとテーブル名もデフォルトではクラス名同等の名前になる模様。そういう問題が出るような場合(insert等のSQLを自動生成して実行するような場合)にはnamingパラメーターでクラス内で実行するSQLを生成する際に参照するテーブル名などの方式を設定すれば良い。上記だとクラス名をlowercaseした値でSQLを実行する</p>
+
+<p>※@Tableアノテーションで指定した名前で利用することも可能っぽい</p>
+<h4>SampleDao.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 
@@ -232,18 +248,26 @@ public interface SampleDao {
     // へたに引数の変数名にパッケージ名等に存在するような名称使うとコンパイルエラーになる
     int save(Sample s);
 }
-</code></pre><p>で@Selectアノテーションで使うSQLファイルを定義する必要がある。resources/META-INF/DAOパッケージ名/メソッド名.sqlで定義すれば良い模様</p><h4>resources/META-INF/sample/dao/SampleDao/findAll.sql</h4><pre class="line-numbers"><code class="language-sql">select
+</code></pre>
+<p>で@Selectアノテーションで使うSQLファイルを定義する必要がある。resources/META-INF/DAOパッケージ名/メソッド名.sqlで定義すれば良い模様</p>
+<h4>resources/META-INF/sample/dao/SampleDao/findAll.sql</h4><pre class="line-numbers"><code class="language-sql">select
     /*%expand*/*
 from
     sample
 order by id
-</code></pre><p>/<em>%expand</em>/っていう形として、オブジェクトが持つカラムを展開してくれる</p><h4>resources/META-INF/sample/dao/SampleDao/find.sql</h4><pre class="line-numbers"><code class="language-sql">SELECT
+</code></pre>
+<p>/<em>%expand</em>/っていう形として、オブジェクトが持つカラムを展開してくれる</p>
+<h4>resources/META-INF/sample/dao/SampleDao/find.sql</h4><pre class="line-numbers"><code class="language-sql">SELECT
     /*%expand*/*
 FROM
     sample
 WHERE
     id = /* id */0
-</code></pre><p>/* id */の箇所にメソッドの引数で指定した値が展開される</p><p>っていう感じでこれで実装終わりなので、テスト書いて実際にデータベースの問い合わせをテストしてみる</p><h4>SampleDaoTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
+</code></pre>
+<p>/* id */の箇所にメソッドの引数で指定した値が展開される</p>
+
+<p>っていう感じでこれで実装終わりなので、テスト書いて実際にデータベースの問い合わせをテストしてみる</p>
+<h4>SampleDaoTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 
@@ -299,7 +323,11 @@ public class SampleDaoTest {
         });
     }
 }
-</code></pre><p>終わり。とりあえずGetting Startedをやってみただけなので今後もドキュメント読みを遂行しつつやってく予定っていうことで</p>
+</code></pre>
+<p>終わり。とりあえずGetting Startedをやってみただけなので今後もドキュメント読みを遂行しつつやってく予定っていうことで</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -391,7 +419,7 @@ public class SampleDaoTest {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -412,9 +440,6 @@ public class SampleDaoTest {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -527,7 +552,7 @@ public class SampleDaoTest {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -550,20 +575,20 @@ public class SampleDaoTest {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -573,13 +598,15 @@ public class SampleDaoTest {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("1cc08b4f52b8ea404c4e2d03ade8b3723c181d19");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

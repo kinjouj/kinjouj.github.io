@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く" />
     <title>Androidアプリのテスト関係な件 - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/01/nginx-root-alias.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/01/npapi-3.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/01/npapi-2.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/01/nginx-root-alias.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/01/android-app-testing.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-27T00:00:00+00:00">
+                <time datetime="2013-01-27 00:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["前提", "ApplicationTestCase", "AndroidTestCase", "ServiceTestCase", "ProviderTestCase2", "LoaderTestCase", "ActivityUnitTestCase", "ActivityInstrumentationTestCase2", "SingleLaunchActivityTestCase"]-->
-                <p>色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く</p><h4>前提</h4><p>アプリとテストはプロジェクトを分ける。テストプロジェクトはアプリプロジェクトを参照として設定する(普通にADT使えば特にやる必要ない。テストプロジェクト作成段階で設定される)</p><p>で以下もテストプロジェクト作成段階で設定されるので必要ないけど</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+                <!--[&quot;前提&quot;, &quot;ApplicationTestCase&quot;, &quot;AndroidTestCase&quot;, &quot;ServiceTestCase&quot;, &quot;ProviderTestCase2&quot;, &quot;LoaderTestCase&quot;, &quot;ActivityUnitTestCase&quot;, &quot;ActivityInstrumentationTestCase2&quot;, &quot;SingleLaunchActivityTestCase&quot;]-->
+                <p>色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く</p>
+<h4>前提</h4>
+<p>アプリとテストはプロジェクトを分ける。テストプロジェクトはアプリプロジェクトを参照として設定する(普通にADT使えば特にやる必要ない。テストプロジェクト作成段階で設定される)</p>
+
+<p>で以下もテストプロジェクト作成段階で設定されるので必要ないけど</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;sample.test.test&quot;
     android:versionCode=&quot;1&quot;
@@ -93,7 +99,15 @@
     &lt;/application&gt;
 
 &lt;/manifest&gt;
-</code></pre><p>な感じで&lt;instrumentation&gt;と&lt;uses-library&gt;とかの設定が必要</p><p>あとはクラス書きつつテストケースを書く感じ。でテストを対象とするクラスはアプリプロジェクト、テストケースはテストプロジェクトに書く。でテストケースの方式はJUnit4方式じゃなくてJUnit3方式</p><p>あとテストプロジェクトのアプリもしっかり端末に入るので(ry</p><h4>ApplicationTestCase</h4><p>android.app.Applicationを拡張して使用する場合、ApplicationTestCaseを使えばAndroid JUnitでテスト出来る。例えば以下のようなApplicationクラスを継承したクラスがあった場合</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>な感じで&lt;instrumentation&gt;と&lt;uses-library&gt;とかの設定が必要</p>
+
+<p>あとはクラス書きつつテストケースを書く感じ。でテストを対象とするクラスはアプリプロジェクト、テストケースはテストプロジェクトに書く。でテストケースの方式はJUnit4方式じゃなくてJUnit3方式</p>
+
+<p>あとテストプロジェクトのアプリもしっかり端末に入るので(ry</p>
+<h4>ApplicationTestCase</h4>
+<p>android.app.Applicationを拡張して使用する場合、ApplicationTestCaseを使えばAndroid JUnitでテスト出来る。例えば以下のようなApplicationクラスを継承したクラスがあった場合</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
 
@@ -102,7 +116,9 @@ public class MainApplication extends Application {
         return getResources().getString(R.string.app_name);
     }
 }
-</code></pre><p>getAppNameメソッドをテストしたい場合</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>getAppNameメソッドをテストしたい場合</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
@@ -128,7 +144,11 @@ public class MainApplicationTestCase extends ApplicationTestCase&lt;MainApplicat
         assertEquals(&quot;sample&quot;, ((MainApplication)app).getAppName());
     }
 }
-</code></pre><p>な感じでテスト出来る</p><h4>AndroidTestCase</h4><p>AndroidのContextに依存するようなクラスをテストするケースにおいてはAndroidTestCaseを使えば良い模様。</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>な感じでテスト出来る</p>
+<h4>AndroidTestCase</h4>
+<p>AndroidのContextに依存するようなクラスをテストするケースにおいてはAndroidTestCaseを使えば良い模様。</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.test.AndroidTestCase;
 
@@ -139,7 +159,11 @@ public class MainAndroidTestCase extends AndroidTestCase {
         assertEquals(&quot;sample&quot;, appName);
     }
 }
-</code></pre><p>で、同様な例としてBroadcastReceiverをテストする場合等でもAndroidTestCaseを使えば出来なくもない。それは<a href="/2012/01/android-broadcastreceiver-testing-androidtestcase.html">以前に書いた</a>ので省略</p><h4>ServiceTestCase</h4><p>android.app.Serviceをテストする目的で使用。とりあえずてきとーに</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>で、同様な例としてBroadcastReceiverをテストする場合等でもAndroidTestCaseを使えば出来なくもない。それは<a href="/2012/01/android-broadcastreceiver-testing-androidtestcase.html">以前に書いた</a>ので省略</p>
+<h4>ServiceTestCase</h4>
+<p>android.app.Serviceをテストする目的で使用。とりあえずてきとーに</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -186,7 +210,9 @@ public class SampleService extends Service {
         return completed;
     }
 }
-</code></pre><p>な感じで作っといて、onStartCommand等で実行される処理をテストする際に</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>な感じで作っといて、onStartCommand等で実行される処理をテストする際に</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import java.util.List;
 
@@ -224,7 +250,11 @@ public class SampleServiceTestCase extends ServiceTestCase&lt;SampleService&gt; 
         assertEquals(3, names.size());
     }
 }
-</code></pre><p>テストする場合にはアプリ側に&lt;service&gt;で設定しておかなくても良い模様。又、タイミング処理をする場合にはフラグ等を持たせておいて完了するまで処理をThread.sleepさせておく、んでデータをチェックしたりすれば良いんじゃないかなーっと</p><p>例えば一定時間で変わるLive Wallpaperのような場合だとサービスをstartさせてから一定時間変わったら表示されている現在のandroid.graphics.Bitmap?とかをチェックするとか。んまぁ要件によりきりかなと</p><h4>ProviderTestCase2</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>テストする場合にはアプリ側に&lt;service&gt;で設定しておかなくても良い模様。又、タイミング処理をする場合にはフラグ等を持たせておいて完了するまで処理をThread.sleepさせておく、んでデータをチェックしたりすれば良いんじゃないかなーっと</p>
+
+<p>例えば一定時間で変わるLive Wallpaperのような場合だとサービスをstartさせてから一定時間変わったら表示されている現在のandroid.graphics.Bitmap?とかをチェックするとか。んまぁ要件によりきりかなと</p>
+<h4>ProviderTestCase2</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -287,7 +317,9 @@ public class SampleProvider extends ContentProvider {
         return 0;
     }
 }
-</code></pre><p>な感じでqueryの検証をProviderTestCase2で行える。Service同様にテストする状態であれば&lt;provider&gt;定義しなくても良い模様</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>な感じでqueryの検証をProviderTestCase2で行える。Service同様にテストする状態であれば&lt;provider&gt;定義しなくても良い模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.database.Cursor;
 import android.test.ProviderTestCase2;
@@ -310,7 +342,13 @@ public class SampleProviderTestCase extends ProviderTestCase2&lt;SampleProvider&
         assertEquals(10, csr.getCount());
     }
 }
-</code></pre><p>な感じでProviderTestCase2を継承してgetProviderでProviderクラスの実体クラスが取得できてテスト出来る模様。ただ気になるのがコンストラクタの第2引数のプロバイダーのAuthorityがなぜ必要なのかっていう所。空にしてもテストコケないし... 謎なので分かり次第追記する</p><h4>LoaderTestCase</h4><p><a href="/2011/12/android-loader-testing-loadertestcase.html">以前に検証した</a>ので省略</p><h4>ActivityUnitTestCase</h4><p>アクティビティ操作をテスト出来るクラスな模様</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>な感じでProviderTestCase2を継承してgetProviderでProviderクラスの実体クラスが取得できてテスト出来る模様。ただ気になるのがコンストラクタの第2引数のプロバイダーのAuthorityがなぜ必要なのかっていう所。空にしてもテストコケないし... 謎なので分かり次第追記する</p>
+<h4>LoaderTestCase</h4>
+<p><a href="/2011/12/android-loader-testing-loadertestcase.html">以前に検証した</a>ので省略</p>
+<h4>ActivityUnitTestCase</h4>
+<p>アクティビティ操作をテスト出来るクラスな模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 
 import android.app.Activity;
@@ -357,7 +395,9 @@ public class MainActivity extends Activity {
         }
     }
 }
-</code></pre><p>な感じで、onStartでデータを取得してListViewにバインド。んでボタンを押すとそれが消える。そういう操作をエミュレーションしてテストしてみるには</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>な感じで、onStartでデータを取得してListViewにバインド。んでボタンを押すとそれが消える。そういう操作をエミュレーションしてテストしてみるには</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
 import android.content.Intent;
@@ -429,7 +469,11 @@ public class MainActivityTestCase extends ActivityUnitTestCase&lt;MainActivity&g
         assertEquals(0, adapter.getCount());
     }
 }
-</code></pre><p>アクティビティは自動自動等しない模様なのでstartActivityで起動。んでsetApplicationで使用するApplicationクラスを指定出来る。でcallAcvitityOnStartでOnStartを発生させて、runOnUiThreadを使ってボタンをクリックしたり等の操作を行い、waitForIdelSyncで操作が完了するのを待つっていう感じかと</p><h4>ActivityInstrumentationTestCase2</h4><p>ActivityUnitTestCaseを使わずにAndroidManifest.xmlに沿った形式でAcvitityテストを行うにはこれでも出来る。ActivityUnitTestCaseで使ったAcvitityをそのままAcitvityInstrumentationTestCase2に移行させる場合には以下のような感じ</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>アクティビティは自動自動等しない模様なのでstartActivityで起動。んでsetApplicationで使用するApplicationクラスを指定出来る。でcallAcvitityOnStartでOnStartを発生させて、runOnUiThreadを使ってボタンをクリックしたり等の操作を行い、waitForIdelSyncで操作が完了するのを待つっていう感じかと</p>
+<h4>ActivityInstrumentationTestCase2</h4>
+<p>ActivityUnitTestCaseを使わずにAndroidManifest.xmlに沿った形式でAcvitityテストを行うにはこれでも出来る。ActivityUnitTestCaseで使ったAcvitityをそのままAcitvityInstrumentationTestCase2に移行させる場合には以下のような感じ</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
 import android.test.ActivityInstrumentationTestCase2;
@@ -484,7 +528,9 @@ public class MainActivityTestCase extends ActivityInstrumentationTestCase2&lt;Ma
         assertEquals(0, adapter.getCount());
     }
 }
-</code></pre><h4>SingleLaunchActivityTestCase</h4><p>恐らくは上記のActivityテストの場合であるとテスト毎にActivityが初期化される。でテストで実行したアクティビティの状態を維持させたい場合には一度しか初期化されない模様</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><h4>SingleLaunchActivityTestCase</h4>
+<p>恐らくは上記のActivityテストの場合であるとテスト毎にActivityが初期化される。でテストで実行したアクティビティの状態を維持させたい場合には一度しか初期化されない模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Application;
 import android.test.SingleLaunchActivityTestCase;
@@ -555,15 +601,21 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
         assertEquals(10, adapter.getCount()); // fail
     }
 }
-</code></pre><p>ちなみにこのテストは成功しない。test_fetchSamples3ではListAdapterを取得してデータ数をカウントしているだけだけど、test_fetchSamples2で既にAdapterをボタンクリックによりクリアされているので、以降のテストにおいてデータをチェックするとテスト毎にアクティビティが初期化されずに状態維持されたままなのでテストがfailする。テストの順序がポイントになりそうな気もする</p><p>ってな感じでAndroidコアに入ってるテストスイートなAPIは以上なんじゃないかなーって所。最近増えたのかどうかは定かじゃないけど、んまぁ以上な事を踏まえてテストする部分の所を適切なAPI選択すれば良いんじゃねーかと</p>
+</code></pre>
+<p>ちなみにこのテストは成功しない。test_fetchSamples3ではListAdapterを取得してデータ数をカウントしているだけだけど、test_fetchSamples2で既にAdapterをボタンクリックによりクリアされているので、以降のテストにおいてデータをチェックするとテスト毎にアクティビティが初期化されずに状態維持されたままなのでテストがfailする。テストの順序がポイントになりそうな気もする</p>
+
+<p>ってな感じでAndroidコアに入ってるテストスイートなAPIは以上なんじゃないかなーって所。最近増えたのかどうかは定かじゃないけど、んまぁ以上な事を踏まえてテストする部分の所を適切なAPI選択すれば良いんじゃねーかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/01/npapi-3.html">&lt;&nbsp;NPAPIをざっくりやってみる (3)</a>
+            <a class="float-start box-link" href="/2013/01/nginx-root-alias.html">&lt;&nbsp;nginxのrootとalias</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/01/nginx-root-alias.html">nginxのrootとalias&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/01/npapi-2.html">NPAPIをざっくりやってみる (2)&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -647,7 +699,7 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -668,9 +720,6 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -783,7 +832,7 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -806,20 +855,20 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -829,13 +878,15 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("afb8c6eaa023ddcf7300a60a829dff81e0750aa7");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

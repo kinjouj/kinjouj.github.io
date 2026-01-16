@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-07-19T00:00:00+00:00">
+                <time datetime="2013-07-19 00:00:00 +0900">
                   <a href="/archives/2013/07">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,21 +78,32 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["SampleService.java", "SampleBroadcastReceiver.java", "MainActivity.java"]-->
-                <p>※ローカルのネタ帳からのほぼコピペ</p><p>一言で言えばアプリ内ローカルでのみ利用可能なブロードキャスト的な感じかなと。一般的には</p><pre class="line-numbers"><code class="language-xml">&lt;receiver android:name=&quot;.SampleBroadcastReceiver&quot;&gt;
+                <!--[&quot;SampleService.java&quot;, &quot;SampleBroadcastReceiver.java&quot;, &quot;MainActivity.java&quot;]-->
+                <p>※ローカルのネタ帳からのほぼコピペ</p>
+
+<p>一言で言えばアプリ内ローカルでのみ利用可能なブロードキャスト的な感じかなと。一般的には</p>
+<pre class="line-numbers"><code class="language-xml">&lt;receiver android:name=&quot;.SampleBroadcastReceiver&quot;&gt;
   &lt;intent-filter&gt;
     &lt;action android:name=&quot;sample.test.broadcast&quot; /&gt;
   &lt;/intent-filter&gt;
 &lt;/receiver&gt;
-</code></pre><p>的な感じでグローバルなBroadcastReceiverを設定するんだと思うけど、これでやると</p><pre class="line-numbers"><code class="language-">adb shell am broadcast -a sample.test.broadcast
-</code></pre><p>等でも反応できちゃう。特に必要性が無い場合とかであったりだとかの場合とかだとLocalBroadcastManagerを使ってアプリ内のコンテキストのみでブロードキャスト可能にしたり出来るとか。説明ムズイ</p><p>とりまぁやってみる。要件的には</p>
+</code></pre>
+<p>的な感じでグローバルなBroadcastReceiverを設定するんだと思うけど、これでやると</p>
+<pre class="line-numbers"><code class="language-">adb shell am broadcast -a sample.test.broadcast
+</code></pre>
+<p>等でも反応できちゃう。特に必要性が無い場合とかであったりだとかの場合とかだとLocalBroadcastManagerを使ってアプリ内のコンテキストのみでブロードキャスト可能にしたり出来るとか。説明ムズイ</p>
+
+<p>とりまぁやってみる。要件的には</p>
+
 <ul>
 <li>Activity(LocalBroadcastManager#registerReceiver)</li>
 <li>Service(LocalBroadcastManager#sendBroadcast)</li>
 <li>BroadcastReceiver(Handler#sendMessage)</li>
 <li>Activity(Handler#handleMessage)</li>
 </ul>
-<p>っていう流れだけ。</p><h4>SampleService.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+
+<p>っていう流れだけ。</p>
+<h4>SampleService.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import java.util.Date;
 import java.util.Timer;
@@ -266,13 +278,29 @@ public class MainActivity extends Activity {
         stopService(new Intent(this, SampleService.class));
     }
 }
-</code></pre><p>終わり。実行してServiceを起動してほっとくと</p><p><img src="/images/2013/07/20130719001552.png" class="img-fluid" alt="image" /></p><p>っつー感じに。LocalBroadcastManagerでregisterReceiverをしたBroadcastReceiverは</p><pre class="line-numbers"><code class="language-">adb shell am broadcast -a sample.test.broadcast
-</code></pre><p>的なので要求を出しても反応しない。</p><pre class="line-numbers"><code class="language-xml">&lt;receiver android:name=&quot;.SampleBroadcastReceiver&quot;&gt;
+</code></pre>
+<p>終わり。実行してServiceを起動してほっとくと</p>
+
+<p><img src="/images/2013/07/20130719001552.png" class="img-fluid" alt="image" /></p>
+
+<p>っつー感じに。LocalBroadcastManagerでregisterReceiverをしたBroadcastReceiverは</p>
+<pre class="line-numbers"><code class="language-">adb shell am broadcast -a sample.test.broadcast
+</code></pre>
+<p>的なので要求を出しても反応しない。</p>
+<pre class="line-numbers"><code class="language-xml">&lt;receiver android:name=&quot;.SampleBroadcastReceiver&quot;&gt;
   &lt;intent-filter&gt;
     &lt;action android:name=&quot;sample.test.broadcast&quot; /&gt;
   &lt;/intent-filter&gt;
 &lt;/receiver&gt;
-</code></pre><p>的な事をすれば上記コマンドで反応させる事は出来る。という事で意図しないブロードキャストを許容しないのであればLocalBroadcastManagerを使ったブロードキャストな設計を組み込むべきというオチで</p><p>ちなみに以下を参考にした方が良いという。今までなんだったんだと..orz</p><p>参考: <a href="http://stackoverflow.com/questions/8802157/how-to-use-localbroadcastmanager/8875292" target="_blank" rel="noopener noreferrer">http://stackoverflow.com/questions/8802157/how-to-use-localbroadcastmanager/8875292</a></p>
+</code></pre>
+<p>的な事をすれば上記コマンドで反応させる事は出来る。という事で意図しないブロードキャストを許容しないのであればLocalBroadcastManagerを使ったブロードキャストな設計を組み込むべきというオチで</p>
+
+<p>ちなみに以下を参考にした方が良いという。今までなんだったんだと..orz</p>
+
+<p>参考: <a href="http://stackoverflow.com/questions/8802157/how-to-use-localbroadcastmanager/8875292">http://stackoverflow.com/questions/8802157/how-to-use-localbroadcastmanager/8875292</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -364,7 +392,7 @@ public class MainActivity extends Activity {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -385,9 +413,6 @@ public class MainActivity extends Activity {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -500,7 +525,7 @@ public class MainActivity extends Activity {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -523,20 +548,20 @@ public class MainActivity extends Activity {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -546,13 +571,15 @@ public class MainActivity extends Activity {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("6fb00a84e61934f60c7fc55953fdb6dab5c1f6fb");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

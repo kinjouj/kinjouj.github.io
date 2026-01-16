@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-10-10T00:00:00+00:00">
+                <time datetime="2013-10-10 00:00:00 +0900">
                   <a href="/archives/2013/10">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,21 +78,40 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["geminaboxをインストール", "RubyGemsサーバーにgemを登録", "Gemfileを修正"]-->
-                <p>以前にやった<a href="/rails-assets-pipeline.html">Rails assets pipeline</a>ではパスを指定してパッケージ的なのを読み込んでたんだけれどもRubyGemsで参照できるサーバーを用意、つまりはrubygems.org的ながあれば良いよねっていう事で参考を読みつつやってみた</p><h4>geminaboxをインストール</h4><pre class="line-numbers"><code class="language-">gem install geminabox
-</code></pre><p>で入れる。で適当なディレクトリを作って、そこにconfig.ruを作る</p><pre class="line-numbers"><code class="language-rb">require &quot;geminabox&quot;
+                <!--[&quot;geminaboxをインストール&quot;, &quot;RubyGemsサーバーにgemを登録&quot;, &quot;Gemfileを修正&quot;]-->
+                <p>以前にやった<a href="/rails-assets-pipeline.html">Rails assets pipeline</a>ではパスを指定してパッケージ的なのを読み込んでたんだけれどもRubyGemsで参照できるサーバーを用意、つまりはrubygems.org的ながあれば良いよねっていう事で参考を読みつつやってみた</p>
+<h4>geminaboxをインストール</h4><pre class="line-numbers"><code class="language-">gem install geminabox
+</code></pre>
+<p>で入れる。で適当なディレクトリを作って、そこにconfig.ruを作る</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;geminabox&quot;
 
 Geminabox.data = &quot;./data&quot;;
 run Geminabox
-</code></pre><p>あとは</p><pre class="line-numbers"><code class="language-">rackup
-</code></pre><p>して起動しておく。ちなみにRubyGems index的なのが指定したディレクトリに作られる模様だけどディレクトリ無くても勝手に作ってくれる模様。多分...</p><h4>RubyGemsサーバーにgemを登録</h4><p>以前にやったやつをそこままインデックスさせる</p><pre class="line-numbers"><code class="language-sh"># ビルド
+</code></pre>
+<p>あとは</p>
+<pre class="line-numbers"><code class="language-">rackup
+</code></pre>
+<p>して起動しておく。ちなみにRubyGems index的なのが指定したディレクトリに作られる模様だけどディレクトリ無くても勝手に作ってくれる模様。多分...</p>
+<h4>RubyGemsサーバーにgemを登録</h4>
+<p>以前にやったやつをそこままインデックスさせる</p>
+<pre class="line-numbers"><code class="language-sh"># ビルド
 cd /home/kinjouj/sample-ui-rails
 rake build
 
 # RubyGemsサーバーにインデックス
 gem inabox pkg/sample-ui-rails-0.0.1.gem
-</code></pre><p>はい、終わり。これでインデックスされているはずなので <a href="http://localhost:9292" target="_blank" rel="noopener noreferrer">http://localhost:9292</a> にアクセスしてみると</p><p><img src="/images/2013/10/201310100203.png" class="img-fluid" alt="image" /></p><p>的な感じでインデックスしたgemが表示されるようになる</p><h4>Gemfileを修正</h4><p>後術する参考にも書いてるけど</p><pre class="line-numbers"><code class="language-">gem sources --add http://localhost:9292
-</code></pre><p>普通にgemコマンドを使ってやる場合は上記でインデックス元なところを登録?すればいい模様。今回はRailsプロジェクトなのでGemfileをいじる</p><pre class="line-numbers"><code class="language-rb">source &quot;https://rubygems.org&quot;
+</code></pre>
+<p>はい、終わり。これでインデックスされているはずなので <a href="http://localhost:9292">http://localhost:9292</a> にアクセスしてみると</p>
+
+<p><img src="/images/2013/10/201310100203.png" class="img-fluid" alt="image" /></p>
+
+<p>的な感じでインデックスしたgemが表示されるようになる</p>
+<h4>Gemfileを修正</h4>
+<p>後術する参考にも書いてるけど</p>
+<pre class="line-numbers"><code class="language-">gem sources --add http://localhost:9292
+</code></pre>
+<p>普通にgemコマンドを使ってやる場合は上記でインデックス元なところを登録?すればいい模様。今回はRailsプロジェクトなのでGemfileをいじる</p>
+<pre class="line-numbers"><code class="language-rb">source &quot;https://rubygems.org&quot;
 
 # 参照するサーバーをこっちで作ったやつを参照するように設定しておく
 source &quot;http://localhost:9292&quot;
@@ -104,7 +124,15 @@ gem &quot;angular-rails&quot;
 
 # :pathを指定しない
 gem &quot;sample-ui-rails&quot;
-</code></pre><p>問題なくbundle install辺りが行われればオッケーって事だと思いますんで</p><p>ってな感じで自社で作ったgemファイルとかを提供したいのであれば、geminaboxっていうのが使えるというのを知った</p><p>参考: <a href="http://guides.rubygems.org/run-your-own-gem-server" target="_blank" rel="noopener noreferrer">http://guides.rubygems.org/run-your-own-gem-server</a></p>
+</code></pre>
+<p>問題なくbundle install辺りが行われればオッケーって事だと思いますんで</p>
+
+<p>ってな感じで自社で作ったgemファイルとかを提供したいのであれば、geminaboxっていうのが使えるというのを知った</p>
+
+<p>参考: <a href="http://guides.rubygems.org/run-your-own-gem-server">http://guides.rubygems.org/run-your-own-gem-server</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -196,7 +224,7 @@ gem &quot;sample-ui-rails&quot;
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -217,9 +245,6 @@ gem &quot;sample-ui-rails&quot;
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -332,7 +357,7 @@ gem &quot;sample-ui-rails&quot;
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -355,20 +380,20 @@ gem &quot;sample-ui-rails&quot;
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -378,13 +403,15 @@ gem &quot;sample-ui-rails&quot;
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("7c9a9216648b4091e2c84bedc2b120412bf912f7");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

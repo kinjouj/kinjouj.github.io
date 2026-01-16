@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-01-03T00:00:00+00:00">
+                <time datetime="2014-01-03 00:00:00 +0900">
                   <a href="/archives/2014/01">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Sample.java", "SampleFormatter.java", "spring-web-servlet.xml", "SampleController.java", "余談1: XMLで定義せずにFormatterを使う", "余談2: FormatterRegistrarを使う場合"]-->
-                <p>前回のConverter同様に型を変換したりする仕組みな模様。@DateTimeFormatのようにアノテーションによって型変換を行うのも可能(後日書く)。んまぁ違い的な所としては非常に曖昧で微妙なのだけど、Formatterはインターフェースによりパースする所と出力サポートを行うメソッドを実装する必要がある。んまぁ詳しい違いとかわかり次第補足なりする予定</p><p>とりあえず使ってみる。題材的なのとしてEnumを変換する仕組み的なのを作ってみる</p><h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+                <!--[&quot;Sample.java&quot;, &quot;SampleFormatter.java&quot;, &quot;spring-web-servlet.xml&quot;, &quot;SampleController.java&quot;, &quot;余談1: XMLで定義せずにFormatterを使う&quot;, &quot;余談2: FormatterRegistrarを使う場合&quot;]-->
+                <p>前回のConverter同様に型を変換したりする仕組みな模様。@DateTimeFormatのようにアノテーションによって型変換を行うのも可能(後日書く)。んまぁ違い的な所としては非常に曖昧で微妙なのだけど、Formatterはインターフェースによりパースする所と出力サポートを行うメソッドを実装する必要がある。んまぁ詳しい違いとかわかり次第補足なりする予定</p>
+
+<p>とりあえず使ってみる。題材的なのとしてEnumを変換する仕組み的なのを作ってみる</p>
+<h4>Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 public enum Sample {
 
@@ -95,7 +99,9 @@ public enum Sample {
         return name;
     }
 }
-</code></pre><p>でこのEnumに変換なりを行うFormatterインターフェースの実装クラスが必要</p><h4>SampleFormatter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>でこのEnumに変換なりを行うFormatterインターフェースの実装クラスが必要</p>
+<h4>SampleFormatter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -114,7 +120,9 @@ public class SampleFormatter implements Formatter&lt;Sample&gt; {
         return Sample.valueOf(text.toUpperCase());
     }
 }
-</code></pre><p>んでこのFormatterが使えるように設定を行う</p><h4>spring-web-servlet.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</code></pre>
+<p>んでこのFormatterが使えるように設定を行う</p>
+<h4>spring-web-servlet.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
     xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
@@ -158,7 +166,9 @@ public class SampleController {
         model.addAttribute(sample);
     }
 }
-</code></pre><p>的な感じで@RequestParamに指定している型な引数がFormatterで変換される。もし変換に失敗した場合などには400エラーになる</p><h4>余談1: XMLで定義せずにFormatterを使う</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>的な感じで@RequestParamに指定している型な引数がFormatterで変換される。もし変換に失敗した場合などには400エラーになる</p>
+<h4>余談1: XMLで定義せずにFormatterを使う</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
@@ -182,7 +192,11 @@ public class SampleController {
         model.addAttribute(sample);
     }
 }
-</code></pre><p>っていう感じで、DefaultFormattingConversionService.addFormatterForFieldTypeメソッドを使う事で出来る模様</p><h4>余談2: FormatterRegistrarを使う場合</h4><p>例えば複数のFormatterとかをまとめてregisterしたい時とか</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>っていう感じで、DefaultFormattingConversionService.addFormatterForFieldTypeメソッドを使う事で出来る模様</p>
+<h4>余談2: FormatterRegistrarを使う場合</h4>
+<p>例えば複数のFormatterとかをまとめてregisterしたい時とか</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
@@ -194,7 +208,9 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
         registry.addFormatterForFieldType(Sample.class, new SampleFormatter());
     }
 }
-</code></pre><p>とかで定義してこれを</p><pre class="line-numbers"><code class="language-xml">&lt;bean
+</code></pre>
+<p>とかで定義してこれを</p>
+<pre class="line-numbers"><code class="language-xml">&lt;bean
     id=&quot;conversionService&quot;
     class=&quot;org.springframework.format.support.FormattingConversionServiceFactoryBean&quot;&gt;
 
@@ -204,7 +220,11 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
         &lt;/list&gt;
     &lt;/property&gt;
 &lt;/bean&gt;
-</code></pre><p>っていう感じでformatterRegistrarsに追加してあげれば良い模様</p>
+</code></pre>
+<p>っていう感じでformatterRegistrarsに追加してあげれば良い模様</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -296,7 +316,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -317,9 +337,6 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -432,7 +449,7 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -455,20 +472,20 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -478,13 +495,15 @@ public class SampleFormatterRegistrar implements FormatterRegistrar {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("03aa91cf78242144c1720f064cf9562064694d50");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

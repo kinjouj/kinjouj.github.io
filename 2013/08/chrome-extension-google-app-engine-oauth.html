@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;http://blogs.dion.ne.jp/kotemaru/archives/10093611.html&gt;" />
+    <meta name="description" content="&amp;lt;http://blogs.dion.ne.jp/kotemaru/archives/10093611.html&amp;gt;" />
     <title>Chrome Extension+Google App Engine(+OAuth) - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/08/codemodel-annotation-processing-java-sourcecode-generation.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/08/getting-started-indexeddb.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-08-18T00:00:00+00:00">
+                <time datetime="2013-08-18 00:00:00 +0900">
                   <a href="/archives/2013/08">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["manifest.json", "bg.js", "chrome_ex_oauth.html", "余談"]-->
-                <p><a href="http://blogs.dion.ne.jp/kotemaru/archives/10093611.html" target="_blank" rel="noopener noreferrer">http://blogs.dion.ne.jp/kotemaru/archives/10093611.html</a></p><p>を参考にすれば良い。でサーバー側はOAuthServiceクラスを使ってOAuth利用による通信であるかっていうのを検知するような方式を利用する</p><p>で問題はそれをどうやってChrome Extensionで行うかって所だと思いますけど、一応公式的には<a href="http://developer.chrome.com/extensions/tut_oauth.html">chrome_ex_oauth</a>っていうのを使って利用可能な模様</p><p>という事でやってみた</p><h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+                <!--[&quot;manifest.json&quot;, &quot;bg.js&quot;, &quot;chrome_ex_oauth.html&quot;, &quot;余談&quot;]-->
+                <p><a href="http://blogs.dion.ne.jp/kotemaru/archives/10093611.html">http://blogs.dion.ne.jp/kotemaru/archives/10093611.html</a></p>
+
+<p>を参考にすれば良い。でサーバー側はOAuthServiceクラスを使ってOAuth利用による通信であるかっていうのを検知するような方式を利用する</p>
+
+<p>で問題はそれをどうやってChrome Extensionで行うかって所だと思いますけど、一応公式的には<a href="http://developer.chrome.com/extensions/tut_oauth.html">chrome_ex_oauth</a>っていうのを使って利用可能な模様</p>
+
+<p>という事でやってみた</p>
+<h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;test&quot;,
   &quot;version&quot;: &quot;0.1&quot;,
   &quot;manifest_version&quot;: 2,
@@ -92,7 +100,9 @@
   },
   &quot;permissions&quot;: [&quot;https://*/*&quot;]
 }
-</code></pre><p>const.jsはOAUTH_CONSUMER_KEY及びOAUTH_CONSUMER_SECRETなconstを定義しているだけなので省略する</p><h4>bg.js</h4><pre class="line-numbers"><code class="language-js">(function(undefined) {
+</code></pre>
+<p>const.jsはOAUTH_CONSUMER_KEY及びOAUTH_CONSUMER_SECRETなconstを定義しているだけなので省略する</p>
+<h4>bg.js</h4><pre class="line-numbers"><code class="language-js">(function(undefined) {
   var oauth = ChromeExOAuth.initBackgroundPage({
     &quot;request_url&quot;: &quot;https://shareroid.appspot.com/_ah/OAuthGetRequestToken&quot;,
     &quot;authorize_url&quot;: &quot;https://shareroid.appspot.com/_ah/OAuthAuthorizeToken&quot;,
@@ -111,7 +121,9 @@
     );
   });
 })();
-</code></pre><p>でauthorize時に認証していない場合においてはchrome_ex_oauth.htmlがオープンされる</p><h4>chrome_ex_oauth.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+</code></pre>
+<p>でauthorize時に認証していない場合においてはchrome_ex_oauth.htmlがオープンされる</p>
+<h4>chrome_ex_oauth.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;title&gt;OAuth Redirect Page&lt;/title&gt;
@@ -122,10 +134,20 @@
   &lt;body&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>onload.jsでは</p><pre class="line-numbers"><code class="language-js">(function(undefined) {
+</code></pre>
+<p>onload.jsでは</p>
+<pre class="line-numbers"><code class="language-js">(function(undefined) {
   ChromeExOAuth.initCallbackPage();
 })();
-</code></pre><p>を行ってるだけ。で認証されてない場合には認証要求なページへリダイレクトされる。でその後にauthorizeな引数に指定したコールバックが作用する</p><p>っていう感じで使えばGoogle App EngineでOAuthServiceより保護されるアクション等をChrome Extensionからアクセスする事は可能な模様</p><h4>余談</h4><p>上記で呼ばれるchrome_ex_oauth.html自体はChromeExOAuthなインスタンスでcallback_pageなプロパティを設定する事で変える事自体は可能</p>
+</code></pre>
+<p>を行ってるだけ。で認証されてない場合には認証要求なページへリダイレクトされる。でその後にauthorizeな引数に指定したコールバックが作用する</p>
+
+<p>っていう感じで使えばGoogle App EngineでOAuthServiceより保護されるアクション等をChrome Extensionからアクセスする事は可能な模様</p>
+<h4>余談</h4>
+<p>上記で呼ばれるchrome_ex_oauth.html自体はChromeExOAuthなインスタンスでcallback_pageなプロパティを設定する事で変える事自体は可能</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -217,7 +239,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -238,9 +260,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -353,7 +372,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -376,20 +395,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -399,13 +418,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("1f35267a190dba6824f14dc90a4183042eb2fbac");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

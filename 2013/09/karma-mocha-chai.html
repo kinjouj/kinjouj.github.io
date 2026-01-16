@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-02T00:00:00+00:00">
+                <time datetime="2013-09-02 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,10 +77,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["karmaのインストール", "karmaの設定ファイルを生成", "適当なJavaScriptオブジェクトをでっちあげる", "テストディレクトリ内にテストを作成", "テスト実行"]-->
-                <p><a href="http://karma-runner.github.io/">karma</a>を使ってみた。で最近JSなテストとかだと主にmocha+chaiを使って書く事が多いので (別にjasmineでも良いんだけど)</p><h4>karmaのインストール</h4><pre class="line-numbers"><code class="language-">npm install -g karma
-</code></pre><p>で出来るのでサクッとやっちゃう。でmochaとchaiに関しては後術しますんで</p><h4>karmaの設定ファイルを生成</h4><pre class="line-numbers"><code class="language-">karma init
-</code></pre><p>をするとkarma.conf.jsが生成される。で問い合わせに対して色々回答していくと設定ファイルが出来上がる。でまぁ生成されるファイルは以下のような形</p><pre class="line-numbers"><code class="language-js">// Karma configuration
+                <!--[&quot;karmaのインストール&quot;, &quot;karmaの設定ファイルを生成&quot;, &quot;適当なJavaScriptオブジェクトをでっちあげる&quot;, &quot;テストディレクトリ内にテストを作成&quot;, &quot;テスト実行&quot;]-->
+                <p><a href="http://karma-runner.github.io/">karma</a>を使ってみた。で最近JSなテストとかだと主にmocha+chaiを使って書く事が多いので (別にjasmineでも良いんだけど)</p>
+<h4>karmaのインストール</h4><pre class="line-numbers"><code class="language-">npm install -g karma
+</code></pre>
+<p>で出来るのでサクッとやっちゃう。でmochaとchaiに関しては後術しますんで</p>
+<h4>karmaの設定ファイルを生成</h4><pre class="line-numbers"><code class="language-">karma init
+</code></pre>
+<p>をするとkarma.conf.jsが生成される。で問い合わせに対して色々回答していくと設定ファイルが出来上がる。でまぁ生成されるファイルは以下のような形</p>
+<pre class="line-numbers"><code class="language-js">// Karma configuration
 // Generated on Mon Sep 02 2013 10:59:25 GMT+0900 (JST)
 
 module.exports = function(config) {
@@ -154,7 +160,13 @@ module.exports = function(config) {
     singleRun: false
   });
 };
-</code></pre><p>書いてある通り、<a href="https://github.com/xdissent/karma-chai">karma-chai</a>を使うので左リンク先を参照してインストール。karma-coverageもついでに入れておく</p><p>カバレッジ出力に関しては <a href="http://karma-runner.github.io/0.8/config/coverage.html" target="_blank" rel="noopener noreferrer">http://karma-runner.github.io/0.8/config/coverage.html</a> を参考に</p><h4>適当なJavaScriptオブジェクトをでっちあげる</h4><p>src/sample.jsとかを作っておく</p><pre class="line-numbers"><code class="language-js">var Sample = (function() {
+</code></pre>
+<p>書いてある通り、<a href="https://github.com/xdissent/karma-chai">karma-chai</a>を使うので左リンク先を参照してインストール。karma-coverageもついでに入れておく</p>
+
+<p>カバレッジ出力に関しては <a href="http://karma-runner.github.io/0.8/config/coverage.html">http://karma-runner.github.io/0.8/config/coverage.html</a> を参考に</p>
+<h4>適当なJavaScriptオブジェクトをでっちあげる</h4>
+<p>src/sample.jsとかを作っておく</p>
+<pre class="line-numbers"><code class="language-js">var Sample = (function() {
 
   function Sample() {
   }
@@ -169,14 +181,26 @@ module.exports = function(config) {
   return Sample;
 
 })();
-</code></pre><p>まー適当なんで(ry</p><h4>テストディレクトリ内にテストを作成</h4><p>今回はtests/*.jsで参照できるようになってるので</p><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
+</code></pre>
+<p>まー適当なんで(ry</p>
+<h4>テストディレクトリ内にテストを作成</h4>
+<p>今回はtests/*.jsで参照できるようになってるので</p>
+<pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
   it(&quot;#pow&quot;, function() {
     var sample = new Sample();
     expect(sample.pow(2)).to.be.eq(4);
   });
 });
-</code></pre><p>的な感じで</p><h4>テスト実行</h4><pre class="line-numbers"><code class="language-">karma start
-</code></pre><p>で実行出来る。実行するとbrowsersで指定しているブラウザが起動されてテストが実行されコンソール側に結果が出力される。で今回カバレッジを出すようにしているので、coverageディレクトリにブラウザ毎のカバレッジ出力が行われる</p><p>ブラウザによって挙動が異なったりする場合もあるかも知れない、そういう場合において単体テストをブラウザで自分で実行してテストするよりはkarmaとかを使ってそういう所を自動化しちゃうっていうのも良い感じなのではと</p>
+</code></pre>
+<p>的な感じで</p>
+<h4>テスト実行</h4><pre class="line-numbers"><code class="language-">karma start
+</code></pre>
+<p>で実行出来る。実行するとbrowsersで指定しているブラウザが起動されてテストが実行されコンソール側に結果が出力される。で今回カバレッジを出すようにしているので、coverageディレクトリにブラウザ毎のカバレッジ出力が行われる</p>
+
+<p>ブラウザによって挙動が異なったりする場合もあるかも知れない、そういう場合において単体テストをブラウザで自分で実行してテストするよりはkarmaとかを使ってそういう所を自動化しちゃうっていうのも良い感じなのではと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -268,7 +292,7 @@ module.exports = function(config) {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -289,9 +313,6 @@ module.exports = function(config) {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -404,7 +425,7 @@ module.exports = function(config) {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -427,20 +448,20 @@ module.exports = function(config) {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -450,13 +471,15 @@ module.exports = function(config) {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("69351f59e163ca51bd33673276a07cb617b2d4ac");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-10-15T00:00:00+00:00">
+                <time datetime="2013-10-15 00:00:00 +0900">
                   <a href="/archives/2013/10">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,8 +79,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["onCreateをRobolectric側で作用させずにモック化してから実行する場合", "onStartをRobolectricで作用させずにモック化する場合"]-->
-                <p><a href="/android-testing-robolectric-powermockito.html">Robolectric+powermockito</a>でRobolectricを利用している際におけるstaticメソッドのモック化っていうのを書いたけど、単純にRobolectric+Mockitoを使ったインスタンスメソッドのモック化に関してはスルーしてたので色々検証</p><p>まぁ通常であればRobolectricでActivityをテストするのには</p><pre class="line-numbers"><code class="language-java">package shareroid.app;
+                <!--[&quot;onCreateをRobolectric側で作用させずにモック化してから実行する場合&quot;, &quot;onStartをRobolectricで作用させずにモック化する場合&quot;]-->
+                <p><a href="/android-testing-robolectric-powermockito.html">Robolectric+powermockito</a>でRobolectricを利用している際におけるstaticメソッドのモック化っていうのを書いたけど、単純にRobolectric+Mockitoを使ったインスタンスメソッドのモック化に関してはスルーしてたので色々検証</p>
+
+<p>まぁ通常であればRobolectricでActivityをテストするのには</p>
+<pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -105,13 +109,21 @@ public class SampleActivityTestCase {
         assertThat(activity.mTextView.getText().toString(), is(&quot;aG9nZQ&quot;));
     }
 }
-</code></pre><p>んな感じで実行するのだけど、Robolectric.buildActivityの返り値はorg.robolectric.util.ActivityController<T>になる。でcreateメソッドで内部的なattachとperformCreateメソッド(継承しても不可視なメソッド)をコール、startでperformStartをコールするっていう仕組みになっている模様</p><p>まぁそこは良いとして、要点としては</p>
+</code></pre>
+<p>んな感じで実行するのだけど、Robolectric.buildActivityの返り値はorg.robolectric.util.ActivityController<T>になる。でcreateメソッドで内部的なattachとperformCreateメソッド(継承しても不可視なメソッド)をコール、startでperformStartをコールするっていう仕組みになっている模様</p>
+
+<p>まぁそこは良いとして、要点としては</p>
+
 <ul>
 <li>Robolectric.buildActivityを利用するのでMockitoを使ってどうやってモック化するのか</li>
 <li>onCreateが走る前にonCreateメソッドが利用する他のメソッドをモック化する場合はどうすれば良いのか</li>
 <li>上記のようにRobolectricクラスを使ってonStartまでを処理させず自分でやりたい場合はどうすれば良いのか</li>
 </ul>
-<p>っていう所。1に関してはMockito.spyを使えば良いはずなので、2と3に関して色々やってみる。本題はここから</p><p>その前に対象となるActivityは</p><pre class="line-numbers"><code class="language-java">package shareroid.app;
+
+<p>っていう所。1に関してはMockito.spyを使えば良いはずなので、2と3に関して色々やってみる。本題はここから</p>
+
+<p>その前に対象となるActivityは</p>
+<pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -139,7 +151,11 @@ public class SampleActivity extends Activity {
         return Sample.encodeB64(&quot;hoge&quot;);
     }
 }
-</code></pre><h4>onCreateをRobolectric側で作用させずにモック化してから実行する場合</h4><p>※onStartは使わないのでコメントアウト</p><p>まぁただTextViewなインスタンス作って、それのテキストにbuildTextを使うだけ。でそのbuildTextメソッドをモック化して返す値を変えたりするだけ</p><pre class="line-numbers"><code class="language-java">package shareroid.app;
+</code></pre><h4>onCreateをRobolectric側で作用させずにモック化してから実行する場合</h4>
+<p>※onStartは使わないのでコメントアウト</p>
+
+<p>まぁただTextViewなインスタンス作って、それのテキストにbuildTextを使うだけ。でそのbuildTextメソッドをモック化して返す値を変えたりするだけ</p>
+<pre class="line-numbers"><code class="language-java">package shareroid.app;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -234,7 +250,13 @@ public class SampleActivityTestCase {
         verify(activity).buildText();
     }
 }
-</code></pre><p>まぁこれに関しては特にツッコミどころ無い。ActivityController.startをしないだけで自分でonStartするだけだし。ActivityController.createはやってるけど、それもやらないのであればonCreateな時と同様に一度attachをしておく必要がある</p><p>無難なのはonCreateでモック化する必要とするようなケースの仕様にしない方がテストもすんなり出来るんじゃないかなっては思う所。onCreateでグダグダしてもねぇって所も</p>
+</code></pre>
+<p>まぁこれに関しては特にツッコミどころ無い。ActivityController.startをしないだけで自分でonStartするだけだし。ActivityController.createはやってるけど、それもやらないのであればonCreateな時と同様に一度attachをしておく必要がある</p>
+
+<p>無難なのはonCreateでモック化する必要とするようなケースの仕様にしない方がテストもすんなり出来るんじゃないかなっては思う所。onCreateでグダグダしてもねぇって所も</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -326,7 +348,7 @@ public class SampleActivityTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -347,9 +369,6 @@ public class SampleActivityTestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -462,7 +481,7 @@ public class SampleActivityTestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -485,20 +504,20 @@ public class SampleActivityTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -508,13 +527,15 @@ public class SampleActivityTestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("49b8af09fdff9612ae6c99ed0c9cc5abffce53e5");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

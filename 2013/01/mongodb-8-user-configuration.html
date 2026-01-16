@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="今頃かって話ですが、MongoDBで操作するにはユーザー認証が必要っていう設定をやってみる事に" />
     <title>mongodbを使ってみる (8) - ユーザー設定 - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-tailable-cursor.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/01/android-appwidget-listview.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/01/android-appwidget-listview.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/01/android-accountmanager.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/01/mongodb-8-user-configuration.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-18T00:00:00+00:00">
+                <time datetime="2013-01-18 00:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,12 +78,19 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p>今頃かって話ですが、MongoDBで操作するにはユーザー認証が必要っていう設定をやってみる事に</p><p>とりあえずユーザー設定をする前段階で</p><pre class="line-numbers"><code class="language-js">db.samples.save({ name: &quot;hoge&quot; })
+                <p>今頃かって話ですが、MongoDBで操作するにはユーザー認証が必要っていう設定をやってみる事に</p>
+
+<p>とりあえずユーザー設定をする前段階で</p>
+<pre class="line-numbers"><code class="language-js">db.samples.save({ name: &quot;hoge&quot; })
 db.samples.find()
 
 // { &quot;_id&quot; : ObjectId(&quot;50f7533baa1adeb4c2bf432b&quot;), &quot;name&quot; : &quot;hoge&quot; }
-</code></pre><p>っていうのは普通に無難に出来る事を前提に確認しておく。でMongoDBでユーザー認証しないとダメになるケースにするにはmongodb.confを設定しないといけない模様</p><pre class="line-numbers"><code class="language-properties">auth = true
-</code></pre><p>を設定しておく。多分デフォルトで書かれてるけどコメントされてると思うので。でMongoDBを再起動。んでユーザーを作る</p><pre class="line-numbers"><code class="language-js">use admin
+</code></pre>
+<p>っていうのは普通に無難に出来る事を前提に確認しておく。でMongoDBでユーザー認証しないとダメになるケースにするにはmongodb.confを設定しないといけない模様</p>
+<pre class="line-numbers"><code class="language-properties">auth = true
+</code></pre>
+<p>を設定しておく。多分デフォルトで書かれてるけどコメントされてると思うので。でMongoDBを再起動。んでユーザーを作る</p>
+<pre class="line-numbers"><code class="language-js">use admin
 
 // ユーザーID: test1 パスワード:testで作る
 db.addUser(&quot;test1&quot;, &quot;test&quot;)
@@ -92,7 +100,9 @@ db.auth(&quot;test1&quot;, &quot;test&quot;)
 
 // ユーザーID: test2 パスワード: testで作る(但しリードオンリー)
 db.addUser(&quot;test2&quot;, &quot;test&quot;, true)
-</code></pre><p>っていう感じで作るとdb.system.usersに格納されているのでfind(show usersでも良いっぽい)すると</p><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>っていう感じで作るとdb.system.usersに格納されているのでfind(show usersでも良いっぽい)すると</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;_id&quot; : ObjectId(&quot;50f76961e832fd5a08ff5353&quot;),
   &quot;user&quot; : &quot;test1&quot;,
   &quot;readOnly&quot; : false,
@@ -104,17 +114,25 @@ db.addUser(&quot;test2&quot;, &quot;test&quot;, true)
   &quot;readOnly&quot; : true,
   &quot;pwd&quot; : &quot;e81ab577bdd505b13f1489e5295fe1be&quot;
 }
-</code></pre><p>な感じになってる。で一度mongo shellを一度抜けておく。で再度mongo shell起動して</p><pre class="line-numbers"><code class="language-js">db.samples.find()
-</code></pre><p>をすると</p><pre class="line-numbers"><code class="language-json">error: {
+</code></pre>
+<p>な感じになってる。で一度mongo shellを一度抜けておく。で再度mongo shell起動して</p>
+<pre class="line-numbers"><code class="language-js">db.samples.find()
+</code></pre>
+<p>をすると</p>
+<pre class="line-numbers"><code class="language-json">error: {
         &quot;$err&quot; : &quot;unauthorized db:sample lock type:-1 client:127.0.0.1&quot;,
         &quot;code&quot; : 10057
 }
-</code></pre><p>んまぁログイン処理しとらんので。</p><pre class="line-numbers"><code class="language-js">use admin
+</code></pre>
+<p>んまぁログイン処理しとらんので。</p>
+<pre class="line-numbers"><code class="language-js">use admin
 db.auth(&quot;test1&quot;, &quot;test&quot;)
 
 use sample
 db.samples.find()
-</code></pre><p>っていう感じでログインしないと正常に結果が返ってこない。でtest2ユーザーはリードオンリーで作ったので</p><pre class="line-numbers"><code class="language-js">use admin
+</code></pre>
+<p>っていう感じでログインしないと正常に結果が返ってこない。でtest2ユーザーはリードオンリーで作ったので</p>
+<pre class="line-numbers"><code class="language-js">use admin
 db.auth(&quot;test2&quot;, &quot;test&quot;)
 
 use sample
@@ -124,15 +142,21 @@ db.samples.find()
 
 //unauthorizedで処理出来ない
 db.samples.save({ name: &quot;fuga&quot; })
-</code></pre><p>という感じでユーザー認証していない場合とかをエラーにしたりとかリードオンリーなユーザーにするとかっていうのはこんな感じ。</p><p>参考: <a href="http://learnmongo.com/posts/quick-tip-mongodb-users" target="_blank" rel="noopener noreferrer">http://learnmongo.com/posts/quick-tip-mongodb-users</a></p>
+</code></pre>
+<p>という感じでユーザー認証していない場合とかをエラーにしたりとかリードオンリーなユーザーにするとかっていうのはこんな感じ。</p>
+
+<p>参考: <a href="http://learnmongo.com/posts/quick-tip-mongodb-users">http://learnmongo.com/posts/quick-tip-mongodb-users</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/01/android-appwidget-listview.html">&lt;&nbsp;AppWidgetでListView</a>
+            <a class="float-start box-link" href="/2013/01/android-accountmanager.html">&lt;&nbsp;Android AccountManagerで使えるカスタムアカウントを開発する方法</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/01/mongodb-tailable-cursor.html">MongoDB(Perlクライアント)でtailable Cursorを使う&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/01/android-appwidget-listview.html">AppWidgetでListView&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -216,7 +240,7 @@ db.samples.save({ name: &quot;fuga&quot; })
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -237,9 +261,6 @@ db.samples.save({ name: &quot;fuga&quot; })
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -352,7 +373,7 @@ db.samples.save({ name: &quot;fuga&quot; })
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -375,20 +396,20 @@ db.samples.save({ name: &quot;fuga&quot; })
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -398,13 +419,15 @@ db.samples.save({ name: &quot;fuga&quot; })
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("bd13f08f665363bdbf99ff27e52a4939fea7a424");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

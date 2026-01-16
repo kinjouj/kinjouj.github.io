@@ -10,216 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="例えば以下のようなAbstractCursorを継承したクラスを作ったとする
-
-
-
-
-```java
-package sample.test;
-
-import android.database.AbstractCursor;
-import android.provider.BaseColumns;
-
-public class SampleCursor extends AbstractCursor implements BaseColumns {
-
-    @Override
-    public String[] getColumnNames() {
-        return null;
-    }
-
-    @Override
-    public int getCount() {
-        return 0;
-    }
-
-    @Override
-    public double getDouble(int column) {
-        return 0;
-    }
-
-    @Override
-    public float getFloat(int column) {
-        return 0;
-    }
-
-    @Override
-    public int getInt(int column) {
-        return 0;
-    }
-
-    @Override
-    public long getLong(int column) {
-        return 0;
-    }
-
-    @Override
-    public short getShort(int column) {
-        return 0;
-    }
-
-    @Override
-    public String getString(int column) {
-        return null;
-    }
-
-    @Override
-    public boolean isNull(int column) {
-        return false;
-    }
-}
-```
-
-
-あくまでネタとしてなんで実装はほとんど書いてません。それはおいといて
-
-
-でこれを返すContentProviderを作る
-
-
-```java
-package sample.test;
-
-import android.content.ContentProvider;
-import android.content.ContentValues;
-import android.content.UriMatcher;
-import android.database.Cursor;
-import android.net.Uri;
-
-public class SampleProvider extends ContentProvider {
-
-    private static UriMatcher matcher;
-
-    static {
-        matcher = new UriMatcher(UriMatcher.NO_MATCH);
-        matcher.addURI(&quot;sample.provider&quot;, &quot;samples&quot;, 0);
-    }
-
-    @Override
-    public String getType(Uri uri) {
-        return &quot;vnd.android.cursor.dir/sample.provider&quot;;
-    }
-
-    @Override
-    public boolean onCreate() {
-        return false;
-    }
-
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        // 作ったAbstractCursorを継承したクラスのインスタンスを返す
-        return new SampleCursor();
-    }
-
-    @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        return null;
-    }
-
-    @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
-    }
-    @Override
-    public int delete(Uri arg0, String arg1, String[] arg2) {
-        return 0;
-    }
-}
-```
-
-
-でこれを Uri.parse(&quot;content://sample.provider/samples&quot;)をgetContentResolver().query した場合に実体クラスでキャストするとどうなるか。結果はClassCastException。理由としてgetContentResolver.queryが返すCursorクラスはContentResolver.CursorWrapperInnerにラップされてる。それはContentResolverのソースコードにもろ書いてる
-
-
-でこういう場合にqueryメソッドを使って返されるCursorクラスの実体を取得したい場合はどうなるかって話になる訳なのですが
-
-
-&lt;pre&gt;
-getContentResolver -&gt; acquireContentProviderClient(uri) -&gt; query
-&lt;/pre&gt;
-
-
-っていうようにContentResolverのacquireContentProviderClientメソッドを使ってContentProviderClientクラスを取得する。でそのクラスからqueryをする事で、ラップされずにqueryメソッドから返される結果のCursor実体を取得する事が出来る
-
-
-実際それをやると
-
-
-```java
-package sample.test;
-
-import android.app.Activity;
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.RemoteException;
-import android.widget.TextView;
-
-public class MainActivity extends Activity {
-
-    private Uri uri = Uri.parse(&quot;content://sample.provider/samples&quot;);
-
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        setContentView(R.layout.main);
-
-        fetch1();
-        fetch2();
-    }
-
-
-    private void fetch1() {
-        /* これをやるとClassCastExceptionになる
-        SampleCursor csr = (SampleCursor)getContentResolver().query(uri, null, null, null, null);
-        */
-
-        Cursor csr = getContentResolver().query(uri, null, null, null, null);
-
-        ((TextView)findViewById(R.id.text1)).setText(
-            &quot;getContentResolver.query: &quot; + csr.toString()
-        );
-    }
-
-    private void fetch2() {
-        ContentResolver resolver = getContentResolver();
-        ContentProviderClient client = resolver.acquireContentProviderClient(uri);
-
-        try {
-            Cursor csr = client.query(uri, null, null, null, null);
-
-            ((TextView)findViewById(R.id.text2)).setText(
-                &quot;ContentProviderClient.query: &quot; + csr.toString()
-            );
-        } catch(RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
-
-
-これを実行すると
-
-
-![](/images/2013/01/20130109074052.png)
-
-
-というようになる。っていう感じ。だけどそんなにCursorの実体クラスが必要になるケースなんてあんまり無いような気もするけど
-
-
-もっと簡単に出来る方法あるのかなーって思うところなんだけど
-
-
-#### 追記
-
-
-&lt;http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html&gt;
-
-
-を見ておいた方がいいかも" />
+    <meta name="description" content="例えば以下のようなAbstractCursorを継承したクラスを作ったとする" />
     <title>ContentProviderから返されたCursor実装を取る - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/01/phpunit-selenium-and-tips.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/php-user-ini.html" />
@@ -227,6 +18,7 @@ public class MainActivity extends Activity {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -267,7 +59,7 @@ public class MainActivity extends Activity {
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-09T00:00:00+00:00">
+                <time datetime="2013-01-09 00:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -286,8 +78,9 @@ public class MainActivity extends Activity {
                 </span>
               </p>
               <div class="post-content">
-                <!--["追記"]-->
-                <p>例えば以下のようなAbstractCursorを継承したクラスを作ったとする</p><pre class="line-numbers"><code class="language-java">package sample.test;
+                <!--[&quot;追記&quot;]-->
+                <p>例えば以下のようなAbstractCursorを継承したクラスを作ったとする</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.database.AbstractCursor;
 import android.provider.BaseColumns;
@@ -339,7 +132,11 @@ public class SampleCursor extends AbstractCursor implements BaseColumns {
         return false;
     }
 }
-</code></pre><p>あくまでネタとしてなんで実装はほとんど書いてません。それはおいといて</p><p>でこれを返すContentProviderを作る</p><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>あくまでネタとしてなんで実装はほとんど書いてません。それはおいといて</p>
+
+<p>でこれを返すContentProviderを作る</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -386,11 +183,19 @@ public class SampleProvider extends ContentProvider {
         return 0;
     }
 }
-</code></pre><p>でこれを Uri.parse(<q>content://sample.provider/samples</q>)をgetContentResolver().query した場合に実体クラスでキャストするとどうなるか。結果はClassCastException。理由としてgetContentResolver.queryが返すCursorクラスはContentResolver.CursorWrapperInnerにラップされてる。それはContentResolverのソースコードにもろ書いてる</p><p>でこういう場合にqueryメソッドを使って返されるCursorクラスの実体を取得したい場合はどうなるかって話になる訳なのですが</p>
+</code></pre>
+<p>でこれを Uri.parse(<q>content://sample.provider/samples</q>)をgetContentResolver().query した場合に実体クラスでキャストするとどうなるか。結果はClassCastException。理由としてgetContentResolver.queryが返すCursorクラスはContentResolver.CursorWrapperInnerにラップされてる。それはContentResolverのソースコードにもろ書いてる</p>
+
+<p>でこういう場合にqueryメソッドを使って返されるCursorクラスの実体を取得したい場合はどうなるかって話になる訳なのですが</p>
+
 <pre>
 getContentResolver -> acquireContentProviderClient(uri) -> query
 </pre>
-<p>っていうようにContentResolverのacquireContentProviderClientメソッドを使ってContentProviderClientクラスを取得する。でそのクラスからqueryをする事で、ラップされずにqueryメソッドから返される結果のCursor実体を取得する事が出来る</p><p>実際それをやると</p><pre class="line-numbers"><code class="language-java">package sample.test;
+
+<p>っていうようにContentResolverのacquireContentProviderClientメソッドを使ってContentProviderClientクラスを取得する。でそのクラスからqueryをする事で、ラップされずにqueryメソッドから返される結果のCursor実体を取得する事が出来る</p>
+
+<p>実際それをやると</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Activity;
 import android.content.ContentProviderClient;
@@ -442,7 +247,21 @@ public class MainActivity extends Activity {
         }
     }
 }
-</code></pre><p>これを実行すると</p><p><img src="/images/2013/01/20130109074052.png" class="img-fluid" alt="image" /></p><p>というようになる。っていう感じ。だけどそんなにCursorの実体クラスが必要になるケースなんてあんまり無いような気もするけど</p><p>もっと簡単に出来る方法あるのかなーって思うところなんだけど</p><h4>追記</h4><p><a href="http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html" target="_blank" rel="noopener noreferrer">http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html</a></p><p>を見ておいた方がいいかも</p>
+</code></pre>
+<p>これを実行すると</p>
+
+<p><img src="/images/2013/01/20130109074052.png" class="img-fluid" alt="image" /></p>
+
+<p>というようになる。っていう感じ。だけどそんなにCursorの実体クラスが必要になるケースなんてあんまり無いような気もするけど</p>
+
+<p>もっと簡単に出来る方法あるのかなーって思うところなんだけど</p>
+<h4>追記</h4>
+<p><a href="http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html">http://yuki312.blogspot.jp/2012/07/androidcontentresolvercontentprovidercl.html</a></p>
+
+<p>を見ておいた方がいいかも</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -534,7 +353,7 @@ public class MainActivity extends Activity {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -555,9 +374,6 @@ public class MainActivity extends Activity {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -670,7 +486,7 @@ public class MainActivity extends Activity {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -693,20 +509,20 @@ public class MainActivity extends Activity {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -716,13 +532,15 @@ public class MainActivity extends Activity {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("b9a0d78f62a26127a548a8a28490aad1b2e2bf2d");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="まぁAndroid公式にBluetoothChatっていうのはありますけど。一応Android側はそれのソース読んでやってみたって話。ただこれはAndroidとPC(Ubuntu)をbluetooth RFCOMMを使って通信するというところになる" />
     <title>UbuntuとAndroidをbluetooth RFCOMMで通信する - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/01/fuelphp-26-mongodb.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/01/fuelphp-27-model_soft.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/01/ubuntu-android-record-screen.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/01/fuelphp-26-mongodb.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/01/ubuntu-android-bluetooth-rfcomm.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-21T00:00:00+00:00">
+                <time datetime="2013-01-21 00:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,7 +79,12 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p>まぁAndroid公式にBluetoothChatっていうのはありますけど。一応Android側はそれのソース読んでやってみたって話。ただこれはAndroidとPC(Ubuntu)をbluetooth RFCOMMを使って通信するというところになる</p><p>一応前持って行っておきますが、以下のソースはクソですので... (Threadの扱いとかダメ)。あくまでAndroidとRFCOMMにおける通信方法の手段にしかすぎないかと</p><p>でソースですけど、AndroidManifest.xmlとかはBLUETOOTH/BLUETOOTH_ADMINのpermissionが必要なくらいなので端折る。という事でActivityだけ書く</p><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+                <p>まぁAndroid公式にBluetoothChatっていうのはありますけど。一応Android側はそれのソース読んでやってみたって話。ただこれはAndroidとPC(Ubuntu)をbluetooth RFCOMMを使って通信するというところになる</p>
+
+<p>一応前持って行っておきますが、以下のソースはクソですので... (Threadの扱いとかダメ)。あくまでAndroidとRFCOMMにおける通信方法の手段にしかすぎないかと</p>
+
+<p>でソースですけど、AndroidManifest.xmlとかはBLUETOOTH/BLUETOOTH_ADMINのpermissionが必要なくらいなので端折る。という事でActivityだけ書く</p>
+<pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -409,7 +415,11 @@ public class SampleActivity extends Activity {
         }
     }
 }
-</code></pre><p>簡単に言うと起動するとAcceptThreadが走って、そこでBluetooth RFCOMMをリッスンする。でPC側のクライアントを使って接続するとConnectedThreadが走って、クライアントから受け取ったデータを取得してそれをListViewのアダプターにバインドする。まぁそんな感じ</p><p>でPCからデータを送るクライアントは以前書いたネタにも書いてあるけど、python-bluezを使う</p><pre class="line-numbers"><code class="language-py">from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
+</code></pre>
+<p>簡単に言うと起動するとAcceptThreadが走って、そこでBluetooth RFCOMMをリッスンする。でPC側のクライアントを使って接続するとConnectedThreadが走って、クライアントから受け取ったデータを取得してそれをListViewのアダプターにバインドする。まぁそんな感じ</p>
+
+<p>でPCからデータを送るクライアントは以前書いたネタにも書いてあるけど、python-bluezを使う</p>
+<pre class="line-numbers"><code class="language-py">from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
 
 host = None
 port = 0
@@ -433,11 +443,19 @@ if host is not None:
                 sock.send(&quot;%sn&quot; % data)
             except:
                 break;
-</code></pre><p>まぁこれを実行してデータを送ったりするとスマフォ側にデータが表示される。でその動画を撮影しました</p>
+</code></pre>
+<p>まぁこれを実行してデータを送ったりするとスマフォ側にデータが表示される。でその動画を撮影しました</p>
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/9FjwF3B0rqo?si=pXzDvDuQR4N0Y97j" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<p>というような感じ。で問題はここからで逆にスマフォ側からPC側にデータをどうやって送るのかって話なんですが。上記のJavaソース上だとcreateRfcommSocketToServiceRecordのメソッドを使ってPC側デバイスのRFCOMMと接続してごにょごにょしているのですが、そもそもPC側のbluetoothにRFCOMMがバインドされてるかって所なんですが、基本的にはRFCOMMは自分でやらないとバインドされないはずなので</p><pre class="line-numbers"><code class="language-">sudo sdptool browse local
-</code></pre><p>をやったあとに。Serial Port通信なRFCOMMがあるかどうかを確認しなきゃならん。多分、デフォルトでは無いはずなので</p><pre class="line-numbers"><code class="language-">sudo sdptool add --channel=15 SP
-</code></pre><p>で登録しておく。でもっかい見ると</p><pre class="line-numbers"><code class="language-">Service Name: Serial Port
+
+<p>というような感じ。で問題はここからで逆にスマフォ側からPC側にデータをどうやって送るのかって話なんですが。上記のJavaソース上だとcreateRfcommSocketToServiceRecordのメソッドを使ってPC側デバイスのRFCOMMと接続してごにょごにょしているのですが、そもそもPC側のbluetoothにRFCOMMがバインドされてるかって所なんですが、基本的にはRFCOMMは自分でやらないとバインドされないはずなので</p>
+<pre class="line-numbers"><code class="language-">sudo sdptool browse local
+</code></pre>
+<p>をやったあとに。Serial Port通信なRFCOMMがあるかどうかを確認しなきゃならん。多分、デフォルトでは無いはずなので</p>
+<pre class="line-numbers"><code class="language-">sudo sdptool add --channel=15 SP
+</code></pre>
+<p>で登録しておく。でもっかい見ると</p>
+<pre class="line-numbers"><code class="language-">Service Name: Serial Port
 Service Description: COM Port
 Service Provider: BlueZ
 Service RecHandle: 0x10009
@@ -447,7 +465,11 @@ Protocol Descriptor List:
   &quot;L2CAP&quot; (0x0100)
   &quot;RFCOMM&quot; (0x0003)
     Channel: 15
-</code></pre><p>な感じで出てるかと。あとはこっちもサーバープログラムを作って、スマフォから送られてきたデータを取得して表示したりするなりだけ。だが、上記のJavaソースだと一度PC側からクライアント接続しないと送信なフォームが出ないようになってるので、それと事前にPC側のRFCOMMレシーバーなプログラムを起動しておかないとスマフォ側からデータ送信出来ない。理由としてスマフォからPC側のサーバーへのコネクションは一度処理した一回のみだけ接続処理を行うので</p><p>でそのRFCOMMサーバープログラムも書く。ここもPython</p><pre class="line-numbers"><code class="language-py">from bluetooth import BluetoothSocket,RFCOMM
+</code></pre>
+<p>な感じで出てるかと。あとはこっちもサーバープログラムを作って、スマフォから送られてきたデータを取得して表示したりするなりだけ。だが、上記のJavaソースだと一度PC側からクライアント接続しないと送信なフォームが出ないようになってるので、それと事前にPC側のRFCOMMレシーバーなプログラムを起動しておかないとスマフォ側からデータ送信出来ない。理由としてスマフォからPC側のサーバーへのコネクションは一度処理した一回のみだけ接続処理を行うので</p>
+
+<p>でそのRFCOMMサーバープログラムも書く。ここもPython</p>
+<pre class="line-numbers"><code class="language-py">from bluetooth import BluetoothSocket,RFCOMM
 import notify2
 
 port = 15
@@ -464,7 +486,9 @@ while True:
 
     n = notify2.Notification(&quot;Bluetooth Message&quot;, data)
     n.show()
-</code></pre><p>っていう感じ。今回のだと</p>
+</code></pre>
+<p>っていう感じ。今回のだと</p>
+
 <ul>
 <li>PC側のRFCOMMサーバーを起動する (その前にPC側でRFCOMMなSerial Portあるか確認)</li>
 <li>スマフォアプリ側を起動</li>
@@ -474,13 +498,15 @@ while True:
 </ul>
 
               </div>
+              <div class="post-similarity">
+              </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/01/fuelphp-27-model_soft.html">&lt;&nbsp;FuelPHPをやってみる (27) - Model_Softを使う -</a>
+            <a class="float-start box-link" href="/2013/01/fuelphp-26-mongodb.html">&lt;&nbsp;FuelPHPをやってみる (26) - MongoDBを使う -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/01/fuelphp-26-mongodb.html">FuelPHPをやってみる (26) - MongoDBを使う -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/01/ubuntu-android-record-screen.html">UbuntuでAndroidの動作画面を動画で録画する方法&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -564,7 +590,7 @@ while True:
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -585,9 +611,6 @@ while True:
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -700,7 +723,7 @@ while True:
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -723,20 +746,20 @@ while True:
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -746,13 +769,15 @@ while True:
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("f214cdf28b021496e52694401d769cf85e01d1e2");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

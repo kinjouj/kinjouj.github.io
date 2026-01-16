@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="FuelPHPではHMVCリクエスト方式を利用してビューからコントローラーにリクエストを送ってそのレスポンスをビューにレンダリングしたりも出来る模様" />
     <title>FuelPHPをやってみる (17) - HMVCリクエスト - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2012/11/hdfs-operations.html" />
-    <link rel="next" href="https://kinjouj.github.io/2012/11/eclipse-birt-5-excel-rendering.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2012/11/fuelphp-16-csrf-security.html" />
+    <link rel="next" href="https://kinjouj.github.io/2012/11/hdfs-operations.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2012/11/fuelphp-17-hmvc-request.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-11-21T00:00:00+00:00">
+                <time datetime="2012-11-21 00:00:00 +0900">
                   <a href="/archives/2012/11">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["fuel/app/classes/controller/home.php", "fuel/app/views/home.php", "追記 HMVCリクエストのテスト"]-->
-                <p>FuelPHPではHMVCリクエスト方式を利用してビューからコントローラーにリクエストを送ってそのレスポンスをビューにレンダリングしたりも出来る模様</p><h4>fuel/app/classes/controller/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
+                <!--[&quot;fuel/app/classes/controller/home.php&quot;, &quot;fuel/app/views/home.php&quot;, &quot;追記 HMVCリクエストのテスト&quot;]-->
+                <p>FuelPHPではHMVCリクエスト方式を利用してビューからコントローラーにリクエストを送ってそのレスポンスをビューにレンダリングしたりも出来る模様</p>
+<h4>fuel/app/classes/controller/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
     public function get_index() {
@@ -93,16 +95,28 @@ class Controller_Home extends Controller {
         throw new HttpNotFoundException();
     }
 }
-</code></pre><p>HMVCリクエストかどうかについてはRequest::is_hmvcでチェック出来る。でHMVCリクエストで無い場合には404エラーをスローするようにしている(ブラウザからコントローラーアクションなURLにアクセスすると404になる)</p><h4>fuel/app/views/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;html&gt;
+</code></pre>
+<p>HMVCリクエストかどうかについてはRequest::is_hmvcでチェック出来る。でHMVCリクエストで無い場合には404エラーをスローするようにしている(ブラウザからコントローラーアクションなURLにアクセスすると404になる)</p>
+<h4>fuel/app/views/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;html&gt;
   &lt;body&gt;
     &lt;?php echo Request::forge(&quot;home/sample&quot;)-&gt;execute(); ?&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>でちょっと気になるのが <a href="http://press.nekoget.com/fuelphp_doc/general/hmvc.html" target="_blank" rel="noopener noreferrer">http://press.nekoget.com/fuelphp_doc/general/hmvc.html</a> にある</p>
+</code></pre>
+<p>でちょっと気になるのが <a href="http://press.nekoget.com/fuelphp_doc/general/hmvc.html">http://press.nekoget.com/fuelphp_doc/general/hmvc.html</a> にある</p>
+
 <blockquote>
 「デフォルトでは、すべてのリクエストは、Fuel のルーティングエンジンによって処理されます。 もし、ルーティング可能でないリクエストをしたい場合 (たとえば、ブラウザからそれをリクエストされたくない場合)、"false" を 2 番目のパラメータとして forge() の呼び出しに渡す必要があります。 そうしない場合、リクエストを実行すると、404 エラーで終了します!」
 </blockquote>
-<p>っていう所。第2引数にfalseを入れるとルーティングエンジンで解決しないっていうのがどうも動作的にどうなるのかが微妙。ソース見た所だと「Request::forge -&gt; Router::process -&gt; new Route(falseにした場合)」という流れになるような模様だけど、引数にfalseを設定した場合Router::processでルーティング定義から探索をしないっていう所だけはわかるけど、それが「ルーティング可能では無い」という意味合いがかなり微妙</p><p>とりあえずまぁ、ビューからコントローラーアクションをコンポーネントな感じで扱う事が出来て、それを検知するのにis_hmvcを使えばチェック出来るよな感じかなと</p><p>ちなみにHMVCリクエストなコントローラーアクションのテストケースに関してはまだ調査してないので判明次第追記する予定</p><h4>追記 HMVCリクエストのテスト</h4><p>普通にやれば良い模様</p><pre class="line-numbers"><code class="language-php">&lt;?php
+
+<p>っていう所。第2引数にfalseを入れるとルーティングエンジンで解決しないっていうのがどうも動作的にどうなるのかが微妙。ソース見た所だと「Request::forge -&gt; Router::process -&gt; new Route(falseにした場合)」という流れになるような模様だけど、引数にfalseを設定した場合Router::processでルーティング定義から探索をしないっていう所だけはわかるけど、それが「ルーティング可能では無い」という意味合いがかなり微妙</p>
+
+<p>とりあえずまぁ、ビューからコントローラーアクションをコンポーネントな感じで扱う事が出来て、それを検知するのにis_hmvcを使えばチェック出来るよな感じかなと</p>
+
+<p>ちなみにHMVCリクエストなコントローラーアクションのテストケースに関してはまだ調査してないので判明次第追記する予定</p>
+<h4>追記 HMVCリクエストのテスト</h4>
+<p>普通にやれば良い模様</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Controller_Home extends TestCase {
     public function test_get_sample() {
@@ -111,16 +125,22 @@ class Test_Controller_Home extends TestCase {
         $this-&gt;assertEquals(200, $res-&gt;status);
     }
 }
-</code></pre><p>ただ返ってくるFuel\CoreResponseのbodyがFuel\CoreViewになってるので、それの結果をテストする場合は</p><pre class="line-numbers"><code class="language-php">$res-&gt;body-&gt;render()
-</code></pre><p>で出力結果とかを取れるのでそれをテストするなり、Fuel\Core\Viewのままテストするなりでも良いのかなと</p>
+</code></pre>
+<p>ただ返ってくるFuel\CoreResponseのbodyがFuel\CoreViewになってるので、それの結果をテストする場合は</p>
+<pre class="line-numbers"><code class="language-php">$res-&gt;body-&gt;render()
+</code></pre>
+<p>で出力結果とかを取れるのでそれをテストするなり、Fuel\Core\Viewのままテストするなりでも良いのかなと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2012/11/eclipse-birt-5-excel-rendering.html">&lt;&nbsp;Eclipse BIRTを使ってみる (5) - Excelで出力 -</a>
+            <a class="float-start box-link" href="/2012/11/hdfs-operations.html">&lt;&nbsp;HDFS操作メモ</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2012/11/hdfs-operations.html">HDFS操作メモ&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2012/11/fuelphp-16-csrf-security.html">FuelPHPをやってみる (16) - CSRFに関して -&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -204,7 +224,7 @@ class Test_Controller_Home extends TestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -225,9 +245,6 @@ class Test_Controller_Home extends TestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -340,7 +357,7 @@ class Test_Controller_Home extends TestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -363,20 +380,20 @@ class Test_Controller_Home extends TestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -386,13 +403,15 @@ class Test_Controller_Home extends TestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("6a09aded862083f6a54467e215f05aef180d6c2a");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

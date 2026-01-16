@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-03T00:00:00+00:00">
+                <time datetime="2013-09-03 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["AndroidManifest.xml", "SampleNotificationListenerService.java"]-->
-                <p>タイトル通り、Android4.3から追加されたらしい<a href="http://developer.android.com/reference/android/service/notification/NotificationListenerService.html">NotificationListenerService</a>っていうのがある模様。どうやらAccessibilityServiceを使って通知を取得するっていうのは<a href="/2012/10/android-accessibilityservice.html">以前にやった</a>けれども、それと同等な事をサクッと出来るようになったっぽい</p><p>とりあえずwktkしてるので使ってみた</p><h4>AndroidManifest.xml</h4><p>NotificationListenerServiceは名前の通りServiceなので<service>で設定する</p><pre class="line-numbers"><code class="language-xml">&lt;manifest
+                <!--[&quot;AndroidManifest.xml&quot;, &quot;SampleNotificationListenerService.java&quot;]-->
+                <p>タイトル通り、Android4.3から追加されたらしい<a href="http://developer.android.com/reference/android/service/notification/NotificationListenerService.html">NotificationListenerService</a>っていうのがある模様。どうやらAccessibilityServiceを使って通知を取得するっていうのは<a href="/2012/10/android-accessibilityservice.html">以前にやった</a>けれども、それと同等な事をサクッと出来るようになったっぽい</p>
+
+<p>とりあえずwktkしてるので使ってみた</p>
+<h4>AndroidManifest.xml</h4>
+<p>NotificationListenerServiceは名前の通りServiceなので<service>で設定する</p>
+<pre class="line-numbers"><code class="language-xml">&lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;sample.test&quot;
     android:versionCode=&quot;1&quot;
@@ -101,7 +107,9 @@
         &lt;/service&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><p>まぁこれはドキュメントに普通に書いてあるので説明する必要ないでしょうという事で</p><h4>SampleNotificationListenerService.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>まぁこれはドキュメントに普通に書いてあるので説明する必要ないでしょうという事で</p>
+<h4>SampleNotificationListenerService.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -124,7 +132,21 @@ public class SampleNotificationListenerService extends NotificationListenerServi
     public void onNotificationRemoved(StatusBarNotification sbn) {
     }
 }
-</code></pre><p>通知がぶっ飛ばれてきたら<span style="color: red">onNotificationPosted</span>が飛んでくる。で引数に指定されるのは飛んできて通知だけで既に存在している通知自体はgetActiveNotificationsを使って取得出来る模様</p><p>っていう感じ。で実際に動作させるにあたってエミュレータで検証を行った所だと、「設定」-&gt; 「セキュリティ」から通知の取得設定項目がありNotificationListenerServiceなアプリを入れるとここに表示される。でそれをチェックすると以下のようなダイアログが出る</p><p><img src="/images/2013/09/20130903083320.png" class="img-fluid" alt="image" /></p><p>っていう感じな警告も出る模様。んまぁ設定はこれでオッケーなんだけど、エミュレータだったからなのかは定かじゃないけど、チェックいれてもサービスが起動してないっていうオチがあったりするのでそこ確認しておく事</p><p>あとはAPI DemoなNotificationを使って通知を読み取る事が出来る模様</p><p>という事でAndroid4.3からはAccessibilityServiceではなくてNotificationListenerServiceを使う事でも出来るという事で</p>
+</code></pre>
+<p>通知がぶっ飛ばれてきたら<span style="color: red">onNotificationPosted</span>が飛んでくる。で引数に指定されるのは飛んできて通知だけで既に存在している通知自体はgetActiveNotificationsを使って取得出来る模様</p>
+
+<p>っていう感じ。で実際に動作させるにあたってエミュレータで検証を行った所だと、「設定」-&gt; 「セキュリティ」から通知の取得設定項目がありNotificationListenerServiceなアプリを入れるとここに表示される。でそれをチェックすると以下のようなダイアログが出る</p>
+
+<p><img src="/images/2013/09/20130903083320.png" class="img-fluid" alt="image" /></p>
+
+<p>っていう感じな警告も出る模様。んまぁ設定はこれでオッケーなんだけど、エミュレータだったからなのかは定かじゃないけど、チェックいれてもサービスが起動してないっていうオチがあったりするのでそこ確認しておく事</p>
+
+<p>あとはAPI DemoなNotificationを使って通知を読み取る事が出来る模様</p>
+
+<p>という事でAndroid4.3からはAccessibilityServiceではなくてNotificationListenerServiceを使う事でも出来るという事で</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -216,7 +238,7 @@ public class SampleNotificationListenerService extends NotificationListenerServi
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -237,9 +259,6 @@ public class SampleNotificationListenerService extends NotificationListenerServi
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -352,7 +371,7 @@ public class SampleNotificationListenerService extends NotificationListenerServi
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -375,20 +394,20 @@ public class SampleNotificationListenerService extends NotificationListenerServi
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -398,13 +417,15 @@ public class SampleNotificationListenerService extends NotificationListenerServi
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("7d2d5b11f50b13683372de5387649c1fae9930ab");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

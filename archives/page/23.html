@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -91,91 +90,6 @@
                   <a name="article-link" href="/2014/01/android-times-square.html">android-times-square</a>
                 </h3>
                 CalendarっぽいViewなので&lt;https://github.com/square/android-times-square&gt;っていうのがある模様。ってな訳でちょいと使ってみた
-
-
-
-
-
-レイアウトはドキュメントに書いてる通りで
-
-```xml
-&lt;com.squareup.timessquare.CalendarPickerView
-    android:id=&quot;@+id/calendar_view&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot; /&gt;
-```
-
-
-だけを単純につけただけ
-
-
-#### MainActivity.java
-
-
-```java
-package sample.test;
-
-import java.util.Date;
-
-import android.app.Activity;
-import android.os.Bundle;
-import android.widget.Toast;
-
-import com.squareup.timessquare.CalendarPickerView;
-
-import org.joda.time.DateTime;
-
-
-public class MainActivity extends Activity implements
-    CalendarPickerView.OnDateSelectedListener,
-    CalendarPickerView.OnInvalidDateSelectedListener {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        DateTime today = DateTime.now();
-
-        CalendarPickerView calendar = (CalendarPickerView)findViewById(R.id.calendar_view);
-        calendar.setOnDateSelectedListener(this);
-        calendar.setOnInvalidDateSelectedListener(this);
-
-        calendar
-            .init(
-                today.toDate(),
-                today.plusWeeks(1).toDate()
-            )
-            .inMode(CalendarPickerView.SelectionMode.MULTIPLE);
-    }
-
-    @Override
-    public void onDateSelected(Date date) {
-        Toast.makeText(this, &quot;OK(Selected): &quot; + date.toString(), Toast.LENGTH_LONG).show();
-    }
-
-    // inMode(SelectionMode.MULTIPLE)等?において日付選択が解除された場合に発生する
-    @Override
-    public void onDateUnselected(Date date) {
-        Toast.makeText(this, &quot;OK(Unselected): &quot; + date.toString(), Toast.LENGTH_LONG).show();
-    }
-
-    // initで指定した範囲以外の日付をタップした場合等に発生
-    @Override
-    public void onInvalidDateSelected(Date date) {
-        Toast.makeText(this, &quot;NG: &quot; + date.toString(), Toast.LENGTH_LONG).show();
-    }
-}
-```
-
-
-てな感じにすると
-
-
-![](/images/2014/01/201401191725.png)
-
-
-てな感じのビューになると。単純にそういうのを必要とするようなケースであれば非常に有用に使えるのではという印象(UIデザインとかそこはおいといて)
               </div>
             </div>
             <div id="57b25fbee253425a9505be0250c430855ced903c" class="card m-4 mb-5">
@@ -203,123 +117,6 @@ public class MainActivity extends Activity implements
                   <a name="article-link" href="/2014/01/nginx-websocket.html">nginxでwebsocket</a>
                 </h3>
                 nginx1.3から正式サポートされたらしいのでやった事無かった為やってみただけ。前回の[Androidでsocket.io][1]で使ったのをちょいと修正して使う
-
-
-
-
-
-#### nginx1.3のインストール
-
-
-検証マシンに入ってるnginxが1.2系だったので、nginx公式のPPAを使えば1.3系以降なのもインストール出来る模様
-
-
-```sh
-sudo add-apt-repository ppa:nginx/stable
-sudo apt-get update
-
-# 既に入ってるnginxをアップグレードする。もしくはnginxを一回消してから再度入れるとか
-sudo apt-get upgrade
-```
-
-
-#### クライアント
-
-
-前回、socket.io.js辺りなやつはコピペして使うって書いたけど、socket.ioなサーバー上で/socket.io/socket.io.jsなURLで利用できるっぽい
-
-
-```html
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;/socket.io/socket.io.js&quot;&gt;&lt;/script&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;input type=&quot;text&quot; id=&quot;message&quot; /&gt;
-    &lt;input type=&quot;button&quot; id=&quot;send_btn&quot; value=&quot;send&quot; /&gt;
-    &lt;div id=&quot;messages&quot;&gt;&lt;/div&gt;
-    &lt;script type=&quot;text/javascript&quot;&gt;
-(function(undefined) {
-  &quot;use strict&quot;;
-
-  var messages = document.querySelector(&quot;#messages&quot;);
-
-  var socket = io.connect(&quot;http://server.name/&quot;);
-  socket.on(&quot;connect&quot;, function() {
-    socket.on(&quot;message&quot;, function(data) {
-      var elm = document.createElement(&quot;div&quot;);
-      elm.innerText = data;
-
-      messages.appendChild(elm);
-    });
-
-    document.querySelector(&quot;#send_btn&quot;).addEventListener(&quot;click&quot;, function() {
-      socket.send(document.querySelector(&quot;#message&quot;).value);
-    });
-  });
-})();
-    &lt;/script&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-```
-
-
-#### サーバー側
-
-
-```js
-var express = require(&quot;express&quot;);
-
-var app = express();
-app.configure(function() {
-  // クライアント側にあるファイルを静的ファイルで読み込めるように?
-  app.use(express.static(__dirname + &quot;/../client&quot;));
-});
-
-var server = require(&quot;http&quot;).createServer(app);
-server.listen(3000);
-
-var io = require(&quot;socket.io&quot;).listen(server);
-io.sockets.on(&quot;connection&quot;, function(socket) {
-  socket.on(&quot;message&quot;, function(data) {
-    socket.broadcast.send(data);
-  });
-});
-```
-
-
-#### nginx.conf
-
-
-```nginx
-upstream socketio {
-    server 127.0.0.1:3000;
-}
-
-server {
-    server_name server.name;
-
-    location / {
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection &quot;Upgrade&quot;;
-        proxy_pass http://socketio;
-    }
-}
-```
-
-
-最小限で、proxy\_Set\_headerでUpgradeとConnectionを指定しておけば良いっぽい。んまぁ詳しくは以下参考にすりゃ良いっぽい
-
-
-で外部からnginxにアクセスしても問題無いかどうかをAndroidのブラウザでサーバーにアクセスして、PCから入力したデータが表示されるかの検証してみた所だと
-
-
-![](/images/2014/01/20140112-182622.png)
-
-
-参考: &lt;http://blog.geta6.net/post/45741693575/nginx-1-3-14-websocket-proxy&gt;
-
- [1]: /android-socketio.html
               </div>
             </div>
             <div id="2f182c89ae5419cc6b9c7d6c883d21096235718b" class="card m-4 mb-5">
@@ -427,7 +224,7 @@ server {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -448,9 +245,6 @@ server {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -563,7 +357,7 @@ server {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -586,20 +380,20 @@ server {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-09-08T00:00:00+00:00">
+                <time datetime="2014-09-08 00:00:00 +0900">
                   <a href="/archives/2014/09">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["構成", "SampleApplication.java", "Hoge.java", "SampleController.java", "src/main/WEB-INF/web.xml", "src/main/WEB-INF/beans.xml", "build.gradle", "src/test/resouces/arquillian.xml", "SampleTest.java"]-->
-                <p>公式ドキュメント: <a href="http://arquillian.org/guides/getting_started_ja/">http://arquillian.org/guides/getting_started_ja/</a></p><p>参考: <a href="http://d.hatena.ne.jp/backpaper0/20121202/1354465585">Arquillianでインテグレーションテスト最初の第一歩</a></p><p>タイトル通り、JAX-RS+CDIなのをArquillianでテストしてみようっていうネタ</p><h4>構成</h4>
+                <!--[&quot;構成&quot;, &quot;SampleApplication.java&quot;, &quot;Hoge.java&quot;, &quot;SampleController.java&quot;, &quot;src/main/WEB-INF/web.xml&quot;, &quot;src/main/WEB-INF/beans.xml&quot;, &quot;build.gradle&quot;, &quot;src/test/resouces/arquillian.xml&quot;, &quot;SampleTest.java&quot;]-->
+                <p>公式ドキュメント: <a href="http://arquillian.org/guides/getting_started_ja/">http://arquillian.org/guides/getting_started_ja/</a></p>
+
+<p>参考: <a href="http://d.hatena.ne.jp/backpaper0/20121202/1354465585">Arquillianでインテグレーションテスト最初の第一歩</a></p>
+
+<p>タイトル通り、JAX-RS+CDIなのをArquillianでテストしてみようっていうネタ</p>
+<h4>構成</h4>
 <pre>
 ├── build.gradle
 └── src
@@ -100,7 +106,9 @@
         └── resources
             └── arquillian.xml
 </pre>
-<p>てな感じで。まずアプリケーション側を先に</p><h4>SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+
+<p>てな感じで。まずアプリケーション側を先に</p>
+<h4>SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -120,7 +128,9 @@ public class Hoge implements Greeter {
         return &quot;hoge&quot;;
     }
 }
-</code></pre><p>※Greeterはただのインターフェースなので省略する</p><h4>SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>※Greeterはただのインターフェースなので省略する</p>
+<h4>SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -145,7 +155,9 @@ public class SampleController {
     xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;
     version=&quot;3.0&quot;&gt;
 &lt;/web-app&gt;
-</code></pre><p>JAX-RS準拠なglassfishを使うので特に設定する必要なく、SampleApplicationで@ApplicationPathで設定しているので、/resources/sample/greetでアクションを実行出来るっていう感じで</p><h4>src/main/WEB-INF/beans.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre>
+<p>JAX-RS準拠なglassfishを使うので特に設定する必要なく、SampleApplicationで@ApplicationPathで設定しているので、/resources/sample/greetでアクションを実行出来るっていう感じで</p>
+<h4>src/main/WEB-INF/beans.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
     xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -154,7 +166,13 @@ public class SampleController {
     bean-discovery-mode=&quot;all&quot;&gt;
 
 &lt;/beans&gt;
-</code></pre><p>これがないと@Injectによる依存性の注入が上手く作用しないはずなので</p><p>これでアプリケーション側はオッケー。まぁ試しにglassfishとかにデプロイしてみりゃ実行出来るかと思うので</p><p>でこれをarquillianを使ってテストする</p><h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+</code></pre>
+<p>これがないと@Injectによる依存性の注入が上手く作用しないはずなので</p>
+
+<p>これでアプリケーション側はオッケー。まぁ試しにglassfishとかにデプロイしてみりゃ実行出来るかと思うので</p>
+
+<p>でこれをarquillianを使ってテストする</p>
+<h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;war&quot;
 apply plugin: &quot;eclipse&quot;
 
@@ -175,7 +193,11 @@ dependencies {
     providedRuntime &quot;org.jboss.arquillian.container:arquillian-glassfish-embedded-3.1:+&quot;
     providedRuntime &quot;org.glassfish.main.extras:glassfish-embedded-all:4.0+&quot;
 }
-</code></pre><p>※適当なので使ってるやつのバージョン指定は適当にしてますが(ry</p><h4>src/test/resouces/arquillian.xml</h4><p>Container Adapterな設定が必要になるので</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+</code></pre>
+<p>※適当なので使ってるやつのバージョン指定は適当にしてますが(ry</p>
+<h4>src/test/resouces/arquillian.xml</h4>
+<p>Container Adapterな設定が必要になるので</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;arquillian
     xmlns=&quot;http://jboss.org/schema/arquillian&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -184,7 +206,9 @@ dependencies {
     &lt;container qualifier=&quot;glassfish-embedded&quot; default=&quot;true&quot;&gt;
     &lt;/container&gt;
 &lt;/arquillian&gt;
-</code></pre><p>あとはテストを書くだけ</p><h4>SampleTest.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>あとはテストを書くだけ</p>
+<h4>SampleTest.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.File;
 import java.net.URL;
@@ -237,7 +261,15 @@ public class SampleTest {
         return ClientBuilder.newClient().target(uri);
     }
 }
-</code></pre><p>Arquillianでテストする際には動的にデプロイを作るけど、そのマウントURLが動的(あくまでコンテキストルートが)になるので@ArquillianResourceを使ってURLを取ればそのURLを取得する事が可能</p><p>あと@RunAsClientは参考サイトに書いてあるけど、@RunWith(Arquillian.class)をしているテストでは@Testがサーバー上で動くとの事、@RunAsClientはクライアント上で動作するとの事らしい</p><p>てな感じでJAX-RS+CDIな構成なテストをJerseyTestじゃなくてArquillianを使って利用する事も出来る。あとremoteなパッケージとかもあるのでそこら辺はまた後日やる予定</p>
+</code></pre>
+<p>Arquillianでテストする際には動的にデプロイを作るけど、そのマウントURLが動的(あくまでコンテキストルートが)になるので@ArquillianResourceを使ってURLを取ればそのURLを取得する事が可能</p>
+
+<p>あと@RunAsClientは参考サイトに書いてあるけど、@RunWith(Arquillian.class)をしているテストでは@Testがサーバー上で動くとの事、@RunAsClientはクライアント上で動作するとの事らしい</p>
+
+<p>てな感じでJAX-RS+CDIな構成なテストをJerseyTestじゃなくてArquillianを使って利用する事も出来る。あとremoteなパッケージとかもあるのでそこら辺はまた後日やる予定</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -329,7 +361,7 @@ public class SampleTest {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -350,9 +382,6 @@ public class SampleTest {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -465,7 +494,7 @@ public class SampleTest {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -488,20 +517,20 @@ public class SampleTest {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -511,13 +540,15 @@ public class SampleTest {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("d6845aee2fd14449d1eb67ba70a988d80fa06867");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

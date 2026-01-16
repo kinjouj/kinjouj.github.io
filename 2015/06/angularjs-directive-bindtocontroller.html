@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="参考: &lt;a href=&quot;http://qiita.com/shinsukeimai/items/131780e2f0d82cbf799a&quot;&gt;AngularJS1.4とbindToController&lt;/a&gt;" />
+    <meta name="description" content="参考: &amp;lt;a href=&amp;quot;http://qiita.com/shinsukeimai/items/131780e2f0d82cbf799a&amp;quot;&amp;gt;AngularJS1.4とbindToController&amp;lt;/a&amp;gt;" />
     <title>angular.js directiveのbindToController - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2015/06/ng-infinite-scroll.html" />
     <link rel="next" href="https://kinjouj.github.io/2015/06/google-cloud-endpoints.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-06-20T16:45:37+09:00">
+                <time datetime="2015-06-20 16:45:37 +0900">
                   <a href="/archives/2015/06">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -77,12 +78,19 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["index.html", "app.js"]-->
-                <p>参考: <a href="http://qiita.com/shinsukeimai/items/131780e2f0d82cbf799a">AngularJS1.4とbindToController</a></p><p>参考から引用すると</p>
+                <!--[&quot;index.html&quot;, &quot;app.js&quot;]-->
+                <p>参考: <a href="http://qiita.com/shinsukeimai/items/131780e2f0d82cbf799a">AngularJS1.4とbindToController</a></p>
+
+<p>参考から引用すると</p>
+
 <blockquote>
 Directiveを自作する時に、コントローラーへ値を引き渡し、バインディングするには$scopeが必要でしたが、これが$scopeいらずで行えるようになりました。ng-controllerのas構文では先行して可能だったことがDirectiveでも可能になったんです。また、1.4では、どの値をバインディングするのか、どの値をバインディングしないのかを明確に定めることができるようになりました。
 </blockquote>
-<p>との事。要はdirectiveで指定されるcontrollerにdirectiveが持つscope等で指定したパラメーター等をcontrollerのプロパティとして伝播し利用する事が1.3からbindToControllerを使って可能になり、1.4からはbindToControllerのパラメーターの設定によりバインディングの設定等が行えるようになったよ的な事かと</p><p>っていう事でやってみる</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">{% raw %}
+
+<p>との事。要はdirectiveで指定されるcontrollerにdirectiveが持つscope等で指定したパラメーター等をcontrollerのプロパティとして伝播し利用する事が1.3からbindToControllerを使って可能になり、1.4からはbindToControllerのパラメーターの設定によりバインディングの設定等が行えるようになったよ的な事かと</p>
+
+<p>っていう事でやってみる</p>
+<h4>index.html</h4><pre class="line-numbers"><code class="language-html">{% raw %}
 &lt;!DOCTYPE html&gt;
 &lt;html ng-app=&quot;sample&quot;&gt;
   &lt;head&gt;
@@ -96,7 +104,9 @@ Directiveを自作する時に、コントローラーへ値を引き渡し、�
   &lt;/body&gt;
 &lt;/html&gt;
 {% endraw %}
-</code></pre><p>まぁsample-directiveを作って属性の値をcontrollerに伝播する、そこの内部でcontrollerAsで指定した名前でパラメーターをレンダリングするっていう単純なケース</p><h4>app.js</h4><pre class="line-numbers"><code class="language-js">function SampleCtrl($timeout, $scope) {
+</code></pre>
+<p>まぁsample-directiveを作って属性の値をcontrollerに伝播する、そこの内部でcontrollerAsで指定した名前でパラメーターをレンダリングするっていう単純なケース</p>
+<h4>app.js</h4><pre class="line-numbers"><code class="language-js">function SampleCtrl($timeout, $scope) {
   // directiveから作用したパラメーター値がcontrollerに伝播されてバインディングされる
   // ↑により結果は Object {num: 1, name: &quot;hoge&quot;} となる
   console.log(this);
@@ -134,13 +144,21 @@ angular.module(&#39;sample&#39;, [])
     };
   });
 
-</code></pre><p>上記でも書いてるように1.3の場合にはscopeに指定しなければならないけど、1.4ならbindToControllerで設定する事が可能なのでそちらで設定してもいい。ハマった点として</p>
+</code></pre>
+<p>上記でも書いてるように1.3の場合にはscopeに指定しなければならないけど、1.4ならbindToControllerで設定する事が可能なのでそちらで設定してもいい。ハマった点として</p>
+
 <ul>
 <li>controller及びcontrollerAsの指定は必須</li>
 <li>scopeも{}かtrueで指定する必要あり</li>
 <li>templateとか指定する場合にはtranscludeする必要は無いはず</li>
 </ul>
-<p>というような感じ。他にも色々罠がある模様、それに関しては上記の参考資料に記載されているのでそれ読めば良い(2語名なdirectiveを使うと上手く作用しない等)</p><p>という感じで合ってるか微妙だけど、directiveから作用するパラメーターをコントローラーに伝播するような仕組みをサポートしている模様って事で</p>
+
+<p>というような感じ。他にも色々罠がある模様、それに関しては上記の参考資料に記載されているのでそれ読めば良い(2語名なdirectiveを使うと上手く作用しない等)</p>
+
+<p>という感じで合ってるか微妙だけど、directiveから作用するパラメーターをコントローラーに伝播するような仕組みをサポートしている模様って事で</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -232,7 +250,7 @@ angular.module(&#39;sample&#39;, [])
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -253,9 +271,6 @@ angular.module(&#39;sample&#39;, [])
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -368,7 +383,7 @@ angular.module(&#39;sample&#39;, [])
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -391,20 +406,20 @@ angular.module(&#39;sample&#39;, [])
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -414,13 +429,15 @@ angular.module(&#39;sample&#39;, [])
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("f746e7ac0ec4fe3c2fb80226284d4561b19ff795");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

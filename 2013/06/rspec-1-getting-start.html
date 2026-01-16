@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-02T00:00:00+00:00">
+                <time datetime="2013-06-02 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,33 +78,46 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["参考"]-->
-                <p>まぁRailsとかでは書いたりもしてますけど、without Railsな環境とかっていうかRSpecももっと勉強しないとなっていう欲求にかられてゆる〜く勉強してみた</p><pre class="line-numbers"><code class="language-">rspec --init
-</code></pre><p>な感じで実行すると</p>
+                <!--[&quot;参考&quot;]-->
+                <p>まぁRailsとかでは書いたりもしてますけど、without Railsな環境とかっていうかRSpecももっと勉強しないとなっていう欲求にかられてゆる〜く勉強してみた</p>
+<pre class="line-numbers"><code class="language-">rspec --init
+</code></pre>
+<p>な感じで実行すると</p>
+
 <pre>
 .rspec
 spec/spec_helper.rb
 </pre>
-<p>の2つが生成される。でRailsみたいにrake specみたいな感じでテスト実行出来るようにするとかには</p><pre class="line-numbers"><code class="language-rb">require &quot;rspec/core/rake_task&quot;
+
+<p>の2つが生成される。でRailsみたいにrake specみたいな感じでテスト実行出来るようにするとかには</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;rspec/core/rake_task&quot;
 
 #task :default =&gt; :spec
 
 desc &quot;run all&quot;
 RSpec::Core::RakeTask.new(:spec)
-</code></pre><p>な感じで作れば良い模様。まーあとはテスト書くだけなんだけど、ついでにカバレッジレポートも出したいのでspec/spec_helper.rbとかに</p><pre class="line-numbers"><code class="language-rb">require &quot;simplecov&quot;
+</code></pre>
+<p>な感じで作れば良い模様。まーあとはテスト書くだけなんだけど、ついでにカバレッジレポートも出したいのでspec/spec_helper.rbとかに</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;simplecov&quot;
 SimpleCov.start
-</code></pre><p>とか書いとく。でspec_helper自動で読み込む方式にしたい場合とかには、.rspec辺りに</p><pre class="line-numbers"><code class="language-">--color
+</code></pre>
+<p>とか書いとく。でspec_helper自動で読み込む方式にしたい場合とかには、.rspec辺りに</p>
+<pre class="line-numbers"><code class="language-">--color
 --format progress
 -p # profile
 --require spec_helper
-</code></pre><p>な感じで書いとけば良い模様。さてこれからテスト書くんだが、テストする対象として</p>
+</code></pre>
+<p>な感じで書いとけば良い模様。さてこれからテスト書くんだが、テストする対象として</p>
+
 <ul>
 <li>pow2ってメソッドを持ち、引数のInteger型を2倍にして返す</li>
 <li>引数がnilならArgumentError</li>
 <li>引数がIntegerじゃなければArgumentError</li>
 <li>引数が0以上じゃなければArgumentError</li>
 </ul>
-<p>なクラスを定義する。まぁこれのテストを書く</p><pre class="line-numbers"><code class="language-rb">require &quot;sample&quot;
+
+<p>なクラスを定義する。まぁこれのテストを書く</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;sample&quot;
 
 describe Sample do
   describe &quot;#pow2&quot; do
@@ -184,7 +198,19 @@ describe Sample do
     end
   end
 end
-</code></pre><p>ってな感じ。後述する参考に書いてるけど、今時なRSpecはshouldも使えるけどexpectを使うのが良いっていうか警告出なかったかなーっていう所があるので。んまぁ使い所で使い分ければ良いんじゃないかなーっと。あと、letっていうのもあるけどsubjectとの違いがよー分からんのでとりあえず今回はパス。さらにshared_contextっていうのもあるけど、今回要件が満たさないし後述する参考に詳しく書かれてるのでパス</p><p>とりまぁRspecの勉強はまだまだ続く的な感じで</p><h4>参考</h4><p><a href="http://magazine.rubyist.net/?0035-RSpecInPractice" target="_blank" rel="noopener noreferrer">http://magazine.rubyist.net/?0035-RSpecInPractice</a></p><p><a href="http://qiita.com/items/d880250adc8cdbe7a32f" target="_blank" rel="noopener noreferrer">http://qiita.com/items/d880250adc8cdbe7a32f</a></p><p><a href="https://github.com/rspec/rspec-expectations" target="_blank" rel="noopener noreferrer">https://github.com/rspec/rspec-expectations</a></p>
+</code></pre>
+<p>ってな感じ。後述する参考に書いてるけど、今時なRSpecはshouldも使えるけどexpectを使うのが良いっていうか警告出なかったかなーっていう所があるので。んまぁ使い所で使い分ければ良いんじゃないかなーっと。あと、letっていうのもあるけどsubjectとの違いがよー分からんのでとりあえず今回はパス。さらにshared_contextっていうのもあるけど、今回要件が満たさないし後述する参考に詳しく書かれてるのでパス</p>
+
+<p>とりまぁRspecの勉強はまだまだ続く的な感じで</p>
+<h4>参考</h4>
+<p><a href="http://magazine.rubyist.net/?0035-RSpecInPractice">http://magazine.rubyist.net/?0035-RSpecInPractice</a></p>
+
+<p><a href="http://qiita.com/items/d880250adc8cdbe7a32f">http://qiita.com/items/d880250adc8cdbe7a32f</a></p>
+
+<p><a href="https://github.com/rspec/rspec-expectations">https://github.com/rspec/rspec-expectations</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -276,7 +302,7 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -297,9 +323,6 @@ end
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -412,7 +435,7 @@ end
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -435,20 +458,20 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -458,13 +481,15 @@ end
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("2975e88ccc921652d13fbd63f2039bb67faee224");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

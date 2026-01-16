@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを&lt;http://dev.twitter.com&gt;から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる" />
+    <meta name="description" content="oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを&amp;lt;http://dev.twitter.com&amp;gt;から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる" />
     <title>Chrome Extension開発を勉強してみる (13) - oauth.jsでTwitter API - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/07/chrome-extension-12.html" />
     <link rel="next" href="https://kinjouj.github.io/2012/08/manifest_version2-content-security-policy.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-08-02T09:00:00+09:00">
+                <time datetime="2012-08-02 09:00:00 +0900">
                   <a href="/archives/2012/08">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["概要", "twitter.js", "manifest.json", "background.js", "popup.html", "popup.js", "content_script.js", "追記"]-->
-                <p>oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを<a href="http://dev.twitter.com" target="_blank" rel="noopener noreferrer">http://dev.twitter.com</a>から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる</p><h4>概要</h4><p>ブラウザアクションをクリックした際に出るポップアップにホームタイムラインを表示する。その際に認証されてなかったらOAuthで認証を要求させてAccess Tokenを取得する。あくまでAccess Token自体をソース内にコピペはしない。sha1.js、oauth.js、jquery.jsは別途でダウンロードしてくる</p><p>で今回はChrome ExtensionなのでTwitter OAuthのCallback URLは空にしてPINを画面上に出るようにする。その際にそのPINをコピペしなくてもそこはコンテントスクリプトを使って自動で処理出来るようにする</p><h4>twitter.js</h4><p>oauth.jsを使ってTwitter APIを云々するJavaScriptを作る</p><pre class="line-numbers"><code class="language-js">const CONSUMER_KEY = &quot;省略&quot;;
+                <!--[&quot;概要&quot;, &quot;twitter.js&quot;, &quot;manifest.json&quot;, &quot;background.js&quot;, &quot;popup.html&quot;, &quot;popup.js&quot;, &quot;content_script.js&quot;, &quot;追記&quot;]-->
+                <p>oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを<a href="http://dev.twitter.com">http://dev.twitter.com</a>から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる</p>
+<h4>概要</h4>
+<p>ブラウザアクションをクリックした際に出るポップアップにホームタイムラインを表示する。その際に認証されてなかったらOAuthで認証を要求させてAccess Tokenを取得する。あくまでAccess Token自体をソース内にコピペはしない。sha1.js、oauth.js、jquery.jsは別途でダウンロードしてくる</p>
+
+<p>で今回はChrome ExtensionなのでTwitter OAuthのCallback URLは空にしてPINを画面上に出るようにする。その際にそのPINをコピペしなくてもそこはコンテントスクリプトを使って自動で処理出来るようにする</p>
+<h4>twitter.js</h4>
+<p>oauth.jsを使ってTwitter APIを云々するJavaScriptを作る</p>
+<pre class="line-numbers"><code class="language-js">const CONSUMER_KEY = &quot;省略&quot;;
 const CONSUMER_SECRET = &quot;省略&quot;;
 
 const OAUTH_SIGNATURE_METHOD = &quot;HMAC-SHA1&quot;;
@@ -226,7 +234,11 @@ Twitter.prototype.fetchTimelines = function(cb) {
     cb(data);
   });
 };
-</code></pre><p>チェック系をまったくしてないですけど、ざっくり書くとこんな感じで。まぁ認証してアクセストークンを取得して、そこからホームタイムラインを取得するAPIにリクエストを投げるという処理</p><p>んじゃこれからChrome Extensionの開発をする</p><h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>チェック系をまったくしてないですけど、ざっくり書くとこんな感じで。まぁ認証してアクセストークンを取得して、そこからホームタイムラインを取得するAPIにリクエストを投げるという処理</p>
+
+<p>んじゃこれからChrome Extensionの開発をする</p>
+<h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;test&quot;,
   &quot;version&quot;: &quot;0.1&quot;,
   &quot;content_scripts&quot;: [
@@ -246,7 +258,9 @@ Twitter.prototype.fetchTimelines = function(cb) {
   },
   &quot;permissions&quot;: [&quot;https://api.twitter.com/&quot;]
 }
-</code></pre><p>今回はContent Scriptを使ってPINコードを自動でコピペして処理するが、その処理自体は主にBackground Pageに促すようにする。でBrowser Action側も主な処理は同様にBackground Pageを介して行う(getBackgroundPageを使うだけ)</p><h4>background.js</h4><pre class="line-numbers"><code class="language-js">var api = new Twitter();
+</code></pre>
+<p>今回はContent Scriptを使ってPINコードを自動でコピペして処理するが、その処理自体は主にBackground Pageに促すようにする。でBrowser Action側も主な処理は同様にBackground Pageを介して行う(getBackgroundPageを使うだけ)</p>
+<h4>background.js</h4><pre class="line-numbers"><code class="language-js">var api = new Twitter();
 
 chrome.extension.onRequest.addListener(function(req, sender) {
   // Content Scriptから来たPINコードを処理する
@@ -311,13 +325,29 @@ if ((pin !== undefined &amp;&amp; pin !== null) &amp;&amp; /^d{7}$/.test(pin.inn
   // Background PageでonRequestさせて処理させる
   chrome.extension.sendRequest({ &quot;verifier&quot;: pin.innerText });
 }
-</code></pre><p>という感じ。動かすと認証してない時にブラウザアクションをクリックすると</p><p><img src="/images/2012/08/20120802181056.png" class="img-fluid" alt="image" /></p><p>てな感じで認証後に行うと</p><p><img src="/images/2012/08/20120802181114.png" class="img-fluid" alt="image" /></p><p>というようにホームタイムラインが表示される。んまぁそんな感じでTwitter APIをアクセストークンを取得して行う場合は大体こんな感じかなと</p><h4>追記</h4><p><a href="https://github.com/kinjouj/chrome-extension-twitter-oauth-demo" target="_blank" rel="noopener noreferrer">https://github.com/kinjouj/chrome-extension-twitter-oauth-demo</a> の方にてチェックアウト出来るようにしました(但し、oauth.js・sha1.js・jquery.js等は未混入)</p><p>又、主に記事は修正せずにgithub側の方へ修正を行いますのであしからず</p>
+</code></pre>
+<p>という感じ。動かすと認証してない時にブラウザアクションをクリックすると</p>
+
+<p><img src="/images/2012/08/20120802181056.png" class="img-fluid" alt="image" /></p>
+
+<p>てな感じで認証後に行うと</p>
+
+<p><img src="/images/2012/08/20120802181114.png" class="img-fluid" alt="image" /></p>
+
+<p>というようにホームタイムラインが表示される。んまぁそんな感じでTwitter APIをアクセストークンを取得して行う場合は大体こんな感じかなと</p>
+<h4>追記</h4>
+<p><a href="https://github.com/kinjouj/chrome-extension-twitter-oauth-demo">https://github.com/kinjouj/chrome-extension-twitter-oauth-demo</a> の方にてチェックアウト出来るようにしました(但し、oauth.js・sha1.js・jquery.js等は未混入)</p>
+
+<p>又、主に記事は修正せずにgithub側の方へ修正を行いますのであしからず</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2012/08/manifest_version2-content-security-policy.html">&lt;&nbsp;&quot;manifest_version: 2&quot;とContent-Security-Policy</a>
+            <a class="float-start box-link" href="/2012/08/manifest_version2-content-security-policy.html">&lt;&nbsp;&amp;quot;manifest_version: 2&amp;quot;とContent-Security-Policy</a>
             <!-- prev post -->
             <a class="float-end box-link" href="/2012/07/chrome-extension-12.html">Chrome Extension開発を勉強してみる (12) - コンテキストメニューでブックマークを高階層で表示する -&nbsp;&gt;</a>
           </div>
@@ -403,7 +433,7 @@ if ((pin !== undefined &amp;&amp; pin !== null) &amp;&amp; /^d{7}$/.test(pin.inn
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -424,9 +454,6 @@ if ((pin !== undefined &amp;&amp; pin !== null) &amp;&amp; /^d{7}$/.test(pin.inn
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -539,7 +566,7 @@ if ((pin !== undefined &amp;&amp; pin !== null) &amp;&amp; /^d{7}$/.test(pin.inn
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -562,20 +589,20 @@ if ((pin !== undefined &amp;&amp; pin !== null) &amp;&amp; /^d{7}$/.test(pin.inn
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -585,13 +612,15 @@ if ((pin !== undefined &amp;&amp; pin !== null) &amp;&amp; /^d{7}$/.test(pin.inn
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("6b50c20787d45f674b6e6ffb860822c40fe2e729");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

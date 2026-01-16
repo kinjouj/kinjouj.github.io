@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-10-28T00:00:00+00:00">
+                <time datetime="2013-10-28 00:00:00 +0900">
                   <a href="/archives/2013/10">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,28 +78,49 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["要件", "インストール", "RailsプロジェクトをUnicornで動かす設定", "supervisord.conf"]-->
-                <p>前から勉強する予定に入ってた<a href="http://supervisord.org/">supervisord</a>を使ってみる事に。とりあえずGetting Started的に使うのが今回なセクションとして今後はドキュメント読みつつ色々やってみる的な感じで</p><h4>要件</h4><p>普通にRubyOnRailsで作ったプロジェクトとRedmineなパッケージをunicorn(_rails)で起動。それをsupervisordを行う</p><p>っていう事だけ。上記を/var/wwwに格納</p>
+                <!--[&quot;要件&quot;, &quot;インストール&quot;, &quot;RailsプロジェクトをUnicornで動かす設定&quot;, &quot;supervisord.conf&quot;]-->
+                <p>前から勉強する予定に入ってた<a href="http://supervisord.org/">supervisord</a>を使ってみる事に。とりあえずGetting Started的に使うのが今回なセクションとして今後はドキュメント読みつつ色々やってみる的な感じで</p>
+<h4>要件</h4>
+<p>普通にRubyOnRailsで作ったプロジェクトとRedmineなパッケージをunicorn(_rails)で起動。それをsupervisordを行う</p>
+
+<p>っていう事だけ。上記を/var/wwwに格納</p>
+
 <pre>
 .
 ├── redmine
 └── sample
 </pre>
-<p>な感じ</p><h4>インストール</h4><pre class="line-numbers"><code class="language-">sudo pip install supervisor
-</code></pre><p>でインストール出来る。あとはsupervisord.conf的な設定ファイルを書けば良い。ちなみに</p><pre class="line-numbers"><code class="language-">echo_supervisord_conf
-</code></pre><p>をやればデフォルトのテンプレート的な設定を出力出来る模様</p><h4>RailsプロジェクトをUnicornで動かす設定</h4><p>unicorn的なインストールは普通に上記要件なプロジェクト中にあるGemfileに</p><pre class="line-numbers"><code class="language-rb">source &quot;https://rubygems.org&quot;
+
+<p>な感じ</p>
+<h4>インストール</h4><pre class="line-numbers"><code class="language-">sudo pip install supervisor
+</code></pre>
+<p>でインストール出来る。あとはsupervisord.conf的な設定ファイルを書けば良い。ちなみに</p>
+<pre class="line-numbers"><code class="language-">echo_supervisord_conf
+</code></pre>
+<p>をやればデフォルトのテンプレート的な設定を出力出来る模様</p>
+<h4>RailsプロジェクトをUnicornで動かす設定</h4>
+<p>unicorn的なインストールは普通に上記要件なプロジェクト中にあるGemfileに</p>
+<pre class="line-numbers"><code class="language-rb">source &quot;https://rubygems.org&quot;
 
 # 追加
 gem &quot;unicorn&quot;
-</code></pre><p>をしておく。で更に別にどこでも良い(supervisord.confで指定する)ので、unicornな設定を行うRubyスクリプトを書く</p><pre class="line-numbers"><code class="language-rb">APP_PATH = &quot;/var/www/sample&quot;
+</code></pre>
+<p>をしておく。で更に別にどこでも良い(supervisord.confで指定する)ので、unicornな設定を行うRubyスクリプトを書く</p>
+<pre class="line-numbers"><code class="language-rb">APP_PATH = &quot;/var/www/sample&quot;
 
 listen 8080
 
 working_directory APP_PATH
 pid APP_PATH + &quot;/tmp/pids/unicorn.pid&quot;
 preload_app true
-</code></pre><p>でunicornが開放するデフォルトのポートが8080番になるので、2つのプロジェクトで別々なポートを指定しておく。あとAPP_PATHな所も要所で修正</p><p>とりあえず動かすだけならこれだけで良いっぽい。プラスアルファな設定辺りは後術する参考を</p><pre class="line-numbers"><code class="language-">unicorn_rails -c config/unicorn.rb -E production
-</code></pre><p>辺りで起動してみて無難にアクセス出来るかを確認しておく (一応念の為)</p><h4>supervisord.conf</h4><pre class="line-numbers"><code class="language-ini">[inet_http_server]
+</code></pre>
+<p>でunicornが開放するデフォルトのポートが8080番になるので、2つのプロジェクトで別々なポートを指定しておく。あとAPP_PATHな所も要所で修正</p>
+
+<p>とりあえず動かすだけならこれだけで良いっぽい。プラスアルファな設定辺りは後術する参考を</p>
+<pre class="line-numbers"><code class="language-">unicorn_rails -c config/unicorn.rb -E production
+</code></pre>
+<p>辺りで起動してみて無難にアクセス出来るかを確認しておく (一応念の為)</p>
+<h4>supervisord.conf</h4><pre class="line-numbers"><code class="language-ini">[inet_http_server]
 port=127.0.0.1:9001
 
 [supervisord]
@@ -118,8 +140,24 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
 [program:redmine]
 environment=BUNDLE_GEMFILE=/var/www/redmine/Gemfile
 command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /var/www/redmine/config/unicorn.rb
-</code></pre><p>な感じで。あとはこのsupervisord.confがあるディレクトリで</p><pre class="line-numbers"><code class="language-">supervisord -n
-</code></pre><p>な感じで起動(-nはnodaemonオプション)</p><p>でsupervisordな管理ポートである9001にアクセスすると</p><p><img src="/images/2013/10/201310281325.png" class="img-fluid" alt="image" /></p><p>な感じで起動されている模様</p><p>とりまぁGetting Started的な感じで使ってみるのはこんなかんじでええかなと</p><p>参考: <a href="https://gist.github.com/mikhailov/3052776" target="_blank" rel="noopener noreferrer">https://gist.github.com/mikhailov/3052776</a></p>
+</code></pre>
+<p>な感じで。あとはこのsupervisord.confがあるディレクトリで</p>
+<pre class="line-numbers"><code class="language-">supervisord -n
+</code></pre>
+<p>な感じで起動(-nはnodaemonオプション)</p>
+
+<p>でsupervisordな管理ポートである9001にアクセスすると</p>
+
+<p><img src="/images/2013/10/201310281325.png" class="img-fluid" alt="image" /></p>
+
+<p>な感じで起動されている模様</p>
+
+<p>とりまぁGetting Started的な感じで使ってみるのはこんなかんじでええかなと</p>
+
+<p>参考: <a href="https://gist.github.com/mikhailov/3052776">https://gist.github.com/mikhailov/3052776</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -211,7 +249,7 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -232,9 +270,6 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -347,7 +382,7 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -370,20 +405,20 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -393,13 +428,15 @@ command=/home/kinjouj/.rbenv/shims/bundle exec unicorn_rails -E production -c /v
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("74ee7d94939ff33700ec71dc66e180ef8073ab6a");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-07-22T00:00:00+09:00">
+                <time datetime="2012-07-22 00:00:00 +0900">
                   <a href="/archives/2012/07">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,25 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p>今まではMySQL Fulltext IndexはMyISAMはサポートされているけど、InnoDBではサポートされていなかったと思うのですが、色々調べててMySQL5.6からサポートされるらしいってのを目にしたのでやってみた</p><p><a href="http://dev.mysql.com/downloads/mysql" target="_blank" rel="noopener noreferrer">http://dev.mysql.com/downloads/mysql</a> から辿ってMySQL5.6をダウンロード。まだ開発版しかないので注意。今回使ってるマシンでやってるのでUbuntu用の.debパッケージを取ってくる。まぁ普通にdpkgでインストールしたら、/opt/mysql/server-5.6が出来てるのでMySQLをソースでインストールする際と同様にDBの初期化とかを行う</p><p>でsupport-filesってディレクトリにmysql.serverってファイルがあるので、これを/etc/init.dにコピーすればserviceコマンドで起動出来るのでコピーしとく。別にやんなくてもいいけど</p><p>んでちょっとした設定をうんにゃらしたら、結構ぶっ飛ぶけど適当にMySQL内にDBを作る。今回は既存する開発中のシステムのDBをそのまま使う。構造がこんな感じ</p><p><img src="/images/2012/07/20120722212700.png" class="img-fluid" alt="image" /></p><p>で上記のentryテーブルにFulltext Indexを付けて全文検索を出来るようにする。まぁ以前だと上に書いてる通りInnoDBだと出来なかったのだが</p><p><img src="/images/2012/07/20120722213224.png" class="img-fluid" alt="image" /></p><pre class="line-numbers"><code class="language-sql">CREATE FULLTEXT INDEX インデックス名 ON テーブル名(カラム名)
-</code></pre><p>で作る。で上の画像で出てる通り作る前と作った後だとFULLTEXT INDEXなのが表示されている。んじゃ全文検索やってみる</p><p>条件として「Androidを含んで、Fragmentが含まないもの」。SQLにすると</p><pre class="line-numbers"><code class="language-sql">SELECT
+                <p>今まではMySQL Fulltext IndexはMyISAMはサポートされているけど、InnoDBではサポートされていなかったと思うのですが、色々調べててMySQL5.6からサポートされるらしいってのを目にしたのでやってみた</p>
+
+<p><a href="http://dev.mysql.com/downloads/mysql">http://dev.mysql.com/downloads/mysql</a> から辿ってMySQL5.6をダウンロード。まだ開発版しかないので注意。今回使ってるマシンでやってるのでUbuntu用の.debパッケージを取ってくる。まぁ普通にdpkgでインストールしたら、/opt/mysql/server-5.6が出来てるのでMySQLをソースでインストールする際と同様にDBの初期化とかを行う</p>
+
+<p>でsupport-filesってディレクトリにmysql.serverってファイルがあるので、これを/etc/init.dにコピーすればserviceコマンドで起動出来るのでコピーしとく。別にやんなくてもいいけど</p>
+
+<p>んでちょっとした設定をうんにゃらしたら、結構ぶっ飛ぶけど適当にMySQL内にDBを作る。今回は既存する開発中のシステムのDBをそのまま使う。構造がこんな感じ</p>
+
+<p><img src="/images/2012/07/20120722212700.png" class="img-fluid" alt="image" /></p>
+
+<p>で上記のentryテーブルにFulltext Indexを付けて全文検索を出来るようにする。まぁ以前だと上に書いてる通りInnoDBだと出来なかったのだが</p>
+
+<p><img src="/images/2012/07/20120722213224.png" class="img-fluid" alt="image" /></p>
+<pre class="line-numbers"><code class="language-sql">CREATE FULLTEXT INDEX インデックス名 ON テーブル名(カラム名)
+</code></pre>
+<p>で作る。で上の画像で出てる通り作る前と作った後だとFULLTEXT INDEXなのが表示されている。んじゃ全文検索やってみる</p>
+
+<p>条件として「Androidを含んで、Fragmentが含まないもの」。SQLにすると</p>
+<pre class="line-numbers"><code class="language-sql">SELECT
   title
 FROM
   entry
@@ -89,7 +107,17 @@ WHERE
 
 ORDER BY
   id
-</code></pre><p>という感じかな、多分。で実行すると</p><p><img src="/images/2012/07/20120722214136.png" class="img-fluid" alt="image" /></p><p>となる。んまぁまだ調整が必要なのかマッチ精度が微妙な感じはしますけど</p><p>とりあえずMySQL5.6からInnoDBでもFulltext Indexは使えるみたいっすね</p>
+</code></pre>
+<p>という感じかな、多分。で実行すると</p>
+
+<p><img src="/images/2012/07/20120722214136.png" class="img-fluid" alt="image" /></p>
+
+<p>となる。んまぁまだ調整が必要なのかマッチ精度が微妙な感じはしますけど</p>
+
+<p>とりあえずMySQL5.6からInnoDBでもFulltext Indexは使えるみたいっすね</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -181,7 +209,7 @@ ORDER BY
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -202,9 +230,6 @@ ORDER BY
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -317,7 +342,7 @@ ORDER BY
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -340,20 +365,20 @@ ORDER BY
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -363,13 +388,15 @@ ORDER BY
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("7c07db8a3d9d529f4bb80cad3e7c090ebe833a3f");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

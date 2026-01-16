@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-10T00:00:00+00:00">
+                <time datetime="2013-09-10 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["構造", "web-server.js", "src/sample.js", "app/index.html", "karma.e2e.js", "tests/e2e/sample.js"]-->
-                <p>AngularJSなコントローラーとかの単体テストに関しては</p><pre class="line-numbers"><code class="language-js">describe(&quot;...&quot;, function() {
+                <!--[&quot;構造&quot;, &quot;web-server.js&quot;, &quot;src/sample.js&quot;, &quot;app/index.html&quot;, &quot;karma.e2e.js&quot;, &quot;tests/e2e/sample.js&quot;]-->
+                <p>AngularJSなコントローラーとかの単体テストに関しては</p>
+<pre class="line-numbers"><code class="language-js">describe(&quot;...&quot;, function() {
   it(&quot;...&quot;, function() {
     var scope = {};
     var controller = new SampleController(scope);
@@ -86,7 +88,11 @@
     // 以下省略
   });
 });
-</code></pre><p>的な事が <a href="http://docs.angularjs.org/tutorial/step_02" target="_blank" rel="noopener noreferrer">http://docs.angularjs.org/tutorial/step_02</a> には既に書いてあるから良いんだけど、で実際HTMLと組み合わせて処理とかをテストするにはどうすれば良いのかがこのセクションの次に書いてあるe2eテストっていう方式を採用すれば出来るらしい。んまぁそういう事じゃないような気もするのだけど</p><p>んまぁとりあえずやってみたんでレポート</p><h4>構造</h4>
+</code></pre>
+<p>的な事が <a href="http://docs.angularjs.org/tutorial/step_02">http://docs.angularjs.org/tutorial/step_02</a> には既に書いてあるから良いんだけど、で実際HTMLと組み合わせて処理とかをテストするにはどうすれば良いのかがこのセクションの次に書いてあるe2eテストっていう方式を採用すれば出来るらしい。んまぁそういう事じゃないような気もするのだけど</p>
+
+<p>んまぁとりあえずやってみたんでレポート</p>
+<h4>構造</h4>
 <pre>
 ├── app
 │   └── index.html
@@ -98,14 +104,22 @@
 │       └── sample.js
 └── web-server.js
 </pre>
-<p>な感じになっとります</p><h4>web-server.js</h4><p>んまぁとにかく参考ベースが <a href="https://github.com/angular/angular-phonecat" target="_blank" rel="noopener noreferrer">https://github.com/angular/angular-phonecat</a> なんなので。script/web-server.jsをポチってくる。</p><p>※別に既にアプリケーションとして構築しているのなら必要ない。以下で設定するプロキシー先にアプリケーション先のアドレスを設定すれば良いだけだと思うので</p><h4>src/sample.js</h4><pre class="line-numbers"><code class="language-js">function SampleController($scope) {
+
+<p>な感じになっとります</p>
+<h4>web-server.js</h4>
+<p>んまぁとにかく参考ベースが <a href="https://github.com/angular/angular-phonecat">https://github.com/angular/angular-phonecat</a> なんなので。script/web-server.jsをポチってくる。</p>
+
+<p>※別に既にアプリケーションとして構築しているのなら必要ない。以下で設定するプロキシー先にアプリケーション先のアドレスを設定すれば良いだけだと思うので</p>
+<h4>src/sample.js</h4><pre class="line-numbers"><code class="language-js">function SampleController($scope) {
   $scope.samples = [
     { &quot;text&quot;: &quot;hoge&quot; },
     { &quot;text&quot;: &quot;fuga&quot; },
     { &quot;text&quot;: &quot;foobar&quot; }
   ]
 }
-</code></pre><p>ただ&lt;li ng-repeat=<q>sample in samples | filter:name</q>&gt;的な感じで動かすだけな物なので内容は殆ど無いって事で (それ以前にまだ使い始めたばかりなので)</p><h4>app/index.html</h4><pre class="line-numbers"><code class="language-html">&lt;html ng-app&gt;
+</code></pre>
+<p>ただ&lt;li ng-repeat=<q>sample in samples | filter:name</q>&gt;的な感じで動かすだけな物なので内容は殆ど無いって事で (それ以前にまだ使い始めたばかりなので)</p>
+<h4>app/index.html</h4><pre class="line-numbers"><code class="language-html">&lt;html ng-app&gt;
   &lt;head&gt;
     &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js&quot;&gt;&lt;/script&gt;
     &lt;script type=&quot;text/javascript&quot; src=&quot;../src/sample.js&quot;&gt;&lt;/script&gt;
@@ -119,7 +133,9 @@
     &lt;/div&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>上記で書いたように&lt;input type=<q>text</q> ng-model=<q>name</q> /&gt;で指定されたクエリーにより&lt;li ng-repeat=&quot;&quot;&gt;な所をフィルターするっていう所。そこをテストする</p><h4>karma.e2e.js</h4><pre class="line-numbers"><code class="language-js">// Karma configuration
+</code></pre>
+<p>上記で書いたように&lt;input type=<q>text</q> ng-model=<q>name</q> /&gt;で指定されたクエリーにより&lt;li ng-repeat=&quot;&quot;&gt;な所をフィルターするっていう所。そこをテストする</p>
+<h4>karma.e2e.js</h4><pre class="line-numbers"><code class="language-js">// Karma configuration
 // Generated on Tue Sep 10 2013 15:56:19 GMT+0900 (JST)
 
 module.exports = function(config) {
@@ -196,11 +212,17 @@ module.exports = function(config) {
     singleRun: false
   });
 };
-</code></pre><p>ベースはkarma initとかで生成して修正する感じで。</p><p>ANGULAR_SCENARIOとか使うと</p>
+</code></pre>
+<p>ベースはkarma initとかで生成して修正する感じで。</p>
+
+<p>ANGULAR_SCENARIOとか使うと</p>
+
 <blockquote>
 Please use \`frameworks = ["ng-scenario"];\` instead
 </blockquote>
-<p>って怒られるけど、逆にこれをframeworksに追加するとbrowserだとかinputだとかrepeaterだとかが認識してくれないので。この件に関しては判明次第追記予定</p><h4>tests/e2e/sample.js</h4><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
+
+<p>って怒られるけど、逆にこれをframeworksに追加するとbrowserだとかinputだとかrepeaterだとかが認識してくれないので。この件に関しては判明次第追記予定</p>
+<h4>tests/e2e/sample.js</h4><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
 
   beforeEach(function() {
     browser().navigateTo(&quot;../../app/index.html&quot;);
@@ -215,8 +237,18 @@ Please use \`frameworks = ["ng-scenario"];\` instead
     expect(repeater(&quot;.entries li&quot;).count()).toBe(2);
   });
 });
-</code></pre><p>っていう感じ。んで</p><pre class="line-numbers"><code class="language-">karma start karma.e2e.js
-</code></pre><p>で実行すると</p><p><img src="/images/2013/09/201309101718.png" class="img-fluid" alt="image" /></p><p>っていう感じでテストされる。</p>
+</code></pre>
+<p>っていう感じ。んで</p>
+<pre class="line-numbers"><code class="language-">karma start karma.e2e.js
+</code></pre>
+<p>で実行すると</p>
+
+<p><img src="/images/2013/09/201309101718.png" class="img-fluid" alt="image" /></p>
+
+<p>っていう感じでテストされる。</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -308,7 +340,7 @@ Please use \`frameworks = ["ng-scenario"];\` instead
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -329,9 +361,6 @@ Please use \`frameworks = ["ng-scenario"];\` instead
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -444,7 +473,7 @@ Please use \`frameworks = ["ng-scenario"];\` instead
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -467,20 +496,20 @@ Please use \`frameworks = ["ng-scenario"];\` instead
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -490,13 +519,15 @@ Please use \`frameworks = ["ng-scenario"];\` instead
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("232ab8c4134cf44841110d2164c1a75c65bdf4ee");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

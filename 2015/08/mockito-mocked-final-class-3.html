@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-08-19T15:34:57+09:00">
+                <time datetime="2015-08-19 15:34:57 +0900">
                   <a href="/archives/2015/08">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -76,13 +77,18 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["SampleTest.java"]-->
+                <!--[&quot;SampleTest.java&quot;]-->
                 <p>今まで</p>
+
 <ul>
 <li><a href="/2013/06/mockito-mocked-final-class.html">Mockitoでfinalクラスをモック化</a></li>
 <li><a href="/2013/10/mockito-mocked-final-class-2.html">Mockitoでfinalクラスをモック化 (2)</a></li>
 </ul>
-<p>というように書いてきたんですが、知ってはいたものの書いてなかったっていうのもあるので改めて書く事にした</p><p>でそのfinalクラスをモック化出来るようにする方法はMockitoではなくPowerMockを使う</p><h4>SampleTest.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+
+<p>というように書いてきたんですが、知ってはいたものの書いてなかったっていうのもあるので改めて書く事にした</p>
+
+<p>でそのfinalクラスをモック化出来るようにする方法はMockitoではなくPowerMockを使う</p>
+<h4>SampleTest.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.junit.Test;
 
@@ -99,7 +105,13 @@ public class SampleTest {
         assertThat(sample.say()).isSameAs(&quot;hoge&quot;);
     }
 }
-</code></pre><p>まぁこのSampleクラスはfinalクラスだったとする。そうした場合にこのテストを動かすと</p><p><img src="/images/2015/08/201508191530_1.jpg" class="img-fluid" alt="image" /></p><p>というような結果になるはず。んまぁ今まで散々言ってきたMockito自体がfinalクラスをサポートしていない為っていう事なので、これをPowerMockを使うように置き換える</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>まぁこのSampleクラスはfinalクラスだったとする。そうした場合にこのテストを動かすと</p>
+
+<p><img src="/images/2015/08/201508191530_1.jpg" class="img-fluid" alt="image" /></p>
+
+<p>というような結果になるはず。んまぁ今まで散々言ってきたMockito自体がfinalクラスをサポートしていない為っていう事なので、これをPowerMockを使うように置き換える</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -123,7 +135,21 @@ public class SampleTest {
         assertThat(sample.say()).isSameAs(&quot;hoge&quot;);
     }
 }
-</code></pre><p>※import staticするのがMockitoのじゃないのは注意</p><p>っていうようにして実行すると</p><p><img src="/images/2015/08/201508191530_2.jpg" class="img-fluid" alt="image" /></p><p>というような結果になる。@Ruleをしなくても@RunWith(PowerMockRunner.class)を使えば良いけど、一定の環境下においてはその@RunWithが使う事が出来ないような事象の場合もある</p><p>ちなみに余談として、@Ruleでやるのはいかんという意見もあるようで ( <a href="http://irof.hateblo.jp/entry/20130517/p1" target="_blank" rel="noopener noreferrer">http://irof.hateblo.jp/entry/20130517/p1</a> )</p><p>んまぁどの方法を使ってfinalクラスをモック化出来るようにするかっていう所はケースバイケースって事で</p><h1>余談: build.gradle</h1><p>どのライブラリ必要なのか一応メモっておく</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+</code></pre>
+<p>※import staticするのがMockitoのじゃないのは注意</p>
+
+<p>っていうようにして実行すると</p>
+
+<p><img src="/images/2015/08/201508191530_2.jpg" class="img-fluid" alt="image" /></p>
+
+<p>というような結果になる。@Ruleをしなくても@RunWith(PowerMockRunner.class)を使えば良いけど、一定の環境下においてはその@RunWithが使う事が出来ないような事象の場合もある</p>
+
+<p>ちなみに余談として、@Ruleでやるのはいかんという意見もあるようで ( <a href="http://irof.hateblo.jp/entry/20130517/p1">http://irof.hateblo.jp/entry/20130517/p1</a> )</p>
+
+<p>んまぁどの方法を使ってfinalクラスをモック化出来るようにするかっていう所はケースバイケースって事で</p>
+<h1>余談: build.gradle</h1>
+<p>どのライブラリ必要なのか一応メモっておく</p>
+<pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 
 repositories {
     jcenter()
@@ -142,6 +168,8 @@ dependencies {
     testCompile &#39;org.powermock:powermock-classloading-xstream:1.6.2&#39;
 }
 </code></pre>
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -233,7 +261,7 @@ dependencies {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -254,9 +282,6 @@ dependencies {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -369,7 +394,7 @@ dependencies {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -392,20 +417,20 @@ dependencies {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -415,13 +440,15 @@ dependencies {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("a6638ab8fc6224508b0a1d9ad9304e461e9560f3");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

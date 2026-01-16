@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-11-26T00:00:00+00:00">
+                <time datetime="2012-11-26 00:00:00 +0900">
                   <a href="/archives/2012/11">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["fuel/app/config/upload.php", "fuel/app/classes/controller/home.php", "fuel/app/views/home.php", "追記 ファイルをURLから直接参照できない場合"]-->
-                <p>タイトル通り。Uploadクラスを使えばサラっとできちゃう模様</p><h4>fuel/app/config/upload.php</h4><p>fuel/core/config/upload.phpからコピーするなりで作成</p><pre class="line-numbers"><code class="language-php">&lt;?php
+                <!--[&quot;fuel/app/config/upload.php&quot;, &quot;fuel/app/classes/controller/home.php&quot;, &quot;fuel/app/views/home.php&quot;, &quot;追記 ファイルをURLから直接参照できない場合&quot;]-->
+                <p>タイトル通り。Uploadクラスを使えばサラっとできちゃう模様</p>
+<h4>fuel/app/config/upload.php</h4>
+<p>fuel/core/config/upload.phpからコピーするなりで作成</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 return array(
     &quot;auto_process&quot; =&gt; true,
@@ -103,7 +107,9 @@ return array(
     &quot;change_case&quot; =&gt; false,
     &quot;max_length&quot; =&gt; 0
 );
-</code></pre><p>デフォルトからはpathとrandomizeを変更。アップロード先を指定するのに毎回指定するのもどうかと思うので、設定に記述してそれを再利用する形式を使う。今回DB等は使わない(そもそもModelクラス等にblobサポートが無いかも)</p><h4>fuel/app/classes/controller/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre>
+<p>デフォルトからはpathとrandomizeを変更。アップロード先を指定するのに毎回指定するのもどうかと思うので、設定に記述してそれを再利用する形式を使う。今回DB等は使わない(そもそもModelクラス等にblobサポートが無いかも)</p>
+<h4>fuel/app/classes/controller/home.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
 
@@ -158,14 +164,28 @@ class Controller_Home extends Controller {
     &lt;?php } ?&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>な感じかなと。今回はDOCROOTのuploadsディレクトリに作ってるので普通に参照できる</p><p>DBとか使う場合にはUpload::get_files()なメソッドで返ってくる情報をDBに格納しておいて処理するとかで良いんじゃないかと</p><p>一応、これから普通にURLからアクセス出来ないところにアップロードした場合のケースをやるので検証次第追記します</p><h4>追記 ファイルをURLから直接参照できない場合</h4><p>publicなディレクトリ内にありゃ普通に参照できるけど、そうじゃない場合にはアクション作って読み取るような処理が必要になる訳ですが。で問題がFuelPHPのルーティング上で「拡張子は無視される」っていうのがあると思うのですが。今回はUpload::get_files等から情報をDBなどに格納したりしてないので、リクエストされたファイル名から拡張子抜いた値から推定しなきゃならんので、とりあえずは拡張子はjpgに限定</p><p>なのでfuel/app/config/upload.phpをちょっと修正</p><pre class="line-numbers"><code class="language-php">return array(
+</code></pre>
+<p>な感じかなと。今回はDOCROOTのuploadsディレクトリに作ってるので普通に参照できる</p>
+
+<p>DBとか使う場合にはUpload::get_files()なメソッドで返ってくる情報をDBに格納しておいて処理するとかで良いんじゃないかと</p>
+
+<p>一応、これから普通にURLからアクセス出来ないところにアップロードした場合のケースをやるので検証次第追記します</p>
+<h4>追記 ファイルをURLから直接参照できない場合</h4>
+<p>publicなディレクトリ内にありゃ普通に参照できるけど、そうじゃない場合にはアクション作って読み取るような処理が必要になる訳ですが。で問題がFuelPHPのルーティング上で「拡張子は無視される」っていうのがあると思うのですが。今回はUpload::get_files等から情報をDBなどに格納したりしてないので、リクエストされたファイル名から拡張子抜いた値から推定しなきゃならんので、とりあえずは拡張子はjpgに限定</p>
+
+<p>なのでfuel/app/config/upload.phpをちょっと修正</p>
+<pre class="line-numbers"><code class="language-php">return array(
     &quot;path&quot; =&gt; DOCROOT.&quot;../uploads&quot;,
     &quot;ext_whitelist&quot; =&gt; array(&quot;jpg&quot;)
 );
-</code></pre><p>な設定しておく。でルーティングで</p><pre class="line-numbers"><code class="language-php">return array(
+</code></pre>
+<p>な設定しておく。でルーティングで</p>
+<pre class="line-numbers"><code class="language-php">return array(
     &quot;fetch/(:any)&quot; =&gt; &quot;home/fetch/$1&quot;
 );
-</code></pre><p>な設定もやっとく。あとはこのアクションをビューで参照する。でそのアクション側が</p><pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre>
+<p>な設定もやっとく。あとはこのアクションをビューで参照する。でそのアクション側が</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
 
@@ -193,7 +213,11 @@ class Controller_Home extends Controller {
         throw new HttpNotFoundException();
     }
 }
-</code></pre><p>な感じでFile::readを使って読み込んだデータをレスポンスで出す。Imageクラスとか使えばリサイズとかも出来る模様なので、状況に応じてそういう処理かましたらいいかと</p>
+</code></pre>
+<p>な感じでFile::readを使って読み込んだデータをレスポンスで出す。Imageクラスとか使えばリサイズとかも出来る模様なので、状況に応じてそういう処理かましたらいいかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -285,7 +309,7 @@ class Controller_Home extends Controller {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -306,9 +330,6 @@ class Controller_Home extends Controller {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -421,7 +442,7 @@ class Controller_Home extends Controller {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -444,20 +465,20 @@ class Controller_Home extends Controller {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -467,13 +488,15 @@ class Controller_Home extends Controller {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("3d5f17a6894c42917d1ead6a8b5558fa1cbe4366");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;http://laravel.com/docs/errors&gt; のドキュメント読み" />
+    <meta name="description" content="&amp;lt;http://laravel.com/docs/errors&amp;gt; のドキュメント読み" />
     <title>Laravel使ってみた (9) - Error&amp;Logging - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/07/laravel-8-mock-test.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/07/laravel-10-views-and-response.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-07-11T00:00:00+00:00">
+                <time datetime="2013-07-11 00:00:00 +0900">
                   <a href="/archives/2013/07">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -68,7 +69,7 @@
                   </a>
                 </time>
               </div>
-              <h1 class="post-title">Laravel使ってみた (9) - Error&amp;Logging -</h1>
+              <h1 class="post-title">Laravel使ってみた (9) - Error&amp;amp;Logging -</h1>
               <hr />
               <p class="meta">
                 <span class="categories">
@@ -78,17 +79,24 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p><a href="http://laravel.com/docs/errors" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/errors</a> のドキュメント読み</p><p>Laravel上でのエラーとかはApp::abortとかでHTTPステータスコードやメッセージを送出してエラーにするとかあるけど、それをキャッチするにはapp/start/globals.phpなどで</p><pre class="line-numbers"><code class="language-php">&lt;?php
+                <p><a href="http://laravel.com/docs/errors">http://laravel.com/docs/errors</a> のドキュメント読み</p>
+
+<p>Laravel上でのエラーとかはApp::abortとかでHTTPステータスコードやメッセージを送出してエラーにするとかあるけど、それをキャッチするにはapp/start/globals.phpなどで</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 App::error(function(Exception $exception, $code) {
     Log::error($exception);
 });
-</code></pre><p>とか定義出来て、んまぁResponseをリターンする事も出来るっていう感じですかね。でルーティングが見つからないとかのエラーは</p><pre class="line-numbers"><code class="language-php">&lt;?php
+</code></pre>
+<p>とか定義出来て、んまぁResponseをリターンする事も出来るっていう感じですかね。でルーティングが見つからないとかのエラーは</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 App::missing(function($exception) {
     return Response::make(&quot;not found&quot;, 404);
 });
-</code></pre><p>とかも出来ちゃう模様で。んで</p>
+</code></pre>
+<p>とかも出来ちゃう模様で。んで</p>
+
 <blockquote class="twitter-tweet">
   <p>
     App::errorとApp::missingを両方定義した場合に、存在しないアクションとかやるとerrorな方が発生するっぽい。引数の$codeで404ならreturnする的な事すれば、App::missingに処理が及ぶ模様
@@ -108,17 +116,27 @@ App::missing(function($exception) {
     &mdash; kinjouj (@kinjou_j) <a href="https://twitter.com/kinjou_j/statuses/354814810413731841">July 10, 2013</a>
   </p>
 </blockquote>
-<p>っていう感じ。前者のやつは結構ポイントじゃないかなーって思うんですが、App::missingとApp::errorを両方定義しているとmissingに処理が回らなかった。という事で$codeが404な場合にはreturnしちゃえば処理が回る模様。ソースで把握した訳じゃないので非理論的なんですが</p><p>んで持ってログに関しては <a href="http://laravel.com/api/class-Illuminate.Log.Writer.html" target="_blank" rel="noopener noreferrer">http://laravel.com/api/class-Illuminate.Log.Writer.html</a> を参考。正確にはLog.Writerなクラスを使うんだけれども、例えばLogクラスを使ってロギングするにあたって、ちょっとそれ取りたいとかっていう場合とかには</p><pre class="line-numbers"><code class="language-php">&lt;?php
+
+<p>っていう感じ。前者のやつは結構ポイントじゃないかなーって思うんですが、App::missingとApp::errorを両方定義しているとmissingに処理が回らなかった。という事で$codeが404な場合にはreturnしちゃえば処理が回る模様。ソースで把握した訳じゃないので非理論的なんですが</p>
+
+<p>んで持ってログに関しては <a href="http://laravel.com/api/class-Illuminate.Log.Writer.html">http://laravel.com/api/class-Illuminate.Log.Writer.html</a> を参考。正確にはLog.Writerなクラスを使うんだけれども、例えばLogクラスを使ってロギングするにあたって、ちょっとそれ取りたいとかっていう場合とかには</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
 
 Log::listen(function($level, $message, $context) {
 });
-</code></pre><p>な感じでlisten出来ちゃう模様げ。んまぁ同期的なので、ここの処理で遅くなるような事をすると色々問題になりそうなのであんま余計な事しない方が良いかもですね。んまぁエラー起きたら、エラーレポートをどっかのシステムにぶん投げるとか、そういうのも結構遅くなる要因にもなりそうだけど</p><p>とりまぁドキュメントはこんくらいかなと</p>
+</code></pre>
+<p>な感じでlisten出来ちゃう模様げ。んまぁ同期的なので、ここの処理で遅くなるような事をすると色々問題になりそうなのであんま余計な事しない方が良いかもですね。んまぁエラー起きたら、エラーレポートをどっかのシステムにぶん投げるとか、そういうのも結構遅くなる要因にもなりそうだけど</p>
+
+<p>とりまぁドキュメントはこんくらいかなと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/07/laravel-10-views-and-response.html">&lt;&nbsp;Laravel使ってみた (10) - Views &amp; Response -</a>
+            <a class="float-start box-link" href="/2013/07/laravel-10-views-and-response.html">&lt;&nbsp;Laravel使ってみた (10) - Views &amp;amp; Response -</a>
             <!-- prev post -->
             <a class="float-end box-link" href="/2013/07/laravel-8-mock-test.html">Laravel使ってみた (8) - Laravelでのモックテスト -&nbsp;&gt;</a>
           </div>
@@ -204,7 +222,7 @@ Log::listen(function($level, $message, $context) {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -225,9 +243,6 @@ Log::listen(function($level, $message, $context) {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -340,7 +355,7 @@ Log::listen(function($level, $message, $context) {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -363,20 +378,20 @@ Log::listen(function($level, $message, $context) {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -386,13 +401,15 @@ Log::listen(function($level, $message, $context) {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("00dfe402cd294169662cad434962135ed4ef4946");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

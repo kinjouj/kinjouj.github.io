@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="参考: &lt;a href=&quot;https://speakerdeck.com/sys1yagi/rxjavaxue-xi-falsehesutohurakuteisutuhoimofalse&quot;&gt;RxJava学習のベストプラクティスっぽいもの &lt;/a&gt;" />
+    <meta name="description" content="参考: &amp;lt;a href=&amp;quot;https://speakerdeck.com/sys1yagi/rxjavaxue-xi-falsehesutohurakuteisutuhoimofalse&amp;quot;&amp;gt;RxJava学習のベストプラクティスっぽいもの &amp;lt;/a&amp;gt;" />
     <title>RxJavaのlift - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2015/10/gradle-test-heapdump.html" />
     <link rel="next" href="https://kinjouj.github.io/2015/10/android-fabric-crashlytics-report.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-10-15T11:16:25+09:00">
+                <time datetime="2015-10-15 11:16:25 +0900">
                   <a href="/archives/2015/10">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["前提となるテスト", "SampleService.java"]-->
-                <p>参考: <a href="https://speakerdeck.com/sys1yagi/rxjavaxue-xi-falsehesutohurakuteisutuhoimofalse">RxJava学習のベストプラクティスっぽいもの </a></p><p>※あくまで個人的なメモなので、詳しいことは上記参考参照</p><p>まぁ要はOperatorを通す物って感じなのだろうか。やってみた</p><h4>前提となるテスト</h4><pre class="line-numbers"><code class="language-java">package sample;
+                <!--[&quot;前提となるテスト&quot;, &quot;SampleService.java&quot;]-->
+                <p>参考: <a href="https://speakerdeck.com/sys1yagi/rxjavaxue-xi-falsehesutohurakuteisutuhoimofalse">RxJava学習のベストプラクティスっぽいもの </a></p>
+
+<p>※あくまで個人的なメモなので、詳しいことは上記参考参照</p>
+
+<p>まぁ要はOperatorを通す物って感じなのだろうか。やってみた</p>
+<h4>前提となるテスト</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 
@@ -114,7 +120,13 @@ public class SampleServiceTest {
         assertEquals(&quot;foobar&quot;, samples.get(2).getName());
     }
 }
-</code></pre><p>っていうようにObsrevable&lt;SampleService.Sample&gt;を返すメソッドを作って、テスト上なのでtoBlockingを使って取得してその内容をテストするっていうだけの単調な物</p><p>これが正しく作用するように実装書く</p><h4>SampleService.java</h4><p>前提として入力は文字列型。それをSampleService.Sample型で取得出来るようにする</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>っていうようにObsrevable&lt;SampleService.Sample&gt;を返すメソッドを作って、テスト上なのでtoBlockingを使って取得してその内容をテストするっていうだけの単調な物</p>
+
+<p>これが正しく作用するように実装書く</p>
+<h4>SampleService.java</h4>
+<p>前提として入力は文字列型。それをSampleService.Sample型で取得出来るようにする</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -168,7 +180,9 @@ public class SampleService {
         }
     }
 }
-</code></pre><p>入力が文字列なので、そこからストリームとして流れる経過途中でOperatorを使って文字列からSampleクラス型への変換を行う感じ。んまぁ適当な例だけど、これなら別に自前でOperator作らなくても普通にmapでも出来る</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>入力が文字列なので、そこからストリームとして流れる経過途中でOperatorを使って文字列からSampleクラス型への変換を行う感じ。んまぁ適当な例だけど、これなら別に自前でOperator作らなくても普通にmapでも出来る</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -199,7 +213,9 @@ public class SampleService {
         }
     }
 }
-</code></pre><p>なんだけど、昔からあるのかは分からないがObservable.Transformerっていうのを使っても出来る</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>なんだけど、昔からあるのかは分からないがObservable.Transformerっていうのを使っても出来る</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -238,7 +254,15 @@ public class SampleService {
         }
     }
 }
-</code></pre><p>まぁっていう感じでストリームとして流れるデータを処理するOperatorを差し込む事が出来るような感じな機能なのかなと。まだちょっと良く分かってない</p><p>ちなみにRxJava Toolbox for Android(通称:rxt4a)にある<a href="https://github.com/cookpad/RxT4A/blob/cb5e570fbb25d6cc30480f2656f1350a788ec8a2/rxt4a/src/main/java/com/cookpad/android/rxt4a/operators/OperatorAddToCompositeSubscription.java">OperatorAddCompositeSubscription</a>っていうのソースを読むのも良いかと</p><p>もうちょい勉強して追記なりネタなり書くかも</p>
+</code></pre>
+<p>まぁっていう感じでストリームとして流れるデータを処理するOperatorを差し込む事が出来るような感じな機能なのかなと。まだちょっと良く分かってない</p>
+
+<p>ちなみにRxJava Toolbox for Android(通称:rxt4a)にある<a href="https://github.com/cookpad/RxT4A/blob/cb5e570fbb25d6cc30480f2656f1350a788ec8a2/rxt4a/src/main/java/com/cookpad/android/rxt4a/operators/OperatorAddToCompositeSubscription.java">OperatorAddCompositeSubscription</a>っていうのソースを読むのも良いかと</p>
+
+<p>もうちょい勉強して追記なりネタなり書くかも</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -330,7 +354,7 @@ public class SampleService {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -351,9 +375,6 @@ public class SampleService {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -466,7 +487,7 @@ public class SampleService {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -489,20 +510,20 @@ public class SampleService {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -512,13 +533,15 @@ public class SampleService {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("f74f0de3cad6a2a02f4a0bb203624ffd013a96af");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

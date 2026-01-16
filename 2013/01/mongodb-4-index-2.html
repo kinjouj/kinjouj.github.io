@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる" />
     <title>mongodbを使ってみる (4) - インデックスに関して (2) - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-3-index.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-5-dbref-dbpointer.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-2-operators.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-3-index.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/01/mongodb-4-index-2.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-15T00:00:00+00:00">
+                <time datetime="2013-01-15 00:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,13 +77,20 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["追記"]-->
-                <p>引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる</p><p>で大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在するという事でやってみた</p><p>まずその前に、MongoDBとかそういう系のKVSっていうのは基本的にスキーマレスである前提が存在すると思うのですが、UNIQUEインデックスを後で付けたら付けたで問題になるんじゃねーかなって思う所なので。でそれをサポートする為にdropDupsっていうオプションがあり、UNIQUEインデックスを保証させる際に既に重複している部分は削除するような仕組みがある模様。でもデータ消されたらたまったもんじゃねーってオチにならないかなーって思うので、とりあえず自分の無い頭で考えた所</p>
+                <!--[&quot;追記&quot;]-->
+                <p>引き続きMongoDBのインデックスに関してドキュメント読みつつ進めてまいる</p>
+
+<p>で大体のインデックスを作るのは前回でやったわけなんだが、いわゆるインデックスにもUNIQUEインデックスだったりで存在するという事でやってみた</p>
+
+<p>まずその前に、MongoDBとかそういう系のKVSっていうのは基本的にスキーマレスである前提が存在すると思うのですが、UNIQUEインデックスを後で付けたら付けたで問題になるんじゃねーかなって思う所なので。でそれをサポートする為にdropDupsっていうオプションがあり、UNIQUEインデックスを保証させる際に既に重複している部分は削除するような仕組みがある模様。でもデータ消されたらたまったもんじゃねーってオチにならないかなーって思うので、とりあえず自分の無い頭で考えた所</p>
+
 <ul>
 <li>db.createCollectionで事前にコレクションは作っておく</li>
 <li>db.コレクション名.ensureIndexでUNIQUEインデックス作っておく</li>
 </ul>
-<p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p><pre class="line-numbers"><code class="language-js">// samplesコレクションを作る
+
+<p>な感じの方式採用すれば良いんじゃねーかなと。あくまでUNIQUEであるべきインデックスをつける場合のみこういう手法採用する方が良いんじゃないかと。まぁそれを踏まえてやってみると</p>
+<pre class="line-numbers"><code class="language-js">// samplesコレクションを作る
 db.createCollection(&quot;samples&quot;)
 
 // nameに対してUNIQUEインデックスを作っておく
@@ -100,30 +108,50 @@ db.samples.find()
 
 db.samples.save({ name: &quot;hoge&quot;, type: 1 })
 // E11000 duplicate key error index: sample.samples.$name_1  dup key: { : &quot;hoge&quot; } なエラーになる
-</code></pre><p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p><p>でdropDupsも一応検証してみますかという事で</p><pre class="line-numbers"><code class="language-js">db.samples.save({ name: &quot;hoge&quot;, type: 1 })
+</code></pre>
+<p>的な感じな。うまいことそこら辺な設計はちゃんとしないとあとで痛い目にあいそうな気もしなくはないので</p>
+
+<p>でdropDupsも一応検証してみますかという事で</p>
+<pre class="line-numbers"><code class="language-js">db.samples.save({ name: &quot;hoge&quot;, type: 1 })
 db.samples.save({ name: &quot;hoge&quot;, type: 1 })
 db.samples.find()
-</code></pre><p>出力が</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f4e59abc3d8a4279742235&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
+</code></pre>
+<p>出力が</p>
+<pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f4e59abc3d8a4279742235&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
 { &quot;_id&quot; : ObjectId(&quot;50f4e5a2bc3d8a4279742236&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
-</code></pre><p>同じデータを突っ込んでおく。でこの状態でnameにUNIQUEインデックスをつけると</p>
+</code></pre>
+<p>同じデータを突っ込んでおく。でこの状態でnameにUNIQUEインデックスをつけると</p>
+
 <blockquote>
 E11000 duplicate key error index: sample.samples.$name_1 dup key: { : "hoge" }
 </blockquote>
-<p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p><pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
+
+<p>という風に上記でも書いたけど、今回は既にデータがある状態でインデックスをつけるとエラーになる。んじゃdropDupsをすると</p>
+<pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ name: 1 }, { unique: true, dropDups: true })
 db.samples.find()
 // { &quot;_id&quot; : ObjectId(&quot;50f4e59abc3d8a4279742235&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
-</code></pre><p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p><p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p><h4>追記</h4><p>DBに存在するインデックスを確認したい場合は</p><pre class="line-numbers"><code class="language-js">db.system.indexes.find()
-</code></pre><p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p><pre class="line-numbers"><code class="language-js">// sampleデータベース中のsamplesコレクション -&gt; sample.samples
+</code></pre>
+<p>という感じで2回目にsaveしたのがなくなっとるっていうオチになる。まぁこういう自体になるのは場合によっては非常にやばげな事だと思うので</p>
+
+<p>んまぁ個人的な意見ですが、UNIQUEインデックスを確保する必要のあるケースでは事前設計が重要かもって所</p>
+<h4>追記</h4>
+<p>DBに存在するインデックスを確認したい場合は</p>
+<pre class="line-numbers"><code class="language-js">db.system.indexes.find()
+</code></pre>
+<p>をすれば良い。ただコレクション毎に出したいのであればnsキーをフィルターすれば良いので</p>
+<pre class="line-numbers"><code class="language-js">// sampleデータベース中のsamplesコレクション -&gt; sample.samples
 db.system.indexes.find({ ns: &quot;sample.samples&quot; })
 </code></pre>
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/01/mongodb-5-dbref-dbpointer.html">&lt;&nbsp;mongodbを使ってみる (5) - DBRef/DBPointerに関して -</a>
+            <a class="float-start box-link" href="/2013/01/mongodb-3-index.html">&lt;&nbsp;mongodbを使ってみる (3) - インデックスに関して -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/01/mongodb-3-index.html">mongodbを使ってみる (3) - インデックスに関して -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/01/mongodb-2-operators.html">mongodbを使ってみる (2) - operators -&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -207,7 +235,7 @@ db.system.indexes.find({ ns: &quot;sample.samples&quot; })
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -228,9 +256,6 @@ db.system.indexes.find({ ns: &quot;sample.samples&quot; })
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -343,7 +368,7 @@ db.system.indexes.find({ ns: &quot;sample.samples&quot; })
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -366,20 +391,20 @@ db.system.indexes.find({ ns: &quot;sample.samples&quot; })
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -389,13 +414,15 @@ db.system.indexes.find({ ns: &quot;sample.samples&quot; })
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("35fa744ca2c2ba07a65d114fdb91c3a0e5dc185f");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

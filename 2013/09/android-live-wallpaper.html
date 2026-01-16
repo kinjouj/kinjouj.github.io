@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-10T00:00:00+00:00">
+                <time datetime="2013-09-10 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,17 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["仕様", "AndroidManifest.xml", "res/xml/wallpaper.xml", "BijinClockLiveWallpaperService.java"]-->
-                <p>いわゆるライブ壁紙っていう機能。SurfaceView的な感じで壁紙に動的にレンダリングしたりとか出来る</p><p>まぁ自宅のメモ用ブログには書いてたけどこっちに書いてなかったので、美人時計サービスを利用して1分毎に動的に壁紙をレンダリングするっていうのをやってみる。ただ、結構雑に作ってあるので(ry</p><p>※あくまでLive Wallpaperってどんな感じで作るのかっていう</p><h4>仕様</h4><p>Live Wallpaperの仕様じゃなくて美人時計の仕様として <a href="http://www.bijint.com/jp/tokei_images/%02d%02d.jpg" target="_blank" rel="noopener noreferrer">http://www.bijint.com/jp/tokei_images/%02d%02d.jpg</a> というような方式でリクエストすれば画像が取れるらしい。これ検証したのが結構前な話になるのだけど、現状でもそれは変わってはいないが昔はリファラーな辺りをチェックされていて美人時計内部からのリクエストだと模倣させないといけなかったような気がするけど現在そういう仕様は存在しない模様</p><p>んまぁちょっと余談がありましたが、結局は一分おきに上記のURLにリクエスト飛ばして画像取ってレンダリングするだけ</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+                <!--[&quot;仕様&quot;, &quot;AndroidManifest.xml&quot;, &quot;res/xml/wallpaper.xml&quot;, &quot;BijinClockLiveWallpaperService.java&quot;]-->
+                <p>いわゆるライブ壁紙っていう機能。SurfaceView的な感じで壁紙に動的にレンダリングしたりとか出来る</p>
+
+<p>まぁ自宅のメモ用ブログには書いてたけどこっちに書いてなかったので、美人時計サービスを利用して1分毎に動的に壁紙をレンダリングするっていうのをやってみる。ただ、結構雑に作ってあるので(ry</p>
+
+<p>※あくまでLive Wallpaperってどんな感じで作るのかっていう</p>
+<h4>仕様</h4>
+<p>Live Wallpaperの仕様じゃなくて美人時計の仕様として <a href="http://www.bijint.com/jp/tokei_images/%02d%02d.jpg">http://www.bijint.com/jp/tokei_images/%02d%02d.jpg</a> というような方式でリクエストすれば画像が取れるらしい。これ検証したのが結構前な話になるのだけど、現状でもそれは変わってはいないが昔はリファラーな辺りをチェックされていて美人時計内部からのリクエストだと模倣させないといけなかったような気がするけど現在そういう仕様は存在しない模様</p>
+
+<p>んまぁちょっと余談がありましたが、結局は一分おきに上記のURLにリクエスト飛ばして画像取ってレンダリングするだけ</p>
+<h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:versionCode=&quot;1&quot;
@@ -109,12 +119,20 @@
 
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><p>Live Wallpaperなレンダリングを行うのはサービスなのでそれを定義する。ActivityはPreferenceActivityなやつで今回は使わないので省略</p><h4>res/xml/wallpaper.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+</code></pre>
+<p>Live Wallpaperなレンダリングを行うのはサービスなのでそれを定義する。ActivityはPreferenceActivityなやつで今回は使わないので省略</p>
+<h4>res/xml/wallpaper.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
 &lt;wallpaper
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:thumbnail=&quot;@drawable/downloading&quot;
     android:settingsActivity=&quot;net.kinjouj.app.bijin_clock_wallpaper.BijinClockLiveWallpaperPreferenceActivity&quot; /&gt;
-</code></pre><p>android:thumbnailでライブ壁紙一覧で表示される部分に画像を出せる模様。あくまでプレビューとは違うのかも</p><p>android:settingsActivityを設定しておく事でライブ壁紙を設置する際に設定を行う事が出来る。その設定は上記で省略したPreferenceActivityを用いる</p><p>んまぁあとはWallpaperServiceな実体なサービスクラスを作る</p><h4>BijinClockLiveWallpaperService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.app.bijin_clock_wallpaper;
+</code></pre>
+<p>android:thumbnailでライブ壁紙一覧で表示される部分に画像を出せる模様。あくまでプレビューとは違うのかも</p>
+
+<p>android:settingsActivityを設定しておく事でライブ壁紙を設置する際に設定を行う事が出来る。その設定は上記で省略したPreferenceActivityを用いる</p>
+
+<p>んまぁあとはWallpaperServiceな実体なサービスクラスを作る</p>
+<h4>BijinClockLiveWallpaperService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.app.bijin_clock_wallpaper;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -367,7 +385,15 @@ public class BijinClockLiveWallpaperService extends WallpaperService {
         }
     }
 }
-</code></pre><p>ロックの仕方がまったくダメパターンだけど... (ほぼ数年前に書いたコードをそのまま)</p><p>んまぁ一定時間(1分)おきくらいにURLから画像を取得してCanvasにBitmapをレンダリングするだけ。</p><p>んまぁあとは自分で検証してください</p>
+</code></pre>
+<p>ロックの仕方がまったくダメパターンだけど... (ほぼ数年前に書いたコードをそのまま)</p>
+
+<p>んまぁ一定時間(1分)おきくらいにURLから画像を取得してCanvasにBitmapをレンダリングするだけ。</p>
+
+<p>んまぁあとは自分で検証してください</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -459,7 +485,7 @@ public class BijinClockLiveWallpaperService extends WallpaperService {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -480,9 +506,6 @@ public class BijinClockLiveWallpaperService extends WallpaperService {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -595,7 +618,7 @@ public class BijinClockLiveWallpaperService extends WallpaperService {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -618,20 +641,20 @@ public class BijinClockLiveWallpaperService extends WallpaperService {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -641,13 +664,15 @@ public class BijinClockLiveWallpaperService extends WallpaperService {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("3cf82134f557b0e4de72deb8bc12499bd05204d5");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="更にもうちょいドキュメント進めてみる" />
     <title>mongodbを使ってみる (2) - operators - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/01/nodejs-dependencies-document-and-window-2.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-3-index.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-1-getting-start.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-4-index-2.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/01/mongodb-2-operators.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-14T21:00:00+09:00">
+                <time datetime="2013-01-14 21:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,18 +77,25 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["$set/$unsetオペレーター", "$push/$pushAll/addToSetオペレーター", "$incオペレーター"]-->
-                <p>更にもうちょいドキュメント進めてみる</p><h4>$set/$unsetオペレーター</h4><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot; })
+                <!--[&quot;$set/$unsetオペレーター&quot;, &quot;$push/$pushAll/addToSetオペレーター&quot;, &quot;$incオペレーター&quot;]-->
+                <p>更にもうちょいドキュメント進めてみる</p>
+<h4>$set/$unsetオペレーター</h4><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot; })
 db.samples.update({ name: &quot;hoge&quot; }, { size: 1 })
 db.samples.find()
 
 // 出力: { &quot;_id&quot; : ObjectId(&quot;50f358d043555c5360e9507d&quot;), &quot;size&quot; : 1 }
-</code></pre><p>というように、おいnameどこいった的な事になる模様。こういう場合新しいデータを追加するような前提であれば</p><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot; })
+</code></pre>
+<p>というように、おいnameどこいった的な事になる模様。こういう場合新しいデータを追加するような前提であれば</p>
+<pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot; })
 db.samples.update({ name: &quot;hoge&quot; }, { $set: { size: 1 }})
 db.samples.find()
 
 // 出力: { &quot;_id&quot; : ObjectId(&quot;50f3591143555c5360e9507e&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;size&quot; : 1 }
-</code></pre><p>というように$setオペレーターを利用する事で既存するデータに新しい値を追加するという方式を採用できる模様</p><p>で引き続き、sizeデータだけを消す場合は</p><pre class="line-numbers"><code class="language-js">db.samples.update({ name: &quot;hoge&quot; }, { $unset: { size: 1 }})
+</code></pre>
+<p>というように$setオペレーターを利用する事で既存するデータに新しい値を追加するという方式を採用できる模様</p>
+
+<p>で引き続き、sizeデータだけを消す場合は</p>
+<pre class="line-numbers"><code class="language-js">db.samples.update({ name: &quot;hoge&quot; }, { $unset: { size: 1 }})
 db.samples.find()
 
 // 出力: { &quot;_id&quot; : ObjectId(&quot;50f35a8d43555c5360e9507f&quot;), &quot;name&quot; : &quot;hoge&quot; }
@@ -97,24 +105,36 @@ db.samples.update({ &quot;_id&quot;: ObjectId(&quot;50f35ba5da8178ec5484b11e&quo
 db.samples.find()
 
 // 出力: { &quot;_id&quot; : ObjectId(&quot;50f35ba5da8178ec5484b11e&quot;), &quot;values&quot; : [ &quot;A&quot;, &quot;B&quot; ] }
-</code></pre><p>てな感じで。でArrayで$pushするフィールドが存在しなければ[フィールドに指定した値で、存在するけどArrayじゃない場合にはエラーが発生するらしい(検証ではなぜか出てこない)</p><p>でpushAllな場合はフィールドに指定する値がArrayで指定出来て、それにマージするような感じかなーっと。多分</p><p>で$addToSetの場合は配列型でかつ、値が存在しない場合のみ追加処理が行われる模様</p><h4>$incオペレーター</h4><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot;, size: 1 })
+</code></pre>
+<p>てな感じで。でArrayで$pushするフィールドが存在しなければ[フィールドに指定した値で、存在するけどArrayじゃない場合にはエラーが発生するらしい(検証ではなぜか出てこない)</p>
+
+<p>でpushAllな場合はフィールドに指定する値がArrayで指定出来て、それにマージするような感じかなーっと。多分</p>
+
+<p>で$addToSetの場合は配列型でかつ、値が存在しない場合のみ追加処理が行われる模様</p>
+<h4>$incオペレーター</h4><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot;, size: 1 })
 db.samples.update({ name: &quot;hoge&quot; }, { $inc: { size: 2 }})
 db.samples.find()
 
 // 出力: { &quot;_id&quot; : ObjectId(&quot;50f35de7da8178ec5484b123&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;size&quot; : 3 }
-</code></pre><p>あくまで1づつ足していくような感じじゃなくて、$incで指定したフィールドの値分だけを足していく模様。ちなみに$incのフィールド値に文字列型とか入れると</p>
+</code></pre>
+<p>あくまで1づつ足していくような感じじゃなくて、$incで指定したフィールドの値分だけを足していく模様。ちなみに$incのフィールド値に文字列型とか入れると</p>
+
 <blockquote>
 Modifier $inc allowed for numbers only
 </blockquote>
+
 <p>っていう感じで怒られる</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/01/mongodb-3-index.html">&lt;&nbsp;mongodbを使ってみる (3) - インデックスに関して -</a>
+            <a class="float-start box-link" href="/2013/01/mongodb-4-index-2.html">&lt;&nbsp;mongodbを使ってみる (4) - インデックスに関して (2) -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/01/nodejs-dependencies-document-and-window-2.html">node.jsでdocument/window依存なスクリプトをグダる (2)&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/01/mongodb-1-getting-start.html">mongodbを使ってみる&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -198,7 +218,7 @@ Modifier $inc allowed for numbers only
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -219,9 +239,6 @@ Modifier $inc allowed for numbers only
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -334,7 +351,7 @@ Modifier $inc allowed for numbers only
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -357,20 +374,20 @@ Modifier $inc allowed for numbers only
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -380,13 +397,15 @@ Modifier $inc allowed for numbers only
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("d1ea8417ee65dc13f860d5a9f9b9e7fbe2808961");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

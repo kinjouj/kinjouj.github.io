@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -48,24 +47,6 @@
       <div class="row g-0">
         <div class="col col-lg-8">
           <div id="content">
-            <div id="26c7dde674a3f561911c36054b0846fe02ffb47d" class="card m-4 mb-5">
-              <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
-              <div class="card-body">
-                <h3 class="card-title">
-                  <a name="article-link" href="/2012/08/native-client-5.html">Native Client(NaCl)をやってみる (5) - C++を使う -</a>
-                </h3>
-                今までのはC言語でやってましたが、それをC++でやってみる
-              </div>
-            </div>
-            <div id="a0f96d354ae507e2c4daca76fab4f4de2878a59e" class="card m-4 mb-5">
-              <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
-              <div class="card-body">
-                <h3 class="card-title">
-                  <a name="article-link" href="/2012/08/native-client-4.html">Native Client(NaCl)をやってみる (4) - dlopen(dlfcn.h)を使う -</a>
-                </h3>
-                Native Clientのデモにはdlopenっていうのが入ってるのですが、これを単純にやってみる。っていってもこれをそのまま動かすんじゃなくて、作ったtest.cをlibtest.soにして、それをNative Clientから使う(恐らくはNative Client環境のコンパイラを使わないと動かせれないんだと思われる。検証してないけど)
-              </div>
-            </div>
             <div id="73c3f283b07b0e8f290932c4a31c286eaaa53c04" class="card m-4 mb-5">
               <img class="card-img-top" loading="lazy" src="/images/2012/08/20120820210834.png" />
               <div class="card-body">
@@ -73,338 +54,6 @@
                   <a name="article-link" href="/2012/08/chrome-extension-17.html">Chrome Extension開発を勉強してみる (17) - oauth.jsを使ってDropbox API -</a>
                 </h3>
                 タイトル通り。Chrome Extensionでoauth.jsを使いDropboxのアプリ領域なストレージにアクセスしてみる
-
-
-
-
-
-#### manifest.json
-
-
-```json
-{
-  &quot;name&quot;: &quot;chrome-extension-dropbox-oauth-demo&quot;,
-  &quot;description&quot;: &quot;Chrome Extension Dropbox OAuth Demo (using oauth.js)&quot;,
-  &quot;version&quot;: &quot;0.1&quot;,
-  &quot;manifest_version&quot;: 2,
-  &quot;browser_action&quot;: {
-    &quot;default_title&quot;: &quot;Chrome Extension - Dropbox OAuth Demo -&quot;,
-    &quot;default_icon&quot;: &quot;icon.png&quot;
-  },
-  &quot;background&quot;: {
-    &quot;scripts&quot;: [
-      &quot;library/jquery.js&quot;,
-      &quot;library/sha1.js&quot;,
-      &quot;library/oauth.js&quot;,
-      &quot;const.js&quot;,
-      &quot;dropbox.js&quot;,
-      &quot;background.js&quot;
-    ]
-  },
-  &quot;content_scripts&quot;: [
-    {
-      &quot;matches&quot;: [&quot;https://www.dropbox.com/1/oauth/authorize&quot;],
-      &quot;js&quot;: [&quot;content_script.js&quot;],
-      &quot;run_at&quot;: &quot;document_idle&quot;
-    }
-  ],
-  &quot;permissions&quot;: [&quot;https://*.dropbox.com/&quot;]
-}
-```
-
-
-#### const.js
-
-
-```js
-const OAUTH_CONSUMER_KEY = &quot;&quot;;
-const OAUTH_CONSUMER_SECRET = &quot;&quot;;
-```
-
-
-これもTwitterな件と同様にDropbox Developerからアプリを登録して、そのConsumer KeyとConsumer Secretをコピペする
-
-
-#### background.js
-
-
-```js
-// 認証完了後、もしくは認証済みな場合にブラウザアクションで表示されるコンテンツを設定する
-
-function registerPopup() {
-  chrome.browserAction.setPopup({ &quot;popup&quot;: &quot;popup.html&quot; });
-  chrome.browserAction.setBadgeText({ &quot;text&quot;: String() });
-}
-
-(function(undefined) {
-  var dropbox = new Dropbox();
-
-  if (dropbox.isAuthorized()) {
-    registerPopup();
-  } else {
-    chrome.browserAction.setBadgeText({ &quot;text&quot;: &quot;?&quot; });
-
-    dropbox.login();
-  }
-
-  // ここはコンテントスクリプトから来る
-
-  chrome.extension.onRequest.addListener(function(req) {
-    if (req.event === &quot;sign&quot;) {
-      dropbox.sign(function() {
-        registerPopup();
-      });
-    }
-  });
-})();
-```
-
-
-#### dropbox.js
-
-
-```js
-const OAUTH_TOKEN_KEY = &quot;oauth_token&quot;;
-const OAUTH_TOKEN_SECRET_KEY = &quot;oauth_token_secret&quot;;
-
-var Dropbox = function() {};
-
-Dropbox.prototype.getToken = function() {
-  return localStorage.getItem(OAUTH_TOKEN_KEY);
-};
-
-Dropbox.prototype.setToken = function(token) {
-  localStorage.setItem(OAUTH_TOKEN_KEY, token);
-};
-
-Dropbox.prototype.getTokenSecret = function() {
-  return localStorage.getItem(OAUTH_TOKEN_SECRET_KEY);
-};
-
-Dropbox.prototype.setTokenSecret = function(tokenSecret) {
-  return localStorage.setItem(OAUTH_TOKEN_SECRET_KEY, tokenSecret);
-};
-
-Dropbox.prototype.isAuthorized = function() {
-  var authorized = localStorage.getItem(&quot;authorized&quot;);
-
-  return Boolean(authorized);
-};
-
-Dropbox.prototype.getParameterToken = function(res) {
-  var param = OAuth.decodeForm(res);
-
-  return OAuth.getParameter(param, OAUTH_TOKEN_KEY);
-};
-
-Dropbox.prototype.getParameterTokenSecret = function(res) {
-  var param = OAuth.decodeForm(res);
-
-  return OAuth.getParameter(param, OAUTH_TOKEN_SECRET_KEY);
-};
-
-Dropbox.prototype.login = function() {
-  var message = {
-    &quot;method&quot;: &quot;POST&quot;,
-    &quot;action&quot;: &quot;https://api.dropbox.com/1/oauth/request_token&quot;,
-    &quot;parameters&quot;: {
-      &quot;oauth_consumer_key&quot;: OAUTH_CONSUMER_KEY,
-      &quot;oauth_signature_method&quot;: &quot;HMAC-SHA1&quot;
-    }
-  };
-
-  var accessor = {
-    &quot;consumerSecret&quot;: OAUTH_CONSUMER_SECRET
-  };
-
-  OAuth.setTimestampAndNonce(message);
-  OAuth.SignatureMethod.sign(message, accessor);
-
-  $.post(
-    OAuth.addToURL(message.action, message.parameters),
-    $.proxy(
-      function(res) {
-        var param = OAuth.decodeForm(res);
-
-        var token = OAuth.getParameter(param, OAUTH_TOKEN_KEY);
-        var tokenSecret = OAuth.getParameter(param, OAUTH_TOKEN_SECRET_KEY);
-
-        message.action = &quot;https://api.dropbox.com/1/oauth/authorize&quot;;
-        message.parameters.oauth_token = token;
-
-        accessor.oauth_token_secret = tokenSecret;
-
-        OAuth.setTimestampAndNonce(message);
-        OAuth.SignatureMethod.sign(message, accessor);
-
-        this.setToken(token);
-        this.setTokenSecret(tokenSecret);
-
-        window.open(OAuth.addToURL(message.action, message.parameters));
-      },
-      this
-    )
-  );
-};
-
-Dropbox.prototype.sign = function(cb) {
-  if (this.isAuthorized()) {
-    return;
-  }
-
-  var message = {
-    &quot;method&quot;: &quot;POST&quot;,
-    &quot;action&quot;: &quot;https://api.dropbox.com/1/oauth/access_token&quot;,
-    &quot;parameters&quot;: {
-      &quot;oauth_consumer_key&quot;: OAUTH_CONSUMER_KEY,
-      &quot;oauth_token&quot;: this.getToken(),
-      &quot;oauth_signature_method&quot;: &quot;HMAC-SHA1&quot;
-    }
-  };
-
-  var accessor = {
-    &quot;consumerSecret&quot;: OAUTH_CONSUMER_SECRET,
-    &quot;tokenSecret&quot;: this.getTokenSecret()
-  };
-
-  OAuth.setTimestampAndNonce(message);
-  OAuth.SignatureMethod.sign(message, accessor);
-
-  $.post(
-    OAuth.addToURL(message.action, message.parameters),
-    $.proxy(
-      function(res) {
-        this.setToken(this.getParameterToken(res));
-        this.setTokenSecret(this.getParameterTokenSecret(res));
-
-        localStorage.setItem(&quot;authorized&quot;, true);
-
-        cb();
-      },
-      this
-    )
-  );
-};
-
-Dropbox.prototype.getThumbnails = function(cb) {
-  var message = {
-    &quot;method&quot;: &quot;GET&quot;,
-    &quot;action&quot;: &quot;https://api.dropbox.com/1/metadata/sandbox/&quot;,
-    &quot;parameters&quot;: {
-      &quot;oauth_consumer_key&quot;: OAUTH_CONSUMER_KEY,
-      &quot;oauth_token&quot;: this.getToken(),
-      &quot;oauth_signature_method&quot;: &quot;HMAC-SHA1&quot;
-    }
-  };
-
-  var accessor = {
-    &quot;consumerSecret&quot;: OAUTH_CONSUMER_SECRET,
-    &quot;tokenSecret&quot;: this.getTokenSecret()
-  };
-
-  OAuth.setTimestampAndNonce(message);
-  OAuth.SignatureMethod.sign(message, accessor);
-
-  $.getJSON(
-    OAuth.addToURL(message.action, message.parameters),
-    $.proxy(
-      function(res) {
-        res.contents.forEach(function(content) {
-          if (!content.is_dir) {
-            message.action = &quot;https://api-content.dropbox.com/1/thumbnails/sandbox&quot; + content.path;
-            message.parameters.size = &quot;large&quot;;
-
-            OAuth.setTimestampAndNonce(message);
-            OAuth.SignatureMethod.sign(message, accessor);
-
-            var xhr = new XMLHttpRequest();
-            xhr.open(&quot;GET&quot;, OAuth.addToURL(message.action, message.parameters));
-            xhr.responseType = &quot;arraybuffer&quot;;
-            xhr.onload = function() {
-              cb(this.response);
-            };
-            xhr.send(null);
-          }
-        });
-      },
-      this
-    )
-  );
-};
-```
-
-
-#### content_script.js
-
-
-```js
-chrome.extension.sendRequest({ &quot;event&quot;: &quot;sign&quot; });
-```
-
-
-ただBackground Page側に処理をまるなげするだけ
-
-
-#### popup.html
-
-
-```html
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;library/jquery.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;library/sha1.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;library/oauth.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;const.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;dropbox.js&quot;&gt;&lt;/script&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;popup.js&quot;&gt;&lt;/script&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-```
-
-
-#### popup.js
-
-
-```js
-(function(undefined) {
-  var root = $(&quot;body&quot;);
-
-  var dropbox = new Dropbox();
-  dropbox.getThumbnails(function(binaryData) {
-    var bb = new WebKitBlobBuilder();
-    bb.append(binaryData);
-
-    var canvas = document.createElement(&quot;canvas&quot;);
-    var context = canvas.getContext(&quot;2d&quot;);
-
-    var img = new Image();
-    img.src = webkitURL.createObjectURL(bb.getBlob());
-    img.onload = function() {
-      context.canvas.width = img.width;
-      context.canvas.height = img.height;
-      context.drawImage(img, 0, 0);
-
-      webkitURL.revokeObjectURL(this.src);
-    };
-
-    $(root).append($(&quot;&lt;div&gt;&quot;).css(&quot;margin&quot;, &quot;15px&quot;).append($(canvas)));
-  });
-})();
-```
-
-
-まぁ取得した画像(サムネイルデータ)を取得して、それを&amp;lt;canvas&amp;gt;で云々するだけ(別にcanvasじゃなくても良い)
-
-
-まぁそんな感じ。ちょっとやりきった感全開なのでテキトウにかいちゃいましたがorz
-
-
-![](/images/2012/08/20120820210834.png)
-
-
-てな感じでDropboxのアプリフォルダ内に入れた画像が入る。但し、上記のコードで画像であるかのチェックまではしてないので画像以外をうｐするとエラーになるはずなので...
               </div>
             </div>
             <div id="f0eaeeb84a43b8e9da5fde4e7b55e96c2414ca30" class="card m-4 mb-5">
@@ -435,15 +84,6 @@ package server_director.model;
                 chrome.extension.connectを使って、chrome.extension.sendRequestやonRequest等と同様な事をやってみる
               </div>
             </div>
-            <div id="fcc590a823d27c2157357013231772de6a4fd5a0" class="card m-4 mb-5">
-              <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
-              <div class="card-body">
-                <h3 class="card-title">
-                  <a name="article-link" href="/2012/08/native-client-3.html">Native Client(NaCl)をやってみる (3) - NativeClientからPostMessage -</a>
-                </h3>
-                定義したHandleMessage内でHTML側からpostMessageされたデータを取得する場合
-              </div>
-            </div>
             <div id="7ea5affe6b5c580cc1c3c41ea1773f9243beb805" class="card m-4 mb-5">
               <img class="card-img-top" loading="lazy" src="/images/no_image.png" />
               <div class="card-body">
@@ -471,8 +111,16 @@ package server_director.model;
                 前記事のChrome ExtensionでTwitter OAuthを利用してAPIを利用するっていうデモにおいて、manifest_versionを2にすると動かないっていうのが判明。理由がContent Security Policy(CSP)っていうのにひっかかるかららしい。例えば
               </div>
             </div>
+            <div id="6b50c20787d45f674b6e6ffb860822c40fe2e729" class="card m-4 mb-5">
+              <img class="card-img-top" loading="lazy" src="/images/2012/08/20120802181056.png" />
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a name="article-link" href="/2012/08/chrome-extension-13.html">Chrome Extension開発を勉強してみる (13) - oauth.jsでTwitter API -</a>
+                </h3>
+                oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを&lt;http://dev.twitter.com&gt;から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる
+              </div>
+            </div>
             <div class="my-pagination my-5">
-              <a href="/archives/2012/08/2.html" class="float-end box-link">Next</a>
             </div>
           </div>
         </div>
@@ -557,7 +205,7 @@ package server_director.model;
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -578,9 +226,6 @@ package server_director.model;
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -693,7 +338,7 @@ package server_director.model;
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -716,20 +361,20 @@ package server_director.model;
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>

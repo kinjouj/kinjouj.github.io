@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-05-07T00:00:00+09:00">
+                <time datetime="2012-05-07 00:00:00 +0900">
                   <a href="/archives/2012/05">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -78,7 +79,14 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p>Node.jsのrequireは読み込んだ後にその.jsファイルをキャッシュするような事は以前書いた。でこれ不都合な場合もある。それが「テストケース時にモジュールのprototypeを意図的に書き換えた場合にその後のテストケースにも影響する」っていうところがあるようで。</p><p>で色々調べてたらこういう素晴らしすぎる記事を発見</p><p><a href="http://kacchan6.hatenablog.com/entry/2012/03/31/133656">Node.jsでrequireをフックする</a></p><p>つまりrequireは行われた後にmodule.loadで何やらしているらしい。上記の記事にも書いてあるような方法を使用することでrequireでキャッシュされたのを意図的に消すことも出来る。もちろんrequire.cacheを利用する仕組み関係なやつはやっちゃダメだけど。で実際やってみると</p><pre class="line-numbers"><code class="language-js">var module_load = module.constructor.prototype.load;
+                <p>Node.jsのrequireは読み込んだ後にその.jsファイルをキャッシュするような事は以前書いた。でこれ不都合な場合もある。それが「テストケース時にモジュールのprototypeを意図的に書き換えた場合にその後のテストケースにも影響する」っていうところがあるようで。</p>
+
+<p>で色々調べてたらこういう素晴らしすぎる記事を発見</p>
+
+<p><a href="http://kacchan6.hatenablog.com/entry/2012/03/31/133656">Node.jsでrequireをフックする</a></p>
+
+<p>つまりrequireは行われた後にmodule.loadで何やらしているらしい。上記の記事にも書いてあるような方法を使用することでrequireでキャッシュされたのを意図的に消すことも出来る。もちろんrequire.cacheを利用する仕組み関係なやつはやっちゃダメだけど。で実際やってみると</p>
+<pre class="line-numbers"><code class="language-js">var module_load = module.constructor.prototype.load;
 
 module.constructor.prototype.load = function(filename) {
   if (filename in require.cache) {
@@ -92,7 +100,11 @@ var express = require(&quot;express&quot;);
 
 console.log(require.cache);
 console.log(express);
-</code></pre><p>deleteな記述な部分をコメントするとrequire.cacheにはたしかにexpressをロードしたのをキャッシュしたものが格納されているが、このまま動かすとrequire.cacheにはexpressをキャッシュしたのが入らない(正確には消される)</p>
+</code></pre>
+<p>deleteな記述な部分をコメントするとrequire.cacheにはたしかにexpressをロードしたのをキャッシュしたものが格納されているが、このまま動かすとrequire.cacheにはexpressをキャッシュしたのが入らない(正確には消される)</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -184,7 +196,7 @@ console.log(express);
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -205,9 +217,6 @@ console.log(express);
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -320,7 +329,7 @@ console.log(express);
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -343,20 +352,20 @@ console.log(express);
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -366,13 +375,15 @@ console.log(express);
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("bd2e74f5af94927d010c30e163f253c06c48fcdb");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

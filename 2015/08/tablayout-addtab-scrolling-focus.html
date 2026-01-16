@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-08-23T04:27:36+09:00">
+                <time datetime="2015-08-23 04:27:36 +0900">
                   <a href="/archives/2015/08">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -77,10 +78,23 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["簡単な検証要件", "MainActivity.java", "余談"]-->
-                <p>Android Design Support Libraryで?追加されているTabLayoutを使った場合に、addTabをした直後にselectメソッドを呼んだりaddTabの第2引数でtrue(selected)にしてもそのタブにフォーカスは当たるけど自動アニメーションスクロールによる処理が行われない為に自分でそのタブが出てる所までスライドしないといけない問題が出てるのですが...</p><p>なんとか解決出来たっぽいのでメモ</p><h4>簡単な検証要件</h4><p>SearchViewで検索した結果をTabLayoutにタブを動的に追加して検索結果をFragmentで出力するという内容。その動作キャプチャ</p>
+                <!--[&quot;簡単な検証要件&quot;, &quot;MainActivity.java&quot;, &quot;余談&quot;]-->
+                <p>Android Design Support Libraryで?追加されているTabLayoutを使った場合に、addTabをした直後にselectメソッドを呼んだりaddTabの第2引数でtrue(selected)にしてもそのタブにフォーカスは当たるけど自動アニメーションスクロールによる処理が行われない為に自分でそのタブが出てる所までスライドしないといけない問題が出てるのですが...</p>
+
+<p>なんとか解決出来たっぽいのでメモ</p>
+<h4>簡単な検証要件</h4>
+<p>SearchViewで検索した結果をTabLayoutにタブを動的に追加して検索結果をFragmentで出力するという内容。その動作キャプチャ</p>
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/vu2CNF-4Yds" frameborder="0" allowfullscreen></iframe>
-<p>となるようにする。わかりづらいと思うが、上記でも書いてるようにaddTabメソッドのselected引数にtrueを設定したりaddTabした後にtabインスタンスでselectメソッドを呼んだり、TabLayout.getTabAt(TabLayout.getTabCount() -1).selectみたいに呼んでも動画のようにスクロールしないと見えない所に配置される場合にそれのフォーカスは行くけどそこまでアニメーションでスライドされないので自前で持っていくしかない。NGパターンで失敗ケースが</p><p><img src="/images/2015/08/201508231500.jpg" class="img-fluid" alt="image" /></p><p>のように検索を実行した後、Tab.selectはされているけどスライドでフォーカスまでは至ってないので自前でスクロールしないと見えないっていう。それをなんとかするっていうのが今回の本要件</p><h4>MainActivity.java</h4><p>※部分的な抜粋のみ</p><pre class="line-numbers"><code class="language-java">public boolean onQueryTextSubmit(String query) {
+
+<p>となるようにする。わかりづらいと思うが、上記でも書いてるようにaddTabメソッドのselected引数にtrueを設定したりaddTabした後にtabインスタンスでselectメソッドを呼んだり、TabLayout.getTabAt(TabLayout.getTabCount() -1).selectみたいに呼んでも動画のようにスクロールしないと見えない所に配置される場合にそれのフォーカスは行くけどそこまでアニメーションでスライドされないので自前で持っていくしかない。NGパターンで失敗ケースが</p>
+
+<p><img src="/images/2015/08/201508231500.jpg" class="img-fluid" alt="image" /></p>
+
+<p>のように検索を実行した後、Tab.selectはされているけどスライドでフォーカスまでは至ってないので自前でスクロールしないと見えないっていう。それをなんとかするっていうのが今回の本要件</p>
+<h4>MainActivity.java</h4>
+<p>※部分的な抜粋のみ</p>
+<pre class="line-numbers"><code class="language-java">public boolean onQueryTextSubmit(String query) {
     collapseSearchView();
 
     final TabLayout.Tab tab = createTab(&quot;検索 &quot; + query, R.drawable.ic_search, R.id.tab_menu_search);
@@ -112,7 +126,15 @@
 
     return false;
 }
-</code></pre><p>というような感じで、タブを追加した後にちょっとしたタイムラグを持ちそれからselectを実行する事で上記検証動画と同様になる。おそらくはaddTabをした直後でもまだUIがdrawされてなくてポジションがどこにあたるのかが不定になるからなのではと。もちろん理論的な理由では無いので...</p><p>っていうような感じでやれば上記のような感じになる。理論的な理由が分かれば追記するか別途でネタにするかと</p><h4>余談</h4><p>ViewPagerを使う場合には<a href="http://qiita.com/k-kagurazaka@github/items/f1bbc905a4f5b2a5cd2b">TabLayout + ViewPager で初期ページを設定してもタブがスクロールしてない問題</a>が参考になるのではないかと</p>
+</code></pre>
+<p>というような感じで、タブを追加した後にちょっとしたタイムラグを持ちそれからselectを実行する事で上記検証動画と同様になる。おそらくはaddTabをした直後でもまだUIがdrawされてなくてポジションがどこにあたるのかが不定になるからなのではと。もちろん理論的な理由では無いので...</p>
+
+<p>っていうような感じでやれば上記のような感じになる。理論的な理由が分かれば追記するか別途でネタにするかと</p>
+<h4>余談</h4>
+<p>ViewPagerを使う場合には<a href="http://qiita.com/k-kagurazaka@github/items/f1bbc905a4f5b2a5cd2b">TabLayout + ViewPager で初期ページを設定してもタブがスクロールしてない問題</a>が参考になるのではないかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -204,7 +226,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -225,9 +247,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -340,7 +359,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -363,20 +382,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -386,13 +405,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("08e3f48101c14907e52ff2336f9bfa967d8cd1d9");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

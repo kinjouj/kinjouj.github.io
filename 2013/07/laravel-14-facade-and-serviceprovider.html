@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="使い方合ってるのかは定かじゃない。当てずっぽうで書いてる感も否めないのですが。ドキュメント的には &lt;http://laravel.com/docs/facades&gt; と &lt;http://laravel.com/docs/ioc&gt; の組み合わせ的な感じかと" />
+    <meta name="description" content="使い方合ってるのかは定かじゃない。当てずっぽうで書いてる感も否めないのですが。ドキュメント的には &amp;lt;http://laravel.com/docs/facades&amp;gt; と &amp;lt;http://laravel.com/docs/ioc&amp;gt; の組み合わせ的な感じかと" />
     <title>Laravel使ってみた (14) - FacadeとServiceProviderの使い方? - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/07/laravel-13-forms-and-html.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/07/laravel-15-template-layout.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-07-21T00:00:00+00:00">
+                <time datetime="2013-07-21 00:00:00 +0900">
                   <a href="/archives/2013/07">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,17 +78,26 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Hoge.php", "HogeServiceProvider.php", "HogeService.php"]-->
-                <p>使い方合ってるのかは定かじゃない。当てずっぽうで書いてる感も否めないのですが。ドキュメント的には <a href="http://laravel.com/docs/facades" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/facades</a> と <a href="http://laravel.com/docs/ioc" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/ioc</a> の組み合わせ的な感じかと</p><p>例えば、とあるクラスを作る。それをApp::bindを行なってIoC Containerに登録するなりで</p><pre class="line-numbers"><code class="language-php">$hoge = App::make(&quot;hoge&quot;);
+                <!--[&quot;Hoge.php&quot;, &quot;HogeServiceProvider.php&quot;, &quot;HogeService.php&quot;]-->
+                <p>使い方合ってるのかは定かじゃない。当てずっぽうで書いてる感も否めないのですが。ドキュメント的には <a href="http://laravel.com/docs/facades">http://laravel.com/docs/facades</a> と <a href="http://laravel.com/docs/ioc">http://laravel.com/docs/ioc</a> の組み合わせ的な感じかと</p>
+
+<p>例えば、とあるクラスを作る。それをApp::bindを行なってIoC Containerに登録するなりで</p>
+<pre class="line-numbers"><code class="language-php">$hoge = App::make(&quot;hoge&quot;);
 $hoge-&gt;say();
-</code></pre><p>的な事をやればbindで返した値が取得出来る。ただ、Laravelを使ってみての主観上として、</p><pre class="line-numbers"><code class="language-php">Hoge::say();
-</code></pre><p>的な感じでメソッド自体はインスタンスメソッドだけど、スタティックメソッドのように扱える設計方式っていうのがコア的な所も多いんじゃないのかっと。でそういう風に扱えるようにするには</p>
+</code></pre>
+<p>的な事をやればbindで返した値が取得出来る。ただ、Laravelを使ってみての主観上として、</p>
+<pre class="line-numbers"><code class="language-php">Hoge::say();
+</code></pre>
+<p>的な感じでメソッド自体はインスタンスメソッドだけど、スタティックメソッドのように扱える設計方式っていうのがコア的な所も多いんじゃないのかっと。でそういう風に扱えるようにするには</p>
+
 <ul>
 <li><a href="http://laravel.com/api/class-Illuminate.Support.Facades.Facade.html">Illuminate\Support\Facades\Facade</a>を継承したクラスを作り、getFacadesAccessorを実装する。実装内容はServiceProviderでApp::bindした名前?</li>
 <li><a href="http://laravel.com/api/class-Illuminate.Support.ServiceProvider.html">Illuminate\Support\ServiceProvider</a>を継承したクラスを作り、registerメソッドを実装する。そこでApp::bind等を行う</li>
 <li>作成したServiceProviderをApp::registerする</li>
 </ul>
-<p>的な感じじゃないかなーと。</p><h4>Hoge.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
+
+<p>的な感じじゃないかなーと。</p>
+<h4>Hoge.php</h4><pre class="line-numbers"><code class="language-php">&lt;?php
 
 use Illuminate\Support\Facades\Facade;
 
@@ -114,8 +124,16 @@ class HogeService {
         return &quot;hoge&quot;;
     }
 }
-</code></pre><p>で上記のHogeServiceProviderをApp::registerしておく。あとは</p><pre class="line-numbers"><code class="language-php">var_dump(Hoge::say());
-</code></pre><p>的な事をやるとIoC Containerからの名前解決により実装クラスインスタンスが取得されて利用できるような感じ</p><p>冒頭でも言ったけどこういう使い方が正しいのかは微妙だけど、こういう設計を利用する事でコントローラーとかでApp::makeなどをせずにIoC Containerな機能を利用してインスタンスを取得したりするっていう方式の方が望ましいのはっては思う所</p>
+</code></pre>
+<p>で上記のHogeServiceProviderをApp::registerしておく。あとは</p>
+<pre class="line-numbers"><code class="language-php">var_dump(Hoge::say());
+</code></pre>
+<p>的な事をやるとIoC Containerからの名前解決により実装クラスインスタンスが取得されて利用できるような感じ</p>
+
+<p>冒頭でも言ったけどこういう使い方が正しいのかは微妙だけど、こういう設計を利用する事でコントローラーとかでApp::makeなどをせずにIoC Containerな機能を利用してインスタンスを取得したりするっていう方式の方が望ましいのはっては思う所</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -123,7 +141,7 @@ class HogeService {
             <!-- next post -->
             <a class="float-start box-link" href="/2013/07/laravel-15-template-layout.html">&lt;&nbsp;Laravel使ってみた (15) - テンプレートレイアウト -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/07/laravel-13-forms-and-html.html">Laravel使ってみた (13) - Forms &amp; HTML -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/07/laravel-13-forms-and-html.html">Laravel使ってみた (13) - Forms &amp;amp; HTML -&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -207,7 +225,7 @@ class HogeService {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -228,9 +246,6 @@ class HogeService {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -343,7 +358,7 @@ class HogeService {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -366,20 +381,20 @@ class HogeService {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -389,13 +404,15 @@ class HogeService {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("84ef01f40a150e2b566dd2d2628c6c8bbe90bd29");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

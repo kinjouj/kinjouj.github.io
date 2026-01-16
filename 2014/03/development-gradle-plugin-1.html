@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-03-21T00:00:00+00:00">
+                <time datetime="2014-03-21 00:00:00 +0900">
                   <a href="/archives/2014/03">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["gradleプラグインの構造について", "build.gradle (プラグイン側)", "src/main/resources/META-INF/gradle-plugins/helloworld.properties", "src/main/groovy/kinjouj/gradle/plugin/HelloWorldPlugin.groovy", "src/main/groovy/kinjouj/gradle/plugin/HelloWorldTask.groovy", "build.gradle"]-->
-                <p>gradleプラグイン開発な辺りを勉強してみた</p><h4>gradleプラグインの構造について</h4>
+                <!--[&quot;gradleプラグインの構造について&quot;, &quot;build.gradle (プラグイン側)&quot;, &quot;src/main/resources/META-INF/gradle-plugins/helloworld.properties&quot;, &quot;src/main/groovy/kinjouj/gradle/plugin/HelloWorldPlugin.groovy&quot;, &quot;src/main/groovy/kinjouj/gradle/plugin/HelloWorldTask.groovy&quot;, &quot;build.gradle&quot;]-->
+                <p>gradleプラグイン開発な辺りを勉強してみた</p>
+<h4>gradleプラグインの構造について</h4>
 <pre>
 ├── build.gradle
 └── src
@@ -93,7 +95,9 @@
                 └── gradle-plugins
                     └── helloworld.properties
 </pre>
+
 <p>的な感じでビルドしたあとのjarで</p>
+
 <pre>
 ├─── META-INF
 │   ├── MANIFEST.MF
@@ -105,7 +109,11 @@
             ├── HelloWorldPlugin.class
             └── HelloWorldTask.class
 </pre>
-<p>的な感じで作る。META-INF/gradle-plugins/プラグイン名.propertiesで定義したのがプラグインとして利用できるようになるっぽい。つまり上記の場合にはプラグイン名はhelloworldになる</p><p>まぁプラグインのソースを一つづつ書いていく</p><h4>build.gradle (プラグイン側)</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;groovy&quot;
+
+<p>的な感じで作る。META-INF/gradle-plugins/プラグイン名.propertiesで定義したのがプラグインとして利用できるようになるっぽい。つまり上記の場合にはプラグイン名はhelloworldになる</p>
+
+<p>まぁプラグインのソースを一つづつ書いていく</p>
+<h4>build.gradle (プラグイン側)</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;groovy&quot;
 apply plugin: &quot;maven&quot;
 
 group &quot;kinjouj.gradle&quot;
@@ -114,8 +122,12 @@ dependencies {
     compile localGroovy()
     compile gradleApi()
 }
-</code></pre><p>groovyとgradleなAPIの依存性が必要なのでlocalGroovyとgradleApiを利用する</p><h4>src/main/resources/META-INF/gradle-plugins/helloworld.properties</h4><pre class="line-numbers"><code class="language-ini">implementation-class=kinjouj.gradle.plugin.HelloWorldPlugin
-</code></pre><p>implementation-classにプラグインクラスを指定するだけ</p><h4>src/main/groovy/kinjouj/gradle/plugin/HelloWorldPlugin.groovy</h4><pre class="line-numbers"><code class="language-groovy">package kinjouj.gradle.plugin
+</code></pre>
+<p>groovyとgradleなAPIの依存性が必要なのでlocalGroovyとgradleApiを利用する</p>
+<h4>src/main/resources/META-INF/gradle-plugins/helloworld.properties</h4><pre class="line-numbers"><code class="language-ini">implementation-class=kinjouj.gradle.plugin.HelloWorldPlugin
+</code></pre>
+<p>implementation-classにプラグインクラスを指定するだけ</p>
+<h4>src/main/groovy/kinjouj/gradle/plugin/HelloWorldPlugin.groovy</h4><pre class="line-numbers"><code class="language-groovy">package kinjouj.gradle.plugin
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -129,7 +141,9 @@ class HelloWorldPlugin implements Plugin&lt;project&gt; {
         )
     }
 }
-</code></pre><p>helloタスクを動かす際にHelloWorldTaskクラスを利用するようにする等</p><h4>src/main/groovy/kinjouj/gradle/plugin/HelloWorldTask.groovy</h4><pre class="line-numbers"><code class="language-java">package kinjouj.gradle.plugin
+</code></pre>
+<p>helloタスクを動かす際にHelloWorldTaskクラスを利用するようにする等</p>
+<h4>src/main/groovy/kinjouj/gradle/plugin/HelloWorldTask.groovy</h4><pre class="line-numbers"><code class="language-java">package kinjouj.gradle.plugin
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -147,7 +161,11 @@ class HelloWorldTask extends DefaultTask {
         println message
     }
 }
-</code></pre><p>DefaultTaskを継承しつつ、@TaskActionアノテーションを付与したメソッドが動作する模様。で.gradleファイル上でタスクを動かすにあたってパラメーターとかを利用する場合には、セッターメソッドを定義しとけば良いっぽい</p><p>んまぁここまでがプラグインのソース辺りなのでビルドしてinstallしておけば使えるようになる</p><h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
+</code></pre>
+<p>DefaultTaskを継承しつつ、@TaskActionアノテーションを付与したメソッドが動作する模様。で.gradleファイル上でタスクを動かすにあたってパラメーターとかを利用する場合には、セッターメソッドを定義しとけば良いっぽい</p>
+
+<p>んまぁここまでがプラグインのソース辺りなのでビルドしてinstallしておけば使えるようになる</p>
+<h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenLocal()
     }
@@ -162,7 +180,9 @@ apply plugin: &quot;helloworld&quot;
 hello {
     message &quot;hoge&quot;
 }
-</code></pre><p>な感じで使う。でgradle tasksをすると</p>
+</code></pre>
+<p>な感じで使う。でgradle tasksをすると</p>
+
 <pre>
 :tasks
 
@@ -170,7 +190,13 @@ Other tasks
 -----------
 hello
 </pre>
-<p>な感じでhelloタスクが使えるようになる。で上記のbuild.gradle上でhelloタスクのmessageパラメーターを設定しているのでそれが利用される</p><p>んまぁgradleのプラグイン開発の初歩辺りはこんなもんで</p>
+
+<p>な感じでhelloタスクが使えるようになる。で上記のbuild.gradle上でhelloタスクのmessageパラメーターを設定しているのでそれが利用される</p>
+
+<p>んまぁgradleのプラグイン開発の初歩辺りはこんなもんで</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -262,7 +288,7 @@ hello
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -283,9 +309,6 @@ hello
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -398,7 +421,7 @@ hello
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -421,20 +444,20 @@ hello
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -444,13 +467,15 @@ hello
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("8d0506176db4f4d937f250dabeb162cc458444b6");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

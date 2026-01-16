@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-03-20T00:00:00+00:00">
+                <time datetime="2014-03-20 00:00:00 +0900">
                   <a href="/archives/2014/03">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -78,7 +79,10 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p>前回の<a href="/angularjs-8-resource.html">angular.jsをやってみる (8) – $resource -</a>でも述べているように、paramsDefaultのパラメーターには@な接頭辞を持つデータ指定を利用する事が出来る</p><p>例えば以下ような感じで</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngResource&quot;, &quot;ngRoute&quot;])
+                <p>前回の<a href="/angularjs-8-resource.html">angular.jsをやってみる (8) – $resource -</a>でも述べているように、paramsDefaultのパラメーターには@な接頭辞を持つデータ指定を利用する事が出来る</p>
+
+<p>例えば以下ような感じで</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngResource&quot;, &quot;ngRoute&quot;])
   .factory(&quot;Sample&quot;, [&quot;$resource&quot;, function($resource) {
     return $resource(
       &quot;/sample/:id.json&quot;,
@@ -89,7 +93,11 @@
       }
     );
   }]);
-</code></pre><p>でangular.jsのドキュメント(日本語訳サイトからの引用)によると「もしパラメータの値に接頭辞として@が付いていた場合、 そのパラメータの値は、データオブジェクトから抽出されます。(GETを使用しない操作で便利です。)」っていう事らしい。恐らくはパラメーターに対してオブジェクトのインスタンスからプロパティ的なのから作用されるようになる物な感じだと思う(合ってるかは定かじゃないけど)</p><p>まぁ実例だした方が手っ取り早いと思うのだけど、例えばRailsとかのresourceコントローラーのルーティング定義の場合</p>
+</code></pre>
+<p>でangular.jsのドキュメント(日本語訳サイトからの引用)によると「もしパラメータの値に接頭辞として@が付いていた場合、 そのパラメータの値は、データオブジェクトから抽出されます。(GETを使用しない操作で便利です。)」っていう事らしい。恐らくはパラメーターに対してオブジェクトのインスタンスからプロパティ的なのから作用されるようになる物な感じだと思う(合ってるかは定かじゃないけど)</p>
+
+<p>まぁ実例だした方が手っ取り早いと思うのだけど、例えばRailsとかのresourceコントローラーのルーティング定義の場合</p>
+
 <pre>
 sample_index GET    /sample(.:format)          sample#index
              POST   /sample(.:format)          sample#create
@@ -100,7 +108,11 @@ sample_index GET    /sample(.:format)          sample#index
              PUT    /sample/:id(.:format)      sample#update
              DELETE /sample/:id(.:format)      sample#destroy
 </pre>
-<p>ていうようなルーティング定義が行われている。例えばここで言うとupdateを行うには/sample/1.json等のようなリクエストを行い尚且リクエストメソッドがPUTかPATCHメソッドであれば良い。恐らくはdestroyなやつを作用させる場合も同様だと思うけどそこ(destroy)は今回触れない</p><p>で述べたようにupdateリクエストを行うにはURLパラメーターとしてIDが指定されていなければならない。そういうケース等においてはparamsDefaultにおいて@接頭辞なのを利用する事で解決できる模様</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngResource&quot;, &quot;ngRoute&quot;])
+
+<p>ていうようなルーティング定義が行われている。例えばここで言うとupdateを行うには/sample/1.json等のようなリクエストを行い尚且リクエストメソッドがPUTかPATCHメソッドであれば良い。恐らくはdestroyなやつを作用させる場合も同様だと思うけどそこ(destroy)は今回触れない</p>
+
+<p>で述べたようにupdateリクエストを行うにはURLパラメーターとしてIDが指定されていなければならない。そういうケース等においてはparamsDefaultにおいて@接頭辞なのを利用する事で解決できる模様</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngResource&quot;, &quot;ngRoute&quot;])
   .config(function($routeProvider) {
     $routeProvider
       .when(&quot;/sample&quot;, {
@@ -136,7 +148,11 @@ sample_index GET    /sample(.:format)          sample#index
       });
     };
   });
-</code></pre><p>っていう感じかなと実感遠回りした気分がするけど、要はリクエストするパラメーターはオブジェクトから作用させる事が出来るようになるって事なんじゃないのかなと</p>
+</code></pre>
+<p>っていう感じかなと実感遠回りした気分がするけど、要はリクエストするパラメーターはオブジェクトから作用させる事が出来るようになるって事なんじゃないのかなと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -228,7 +244,7 @@ sample_index GET    /sample(.:format)          sample#index
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -249,9 +265,6 @@ sample_index GET    /sample(.:format)          sample#index
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -364,7 +377,7 @@ sample_index GET    /sample(.:format)          sample#index
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -387,20 +400,20 @@ sample_index GET    /sample(.:format)          sample#index
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -410,13 +423,15 @@ sample_index GET    /sample(.:format)          sample#index
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("6fef9cb15ca1b6de2b041f9db953d348faf15ee7");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

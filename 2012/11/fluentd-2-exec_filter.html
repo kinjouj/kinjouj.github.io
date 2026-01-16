@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="exec_filterを使えば指定したコマンドでフィルタリング(っていうか中継?)したり出来る模様" />
     <title>fluentdを使ってみる (2) - exec_filter - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2012/11/fuelphp-13-controller_hybrid.html" />
-    <link rel="next" href="https://kinjouj.github.io/2012/11/maven-s2jdbc-gen.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2012/11/maven-s2jdbc-gen.html" />
+    <link rel="next" href="https://kinjouj.github.io/2012/11/fuelphp-14-module.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2012/11/fluentd-2-exec_filter.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-11-17T00:00:00+00:00">
+                <time datetime="2012-11-17 00:00:00 +0900">
                   <a href="/archives/2012/11">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["/etc/td-agent/td-agent.conf", "/var/lib/fluentd/accesslog_filter.pl", "結果"]-->
-                <p>exec_filterを使えば指定したコマンドでフィルタリング(っていうか中継?)したり出来る模様</p><h4>/etc/td-agent/td-agent.conf</h4><pre class="line-numbers"><code class="language-">&lt;source&gt;
+                <!--[&quot;/etc/td-agent/td-agent.conf&quot;, &quot;/var/lib/fluentd/accesslog_filter.pl&quot;, &quot;結果&quot;]-->
+                <p>exec_filterを使えば指定したコマンドでフィルタリング(っていうか中継?)したり出来る模様</p>
+<h4>/etc/td-agent/td-agent.conf</h4><pre class="line-numbers"><code class="language-">&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -98,7 +100,9 @@
     type file
     path /var/log/td-agent/accesslog
 &lt;/match&gt;
-</code></pre><p>/var/log/nginx/access.logをtailした結果をexec_filterで/var/lib/fluentd/accesslog_filter.plをかましてから/var/log/td-agent/accesslogへ持っていく</p><h4>/var/lib/fluentd/accesslog_filter.pl</h4><pre class="line-numbers"><code class="language-pl">#!/usr/bin/env perl
+</code></pre>
+<p>/var/log/nginx/access.logをtailした結果をexec_filterで/var/lib/fluentd/accesslog_filter.plをかましてから/var/log/td-agent/accesslogへ持っていく</p>
+<h4>/var/lib/fluentd/accesslog_filter.pl</h4><pre class="line-numbers"><code class="language-pl">#!/usr/bin/env perl
 
 use strict;
 use warnings;
@@ -133,20 +137,28 @@ while (my $data = &lt;STDIN&gt;) {
         print $mp-&gt;pack($json);
     });
 }
-</code></pre><p>/var/log/nginx/access.logをtailして、キャッチされた時点で標準入力にin_formatで指定した形式で入ってくる(んだと思われる)。なので、それをdecode_jsonでデコードしてそこからホストとパスだけを取って、MessagePack形式で出力する</p><h4>結果</h4>
+</code></pre>
+<p>/var/log/nginx/access.logをtailして、キャッチされた時点で標準入力にin_formatで指定した形式で入ってくる(んだと思われる)。なので、それをdecode_jsonでデコードしてそこからホストとパスだけを取って、MessagePack形式で出力する</p>
+<h4>結果</h4>
 <pre>
 2012-11-17T18:34:01+09:00   accesslog.filter.output {"host":"127.0.0.1","path":"/"}
 2012-11-17T18:34:01+09:00   accesslog.filter.output {"host":"127.0.0.1","path":"/favicon.ico"}
 </pre>
-<p>んな形式でaccesslog.filter.output先で出力される。っていう感じで中間的にプログラムを挟んでごにょごにょ出来る模様</p><p>公式ドキュメント: <a href="http://docs.fluentd.org/articles/out_exec_filter">http://docs.fluentd.org/articles/out_exec_filter</a></p>
+
+<p>んな形式でaccesslog.filter.output先で出力される。っていう感じで中間的にプログラムを挟んでごにょごにょ出来る模様</p>
+
+<p>公式ドキュメント: <a href="http://docs.fluentd.org/articles/out_exec_filter">http://docs.fluentd.org/articles/out_exec_filter</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2012/11/maven-s2jdbc-gen.html">&lt;&nbsp;Mavenでs2jdbc-gen</a>
+            <a class="float-start box-link" href="/2012/11/fuelphp-14-module.html">&lt;&nbsp;FuelPHPをやってみる (14) - モジュールを使う -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2012/11/fuelphp-13-controller_hybrid.html">FuelPHPをやってみる (13) - Controller_Hybridを使う -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2012/11/maven-s2jdbc-gen.html">Mavenでs2jdbc-gen&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -230,7 +242,7 @@ while (my $data = &lt;STDIN&gt;) {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -251,9 +263,6 @@ while (my $data = &lt;STDIN&gt;) {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -366,7 +375,7 @@ while (my $data = &lt;STDIN&gt;) {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -389,20 +398,20 @@ while (my $data = &lt;STDIN&gt;) {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -412,13 +421,15 @@ while (my $data = &lt;STDIN&gt;) {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("247163272b76c7663ef1159ceb6786c972fefd5d");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

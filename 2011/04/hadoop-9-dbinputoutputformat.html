@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2011-04-09T09:00:00+09:00">
+                <time datetime="2011-04-09 09:00:00 +0900">
                   <a href="/archives/2011/04">
                   <span class="post-date-year">2011</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["TestWritable.javaを作成", "SampleWritable.javaを作成", "SampleMapper.javaを作成", "SampleReducer.javaを作成", "Client.javaを作成"]-->
-                <p>MySQLのデータをHadoopで利用するにはDBInputFormat及びDBOutputFormatを使用すれば良い</p><p>DBOutputFormatだけを使う前提であればJDBCドライバー自体はHDFSに格納しDistributedCacheを利用する事ができるが、InputFormatでは依存性の解決ができない。なのでJDBCドライバーはHadoopコンテナに事前にコピーしておく</p><h4>TestWritable.javaを作成</h4><p>DBInputFormatでテーブルから読み込んでMapperで利用する為、別途Writable実装が必要になる</p><pre class="line-numbers"><code class="language-java">package sample;
+                <!--[&quot;TestWritable.javaを作成&quot;, &quot;SampleWritable.javaを作成&quot;, &quot;SampleMapper.javaを作成&quot;, &quot;SampleReducer.javaを作成&quot;, &quot;Client.javaを作成&quot;]-->
+                <p>MySQLのデータをHadoopで利用するにはDBInputFormat及びDBOutputFormatを使用すれば良い</p>
+
+<p>DBOutputFormatだけを使う前提であればJDBCドライバー自体はHDFSに格納しDistributedCacheを利用する事ができるが、InputFormatでは依存性の解決ができない。なのでJDBCドライバーはHadoopコンテナに事前にコピーしておく</p>
+<h4>TestWritable.javaを作成</h4>
+<p>DBInputFormatでテーブルから読み込んでMapperで利用する為、別途Writable実装が必要になる</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -125,7 +131,9 @@ public class TestWritable implements Writable, DBWritable {
         return name;
     }
 }
-</code></pre><p>InputFormat側から動的にインスタンスが作られる為に空コンストラクタは必ず必要になる。又、今回はファイルから読み込む訳ではないので、引数がDataInput/DataOutputの物はサポートしないようにする</p><h4>SampleWritable.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>InputFormat側から動的にインスタンスが作られる為に空コンストラクタは必ず必要になる。又、今回はファイルから読み込む訳ではないので、引数がDataInput/DataOutputの物はサポートしないようにする</p>
+<h4>SampleWritable.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -169,7 +177,9 @@ public class SampleWritable implements Writable, DBWritable {
         ps.setInt(2, count);
     }
 }
-</code></pre><p>ReducerからOutputFormat側に明示的に流す為、空引数なコンストラクタは必要ない</p><h4>SampleMapper.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>ReducerからOutputFormat側に明示的に流す為、空引数なコンストラクタは必要ない</p>
+<h4>SampleMapper.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 
@@ -198,7 +208,9 @@ public class SampleMapper extends Mapper&lt;LongWritable, TestWritable, Text, In
         }
     }
 }
-</code></pre><p>DBInputFormatで行を読み込んで、TestWritableのreadFieldsが呼び出され引数に渡されるので、ジェネリックスの2番目はTestWritableを指定しなければならない</p><h4>SampleReducer.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>DBInputFormatで行を読み込んで、TestWritableのreadFieldsが呼び出され引数に渡されるので、ジェネリックスの2番目はTestWritableを指定しなければならない</p>
+<h4>SampleReducer.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 
@@ -226,7 +238,9 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, SampleWritable,
         }
     }
 }
-</code></pre><p>OutputFormatにはSampleWritableを流す為、値部の型はNullWritableにしておく。ジェネリックスの型もキー部はSampleWritableにする</p><h4>Client.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>OutputFormatにはSampleWritableを流す為、値部の型はNullWritableにしておく。ジェネリックスの型もキー部はSampleWritableにする</p>
+<h4>Client.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Cluster;
@@ -264,6 +278,8 @@ public class Client {
     }
 }
 </code></pre>
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -355,7 +371,7 @@ public class Client {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -376,9 +392,6 @@ public class Client {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -491,7 +504,7 @@ public class Client {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -514,20 +527,20 @@ public class Client {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -537,13 +550,15 @@ public class Client {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("3fa50086e33c1b3847340c07c89769a8a9668fac");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

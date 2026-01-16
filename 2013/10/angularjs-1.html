@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-10-21T00:00:00+00:00">
+                <time datetime="2013-10-21 00:00:00 +0900">
                   <a href="/archives/2013/10">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["index.html", "main.js", "sample.js", "余談: ng-cloakに関して"]-->
-                <p>以前からちょいちょいネタに出したりしてるけど、<a href="http://docs.angularjs.org/guide">angular.jsの公式ドキュメント</a>を読みつつ勉強を進めてみようかと。今回はbootstrap+conceptual overviewなセクションを読みつつ(※directiveな仕様なやつは今回は除外、別途で書く予定)</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!--
+                <!--[&quot;index.html&quot;, &quot;main.js&quot;, &quot;sample.js&quot;, &quot;余談: ng-cloakに関して&quot;]-->
+                <p>以前からちょいちょいネタに出したりしてるけど、<a href="http://docs.angularjs.org/guide">angular.jsの公式ドキュメント</a>を読みつつ勉強を進めてみようかと。今回はbootstrap+conceptual overviewなセクションを読みつつ(※directiveな仕様なやつは今回は除外、別途で書く予定)</p>
+<h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!--
 angular.bootstrapはng-appで指定しても可能
 &lt;html ng-app=&quot;hogeApp&quot;&gt;
 --&gt;
@@ -103,7 +105,9 @@ angular.bootstrapはng-appで指定しても可能
     &lt;script type=&quot;text/javascript&quot; src=&quot;main.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>&lt;li ng-repeat=<q>sample in samples|filter:name</q>&gt;な件に関しては<a href="/angularjs-karma-e2e-testing.html">AngularJSのkarmaを使ったテスト</a>でも書いてるので</p><h4>main.js</h4><pre class="line-numbers"><code class="language-js">// 接頭辞がNG_DEFER_BOOTSTRAPな場合はbootstrapしても待機待ち状態になるので、大樹町を解除するにはresumeBootstrapする必要あり?
+</code></pre>
+<p>&lt;li ng-repeat=<q>sample in samples|filter:name</q>&gt;な件に関しては<a href="/angularjs-karma-e2e-testing.html">AngularJSのkarmaを使ったテスト</a>でも書いてるので</p>
+<h4>main.js</h4><pre class="line-numbers"><code class="language-js">// 接頭辞がNG_DEFER_BOOTSTRAPな場合はbootstrapしても待機待ち状態になるので、大樹町を解除するにはresumeBootstrapする必要あり?
 window.name = &quot;NG_DEFER_BOOTSTRAP!_x&quot;;
 
 angular.element(document).ready(function() {
@@ -149,16 +153,28 @@ angular.element(document).ready(function() {
 
   return SampleController;
 })();
-</code></pre><p>んまぁ$scope.watchに関してはコメントで書いてるし、$scopeな件も特に言う事無いし終わり</p><h4>余談: ng-cloakに関して</h4><p>んまぁ<a href="http://docs.angularjs.org/api/ng.directive:ngCloak">公式ドキュメント</a>にもあるのだけど、ng-repeat等で処理されているエレメントとかを処理完了後に表示するような場合にはng-cloakを使えば良いっぽい</p><p>angular.js的な所して、angular.resumeBootstrapをしない状態で確認した所だと</p><pre class="line-numbers"><code class="language-css">[ng:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+</code></pre>
+<p>んまぁ$scope.watchに関してはコメントで書いてるし、$scopeな件も特に言う事無いし終わり</p>
+<h4>余談: ng-cloakに関して</h4>
+<p>んまぁ<a href="http://docs.angularjs.org/api/ng.directive:ngCloak">公式ドキュメント</a>にもあるのだけど、ng-repeat等で処理されているエレメントとかを処理完了後に表示するような場合にはng-cloakを使えば良いっぽい</p>
+
+<p>angular.js的な所して、angular.resumeBootstrapをしない状態で確認した所だと</p>
+<pre class="line-numbers"><code class="language-css">[ng:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
 }
-</code></pre><p>っていうようなCSSがぶち込まれている。でこのdirectiveな所としては</p><pre class="line-numbers"><code class="language-js">var ngCloakDirective = ngDirective({
+</code></pre>
+<p>っていうようなCSSがぶち込まれている。でこのdirectiveな所としては</p>
+<pre class="line-numbers"><code class="language-js">var ngCloakDirective = ngDirective({
   compile: function(element, attr) {
     attr.$set(&quot;ngCloak&quot;, undefined);
     element.removeClass(&quot;ng-cloak&quot;);
   }
 });
-</code></pre><p>んng-cloakな属性とng-cloakなclass属性を消してる模様</p>
+</code></pre>
+<p>んng-cloakな属性とng-cloakなclass属性を消してる模様</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -250,7 +266,7 @@ angular.element(document).ready(function() {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -271,9 +287,6 @@ angular.element(document).ready(function() {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -386,7 +399,7 @@ angular.element(document).ready(function() {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -409,20 +422,20 @@ angular.element(document).ready(function() {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -432,13 +445,15 @@ angular.element(document).ready(function() {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("215a68e8f7650f9c7761628b76781371d3d2b014");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

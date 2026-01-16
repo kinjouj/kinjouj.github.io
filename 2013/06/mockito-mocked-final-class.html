@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-06-28T00:00:00+00:00">
+                <time datetime="2013-06-28 00:00:00 +0900">
                   <a href="/archives/2013/06">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,25 +77,34 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["モックするクラス", "ClassLoaderを継承したクラスを作成", "テストを書く", "追記"]-->
-                <p>※解釈が正しいかは微妙なのであしからず</p><p>通常Mockitoではfinalクラス等はモック化出来ない。やってもエラーになるのだけど、それを無茶ぶりでやっちゃう方法がある模様</p>
+                <!--[&quot;モックするクラス&quot;, &quot;ClassLoaderを継承したクラスを作成&quot;, &quot;テストを書く&quot;, &quot;追記&quot;]-->
+                <p>※解釈が正しいかは微妙なのであしからず</p>
+
+<p>通常Mockitoではfinalクラス等はモック化出来ない。やってもエラーになるのだけど、それを無茶ぶりでやっちゃう方法がある模様</p>
+
 <ul>
 <li>ClassLoaderを継承したクラスを作る。loadClassをオーバーライドしてモック化を対象とするクラスのターゲットにfinal修飾子を削除したクラスを定義させてそのClassを返すように実装</li>
 <li>Mockito.mockで指定するClassを上記のClassLoader経由で取得する。</li>
 </ul>
-<p>っていう工程を行う事で可能らしい。後述する参考ではPowerMockitoを使ってる模様。とりまぁやってみるか</p><h4>モックするクラス</h4><pre class="line-numbers"><code class="language-java">package sample;
+
+<p>っていう工程を行う事で可能らしい。後述する参考ではPowerMockitoを使ってる模様。とりまぁやってみるか</p>
+<h4>モックするクラス</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 public interface Sample {
     String say();
 }
-</code></pre><p>なインターフェースがあって</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>なインターフェースがあって</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 public final class SampleImpl implements Sample {
     public String say() {
         return &quot;hoge&quot;;
     }
 }
-</code></pre><p>というようなクラスを対象にする</p><h4>ClassLoaderを継承したクラスを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>というようなクラスを対象にする</p>
+<h4>ClassLoaderを継承したクラスを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.lang.reflect.Modifier;
 
@@ -138,7 +148,9 @@ public class SampleClassLoader extends ClassLoader {
         return defineClass(name, b, 0, b.length);
     }
 }
-</code></pre><p>利用するにはjavassistが必要</p><h4>テストを書く</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>利用するにはjavassistが必要</p>
+<h4>テストを書く</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -167,15 +179,23 @@ public class SampleTestCase {
         assertThat(sample.say(), is(&quot;hoge&quot;)); // fail
     }
 }
-</code></pre><p>っていう感じ。で</p><pre class="line-numbers"><code class="language-java">when(sample.say()).thenCallRealMethod();
-</code></pre><p>とかにしとけばテストは通る。でテストスタックトレース的には</p>
+</code></pre>
+<p>っていう感じ。で</p>
+<pre class="line-numbers"><code class="language-java">when(sample.say()).thenCallRealMethod();
+</code></pre>
+<p>とかにしとけばテストは通る。でテストスタックトレース的には</p>
+
 <pre>
 java.lang.AssertionError:
 Expected: is "hoge"
      but: was "fuga"
 </pre>
-<p>んで</p><pre class="line-numbers"><code class="language-java">Sample sample = (Sample)mock(SampleImpl.class);
-</code></pre><p>なんていうのをやるとどうなるか</p>
+
+<p>んで</p>
+<pre class="line-numbers"><code class="language-java">Sample sample = (Sample)mock(SampleImpl.class);
+</code></pre>
+<p>なんていうのをやるとどうなるか</p>
+
 <pre>
 org.mockito.exceptions.base.MockitoException:
 Cannot mock/spy class sample.SampleImpl
@@ -184,7 +204,15 @@ Mockito cannot mock/spy following:
   - anonymous classes
   - primitive types
 </pre>
-<p>というようにfinal classはmock出来ねーよって怒られる。っていうような感じでfinalクラスをmock化する方法があったのでやってみた程度で</p><p>参考: <a href="http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests" target="_blank" rel="noopener noreferrer">http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests</a></p><h4>追記</h4><p><a href="/2013/10/mockito-mocked-final-class-2.html">続きとなる別アプローチ</a>を書きました</p>
+
+<p>というようにfinal classはmock出来ねーよって怒られる。っていうような感じでfinalクラスをmock化する方法があったのでやってみた程度で</p>
+
+<p>参考: <a href="http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests">http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests</a></p>
+<h4>追記</h4>
+<p><a href="/2013/10/mockito-mocked-final-class-2.html">続きとなる別アプローチ</a>を書きました</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -276,7 +304,7 @@ Mockito cannot mock/spy following:
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -297,9 +325,6 @@ Mockito cannot mock/spy following:
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -412,7 +437,7 @@ Mockito cannot mock/spy following:
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -435,20 +460,20 @@ Mockito cannot mock/spy following:
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -458,13 +483,15 @@ Mockito cannot mock/spy following:
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("38527c8fea470d814421905dd9ca07688f5cf689");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-03-17T00:00:00+09:00">
+                <time datetime="2013-03-17 00:00:00 +0900">
                   <a href="/archives/2013/03">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,8 +77,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["sample.js", "test/runner.html (mochaのテストランナー)", "test/test1.js", "コードカバレッジを出力"]-->
-                <p>っていうのをやってみた</p><h4>sample.js</h4><pre class="line-numbers"><code class="language-js">var Sample = (function() {
+                <!--[&quot;sample.js&quot;, &quot;test/runner.html (mochaのテストランナー)&quot;, &quot;test/test1.js&quot;, &quot;コードカバレッジを出力&quot;]-->
+                <p>っていうのをやってみた</p>
+<h4>sample.js</h4><pre class="line-numbers"><code class="language-js">var Sample = (function() {
   function Sample() {
   };
 
@@ -91,7 +93,9 @@
 
   return Sample;
 })();
-</code></pre><p>てな感じでJavaScriptを作ってこいつをmocha-phantomjsを使ってテストする。今回のはphantomjs使わなくても出来るけど、結局作って行ったらphantomjs使わないとできなくなったりするのであくまで例として</p><h4>test/runner.html (mochaのテストランナー)</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+</code></pre>
+<p>てな感じでJavaScriptを作ってこいつをmocha-phantomjsを使ってテストする。今回のはphantomjs使わなくても出来るけど、結局作って行ったらphantomjs使わないとできなくなったりするのであくまで例として</p>
+<h4>test/runner.html (mochaのテストランナー)</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;title&gt;Mocha&lt;/title&gt;
@@ -119,8 +123,12 @@
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>まぁ単純に</p><pre class="line-numbers"><code class="language-">mocha init .
-</code></pre><p>したのをchai参照とテストスクリプト(test1.js)の参照、mochaPhantomJS関係を色々修正</p><h4>test/test1.js</h4><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
+</code></pre>
+<p>まぁ単純に</p>
+<pre class="line-numbers"><code class="language-">mocha init .
+</code></pre>
+<p>したのをchai参照とテストスクリプト(test1.js)の参照、mochaPhantomJS関係を色々修正</p>
+<h4>test/test1.js</h4><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
 
   var sample;
 
@@ -133,17 +141,37 @@
     expect(sample.say(&quot;hoge&quot;)).to.be.equal(&quot;hello world: hoge&quot;);
   });
 });
-</code></pre><p>な感じでテストを書く。でここまでやったらまぁ実行出来るはずなので実行してテストが動いてコケない事を確認。引数指定しないテストをしてないのは後述すれば分かるのでここでは省略</p><h4>コードカバレッジを出力</h4><p>出力するには</p>
+</code></pre>
+<p>な感じでテストを書く。でここまでやったらまぁ実行出来るはずなので実行してテストが動いてコケない事を確認。引数指定しないテストをしてないのは後述すれば分かるのでここでは省略</p>
+<h4>コードカバレッジを出力</h4>
+<p>出力するには</p>
+
 <ul>
 <li>jscoverageでテストを対象とするJavaScriptをカバレッジを出せるようにする</li>
 <li>mocha(-phantomjs)で「-R json-cov」を指定してカバレッジなJSONを出力</li>
 <li>出力されたカバレッジなJSONをjson2htmlcovを使って出力</li>
 </ul>
-<p>な感じ。html-covってレポーターもある模様なのですが動かないので上記の工程をこなしていく</p><pre class="line-numbers"><code class="language-">jscoverage sample.js
-</code></pre><p>同じディレクトリにsample-cov.jsが出力されるのでテストランナーなtest/runner.html内での参照も変える必要がある。一般的にはテストするJavaScriptソース自体をディレクトリに入れて、ディレクトリにjscoverageするっていうケースが多いのかも</p><p>んで第2工程でカバレッジを出力する</p><pre class="line-numbers"><code class="language-">mocha-phantomjs -R json-cov test/runner.html &gt; coverage.js
-</code></pre><p>で第3工程。出力されたカバレッジなJSをjson2htmlcovでHTMLに変換する</p><pre class="line-numbers"><code class="language-">cat coverage.js | json2htmlcov
-</code></pre><p>ってな感じだけど、ひとまとめに出来るので</p><pre class="line-numbers"><code class="language-">mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
-</code></pre><p>な感じで。で出力されたカバレッジレポートを見てみると</p><p><img src="/images/2013/03/20130317125246.png" class="img-fluid" alt="image" /></p><p>という感じになる。で上記でも述べたように引数のチェックをしていないのでテストを書きなおす</p><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
+
+<p>な感じ。html-covってレポーターもある模様なのですが動かないので上記の工程をこなしていく</p>
+<pre class="line-numbers"><code class="language-">jscoverage sample.js
+</code></pre>
+<p>同じディレクトリにsample-cov.jsが出力されるのでテストランナーなtest/runner.html内での参照も変える必要がある。一般的にはテストするJavaScriptソース自体をディレクトリに入れて、ディレクトリにjscoverageするっていうケースが多いのかも</p>
+
+<p>んで第2工程でカバレッジを出力する</p>
+<pre class="line-numbers"><code class="language-">mocha-phantomjs -R json-cov test/runner.html &gt; coverage.js
+</code></pre>
+<p>で第3工程。出力されたカバレッジなJSをjson2htmlcovでHTMLに変換する</p>
+<pre class="line-numbers"><code class="language-">cat coverage.js | json2htmlcov
+</code></pre>
+<p>ってな感じだけど、ひとまとめに出来るので</p>
+<pre class="line-numbers"><code class="language-">mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
+</code></pre>
+<p>な感じで。で出力されたカバレッジレポートを見てみると</p>
+
+<p><img src="/images/2013/03/20130317125246.png" class="img-fluid" alt="image" /></p>
+
+<p>という感じになる。で上記でも述べたように引数のチェックをしていないのでテストを書きなおす</p>
+<pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
 
   var sample;
 
@@ -157,7 +185,13 @@
     expect(function() { sample.say() }).to.be.throw(Error); // 追加
   });
 });
-</code></pre><p>な感じで直して再度出力してみると</p><p><img src="/images/2013/03/20130317125418.png" class="img-fluid" alt="image" /></p>
+</code></pre>
+<p>な感じで直して再度出力してみると</p>
+
+<p><img src="/images/2013/03/20130317125418.png" class="img-fluid" alt="image" /></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -249,7 +283,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -270,9 +304,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -385,7 +416,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -408,20 +439,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -431,13 +462,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("df7e16caface0808e051982174b2cb0e671cf125");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

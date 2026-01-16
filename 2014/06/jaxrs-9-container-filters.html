@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="公式ドキュメント: &lt;https://jersey.java.net/documentation/latest/user-guide.html#d0e8119&gt;" />
+    <meta name="description" content="公式ドキュメント: &amp;lt;https://jersey.java.net/documentation/latest/user-guide.html#d0e8119&amp;gt;" />
     <title>JAX-RSをやってみる (9) - Container Filters - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/06/jaxrs-8-dynamicfeature.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/06/jaxrs-10-asyncresponse.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-06-16T00:00:00+00:00">
+                <time datetime="2014-06-16 00:00:00 +0900">
                   <a href="/archives/2014/06">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["XHRRequestFilter.java"]-->
-                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#d0e8119" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#d0e8119</a></p><p>単純にリクエストなりレスポンスをフィルターする仕組みなAPIな模様。でリクエストからレスポンスまでのライフサイクルについては<a href="https://jersey.java.net/documentation/latest/user-guide.html#d0e8397">9.4. Filter and interceptor execution order</a>にかかれているのだけど、@PreMatchingを使う事によりリクエストからマッチするリソースが特定される前に実行される物なのだろうかと</p><h4>XHRRequestFilter.java</h4><p>X-Requested-Withヘッダーをチェックして無い(もしくはXMLHttpRequestではない)ならHTTP/400(Bad Request)を流すようなContainerRequestFilterを作る</p><pre class="line-numbers"><code class="language-java">package sample.filter;
+                <!--[&quot;XHRRequestFilter.java&quot;]-->
+                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#d0e8119">https://jersey.java.net/documentation/latest/user-guide.html#d0e8119</a></p>
+
+<p>単純にリクエストなりレスポンスをフィルターする仕組みなAPIな模様。でリクエストからレスポンスまでのライフサイクルについては<a href="https://jersey.java.net/documentation/latest/user-guide.html#d0e8397">9.4. Filter and interceptor execution order</a>にかかれているのだけど、@PreMatchingを使う事によりリクエストからマッチするリソースが特定される前に実行される物なのだろうかと</p>
+<h4>XHRRequestFilter.java</h4>
+<p>X-Requested-Withヘッダーをチェックして無い(もしくはXMLHttpRequestではない)ならHTTP/400(Bad Request)を流すようなContainerRequestFilterを作る</p>
+<pre class="line-numbers"><code class="language-java">package sample.filter;
 
 import java.io.IOException;
 
@@ -102,7 +108,9 @@ public class XHRRequestFilter implements ContainerRequestFilter {
         }
     }
 }
-</code></pre><p>っていうような感じだけど、これだと@Providerされてる時点で全リクエストに対してこのフィルターが作用するようになる。で例えば</p><pre class="line-numbers"><code class="language-java">package sample.filter;
+</code></pre>
+<p>っていうような感じだけど、これだと@Providerされてる時点で全リクエストに対してこのフィルターが作用するようになる。で例えば</p>
+<pre class="line-numbers"><code class="language-java">package sample.filter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -113,7 +121,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface XHRFilter {
 }
-</code></pre><p>っていうような@XHRFilterアノテーションを作って、このアノテーションがついてる場合にのみこのフィルターが作動するような場合であれば</p><pre class="line-numbers"><code class="language-java">package sample.filter;
+</code></pre>
+<p>っていうような@XHRFilterアノテーションを作って、このアノテーションがついてる場合にのみこのフィルターが作動するような場合であれば</p>
+<pre class="line-numbers"><code class="language-java">package sample.filter;
 
 import java.io.IOException;
 
@@ -149,7 +159,13 @@ public class XHRRequestFilter implements ContainerRequestFilter {
         }
     }
 }
-</code></pre><p>っていうように出来る。@PreMatchingを使っているとリソースマッチを処理していない段階でのフィルタリング処理が行われるのでgetMatchedResourceMethodを使ってもnullしか返ってこない</p><p>っていう感じ。又は前回の「<a href="/jaxrs-8-dynamicfeature.html">DynamicFeature</a>」を使って特定のアノテーションがついてる場合にのみコンポーネントをregisterするような仕組みを使っても出来る</p><p>っていう事でコントローラーが</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>っていうように出来る。@PreMatchingを使っているとリソースマッチを処理していない段階でのフィルタリング処理が行われるのでgetMatchedResourceMethodを使ってもnullしか返ってこない</p>
+
+<p>っていう感じ。又は前回の「<a href="/jaxrs-8-dynamicfeature.html">DynamicFeature</a>」を使って特定のアノテーションがついてる場合にのみコンポーネントをregisterするような仕組みを使っても出来る</p>
+
+<p>っていう事でコントローラーが</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -172,7 +188,9 @@ public class Home {
         return &quot;hoge&quot;;
     }
 }
-</code></pre><p>みたいになってて</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>みたいになってて</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
@@ -234,7 +252,11 @@ public class HomeTest extends JerseyTest {
         assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
     }
 }
-</code></pre><p>のテストが通れば良いんじゃないかと</p>
+</code></pre>
+<p>のテストが通れば良いんじゃないかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -326,7 +348,7 @@ public class HomeTest extends JerseyTest {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -347,9 +369,6 @@ public class HomeTest extends JerseyTest {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -462,7 +481,7 @@ public class HomeTest extends JerseyTest {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -485,20 +504,20 @@ public class HomeTest extends JerseyTest {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -508,13 +527,15 @@ public class HomeTest extends JerseyTest {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("5930847f24ed1370461109984291304ee1b8894d");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

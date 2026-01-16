@@ -10,309 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="公式ドキュメント: &lt;https://jersey.java.net/documentation/latest/user-guide.html#sse&gt;
-
-
-Server Sent Eventsにも対応している模様。んまぁドキュメントに書いてる通りにjersey-media-sseなライブラリを参照をすればAutoDiscoverableとかそれによりSseFeatureが作用してServer Sent Eventsなのを利用出来るようになる感じかと
-
-
-
-
-
-#### Home.java
-
-
-```java
-package sample.controller;
-
-import java.io.IOException;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
-import org.glassfish.jersey.media.sse.EventOutput;
-import org.glassfish.jersey.media.sse.OutboundEvent;
-import org.glassfish.jersey.media.sse.SseFeature;
-
-@Path(&quot;/sample&quot;)
-public class Home {
-
-    @Path(&quot;events&quot;)
-    @GET
-    @Produces(SseFeature.SERVER_SENT_EVENTS)
-    public EventOutput getServerSentEvents() {
-        final EventOutput output = new EventOutput();
-
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    OutboundEvent.Builder builder = new OutboundEvent.Builder();
-                    builder.name(&quot;sample_event&quot;);
-                    builder.data(String.class, &quot;hoge&quot;);
-
-                    final OutboundEvent event = builder.build();
-                    output.write(event);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        output.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
-
-        return output;
-    }
-}
-```
-
-
-っていう感じでEventOutputをリソースメソッドから返すなりで、@ProducesでSERVER\_SENT\_EVENTSなMediaTypeを指定すれば良い模様。
-
-
-んまぁjersey-media-sseを使ったテストに関しては
-
-
-```java
-package sample.controller;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.core.Application;
-
-import org.glassfish.jersey.media.sse.EventListener;
-import org.glassfish.jersey.media.sse.EventSource;
-import org.glassfish.jersey.media.sse.InboundEvent;
-import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Test;
-
-import sample.SampleApplication;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
-public class HomeTest extends JerseyTest {
-
-    @Override
-    protected Application configure() {
-        return new SampleApplication();
-    }
-
-    @Test
-    public void test_index() throws InterruptedException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final List&lt;String&gt; data = new ArrayList&lt;String&gt;(1);
-
-        EventSource es = EventSource.target(target(&quot;/sample/events&quot;)).build();
-        assertThat(es, notNullValue());
-
-        es.register(
-            new EventListener() {
-                @Override
-                public void onEvent(InboundEvent inboundEvent) {
-                    try {
-                        data.add(inboundEvent.readData());
-                    } finally {
-                        latch.countDown();
-                    }
-                }
-            },
-            // ここで起きないイベント名を指定するとテストはタイムアウトによりずっこける
-            &quot;sample_event&quot;
-        );
-        es.open();
-        latch.await(3, TimeUnit.SECONDS);
-        es.close();
-
-        assertThat(data, hasSize(1));
-        assertThat(data, hasItem(&quot;hoge&quot;));
-    }
-}
-```
-
-
-てな感じでEventSourceクラスなりEventListenerなりを使ってテストする事が出来る模様で。&lt;https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java&gt;とかにもあるのでそれ参考にすれば良いのではと
-
-
-#### SseBroadcasterを使う
-
-
-上記だけだと面白くないので、SseBroadcasterっていうのを使うとServer Sent Events側にイベントをブロードキャスト出来る仕組みがある模様。例えば
-
-
-```html
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;script src=&quot;jquery.js&quot;&gt;&lt;/script&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;input type=&quot;text&quot; id=&quot;message&quot; /&gt;
-    &lt;button onclick=&quot;send(document.querySelector(&quot;#message&quot;).value)&quot;&gt;send&lt;/button&gt;
-    &lt;hr /&gt;
-    &lt;div id=&quot;messages&quot;&gt;&lt;/div&gt;
-    &lt;script&gt;
-var messages = document.querySelector(&quot;#messages&quot;);
-
-var es = new EventSource(&quot;/jaxrs/resources/sample/events&quot;);
-es.addEventListener(&quot;sample_event&quot;, function(e) {
-  console.log(e);
-
-  var elm = document.createElement(&quot;div&quot;);
-  elm.innerText = e.data;
-
-  messages.appendChild(elm);
-}, false);
-
-function send(message) {
-  $.post(&quot;/jaxrs/resources/sample/push&quot;, { message: message });
-}
-    &lt;/script&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-```
-
-
-みたいにテキストで入力した値をPOSTで/sample/pushに送る。で/sample/push側でServer Sent Eventsにブロードキャストする事で指定した値がServer Sent Eventsに通知されてイベントでキャッチ出来るような感じを利用するには
-
-
-```java
-package sample.controller;
-
-import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.glassfish.jersey.media.sse.EventOutput;
-import org.glassfish.jersey.media.sse.OutboundEvent;
-import org.glassfish.jersey.media.sse.SseBroadcaster;
-import org.glassfish.jersey.media.sse.SseFeature;
-
-@Singleton
-@Path(&quot;/sample&quot;)
-public class Home {
-
-    private final SseBroadcaster broadcaster = new SseBroadcaster();
-
-    @Path(&quot;events&quot;)
-    @GET
-    @Produces(SseFeature.SERVER_SENT_EVENTS)
-    public EventOutput getServerSentEvents() {
-        final EventOutput output = new EventOutput();
-        broadcaster.add(output);
-
-        return output;
-    }
-
-    @Path(&quot;push&quot;)
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response push(@FormParam(&quot;message&quot;) String message) {
-        OutboundEvent event = new OutboundEvent.Builder()
-            .name(&quot;sample_event&quot;)
-            .data(String.class, message)
-            .build();
-
-        broadcaster.broadcast(event);
-
-        return Response.ok().build();
-    }
-}
-```
-
-
-Server Sent Eventsを利用する際に生成したEventOutputをSseBroadcasterに突っ込んでおいて、POSTなりのリクエストでデータを受け取る側のリソースメソッドでbroadcastメソッドを使ってOutboundEventを送る。するとSseBroadcaster側に突っ込んでおいたEventOutputに書き込み処理が行われる。要はPOSTしたりしてデータを処理した後にブロードキャストしたいような要件であればSseBroadcasterを使う事で容易に実現出来る的なAPIかと
-
-
-ちなみにこの場合のテストは
-
-
-```java
-package sample.controller;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
-
-import org.glassfish.jersey.media.sse.EventListener;
-import org.glassfish.jersey.media.sse.EventSource;
-import org.glassfish.jersey.media.sse.InboundEvent;
-import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Test;
-
-import sample.SampleApplication;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
-public class HomeTest extends JerseyTest {
-
-    @Override
-    protected Application configure() {
-        return new SampleApplication();
-    }
-
-    @Test
-    public void test_index() throws InterruptedException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final List&lt;String&gt; data = new ArrayList&lt;String&gt;(1);
-
-        EventSource es = EventSource.target(target(&quot;/sample/events&quot;)).build();
-        assertThat(es, notNullValue());
-
-        es.register(
-            new EventListener() {
-                @Override
-                public void onEvent(InboundEvent inboundEvent) {
-                    try {
-                        data.add(inboundEvent.readData());
-                    } finally {
-                        latch.countDown();
-                    }
-                }
-            },
-            &quot;sample_event&quot;
-        );
-        es.open();
-
-        // 送るデータを準備
-        Form form = new Form();
-        form.param(&quot;message&quot;, &quot;hoge&quot;);
-
-        // データを送信。んでステータスが正常に返ってくるかをテスト
-        Response response = target(&quot;/sample/push&quot;).request().post(Entity.form(form));
-        assertThat(response, notNullValue());
-        assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
-
-        // Server Sent Eventsにブロードキャストするまでウェイト
-        latch.await(3, TimeUnit.SECONDS);
-        es.close();
-
-
-        // その後にデータを検証
-        assertThat(data, hasSize(1));
-        assertThat(data, hasItem(&quot;hoge&quot;));
-    }
-}
-```
-
-
-的な感じかと。んまぁ大体はドキュメント通りなので(ry" />
+    <meta name="description" content="公式ドキュメント: &amp;lt;https://jersey.java.net/documentation/latest/user-guide.html#sse&amp;gt;" />
     <title>JAX-RSをやってみる (11) - Server Sent Events - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/06/jaxrs-10-asyncresponse.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/06/jaxrs-12-mvc.html" />
@@ -320,6 +18,7 @@ public class HomeTest extends JerseyTest {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -360,7 +59,7 @@ public class HomeTest extends JerseyTest {
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-06-21T00:00:00+00:00">
+                <time datetime="2014-06-21 00:00:00 +0900">
                   <a href="/archives/2014/06">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -379,8 +78,11 @@ public class HomeTest extends JerseyTest {
                 </span>
               </p>
               <div class="post-content">
-                <!--["Home.java", "SseBroadcasterを使う"]-->
-                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#sse" target="_blank" rel="noopener noreferrer">https://jersey.java.net/documentation/latest/user-guide.html#sse</a></p><p>Server Sent Eventsにも対応している模様。んまぁドキュメントに書いてる通りにjersey-media-sseなライブラリを参照をすればAutoDiscoverableとかそれによりSseFeatureが作用してServer Sent Eventsなのを利用出来るようになる感じかと</p><h4>Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
+                <!--[&quot;Home.java&quot;, &quot;SseBroadcasterを使う&quot;]-->
+                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#sse">https://jersey.java.net/documentation/latest/user-guide.html#sse</a></p>
+
+<p>Server Sent Eventsにも対応している模様。んまぁドキュメントに書いてる通りにjersey-media-sseなライブラリを参照をすればAutoDiscoverableとかそれによりSseFeatureが作用してServer Sent Eventsなのを利用出来るようになる感じかと</p>
+<h4>Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.io.IOException;
 import javax.ws.rs.GET;
@@ -425,7 +127,11 @@ public class Home {
         return output;
     }
 }
-</code></pre><p>っていう感じでEventOutputをリソースメソッドから返すなりで、@ProducesでSERVER_SENT_EVENTSなMediaTypeを指定すれば良い模様。</p><p>んまぁjersey-media-sseを使ったテストに関しては</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>っていう感じでEventOutputをリソースメソッドから返すなりで、@ProducesでSERVER_SENT_EVENTSなMediaTypeを指定すれば良い模様。</p>
+
+<p>んまぁjersey-media-sseを使ったテストに関しては</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -480,7 +186,11 @@ public class HomeTest extends JerseyTest {
         assertThat(data, hasItem(&quot;hoge&quot;));
     }
 }
-</code></pre><p>てな感じでEventSourceクラスなりEventListenerなりを使ってテストする事が出来る模様で。<a href="https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java" target="_blank" rel="noopener noreferrer">https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java</a>とかにもあるのでそれ参考にすれば良いのではと</p><h4>SseBroadcasterを使う</h4><p>上記だけだと面白くないので、SseBroadcasterっていうのを使うとServer Sent Events側にイベントをブロードキャスト出来る仕組みがある模様。例えば</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre>
+<p>てな感じでEventSourceクラスなりEventListenerなりを使ってテストする事が出来る模様で。<a href="https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java">https://github.com/jersey/jersey/blob/master/examples/sse-item-store-webapp/src/test/java/org/glassfish/jersey/examples/sseitemstore/ItemStoreResourceTest.java</a>とかにもあるのでそれ参考にすれば良いのではと</p>
+<h4>SseBroadcasterを使う</h4>
+<p>上記だけだと面白くないので、SseBroadcasterっていうのを使うとServer Sent Events側にイベントをブロードキャスト出来る仕組みがある模様。例えば</p>
+<pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;script src=&quot;jquery.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
@@ -508,7 +218,9 @@ function send(message) {
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>みたいにテキストで入力した値をPOSTで/sample/pushに送る。で/sample/push側でServer Sent Eventsにブロードキャストする事で指定した値がServer Sent Eventsに通知されてイベントでキャッチ出来るような感じを利用するには</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>みたいにテキストで入力した値をPOSTで/sample/pushに送る。で/sample/push側でServer Sent Eventsにブロードキャストする事で指定した値がServer Sent Eventsに通知されてイベントでキャッチ出来るような感じを利用するには</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -555,7 +267,11 @@ public class Home {
         return Response.ok().build();
     }
 }
-</code></pre><p>Server Sent Eventsを利用する際に生成したEventOutputをSseBroadcasterに突っ込んでおいて、POSTなりのリクエストでデータを受け取る側のリソースメソッドでbroadcastメソッドを使ってOutboundEventを送る。するとSseBroadcaster側に突っ込んでおいたEventOutputに書き込み処理が行われる。要はPOSTしたりしてデータを処理した後にブロードキャストしたいような要件であればSseBroadcasterを使う事で容易に実現出来る的なAPIかと</p><p>ちなみにこの場合のテストは</p><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre>
+<p>Server Sent Eventsを利用する際に生成したEventOutputをSseBroadcasterに突っ込んでおいて、POSTなりのリクエストでデータを受け取る側のリソースメソッドでbroadcastメソッドを使ってOutboundEventを送る。するとSseBroadcaster側に突っ込んでおいたEventOutputに書き込み処理が行われる。要はPOSTしたりしてデータを処理した後にブロードキャストしたいような要件であればSseBroadcasterを使う事で容易に実現出来る的なAPIかと</p>
+
+<p>ちなみにこの場合のテストは</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -626,7 +342,11 @@ public class HomeTest extends JerseyTest {
         assertThat(data, hasItem(&quot;hoge&quot;));
     }
 }
-</code></pre><p>的な感じかと。んまぁ大体はドキュメント通りなので(ry</p>
+</code></pre>
+<p>的な感じかと。んまぁ大体はドキュメント通りなので(ry</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -718,7 +438,7 @@ public class HomeTest extends JerseyTest {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -739,9 +459,6 @@ public class HomeTest extends JerseyTest {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -854,7 +571,7 @@ public class HomeTest extends JerseyTest {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -877,20 +594,20 @@ public class HomeTest extends JerseyTest {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -900,13 +617,15 @@ public class HomeTest extends JerseyTest {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("836bf60f05f63346689faa21c65be9c87920efa1");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

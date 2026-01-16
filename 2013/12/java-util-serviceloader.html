@@ -10,14 +10,15 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="まぁJavaやってるとたまーにみる&lt;span style=&quot;color: red&quot;&gt;META-INF/services&lt;/span&gt;っていうディレクトリにファイルがあってその中身が実装クラスのFQDNが書いてるっていうケース。こういう仕組みを作るにはどうするのかっていうのをやってみた" />
+    <meta name="description" content="まぁJavaやってるとたまーにみる&amp;lt;span style=&amp;quot;color: red&amp;quot;&amp;gt;META-INF/services&amp;lt;/span&amp;gt;っていうディレクトリにファイルがあってその中身が実装クラスのFQDNが書いてるっていうケース。こういう仕組みを作るにはどうするのかっていうのをやってみた" />
     <title>java.util.ServiceLoader - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/12/spring-webmvc-10-gson.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/12/spring-webmvc-11-requestmapping-params-attribute.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/12/jsp-config.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/12/java-util-serviceloader.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-12-16T00:00:00+00:00">
+                <time datetime="2013-12-16 00:00:00 +0900">
                   <a href="/archives/2013/12">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,13 +77,18 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["ServiceLoaderで処理される側な部分", "ServiceLoaderを使う"]-->
-                <p>まぁJavaやってるとたまーにみる<span style="color: red">META-INF/services</span>っていうディレクトリにファイルがあってその中身が実装クラスのFQDNが書いてるっていうケース。こういう仕組みを作るにはどうするのかっていうのをやってみた</p><h4>ServiceLoaderで処理される側な部分</h4><p>つまりMETA-INF/servicesに記載する部分。まずservices内にあるファイル名はインターフェース名な模様。なのでインターフェースを作る</p><pre class="line-numbers"><code class="language-java">package sample;
+                <!--[&quot;ServiceLoaderで処理される側な部分&quot;, &quot;ServiceLoaderを使う&quot;]-->
+                <p>まぁJavaやってるとたまーにみる<span style="color: red">META-INF/services</span>っていうディレクトリにファイルがあってその中身が実装クラスのFQDNが書いてるっていうケース。こういう仕組みを作るにはどうするのかっていうのをやってみた</p>
+<h4>ServiceLoaderで処理される側な部分</h4>
+<p>つまりMETA-INF/servicesに記載する部分。まずservices内にあるファイル名はインターフェース名な模様。なのでインターフェースを作る</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 public interface Sample {
     String say();
 }
-</code></pre><p>っていう感じで作ればMETA-INF/services/sample.Sampleっていうファイルを作って中身にはそのインターフェースを実装したクラスのFQDNを書けば良い。今回はsample.SampleImplって感じにしておいた。まぁjar tvfすると</p>
+</code></pre>
+<p>っていう感じで作ればMETA-INF/services/sample.Sampleっていうファイルを作って中身にはそのインターフェースを実装したクラスのFQDNを書けば良い。今回はsample.SampleImplって感じにしておいた。まぁjar tvfすると</p>
+
 <pre>
 0 Mon Dec 16 13:15:16 JST 2013 sample/
    388 Mon Dec 16 13:15:16 JST 2013 sample/SampleImpl.class
@@ -90,7 +96,11 @@ public interface Sample {
      0 Mon Dec 16 13:09:50 JST 2013 META-INF/services/
     18 Mon Dec 16 13:09:50 JST 2013 META-INF/services/sample.Sample
 </pre>
-<p>っていう感じになる。んでこれを使う</p><h4>ServiceLoaderを使う</h4><p>まぁ上記で生成したjarファイルをビルドパスに入れてと</p><pre class="line-numbers"><code class="language-java">import java.util.ServiceLoader;
+
+<p>っていう感じになる。んでこれを使う</p>
+<h4>ServiceLoaderを使う</h4>
+<p>まぁ上記で生成したjarファイルをビルドパスに入れてと</p>
+<pre class="line-numbers"><code class="language-java">import java.util.ServiceLoader;
 import sample.Sample;
 
 public class Main {
@@ -103,13 +113,17 @@ public class Main {
         }
     }
 }
-</code></pre><p>っていう感じでjava.util.ServiceLoaderを使う事で、META-INF/servicesで定義されているインターフェースで取得しその実装を利用する事が出来る感じかと</p>
+</code></pre>
+<p>っていう感じでjava.util.ServiceLoaderを使う事で、META-INF/servicesで定義されているインターフェースで取得しその実装を利用する事が出来る感じかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/12/spring-webmvc-11-requestmapping-params-attribute.html">&lt;&nbsp;Spring WebMVCをやってみる (11) - @RequestMappingのparams -</a>
+            <a class="float-start box-link" href="/2013/12/jsp-config.html">&lt;&nbsp;jsp-config</a>
             <!-- prev post -->
             <a class="float-end box-link" href="/2013/12/spring-webmvc-10-gson.html">Spring WebMVCをやってみる (10) - gsonを使う -&nbsp;&gt;</a>
           </div>
@@ -195,7 +209,7 @@ public class Main {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -216,9 +230,6 @@ public class Main {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -331,7 +342,7 @@ public class Main {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -354,20 +365,20 @@ public class Main {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -377,13 +388,15 @@ public class Main {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("73652f5b0ef2d3f5f5da677ede917c9d0daa14f2");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

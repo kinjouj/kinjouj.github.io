@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-04-01T00:00:00+09:00">
+                <time datetime="2015-04-01 00:00:00 +0900">
                   <a href="/archives/2015/04">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["環境構築", "js/app.js", "js/routes.js", "&lt;NotFoundRoute&gt;と&lt;Redirect&gt;", "js/route.js", "ルーティングパラメーターを利用する", "js/routes.js", "js/app.js", "js/routes.js", "Dynamic Segmentを使う場合の注意", "js/routes.js", "ルーティングをネストする場合", "js/routes.js", "renderする際にリダイレクトしたい場合", "追記"]-->
-                <p>react-routerを使ってみた。</p><p>※React.jsな構成の考え方とかとりあえず反映せずにざらーって書いてるので(ry</p><p>※やたらと長い上に書いた本人以外わかりづらいと思うので公式ドキュメント読んだ方が良い</p><h4>環境構築</h4><p>とりあえずnpmでreact及びreact-routerの依存性とbrowserifyを使ったビルドの定義をしておく</p><pre class="line-numbers"><code class="language-json">{
+                <!--[&quot;環境構築&quot;, &quot;js/app.js&quot;, &quot;js/routes.js&quot;, &quot;&amp;lt;NotFoundRoute&amp;gt;と&amp;lt;Redirect&amp;gt;&quot;, &quot;js/route.js&quot;, &quot;ルーティングパラメーターを利用する&quot;, &quot;js/routes.js&quot;, &quot;js/app.js&quot;, &quot;js/routes.js&quot;, &quot;Dynamic Segmentを使う場合の注意&quot;, &quot;js/routes.js&quot;, &quot;ルーティングをネストする場合&quot;, &quot;js/routes.js&quot;, &quot;renderする際にリダイレクトしたい場合&quot;, &quot;追記&quot;]-->
+                <p>react-routerを使ってみた。</p>
+
+<p>※React.jsな構成の考え方とかとりあえず反映せずにざらーって書いてるので(ry</p>
+
+<p>※やたらと長い上に書いた本人以外わかりづらいと思うので公式ドキュメント読んだ方が良い</p>
+<h4>環境構築</h4>
+<p>とりあえずnpmでreact及びreact-routerの依存性とbrowserifyを使ったビルドの定義をしておく</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;sample&quot;,
   &quot;version&quot;: &quot;0.0.1&quot;,
   &quot;main&quot;: &quot;js/app.js&quot;,
@@ -101,7 +109,11 @@
     &quot;transform&quot;: [&quot;reactify&quot;, &quot;envify&quot;]
   }
 }
-</code></pre><p>でコード中にはReact.jsで使うJSX構文が含まれているのでreactifyのトランスフォームを使ってビルドする事で可能。envifyはnode.jsのprocess.env.NODE_ENVを静的な文字列に置き換えるトランスフォーマーかと(それ以外に何かあるのかは未調査)</p><p>でプロジェクト構成を整えたらnpm installで必要な依存性の取得をした後にpostinstallでビルドするようにしているのでjs/app.jsをビルドしたbundle.jsが生成される。それを以下のHTMLで利用する(以降にて共通で使用するHTML)</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre>
+<p>でコード中にはReact.jsで使うJSX構文が含まれているのでreactifyのトランスフォームを使ってビルドする事で可能。envifyはnode.jsのprocess.env.NODE_ENVを静的な文字列に置き換えるトランスフォーマーかと(それ以外に何かあるのかは未調査)</p>
+
+<p>でプロジェクト構成を整えたらnpm installで必要な依存性の取得をした後にpostinstallでビルドするようにしているのでjs/app.jsをビルドしたbundle.jsが生成される。それを以下のHTMLで利用する(以降にて共通で使用するHTML)</p>
+<pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
   &lt;/head&gt;
   &lt;body&gt;
@@ -109,7 +121,9 @@
     &lt;script src=&quot;bundle.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>あとはガシガシとコード書いてドキュメント読みつつ進める</p><h4>js/app.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre>
+<p>あとはガシガシとコード書いてドキュメント読みつつ進める</p>
+<h4>js/app.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 var React  = require(&quot;react&quot;),
     Router = require(&quot;react-router&quot;),
@@ -127,7 +141,9 @@ Router.run(routes, function(Handler) {
     document.querySelector(&#39;#hello-app&#39;)
   );
 });
-</code></pre><p>Router.runしてマッチしたルーティングを指定したセレクターでハンドラー(ReactClass)で描画するっていう感じかと</p><h4>js/routes.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre>
+<p>Router.runしてマッチしたルーティングを指定したセレクターでハンドラー(ReactClass)で描画するっていう感じかと</p>
+<h4>js/routes.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 var React        = require(&quot;react&quot;),
     Router       = require(&quot;react-router&quot;),
@@ -189,7 +205,9 @@ var routes = (
 );
 
 module.exports = routes;
-</code></pre><p>先ほど書いた上記のHTMLにアクセスにするとまず&lt;DefaultRoute&gt;で定義しているRootハンドラーが作用してそこが&lt;RouteHandler&gt;な領域に描画されるような形かと。で&lt;MainNav&gt;なので定義している&lt;Link&gt;が変換された&lt;a&gt;をクリックするとHelloハンドラーが作用して同様な描画処理が行われる感じ</p><h4>&lt;NotFoundRoute&gt;と&lt;Redirect&gt;</h4><h4>js/route.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre>
+<p>先ほど書いた上記のHTMLにアクセスにするとまず&lt;DefaultRoute&gt;で定義しているRootハンドラーが作用してそこが&lt;RouteHandler&gt;な領域に描画されるような形かと。で&lt;MainNav&gt;なので定義している&lt;Link&gt;が変換された&lt;a&gt;をクリックするとHelloハンドラーが作用して同様な描画処理が行われる感じ</p>
+<h4>&lt;NotFoundRoute&gt;と&lt;Redirect&gt;</h4><h4>js/route.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 var React         = require(&quot;react&quot;),
     Router        = require(&quot;react-router&quot;),
@@ -258,7 +276,11 @@ var routes = (
 );
 
 module.exports = routes;
-</code></pre><p>ルーティングの定義とNotFoundハンドラーの定義だけ修正しただけだけど。存在しないルーティングにアクセスしたような場合には&lt;NotFoundRoute&gt;で定義したハンドラーが作用するようになる。で&lt;Redirect&gt;で定義するとfromで指定したルーティングにアクセスした場合にはtoで指定したルーティング名にリダイレクトされるようになる</p><h4>ルーティングパラメーターを利用する</h4><p>ルーティングパラメーターも利用する事も出来るし、ルーティングライブラリとかによくあるアスタリスクを使ったsplatルーティングパラメーターも利用する事が可能 (詳しくは <a href="https://github.com/rackt/react-router/blob/master/docs/guides/path-matching.md#splats" target="_blank" rel="noopener noreferrer">https://github.com/rackt/react-router/blob/master/docs/guides/path-matching.md#splats</a> )</p><h4>js/routes.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre>
+<p>ルーティングの定義とNotFoundハンドラーの定義だけ修正しただけだけど。存在しないルーティングにアクセスしたような場合には&lt;NotFoundRoute&gt;で定義したハンドラーが作用するようになる。で&lt;Redirect&gt;で定義するとfromで指定したルーティングにアクセスした場合にはtoで指定したルーティング名にリダイレクトされるようになる</p>
+<h4>ルーティングパラメーターを利用する</h4>
+<p>ルーティングパラメーターも利用する事も出来るし、ルーティングライブラリとかによくあるアスタリスクを使ったsplatルーティングパラメーターも利用する事が可能 (詳しくは <a href="https://github.com/rackt/react-router/blob/master/docs/guides/path-matching.md#splats">https://github.com/rackt/react-router/blob/master/docs/guides/path-matching.md#splats</a> )</p>
+<h4>js/routes.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 var React        = require(&quot;react&quot;),
     Router       = require(&quot;react-router&quot;),
@@ -321,7 +343,11 @@ var routes = (
 );
 
 module.exports = routes;
-</code></pre><p>&lt;Route&gt;のpathで:idのようなパラメーターを設定して、それをRouter APIのgetCurrentParamsを介して利用する事が出来る</p><p>又、Router APIを介さなくてもルーティングパラメーターをハンドラーのプロパティ(React.createClass内のprops)で参照する事も可能。それを利用する場合は以下のように修正する</p><h4>js/app.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre>
+<p>&lt;Route&gt;のpathで:idのようなパラメーターを設定して、それをRouter APIのgetCurrentParamsを介して利用する事が出来る</p>
+
+<p>又、Router APIを介さなくてもルーティングパラメーターをハンドラーのプロパティ(React.createClass内のprops)で参照する事も可能。それを利用する場合は以下のように修正する</p>
+<h4>js/app.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 var React  = require(&quot;react&quot;),
     Router = require(&quot;react-router&quot;),
@@ -394,7 +420,11 @@ var routes = (
 );
 
 module.exports = routes;
-</code></pre><p>っていう感じでハンドラーにパラメーターをプロパティにマージ?するような形として利用する事も出来る</p><h4>Dynamic Segmentを使う場合の注意</h4><p>Dynamic Segment(ルーティングパラメーター)を使ってる場合において、&lt;Link&gt;等で切り替えを行うような際(公式的にはトランジションを行う場合)にはそのハンドラーのgetInitialStateが発生しなくなる。getInitialStateで返した値をrenderでstateを使うような場合にはcomponentWillReceivePropsでsetStateするような形を利用するようにとの事。つまり以下みたいな感じでやれって事らしい</p><h4>js/routes.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre>
+<p>っていう感じでハンドラーにパラメーターをプロパティにマージ?するような形として利用する事も出来る</p>
+<h4>Dynamic Segmentを使う場合の注意</h4>
+<p>Dynamic Segment(ルーティングパラメーター)を使ってる場合において、&lt;Link&gt;等で切り替えを行うような際(公式的にはトランジションを行う場合)にはそのハンドラーのgetInitialStateが発生しなくなる。getInitialStateで返した値をrenderでstateを使うような場合にはcomponentWillReceivePropsでsetStateするような形を利用するようにとの事。つまり以下みたいな感じでやれって事らしい</p>
+<h4>js/routes.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 var React        = require(&quot;react&quot;),
     Router       = require(&quot;react-router&quot;),
@@ -463,7 +493,11 @@ var routes = (
 );
 
 module.exports = routes;
-</code></pre><p>getInitialStateは実装しないっていう訳じゃなくて、&lt;Link&gt;でトランジションされるような際においてはgetInitialStateが発生しないので、そこで返すと同等なstateを保持するような形になる模様</p><p>公式的には <a href="https://github.com/rackt/react-router/blob/master/examples/master-detail/app.js#L91" target="_blank" rel="noopener noreferrer">https://github.com/rackt/react-router/blob/master/examples/master-detail/app.js#L91</a> を参考にしろとの事</p><h4>ルーティングをネストする場合</h4><h4>js/routes.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre>
+<p>getInitialStateは実装しないっていう訳じゃなくて、&lt;Link&gt;でトランジションされるような際においてはgetInitialStateが発生しないので、そこで返すと同等なstateを保持するような形になる模様</p>
+
+<p>公式的には <a href="https://github.com/rackt/react-router/blob/master/examples/master-detail/app.js#L91">https://github.com/rackt/react-router/blob/master/examples/master-detail/app.js#L91</a> を参考にしろとの事</p>
+<h4>ルーティングをネストする場合</h4><h4>js/routes.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 var React        = require(&quot;react&quot;),
     Router       = require(&quot;react-router&quot;),
@@ -542,7 +576,13 @@ var routes = (
 );
 
 module.exports = routes;
-</code></pre><p>書いてる通り、ルーティングがネストされている場合にネストされた側のルーティングにマッチしても親側で&lt;RouteHandler&gt;してない場合にはネストされた部分まで処理が作用しない模様(んまぁ、今までを考えればルートなappルーティングで&lt;RouteHandler&gt;してるから当たり前な事だと)</p><p>んまぁ難癖ありそうだなって思ったら出来る限りそういう定義にならないようにルーティング設計を考えるべきかと</p><h4>renderする際にリダイレクトしたい場合</h4><p>そういう事するような要件になるようにならないようにするべきなんですが、あくまで疑問として描画される際にあたって問題があればリダイレクトしたいような要件の場合は以下のようにAPI使って出来なくもない模様</p><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre>
+<p>書いてる通り、ルーティングがネストされている場合にネストされた側のルーティングにマッチしても親側で&lt;RouteHandler&gt;してない場合にはネストされた部分まで処理が作用しない模様(んまぁ、今までを考えればルートなappルーティングで&lt;RouteHandler&gt;してるから当たり前な事だと)</p>
+
+<p>んまぁ難癖ありそうだなって思ったら出来る限りそういう定義にならないようにルーティング設計を考えるべきかと</p>
+<h4>renderする際にリダイレクトしたい場合</h4>
+<p>そういう事するような要件になるようにならないようにするべきなんですが、あくまで疑問として描画される際にあたって問題があればリダイレクトしたいような要件の場合は以下のようにAPI使って出来なくもない模様</p>
+<pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 var React        = require(&quot;react&quot;),
     Router       = require(&quot;react-router&quot;),
@@ -591,7 +631,13 @@ var routes = (
 );
 
 module.exports = routes;
-</code></pre><p>これを使う事によりどういう問題が出てくるかって所までは把握してないので、先も言ったけどこういう事案にならないように避けるべきかと</p><p>以上。長いけどまだ見落としてる部分もありそうなので色々分かったら追記なり新しくネタ書いたりするかも知れない</p><h4>追記</h4><p>Navigationっていうmixinを使うと</p><pre class="line-numbers"><code class="language-js">var React = require(&quot;react&quot;)
+</code></pre>
+<p>これを使う事によりどういう問題が出てくるかって所までは把握してないので、先も言ったけどこういう事案にならないように避けるべきかと</p>
+
+<p>以上。長いけどまだ見落としてる部分もありそうなので色々分かったら追記なり新しくネタ書いたりするかも知れない</p>
+<h4>追記</h4>
+<p>Navigationっていうmixinを使うと</p>
+<pre class="line-numbers"><code class="language-js">var React = require(&quot;react&quot;)
     Router = require(&quot;react-router&quot;),
     Navigation = Router.Navigation;
 
@@ -611,7 +657,11 @@ var Top = React.createClass({
 });
 
 module.exports = Top;
-</code></pre><p>なんて感じに使えますが、Navigationを使うルーティングの操作は現在deprecatedな模様。なので使わないのが良さそう</p>
+</code></pre>
+<p>なんて感じに使えますが、Navigationを使うルーティングの操作は現在deprecatedな模様。なので使わないのが良さそう</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -703,7 +753,7 @@ module.exports = Top;
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -724,9 +774,6 @@ module.exports = Top;
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -839,7 +886,7 @@ module.exports = Top;
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -862,20 +909,20 @@ module.exports = Top;
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -885,13 +932,15 @@ module.exports = Top;
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("d41e0966e548eaa4414d8ddc187b4144454526b6");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

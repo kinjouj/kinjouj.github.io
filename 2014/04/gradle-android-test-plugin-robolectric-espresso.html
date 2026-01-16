@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4&gt; にあるように元はJake Wharton氏が開発されていてdeprecatedになっていたgradle-android-test-pluginをrobolectric開発チームによってメンテされるようになった模様" />
+    <meta name="description" content="&amp;lt;https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4&amp;gt; にあるように元はJake Wharton氏が開発されていてdeprecatedになっていたgradle-android-test-pluginをrobolectric開発チームによってメンテされるようになった模様" />
     <title>gradle-android-test-plugin+robolectric+espresso - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/04/android-espresso-ui-testing.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/05/angularjs-24-ng-non-bindable.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-04-28T00:00:00+00:00">
+                <time datetime="2014-04-28 00:00:00 +0900">
                   <a href="/archives/2014/04">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -78,8 +79,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["構造", "build.gradle", "app/build.gradle", "余談: Jenkinsでビルドしよう"]-->
-                <p><a href="https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4" target="_blank" rel="noopener noreferrer">https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4</a> にあるように元はJake Wharton氏が開発されていてdeprecatedになっていたgradle-android-test-pluginをrobolectric開発チームによってメンテされるようになった模様</p><p>てな訳でgradle-android-test-pluginを使いつつの、robolectricでの単体テスト及びespressoによるUIテストをやってみる</p><h4>構造</h4>
+                <!--[&quot;構造&quot;, &quot;build.gradle&quot;, &quot;app/build.gradle&quot;, &quot;余談: Jenkinsでビルドしよう&quot;]-->
+                <p><a href="https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4">https://groups.google.com/forum/#!topic/robolectric/xsOpEwtdTi4</a> にあるように元はJake Wharton氏が開発されていてdeprecatedになっていたgradle-android-test-pluginをrobolectric開発チームによってメンテされるようになった模様</p>
+
+<p>てな訳でgradle-android-test-pluginを使いつつの、robolectricでの単体テスト及びespressoによるUIテストをやってみる</p>
+<h4>構造</h4>
 <pre>
 ├── app
 │   ├── build.gradle
@@ -111,7 +115,13 @@
 │   └── sample_library (省略)
 └── settings.gradle
 </pre>
-<p>な感じの構成を作った。んでrobolectricテストなところは<a href="/gradle-android-test-plugin-robolectric-testing.html">gradle-android-test-plugin+Robolectricでテスト</a>で書いてるのと同じなのでここでは記載しない。あとespressoテストに関しても<a href="/android-espresso-ui-testing.html">Espressoを使ったUIテスト</a>で記載しているのとまったく同じなので省略する</p><p>すると必然的に修正する必要があるのはapp/build.gradleだけって事になるので</p><p>ちなみにのちのちでやることになるけど、gradle wrapperが必要になるのでgradle wrapperタスクを動かしてgradlewを出力させておく</p><h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
+
+<p>な感じの構成を作った。んでrobolectricテストなところは<a href="/gradle-android-test-plugin-robolectric-testing.html">gradle-android-test-plugin+Robolectricでテスト</a>で書いてるのと同じなのでここでは記載しない。あとespressoテストに関しても<a href="/android-espresso-ui-testing.html">Espressoを使ったUIテスト</a>で記載しているのとまったく同じなので省略する</p>
+
+<p>すると必然的に修正する必要があるのはapp/build.gradleだけって事になるので</p>
+
+<p>ちなみにのちのちでやることになるけど、gradle wrapperが必要になるのでgradle wrapperタスクを動かしてgradlewを出力させておく</p>
+<h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
     }
@@ -190,9 +200,35 @@ androidTest {
     include &quot;**/*Test.class&quot;
     exclude &quot;**/espresso/*.class&quot;
 }
-</code></pre><p>あとは普通に</p><pre class="line-numbers"><code class="language-">gradle clean test connectedAndroidTest
-</code></pre><p>で動かせば良い。testでコケるとconnectedAndroidTestまでは作用しない</p><p>んまぁてな感じでgradle-android-test-pluginを使いつつのrobolectricテスト及びUIテストを動かすのも出来るって事で</p><p>ちなみにandroidのgradle build toolsのバージョンが最近のだとconnectedInstrumentTestではなくconnectedAndroidTestになっているので(instrumentTest Configurationも無い)</p><h4>余談: Jenkinsでビルドしよう</h4><p>前述した通りにgradle wrapperを使えば簡単にJenkins側でビルドする事も出来る模様なので、それもついでにやってみた</p><p>まず上記のプロジェクトをgitリポジトリにぶっこんでおいて</p><p><img src="/images/2014/04/201404281330_1.jpg" class="img-fluid" alt="image" /></p><p>んな感じでビルドプロジェクトでgitリポジトリを設定しておく。でビルドするにあたっては</p><pre class="line-numbers"><code class="language-">./gradlew clean test connectedAndroidTest
-</code></pre><p>的な感じのビルドスクリプトでシェルスクリプト実行で上記を指定すれば良い。もしくはGradle Pluginがあるのでそれを使ってビルドする等の方法も取れる。もしgradlewが無いような場合等はこっちの方法を取れば良いはず</p><p>でなんだかんだで設定してビルドすると</p><p><img src="/images/2014/04/201404281330_2.jpg" class="img-fluid" alt="image" /></p><p>っていうようにJenkinsでandroidなプロジェクトのビルドが出来るようになると</p>
+</code></pre>
+<p>あとは普通に</p>
+<pre class="line-numbers"><code class="language-">gradle clean test connectedAndroidTest
+</code></pre>
+<p>で動かせば良い。testでコケるとconnectedAndroidTestまでは作用しない</p>
+
+<p>んまぁてな感じでgradle-android-test-pluginを使いつつのrobolectricテスト及びUIテストを動かすのも出来るって事で</p>
+
+<p>ちなみにandroidのgradle build toolsのバージョンが最近のだとconnectedInstrumentTestではなくconnectedAndroidTestになっているので(instrumentTest Configurationも無い)</p>
+<h4>余談: Jenkinsでビルドしよう</h4>
+<p>前述した通りにgradle wrapperを使えば簡単にJenkins側でビルドする事も出来る模様なので、それもついでにやってみた</p>
+
+<p>まず上記のプロジェクトをgitリポジトリにぶっこんでおいて</p>
+
+<p><img src="/images/2014/04/201404281330_1.jpg" class="img-fluid" alt="image" /></p>
+
+<p>んな感じでビルドプロジェクトでgitリポジトリを設定しておく。でビルドするにあたっては</p>
+<pre class="line-numbers"><code class="language-">./gradlew clean test connectedAndroidTest
+</code></pre>
+<p>的な感じのビルドスクリプトでシェルスクリプト実行で上記を指定すれば良い。もしくはGradle Pluginがあるのでそれを使ってビルドする等の方法も取れる。もしgradlewが無いような場合等はこっちの方法を取れば良いはず</p>
+
+<p>でなんだかんだで設定してビルドすると</p>
+
+<p><img src="/images/2014/04/201404281330_2.jpg" class="img-fluid" alt="image" /></p>
+
+<p>っていうようにJenkinsでandroidなプロジェクトのビルドが出来るようになると</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -284,7 +320,7 @@ androidTest {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -305,9 +341,6 @@ androidTest {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -420,7 +453,7 @@ androidTest {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -443,20 +476,20 @@ androidTest {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -466,13 +499,15 @@ androidTest {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("38e2499d1a64c045b2d7dbb001c088742f7173cd");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-10-08T00:00:00+00:00">
+                <time datetime="2013-10-08 00:00:00 +0900">
                   <a href="/archives/2013/10">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,9 +79,14 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["angular.jsなプロジェクトを作る", "Railsプロジェクトを作る"]-->
-                <p>何やらRailsを使っててJavaScriptとかをgemとかで配布してRailsプロジェクトに組み込んだりするっていうのがあったりするわけで。例えばTwitter BootstrapのCSSとかJSとかをGemfileにそういうgemを定義する事でサクッと出来るっつー訳。でその仕組み的なのがRails assets pipelineっていうのかなと、これCoffeeScriptとかならコンパイルして使えるようにする事も出来るらしいとの事(今回はやらないけど)</p><p>とりあえずこの仕組みを使ってangular.jsなプロジェクトを別にしてRailsプロジェクトに組み込むっていう事をしてみる</p><h4>angular.jsなプロジェクトを作る</h4><pre class="line-numbers"><code class="language-">bundle gem sample-ui-rails
-</code></pre><p>的な感じでプロジェクトを作る。やると何やらsample-ui-rails.gemspecなりが作られる訳で。でlib/sample/ui/rails.rbがあるので</p><pre class="line-numbers"><code class="language-rb">require &quot;sample/ui/rails/version&quot;
+                <!--[&quot;angular.jsなプロジェクトを作る&quot;, &quot;Railsプロジェクトを作る&quot;]-->
+                <p>何やらRailsを使っててJavaScriptとかをgemとかで配布してRailsプロジェクトに組み込んだりするっていうのがあったりするわけで。例えばTwitter BootstrapのCSSとかJSとかをGemfileにそういうgemを定義する事でサクッと出来るっつー訳。でその仕組み的なのがRails assets pipelineっていうのかなと、これCoffeeScriptとかならコンパイルして使えるようにする事も出来るらしいとの事(今回はやらないけど)</p>
+
+<p>とりあえずこの仕組みを使ってangular.jsなプロジェクトを別にしてRailsプロジェクトに組み込むっていう事をしてみる</p>
+<h4>angular.jsなプロジェクトを作る</h4><pre class="line-numbers"><code class="language-">bundle gem sample-ui-rails
+</code></pre>
+<p>的な感じでプロジェクトを作る。やると何やらsample-ui-rails.gemspecなりが作られる訳で。でlib/sample/ui/rails.rbがあるので</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;sample/ui/rails/version&quot;
 
 module Sample
   module Ui
@@ -91,18 +97,24 @@ module Sample
     end
   end
 end
-</code></pre><p>的な感じでちょいと修正しておく。でJavaScriptだとかCSSとかを提供したい場合には</p>
+</code></pre>
+<p>的な感じでちょいと修正しておく。でJavaScriptだとかCSSとかを提供したい場合には</p>
+
 <ul>
 <li>  JavaScript: vendor/assets/javascripts</li>
 <li>  CSS: vendor/assets/stylesheets</li>
 </ul>
-<p>におけば良い。という事でangular.jsなコントローラーなJSを書いて上記のルールに沿った方式な所は配置する</p><pre class="line-numbers"><code class="language-js">var SampleController = function($scope, $http) {
+
+<p>におけば良い。という事でangular.jsなコントローラーなJSを書いて上記のルールに沿った方式な所は配置する</p>
+<pre class="line-numbers"><code class="language-js">var SampleController = function($scope, $http) {
   $http.get(&quot;/sample/index&quot;)
     .success(function(data) {
       $scope.samples = data;
     });
 };
-</code></pre><p>んまぁテストも書きましょうかって事でkarma initでkarma.conf.jsを作る</p><pre class="line-numbers"><code class="language-js">// Karma configuration
+</code></pre>
+<p>んまぁテストも書きましょうかって事でkarma initでkarma.conf.jsを作る</p>
+<pre class="line-numbers"><code class="language-js">// Karma configuration
 // Generated on Tue Oct 08 2013 05:21:20 GMT+0900 (JST)
 
 module.exports = function(config) {
@@ -171,7 +183,9 @@ module.exports = function(config) {
     singleRun: false
   });
 };
-</code></pre><p>angular-mocks.jsはangular.js公式なやつに入ってるのでコピペして持ってくる。んでテスト書く</p><pre class="line-numbers"><code class="language-js">describe(&quot;SampleController&quot;, function() {
+</code></pre>
+<p>angular-mocks.jsはangular.js公式なやつに入ってるのでコピペして持ってくる。んでテスト書く</p>
+<pre class="line-numbers"><code class="language-js">describe(&quot;SampleController&quot;, function() {
 
   var $_httpBackend, scope, controller;
 
@@ -198,30 +212,44 @@ module.exports = function(config) {
     expect(scope.samples.length).toEqual(1);
   });
 });
-</code></pre><p>karma startなりで起動してテスト実行。あとはこのプロジェクトをRailsプロジェクトで参照してコピペとかする事無く利用できるようにと</p><h4>Railsプロジェクトを作る</h4><pre class="line-numbers"><code class="language-">rails new sample
-</code></pre><p>で、Gemfileにangularjs-railsと上記で作ったプロジェクトの参照を追加する</p><pre class="line-numbers"><code class="language-rb">gem &quot;angularjs-rails&quot;
+</code></pre>
+<p>karma startなりで起動してテスト実行。あとはこのプロジェクトをRailsプロジェクトで参照してコピペとかする事無く利用できるようにと</p>
+<h4>Railsプロジェクトを作る</h4><pre class="line-numbers"><code class="language-">rails new sample
+</code></pre>
+<p>で、Gemfileにangularjs-railsと上記で作ったプロジェクトの参照を追加する</p>
+<pre class="line-numbers"><code class="language-rb">gem &quot;angularjs-rails&quot;
 gem &quot;sample-ui-rails&quot;, :path =&gt; &quot;/path/to/sample-ui-rails-project&quot;
-</code></pre><p>でこれだけじゃスクリプトとか参照してくれないので、app/assets/javascripts/application.jsに追加する</p><pre class="line-numbers"><code class="language-">//= require jquery
+</code></pre>
+<p>でこれだけじゃスクリプトとか参照してくれないので、app/assets/javascripts/application.jsに追加する</p>
+<pre class="line-numbers"><code class="language-">//= require jquery
 //= require jquery_ujs
 //= require_tree .
 
 // 以降追加
 //= require angular
 //= require sample
-</code></pre><p>あとはビューとかで</p><p><code>html&lt;div ng-controller=&quot;SampleController&quot;&gt;
-  &lt;ul&gt;
-    &lt;li ng-repeat=&quot;sample in samples&quot;&gt;
-      &lt;span ng-bind-template=&quot;{% raw %}{{sample.name}}{% endraw %}&quot;&gt;&lt;/span&gt;
-    &lt;/li&gt;
-  &lt;/ul&gt;
-&lt;/div&gt;
-</code></p><p>的な事やってみて確認。書いてないけどコントローラーではrespond_toとかで(ry</p>
+</code></pre>
+<p>あとはビューとかで</p>
+
+<p><code>html&lt;div ng-controller=&quot;SampleController&quot;&gt;<br>
+  &lt;ul&gt;<br>
+    &lt;li ng-repeat=&quot;sample in samples&quot;&gt;<br>
+      &lt;span ng-bind-template=&quot;{% raw %}{{sample.name}}{% endraw %}&quot;&gt;&lt;/span&gt;<br>
+    &lt;/li&gt;<br>
+  &lt;/ul&gt;<br>
+&lt;/div&gt;<br>
+</code></p>
+
+<p>的な事やってみて確認。書いてないけどコントローラーではrespond_toとかで(ry</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/10/html5-canvas-rendering-chart.html">&lt;&nbsp;&lt;canvas&gt;でチャートを出力する</a>
+            <a class="float-start box-link" href="/2013/10/html5-canvas-rendering-chart.html">&lt;&nbsp;&amp;lt;canvas&amp;gt;でチャートを出力する</a>
             <!-- prev post -->
             <a class="float-end box-link" href="/2013/10/struts2-16-modeldriven.html">Struts2をやってみる (16) - ModelDriven -&nbsp;&gt;</a>
           </div>
@@ -307,7 +335,7 @@ gem &quot;sample-ui-rails&quot;, :path =&gt; &quot;/path/to/sample-ui-rails-proj
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -328,9 +356,6 @@ gem &quot;sample-ui-rails&quot;, :path =&gt; &quot;/path/to/sample-ui-rails-proj
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -443,7 +468,7 @@ gem &quot;sample-ui-rails&quot;, :path =&gt; &quot;/path/to/sample-ui-rails-proj
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -466,20 +491,20 @@ gem &quot;sample-ui-rails&quot;, :path =&gt; &quot;/path/to/sample-ui-rails-proj
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -489,13 +514,15 @@ gem &quot;sample-ui-rails&quot;, :path =&gt; &quot;/path/to/sample-ui-rails-proj
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("a0668f136cd75b10737ae733a24682249985b2e8");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

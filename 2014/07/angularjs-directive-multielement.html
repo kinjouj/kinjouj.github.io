@@ -11,17 +11,17 @@
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="```html
-&lt;!DOCTYPE html&gt;
-&lt;html ng-app=&quot;sample&quot;&gt;
-  &lt;head&gt;
-    &lt;script src=&quot;https://code.angularjs.org/1.3.0-beta.16/angular.js&quot;&gt;&lt;/script&gt;
-    &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
-  &lt;/head&gt;
-  &lt;body ng-controller=&quot;SampleCtrl&quot;&gt;
-    &lt;div directive1-start&gt;&lt;/div&gt;
-    &lt;div directive1-end&gt;&lt;/div&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
+&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html ng-app=&amp;quot;sample&amp;quot;&amp;gt;
+  &amp;lt;head&amp;gt;
+    &amp;lt;script src=&amp;quot;https://code.angularjs.org/1.3.0-beta.16/angular.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
+    &amp;lt;script src=&amp;quot;app.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
+  &amp;lt;/head&amp;gt;
+  &amp;lt;body ng-controller=&amp;quot;SampleCtrl&amp;quot;&amp;gt;
+    &amp;lt;div directive1-start&amp;gt;&amp;lt;/div&amp;gt;
+    &amp;lt;div directive1-end&amp;gt;&amp;lt;/div&amp;gt;
+  &amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
 ```" />
     <title>directiveのmultiElement - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/07/rails-concerns.html" />
@@ -30,6 +30,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -70,7 +71,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-07-25T00:00:00+00:00">
+                <time datetime="2014-07-25 00:00:00 +0900">
                   <a href="/archives/2014/07">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -101,7 +102,9 @@
     &lt;div directive1-end&gt;&lt;/div&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>みたいなのがあった場合において</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
+</code></pre>
+<p>みたいなのがあった場合において</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
   .directive(&quot;directive1&quot;, function() {
     return {
       link: function(scope, element, attrs) {
@@ -111,7 +114,13 @@
   })
   .controller(&quot;SampleCtrl&quot;, function() {
   });
-</code></pre><p>っていう事になるらしい。書いてる通りlinkで指定されてるところは処理されない</p><p>なぜかというと、directiveを同一スコープ?を複数処理する場合においてはmultiElementオプションを設定しなければ処理されないようになるらしい。ちなみにこれ 1.3.x系(現時点ではまだベータ版)ので動かしているが1.2.x系を使えば普通に動く</p><p>つまり今後そういうdirectiveを書く要件があるような場合においては</p><pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
+</code></pre>
+<p>っていう事になるらしい。書いてる通りlinkで指定されてるところは処理されない</p>
+
+<p>なぜかというと、directiveを同一スコープ?を複数処理する場合においてはmultiElementオプションを設定しなければ処理されないようになるらしい。ちなみにこれ 1.3.x系(現時点ではまだベータ版)ので動かしているが1.2.x系を使えば普通に動く</p>
+
+<p>つまり今後そういうdirectiveを書く要件があるような場合においては</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
   .directive(&quot;directive1&quot;, function() {
     return {
       multiElement: true,
@@ -121,7 +130,15 @@
   })
   .controller(&quot;SampleCtrl&quot;, function() {
   });
-</code></pre><p>というようにmultiElementの設定をしないといけない模様</p><p>詳しいことは <a href="https://github.com/angular/angular.js/commit/e8066c4b4ce11496b0d8f39e41b4d753048bca2d" target="_blank" rel="noopener noreferrer">https://github.com/angular/angular.js/commit/e8066c4b4ce11496b0d8f39e41b4d753048bca2d</a> を見るべし(公式ドキュメントには記載されていない?)</p><p>まぁそういう風な仕様の変更がある模様なのでメモ</p>
+</code></pre>
+<p>というようにmultiElementの設定をしないといけない模様</p>
+
+<p>詳しいことは <a href="https://github.com/angular/angular.js/commit/e8066c4b4ce11496b0d8f39e41b4d753048bca2d">https://github.com/angular/angular.js/commit/e8066c4b4ce11496b0d8f39e41b4d753048bca2d</a> を見るべし(公式ドキュメントには記載されていない?)</p>
+
+<p>まぁそういう風な仕様の変更がある模様なのでメモ</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -213,7 +230,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -234,9 +251,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -349,7 +363,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -372,20 +386,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -395,13 +409,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("4b42a36cd91375e12aee41ccda9d87ba65c5dfdd");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

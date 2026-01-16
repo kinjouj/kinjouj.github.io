@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="更にドキュメントよみを進めてみる。今回はDBRefに関して" />
     <title>mongodbを使ってみる (5) - DBRef/DBPointerに関して - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-4-index-2.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-3-index.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-6-findandmodify.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/01/mongodb-5-dbref-dbpointer.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-16T00:00:00+00:00">
+                <time datetime="2013-01-16 00:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,12 +78,19 @@
               </p>
               <div class="post-content">
                 <!--[]-->
-                <p>更にドキュメントよみを進めてみる。今回はDBRefに関して</p><p>例えばドキュメントから別のドキュメントのデータを参照したい場合にどうするかって話なんですが、DBRefを使えば一応そういった事も出来る模様。言うよりやれ論でとりあえずやってみる</p><pre class="line-numbers"><code class="language-js">db.samples.tags.save({ name: &quot;テスト&quot; })
-</code></pre><p>っていうのをやると_idが自動で付く。でその値は<span style="color: red">50f5370e85ac77daf3dd4bfb</span>っていう感じになってるとする。でそれを別のデータから参照したい場合には</p><pre class="line-numbers"><code class="language-js">db.samples.entry.save({
+                <p>更にドキュメントよみを進めてみる。今回はDBRefに関して</p>
+
+<p>例えばドキュメントから別のドキュメントのデータを参照したい場合にどうするかって話なんですが、DBRefを使えば一応そういった事も出来る模様。言うよりやれ論でとりあえずやってみる</p>
+<pre class="line-numbers"><code class="language-js">db.samples.tags.save({ name: &quot;テスト&quot; })
+</code></pre>
+<p>っていうのをやると_idが自動で付く。でその値は<span style="color: red">50f5370e85ac77daf3dd4bfb</span>っていう感じになってるとする。でそれを別のデータから参照したい場合には</p>
+<pre class="line-numbers"><code class="language-js">db.samples.entry.save({
   name: &quot;Test&quot;,
   tag: new DBRef(&quot;samples.tags&quot;, ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;))
 })
-</code></pre><p>という感じでsaveする。んじゃとりあえずfindしてみると</p><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>という感じでsaveする。んじゃとりあえずfindしてみると</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;_id&quot; : ObjectId(&quot;50f5379785ac77daf3dd4bfd&quot;),
   &quot;name&quot; : &quot;Test&quot;,
   &quot;tag&quot; : {
@@ -90,17 +98,31 @@
     &quot;$id&quot; : ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;)
   }
 }
-</code></pre><p>っていう結果になる。まぁDBRefとしてsaveしなくても上記のように$refと$idを持つ連想配列型を作れば参照できる模様。で$ref自体はあくまでコレクションからの名前なので、今回<span style="color: red">db.samples.tags</span>っていうのを参照したいのでsamples.tagsで指定しなければならないような感じ。$idは言わなくてもわかるとおもうので(ry</p><p>んでもって</p><pre class="line-numbers"><code class="language-js">db.samples.entry.findOne().tag
+</code></pre>
+<p>っていう結果になる。まぁDBRefとしてsaveしなくても上記のように$refと$idを持つ連想配列型を作れば参照できる模様。で$ref自体はあくまでコレクションからの名前なので、今回<span style="color: red">db.samples.tags</span>っていうのを参照したいのでsamples.tagsで指定しなければならないような感じ。$idは言わなくてもわかるとおもうので(ry</p>
+
+<p>んでもって</p>
+<pre class="line-numbers"><code class="language-js">db.samples.entry.findOne().tag
 // 出力: { &quot;$ref&quot; : &quot;samples.tags&quot;, &quot;$id&quot; : ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;) }
 
 db.samples.entry.findOne().tag.fetch()
 // 出力: { &quot;_id&quot; : ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;), &quot;name&quot; : &quot;テスト&quot; }
-</code></pre><p>という感じで、データが参照しているデータを紐づけてフェッチする事が出来る模様。</p><p>でDBRefじゃなくてDBPointerっていうのもある模様</p><pre class="line-numbers"><code class="language-js">db.samples.entry.save({ name: &quot;Test&quot;, tag: new DBPointer(&quot;samples.tags&quot;, ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;) })
-</code></pre><p>DBPointerってのを使うと</p><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>という感じで、データが参照しているデータを紐づけてフェッチする事が出来る模様。</p>
+
+<p>でDBRefじゃなくてDBPointerっていうのもある模様</p>
+<pre class="line-numbers"><code class="language-js">db.samples.entry.save({ name: &quot;Test&quot;, tag: new DBPointer(&quot;samples.tags&quot;, ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;) })
+</code></pre>
+<p>DBPointerってのを使うと</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;ns&quot;: &quot;samples.tags&quot;,
   &quot;id&quot;: ObjectId(&quot;50f5370e85ac77daf3dd4bfb&quot;)
 }
-</code></pre><p>っていうような形式になる模様。DBRefと同様な方式でフェッチ出来る模様</p>
+</code></pre>
+<p>っていうような形式になる模様。DBRefと同様な方式でフェッチ出来る模様</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -108,7 +130,7 @@ db.samples.entry.findOne().tag.fetch()
             <!-- next post -->
             <a class="float-start box-link" href="/2013/01/mongodb-6-findandmodify.html">&lt;&nbsp;mongodbを使ってみる (6) - findAndModify -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/01/mongodb-4-index-2.html">mongodbを使ってみる (4) - インデックスに関して (2) -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/01/mongodb-3-index.html">mongodbを使ってみる (3) - インデックスに関して -&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -192,7 +214,7 @@ db.samples.entry.findOne().tag.fetch()
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -213,9 +235,6 @@ db.samples.entry.findOne().tag.fetch()
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -328,7 +347,7 @@ db.samples.entry.findOne().tag.fetch()
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -351,20 +370,20 @@ db.samples.entry.findOne().tag.fetch()
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -374,13 +393,15 @@ db.samples.entry.findOne().tag.fetch()
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("2a185b6d3364562b7c816b2a601a741d100d336b");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

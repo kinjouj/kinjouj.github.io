@@ -10,144 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="今まで
-
-
-[angular.jsのkarmaを使ったテスト][1]  
-[protractorを使ったangular.jsのe2eテスト][2]
-
-
-っていうのをやってたけど、angular-mocks.jsを使う事での単体テストすることも可能な模様なので色々整理する辺りな所としてやってみた
-
-
-
-
-
-#### sample.js
-
-
-```js
-var SampleController = (function() {
-
-  function SampleController($scope, $http) {
-    $http.get(&quot;/samples&quot;).success(function(samples) {
-      $scope.samples = samples;
-    });
-  };
-
-  return SampleController;
-
-})();
-```
-
-
-っていう感じでangular.jsの$httpを使ってAPI呼び出しなりをしてデータを取得後$scopeに突っ込むという単純なangular.jsのコントローラーを定義
-
-
-まぁこれを単体テストしましょうってことなので(ry
-
-
-#### mocha.html
-
-
-テストにmochaを使う。なのでテストランナーなHTMLを作る
-
-
-```html
-&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;meta charset=&quot;utf-8&quot; /&gt;
-    &lt;title&gt;Mocha&lt;/title&gt;
-    &lt;link rel=&quot;stylesheet&quot; href=&quot;mocha.css&quot; /&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;mocha.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;chai.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot;&gt;
-      chai.should();
-
-      var expect = chai.expect;
-      mocha.setup({ &quot;ui&quot;: &quot;bdd&quot;, &quot;timeout&quot;: 3000, &quot;ignoreLeaks&quot;: false });
-    &lt;/script&gt;
-
-    &lt;!-- 上記コントローラーなJS --&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;sample.js&quot;&gt;&lt;/script&gt;
-  &lt;/head&gt;
-  &lt;body style=&quot;background: #bbb&quot;&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular-mocks.js&quot;&gt;&lt;/script&gt;
-    &lt;!-- テストスペック --&gt;
-    &lt;script src=&quot;test.js&quot;&gt;&lt;/script&gt;
-    &lt;div id=&quot;mocha&quot;&gt;&lt;/div&gt;
-    &lt;script&gt;
-        mocha.run();
-    &lt;/script&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-```
-
-
-な感じで。これでテストスペック上で&lt;span style=&quot;color: red&quot;&gt;inject&lt;/span&gt;等が使えるのでこれを利用して$httpを利用して返されるレスポンスをテストしたり出来る
-
-
-#### test.js
-
-
-```js
-describe(&quot;Sample&quot;, function() {
-
-  var $controller;
-  var $httpBackend;
-
-  function createController(scope) {
-    return $controller(&quot;SampleController&quot;, { &quot;$scope&quot;: scope });
-  }
-
-  beforeEach(
-    inject(function($injector) {
-        $controller = $injector.get(&quot;$controller&quot;);
-        $httpBackend = $injector.get(&quot;$httpBackend&quot;);
-        $httpBackend
-          .when(&quot;GET&quot;, &quot;/samples&quot;)
-          .respond([{ name: &quot;hoge&quot; }, { name: &quot;fuga&quot; }]);
-    })
-  );
-
-  afterEach(function() {
-    // flushで呼ばれるので必要ないのでは?
-    // リクエスト発生してないのにflushするとthrow new Errorされる
-    // $httpBackend.verifyNoOutstandingExpectation();
-
-    // flushしてないとthrow new Errorされる
-    $httpBackend.verifyNoOutstandingRequest();
-  });
-
-  it(&quot;constructor&quot;, function() {
-    var scope = {};
-    var sample = createController(scope);
-    $httpBackend.flush();
-
-    expect(scope.samples).not.to.be.empty;
-    // 実際に返される値数は2 (when -&gt; respondで返してる配列の要素数が2だから)
-    expect(scope.samples).to.have.length(3);
-  });
-});
-```
-
-
-っていう感じで。あとはテストランナーなHTMLを普通にブラウザで開けば良い。それをやると
-
-
-![](/images/2014/03/201403271433.jpg)
-
-
-っていうような結果が得られる。
-
-
-んまぁangular.jsなコントローラーとかの単体テストをする場合とかでangular.jsなproviderやserviceが必要になる要件な場合とかだとangular-mocks.jsを使う事で擬似オブジェクトを利用したテストを利用できるっていう感じかと
-
-
- [1]: /angularjs-karma-e2e-testing.html
- [2]: /angularjs-protractor-e2e-testing.html" />
+    <meta name="description" content="今まで" />
     <title>angular.jsをやってみる (12) - angular-mocks.jsを使ったテスト - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/03/angularjs-11-interval.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/03/angularjs-13-sce-ng-sanitize.html" />
@@ -155,6 +18,7 @@ describe(&quot;Sample&quot;, function() {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -195,7 +59,7 @@ describe(&quot;Sample&quot;, function() {
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-03-27T00:00:00+00:00">
+                <time datetime="2014-03-27 00:00:00 +0900">
                   <a href="/archives/2014/03">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -214,9 +78,14 @@ describe(&quot;Sample&quot;, function() {
                 </span>
               </p>
               <div class="post-content">
-                <!--["sample.js", "mocha.html", "test.js"]-->
-                <p>今まで</p><p>[angular.jsのkarmaを使ったテスト][1]<br>
-[protractorを使ったangular.jsのe2eテスト][2]</p><p>っていうのをやってたけど、angular-mocks.jsを使う事での単体テストすることも可能な模様なので色々整理する辺りな所としてやってみた</p><h4>sample.js</h4><pre class="line-numbers"><code class="language-js">var SampleController = (function() {
+                <!--[&quot;sample.js&quot;, &quot;mocha.html&quot;, &quot;test.js&quot;]-->
+                <p>今まで</p>
+
+<p>[angular.jsのkarmaを使ったテスト][1]<br><br>
+[protractorを使ったangular.jsのe2eテスト][2]</p>
+
+<p>っていうのをやってたけど、angular-mocks.jsを使う事での単体テストすることも可能な模様なので色々整理する辺りな所としてやってみた</p>
+<h4>sample.js</h4><pre class="line-numbers"><code class="language-js">var SampleController = (function() {
 
   function SampleController($scope, $http) {
     $http.get(&quot;/samples&quot;).success(function(samples) {
@@ -227,7 +96,13 @@ describe(&quot;Sample&quot;, function() {
   return SampleController;
 
 })();
-</code></pre><p>っていう感じでangular.jsの$httpを使ってAPI呼び出しなりをしてデータを取得後$scopeに突っ込むという単純なangular.jsのコントローラーを定義</p><p>まぁこれを単体テストしましょうってことなので(ry</p><h4>mocha.html</h4><p>テストにmochaを使う。なのでテストランナーなHTMLを作る</p><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+</code></pre>
+<p>っていう感じでangular.jsの$httpを使ってAPI呼び出しなりをしてデータを取得後$scopeに突っ込むという単純なangular.jsのコントローラーを定義</p>
+
+<p>まぁこれを単体テストしましょうってことなので(ry</p>
+<h4>mocha.html</h4>
+<p>テストにmochaを使う。なのでテストランナーなHTMLを作る</p>
+<pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;meta charset=&quot;utf-8&quot; /&gt;
@@ -256,7 +131,9 @@ describe(&quot;Sample&quot;, function() {
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>な感じで。これでテストスペック上で<span style="color: red">inject</span>等が使えるのでこれを利用して$httpを利用して返されるレスポンスをテストしたり出来る</p><h4>test.js</h4><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
+</code></pre>
+<p>な感じで。これでテストスペック上で<span style="color: red">inject</span>等が使えるのでこれを利用して$httpを利用して返されるレスポンスをテストしたり出来る</p>
+<h4>test.js</h4><pre class="line-numbers"><code class="language-js">describe(&quot;Sample&quot;, function() {
 
   var $controller;
   var $httpBackend;
@@ -294,8 +171,20 @@ describe(&quot;Sample&quot;, function() {
     expect(scope.samples).to.have.length(3);
   });
 });
-</code></pre><p>っていう感じで。あとはテストランナーなHTMLを普通にブラウザで開けば良い。それをやると</p><p><img src="/images/2014/03/201403271433.jpg" class="img-fluid" alt="image" /></p><p>っていうような結果が得られる。</p><p>んまぁangular.jsなコントローラーとかの単体テストをする場合とかでangular.jsなproviderやserviceが必要になる要件な場合とかだとangular-mocks.jsを使う事で擬似オブジェクトを利用したテストを利用できるっていう感じかと</p><p> [1]: /angularjs-karma-e2e-testing.html
+</code></pre>
+<p>っていう感じで。あとはテストランナーなHTMLを普通にブラウザで開けば良い。それをやると</p>
+
+<p><img src="/images/2014/03/201403271433.jpg" class="img-fluid" alt="image" /></p>
+
+<p>っていうような結果が得られる。</p>
+
+<p>んまぁangular.jsなコントローラーとかの単体テストをする場合とかでangular.jsなproviderやserviceが必要になる要件な場合とかだとangular-mocks.jsを使う事で擬似オブジェクトを利用したテストを利用できるっていう感じかと</p>
+
+<p>[1]: /angularjs-karma-e2e-testing.html<br>
  [2]: /angularjs-protractor-e2e-testing.html</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -387,7 +276,7 @@ describe(&quot;Sample&quot;, function() {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -408,9 +297,6 @@ describe(&quot;Sample&quot;, function() {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -523,7 +409,7 @@ describe(&quot;Sample&quot;, function() {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -546,20 +432,20 @@ describe(&quot;Sample&quot;, function() {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -569,13 +455,15 @@ describe(&quot;Sample&quot;, function() {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("76c495738bc08dd67cbfb57ebb181e207c023c51");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

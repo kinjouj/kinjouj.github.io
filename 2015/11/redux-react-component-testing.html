@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-11-10T19:59:35+09:00">
+                <time datetime="2015-11-10 19:59:35 +0900">
                   <a href="/archives/2015/11">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -78,8 +79,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["test/components/TodoInput-test.js", "余談: React Componentのstateをテストする場合"]-->
-                <p>ドハマりしてたけど結局ドキュメントに書いてるっていうオチなメモ</p><p>※詳しい事は記事末尾にある参考を参照</p><h3>src/components/TodoInput.jsx</h3><pre class="line-numbers"><code class="language-javascript">import React, { Component, PropTypes } from &quot;react&quot;;
+                <!--[&quot;test/components/TodoInput-test.js&quot;, &quot;余談: React Componentのstateをテストする場合&quot;]-->
+                <p>ドハマりしてたけど結局ドキュメントに書いてるっていうオチなメモ</p>
+
+<p>※詳しい事は記事末尾にある参考を参照</p>
+<h3>src/components/TodoInput.jsx</h3><pre class="line-numbers"><code class="language-javascript">import React, { Component, PropTypes } from &quot;react&quot;;
 import LinkedStateMixin from &quot;react-addons-linked-state-mixin&quot;;
 import { connect } from &quot;react-redux&quot;;
 
@@ -106,7 +110,9 @@ class TodoInput extends Component {
 }
 
 export default connect()(TodoInput);
-</code></pre><p>あくまでReactの事はおいといてreduxのconnectを使ってるコンポーネントをテストする</p><h4>test/components/TodoInput-test.js</h4><pre class="line-numbers"><code class="language-javascript">import React from &quot;react&quot;;
+</code></pre>
+<p>あくまでReactの事はおいといてreduxのconnectを使ってるコンポーネントをテストする</p>
+<h4>test/components/TodoInput-test.js</h4><pre class="line-numbers"><code class="language-javascript">import React from &quot;react&quot;;
 import ReactDOM from &quot;react-dom&quot;;
 import ReactTestUtils from &quot;react-addons-test-utils&quot;;
 //import { createStore } from &quot;redux&quot;;
@@ -133,19 +139,35 @@ describe(&quot;TodoInput&quot;, () =&gt; {
     // output: &lt;input type=&quot;text&quot; data-reactid=&quot;.0.0&quot;&gt;&lt;button data-reactid=&quot;.0.1&quot;&gt;add&lt;/button&gt;
   });
 });
-</code></pre><p>っていうようにconnectを使ってるComponentをテストする場合、そのコンポーネント自身にstoreを指定する必要がある模様</p><p>又、テストを開始する際にdocument等の依存が解決出来ないのでtest/setup.jsを</p><pre class="line-numbers"><code class="language-javascript">import { jsdom } from &#39;jsdom&#39;
+</code></pre>
+<p>っていうようにconnectを使ってるComponentをテストする場合、そのコンポーネント自身にstoreを指定する必要がある模様</p>
+
+<p>又、テストを開始する際にdocument等の依存が解決出来ないのでtest/setup.jsを</p>
+<pre class="line-numbers"><code class="language-javascript">import { jsdom } from &#39;jsdom&#39;
 
 global.document = jsdom(&#39;&lt;!doctype html&gt;&lt;html&gt;&lt;body&gt;&lt;/body&gt;&lt;/html&gt;&#39;)
 global.window = document.defaultView
 global.navigator = global.window.navigator
-</code></pre><p>を作っておく必要がある</p><p>てな感じでreduxを使うReact Componentのテストを行う際にはstoreを指定する必要があるって事で終わり。一応、まだテストに関するドキュメントを制覇してないので読みつつ色々まとめる予定</p><p>参考: <a href="http://redux.js.org/docs/recipes/WritingTests.html" target="_blank" rel="noopener noreferrer">http://redux.js.org/docs/recipes/WritingTests.html</a></p><h4>余談: React Componentのstateをテストする場合</h4><p>上記のReact ComponentではlinkStateを使ってstateに状態を持つ事をやってる。そこがただしく作用しているかっていう所までチェックしたい場合、上記のテストコードの末尾に</p><pre class="line-numbers"><code class="language-javascript">expect(todo.state.text).toEqual(&quot;hoge&quot;);
-</code></pre><p>とやっても出来ない。なぜかというとconnectされたReact Componentはreact-reduxのconnectのConnectコンポーネントに内包される形になるので上記のtodo変数自体はTodoInputではなくConnectになる。もちろんTodoInput内でのsetStateはTodoInput上で作用するので問題無いがテスト上ではそのstateにアクセスする事が出来ない。それをやるには</p>
+</code></pre>
+<p>を作っておく必要がある</p>
+
+<p>てな感じでreduxを使うReact Componentのテストを行う際にはstoreを指定する必要があるって事で終わり。一応、まだテストに関するドキュメントを制覇してないので読みつつ色々まとめる予定</p>
+
+<p>参考: <a href="http://redux.js.org/docs/recipes/WritingTests.html">http://redux.js.org/docs/recipes/WritingTests.html</a></p>
+<h4>余談: React Componentのstateをテストする場合</h4>
+<p>上記のReact ComponentではlinkStateを使ってstateに状態を持つ事をやってる。そこがただしく作用しているかっていう所までチェックしたい場合、上記のテストコードの末尾に</p>
+<pre class="line-numbers"><code class="language-javascript">expect(todo.state.text).toEqual(&quot;hoge&quot;);
+</code></pre>
+<p>とやっても出来ない。なぜかというとconnectされたReact Componentはreact-reduxのconnectのConnectコンポーネントに内包される形になるので上記のtodo変数自体はTodoInputではなくConnectになる。もちろんTodoInput内でのsetStateはTodoInput上で作用するので問題無いがテスト上ではそのstateにアクセスする事が出来ない。それをやるには</p>
+
 <ul>
 <li>connectを使うコンポーネントのオプションにwithRef: trueを設定する</li>
 <li>一定の処理後にgetWrappedInstanceメソッドで内包されているComponentのインスタンスを取る</li>
 <li>stateを検証する</li>
 </ul>
-<p>っていうのが必要になる。以下に例を示す</p><pre class="line-numbers"><code class="language-javascript">import React, { Component, PropTypes } from &quot;react&quot;;
+
+<p>っていうのが必要になる。以下に例を示す</p>
+<pre class="line-numbers"><code class="language-javascript">import React, { Component, PropTypes } from &quot;react&quot;;
 import LinkedStateMixin from &quot;react-addons-linked-state-mixin&quot;;
 import { connect } from &quot;react-redux&quot;;
 
@@ -184,7 +206,9 @@ export default connect(
   // これが必要
   { withRef: true }
 )(TodoInput);
-</code></pre><p>んでテストする際には上記で書いたように普通に使ってもこれはConnectクラスに内包されてしまうのでgetWrappedInstanceで取得してからstateをテストする</p><pre class="line-numbers"><code class="language-javascript">import expect from &quot;expect&quot;;
+</code></pre>
+<p>んでテストする際には上記で書いたように普通に使ってもこれはConnectクラスに内包されてしまうのでgetWrappedInstanceで取得してからstateをテストする</p>
+<pre class="line-numbers"><code class="language-javascript">import expect from &quot;expect&quot;;
 import React from &quot;react&quot;;
 import ReactDOM from &quot;react-dom&quot;;
 import ReactTestUtils from &quot;react-addons-test-utils&quot;;
@@ -215,7 +239,13 @@ describe(&quot;TodoInput&quot;, () =&gt; {
     expect(instance.state.text).toEqual(&quot;hoge&quot;);
   });
 });
-</code></pre><p>っていう感じ。現在withRefをテストでのみ作用させるにはReact Component自体を動的にconnectで処理させる方法以外無さそう</p><p>っていう感じで一応出来る</p>
+</code></pre>
+<p>っていう感じ。現在withRefをテストでのみ作用させるにはReact Component自体を動的にconnectで処理させる方法以外無さそう</p>
+
+<p>っていう感じで一応出来る</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -307,7 +337,7 @@ describe(&quot;TodoInput&quot;, () =&gt; {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -328,9 +358,6 @@ describe(&quot;TodoInput&quot;, () =&gt; {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -443,7 +470,7 @@ describe(&quot;TodoInput&quot;, () =&gt; {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -466,20 +493,20 @@ describe(&quot;TodoInput&quot;, () =&gt; {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -489,13 +516,15 @@ describe(&quot;TodoInput&quot;, () =&gt; {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("ebbf6ea9421f131b8c5de20e9c88305eed569a95");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

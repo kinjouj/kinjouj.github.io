@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2025-06-30T09:00:00+09:00">
+                <time datetime="2025-06-30 09:00:00 +0900">
                   <a href="/archives/2025/06">
                   <span class="post-date-year">2025</span>
                   <span class="hyphen">-</span>
@@ -76,9 +77,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["JSONを出力する側", "出力したJSONを利用する側", "DateTimeとかも変換する方法", "まとめ", "余談：create_additionsオプションについて"]-->
+                <!--[&quot;JSONを出力する側&quot;, &quot;出力したJSONを利用する側&quot;, &quot;DateTimeとかも変換する方法&quot;, &quot;まとめ&quot;, &quot;余談：create_additionsオプションについて&quot;]-->
                 <div class="note"><i class="fa-solid fa-circle-exclamation"></i>以下のコードなどでDateTimeとかの時間をちょっといじってあるので整合性が合わないのもあるので注意</div>
-<p>例えば以下のようにオブジェクトをJSONに出力をするとする</p><pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
+
+<p>例えば以下のようにオブジェクトをJSONに出力をするとする</p>
+<pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
 require &quot;date&quot;
 
 class Sample
@@ -98,7 +101,9 @@ end
 puts JSON.generate(
   Sample.new(name: &quot;hoge&quot;, date: DateTime.now)
 )
-</code></pre><p>出力したJSONをファイルに保管しておいて以下のようにロードする</p><pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
+</code></pre>
+<p>出力したJSONをファイルに保管しておいて以下のようにロードする</p>
+<pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
 
 class Sample
   def initialize(params)
@@ -115,7 +120,11 @@ class Sample
 end
 
 sample = JSON.load_file(&quot;sample.json&quot;)
-</code></pre><p>はい。ここで問題！変数sampleのクラスはなんでしょう？答えはかんたんで普通にHashです。</p><p>そこで今回の件！こうやってパースしたりした際にそういうオブジェクトに変換してほしいよねっていうお話なのですがちゃんとそういう仕組みが用意されているのでご紹介しますｗ</p><h4>JSONを出力する側</h4><pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
+</code></pre>
+<p>はい。ここで問題！変数sampleのクラスはなんでしょう？答えはかんたんで普通にHashです。</p>
+
+<p>そこで今回の件！こうやってパースしたりした際にそういうオブジェクトに変換してほしいよねっていうお話なのですがちゃんとそういう仕組みが用意されているのでご紹介しますｗ</p>
+<h4>JSONを出力する側</h4><pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
 require &quot;date&quot;
 
 class Sample
@@ -138,12 +147,16 @@ end
 puts JSON.generate(
   Sample.new(name: &quot;hoge&quot;, date: DateTime.now)
 )
-</code></pre><p>要点は１つのみto_jsonで出力する際に<mark>JSON.create_id</mark>を設定しておくこと。それだけ。ということでこれで出力すると</p><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>要点は１つのみto_jsonで出力する際に<mark>JSON.create_id</mark>を設定しておくこと。それだけ。ということでこれで出力すると</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;json_class&quot;: &quot;Sample&quot;,
   &quot;name&quot;: &quot;hoge&quot;,
   &quot;date&quot;: &quot;2025-06-30T00:00:00+09:00&quot;
 }
-</code></pre><p>というような結果になる。でこれをパースする祭にSampleクラスに変換されてほしいよねって言う話なのでそこもやる</p><h4>出力したJSONを利用する側</h4><pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
+</code></pre>
+<p>というような結果になる。でこれをパースする祭にSampleクラスに変換されてほしいよねって言う話なのでそこもやる</p>
+<h4>出力したJSONを利用する側</h4><pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
 
 class Sample
   attr_reader :name, :date
@@ -163,12 +176,16 @@ pp sample
 
 # OUTPUT
 # #&lt;Sample:0x00007d20eee7e8c0 @date=&quot;2025-06-30T00:00:00+09:00&quot;, @name=&quot;hoge&quot;&gt;
-</code></pre><p>要点は以下の２つ</p>
+</code></pre>
+<p>要点は以下の２つ</p>
+
 <ul>
 <li>json_createのクラスメソッドを定義する。そこでJSONをパースしたものからオブジェクトを生成するようにする</li>
 <li>load_file(or parse)にcreate_additionsを指定する</li>
 </ul>
-<p>ということなんだが上記のソース中のコメントに記載してる結果を見ればわかるが@dateがDateTimeなどに変換されてなくてただの文字列になってるよね。そこもなんとかしようかと↓</p><h4>DateTimeとかも変換する方法</h4><pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
+
+<p>ということなんだが上記のソース中のコメントに記載してる結果を見ればわかるが@dateがDateTimeなどに変換されてなくてただの文字列になってるよね。そこもなんとかしようかと↓</p>
+<h4>DateTimeとかも変換する方法</h4><pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
 require &quot;json/add/core&quot;
 require &quot;date&quot;
 
@@ -192,7 +209,9 @@ end
 puts JSON.generate(
   Sample.new(name: &quot;hoge&quot;, date: DateTime.now)
 )
-</code></pre><p><mark>require &quot;json/add/core</mark>を追加しただけ。これを実行すると</p><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p><mark>require &quot;json/add/core</mark>を追加しただけ。これを実行すると</p>
+<pre class="line-numbers"><code class="language-json">{
   &quot;json_class&quot;: &quot;Sample&quot;,
   &quot;name&quot;: &quot;hoge&quot;,
   &quot;date&quot;: {
@@ -207,7 +226,9 @@ puts JSON.generate(
     &quot;sg&quot;: 2299161.0
   }
 }
-</code></pre><p>というようなJSONが出力される。でこのJSONを解析するには</p><pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
+</code></pre>
+<p>というようなJSONが出力される。でこのJSONを解析するには</p>
+<pre class="line-numbers"><code class="language-ruby">require &quot;json&quot;
 require &quot;json/add/core&quot;
 
 class Sample
@@ -230,13 +251,25 @@ pp sample
 # #&lt;Sample:0x000073c5a9a2f3b8
 # @date= #&lt;DateTime: 2025-06-30T00:00:00+09:00 (省略)&gt;,
 # @name=&quot;hoge&quot;&gt;
-</code></pre><p>生成側と同じく<mark>require <q>json/add/core</q></mark>を追加しただけ。今回はDateTimeだけを変換しているので<mark>json/add/date_time</mark>でも可能。必要だと思うものを指定すればいいと思われる(詳しくは以下のURL参照)</p><p><a href="https://docs.ruby-lang.org/ja/latest/library/json=2fadd=2fcore.html" target="_blank" rel="noopener noreferrer">https://docs.ruby-lang.org/ja/latest/library/json=2fadd=2fcore.html</a></p><h4>まとめ</h4><p>要点をまとめるとRubyからJSONを出力しそれを利用する場合にオブジェクトに変換したりして欲しい場合には</p>
+</code></pre>
+<p>生成側と同じく<mark>require <q>json/add/core</q></mark>を追加しただけ。今回はDateTimeだけを変換しているので<mark>json/add/date_time</mark>でも可能。必要だと思うものを指定すればいいと思われる(詳しくは以下のURL参照)</p>
+
+<p><a href="https://docs.ruby-lang.org/ja/latest/library/json=2fadd=2fcore.html">https://docs.ruby-lang.org/ja/latest/library/json=2fadd=2fcore.html</a></p>
+<h4>まとめ</h4>
+<p>要点をまとめるとRubyからJSONを出力しそれを利用する場合にオブジェクトに変換したりして欲しい場合には</p>
+
 <ul>
 <li>出力するJSONに<mark>JSON.create_id</mark>を設定する。</li>
 <li>パースする側でオブジェクトに変換する<mark>json_create</mark>クラスメソッドを定義する。あと<mark>create_additions</mark>も設定するのを忘れずに</li>
 <li>DateTimeとかも変換してほしいなら<mark>require <q>json/add/core</q></mark>などの拡張ライブラリを使用する</li>
 </ul>
-<p>以上！でもRuby特有な機能だと思うのでどうなんだろなってのはちょっと思うけど内部的になんかやる時にJSONで出力してそれを利用する場合とかには使えるかもね(JSON APIとかには×だと思う)</p><h4>余談：create_additionsオプションについて</h4><p>generateとparse(or load_file)両方にこのオプションあるがgenerateのcreate_additionsはデフォルトがtrueなのに対しparse(or load_file)ではデフォルトがfalseになっている模様なので(ry</p>
+
+<p>以上！でもRuby特有な機能だと思うのでどうなんだろなってのはちょっと思うけど内部的になんかやる時にJSONで出力してそれを利用する場合とかには使えるかもね(JSON APIとかには×だと思う)</p>
+<h4>余談：create_additionsオプションについて</h4>
+<p>generateとparse(or load_file)両方にこのオプションあるがgenerateのcreate_additionsはデフォルトがtrueなのに対しparse(or load_file)ではデフォルトがfalseになっている模様なので(ry</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -328,7 +361,7 @@ pp sample
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -349,9 +382,6 @@ pp sample
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -464,7 +494,7 @@ pp sample
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -487,20 +517,20 @@ pp sample
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -510,13 +540,15 @@ pp sample
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("93e8ef33d0543e91574728a0b7af50affec0ac74");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

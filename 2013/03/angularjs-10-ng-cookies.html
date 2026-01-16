@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;http://docs.angularjs.org/api/ngCookies&gt; を使えばCookie的な利用をする事も出来るらしい。っていう事で使ってみた" />
+    <meta name="description" content="&amp;lt;http://docs.angularjs.org/api/ngCookies&amp;gt; を使えばCookie的な利用をする事も出来るらしい。っていう事で使ってみた" />
     <title>angular.jsをやってみる (10) - ngCookies - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2014/03/development-gradle-plugin-1.html" />
     <link rel="next" href="https://kinjouj.github.io/2014/03/angularjs-11-interval.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-03-26T00:00:00+00:00">
+                <time datetime="2014-03-26 00:00:00 +0900">
                   <a href="/archives/2014/03">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["index.html", "app.js"]-->
-                <p><a href="http://docs.angularjs.org/api/ngCookies" target="_blank" rel="noopener noreferrer">http://docs.angularjs.org/api/ngCookies</a> を使えばCookie的な利用をする事も出来るらしい。っていう事で使ってみた</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+                <!--[&quot;index.html&quot;, &quot;app.js&quot;]-->
+                <p><a href="http://docs.angularjs.org/api/ngCookies">http://docs.angularjs.org/api/ngCookies</a> を使えばCookie的な利用をする事も出来るらしい。っていう事で使ってみた</p>
+<h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html ng-app=&quot;app&quot;&gt;
   &lt;head&gt;
     &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.2/angular.min.js&quot;&gt;&lt;/script&gt;
@@ -90,7 +92,9 @@
     &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>ngCookiesを使うにはangular-cookies.jsを利用するようにしておく</p><h4>app.js</h4><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngRoute&quot;, &quot;ngCookies&quot;])
+</code></pre>
+<p>ngCookiesを使うにはangular-cookies.jsを利用するようにしておく</p>
+<h4>app.js</h4><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [&quot;ngRoute&quot;, &quot;ngCookies&quot;])
   .config(function($routeProvider) {
     $routeProvider
       .when(&quot;/list&quot;, {
@@ -115,7 +119,9 @@
   .controller(&quot;ShowController&quot;, function($cookieStore, $routeParams) {
     $cookieStore.put(&quot;n&quot;, parseInt($routeParams.n));
   });
-</code></pre><p>であとはlist.html側でlastestを参照して前回見たのをCSSでafter contentをする</p><pre class="line-numbers"><code class="language-html">&lt;ul&gt;
+</code></pre>
+<p>であとはlist.html側でlastestを参照して前回見たのをCSSでafter contentをする</p>
+<pre class="line-numbers"><code class="language-html">&lt;ul&gt;
   &lt;li ng-repeat=&quot;entry in entries&quot;&gt;
     &lt;a href=&quot;/#/show/{% raw %}{{entry}}{% endraw %}&quot; ng-class=&quot;{active: entry == lastest}&quot;&gt;link{% raw %}{{entry}}{% endraw %}&lt;/a&gt;
   &lt;/li&gt;
@@ -124,13 +130,23 @@
 .active:after {
   content: &quot;★&quot;;
 }
-</code></pre><p>以上。上記のような事をした場合だと</p>
+</code></pre>
+<p>以上。上記のような事をした場合だと</p>
+
 <ul>
 <li>#/listで一覧を参照する</li>
 <li>#/show/{n}で固定なのを見る。ここでcookieにパラメーターをマークする</li>
 <li>#/listに戻った際にcookieにマークしたパラメーターを参照してマッチするのであればng-classでactiveなCSSクラスをマークする(でその際cookieStore.removeしているのでリロードすると参照はできなくなる)</li>
 </ul>
-<p>っていう事になる。つまり上記のlist.htmlでやってる.active:afterな辺りの★は#/show/{n}から戻ってきた直後は参照されるけど、その後に$cookieStore.removeされてるのでリロードすると参照されなくなる</p><p>んまぁ検証要件が非常に微妙ではあるけれども、コントローラーをまたいで値を共有したりする際とかに使えるんですかねと</p><p>ちなみに関係あるのかは微妙だしangular-cookie.jsのソース見てないけど、Cookieヘッダーのhttponlyがついてる場合とかだとどうなんだろうなと</p>
+
+<p>っていう事になる。つまり上記のlist.htmlでやってる.active:afterな辺りの★は#/show/{n}から戻ってきた直後は参照されるけど、その後に$cookieStore.removeされてるのでリロードすると参照されなくなる</p>
+
+<p>んまぁ検証要件が非常に微妙ではあるけれども、コントローラーをまたいで値を共有したりする際とかに使えるんですかねと</p>
+
+<p>ちなみに関係あるのかは微妙だしangular-cookie.jsのソース見てないけど、Cookieヘッダーのhttponlyがついてる場合とかだとどうなんだろうなと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -222,7 +238,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -243,9 +259,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -358,7 +371,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -381,20 +394,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -404,13 +417,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("c455c483adfffe6fb54cfa2f95834c86303e8257");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

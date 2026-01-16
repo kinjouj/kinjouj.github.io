@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-10-06T16:30:21+09:00">
+                <time datetime="2015-10-06 16:30:21 +0900">
                   <a href="/archives/2015/10">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,23 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["インストール", "リポジトリの作成", "パッケージのデプロイ", "余談: Jenkinsでビルドする場合"]-->
-                <p>gradle(maven)に対応したパッケージ管理のOSSっていうのかね。artifactoryを使ってみた(実際にはgradleとかだけでなくRubyとかのライブラリとかも管理出来るっぽい</p><h4>インストール</h4><p><a href="https://www.jfrog.com/open-source" target="_blank" rel="noopener noreferrer">https://www.jfrog.com/open-source</a> からダウンロード。今回はzipをダウンロード</p><p>そのままでも動かす事出来るんですが、既存するTomcatサーブレットコンテナ内にデプロイしたいのでwebappsにあるartifactory.warを既存するTomcatにデプロイする</p><p>※データベース関係はデフォルトだとderbyを使う模様。色々変える事も出来るみたいだけど今回はパス</p><h4>リポジトリの作成</h4><p>おそらくは作らなくてもパッケージをデプロイする事自体は出来る(libs-release-local等を使えば)。ちなみに作るとこんな感じになる</p><p><img src="/images/2015/10/201510061645_1.png" class="img-fluid" alt="image" /></p><p>んまぁ作らなくてもイケるので今回はlibs-release-localを使う</p><h4>パッケージのデプロイ</h4><p>パッケージのデプロイはgradle pluginを使って行う事が可能</p><pre class="line-numbers"><code class="language-groovy">buildscript {
+                <!--[&quot;インストール&quot;, &quot;リポジトリの作成&quot;, &quot;パッケージのデプロイ&quot;, &quot;余談: Jenkinsでビルドする場合&quot;]-->
+                <p>gradle(maven)に対応したパッケージ管理のOSSっていうのかね。artifactoryを使ってみた(実際にはgradleとかだけでなくRubyとかのライブラリとかも管理出来るっぽい</p>
+<h4>インストール</h4>
+<p><a href="https://www.jfrog.com/open-source">https://www.jfrog.com/open-source</a> からダウンロード。今回はzipをダウンロード</p>
+
+<p>そのままでも動かす事出来るんですが、既存するTomcatサーブレットコンテナ内にデプロイしたいのでwebappsにあるartifactory.warを既存するTomcatにデプロイする</p>
+
+<p>※データベース関係はデフォルトだとderbyを使う模様。色々変える事も出来るみたいだけど今回はパス</p>
+<h4>リポジトリの作成</h4>
+<p>おそらくは作らなくてもパッケージをデプロイする事自体は出来る(libs-release-local等を使えば)。ちなみに作るとこんな感じになる</p>
+
+<p><img src="/images/2015/10/201510061645_1.png" class="img-fluid" alt="image" /></p>
+
+<p>んまぁ作らなくてもイケるので今回はlibs-release-localを使う</p>
+<h4>パッケージのデプロイ</h4>
+<p>パッケージのデプロイはgradle pluginを使って行う事が可能</p>
+<pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         maven {
             url &#39;http://localhost:8080/artifactory/plugins-release&#39;
@@ -136,8 +152,16 @@ publishing {
         }
     }
 }
-</code></pre><p>っていうようにbuild.gradleを定義。artifactory pluginを使うとartifactoryPublishが使えるようになるので</p><pre class="line-numbers"><code class="language-sh">gradle clean test artifactoryPublish
-</code></pre><p>な感じでデプロイすると</p><p><img src="/images/2015/10/201510061645_2.png" class="img-fluid" alt="image" /></p><p>っていう感じでパッケージがデプロイされる。あとは使う側で</p><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+</code></pre>
+<p>っていうようにbuild.gradleを定義。artifactory pluginを使うとartifactoryPublishが使えるようになるので</p>
+<pre class="line-numbers"><code class="language-sh">gradle clean test artifactoryPublish
+</code></pre>
+<p>な感じでデプロイすると</p>
+
+<p><img src="/images/2015/10/201510061645_2.png" class="img-fluid" alt="image" /></p>
+
+<p>っていう感じでパッケージがデプロイされる。あとは使う側で</p>
+<pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 
 repositories {
     jcenter()
@@ -150,7 +174,19 @@ dependencies {
     testCompile &quot;sample:sample:+&quot;
     testCompile &quot;junit:junit:+&quot;
 }
-</code></pre><p>な感じでrepositoriesにmavenでurlを与えてやればいい。んまぁ非常に使い方がざっくりとしてますが...</p><h4>余談: Jenkinsでビルドする場合</h4><p>Jenkins Artifactory Pluginがあるのでインストール</p><p>んでジョブを作成して設定でartifactoryを使う部分の情報を設定するが「gradleでartifactory pluginを使用している場合にJenkins Artifactory Pluginでも同様にプラグインを処理しようとする為にエラーになる」っていう件に関しては「Project uses the Artifactory Gradle Plugin」が入っているとJenkins側でもプラグインのロードをしようとするので、gradle側でもデプロイ出来るようにプラグインを使用する場合にはこちらをチェック入れておかないとビルドでエラーになる</p><p>あとはまぁ普通に適切に設定を行った上でビルドを実行すればJenkinsでビルドを行ってartifactoryにデプロイしてくれる</p><p>んまぁという感じでgradle(maven)で使う自社開発ライブラリの管理とかはartifactoryを構築して使うのは良さそう</p>
+</code></pre>
+<p>な感じでrepositoriesにmavenでurlを与えてやればいい。んまぁ非常に使い方がざっくりとしてますが...</p>
+<h4>余談: Jenkinsでビルドする場合</h4>
+<p>Jenkins Artifactory Pluginがあるのでインストール</p>
+
+<p>んでジョブを作成して設定でartifactoryを使う部分の情報を設定するが「gradleでartifactory pluginを使用している場合にJenkins Artifactory Pluginでも同様にプラグインを処理しようとする為にエラーになる」っていう件に関しては「Project uses the Artifactory Gradle Plugin」が入っているとJenkins側でもプラグインのロードをしようとするので、gradle側でもデプロイ出来るようにプラグインを使用する場合にはこちらをチェック入れておかないとビルドでエラーになる</p>
+
+<p>あとはまぁ普通に適切に設定を行った上でビルドを実行すればJenkinsでビルドを行ってartifactoryにデプロイしてくれる</p>
+
+<p>んまぁという感じでgradle(maven)で使う自社開発ライブラリの管理とかはartifactoryを構築して使うのは良さそう</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -242,7 +278,7 @@ dependencies {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -263,9 +299,6 @@ dependencies {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -378,7 +411,7 @@ dependencies {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -401,20 +434,20 @@ dependencies {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -424,13 +457,15 @@ dependencies {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("75f8218822cb77fc25af6806be6b3f96465b095f");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="&lt;http://laravel.com/docs/events&gt; のドキュメント読み" />
+    <meta name="description" content="&amp;lt;http://laravel.com/docs/events&amp;gt; のドキュメント読み" />
     <title>Laravel使ってみた (16) - Events - - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/07/laravel-15-template-layout.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/07/laravel-17-queue.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-07-24T00:00:00+00:00">
+                <time datetime="2013-07-24 00:00:00 +0900">
                   <a href="/archives/2013/07">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["追記1: ワイルドカードなイベントを着火させない方法"]-->
-                <p><a href="http://laravel.com/docs/events" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/events</a> のドキュメント読み</p><p>要はイベントというのを作って、そいつをtrigger(公式的にはfire)的な事をする事で処理を行う機能的な所か。Queueとはまた話が違うっぽいので</p><p>でEventの登録方法はEvent::listenを使うんだけど、app/start/global.phpとかで普通に記述するか <a href="http://laravel.com/docs/events#event-subscribers" target="_blank" rel="noopener noreferrer">http://laravel.com/docs/events#event-subscribers</a> セクションのようにクラスを用いてEvent::listenさせるかっていう、とりあえずは2種類がある模様</p><p>まずは前者の普通にクラスを使わずにapp/start/global.phpとかに定義</p><pre class="line-numbers"><code class="language-php">Event::listen(
+                <!--[&quot;追記1: ワイルドカードなイベントを着火させない方法&quot;]-->
+                <p><a href="http://laravel.com/docs/events">http://laravel.com/docs/events</a> のドキュメント読み</p>
+
+<p>要はイベントというのを作って、そいつをtrigger(公式的にはfire)的な事をする事で処理を行う機能的な所か。Queueとはまた話が違うっぽいので</p>
+
+<p>でEventの登録方法はEvent::listenを使うんだけど、app/start/global.phpとかで普通に記述するか <a href="http://laravel.com/docs/events#event-subscribers">http://laravel.com/docs/events#event-subscribers</a> セクションのようにクラスを用いてEvent::listenさせるかっていう、とりあえずは2種類がある模様</p>
+
+<p>まずは前者の普通にクラスを使わずにapp/start/global.phpとかに定義</p>
+<pre class="line-numbers"><code class="language-php">Event::listen(
     &quot;hoge&quot;, // Event name
     function() {
         echo &quot;hoge(1)&quot;;
@@ -93,20 +101,34 @@ Event::listen(
     },
     5
 );
-</code></pre><p>っていうような感じなんですが、Priorityな引数が基本的に大きい方から実行されていく模様。で指定しなかった場合のデフォルトのプライオリティは0。でEventをtriggerしちゃう場合には</p><pre class="line-numbers"><code class="language-php">Event::fire(&quot;hoge&quot;, [引数]);
-</code></pre><p>引数が１つであれば別に引数な所をArrayで指定する必要はない(Illuminate\Events\Dispatcher.phpの174行目でArrayに内包するようになってる為)</p><p>でちなみにEvent自体はクラスで利用する事も出来る</p><pre class="line-numbers"><code class="language-php">class HogeEvent {
+</code></pre>
+<p>っていうような感じなんですが、Priorityな引数が基本的に大きい方から実行されていく模様。で指定しなかった場合のデフォルトのプライオリティは0。でEventをtriggerしちゃう場合には</p>
+<pre class="line-numbers"><code class="language-php">Event::fire(&quot;hoge&quot;, [引数]);
+</code></pre>
+<p>引数が１つであれば別に引数な所をArrayで指定する必要はない(Illuminate\Events\Dispatcher.phpの174行目でArrayに内包するようになってる為)</p>
+
+<p>でちなみにEvent自体はクラスで利用する事も出来る</p>
+<pre class="line-numbers"><code class="language-php">class HogeEvent {
     public function handle() {
         echo &quot;hoge&quot;;
     }
 }
-</code></pre><p>デフォルトだとhandleメソッドが動くけど</p><pre class="line-numbers"><code class="language-php">Event::listen(&quot;hoge&quot;, &quot;HogeEvent@hoge&quot;);
-</code></pre><p>のようにルーティングでアクションに対するコントローラーのメソッドを指定するような形式でEventが発動されるメソッドを指定する事も可能な模様。んまぁ定義から実行はこんな感じな訳で、でEvent::listenクラス上で行わせるsubscriberっていう機能もある</p><pre class="line-numbers"><code class="language-php">class HogeSubscribe {
+</code></pre>
+<p>デフォルトだとhandleメソッドが動くけど</p>
+<pre class="line-numbers"><code class="language-php">Event::listen(&quot;hoge&quot;, &quot;HogeEvent@hoge&quot;);
+</code></pre>
+<p>のようにルーティングでアクションに対するコントローラーのメソッドを指定するような形式でEventが発動されるメソッドを指定する事も可能な模様。んまぁ定義から実行はこんな感じな訳で、でEvent::listenクラス上で行わせるsubscriberっていう機能もある</p>
+<pre class="line-numbers"><code class="language-php">class HogeSubscribe {
     public function subscribe() {
         Event::listen(&quot;hoge&quot;, &quot;HogeEvent&quot;);
     }
 }
-</code></pre><p>でapp/start/global.phpとかで</p><pre class="line-numbers"><code class="language-php">Event::subscribe(new HogeSubscribe());
-</code></pre><p>的な事やれば良い。subscribeの引数はインスタンスじゃなくても普通にクラス名でもオッケーっぽい感じがする(ソース読んだ所だと)。でイベントにはワイルドカードを使って定義する事も可能</p><pre class="line-numbers"><code class="language-php">Event::listen(&quot;hoge.fuga&quot;, function() {
+</code></pre>
+<p>でapp/start/global.phpとかで</p>
+<pre class="line-numbers"><code class="language-php">Event::subscribe(new HogeSubscribe());
+</code></pre>
+<p>的な事やれば良い。subscribeの引数はインスタンスじゃなくても普通にクラス名でもオッケーっぽい感じがする(ソース読んだ所だと)。でイベントにはワイルドカードを使って定義する事も可能</p>
+<pre class="line-numbers"><code class="language-php">Event::listen(&quot;hoge.fuga&quot;, function() {
     echo &quot;fuga&quot;;
 });
 
@@ -114,12 +136,18 @@ Event::listen(
 Event::listen(&quot;hoge.*&quot;, function() {
     var_dump(func_get_args());
 });
-</code></pre><p>っていう感じ。hoge.fugaっていうイベントがEvent::fireされると</p>
+</code></pre>
+<p>っていう感じ。hoge.fugaっていうイベントがEvent::fireされると</p>
+
 <ul>
 <li>hoge.fugaが発動</li>
 <li>hoge.*が発動</li>
 </ul>
-<p>っていうようになる。どうやらこれはプライオリティを指定する事出来ないっぽい(ソース上でsetupWildcardListenで何かPriorityを維持するような構造になってないっぽい)</p><p>でEvent::queueに関して。Queueクラスっていうのがあるけどこれとは関係が無い。単純に引数で指定したイベント名+_queueで定義しておいて、それがfireされたら元のイベント名の処理を実行するような感じ。んーわかりづらい</p><pre class="line-numbers"><code class="language-php">// この時点ではhoge_queueっていうイベントを作ってるだけなので何も起きない
+
+<p>っていうようになる。どうやらこれはプライオリティを指定する事出来ないっぽい(ソース上でsetupWildcardListenで何かPriorityを維持するような構造になってないっぽい)</p>
+
+<p>でEvent::queueに関して。Queueクラスっていうのがあるけどこれとは関係が無い。単純に引数で指定したイベント名+_queueで定義しておいて、それがfireされたら元のイベント名の処理を実行するような感じ。んーわかりづらい</p>
+<pre class="line-numbers"><code class="language-php">// この時点ではhoge_queueっていうイベントを作ってるだけなので何も起きない
 Event::queue(&quot;hoge&quot;);
 
 // Event::flushを使う事でqueueなイベントをfire出来る
@@ -127,7 +155,19 @@ Event::flush(&quot;hoge&quot;);
 
 // 単純にイベント名_queueで定義されるだけなのでfireでも出来る
 Event::fire(&quot;hoge_queue&quot;, true);
-</code></pre><p>的な感じかなと。個人的に使い所あんのか無いのか微妙。あとflusherっていうメソッドがある的な事をドキュメントに書いてるけど実装されてない模様。もしくはdeprecateで消えたとか?</p><p>とりまぁEventsなドキュメント読み終わりって事で。</p><p>ちなみに以前にUnit TestingでEventをテストするっていうのあったけどまだ今回は手付かずなのでやり次第追記するかも</p><h4>追記1: ワイルドカードなイベントを着火させない方法</h4><p>上記のようにhoge.fugaとhoge.*があってhoge.fugaに着火させるとhoge.*にまで及ぶっていう形にはなるが、hoge.fugaな所からreturn falseしちゃうとStop Propagationされてそこで止まるっぽい</p><p>っていうのを書くの忘れてた</p>
+</code></pre>
+<p>的な感じかなと。個人的に使い所あんのか無いのか微妙。あとflusherっていうメソッドがある的な事をドキュメントに書いてるけど実装されてない模様。もしくはdeprecateで消えたとか?</p>
+
+<p>とりまぁEventsなドキュメント読み終わりって事で。</p>
+
+<p>ちなみに以前にUnit TestingでEventをテストするっていうのあったけどまだ今回は手付かずなのでやり次第追記するかも</p>
+<h4>追記1: ワイルドカードなイベントを着火させない方法</h4>
+<p>上記のようにhoge.fugaとhoge.*があってhoge.fugaに着火させるとhoge.*にまで及ぶっていう形にはなるが、hoge.fugaな所からreturn falseしちゃうとStop Propagationされてそこで止まるっぽい</p>
+
+<p>っていうのを書くの忘れてた</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -219,7 +259,7 @@ Event::fire(&quot;hoge_queue&quot;, true);
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -240,9 +280,6 @@ Event::fire(&quot;hoge_queue&quot;, true);
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -355,7 +392,7 @@ Event::fire(&quot;hoge_queue&quot;, true);
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -378,20 +415,20 @@ Event::fire(&quot;hoge_queue&quot;, true);
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -401,13 +438,15 @@ Event::fire(&quot;hoge_queue&quot;, true);
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("72fbfc494e35235c47a3c43ed65c67a0e3819ac7");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

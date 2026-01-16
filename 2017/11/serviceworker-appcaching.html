@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2017-11-07T08:00:00+09:00">
+                <time datetime="2017-11-07 08:00:00 +0900">
                   <a href="/archives/2017/11">
                   <span class="post-date-year">2017</span>
                   <span class="hyphen">-</span>
@@ -76,11 +77,28 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["前提条件", "index.html", "app.js", "service-worker.js", "結果"]-->
-                <p>参考1: <a href="https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja" target="_blank" rel="noopener noreferrer">https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja</a></p><p>参考2: <a href="https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja" target="_blank" rel="noopener noreferrer">https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja</a></p><p>PWA(Progressive Web Apps)などで、Webアプリケーションをネイティブアプリケーションのような内部にリソースを持つようにWebアプリケーションでもそういうリソースをServiceWorkerでキャッシュさせて利用する事が出来るとのことなのでちょっとやってみた</p><p>※上記参考を必読推奨</p><p>※あくまで個人的なメモです</p><h4>前提条件</h4><p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p><pre class="line-numbers"><code class="language-js">navigator.serviceWorker.register(&quot;sw.js&quot;).then(() =&gt; {
+                <!--[&quot;前提条件&quot;, &quot;index.html&quot;, &quot;app.js&quot;, &quot;service-worker.js&quot;, &quot;結果&quot;]-->
+                <p>参考1: <a href="https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja">https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja</a></p>
+
+<p>参考2: <a href="https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja">https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja</a></p>
+
+<p>PWA(Progressive Web Apps)などで、Webアプリケーションをネイティブアプリケーションのような内部にリソースを持つようにWebアプリケーションでもそういうリソースをServiceWorkerでキャッシュさせて利用する事が出来るとのことなのでちょっとやってみた</p>
+
+<p>※上記参考を必読推奨</p>
+
+<p>※あくまで個人的なメモです</p>
+<h4>前提条件</h4>
+<p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p>
+<pre class="line-numbers"><code class="language-js">navigator.serviceWorker.register(&quot;sw.js&quot;).then(() =&gt; {
   fetch(&quot;省略&quot;);
 });
-</code></pre><p>みたいにやっても初回アクセス時はコントロール化に置かれるまではthenからのfetchがコントロール化になってない場合にはキャッシュなどの処理が行われないと思われる。よってfetch処理などはコントロール化に置かれてから処理する必要があるのでそこも考慮する</p><p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p><p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p><h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
+</code></pre>
+<p>みたいにやっても初回アクセス時はコントロール化に置かれるまではthenからのfetchがコントロール化になってない場合にはキャッシュなどの処理が行われないと思われる。よってfetch処理などはコントロール化に置かれてから処理する必要があるのでそこも考慮する</p>
+
+<p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p>
+
+<p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p>
+<h4>index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;body&gt;
     &lt;div id=&quot;msg&quot;&gt;&lt;/div&gt;
@@ -122,7 +140,9 @@ if (&quot;serviceWorker&quot; in navigator) {
     }
   });
 }
-</code></pre><p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p><h4>service-worker.js</h4><pre class="line-numbers"><code class="language-js">let cacheName = &quot;sample-pwa-cache-v1&quot;;
+</code></pre>
+<p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p>
+<h4>service-worker.js</h4><pre class="line-numbers"><code class="language-js">let cacheName = &quot;sample-pwa-cache-v1&quot;;
 let cacheDataName = &quot;sample-pwa-data-cache-v1&quot;;
 let filesToCache = [ &quot;/&quot;, &quot;/index.html&quot;, &quot;/app.js&quot; ];
 
@@ -180,7 +200,23 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
     );
   }
 });
-</code></pre><h4>結果</h4><p>初回リクエスト時にはAPIコールにしつつそのデータをキャッシュすることになるので</p><p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-1.png" class="img-fluid" alt="image" /></p><p>となる。次回リクエスト時には</p><p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-2.png" class="img-fluid" alt="image" /></p><p>となる。またindex.htmlやapp.jsなどもキャッシュしているので初回時にキャッシュされるので再度ロードされる際にはServiceWorkerからのキャッシュとして配信されるようになる。なので一度キャッシュした状態でサーバーを落としてみても結果はキャッシュされたのがServiceWorkerから配信されるようになる</p><p>ちなみにこういうのを実現したいのであればそれをサポートしてくれるライブラリ(sw-precache等)があるのでそれを使っても良いかと</p><p>今回はAPIコールした結果をキャッシュしてそれがある場合にはそれをレンダリングしているが、本式としてはキャッシュをしつつAPIをコールして得られる結果を取得する前にキャッシュからレンダリングしておいて、リアルタイムなデータをレンダリングするような形になるかと</p>
+</code></pre><h4>結果</h4>
+<p>初回リクエスト時にはAPIコールにしつつそのデータをキャッシュすることになるので</p>
+
+<p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-1.png" class="img-fluid" alt="image" /></p>
+
+<p>となる。次回リクエスト時には</p>
+
+<p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-2.png" class="img-fluid" alt="image" /></p>
+
+<p>となる。またindex.htmlやapp.jsなどもキャッシュしているので初回時にキャッシュされるので再度ロードされる際にはServiceWorkerからのキャッシュとして配信されるようになる。なので一度キャッシュした状態でサーバーを落としてみても結果はキャッシュされたのがServiceWorkerから配信されるようになる</p>
+
+<p>ちなみにこういうのを実現したいのであればそれをサポートしてくれるライブラリ(sw-precache等)があるのでそれを使っても良いかと</p>
+
+<p>今回はAPIコールした結果をキャッシュしてそれがある場合にはそれをレンダリングしているが、本式としてはキャッシュをしつつAPIをコールして得られる結果を取得する前にキャッシュからレンダリングしておいて、リアルタイムなデータをレンダリングするような形になるかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -272,7 +308,7 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -293,9 +329,6 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -408,7 +441,7 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -431,20 +464,20 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -454,13 +487,15 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("18be8ce61941534c383df9a9844301693087feed");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-07-20T00:00:00+00:00">
+                <time datetime="2014-07-20 00:00:00 +0900">
                   <a href="/archives/2014/07">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["directive1だけをscope:trueにした場合", "directive2もscope:trueにした場合", "余談"]-->
-                <p>参考: <a href="http://qiita.com/grapswiz@github/items/878432cb7e04039b06fb">AngularJSのdirectiveとは</a></p><pre class="line-numbers"><code class="language-html">&lt;html ng-app=&quot;sample&quot;&gt;
+                <!--[&quot;directive1だけをscope:trueにした場合&quot;, &quot;directive2もscope:trueにした場合&quot;, &quot;余談&quot;]-->
+                <p>参考: <a href="http://qiita.com/grapswiz@github/items/878432cb7e04039b06fb">AngularJSのdirectiveとは</a></p>
+<pre class="line-numbers"><code class="language-html">&lt;html ng-app=&quot;sample&quot;&gt;
   &lt;head&gt;
     &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular.min.js&quot;&gt;&lt;/script&gt;
     &lt;script src=&quot;main.js&quot;&gt;&lt;/script&gt;
@@ -95,7 +97,9 @@
     &lt;/div&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>っていうのに作ったng-directiveに対してscopeを設定するかしないかで何が変わるのか検証してみた</p><h4>directive1だけをscope:trueにした場合</h4><pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
+</code></pre>
+<p>っていうのに作ったng-directiveに対してscopeを設定するかしないかで何が変わるのか検証してみた</p>
+<h4>directive1だけをscope:trueにした場合</h4><pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
   .controller(&quot;SampleCtrl&quot;, function($scope) {
     $scope.message = &quot;hoge&quot;
   })
@@ -114,7 +118,13 @@
       }
     };
   });
-</code></pre><p>結果は</p><p><img src="/images/2014/07/201407201510_1.jpg" class="img-fluid" alt="image" /></p><p>directive1にネストされているdirective2でのscopeの反映がレンダリングまでは伝搬されてない? というよりはあくまで参照されるスコープコンテキストがdirective1になる的な感じだろうか</p><h4>directive2もscope:trueにした場合</h4><pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
+</code></pre>
+<p>結果は</p>
+
+<p><img src="/images/2014/07/201407201510_1.jpg" class="img-fluid" alt="image" /></p>
+
+<p>directive1にネストされているdirective2でのscopeの反映がレンダリングまでは伝搬されてない? というよりはあくまで参照されるスコープコンテキストがdirective1になる的な感じだろうか</p>
+<h4>directive2もscope:trueにした場合</h4><pre class="line-numbers"><code class="language-js">angular.module(&quot;sample&quot;, [])
   .controller(&quot;SampleCtrl&quot;, function($scope) {
     $scope.message = &quot;hoge&quot;
   })
@@ -134,7 +144,19 @@
       }
     };
   });
-</code></pre><p>結果は</p><p><img src="/images/2014/07/201407201510_2.jpg" class="img-fluid" alt="image" /></p><p>っていうような感じでdirective2ではdirective2なスコープコンテキストが作用する。上記でdirective1だけscope:trueにした場合と結果が違うのはdirective2で指定されているエレメント等において参照されるコンテキストなスコープがdirective1のスコープを親として新しいスコープを生成する。directive1.scope == directive2.scopeでは無いっていう事かと</p><p>そういう事象もあるって事でメモ</p><h4>余談</h4><p>ちなみにng-directiveでとあるdirectiveに依存にするようなdirectiveを作る場合にはちゃんとrequireで^を使って親のdirectiveによる依存を設定するべきかと</p><p>それともう一件</p>
+</code></pre>
+<p>結果は</p>
+
+<p><img src="/images/2014/07/201407201510_2.jpg" class="img-fluid" alt="image" /></p>
+
+<p>っていうような感じでdirective2ではdirective2なスコープコンテキストが作用する。上記でdirective1だけscope:trueにした場合と結果が違うのはdirective2で指定されているエレメント等において参照されるコンテキストなスコープがdirective1のスコープを親として新しいスコープを生成する。directive1.scope == directive2.scopeでは無いっていう事かと</p>
+
+<p>そういう事象もあるって事でメモ</p>
+<h4>余談</h4>
+<p>ちなみにng-directiveでとあるdirectiveに依存にするようなdirectiveを作る場合にはちゃんとrequireで^を使って親のdirectiveによる依存を設定するべきかと</p>
+
+<p>それともう一件</p>
+
 <blockquote class="twitter-tweet" lang="ja">
   <p>
     前にも書いたけど、ng-directiveでelementに要素追加する際はappendを使ってはいけない
@@ -145,6 +167,8 @@
   </p>
 </blockquote>
 
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -236,7 +260,7 @@
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -257,9 +281,6 @@
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -372,7 +393,7 @@
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -395,20 +416,20 @@
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -418,13 +439,15 @@
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("fc6ea61ec94410e5245b2a96766a4e130d2095c1");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="ちょいとインデックスの使い方な感じでやってみる" />
     <title>mongodbを使ってみる (3) - インデックスに関して - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-2-operators.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-4-index-2.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/01/mongodb-4-index-2.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/01/mongodb-5-dbref-dbpointer.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/01/mongodb-3-index.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-01-15T00:00:00+00:00">
+                <time datetime="2013-01-15 00:00:00 +0900">
                   <a href="/archives/2013/01">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -76,15 +77,24 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["追記"]-->
-                <p>ちょいとインデックスの使い方な感じでやってみる</p><pre class="line-numbers"><code class="language-js">db.samples.save({ name: &quot;hoge&quot;, tags: [&quot;A&quot;] })
+                <!--[&quot;追記&quot;]-->
+                <p>ちょいとインデックスの使い方な感じでやってみる</p>
+<pre class="line-numbers"><code class="language-js">db.samples.save({ name: &quot;hoge&quot;, tags: [&quot;A&quot;] })
 db.samples.save({ name: &quot;fuga&quot;, tags: [&quot;A&quot;, &quot;B&quot;] })
 db.samples.save({ name: &quot;foobar&quot;, tags: [&quot;B&quot;, &quot;C&quot;] })
-</code></pre><p>な感じで突っ込んでおいて、普通にキーに対する値の型が配列型でも</p><pre class="line-numbers"><code class="language-js">db.samples.find({ tags: &quot;A&quot; })
-</code></pre><p>っていう感じで検索は出来る。出力が</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f475453f2dbe87db25fd00&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;tags&quot; : [ &quot;A&quot; ] }
+</code></pre>
+<p>な感じで突っ込んでおいて、普通にキーに対する値の型が配列型でも</p>
+<pre class="line-numbers"><code class="language-js">db.samples.find({ tags: &quot;A&quot; })
+</code></pre>
+<p>っていう感じで検索は出来る。出力が</p>
+<pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f475453f2dbe87db25fd00&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;tags&quot; : [ &quot;A&quot; ] }
 { &quot;_id&quot; : ObjectId(&quot;50f475533f2dbe87db25fd01&quot;), &quot;name&quot; : &quot;fuga&quot;, &quot;tags&quot; : [ &quot;A&quot;, &quot;B&quot; ] }
-</code></pre><p>でどういうインデックスが使われてるかとかexplainで見れるらしいので</p><pre class="line-numbers"><code class="language-js">db.samples.find({ tags: &quot;A&quot; }).explain()
-</code></pre><p>でやると</p><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>でどういうインデックスが使われてるかとかexplainで見れるらしいので</p>
+<pre class="line-numbers"><code class="language-js">db.samples.find({ tags: &quot;A&quot; }).explain()
+</code></pre>
+<p>でやると</p>
+<pre class="line-numbers"><code class="language-json">{
         &quot;cursor&quot; : &quot;BasicCursor&quot;,
         &quot;nscanned&quot; : 3,
         &quot;nscannedObjects&quot; : 3,
@@ -98,8 +108,14 @@ db.samples.save({ name: &quot;foobar&quot;, tags: [&quot;B&quot;, &quot;C&quot;]
 
         }
 }
-</code></pre><p>多分、indexBoundsが無いっていう事でインデックスが使われてない。っていうかそもそもインデックス自体作ってない</p><pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ tags: 1 })
-</code></pre><p>でtagsキーに対してインデックスを作る。何やらドキュメントによるとensureIndexが同期型であり、インデックス作成が完了するまでは操作をブロックする模様(db.currentOp で見れるとか)。その場合には第2引数で、<span style="color: red">{ background: true }</span>な感じで作ればインデックスをバックグラウンドで作成するようになる模様。但し、マスター/スレーブな構成とかで使ってる場合にはこれを指定した所でもスレーブ側は完了するまで操作ブロックされるみたい。検証してないから微妙だけど</p><p>という感じでもう一回explainしてみると</p><pre class="line-numbers"><code class="language-json">{
+</code></pre>
+<p>多分、indexBoundsが無いっていう事でインデックスが使われてない。っていうかそもそもインデックス自体作ってない</p>
+<pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ tags: 1 })
+</code></pre>
+<p>でtagsキーに対してインデックスを作る。何やらドキュメントによるとensureIndexが同期型であり、インデックス作成が完了するまでは操作をブロックする模様(db.currentOp で見れるとか)。その場合には第2引数で、<span style="color: red">{ background: true }</span>な感じで作ればインデックスをバックグラウンドで作成するようになる模様。但し、マスター/スレーブな構成とかで使ってる場合にはこれを指定した所でもスレーブ側は完了するまで操作ブロックされるみたい。検証してないから微妙だけど</p>
+
+<p>という感じでもう一回explainしてみると</p>
+<pre class="line-numbers"><code class="language-json">{
         &quot;cursor&quot; : &quot;BtreeCursor tags_1&quot;,
         &quot;nscanned&quot; : 2,
         &quot;nscannedObjects&quot; : 2,
@@ -118,25 +134,39 @@ db.samples.save({ name: &quot;foobar&quot;, tags: [&quot;B&quot;, &quot;C&quot;]
                 ]
         }
 }
-</code></pre><p>な感じの結果になる。配列型にインデックスをつけるとmultikeysタイプになる模様なのでisMultiKeyがtrueになる的な感じかと</p><h4>追記</h4><p>ensureIndexに指定出来るキーと値についてドキュメントによると、キーはインデックスを適応するキー名であり、値が1であれば昇順、-1であれは降順になる模様</p><pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot;, type: 1 })
+</code></pre>
+<p>な感じの結果になる。配列型にインデックスをつけるとmultikeysタイプになる模様なのでisMultiKeyがtrueになる的な感じかと</p>
+<h4>追記</h4>
+<p>ensureIndexに指定出来るキーと値についてドキュメントによると、キーはインデックスを適応するキー名であり、値が1であれば昇順、-1であれは降順になる模様</p>
+<pre class="line-numbers"><code class="language-js">db.samples.insert({ name: &quot;hoge&quot;, type: 1 })
 db.samples.insert({ name: &quot;fuga&quot;, type: 1 })
 db.samples.insert({ name: &quot;foobar&quot;, type: 1 })
-</code></pre><p>というデータつっこんどいて</p><pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ type: 1, name: 1 })
-</code></pre><p>っていうインデックスを突っ込んで、find({ type: 1 })すると</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f4c6fe65d2c24c46dd38a9&quot;), &quot;name&quot; : &quot;foobar&quot;, &quot;type&quot; : 1 }
+</code></pre>
+<p>というデータつっこんどいて</p>
+<pre class="line-numbers"><code class="language-js">db.samples.ensureIndex({ type: 1, name: 1 })
+</code></pre>
+<p>っていうインデックスを突っ込んで、find({ type: 1 })すると</p>
+<pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f4c6fe65d2c24c46dd38a9&quot;), &quot;name&quot; : &quot;foobar&quot;, &quot;type&quot; : 1 }
 { &quot;_id&quot; : ObjectId(&quot;50f4c6f465d2c24c46dd38a8&quot;), &quot;name&quot; : &quot;fuga&quot;, &quot;type&quot; : 1 }
 { &quot;_id&quot; : ObjectId(&quot;50f4c6eb65d2c24c46dd38a7&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
-</code></pre><p>という結果になる。もし、nameにインデックス適応させなかったら</p><pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f4c6eb65d2c24c46dd38a7&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
+</code></pre>
+<p>という結果になる。もし、nameにインデックス適応させなかったら</p>
+<pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f4c6eb65d2c24c46dd38a7&quot;), &quot;name&quot; : &quot;hoge&quot;, &quot;type&quot; : 1 }
 { &quot;_id&quot; : ObjectId(&quot;50f4c6f465d2c24c46dd38a8&quot;), &quot;name&quot; : &quot;fuga&quot;, &quot;type&quot; : 1 }
 { &quot;_id&quot; : ObjectId(&quot;50f4c6fe65d2c24c46dd38a9&quot;), &quot;name&quot; : &quot;foobar&quot;, &quot;type&quot; : 1 }
-</code></pre><p>というようにインデックスによるソートが反映されない。自前でsortすれば良いって話にもなるかも知らないけど</p>
+</code></pre>
+<p>というようにインデックスによるソートが反映されない。自前でsortすれば良いって話にもなるかも知らないけど</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/01/mongodb-4-index-2.html">&lt;&nbsp;mongodbを使ってみる (4) - インデックスに関して (2) -</a>
+            <a class="float-start box-link" href="/2013/01/mongodb-5-dbref-dbpointer.html">&lt;&nbsp;mongodbを使ってみる (5) - DBRef/DBPointerに関して -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/01/mongodb-2-operators.html">mongodbを使ってみる (2) - operators -&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/01/mongodb-4-index-2.html">mongodbを使ってみる (4) - インデックスに関して (2) -&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -220,7 +250,7 @@ db.samples.insert({ name: &quot;foobar&quot;, type: 1 })
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -241,9 +271,6 @@ db.samples.insert({ name: &quot;foobar&quot;, type: 1 })
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -356,7 +383,7 @@ db.samples.insert({ name: &quot;foobar&quot;, type: 1 })
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -379,20 +406,20 @@ db.samples.insert({ name: &quot;foobar&quot;, type: 1 })
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -402,13 +429,15 @@ db.samples.insert({ name: &quot;foobar&quot;, type: 1 })
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("ab8d325fd1eb0a915574b0ccbaa934f7172d6aaf");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

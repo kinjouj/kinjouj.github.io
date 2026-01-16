@@ -12,12 +12,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="例えば" />
     <title>Spring WebMVCをやってみる (11) - @RequestMappingのparams - - kinjouj.github.io</title>
-    <link rel="prev" href="https://kinjouj.github.io/2013/12/java-util-serviceloader.html" />
-    <link rel="next" href="https://kinjouj.github.io/2013/12/jsp-config.html" />
+    <link rel="prev" href="https://kinjouj.github.io/2013/12/jsp-config.html" />
+    <link rel="next" href="https://kinjouj.github.io/2013/12/spring-webmvc-12-redirectattributes.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2013/12/spring-webmvc-11-requestmapping-params-attribute.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-12-18T00:00:00+00:00">
+                <time datetime="2013-12-18 00:00:00 +0900">
                   <a href="/archives/2013/12">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,12 +78,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["SampleController.java", "SampleControllerTest.java", "余談: GETリクエストでも問題無いのかって件"]-->
-                <p>例えば</p><pre class="line-numbers"><code class="language-html">&lt;form action=&quot;/swmvc/sample/index.action&quot; method=&quot;post&quot;&gt;
+                <!--[&quot;SampleController.java&quot;, &quot;SampleControllerTest.java&quot;, &quot;余談: GETリクエストでも問題無いのかって件&quot;]-->
+                <p>例えば</p>
+<pre class="line-numbers"><code class="language-html">&lt;form action=&quot;/swmvc/sample/index.action&quot; method=&quot;post&quot;&gt;
     &lt;input type=&quot;submit&quot; name=&quot;say1&quot; value=&quot;say1&quot; /&gt;
     &lt;input type=&quot;submit&quot; name=&quot;say2&quot; value=&quot;say2&quot; /&gt;
 &lt;/form&gt;
-</code></pre><p>っていうようにターゲットとなるアクションは1つでサブミットによって処理されるアクションを切り分けたい場合には@RequestMappingアノテーションにparams属性で&lt;input type=<q>submit</q>&gt;で指定されてるname属性の値を指定すれば良いらしいとの事</p><h4>SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>っていうようにターゲットとなるアクションは1つでサブミットによって処理されるアクションを切り分けたい場合には@RequestMappingアノテーションにparams属性で&lt;input type=<q>submit</q>&gt;で指定されてるname属性の値を指定すれば良いらしいとの事</p>
+<h4>SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -110,12 +114,16 @@ public class SampleController {
         return &quot;fuga&quot;;
     }
 }
-</code></pre><p>っていう感じで</p>
+</code></pre>
+<p>っていう感じで</p>
+
 <ul>
 <li>  &lt;input type=<q>submit</q> name=<q>say1</q> /&gt; ではsay1メソッドが発生</li>
 <li>  &lt;input type=<q>submit</q> name=<q>say2</q> /&gt; ではsay2メソッドが発生</li>
 </ul>
-<p>っていう事になる</p><h4>SampleControllerTest.java</h4><pre class="line-numbers"><code class="language-java">package swmvc;
+
+<p>っていう事になる</p>
+<h4>SampleControllerTest.java</h4><pre class="line-numbers"><code class="language-java">package swmvc;
 
 import org.junit.Test;
 
@@ -139,21 +147,27 @@ public class SampleControllerTest extends AbstractTestCase {
             .andExpect(content().string(is(&quot;fuga&quot;)));
     }
 }
-</code></pre><h4>余談: GETリクエストでも問題無いのかって件</h4><p>例えば上記のPOSTリクエストで受け付ける条件を排除してGETリクエストで送るのは出来るのかって話ですが、結論から言えば出来る</p>
+</code></pre><h4>余談: GETリクエストでも問題無いのかって件</h4>
+<p>例えば上記のPOSTリクエストで受け付ける条件を排除してGETリクエストで送るのは出来るのかって話ですが、結論から言えば出来る</p>
+
 <ul>
-<li>  <a href="http://localhost:8080/[context]/sample/index.action" target="_blank" rel="noopener noreferrer">http://localhost:8080/[context]/sample/index.action</a> -&gt; 400 Bad Request</li>
-<li>  <a href="http://localhost:8080/[context]/sample/index.action?say1" target="_blank" rel="noopener noreferrer">http://localhost:8080/[context]/sample/index.action?say1</a> -&gt; 200 OK</li>
-<li>  <a href="http://localhost:8080/[context]/sample/index.action?say2" target="_blank" rel="noopener noreferrer">http://localhost:8080/[context]/sample/index.action?say2</a> -&gt; 200 OK</li>
+<li>  <a href="http://localhost:8080/%5Bcontext%5D/sample/index.action">http://localhost:8080/[context]/sample/index.action</a> -&gt; 400 Bad Request</li>
+<li>  <a href="http://localhost:8080/%5Bcontext%5D/sample/index.action?say1">http://localhost:8080/[context]/sample/index.action?say1</a> -&gt; 200 OK</li>
+<li>  <a href="http://localhost:8080/%5Bcontext%5D/sample/index.action?say2">http://localhost:8080/[context]/sample/index.action?say2</a> -&gt; 200 OK</li>
 </ul>
+
 <p>というようになる模様</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2013/12/jsp-config.html">&lt;&nbsp;jsp-config</a>
+            <a class="float-start box-link" href="/2013/12/spring-webmvc-12-redirectattributes.html">&lt;&nbsp;Spring WebMVCをやってみる (12) - RedirectAttributes -</a>
             <!-- prev post -->
-            <a class="float-end box-link" href="/2013/12/java-util-serviceloader.html">java.util.ServiceLoader&nbsp;&gt;</a>
+            <a class="float-end box-link" href="/2013/12/jsp-config.html">jsp-config&nbsp;&gt;</a>
           </div>
         </div>
         <aside class="col col-lg-4 px-5 sidebar">
@@ -237,7 +251,7 @@ public class SampleControllerTest extends AbstractTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -258,9 +272,6 @@ public class SampleControllerTest extends AbstractTestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -373,7 +384,7 @@ public class SampleControllerTest extends AbstractTestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -396,20 +407,20 @@ public class SampleControllerTest extends AbstractTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -419,13 +430,15 @@ public class SampleControllerTest extends AbstractTestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("182d2ea61a1b4483e2ade301460975f6d0375a68");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

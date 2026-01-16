@@ -10,7 +10,7 @@
     <meta name="referrer" content="unsafe-url" />
     <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="[android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する][1]をAndroid4.x以下(3.x系を除く)な2.x系で動かす場合、&amp;lt;meta-data&amp;gt;によるAccessibityServiceInfoの構築?はサポートされてない模様。" />
+    <meta name="description" content="[android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する][1]をAndroid4.x以下(3.x系を除く)な2.x系で動かす場合、&amp;amp;lt;meta-data&amp;amp;gt;によるAccessibityServiceInfoの構築?はサポートされてない模様。" />
     <title>AccessibilityServiceを古いAndroidバージョンで動かす - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2013/09/android-oauth-signpost-google-app-engine-oauth.html" />
     <link rel="next" href="https://kinjouj.github.io/2013/09/android-live-wallpaper.html" />
@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-08T00:00:00+00:00">
+                <time datetime="2013-09-08 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["AndroidManifest.xml", "SampleService.java", "追記"]-->
-                <p><a href="/android-accessibilityservice.html">android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する</a>をAndroid4.x以下(3.x系を除く)な2.x系で動かす場合、&lt;meta-data&gt;によるAccessibityServiceInfoの構築?はサポートされてない模様。</p><p>という事でやってみた</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+                <!--[&quot;AndroidManifest.xml&quot;, &quot;SampleService.java&quot;, &quot;追記&quot;]-->
+                <p><a href="/android-accessibilityservice.html">android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する</a>をAndroid4.x以下(3.x系を除く)な2.x系で動かす場合、&lt;meta-data&gt;によるAccessibityServiceInfoの構築?はサポートされてない模様。</p>
+
+<p>という事でやってみた</p>
+<h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;sample.test&quot;
     android:versionCode=&quot;1&quot;
     android:versionName=&quot;1.0&quot;&gt;
@@ -102,7 +106,9 @@
         &lt;/service&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><p>&lt;meta-data&gt;を指定しない</p><h4>SampleService.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>&lt;meta-data&gt;を指定しない</p>
+<h4>SampleService.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -171,7 +177,9 @@ public class SampleService extends AccessibilityService {
         }
     }
 }
-</code></pre><p>っていう事。要は</p>
+</code></pre>
+<p>っていう事。要は</p>
+
 <blockquote class="twitter-tweet">
   <p>
     Android2.2だとmeta-data指定だとイケない。onServiceConnectedでAccessibilityServiceInfoをsetServiceInfoするのが良い
@@ -181,7 +189,9 @@ public class SampleService extends AccessibilityService {
     &mdash; kinjouj (@kinjou_j) <a href="https://twitter.com/kinjou_j/statuses/376672186406154241">September 8, 2013</a>
   </p>
 </blockquote>
+
 <p>っていう事。ちなみに</p>
+
 <blockquote class="twitter-tweet">
   <p>
     Android4.xだと4.1までなら問題無いらしいが、それ以降だとandroid.permission.BIND_ACCESSIBILITY_SERVICEを指定してないとユーザー補助機能に出てこない
@@ -191,7 +201,15 @@ public class SampleService extends AccessibilityService {
     &mdash; kinjouj (@kinjou_j) <a href="https://twitter.com/kinjou_j/statuses/376672358133538817">September 8, 2013</a>
   </p>
 </blockquote>
-<p>っていうのもあるのでそれもあわせて</p><h4>追記</h4><p><a href="http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html#SERVICE_META_DATA">http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html#SERVICE_META_DATA</a></p><p>によると<meta-data>で指定出来るのはAPI Level 14かららしい</p>
+
+<p>っていうのもあるのでそれもあわせて</p>
+<h4>追記</h4>
+<p><a href="http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html#SERVICE_META_DATA">http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html#SERVICE_META_DATA</a></p>
+
+<p>によると<meta-data>で指定出来るのはAPI Level 14かららしい</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -283,7 +301,7 @@ public class SampleService extends AccessibilityService {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -304,9 +322,6 @@ public class SampleService extends AccessibilityService {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -419,7 +434,7 @@ public class SampleService extends AccessibilityService {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -442,20 +457,20 @@ public class SampleService extends AccessibilityService {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -465,13 +480,15 @@ public class SampleService extends AccessibilityService {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("a65b417d410af26145bdef0673fbceb58585c0d0");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

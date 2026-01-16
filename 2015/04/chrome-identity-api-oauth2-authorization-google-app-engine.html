@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2015-04-22T00:00:00+09:00">
+                <time datetime="2015-04-22 00:00:00 +0900">
                   <a href="/archives/2015/04">
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
@@ -79,8 +80,21 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["概要", "サーバー側のOAuth2への対応修正", "chrome.identity APIを使ったクライアント側を実装"]-->
-                <p>参考: <a href="http://www.ciiycode.com/0z6ziWjWxjjP/google-app-engine-oauth2-provider" target="_blank" rel="noopener noreferrer">http://www.ciiycode.com/0z6ziWjWxjjP/google-app-engine-oauth2-provider</a></p><p>Google Account OAuth1.0aがdeprecated化したのがつい先日くらいの話なので、そのまま放置しておくと問題にもなりそうなので検証してみる</p><h4>概要</h4><p>Google App EngineにはOAuthServiceっていうAPIがあるのでOAuth2認証を利用する事も出来る。OAuth1.0aの場合はOAuthServiceでgetCurrentUserメソッドを使う場合等にはクエリーストリングにOAuth認証に必要なパラメーターを設置する必要があるがOAuth2の場合にはAuthorizationヘッダーに取得したアクセストークンを指定するような形式になる。又、OAuth1.0aの時とは違いクライアント側で取得のトークンは有効期限は自前でトークンを削除しない限りは問題無いが、OAuth2の場合には一定時間でトークンの有効期限が設定されているので定期的にチェックしつつ再取得する必要性がある</p><p>でOAuth2を利用するにあたって <a href="https://console.developers.google.com" target="_blank" rel="noopener noreferrer">https://console.developers.google.com</a> からプロジェクトのクライアントID及びクライアントシークレットを取得する必要がある。今回のはInstalled Applicationを使うのでクライアントのタイプはそっちで登録する</p><p><img src="/images/2015/04/201504222145-1.jpg" class="img-fluid" alt="image" /></p><p>まぁ下準備はこれくらい</p><h4>サーバー側のOAuth2への対応修正</h4><p>確証は無いけどOAuthService.getCurrentUserやisUserAdmin等のメソッドの引数にscopeを指定しないと正常にUserインスタンスを取得できない模様なので</p><pre class="line-numbers"><code class="language-java">OAuthService service = OAuthServiceFactory.getOAuthService();
+                <!--[&quot;概要&quot;, &quot;サーバー側のOAuth2への対応修正&quot;, &quot;chrome.identity APIを使ったクライアント側を実装&quot;]-->
+                <p>参考: <a href="http://www.ciiycode.com/0z6ziWjWxjjP/google-app-engine-oauth2-provider">http://www.ciiycode.com/0z6ziWjWxjjP/google-app-engine-oauth2-provider</a></p>
+
+<p>Google Account OAuth1.0aがdeprecated化したのがつい先日くらいの話なので、そのまま放置しておくと問題にもなりそうなので検証してみる</p>
+<h4>概要</h4>
+<p>Google App EngineにはOAuthServiceっていうAPIがあるのでOAuth2認証を利用する事も出来る。OAuth1.0aの場合はOAuthServiceでgetCurrentUserメソッドを使う場合等にはクエリーストリングにOAuth認証に必要なパラメーターを設置する必要があるがOAuth2の場合にはAuthorizationヘッダーに取得したアクセストークンを指定するような形式になる。又、OAuth1.0aの時とは違いクライアント側で取得のトークンは有効期限は自前でトークンを削除しない限りは問題無いが、OAuth2の場合には一定時間でトークンの有効期限が設定されているので定期的にチェックしつつ再取得する必要性がある</p>
+
+<p>でOAuth2を利用するにあたって <a href="https://console.developers.google.com">https://console.developers.google.com</a> からプロジェクトのクライアントID及びクライアントシークレットを取得する必要がある。今回のはInstalled Applicationを使うのでクライアントのタイプはそっちで登録する</p>
+
+<p><img src="/images/2015/04/201504222145-1.jpg" class="img-fluid" alt="image" /></p>
+
+<p>まぁ下準備はこれくらい</p>
+<h4>サーバー側のOAuth2への対応修正</h4>
+<p>確証は無いけどOAuthService.getCurrentUserやisUserAdmin等のメソッドの引数にscopeを指定しないと正常にUserインスタンスを取得できない模様なので</p>
+<pre class="line-numbers"><code class="language-java">OAuthService service = OAuthServiceFactory.getOAuthService();
 User user = null;
 
 try {
@@ -88,7 +102,15 @@ try {
 } catch (OAuthRequestException e) {
     e.printStackTrace();
 }
-</code></pre><p>っていう感じで取得したりするような処理に書き換える必要がある模様。これを行わないでクライアント側で取得したトークンを使ってリクエストを投げるとInvalidOAuthTokenException等の例外が送出されてしまう模様。但し、これを修正してしまうとOAuth1.0aの際に指定していたscopeと一致しないような場合とかだとOAuth1.0aがすぐに通らなくなるので</p><p>んまぁサーバー側のGoogle App Engineの修正はこれだけ。修正してコンパイル後に修正版をデプロイしておく</p><h4>chrome.identity APIを使ったクライアント側を実装</h4><p>Chrome Extensionにはidentityパーミッションを付与すればchrome.identityが使えるようになる。chrome.identityを使うとGoogle Accountやそれ以外のOAuth2フローによるアクセストークンなどの取得が出来るようになる。但し、chrome.identity.getAuthTokenを使う場合だとChrome Syncの有効が必要になるっぽい気がするのでchrome.identity.launchWebAuthFlowのAPIを使ってGoogle Account認証を行ってそれからアクセストークンを取得して、その取得したアクセストークンを利用してサーバー側のGoogle App Engine側にAuthorizationヘッダーを付与してリクエストしてOAuth2によるユーザー処理を行えるようにする</p><p>※微妙と長いので</p><pre class="line-numbers"><code class="language-js">var client_id     = &quot;console.developers.google.comから取得したクライアントID&quot;;
+</code></pre>
+<p>っていう感じで取得したりするような処理に書き換える必要がある模様。これを行わないでクライアント側で取得したトークンを使ってリクエストを投げるとInvalidOAuthTokenException等の例外が送出されてしまう模様。但し、これを修正してしまうとOAuth1.0aの際に指定していたscopeと一致しないような場合とかだとOAuth1.0aがすぐに通らなくなるので</p>
+
+<p>んまぁサーバー側のGoogle App Engineの修正はこれだけ。修正してコンパイル後に修正版をデプロイしておく</p>
+<h4>chrome.identity APIを使ったクライアント側を実装</h4>
+<p>Chrome Extensionにはidentityパーミッションを付与すればchrome.identityが使えるようになる。chrome.identityを使うとGoogle Accountやそれ以外のOAuth2フローによるアクセストークンなどの取得が出来るようになる。但し、chrome.identity.getAuthTokenを使う場合だとChrome Syncの有効が必要になるっぽい気がするのでchrome.identity.launchWebAuthFlowのAPIを使ってGoogle Account認証を行ってそれからアクセストークンを取得して、その取得したアクセストークンを利用してサーバー側のGoogle App Engine側にAuthorizationヘッダーを付与してリクエストしてOAuth2によるユーザー処理を行えるようにする</p>
+
+<p>※微妙と長いので</p>
+<pre class="line-numbers"><code class="language-js">var client_id     = &quot;console.developers.google.comから取得したクライアントID&quot;;
 var client_secret = &quot;console.developers.google.comから取得したクライアンシークレット&quot;;
 
 var access_token  = localStorage[&quot;access_token&quot;];
@@ -215,13 +237,35 @@ function start_authorization() {
     }
   );
 }
-</code></pre><p>まぁそんな感じで要点をまとめると</p>
+</code></pre>
+<p>まぁそんな感じで要点をまとめると</p>
+
 <ul>
 <li>アクセストークンが取得されてないならchrome.identity.launchWebAuthFlowを使って認証及び認証コードの取得を行う。その認証コードを用いてアクセストークンを取得</li>
 <li>上記を実行後、OAuth2で保護されてるリソースへAuthorization: Bearerを用いてリクエストする(※アクセストークンの取得の際にtoken_type?かなんかで識別可能。Bearerの場合はBearerを使う)。その前にアクセストークンが有効かどうかをチェックした後に行う</li>
 <li>アクセストークンが有効切れになっているような場合(check_tokenにてのリクエストで400エラーが返ってくる場合等)にはrefresh_access_tokenを行ってアクセストークンの更新を行う。</li>
 </ul>
-<p>で動き的なのとしては</p><p><img src="/images/2015/04/201504222145-2.jpg" class="img-fluid" alt="image" /></p><p>みたいに許可しますか的なウィンドウが出るので許可すると</p><p><img src="/images/2015/04/201504222145-3.jpg" class="img-fluid" alt="image" /></p><p>みたいに認証コードが出るのでそのウィンドウを消すと</p><p><img src="/images/2015/04/201504222145-4.jpg" class="img-fluid" alt="image" /></p><p>というダイアログが出るので先ほどの認証コードをコピペする。でOKを押すとアクセストークンの取得が行われてそのトークンを用いてプロテクトリソースにアクセスする(console.logしてるので)</p><p>っていう感じでfetch apiを使ってやってるので色々とPromise関係でフローがややこしくなってるので上記コードでも若干バグる事があると思うので慎重利用しなきゃならんとは思うのですが…</p><p>んまぁそんな感じでGoogle App EngineのOAuthServiceを用いてOAuth2認証リソースを利用したいような感じをchrome.identity APIを使ってやる実験はとりあえず出来るっていう事で</p>
+
+<p>で動き的なのとしては</p>
+
+<p><img src="/images/2015/04/201504222145-2.jpg" class="img-fluid" alt="image" /></p>
+
+<p>みたいに許可しますか的なウィンドウが出るので許可すると</p>
+
+<p><img src="/images/2015/04/201504222145-3.jpg" class="img-fluid" alt="image" /></p>
+
+<p>みたいに認証コードが出るのでそのウィンドウを消すと</p>
+
+<p><img src="/images/2015/04/201504222145-4.jpg" class="img-fluid" alt="image" /></p>
+
+<p>というダイアログが出るので先ほどの認証コードをコピペする。でOKを押すとアクセストークンの取得が行われてそのトークンを用いてプロテクトリソースにアクセスする(console.logしてるので)</p>
+
+<p>っていう感じでfetch apiを使ってやってるので色々とPromise関係でフローがややこしくなってるので上記コードでも若干バグる事があると思うので慎重利用しなきゃならんとは思うのですが…</p>
+
+<p>んまぁそんな感じでGoogle App EngineのOAuthServiceを用いてOAuth2認証リソースを利用したいような感じをchrome.identity APIを使ってやる実験はとりあえず出来るっていう事で</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -313,7 +357,7 @@ function start_authorization() {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -334,9 +378,6 @@ function start_authorization() {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -449,7 +490,7 @@ function start_authorization() {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -472,20 +513,20 @@ function start_authorization() {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -495,13 +536,15 @@ function start_authorization() {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("e6e8910a3569de9a0d8c60330d104918015816f2");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

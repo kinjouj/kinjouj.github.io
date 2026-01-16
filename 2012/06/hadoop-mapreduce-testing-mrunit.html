@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-06-28T09:00:00+09:00">
+                <time datetime="2012-06-28 09:00:00 +0900">
                   <a href="/archives/2012/06">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["pom.xml", "src/main/java/sample/SampleMapper.java", "src/main/java/sample/SampleReducer.java", "src/test/java/SampleHadoopTestCase.java", "追記"]-->
-                <p>Hadoop MapReduceのテストを書く方法としてMRUnitっていうのがあるのを以前から知ってて、だけどまったく検証する気配が無いのでやってみた。但し、相変わらずMaven2を使う</p><h4>pom.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+                <!--[&quot;pom.xml&quot;, &quot;src/main/java/sample/SampleMapper.java&quot;, &quot;src/main/java/sample/SampleReducer.java&quot;, &quot;src/test/java/SampleHadoopTestCase.java&quot;, &quot;追記&quot;]-->
+                <p>Hadoop MapReduceのテストを書く方法としてMRUnitっていうのがあるのを以前から知ってて、だけどまったく検証する気配が無いのでやってみた。但し、相変わらずMaven2を使う</p>
+<h4>pom.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;project
     xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -118,7 +120,11 @@
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/project&gt;
-</code></pre><p>なぜかmvnrepositoryにはMRUnitの0.9.0-incubatingが上がってる模様げなのに、それを指定すると取得できないという罠に若干ハマったのでバージョンをひとつ下げました</p><p>これに書いてある通り使用するHadoopのバージョンは0.20.205</p><h4>src/main/java/sample/SampleMapper.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>なぜかmvnrepositoryにはMRUnitの0.9.0-incubatingが上がってる模様げなのに、それを指定すると取得できないという罠に若干ハマったのでバージョンをひとつ下げました</p>
+
+<p>これに書いてある通り使用するHadoopのバージョンは0.20.205</p>
+<h4>src/main/java/sample/SampleMapper.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 
@@ -174,7 +180,9 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, Text, IntWritab
         }
     }
 }
-</code></pre><h4>src/test/java/SampleHadoopTestCase.java</h4><p>で上記で書いたMapperとReducerを単一でもテストしつつMapReduceで処理した場合のテストを行なってみる</p><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4>src/test/java/SampleHadoopTestCase.java</h4>
+<p>で上記で書いたMapperとReducerを単一でもテストしつつMapReduceで処理した場合のテストを行なってみる</p>
+<pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -245,15 +253,27 @@ public class SampleHadoopTestCase {
         mrDriver.runTest();
     }
 }
-</code></pre><p>ってな感じで、MapperをテストするならMapDriver、ReducerをテストするならReduceDriver、MapperとReducerを流してMapReduceとして?テストするならMapReduceDriver(他にもPipelineMapReduceDriverとかもあるらしい)</p><p>でそれに対して、withInputで入力データをやってあげて、withOutputでそれのContext.writeなどから流れるのをテスト出来るっていう仕組みっぽい。であとは</p><pre class="line-numbers"><code class="language-sh">mvn test
-</code></pre><p>参考: <a href="https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial" target="_blank" rel="noopener noreferrer">https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial</a></p><h4>追記</h4><p>MavenでMRUnit-0.9.0-incubatingを使う場合には</p><pre class="line-numbers"><code class="language-xml">&lt;dependency&gt;
+</code></pre>
+<p>ってな感じで、MapperをテストするならMapDriver、ReducerをテストするならReduceDriver、MapperとReducerを流してMapReduceとして?テストするならMapReduceDriver(他にもPipelineMapReduceDriverとかもあるらしい)</p>
+
+<p>でそれに対して、withInputで入力データをやってあげて、withOutputでそれのContext.writeなどから流れるのをテスト出来るっていう仕組みっぽい。であとは</p>
+<pre class="line-numbers"><code class="language-sh">mvn test
+</code></pre>
+<p>参考: <a href="https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial">https://cwiki.apache.org/confluence/display/MRUNIT/MRUnit+Tutorial</a></p>
+<h4>追記</h4>
+<p>MavenでMRUnit-0.9.0-incubatingを使う場合には</p>
+<pre class="line-numbers"><code class="language-xml">&lt;dependency&gt;
   &lt;groupId&gt;org.apache.mrunit&lt;/groupId&gt;
   &lt;artifactId&gt;mrunit&lt;/artifactId&gt;
   &lt;version&gt;0.9.0-incubating&lt;/version&gt;
   &lt;scope&gt;test&lt;/scope&gt;
   &lt;classifier&gt;hadoop1&lt;/classifier&gt;
 &lt;/dependency&gt;
-</code></pre><p>というように&lt;classifier&gt;を設定しないといけない(0.20及び1.0系ならhadoop1、0.23とかの場合はhadoop2っぽい)</p>
+</code></pre>
+<p>というように&lt;classifier&gt;を設定しないといけない(0.20及び1.0系ならhadoop1、0.23とかの場合はhadoop2っぽい)</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -345,7 +365,7 @@ public class SampleHadoopTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -366,9 +386,6 @@ public class SampleHadoopTestCase {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -481,7 +498,7 @@ public class SampleHadoopTestCase {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -504,20 +521,20 @@ public class SampleHadoopTestCase {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -527,13 +544,15 @@ public class SampleHadoopTestCase {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("bbb809ff970ddcc5fa842e10dae6d64222caf6f6");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

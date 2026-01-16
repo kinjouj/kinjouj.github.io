@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-10-14T00:00:00+00:00">
+                <time datetime="2012-10-14 00:00:00 +0900">
                   <a href="/archives/2012/10">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["AndroidManifest.xml", "res/xml/accessibility_service.xml", "MainActivity.java", "res/layout/notify.xml", "SampleAccessibilityService.java", "追記", "追記2", "追記3"]-->
-                <p>ちょっと前にDeskNotifierっていうスマフォの通知をPCにプッシュするというアプリがあったのを見て思ったのですけど、(Android)スマフォのNotificationって監視して取得したり出来る物なのかっていう所が不明だったので色々と調査</p><p>で調査結果としてAccessibilityServiceを使う事で可能な模様、という事でやってみた。まぁ詳しい事は公式ドキュメントに書いてあるんですけど</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest
+                <!--[&quot;AndroidManifest.xml&quot;, &quot;res/xml/accessibility_service.xml&quot;, &quot;MainActivity.java&quot;, &quot;res/layout/notify.xml&quot;, &quot;SampleAccessibilityService.java&quot;, &quot;追記&quot;, &quot;追記2&quot;, &quot;追記3&quot;]-->
+                <p>ちょっと前にDeskNotifierっていうスマフォの通知をPCにプッシュするというアプリがあったのを見て思ったのですけど、(Android)スマフォのNotificationって監視して取得したり出来る物なのかっていう所が不明だったので色々と調査</p>
+
+<p>で調査結果としてAccessibilityServiceを使う事で可能な模様、という事でやってみた。まぁ詳しい事は公式ドキュメントに書いてあるんですけど</p>
+<h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;sample.test&quot;
     android:versionCode=&quot;1&quot;
@@ -115,14 +119,20 @@
 
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><p>Activityはテスト名目でただNotificationを送るだけのActivity。でAccessibilityServiceを継承したクラスに&lt;service&gt;に設定しておく。んでそのサービスの設定が必要になるのでそれを&lt;meta-data&gt;で設定しておく</p><h4>res/xml/accessibility_service.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+</code></pre>
+<p>Activityはテスト名目でただNotificationを送るだけのActivity。でAccessibilityServiceを継承したクラスに&lt;service&gt;に設定しておく。んでそのサービスの設定が必要になるのでそれを&lt;meta-data&gt;で設定しておく</p>
+<h4>res/xml/accessibility_service.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;accessibility-service
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:accessibilityEventTypes=&quot;typeNotificationStateChanged&quot;
     android:accessibilityFeedbackType=&quot;feedbackGeneric&quot;
     android:accessibilityFlags=&quot;flagDefault&quot;
     android:canRetrieveWindowContent=&quot;true&quot; /&gt;
-</code></pre><p>こいつも公式ドキュメントに書いてあるので詳しい事は省略しますが、<span style="color: red">android:packageNames</span>を定義すると対象とするパッケージを限定出来る模様。今回それを定義していないのでグローバルになる模様(確証は無い)</p><p>でこれを設定してインストールした場合にAndroid端末の設定画面のユーザー補助な所にサービスとして表示されるようになる。デフォルトではOFFになっているのでこれを使う場合はONにしておく</p><h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>こいつも公式ドキュメントに書いてあるので詳しい事は省略しますが、<span style="color: red">android:packageNames</span>を定義すると対象とするパッケージを限定出来る模様。今回それを定義していないのでグローバルになる模様(確証は無い)</p>
+
+<p>でこれを設定してインストールした場合にAndroid端末の設定画面のユーザー補助な所にサービスとして表示されるようになる。デフォルトではOFFになっているのでこれを使う場合はONにしておく</p>
+<h4>MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -166,7 +176,9 @@ public class MainActivity extends Activity {
         setContentView(btn);
     }
 }
-</code></pre><p>恐らくはデフォルトのNotificationのレイアウト構造自体はandroid.R.layout.notification_template_base(/path/to/aosp/framework/base/core/res/res/layout/notification_template_base.xml)だと思われる</p><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+</code></pre>
+<p>恐らくはデフォルトのNotificationのレイアウト構造自体はandroid.R.layout.notification_template_base(/path/to/aosp/framework/base/core/res/res/layout/notification_template_base.xml)だと思われる</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -302,7 +314,9 @@ http://www.apache.org/licenses/LICENSE-2.0
         &lt;/LinearLayout&gt;
     &lt;/LinearLayout&gt;
 &lt;/FrameLayout&gt;
-</code></pre><p>これでR.id.titleが定義されているので、パッケージを含めるとandroid.R.id.titleになるんだと思われる。なのでカスタムViewのレイアウトでも<span style="color: red">android:id</span>な部分はandroidプレフィックスで指定する事でカスタムViewを使った場合にでもグローバルと差を無くして取得出来る(はず。これも確証無し)</p><h4>res/layout/notify.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+</code></pre>
+<p>これでR.id.titleが定義されているので、パッケージを含めるとandroid.R.id.titleになるんだと思われる。なのでカスタムViewのレイアウトでも<span style="color: red">android:id</span>な部分はandroidプレフィックスで指定する事でカスタムViewを使った場合にでもグローバルと差を無くして取得出来る(はず。これも確証無し)</p>
+<h4>res/layout/notify.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;FrameLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;match_parent&quot;
@@ -314,7 +328,9 @@ http://www.apache.org/licenses/LICENSE-2.0
         android:layout_height=&quot;wrap_content&quot; /&gt;
 
 &lt;/FrameLayout&gt;
-</code></pre><p>上で言った通りなので詳しい事は省略。だけど、AndroidコアのNotificationのレイアウトだとFrameLayoutになってた気がするので、レイアウトベースはFrameLayoutを使用する</p><h4>SampleAccessibilityService.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>上で言った通りなので詳しい事は省略。だけど、AndroidコアのNotificationのレイアウトだとFrameLayoutになってた気がするので、レイアウトベースはFrameLayoutを使用する</p>
+<h4>SampleAccessibilityService.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.accessibilityservice.AccessibilityService;
 import android.app.Notification;
@@ -363,7 +379,21 @@ public class SampleAccessibilityService extends AccessibilityService {
     public void onInterrupt() {
     }
 }
-</code></pre><p>AccessibilityServiceを継承したクラスを作る。で検証はしてないんだけど、onServiceConnectedをオーバーライドして、setServiceInfo(AccessibilityServiceInfo)を設定する事で、上記で設定したaccessibility_service.xmlを使わずにサービスクラス側でコントロールする事も可能な模様(ってどっかのサイトに書いてた)</p><p>それとToastもNotificationとして認識されるのでそこ注意しておく。でToastの実体?っぽいのがandroid.widget.Toast$TNってなってるのでstartsWithでそこら辺チェックしておく。あとは取得されたNotificationからRemoteViewsを取得してそこのビューを取得してandroid.R.id.titleなUIコンポーネントにアクセスしてテキストを取得する事が可能な模様</p><p>ちなみにaccessibility_service.xmlの<span style="color:red">accessibilityEventTypes</span>によってはAccessibilityEventで取得出来る情報は限られている模様。そこも公式ドキュメントにしっかり書かれているので参照</p><p>公式ドキュメント: <a href="http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html" target="_blank" rel="noopener noreferrer">http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html</a></p><h4>追記</h4><p>Android4.3からはNotificationListenerServiceを用いる事で容易に実現可能っぽい。既に<a href="/android43-notificationlistenerservice.html">検証済み</a></p><h4>追記2</h4><p>古いAndroidのバージョンに関しては<a href="/android-accessibilityservice-legacy-firmware.html">AccessibilityServiceを古いAndroidバージョンで動かす</a>にて補足済み</p><h4>追記3</h4><p>追記2のリンク先にも書いてますが</p>
+</code></pre>
+<p>AccessibilityServiceを継承したクラスを作る。で検証はしてないんだけど、onServiceConnectedをオーバーライドして、setServiceInfo(AccessibilityServiceInfo)を設定する事で、上記で設定したaccessibility_service.xmlを使わずにサービスクラス側でコントロールする事も可能な模様(ってどっかのサイトに書いてた)</p>
+
+<p>それとToastもNotificationとして認識されるのでそこ注意しておく。でToastの実体?っぽいのがandroid.widget.Toast$TNってなってるのでstartsWithでそこら辺チェックしておく。あとは取得されたNotificationからRemoteViewsを取得してそこのビューを取得してandroid.R.id.titleなUIコンポーネントにアクセスしてテキストを取得する事が可能な模様</p>
+
+<p>ちなみにaccessibility_service.xmlの<span style="color:red">accessibilityEventTypes</span>によってはAccessibilityEventで取得出来る情報は限られている模様。そこも公式ドキュメントにしっかり書かれているので参照</p>
+
+<p>公式ドキュメント: <a href="http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html">http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html</a></p>
+<h4>追記</h4>
+<p>Android4.3からはNotificationListenerServiceを用いる事で容易に実現可能っぽい。既に<a href="/android43-notificationlistenerservice.html">検証済み</a></p>
+<h4>追記2</h4>
+<p>古いAndroidのバージョンに関しては<a href="/android-accessibilityservice-legacy-firmware.html">AccessibilityServiceを古いAndroidバージョンで動かす</a>にて補足済み</p>
+<h4>追記3</h4>
+<p>追記2のリンク先にも書いてますが</p>
+
 <blockquote class="twitter-tweet" lang="ja">
   <p>
     Android4.xだと4.1までなら問題無いらしいが、それ以降だとandroid.permission.BIND_ACCESSIBILITY_SERVICEを指定してないとユーザー補助機能に出てこない
@@ -374,6 +404,8 @@ public class SampleAccessibilityService extends AccessibilityService {
   </p>
 </blockquote>
 
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -465,7 +497,7 @@ public class SampleAccessibilityService extends AccessibilityService {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -486,9 +518,6 @@ public class SampleAccessibilityService extends AccessibilityService {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -601,7 +630,7 @@ public class SampleAccessibilityService extends AccessibilityService {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -624,20 +653,20 @@ public class SampleAccessibilityService extends AccessibilityService {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -647,13 +676,15 @@ public class SampleAccessibilityService extends AccessibilityService {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("be2e3da11f53e464541b637cda18ceb1817810aa");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

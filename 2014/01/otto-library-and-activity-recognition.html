@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-01-27T00:00:00+00:00">
+                <time datetime="2014-01-27 00:00:00 +0900">
                   <a href="/archives/2014/01">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -77,13 +78,28 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["プロジェクトの準備", "AndroidManifest.xml", "RecognitionIntentService.java", "BusProvider.java", "MainActivity.java"]-->
-                <p>ottoな勉強をするにあたってそういう要件が必要にならないと例にならない気がしたので、ActivityRecognitionを使って行動認識をActivityへottoを使って通知する仕組み的な事やってみた</p><p>記事下部に参考を書くと分かりづらいので以下を参考にした</p><p>参考1: <a href="http://qiita.com/amay077/items/a6b4ff0d69dd4d787ce2">Google I/O 2013 で発表された行動認識(Activity Recognition)を使ってみる</a> (※この例だとBroadcastReceiverで受け取ってる)  </p><p>参考2: <a href="http://developer.android.com/training/location/activity-recognition.html">Recognizing the User&#39;s Current Activity</a></p><p>ottoに関しては<a href="https://github.com/square/otto">公式なドキュメント辺り</a>を参照</p><h4>プロジェクトの準備</h4><p>ActivityRecognitionはGoogle Play Serviceなライブラリプロジェクトに含まれているのでAndroid Package Managerを使ってEclipseにプロジェクトをインポートする。で端末が古いのでGoogle Play Serviceのfroyoサポート辺りを使った。何やら最近のGoogle Play Serviceでは</p><pre class="line-numbers"><code class="language-xml">&lt;application&gt;
+                <!--[&quot;プロジェクトの準備&quot;, &quot;AndroidManifest.xml&quot;, &quot;RecognitionIntentService.java&quot;, &quot;BusProvider.java&quot;, &quot;MainActivity.java&quot;]-->
+                <p>ottoな勉強をするにあたってそういう要件が必要にならないと例にならない気がしたので、ActivityRecognitionを使って行動認識をActivityへottoを使って通知する仕組み的な事やってみた</p>
+
+<p>記事下部に参考を書くと分かりづらいので以下を参考にした</p>
+
+<p>参考1: <a href="http://qiita.com/amay077/items/a6b4ff0d69dd4d787ce2">Google I/O 2013 で発表された行動認識(Activity Recognition)を使ってみる</a> (※この例だとBroadcastReceiverで受け取ってる)  </p>
+
+<p>参考2: <a href="http://developer.android.com/training/location/activity-recognition.html">Recognizing the User&#39;s Current Activity</a></p>
+
+<p>ottoに関しては<a href="https://github.com/square/otto">公式なドキュメント辺り</a>を参照</p>
+<h4>プロジェクトの準備</h4>
+<p>ActivityRecognitionはGoogle Play Serviceなライブラリプロジェクトに含まれているのでAndroid Package Managerを使ってEclipseにプロジェクトをインポートする。で端末が古いのでGoogle Play Serviceのfroyoサポート辺りを使った。何やら最近のGoogle Play Serviceでは</p>
+<pre class="line-numbers"><code class="language-xml">&lt;application&gt;
     &lt;meta-data
         android:name=&quot;com.google.android.gms.version&quot;
         android:value=&quot;@integer/google_play_services_version&quot; /&gt;
 &lt;/application&gt;
-</code></pre><p>的な所が必要らしい。どうやらバージョンチェックをしているんだろうとは思うのだけど。それはおいといて</p><p>あとはottoのライブラリはダウンロードしてくるかビルドするかのどっちかをやってアプリプロジェクトのlibsに入れておけば良い</p><h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+</code></pre>
+<p>的な所が必要らしい。どうやらバージョンチェックをしているんだろうとは思うのだけど。それはおいといて</p>
+
+<p>あとはottoのライブラリはダウンロードしてくるかビルドするかのどっちかをやってアプリプロジェクトのlibsに入れておけば良い</p>
+<h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;sample.test&quot;
     android:versionCode=&quot;1&quot;
     android:versionName=&quot;1.0&quot; &gt;
@@ -161,7 +177,9 @@ public class RecognitionIntentService extends IntentService {
         return &quot;unknown&quot;;
     }
 }
-</code></pre><p>DetectedActivity#getTypeの返り値は<a href="http://developer.android.com/reference/com/google/android/gms/location/DetectedActivity.html#Summary">公式リファレンス</a>のSummaryセクションを参考に</p><h4>BusProvider.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre>
+<p>DetectedActivity#getTypeの返り値は<a href="http://developer.android.com/reference/com/google/android/gms/location/DetectedActivity.html#Summary">公式リファレンス</a>のSummaryセクションを参考に</p>
+<h4>BusProvider.java</h4><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
@@ -259,7 +277,13 @@ public class MainActivity extends Activity
         Log.v(TAG, &quot;eventName: &quot; + event.getEventName());
     }
 }
-</code></pre><p>ざっくり書いてるけど、開始したらまずBusをregister。それをする事でpostされたイベントを@Subscribeアノテーションなメソッドを受け取れる的な感じかと。ようはAcitvityRecognitionでアップデート通知されたらRecognitionIntentService#onHandleIntentが発生して、その結果がBusを通じてActivityにイベントがpushされる</p><p>んまぁんな感じでottoとActivityRecognitionの適当にやってみた</p>
+</code></pre>
+<p>ざっくり書いてるけど、開始したらまずBusをregister。それをする事でpostされたイベントを@Subscribeアノテーションなメソッドを受け取れる的な感じかと。ようはAcitvityRecognitionでアップデート通知されたらRecognitionIntentService#onHandleIntentが発生して、その結果がBusを通じてActivityにイベントがpushされる</p>
+
+<p>んまぁんな感じでottoとActivityRecognitionの適当にやってみた</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -351,7 +375,7 @@ public class MainActivity extends Activity
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -372,9 +396,6 @@ public class MainActivity extends Activity
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -487,7 +508,7 @@ public class MainActivity extends Activity
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -510,20 +531,20 @@ public class MainActivity extends Activity
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -533,13 +554,15 @@ public class MainActivity extends Activity
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("44dd9d09c3d1f40d209eb204fe02655e6e479fd8");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

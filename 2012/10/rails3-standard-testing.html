@@ -13,11 +13,12 @@
     <meta name="description" content="標準テストなのかどうかは定かじゃないのですが、RSpecじゃなくてActiveSupport::TestCase/ActionController::TestCaseとかを使って単体テストとかやってみた。あくまで「どう使うのか」っていうのがポイントなんでコード上は特に意味の無い内容になってますんで" />
     <title>RubyOnRailsの標準テストをやってみる - kinjouj.github.io</title>
     <link rel="prev" href="https://kinjouj.github.io/2012/10/android-pager-title-tab-strip.html" />
-    <link rel="next" href="https://kinjouj.github.io/2012/10/native-client-6-pp-urlloader.html" />
+    <link rel="next" href="https://kinjouj.github.io/2012/10/fluentd-1-getting-start.html" />
     <link rel="canonical" href="https://kinjouj.github.io/2012/10/rails3-standard-testing.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2012-10-16T00:00:00+00:00">
+                <time datetime="2012-10-16 00:00:00 +0900">
                   <a href="/archives/2012/10">
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,11 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["app/controllers/sample_controller.rb", "app/models/sample_model.rb", "app/helpers/sample_helper.rb", "test/fixtures/sample_models.yml", "test/unit/sample_model_test.rb", "test/unit/helper/sample_helper_test.rb", "test/functional/sample_controller_test.rb"]-->
-                <p>標準テストなのかどうかは定かじゃないのですが、RSpecじゃなくてActiveSupport::TestCase/ActionController::TestCaseとかを使って単体テストとかやってみた。あくまで「どう使うのか」っていうのがポイントなんでコード上は特に意味の無い内容になってますんで</p><p>ちなみにベースは某イベントで開催されたRailsなLTの物をベースとされたのを参加者が自身で起こした物な模様</p><h4>app/controllers/sample_controller.rb</h4><pre class="line-numbers"><code class="language-rb">class SampleController &lt; ApplicationController
+                <!--[&quot;app/controllers/sample_controller.rb&quot;, &quot;app/models/sample_model.rb&quot;, &quot;app/helpers/sample_helper.rb&quot;, &quot;test/fixtures/sample_models.yml&quot;, &quot;test/unit/sample_model_test.rb&quot;, &quot;test/unit/helper/sample_helper_test.rb&quot;, &quot;test/functional/sample_controller_test.rb&quot;]-->
+                <p>標準テストなのかどうかは定かじゃないのですが、RSpecじゃなくてActiveSupport::TestCase/ActionController::TestCaseとかを使って単体テストとかやってみた。あくまで「どう使うのか」っていうのがポイントなんでコード上は特に意味の無い内容になってますんで</p>
+
+<p>ちなみにベースは某イベントで開催されたRailsなLTの物をベースとされたのを参加者が自身で起こした物な模様</p>
+<h4>app/controllers/sample_controller.rb</h4><pre class="line-numbers"><code class="language-rb">class SampleController &lt; ApplicationController
 
   def index
     render :text =&gt; &quot;hoge&quot;
@@ -106,7 +110,11 @@ end
     return SampleModel.find_by_name(&quot;hoge&quot;)
   end
 end
-</code></pre><p>んじゃ、ここまで書いたのをテストする</p><h4>test/fixtures/sample_models.yml</h4><p>テスト時に投入されるデータをYAMLで定義すれば良い模様</p><pre class="line-numbers"><code class="language-yml">one:
+</code></pre>
+<p>んじゃ、ここまで書いたのをテストする</p>
+<h4>test/fixtures/sample_models.yml</h4>
+<p>テスト時に投入されるデータをYAMLで定義すれば良い模様</p>
+<pre class="line-numbers"><code class="language-yml">one:
   name: hoge
 
 two:
@@ -126,7 +134,9 @@ class SampleModelTestCase &lt; ActiveSupport::TestCase
     assert_not_nil SampleModel.find_by_name(&quot;hoge&quot;)
   end
 end
-</code></pre><p>まぁ特にモデルにメソッドを実装したりしてないので(ry</p><h4>test/unit/helper/sample_helper_test.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
+</code></pre>
+<p>まぁ特にモデルにメソッドを実装したりしてないので(ry</p>
+<h4>test/unit/helper/sample_helper_test.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
 
 class SampleHelperTestCase &lt; ActiveSupport::TestCase
 
@@ -139,7 +149,9 @@ class SampleHelperTestCase &lt; ActiveSupport::TestCase
     assert_equal entry.name, &quot;hoge&quot;
   end
 end
-</code></pre><p>ヘルパーテストのやり方あってるかは微妙なんすけど、とりあえずincludeしちゃって(ry</p><h4>test/functional/sample_controller_test.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
+</code></pre>
+<p>ヘルパーテストのやり方あってるかは微妙なんすけど、とりあえずincludeしちゃって(ry</p>
+<h4>test/functional/sample_controller_test.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
 require &quot;json&quot;
 
 class SampleControllerTest &lt; ActionController::TestCase
@@ -185,13 +197,17 @@ class SampleControllerTest &lt; ActionController::TestCase
     assert_equal data[&quot;id&quot;], &quot;1&quot;
   end
 end
-</code></pre><p>でコントローラーのテスト。respond_to等で処理される形式によりレスポンスを変えたりする場合には、:formatを指定するかrequest.acceptを変えてリクエストする事でそれに適したレスポンスが返ってくる模様</p>
+</code></pre>
+<p>でコントローラーのテスト。respond_to等で処理される形式によりレスポンスを変えたりする場合には、:formatを指定するかrequest.acceptを変えてリクエストする事でそれに適したレスポンスが返ってくる模様</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
           <div class="my-pagination mt-5">
             <!-- next post -->
-            <a class="float-start box-link" href="/2012/10/native-client-6-pp-urlloader.html">&lt;&nbsp;Native Client(NaCl)をやってみる (6) - pp::URLLoader -</a>
+            <a class="float-start box-link" href="/2012/10/fluentd-1-getting-start.html">&lt;&nbsp;fluentdを使ってみる</a>
             <!-- prev post -->
             <a class="float-end box-link" href="/2012/10/android-pager-title-tab-strip.html">PagerTitle(Tab)Stripを使ってみる&nbsp;&gt;</a>
           </div>
@@ -277,7 +293,7 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -298,9 +314,6 @@ end
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -413,7 +426,7 @@ end
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -436,20 +449,20 @@ end
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -459,13 +472,15 @@ end
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("19c703b659d06b0655565aaba5310dd81be96f32");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

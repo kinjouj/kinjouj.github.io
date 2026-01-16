@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2013-09-02T00:00:00+00:00">
+                <time datetime="2013-09-02 00:00:00 +0900">
                   <a href="/archives/2013/09">
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
@@ -78,15 +79,24 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["概要", "DBInputWritable.java", "DBOutputWritable.java", "SampleMapper.java", "SampleReducer.java", "Client.java"]-->
-                <p>今更って感じですが... っていうか元ブログ(自宅用)からの現在のバージョンで動くか確認しつつの転用っていう形</p><p>※ちなみに検証したHadoopのバージョンは1.2.1</p><h4>概要</h4><p>まぁ必要かどうかに関してはおいといて、MySQL等のデータベースからデータを取り出して別のテーブルにレポートとして出力する方法的な感じになるかなと。まぁBasic Construction的な形の使い方的にはHDFSにデータをうｐしてそれをMapReduceで処理する感じじゃねーかなと。まぁ今回あんま関係ないので(ry</p><p>とりあえず入力側なテーブルからデータをカウントして別テーブルにレポートとして出力する感じかと。作る必要性があるのは</p>
+                <!--[&quot;概要&quot;, &quot;DBInputWritable.java&quot;, &quot;DBOutputWritable.java&quot;, &quot;SampleMapper.java&quot;, &quot;SampleReducer.java&quot;, &quot;Client.java&quot;]-->
+                <p>今更って感じですが... っていうか元ブログ(自宅用)からの現在のバージョンで動くか確認しつつの転用っていう形</p>
+
+<p>※ちなみに検証したHadoopのバージョンは1.2.1</p>
+<h4>概要</h4>
+<p>まぁ必要かどうかに関してはおいといて、MySQL等のデータベースからデータを取り出して別のテーブルにレポートとして出力する方法的な感じになるかなと。まぁBasic Construction的な形の使い方的にはHDFSにデータをうｐしてそれをMapReduceで処理する感じじゃねーかなと。まぁ今回あんま関係ないので(ry</p>
+
+<p>とりあえず入力側なテーブルからデータをカウントして別テーブルにレポートとして出力する感じかと。作る必要性があるのは</p>
+
 <ul>
 <li>  Client.java (MapReduceタスクをぶん投げるやつ)</li>
 <li>  DBInputWritable.java (DBからのデータを受け取って保管しておく的なクラス)</li>
 <li>  DBOutputWritable.java (省略)</li>
 <li>  Mapper及びReducerなクラス</li>
 </ul>
-<p>の計5つのクラスが必要</p><h4>DBInputWritable.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+
+<p>の計5つのクラスが必要</p>
+<h4>DBInputWritable.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -133,7 +143,9 @@ public class DBInputWritable implements Writable, DBWritable {
         return name;
     }
 }
-</code></pre><p>InputFormat側から動的にインスタンスが作られる為に空コンストラクタは必ず必要になる。又、今回はファイルから読み込む訳ではないので、引数がDataInput/DataOutputの物はサポートしないようにする</p><h4>DBOutputWritable.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>InputFormat側から動的にインスタンスが作られる為に空コンストラクタは必ず必要になる。又、今回はファイルから読み込む訳ではないので、引数がDataInput/DataOutputの物はサポートしないようにする</p>
+<h4>DBOutputWritable.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -177,7 +189,9 @@ public class DBOutputWritable implements Writable, DBWritable {
         ps.setInt(2, count);
     }
 }
-</code></pre><p>ReducerからOutputFormat側に明示的に流す為、空引数なコンストラクタは必要ない</p><h4>SampleMapper.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>ReducerからOutputFormat側に明示的に流す為、空引数なコンストラクタは必要ない</p>
+<h4>SampleMapper.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 
@@ -205,7 +219,9 @@ public class SampleMapper extends Mapper&lt;LongWritable, DBInputWritable, Text,
         }
     }
 }
-</code></pre><p>DBInputFormatで行を読み込んで、DBInputWritableのreadFieldsが呼び出され引数に渡されるので、ジェネリックスの2番目はDBInputWritableを指定しなければならない</p><h4>SampleReducer.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>DBInputFormatで行を読み込んで、DBInputWritableのreadFieldsが呼び出され引数に渡されるので、ジェネリックスの2番目はDBInputWritableを指定しなければならない</p>
+<h4>SampleReducer.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 
@@ -232,7 +248,9 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, DBOutputWritabl
         }
     }
 }
-</code></pre><p>OutputFormatにはDBOutputWritableを流す為、値部の型はNullWritableにしておく。ジェネリックスの型もキー部はDBOutputWritableにする</p><h4>Client.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre>
+<p>OutputFormatにはDBOutputWritableを流す為、値部の型はNullWritableにしておく。ジェネリックスの型もキー部はDBOutputWritableにする</p>
+<h4>Client.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
@@ -285,8 +303,12 @@ public class Client {
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
 }
-</code></pre><p>っていう感じ。適当にinput_tblにデータ突っ込んで</p><pre class="line-numbers"><code class="language-">hadoop jar sample.jar sample.Client
-</code></pre><p>な感じでタスク送り込んでやると</p>
+</code></pre>
+<p>っていう感じ。適当にinput_tblにデータ突っ込んで</p>
+<pre class="line-numbers"><code class="language-">hadoop jar sample.jar sample.Client
+</code></pre>
+<p>な感じでタスク送り込んでやると</p>
+
 <pre>
 mysql> select * from output_tbl;
 +----+--------+-------+
@@ -298,7 +320,15 @@ mysql> select * from output_tbl;
 +----+--------+-------+
 3 rows in set (0.00 sec)
 </pre>
-<p>っ的な感じでDBに出力される</p><p>もちろんDBから取ってきてHDFSにレポートするとか、HDFSからデータ読み込んでDBにレポートするとかも出来るので(ry</p><p>まぁ使い方的な感じはこんなもんかと</p>
+
+<p>っ的な感じでDBに出力される</p>
+
+<p>もちろんDBから取ってきてHDFSにレポートするとか、HDFSからデータ読み込んでDBにレポートするとかも出来るので(ry</p>
+
+<p>まぁ使い方的な感じはこんなもんかと</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -390,7 +420,7 @@ mysql> select * from output_tbl;
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -411,9 +441,6 @@ mysql> select * from output_tbl;
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -526,7 +553,7 @@ mysql> select * from output_tbl;
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -549,20 +576,20 @@ mysql> select * from output_tbl;
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -572,13 +599,15 @@ mysql> select * from output_tbl;
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("db9c085adb1d44bfe2122fecadd409b0af105f0c");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

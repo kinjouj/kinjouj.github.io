@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2014-01-11T00:00:00+00:00">
+                <time datetime="2014-01-11 00:00:00 +0900">
                   <a href="/archives/2014/01">
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
@@ -79,16 +80,23 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["サーバー側", "クライアント側 (ブラウザ)", "クライアント側 (Android)"]-->
-                <p><a href="https://github.com/Gottox/socket.io-java-client">socket.io-java-client</a>を使えば出来るらしいのでちょっと要件検証目的でやってみた。ちなみにsocket.ioサーバーはnode.jsなやつを使う</p><h4>サーバー側</h4><pre class="line-numbers"><code class="language-">npm install -g socket.io
-</code></pre><p>-gオプションつける必要あるかどうかはおいといて</p><pre class="line-numbers"><code class="language-js">var io = require(&quot;socket.io&quot;).listen(8080);
+                <!--[&quot;サーバー側&quot;, &quot;クライアント側 (ブラウザ)&quot;, &quot;クライアント側 (Android)&quot;]-->
+                <p><a href="https://github.com/Gottox/socket.io-java-client">socket.io-java-client</a>を使えば出来るらしいのでちょっと要件検証目的でやってみた。ちなみにsocket.ioサーバーはnode.jsなやつを使う</p>
+<h4>サーバー側</h4><pre class="line-numbers"><code class="language-">npm install -g socket.io
+</code></pre>
+<p>-gオプションつける必要あるかどうかはおいといて</p>
+<pre class="line-numbers"><code class="language-js">var io = require(&quot;socket.io&quot;).listen(8080);
 io.sockets.on(&quot;connection&quot;, function(socket) {
   socket.on(&quot;message&quot;, function(data) {
     // 送った自身以外のクライアントへsend
     socket.broadcast.send(data);
   });
 });
-</code></pre><p>的なsocket.ioサーバーを作って起動しておく</p><h4>クライアント側 (ブラウザ)</h4><p>ブラウザで使うsocket.ioのライブラリ(<a href="http://socket.io/#how-to-use" target="_blank" rel="noopener noreferrer">http://socket.io/#how-to-use</a>で書かれてるやつ)は、npmでインストールしたsocket.ioパッケージ内の<span style="color: red">node_modules/socket.io-client/dist</span>内に入ってるのでコピペでしておく</p><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre>
+<p>的なsocket.ioサーバーを作って起動しておく</p>
+<h4>クライアント側 (ブラウザ)</h4>
+<p>ブラウザで使うsocket.ioのライブラリ(<a href="http://socket.io/#how-to-use">http://socket.io/#how-to-use</a>で書かれてるやつ)は、npmでインストールしたsocket.ioパッケージ内の<span style="color: red">node_modules/socket.io-client/dist</span>内に入ってるのでコピペでしておく</p>
+<pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;script type=&quot;text/javascript&quot; src=&quot;socket.io.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
@@ -107,7 +115,13 @@ io.sockets.on(&quot;connection&quot;, function(socket) {
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><p>socket.sendとsocket.emitってのがあるのけどsocket.sendだけ使う。socket.sendだとmessageというイベントキーによりデータをキャッチ出来るので(ry</p><h4>クライアント側 (Android)</h4><p>上記にも書いてるsocket.io-java-clientをダウンロードしてくる。ビルドの仕方は書いてるので省略する。socketio.jarをAndroidプロジェクトのlibsディレクトリに突っ込んでおけば良い</p><p>でブラウザ側なクライアントから受信したデータをListViewで出すだけっていう単純な事をする</p><pre class="line-numbers"><code class="language-java">package sample.test.socketio;
+</code></pre>
+<p>socket.sendとsocket.emitってのがあるのけどsocket.sendだけ使う。socket.sendだとmessageというイベントキーによりデータをキャッチ出来るので(ry</p>
+<h4>クライアント側 (Android)</h4>
+<p>上記にも書いてるsocket.io-java-clientをダウンロードしてくる。ビルドの仕方は書いてるので省略する。socketio.jarをAndroidプロジェクトのlibsディレクトリに突っ込んでおけば良い</p>
+
+<p>でブラウザ側なクライアントから受信したデータをListViewで出すだけっていう単純な事をする</p>
+<pre class="line-numbers"><code class="language-java">package sample.test.socketio;
 
 import java.net.MalformedURLException;
 
@@ -251,14 +265,28 @@ public class MainActivity extends Activity {
         }
     }
 }
-</code></pre><p>んまぁエラー処理とか適当なのでもうちょい厳密的にチェックしなきゃならんのですが。要はIOCallbackで適切なメソッドが呼び出されるってだけなんですが</p>
+</code></pre>
+<p>んまぁエラー処理とか適当なのでもうちょい厳密的にチェックしなきゃならんのですが。要はIOCallbackで適切なメソッドが呼び出されるってだけなんですが</p>
+
 <ul>
 <li>  emitならonメソッドが作用</li>
 <li>  sendならonMessage(以下参考)</li>
 </ul>
-<p>っていうようなメソッドが発生する。んまぁonConnectとかそういう系はおいといて、onMessageのメソッドがオーバーロードにより複数存在するのには、socket.ioサーバーにおいて</p><pre class="line-numbers"><code class="language-js">socket.send(&quot;...&quot;)
+
+<p>っていうようなメソッドが発生する。んまぁonConnectとかそういう系はおいといて、onMessageのメソッドがオーバーロードにより複数存在するのには、socket.ioサーバーにおいて</p>
+<pre class="line-numbers"><code class="language-js">socket.send(&quot;...&quot;)
 socket.json.send({})
-</code></pre><p>等によって処理されるメソッドが異なるっていう点は注意しなきゃならんかと</p><p>んまぁてな感じでやればブラウザクライアントから送ったデータがAndroidにも表示されて、Android側から送ったデータがHTML側にもブロードキャストされてるはず</p><p>終わり</p><p>参考: <a href="http://dev.classmethod.jp/smartphone/android-socket-io" target="_blank" rel="noopener noreferrer">http://dev.classmethod.jp/smartphone/android-socket-io</a></p>
+</code></pre>
+<p>等によって処理されるメソッドが異なるっていう点は注意しなきゃならんかと</p>
+
+<p>んまぁてな感じでやればブラウザクライアントから送ったデータがAndroidにも表示されて、Android側から送ったデータがHTML側にもブロードキャストされてるはず</p>
+
+<p>終わり</p>
+
+<p>参考: <a href="http://dev.classmethod.jp/smartphone/android-socket-io">http://dev.classmethod.jp/smartphone/android-socket-io</a></p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -350,7 +378,7 @@ socket.json.send({})
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -371,9 +399,6 @@ socket.json.send({})
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -486,7 +511,7 @@ socket.json.send({})
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -509,20 +534,20 @@ socket.json.send({})
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -532,13 +557,15 @@ socket.json.send({})
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("2f182c89ae5419cc6b9c7d6c883d21096235718b");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>

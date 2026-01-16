@@ -18,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/similarity.js"></script>
     <!--<link rel="stylesheet" type="text/css" href="/css/normalize.css" />-->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -58,7 +59,7 @@
           <div id="content">
             <div class="post">
               <div class="post-date">
-                <time datetime="2025-05-29T09:00:00+09:00">
+                <time datetime="2025-05-29 09:00:00 +0900">
                   <a href="/archives/2025/05">
                   <span class="post-date-year">2025</span>
                   <span class="hyphen">-</span>
@@ -77,8 +78,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--["Server A(nginx.conf)", "Server B(nginx.conf)", "アクセスログ", "Server A/nginx.conf", "Server B/nginx.conf"]-->
-                <p>Docker環境下でフロント部のリバースプロキシサーバーとコンテンツなどを配信するサーバーの構築した場合とする。設定は以下のように</p><h4>Server A(nginx.conf)</h4><pre class="line-numbers"><code class="language-nginx">events {
+                <!--[&quot;Server A(nginx.conf)&quot;, &quot;Server B(nginx.conf)&quot;, &quot;アクセスログ&quot;, &quot;Server A/nginx.conf&quot;, &quot;Server B/nginx.conf&quot;]-->
+                <p>Docker環境下でフロント部のリバースプロキシサーバーとコンテンツなどを配信するサーバーの構築した場合とする。設定は以下のように</p>
+<h4>Server A(nginx.conf)</h4><pre class="line-numbers"><code class="language-nginx">events {
 }
 
 http {
@@ -100,9 +102,19 @@ http {
         }
     }
 }
-</code></pre><p>Dockerfileはほぼ共通でnginx.confを各サーバーに設定するだけなので省略。ではこれでアクセスしてみると</p><h4>アクセスログ</h4><pre class="line-numbers"><code class="language-">192.168.1.10 - - [28/May/2025:15:27:24 +0000] &quot;GET / HTTP/1.1&quot; 200 2 &quot;-&quot; &quot;curl/8.5.0&quot;
-</code></pre><p>※192.168.1.10はクライアント側のIP</p><p>Server Aはフロントのリバースプロキシサーバー側なので問題無いがServer B側では</p><pre class="line-numbers"><code class="language-">172.16.0.3 - - [28/May/2025:15:27:24 +0000] &quot;GET / HTTP/1.0&quot; 200 2 &quot;-&quot; &quot;curl/8.5.0&quot;
-</code></pre><p>※172.16.0.3はServer A側のIP</p><p>Server B側でも正しくクライアント側のIPのアクセスログが欲しいはずなので以下のような設定を行う</p>
+</code></pre>
+<p>Dockerfileはほぼ共通でnginx.confを各サーバーに設定するだけなので省略。ではこれでアクセスしてみると</p>
+<h4>アクセスログ</h4><pre class="line-numbers"><code class="language-">192.168.1.10 - - [28/May/2025:15:27:24 +0000] &quot;GET / HTTP/1.1&quot; 200 2 &quot;-&quot; &quot;curl/8.5.0&quot;
+</code></pre>
+<p>※192.168.1.10はクライアント側のIP</p>
+
+<p>Server Aはフロントのリバースプロキシサーバー側なので問題無いがServer B側では</p>
+<pre class="line-numbers"><code class="language-">172.16.0.3 - - [28/May/2025:15:27:24 +0000] &quot;GET / HTTP/1.0&quot; 200 2 &quot;-&quot; &quot;curl/8.5.0&quot;
+</code></pre>
+<p>※172.16.0.3はServer A側のIP</p>
+
+<p>Server B側でも正しくクライアント側のIPのアクセスログが欲しいはずなので以下のような設定を行う</p>
+
 <ol>
 <li><p>Server AにX-Forwarded-Forの設定を行う</p></li>
 <li><p>set_real_ip_from/real_ip_headerの設定を行う</p></li>
@@ -132,8 +144,14 @@ http {
         }
     }
 }
-</code></pre><p>設定してから(Server B)アクセスログを見てみると</p><pre class="line-numbers"><code class="language-">192.168.1.10 - - [28/May/2025:16:10:19 +0000] &quot;GET / HTTP/1.0&quot; 200 2 &quot;-&quot; &quot;curl/8.5.0
-</code></pre><p>てな感じになる。nginx側設定に関しては<a href="https://christina04.hatenablog.com/entry/2016/10/25/190000" target="_blank" rel="noopener noreferrer">https://christina04.hatenablog.com/entry/2016/10/25/190000</a>がすごく参考になるので(ry</p>
+</code></pre>
+<p>設定してから(Server B)アクセスログを見てみると</p>
+<pre class="line-numbers"><code class="language-">192.168.1.10 - - [28/May/2025:16:10:19 +0000] &quot;GET / HTTP/1.0&quot; 200 2 &quot;-&quot; &quot;curl/8.5.0
+</code></pre>
+<p>てな感じになる。nginx側設定に関しては<a href="https://christina04.hatenablog.com/entry/2016/10/25/190000">https://christina04.hatenablog.com/entry/2016/10/25/190000</a>がすごく参考になるので(ry</p>
+
+              </div>
+              <div class="post-similarity">
               </div>
             </div>
           </div>
@@ -225,7 +243,7 @@ http {
 </ul>
 
   <li>
-    <a href="/archives/category/javascript">JavaScript (168)</a>
+    <a href="/archives/category/javascript">JavaScript (164)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
@@ -246,9 +264,6 @@ http {
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/native-client">Native Client (8)</a>
-  </li>
   <li>
     <a href="/archives/category/jquery">jQuery (6)</a>
   </li>
@@ -361,7 +376,7 @@ http {
     <a href="/archives/category/docker">Docker (9)</a>
   </li>
   <li>
-    <a href="/archives/category/html5">HTML5 (8)</a>
+    <a href="/archives/category/html5">HTML5 (7)</a>
   </li>
   <li>
     <a href="/archives/category/css">CSS (7)</a>
@@ -384,20 +399,20 @@ http {
 </ul>
 
   <li>
-    <a href="/archives/category/c">C (14)</a>
+    <a href="/archives/category/perl">Perl (10)</a>
+  </li>
+  <li>
+    <a href="/archives/category/c">C (10)</a>
   </li>
   <ul class="mx-2 my-1">
   <li>
-    <a href="/archives/category/c-plus-plus">C++ (14)</a>
+    <a href="/archives/category/c-plus-plus">C++ (10)</a>
   </li>
   <li>
     <a href="/archives/category/objective-c">Objective-C (1)</a>
   </li>
 </ul>
 
-  <li>
-    <a href="/archives/category/perl">Perl (10)</a>
-  </li>
   <li>
     <a href="/archives/category/she-hui">社会 (1)</a>
   </li>
@@ -407,13 +422,15 @@ http {
         </aside>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px right: 30px">
+    <button id="btn-back-to-top" type="button" class="btn btn-info btn-floating btn-lg" style="position: fixed; bottom: 20px; right: 30px">
       <i class="fas fa-arrow-up"></i>
     </button>
     <script type="text/javascript">
 $("#btn-back-to-top").click(() => {
   $("body").animate({ scrollTop: 0 });
 });
+
+fetchSimilarity("dcad4352080fddd14a02b86f8773e2c4f96b5a6a");
     </script>
     <footer>
       <div class="footer-content text-center">Powered by <a href="https://github.com/kinjouj/simpress">simpress</a>(octopress like site generator)</div>
