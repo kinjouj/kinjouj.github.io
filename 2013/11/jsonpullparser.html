@@ -25,7 +25,7 @@
     <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-56169419-1', 'auto');ga("send", "pageview");</script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg border-bottom border-secondary p-0">
+    <nav class="navbar navbar-expand-lg p-0">
       <div class="container-fluid">
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -45,7 +45,7 @@
         </nav>
       </div>
     </nav>
-    <div>
+    <div class="logo">
       <header class="logo-header text-center">
         <h2><a href="/">kinjouj.github.io</a></h2>
       </header>
@@ -74,9 +74,9 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--[[1, "App.tsx"], [2, "Content.tsx"], [3, "余談"]]-->
+                <!--[["4773954008811225380", "App.tsx"], ["4974339438311776912", "Content.tsx"], ["13837244650170103497", "余談"]]-->
                 <p><a href="https://github.com/vvakame/JsonPullParser">jsonpullparser</a>を使ってみた</p>
-<h4>検証環境の構築</h4>
+<h4 id="6985637413790449232">検証環境の構築</h4>
 <p>jsonpullparser-coreとjsonpullparser-aptが最低限必要。但しapt側は実際動かす場合には必要なくあくまでアノテーションプロセッサーによるソースコードの生成を利用する</p>
 <pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;eclipse&quot;
@@ -100,7 +100,7 @@ compileJava {
 <p>な感じでcompileタスクプロセス上でjsonpullparser-aptが処理されれば良いんじゃないかと。あとEclipseとかでやる場合には注釈処理・ファクトリーパス等の設定しておくだけで良い</p>
 
 <p>で利用するJSONデータ自体は <a href="https://api.github.com/users/kinjouj/repos">https://api.github.com/users/kinjouj/repos</a> なGithub APIを利用する。これが手っ取り早いので</p>
-<h4>Repository.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
+<h4 id="17267578190707938058">Repository.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
 
 import net.vvakame.util.jsonpullparser.annotation.JsonKey;
 import net.vvakame.util.jsonpullparser.annotation.JsonModel;
@@ -154,7 +154,7 @@ public class Repository {
 </ul>
 
 <p>っていうように怒られる</p>
-<h4>User.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
+<h4 id="16384086468794386054">User.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
 
 import java.net.URL;
 
@@ -202,7 +202,7 @@ public class User {
 <p>書いてあるとおりjava.net.URLは型変換がデフォルトでサポートされていないのでTokenConverterを利用してサポートされていない型への変換を行わないとマッピング出来ない</p>
 
 <p>でまぁ@JsonModelなクラスを定義するとアノテーションプロセッサーによって、デフォルトではGenなサフィックスが付与されたJavaクラスソースが生成される</p>
-<h4>URLTokenConverter.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
+<h4 id="13270226920284668667">URLTokenConverter.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -240,7 +240,7 @@ public class URLTokenConverter extends TokenConverter&lt;url&gt; {
         writer.write(obj.toString());
     }
 }
-</code></pre><h4>RepositoryTest.java</h4><pre class="line-numbers"><code class="language-java">import java.net.URL;
+</code></pre><h4 id="9197790521313567489">RepositoryTest.java</h4><pre class="line-numbers"><code class="language-java">import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
@@ -288,7 +288,7 @@ public class RepositoryTest {
 <p>コメントで書いてるように最後でテストがfailする。理由としてUser.javaが参照するのは <a href="https://api.github.com/users/kinjouj">https://api.github.com/users/kinjouj</a> で参照できるのと <a href="https://api.github.com/users/kinjouj/repos">https://api.github.com/users/kinjouj/repos</a> で参照できるownerに互換性が無い。今回はパースする対象が前者のURLの方なので、ownerなJSONにnameが無いので</p>
 
 <p>でアノテーションプロセッサーによって生成されたクラスのgetメソッドのオーバーライドメソッドに色々あるので引数がStringとかのメソッドもあるのでそういうのを利用する事でJSONリクエストをパースしたりとかも出来る</p>
-<h4>余談: ハッシュ(オブジェクト)形式をTokenConverterでパースする</h4>
+<h4 id="7890917186169732536">余談: ハッシュ(オブジェクト)形式をTokenConverterでパースする</h4>
 <p>例えば上記のUserクラスが@JsonModelでは無いケースを利用する場合にはデフォルトで型変換な方式が行われないので、@JsonKeyで参照する事自体がコンパイルすら出来ない。そういう場合は上記でも書いたようにTokenConverterを作れば良い</p>
 <pre class="line-numbers"><code class="language-java">package sample.model;
 

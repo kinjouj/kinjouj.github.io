@@ -25,7 +25,7 @@
     <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-56169419-1', 'auto');ga("send", "pageview");</script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg border-bottom border-secondary p-0">
+    <nav class="navbar navbar-expand-lg p-0">
       <div class="container-fluid">
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -45,7 +45,7 @@
         </nav>
       </div>
     </nav>
-    <div>
+    <div class="logo">
       <header class="logo-header text-center">
         <h2><a href="/">kinjouj.github.io</a></h2>
       </header>
@@ -75,15 +75,15 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--[[1, "App.tsx"], [2, "Content.tsx"], [3, "余談"]]-->
+                <!--[["4773954008811225380", "App.tsx"], ["4974339438311776912", "Content.tsx"], ["13837244650170103497", "余談"]]-->
                 <p>検証したのいつかは覚えてないんですが、ネタとして書いておく</p>
 
 <p>Android API Level 11(Android3.x)くらいから(RemoteViews.setRemoteAdapter辺りがAPI Level14が必要なのでAndroid4.0以降)だと思うんですが、AppWidgetにListViewが使えるようになってる。それを検証したという件</p>
-<h4>要件</h4>
+<h4 id="6177217346024174885">要件</h4>
 <p>AppWidgetで自分のTwitterのTLの10件を取得してそれをListViewとして表示する。OAuth使いません、まだ普通にリクエストしても取得できる模様なので(正確にはTwitter API 1.1を使う場合には認証が必須かと)</p>
 
 <p>あとAndroid4.2(Emulator)で検証</p>
-<h4>AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<h4 id="17604156503138820600">AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;net.kinjouj.test.android_appwidget_listview_demo&quot;
@@ -119,7 +119,7 @@
 <p>API Level 11以上なんですが、RemoteViews.setRemoteAdapterのメソッドがAPI Level 14以上じゃないといけないのでminSdkVersionは14で良いんじゃないかと</p>
 
 <p>んでAppWidgetの定義ファイルを作る</p>
-<h4>res/xml/widget.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="4114303559410617702">res/xml/widget.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;appwidget-provider
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:minWidth=&quot;294dp&quot;
@@ -129,7 +129,7 @@
 <p>確かAppWidgetのWidth/Heightの計算式が「74 * セル数 - 2」なので、今回4面を使うので「74 * 4 - 2 = 294」になるような感じかと</p>
 
 <p>でinitialLayoutで指定されているレイアウト定義を使うのでそれを作る</p>
-<h4>res/layout/widget_layout.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="11983384042290580688">res/layout/widget_layout.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;RelativeLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;fill_parent&quot;
@@ -164,7 +164,7 @@
 &lt;/RelativeLayout&gt;
 </code></pre>
 <p>reload_btn_labelは適当にres/values/strings.xmlに設定しとく。まぁただのレイアウトなんだが、ListViewを使ってるっていう所。でListViewを使うのにデータをレンダリングする際に使うレイアウトファイルも必要なのでそれも作る</p>
-<h4>res/layout/widget_listview_row.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<h4 id="11019043506189604778">res/layout/widget_listview_row.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;LinearLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;fill_parent&quot;
@@ -188,7 +188,7 @@
 <p>プロフィール画像とツイートだけを表示するだけ</p>
 
 <p>でここからAppWidgetのプログラミングを書く</p>
-<h4>SampleWidgetProvider.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
+<h4 id="8077701591284787446">SampleWidgetProvider.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -276,7 +276,7 @@ public class SampleWidgetProvider extends AppWidgetProvider {
 <p>まぁやりたいならAlarmManagerとか使ってやる方で良いかと</p>
 
 <p>でRemoteViews自体の画面処理自体はSampleWidgetServiceに要求している?ので作る</p>
-<h4>SampleWidgetService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
+<h4 id="4576907414450729226">SampleWidgetService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
 
 import java.io.IOException;
 
@@ -440,7 +440,7 @@ public class SampleWidgetService extends RemoteViewsService {
 <p><img src="/images/2013/01/20130118104310.png" alt="image" /></p>
 
 <p>っつー感じでAppWidgetでListView使えるみたいな感じ</p>
-<h4>追記</h4>
+<h4 id="888620345048677983">追記</h4>
 <p>AndoidAnnotations使われているけど、一応上記同様なソースは <a href="https://github.com/kinjouj/android_appwidget_listview_demo">https://github.com/kinjouj/android_appwidget_listview_demo</a> にて公開してます</p>
 
               </div>

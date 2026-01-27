@@ -33,7 +33,7 @@
     <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-56169419-1', 'auto');ga("send", "pageview");</script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg border-bottom border-secondary p-0">
+    <nav class="navbar navbar-expand-lg p-0">
       <div class="container-fluid">
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -53,7 +53,7 @@
         </nav>
       </div>
     </nav>
-    <div>
+    <div class="logo">
       <header class="logo-header text-center">
         <h2><a href="/">kinjouj.github.io</a></h2>
       </header>
@@ -84,7 +84,7 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--[[1, "App.tsx"], [2, "Content.tsx"], [3, "余談"]]-->
+                <!--[["4773954008811225380", "App.tsx"], ["4974339438311776912", "Content.tsx"], ["13837244650170103497", "余談"]]-->
                 <blockquote class="twitter-tweet" lang="ja">
   <p>
     GradleのRobolectricテスト用プラグインとして、非推奨になったJake氏のgradle-android-test-pluginではなくNovoda氏のrobolectric-pluginを使っているサンプル <a href="http://t.co/lgPqRqbHHE">http://t.co/lgPqRqbHHE</a> …
@@ -96,13 +96,13 @@
 </blockquote>
 
 <p>っていう事でrobolectric-pluginっていうのがあるっては知ってはいたんですが、どうも上手く行かなずな感じで。まぁ一回は挫折したんですが再チャレンジでようやくテストの実行が出来たのでメモっておく</p>
-<h4>構成</h4>
+<h4 id="11991969466577374764">構成</h4>
 <p>構成は前回の[gradle-android-test-plugin+Robolectricでテスト][1]のをそのまま利用する。build.gradle等を色々書き換えしたりとかをする</p>
-<h4>公式のrobolectric-pluginが動かない</h4>
+<h4 id="15114312802330458464">公式のrobolectric-pluginが動かない</h4>
 <p>どうやっても「java.lang.UnsupportedOperationException」が出てしまう。なので、 <a href="http://qiita.com/turugina/items/972f46b40bb972c180f0">http://qiita.com/turugina/items/972f46b40bb972c180f0</a> にて提供されている修正版を使えば何やら動くらしい。これに関しては原因がなんであるのかつきとめられていないけど</p>
 
 <p>まぁ <a href="https://github.com/turugina/robolectric-plugin">https://github.com/turugina/robolectric-plugin</a> からチェックアウトしてgradle installすれば良い。あとはプラグインのロードをローカルから取ってくる形にすれば使う事が出来る</p>
-<h4>build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
+<h4 id="14187816293443410925">build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
         mavenLocal()
@@ -128,7 +128,7 @@ allprojects {
         }
     }
 }
-</code></pre><h4>app/build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;android&quot;
+</code></pre><h4 id="16287574037358616727">app/build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;android&quot;
 // robolectric-pluginをロード
 apply plugin: &quot;robolectric&quot;
 
@@ -152,7 +152,7 @@ tasks.withType(Test) {
 }
 </code></pre>
 <p>あとはrobolectricタスクを動かせばテストが実行されるのだけど、これだけでもまだ成功しない</p>
-<h4>android.content.res.Resources$NotFoundException が出る</h4>
+<h4 id="2382328598868131951">android.content.res.Resources$NotFoundException が出る</h4>
 <p>まぁ単純にリソースのある場所が正確に設定されていないからでしょう。おそらくの原因がRobolectricTestRunnerだと思うので前回も同様にこれを継承して新しいのを作る</p>
 
 <p>で記事トップに書いてる[robolectric-pluginを使うサンプル][2]は、Shadowsも使ってないしリソースも使ってない、つまりRobolectricの機能をほとんど使ってない状態、そもそもRobolectricGradleTestRunner自体がアプリプロジェクト内のsrc/main/resをリソースとして指定しているわけなのでライブラリプロジェクト等が伴うような物の場合であるとテストの実行に失敗するのでは無いかと</p>

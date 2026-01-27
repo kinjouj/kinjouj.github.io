@@ -25,7 +25,7 @@
     <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-56169419-1', 'auto');ga("send", "pageview");</script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg border-bottom border-secondary p-0">
+    <nav class="navbar navbar-expand-lg p-0">
       <div class="container-fluid">
         <nav class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -45,7 +45,7 @@
         </nav>
       </div>
     </nav>
-    <div>
+    <div class="logo">
       <header class="logo-header text-center">
         <h2><a href="/">kinjouj.github.io</a></h2>
       </header>
@@ -75,13 +75,13 @@
                 </span>
               </p>
               <div class="post-content">
-                <!--[[1, "App.tsx"], [2, "Content.tsx"], [3, "余談"]]-->
+                <!--[["4773954008811225380", "App.tsx"], ["4974339438311776912", "Content.tsx"], ["13837244650170103497", "余談"]]-->
                 <p>oauth.jsを使ってTwitter APIを利用するのは前にもやったのですが、その際にはAccess Tokenを<a href="http://dev.twitter.com">http://dev.twitter.com</a>から発行してそのままコピペしてやったのでAccess Tokenを取得して云々するという所を完全にすっ飛ばした。なので今回はその処理を含めてやってみる</p>
-<h4>概要</h4>
+<h4 id="8578203719347004872">概要</h4>
 <p>ブラウザアクションをクリックした際に出るポップアップにホームタイムラインを表示する。その際に認証されてなかったらOAuthで認証を要求させてAccess Tokenを取得する。あくまでAccess Token自体をソース内にコピペはしない。sha1.js、oauth.js、jquery.jsは別途でダウンロードしてくる</p>
 
 <p>で今回はChrome ExtensionなのでTwitter OAuthのCallback URLは空にしてPINを画面上に出るようにする。その際にそのPINをコピペしなくてもそこはコンテントスクリプトを使って自動で処理出来るようにする</p>
-<h4>twitter.js</h4>
+<h4 id="4966881687307813090">twitter.js</h4>
 <p>oauth.jsを使ってTwitter APIを云々するJavaScriptを作る</p>
 <pre class="line-numbers"><code class="language-js">const CONSUMER_KEY = &quot;省略&quot;;
 const CONSUMER_SECRET = &quot;省略&quot;;
@@ -235,7 +235,7 @@ Twitter.prototype.fetchTimelines = function(cb) {
 <p>チェック系をまったくしてないですけど、ざっくり書くとこんな感じで。まぁ認証してアクセストークンを取得して、そこからホームタイムラインを取得するAPIにリクエストを投げるという処理</p>
 
 <p>んじゃこれからChrome Extensionの開発をする</p>
-<h4>manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+<h4 id="13592507132287996198">manifest.json</h4><pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;test&quot;,
   &quot;version&quot;: &quot;0.1&quot;,
   &quot;content_scripts&quot;: [
@@ -257,7 +257,7 @@ Twitter.prototype.fetchTimelines = function(cb) {
 }
 </code></pre>
 <p>今回はContent Scriptを使ってPINコードを自動でコピペして処理するが、その処理自体は主にBackground Pageに促すようにする。でBrowser Action側も主な処理は同様にBackground Pageを介して行う(getBackgroundPageを使うだけ)</p>
-<h4>background.js</h4><pre class="line-numbers"><code class="language-js">var api = new Twitter();
+<h4 id="9099523278933290131">background.js</h4><pre class="line-numbers"><code class="language-js">var api = new Twitter();
 
 chrome.extension.onRequest.addListener(function(req, sender) {
   // Content Scriptから来たPINコードを処理する
@@ -267,7 +267,7 @@ chrome.extension.onRequest.addListener(function(req, sender) {
 function getTwitterAPI() {
   return api;
 }
-</code></pre><h4>popup.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+</code></pre><h4 id="4550657680962571079">popup.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
     &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;popup.css&quot; /&gt;
@@ -282,7 +282,7 @@ function getTwitterAPI() {
     &lt;script type=&quot;text/javascript&quot; src=&quot;popup.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><h4>popup.js</h4><pre class="line-numbers"><code class="language-js">// Background Pageを取得する
+</code></pre><h4 id="9882876469129036672">popup.js</h4><pre class="line-numbers"><code class="language-js">// Background Pageを取得する
 var bgPage = chrome.extension.getBackgroundPage();
 
 // Background Pageで初期化されているTwitter APIなクラスを取得する
@@ -316,7 +316,7 @@ function login() {
     });
   }
 })();
-</code></pre><h4>content_script.js</h4><pre class="line-numbers"><code class="language-js">var pin = document.querySelector(&quot;div#oauth_pin &gt; p &gt; kbd &gt; code&quot;);
+</code></pre><h4 id="1070431523880408246">content_script.js</h4><pre class="line-numbers"><code class="language-js">var pin = document.querySelector(&quot;div#oauth_pin &gt; p &gt; kbd &gt; code&quot;);
 
 if ((pin !== undefined &amp;&amp; pin !== null) &amp;&amp; /^d{7}$/.test(pin.innerText)) {
   // Background PageでonRequestさせて処理させる
@@ -332,7 +332,7 @@ if ((pin !== undefined &amp;&amp; pin !== null) &amp;&amp; /^d{7}$/.test(pin.inn
 <p><img src="/images/2012/08/20120802181114.png" alt="image" /></p>
 
 <p>というようにホームタイムラインが表示される。んまぁそんな感じでTwitter APIをアクセストークンを取得して行う場合は大体こんな感じかなと</p>
-<h4>追記</h4>
+<h4 id="888620345048677983">追記</h4>
 <p><a href="https://github.com/kinjouj/chrome-extension-twitter-oauth-demo">https://github.com/kinjouj/chrome-extension-twitter-oauth-demo</a> の方にてチェックアウト出来るようにしました(但し、oauth.js・sha1.js・jquery.js等は未混入)</p>
 
 <p>又、主に記事は修正せずにgithub側の方へ修正を行いますのであしからず</p>
