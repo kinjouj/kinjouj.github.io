@@ -9,7 +9,7 @@ class SearchModal extends HTMLElement {
                 <div class="input-group">
                   <input type="hidden" name="hl" value="ja" />
                   <input type="hidden" name="sitesearch" value="kinjouj.github.io" />
-                  <input type="search" name="q" class="form-control py-4 rounded-2" placeholder="Search" />
+                  <input type="search" name="q" class="form-control rounded-2 py-4" placeholder="Search" />
                 </div>
               </form>
             </div>
@@ -34,7 +34,7 @@ class SearchModal extends HTMLElement {
 class BackToTopButton extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
-      <a href="#top" class="btn btn-info btn-floating btn-lg btn-back-to-top">
+      <a href="#top" class="btn-back-to-top btn btn-info btn-floating btn-lg">
         <i class="fas fa-arrow-up"></i>
       </a>
     `;
