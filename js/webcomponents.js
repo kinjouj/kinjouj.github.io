@@ -1,11 +1,35 @@
-class SearchModal extends HTMLElement {
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="modal fade" id="searchModal">
+import { LitElement, html } from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js';
+
+class SearchModal extends LitElement {
+  createRenderRoot() {
+    return this;
+  }
+
+  handleSearch(e) {
+    const modalElement = document.getElementById('searchModal');
+    bootstrap.Modal.getInstance(modalElement).hide();
+  }
+
+  firstUpdated() {
+    const modalElement = this.querySelector('#searchModal');
+    
+    modalElement.addEventListener('shown.bs.modal', () => this.querySelector('input[name="q"]')?.focus());
+    modalElement.addEventListener('hide.bs.modal', () => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+
+      requestAnimationFrame(() => modalElement.removeAttribute('aria-hidden'));
+    });
+  }
+
+  render() {
+    return html`
+      <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-modal="true">
         <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content bg-transparent">
+          <div class="modal-content bg-transparent border-0">
             <div class="modal-body">
-              <form action="https://www.google.com/search" method="GET" onsubmit="bootstrap.Modal.getInstance(document.getElementById('searchModal')).hide()">
+              <form action="https://www.google.com/search" method="GET" @submit="${this.handleSearch}">
                 <div class="input-group">
                   <input type="hidden" name="hl" value="ja" />
                   <input type="hidden" name="sitesearch" value="kinjouj.github.io" />
@@ -17,24 +41,17 @@ class SearchModal extends HTMLElement {
         </div>
       </div>
     `;
-
-    const modal = document.getElementById('searchModal');
-    modal.addEventListener('shown.bs.modal', () => {
-      requestAnimationFrame(() => {
-        document.querySelector('#searchModal input[name="q"]').focus();
-      });
-    });
-
-    modal.addEventListener('hide.bs.modal', () => {
-      $('.modal').removeAttr('aria-hidden');
-    });
   }
 }
 
-class BackToTopButton extends HTMLElement {
-  connectedCallback() {
-    this.innerHTML = `
-      <a href="#top" class="btn-back-to-top btn btn-info btn-floating btn-lg">
+class TopElevator extends LitElement {
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    return html`
+      <a href="#" class="top-elevator btn btn-info btn-floating btn-lg">
         <i class="fas fa-arrow-up"></i>
       </a>
     `;
@@ -42,4 +59,4 @@ class BackToTopButton extends HTMLElement {
 }
 
 customElements.define('search-modal', SearchModal);
-customElements.define('back-to-top', BackToTopButton);
+customElements.define('top-elevator', TopElevator);
