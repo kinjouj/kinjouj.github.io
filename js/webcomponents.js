@@ -51,7 +51,7 @@ class TopElevator extends LitElement {
 
   render() {
     return html`
-      <a href="#" class="top-elevator btn btn-info btn-floating btn-lg">
+      <a href="#" class="top-elevator btn btn-info btn-floating btn-lg" aria-label="ページトップ">
         <i class="fas fa-arrow-up"></i>
       </a>
     `;
