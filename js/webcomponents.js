@@ -25,6 +25,9 @@ class SearchModal extends LitElement {
 
   render() {
     return html`
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#searchModal" aria-label="Search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
       <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-modal="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content bg-transparent border-0">
@@ -44,19 +47,4 @@ class SearchModal extends LitElement {
   }
 }
 
-class TopElevator extends LitElement {
-  createRenderRoot() {
-    return this;
-  }
-
-  render() {
-    return html`
-      <a href="#" class="top-elevator btn btn-info btn-floating btn-lg" aria-label="ページトップ">
-        <i class="fas fa-arrow-up"></i>
-      </a>
-    `;
-  }
-}
-
 customElements.define('search-modal', SearchModal);
-customElements.define('top-elevator', TopElevator);
