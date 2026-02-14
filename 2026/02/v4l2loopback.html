@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="v4l2loopbackを使うことで仮想カメラデバイスを作ってそこに映像とかをffmpegとかで流し込んだりすることでそのデバイスを使って映像を取得できたりできるみたいなのでちょっと使って遊んでみた" />
+    <title>v4l2loopbackで遊ぶ - kinjouj.github.io</title>
+    <link rel="canonical" href="https://kinjouj.github.io/2026/02/v4l2loopback.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-56169419-1', 'auto');ga("send", "pageview");</script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-7">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold my-2">
+                <time>
+                  <a href="/archives/2026/02">
+                  <span class="post-date-year">2026</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">2</span>
+                  <span classs="hyphen">-</span>
+                  <span class="post-date-day">14</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">v4l2loopbackで遊ぶ</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/category/linux" class="fs-5">Linux</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>v4l2loopbackを使うことで仮想カメラデバイスを作ってそこに映像とかをffmpegとかで流し込んだりすることでそのデバイスを使って映像を取得できたりできるみたいなのでちょっと使って遊んでみた</p>
+<h4 id="16646592135562246531">セットアップ</h4><pre class="line-numbers"><code class="language-bash">sudo modprobe v4l2loopback exclusive_caps=1
+</code></pre>
+<p>これで/dev/video[n]みたいなデバイスが作られるのでそこに映像を流し込んでいく</p>
+<h4 id="2899892335037057385">ffmpegを使って特定のウィンドウをキャプチャして流し込む</h4><pre class="line-numbers"><code class="language-bash">INFO=$(xwininfo)
+W=$(echo &quot;$INFO&quot; | grep -oP &#39;Width: \K\d+&#39;)
+H=$(echo &quot;$INFO&quot; | grep -oP &#39;Height: \K\d+&#39;)
+X=$(echo &quot;$INFO&quot; | grep &quot;Absolute upper-left X&quot; | awk &#39;{print $4}&#39;)
+Y=$(echo &quot;$INFO&quot; | grep &quot;Absolute upper-left Y&quot; | awk &#39;{print $4}&#39;)
+
+W=$(( W / 2 * 2 ))
+H=$(( H / 2 * 2 ))
+
+ffmpeg -f x11grab -video_size &quot;${W}x${H}&quot; -i :0.0+${X},${Y} -vcodec rawvideo -f v4l2 -pix_fmt yuv420p /dev/video2
+</code></pre>
+<p>自分の場合は<mark>/dev/video2</mark>になったのでそこにウィンドウをキャプチャしたのを流しこんでいく</p>
+<h4 id="18100601634409217549">テスト</h4><pre class="line-numbers"><code class="language-bash">ffplay /dev/video2
+</code></pre>
+<p>これでウィンドウをキャプチャしてる画面が表示されればおｋ</p>
+<h4 id="3729447820284549481">OBSでv4l2デバイスを取り込む</h4>
+<p>ソースから映像キャプチャデバイス(V4L2)を選択してデバイスでv4l2loopbackで作ったデバイスを指定すればそこに流し込んでる映像がOBSのプレビューに表示されるはず</p>
+
+<div class="note"><i class="fa-solid fa-circle-exclamation"></i>OBSにはウィンドウをキャプチャして配信するような機能がそもそもあるので別にこれ使わなくてもできる</div>
+
+<p>終わり。で結局これ何に使えるのかってGeminiに聞いたところ</p>
+
+<p><img src="/images/2026/02/20260214.jpg" alt="image" /></p>
+
+<p>みたいな感じらしい</p>
+<h4 id="1495707251614310094">余談1: IP WebCamアプリを使ってスマホの画面をv4l2loopbackに流し込む</h4>
+<p>IP WebCamアプリを入れてから配信をスタート(特に別サービスと連携とか必要無し)させた状態で</p>
+<pre class="line-numbers"><code class="language-bash">ffmpeg -i http://スマホのIP:8080/video -vf &quot;format=yuv420p&quot; -f v4l2 /dev/video2
+</code></pre>
+<p>とかをやるとスマホで配信してる画面をv4l2デバイスに流し込めてそれを見ることができるようになる</p>
+
+<div class="note"><i class="fa-solid fa-circle-exclamation"></i>普通にhttp://IP:8080/videoで見れるけどねｗ</div>
+<h4 id="8769199012029858907">余談2: scrcpyを使ってスマホの画面を流し込む</h4><pre class="line-numbers"><code class="language-bash">scrcpy --v4l2-sink=/dev/video2 -N
+</code></pre>
+<p>あとはffplay /dev/video2とかで見れる。見れるだけで操作とかはできないけどｗ</p>
+
+              </div>
+              <div class="toc">
+                <a href="#16646592135562246531">セットアップ</a>
+                <a href="#2899892335037057385">ffmpegを使って特定のウィンドウをキャプチャして流し込む</a>
+                <a href="#18100601634409217549">テスト</a>
+                <a href="#3729447820284549481">OBSでv4l2デバイスを取り込む</a>
+                <a href="#1495707251614310094">余談1: IP WebCamアプリを使ってスマホの画面をv4l2loopbackに流し込む</a>
+                <a href="#8769199012029858907">余談2: scrcpyを使ってスマホの画面を流し込む</a>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2026/01/react-lazy.html" rel="prev">React.lazy&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <ul id="recent_posts">
+              <li class="recent-post">
+                <a href="/2026/02/v4l2loopback.html">v4l2loopbackで遊ぶ</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2026/01/react-lazy.html">React.lazy</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2026/01/react-loading-skeleton.html">react-loading-skeletonを使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/possibly-usable-eslint-rules.html">(個人的に)使えるかもしれないESLint Rules</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+            </ul>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <li>
+  <a href="/archives/category/java">Java (291)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/android">Android (100)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/robolectric">robolectric (10)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/gradle">gradle (32)</a>
+</li>
+<li>
+  <a href="/archives/category/hadoop">Hadoop (28)</a>
+</li>
+<li>
+  <a href="/archives/category/spring-framework">Spring Framework (26)</a>
+</li>
+<li>
+  <a href="/archives/category/jax-rs">JAX-RS (22)</a>
+</li>
+<li>
+  <a href="/archives/category/struts2">Struts2 (16)</a>
+</li>
+<li>
+  <a href="/archives/category/sastruts">SAStruts (9)</a>
+</li>
+<li>
+  <a href="/archives/category/google-app-engine">Google App Engine (9)</a>
+</li>
+<li>
+  <a href="/archives/category/mahout">Mahout (8)</a>
+</li>
+<li>
+  <a href="/archives/category/eclipse">Eclipse (6)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/eclipse-birt">Eclipse BIRT (7)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/doma">doma (5)</a>
+</li>
+<li>
+  <a href="/archives/category/rxjava">RxJava (3)</a>
+</li>
+<li>
+  <a href="/archives/category/java-ee">Java EE (2)</a>
+</li>
+<li>
+  <a href="/archives/category/kotlin">Kotlin (1)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/javascript">JavaScript (162)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/angular-dot-js">angular.js (40)</a>
+</li>
+<li>
+  <a href="/archives/category/chrome-extension">Chrome Extension (36)</a>
+</li>
+<li>
+  <a href="/archives/category/node-dot-js">Node.js (17)</a>
+</li>
+<li>
+  <a href="/archives/category/react">React (12)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/redux">redux (1)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/jquery">jQuery (6)</a>
+</li>
+<li>
+  <a href="/archives/category/backbone-dot-js">Backbone.js (6)</a>
+</li>
+<li>
+  <a href="/archives/category/typescript">Typescript (6)</a>
+</li>
+<li>
+  <a href="/archives/category/webpack">webpack (2)</a>
+</li>
+<li>
+  <a href="/archives/category/electron">Electron (1)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/php">PHP (70)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/fuelphp">FuelPHP (33)</a>
+</li>
+<li>
+  <a href="/archives/category/laravel">Laravel (20)</a>
+</li>
+<li>
+  <a href="/archives/category/phpunit">PHPUnit (3)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/ruby">Ruby (63)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/rails">Rails (34)</a>
+</li>
+<li>
+  <a href="/archives/category/rspec">rspec (21)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/linux">Linux (30)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/qmail">qmail (7)</a>
+</li>
+<li>
+  <a href="/archives/category/nginx">nginx (5)</a>
+</li>
+<li>
+  <a href="/archives/category/varnish">varnish (5)</a>
+</li>
+<li>
+  <a href="/archives/category/squid">squid (4)</a>
+</li>
+<li>
+  <a href="/archives/category/postfix">postfix (4)</a>
+</li>
+<li>
+  <a href="/archives/category/supervisord">supervisord (4)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/database">Database (15)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/mongodb">MongoDB (15)</a>
+</li>
+<li>
+  <a href="/archives/category/oracle">Oracle (13)</a>
+</li>
+<li>
+  <a href="/archives/category/cassandra">Cassandra (10)</a>
+</li>
+<li>
+  <a href="/archives/category/mysql">MySQL (7)</a>
+</li>
+<li>
+  <a href="/archives/category/hbase">HBase (7)</a>
+</li>
+<li>
+  <a href="/archives/category/pl-slash-sql">PL/SQL (5)</a>
+</li>
+<li>
+  <a href="/archives/category/postgresql">PostgreSQL (1)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/sonota">その他 (15)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/docker">Docker (9)</a>
+</li>
+<li>
+  <a href="/archives/category/html5">HTML5 (7)</a>
+</li>
+<li>
+  <a href="/archives/category/css">CSS (7)</a>
+</li>
+<li>
+  <a href="/archives/category/fluentd">fluentd (4)</a>
+</li>
+<li>
+  <a href="/archives/category/jenkins">Jenkins (3)</a>
+</li>
+<li>
+  <a href="/archives/category/graphql">GraphQL (3)</a>
+</li>
+<li>
+  <a href="/archives/category/zookeeper">zookeeper (1)</a>
+</li>
+<li>
+  <a href="/archives/category/git">git (1)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/perl">Perl (10)</a>
+</li>
+<li>
+  <a href="/archives/category/c">C (10)</a>
+</li>
+<ul class="mx-2 my-1">
+<li>
+  <a href="/archives/category/c-plus-plus">C++ (6)</a>
+</li>
+<li>
+  <a href="/archives/category/objective-c">Objective-C (1)</a>
+</li>
+
+</ul>
+<li>
+  <a href="/archives/category/she-hui">社会 (1)</a>
+</li>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-5">
+      Powered by simpress(octopress like site generator)
+    </footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>
