@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -74,7 +81,7 @@
 <p>今までGoogle App Engineを使ってWeb API的なのを定義する際、Slim3を使ってOAuthServiceで認証情報を取得してJSONでレスポンス返す的な事を一から実装してたりとかしてたけど、今時そんな事しなくてもGoogle Cloud Endpointsを使う事で同等な事をさらっと出来るようになってるらしい</p>
 
 <p>っていう事でドキュメントを読みつつやってみた</p>
-<h4 id="14214830754605097956">環境構築</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
+<h4 id="section-1">環境構築</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
     }
@@ -122,7 +129,7 @@ test {
 }
 </code></pre>
 <p>んまぁこれだけ。テストする際に実際にサーバーを動かしてURLFetchServiceを使って結果をテストするので</p>
-<h4 id="7296439583226448968">WebApi.java</h4>
+<h4 id="section-2">WebApi.java</h4>
 <p>基本的には@Apiと@ApiMethodを使うのだけど、@Apiで共通項目だけを設定したクラスを用意しておいて、一部実際のAPI実装クラス上で特有する設定部分は@ApiClassで定義するのがよろしい模様。っていうか複数の@Apiを持つクラスを定義して同一のnameを持つ場合に設定項目が異なるとエラーになるので</p>
 <pre class="line-numbers"><code class="language-java">package sample;
 
@@ -133,7 +140,7 @@ public class WebApi {
 }
 </code></pre>
 <p>っていうように@Apiを使ったクラスをベースとしたのを定義しておいて、クラスを継承するか@ApiReferenceでこのクラスを指定するなどの方式を取れば基底となる@Apiを継承して定義出来るような感じっぽい</p>
-<h4 id="4211909094600792195">HogeApi.java</h4><pre class="line-numbers"><code class="language-java">{% raw %}
+<h4 id="section-3">HogeApi.java</h4><pre class="line-numbers"><code class="language-java">{% raw %}
 package sample;
 
 import javax.annotation.Nullable;
@@ -184,7 +191,7 @@ public class HogeApi {
 <p><img src="/images/2015/06/201506242115_1.jpg" alt="image" /></p>
 
 <p>っていうようなレスポンス結果が得られるようになる</p>
-<h4 id="8617196932868668544">SampleApi.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-4">SampleApi.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Arrays;
 import java.util.List;
@@ -234,7 +241,7 @@ public class SampleApi extends WebApi {
 <p>っていうようなレスポンス結果が得られるようになる</p>
 
 <p>んまぁここまでがざっくりとしたAPI実装部分。動かすには設定(web.xml)が必要</p>
-<h4 id="5543107596896037127">web.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="section-5">web.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;!DOCTYPE web-app PUBLIC &quot;-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN&quot; &quot;http://java.sun.com/dtd/web-app_2_3.dtd&quot;&gt;
 &lt;web-app xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; version=&quot;2.5&quot;&gt;
 
@@ -261,7 +268,7 @@ public class SampleApi extends WebApi {
 <p><img src="/images/2015/06/201506242115_2.jpg" alt="image" /></p>
 
 <p>ていうようなAPIが定義されそれぞれ適切なリクエストを行う事で結果をJSON等で取得出来るようになる</p>
-<h4 id="14192843660049078439">Google API Clieng Library for JavaScriptを使ってAPIをコールする</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+<h4 id="section-6">Google API Clieng Library for JavaScriptを使ってAPIをコールする</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
@@ -299,7 +306,7 @@ function init() {
 <p>っていうような感じで使う事が出来る</p>
 
 <p>んまぁそんな感じで今時のGoogle App Engineを使ってWeb APIを実装するような場合であればGoogle Cloud Endpointsを利用する事も出来るって事で</p>
-<h4 id="1815292616330742609">余談1: 例外について</h4>
+<h4 id="section-7">余談1: 例外について</h4>
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr"><a href="https://t.co/g6lOKpa5PF">https://t.co/g6lOKpa5PF</a> に書いてるけど、API側で例外ぶん投げた場合はその後にServiceUnavailableになると思うのでそれによるサービスの例外エラーが503になるとか</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612666965790887937">2015, 6月 21</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -323,7 +330,7 @@ function init() {
 </ul>
 
 <p>っていうような感じになる</p>
-<h4 id="11950466593172488812">余談2: ApiResourcePropertyに関して</h4>
+<h4 id="section-8">余談2: ApiResourcePropertyに関して</h4>
 <p>APIのレスポンスを出す際にオブジェクトのこのプロパティは出したくないとかそういうような制御をする事も出来る</p>
 <pre class="line-numbers"><code class="language-java">package sample;
 
@@ -356,7 +363,7 @@ public class Sample implements Serializable {
 }
 </code></pre>
 <p>っていうような@ApiResourcePropertyでignoredを指定する事でこのプロパティを出力しない等の設定を定義する事が出来る。又、nameパラメーターでこのプロパティを出力する際の名前等も変更する事が可能っぽい</p>
-<h4 id="2081663604370631999">余談3: @ApiTransformerについて</h4>
+<h4 id="section-9">余談3: @ApiTransformerについて</h4>
 <p>ようなオブジェクトとかをJSONとかに変換や解析するような仕組み等をオブジェクトに組み込む機能かと。まったく検証してないので詳しくは書かないけど、デフォルトとかだとjacksonを使ってJSONをエンコード/デコードしているんじゃないかと</p>
 
 <p>んまぁ詳しくは<a href="https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer">ドキュメント</a>読めって事で</p>
@@ -364,15 +371,15 @@ public class Sample implements Serializable {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#14214830754605097956" class="my-1">環境構築</a>
-                <a href="#7296439583226448968" class="my-1">WebApi.java</a>
-                <a href="#4211909094600792195" class="my-1">HogeApi.java</a>
-                <a href="#8617196932868668544" class="my-1">SampleApi.java</a>
-                <a href="#5543107596896037127" class="my-1">web.xml</a>
-                <a href="#14192843660049078439" class="my-1">Google API Clieng Library for JavaScriptを使ってAPIをコールする</a>
-                <a href="#1815292616330742609" class="my-1">余談1: 例外について</a>
-                <a href="#11950466593172488812" class="my-1">余談2: ApiResourcePropertyに関して</a>
-                <a href="#2081663604370631999" class="my-1">余談3: @ApiTransformerについて</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">環境構築</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">WebApi.java</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">HogeApi.java</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">SampleApi.java</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">web.xml</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">Google API Clieng Library for JavaScriptを使ってAPIをコールする</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">余談1: 例外について</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">余談2: ApiResourcePropertyに関して</a>
+                <a href="#section-9" class="d-block p-2 overflow-hidden">余談3: @ApiTransformerについて</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -403,7 +410,7 @@ public class Sample implements Serializable {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -421,6 +428,21 @@ public class Sample implements Serializable {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

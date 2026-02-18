@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -68,7 +75,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p><a href="https://github.com/vvakame/JsonPullParser">jsonpullparser</a>を使ってみた</p>
-<h4 id="6985637413790449232">検証環境の構築</h4>
+<h4 id="section-1">検証環境の構築</h4>
 <p>jsonpullparser-coreとjsonpullparser-aptが最低限必要。但しapt側は実際動かす場合には必要なくあくまでアノテーションプロセッサーによるソースコードの生成を利用する</p>
 <pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;eclipse&quot;
@@ -92,7 +99,7 @@ compileJava {
 <p>な感じでcompileタスクプロセス上でjsonpullparser-aptが処理されれば良いんじゃないかと。あとEclipseとかでやる場合には注釈処理・ファクトリーパス等の設定しておくだけで良い</p>
 
 <p>で利用するJSONデータ自体は <a href="https://api.github.com/users/kinjouj/repos">https://api.github.com/users/kinjouj/repos</a> なGithub APIを利用する。これが手っ取り早いので</p>
-<h4 id="17267578190707938058">Repository.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
+<h4 id="section-2">Repository.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
 
 import net.vvakame.util.jsonpullparser.annotation.JsonKey;
 import net.vvakame.util.jsonpullparser.annotation.JsonModel;
@@ -146,7 +153,7 @@ public class Repository {
 </ul>
 
 <p>っていうように怒られる</p>
-<h4 id="16384086468794386054">User.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
+<h4 id="section-3">User.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
 
 import java.net.URL;
 
@@ -194,7 +201,7 @@ public class User {
 <p>書いてあるとおりjava.net.URLは型変換がデフォルトでサポートされていないのでTokenConverterを利用してサポートされていない型への変換を行わないとマッピング出来ない</p>
 
 <p>でまぁ@JsonModelなクラスを定義するとアノテーションプロセッサーによって、デフォルトではGenなサフィックスが付与されたJavaクラスソースが生成される</p>
-<h4 id="13270226920284668667">URLTokenConverter.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
+<h4 id="section-4">URLTokenConverter.java</h4><pre class="line-numbers"><code class="language-java">package sample.model;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -232,7 +239,7 @@ public class URLTokenConverter extends TokenConverter&lt;url&gt; {
         writer.write(obj.toString());
     }
 }
-</code></pre><h4 id="9197790521313567489">RepositoryTest.java</h4><pre class="line-numbers"><code class="language-java">import java.net.URL;
+</code></pre><h4 id="section-5">RepositoryTest.java</h4><pre class="line-numbers"><code class="language-java">import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
@@ -280,7 +287,7 @@ public class RepositoryTest {
 <p>コメントで書いてるように最後でテストがfailする。理由としてUser.javaが参照するのは <a href="https://api.github.com/users/kinjouj">https://api.github.com/users/kinjouj</a> で参照できるのと <a href="https://api.github.com/users/kinjouj/repos">https://api.github.com/users/kinjouj/repos</a> で参照できるownerに互換性が無い。今回はパースする対象が前者のURLの方なので、ownerなJSONにnameが無いので</p>
 
 <p>でアノテーションプロセッサーによって生成されたクラスのgetメソッドのオーバーライドメソッドに色々あるので引数がStringとかのメソッドもあるのでそういうのを利用する事でJSONリクエストをパースしたりとかも出来る</p>
-<h4 id="7890917186169732536">余談: ハッシュ(オブジェクト)形式をTokenConverterでパースする</h4>
+<h4 id="section-6">余談: ハッシュ(オブジェクト)形式をTokenConverterでパースする</h4>
 <p>例えば上記のUserクラスが@JsonModelでは無いケースを利用する場合にはデフォルトで型変換な方式が行われないので、@JsonKeyで参照する事自体がコンパイルすら出来ない。そういう場合は上記でも書いたようにTokenConverterを作れば良い</p>
 <pre class="line-numbers"><code class="language-java">package sample.model;
 
@@ -353,12 +360,12 @@ public class UserTypeConverter extends TokenConverter&lt;user&gt; {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#6985637413790449232" class="my-1">検証環境の構築</a>
-                <a href="#17267578190707938058" class="my-1">Repository.java</a>
-                <a href="#16384086468794386054" class="my-1">User.java</a>
-                <a href="#13270226920284668667" class="my-1">URLTokenConverter.java</a>
-                <a href="#9197790521313567489" class="my-1">RepositoryTest.java</a>
-                <a href="#7890917186169732536" class="my-1">余談: ハッシュ(オブジェクト)形式をTokenConverterでパースする</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">検証環境の構築</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">Repository.java</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">User.java</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">URLTokenConverter.java</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">RepositoryTest.java</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">余談: ハッシュ(オブジェクト)形式をTokenConverterでパースする</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -389,7 +396,7 @@ public class UserTypeConverter extends TokenConverter&lt;user&gt; {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -407,6 +414,21 @@ public class UserTypeConverter extends TokenConverter&lt;user&gt; {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -68,24 +75,24 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>PostfixでDomainKeysを行う方法をメモ</p>
-<h4 id="15301705944562701944">インストール</h4>
+<h4 id="section-1">インストール</h4>
 <p><a href="http://jason.long.name/dkfilter">http://jason.long.name/dkfilter</a>からDomainKeys Filter dkfilterをダウンロードしてインストールする</p>
-<h4 id="6355838907745373016">秘密鍵、公開鍵を生成</h4><pre class="line-numbers"><code class="language-shell"># 秘密鍵を生成
+<h4 id="section-2">秘密鍵、公開鍵を生成</h4><pre class="line-numbers"><code class="language-shell"># 秘密鍵を生成
 openssl genrsa -out private.key 1024
 
 # 公開鍵を生成
 openssl rsa -in private.key -pubout -out public.key
-</code></pre><h4 id="12867715669185330951">DNSレコードの設定</h4>
+</code></pre><h4 id="section-3">DNSレコードの設定</h4>
 <p>domainkeyとselector1._domainkeyの二つが必要になるので、以下のように設定を行う</p>
 <pre class="line-numbers"><code class="language-dns"># _domainkey TXTレコードを設定
 _domainkey IN TXT &quot;t=y; o=~&quot;
 
 # selector1._domainkey TXTレコードを設定
 selector1._domainkey IN TXT k=rsa; t=y; p=公開鍵内のデータを指定
-</code></pre><h4 id="872254730882354819">受信時のDomainKeysフィルターを起動</h4>
+</code></pre><h4 id="section-4">受信時のDomainKeysフィルターを起動</h4>
 <p>メールを受信する際にDomainKeysの検証を行うフィルターを起動</p>
 <pre class="line-numbers"><code class="language-shell">dkfilter.in --hostname=ドメイン名 127.0.0.1:10025 127.0.0.1:10026
-</code></pre><h4 id="9856541702311672604">送信時のDomainKeysフィルターを起動</h4><pre class="line-numbers"><code class="language-shell">dkfilter.out \
+</code></pre><h4 id="section-5">送信時のDomainKeysフィルターを起動</h4><pre class="line-numbers"><code class="language-shell">dkfilter.out \
     # 秘密鍵のパスを指定
     --keyfile=/etc/postfix/dk/private.key \
     # DomainKeysのセレクタ名を指定
@@ -94,7 +101,7 @@ selector1._domainkey IN TXT k=rsa; t=y; p=公開鍵内のデータを指定
     --method=nofws \
     --headers \
     127.0.0.1:10027 127.0.0.1:10028
-</code></pre><h4 id="14863432940852587448">/etc/postfix/master.cfを設定</h4><pre class="line-numbers"><code class="language-">smtp inet n - n - - smtpd
+</code></pre><h4 id="section-6">/etc/postfix/master.cfを設定</h4><pre class="line-numbers"><code class="language-">smtp inet n - n - - smtpd
    # 追加
    -o smtpd_proxy_filter=127.0.0.1:10025
 
@@ -142,12 +149,12 @@ localhost:10028 inet n  - n - 10 smtpd
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#15301705944562701944" class="my-1">インストール</a>
-                <a href="#6355838907745373016" class="my-1">秘密鍵、公開鍵を生成</a>
-                <a href="#12867715669185330951" class="my-1">DNSレコードの設定</a>
-                <a href="#872254730882354819" class="my-1">受信時のDomainKeysフィルターを起動</a>
-                <a href="#9856541702311672604" class="my-1">送信時のDomainKeysフィルターを起動</a>
-                <a href="#14863432940852587448" class="my-1">/etc/postfix/master.cfを設定</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">インストール</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">秘密鍵、公開鍵を生成</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">DNSレコードの設定</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">受信時のDomainKeysフィルターを起動</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">送信時のDomainKeysフィルターを起動</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">/etc/postfix/master.cfを設定</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -172,7 +179,7 @@ localhost:10028 inet n  - n - 10 smtpd
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -190,6 +197,21 @@ localhost:10028 inet n  - n - 10 smtpd
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

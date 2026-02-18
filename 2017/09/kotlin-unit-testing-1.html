@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -70,11 +77,11 @@
                 <p>参考: <a href="https://www.slideshare.net/shoma2da/kotlin-63635954">https://www.slideshare.net/shoma2da/kotlin-63635954</a></p>
 
 <p>KotlinでUnitTestingをやってみた</p>
-<h4 id="11463438264927884347">余談</h4>
+<h4 id="section-1">余談</h4>
 <p>Kotlinでは基本的にデフォルトでclassはfinal、メソッドにもfinalがついてる。つまりMockitoなどを使って普通にMockしたりする事が出来ない(Mockitoではfinal classそのものをサポートしていないため)。でまぁそうなるとPowerMockitoとかを使う必要があるのだけど、一応open classにすることで継承可能にしたりすることが可能らしいので今回のスコープはそこにあてて使う</p>
 
 <p>※追記: <a href="/2017/09/mockito-final-class-mocking.html">mockito2を使う</a>事でfinalクラスでも出来る模様</p>
-<h4 id="4351085530051794013">build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
+<h4 id="section-2">build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
     ext.kotlin_version = &#39;1.1.4-3&#39;
 
     repositories {
@@ -103,12 +110,12 @@ dependencies {
 <p>※めんどくさいので一部バージョンは適当にしてありますので(ry</p>
 
 <p>まぁAndroidとかでKotlin使う人が多いんでしょうけど(多分)、そこまでする必要性もなかったので普通にgradleプラグインを使って検証します</p>
-<h4 id="15778997430629943487">User.kt</h4>
+<h4 id="section-3">User.kt</h4>
 <p>※資料からのコードを利用してます</p>
 <pre class="line-numbers"><code class="language-kotlin">class User(birthYear: Int) {
     fun getAge() = 2017 - birthYear
 }
-</code></pre><h4 id="5459494394535237917">UserTest.kt</h4><pre class="line-numbers"><code class="language-kotlin">import org.junit.Test
+</code></pre><h4 id="section-4">UserTest.kt</h4><pre class="line-numbers"><code class="language-kotlin">import org.junit.Test
 import org.assertj.core.api.Assertions.*
 import org.mockito.Mockito.*
 
@@ -134,14 +141,14 @@ class UserTest {
 
 <p>というようにfinalクラスはmockできねーよって怒られるわけです。<br>
 ということでそれを解決する方法(ここからが本題)</p>
-<h4 id="15753426729493520777">方法1: open classにする</h4><pre class="line-numbers"><code class="language-kotlin">open class User(birthYear: Int) {
+<h4 id="section-5">方法1: open classにする</h4><pre class="line-numbers"><code class="language-kotlin">open class User(birthYear: Int) {
     open fun getAge() = 2017 - birthYear
 }
 </code></pre>
 <p>ちなみにクラスだけではなくメソッドにもnon-publicではない状態になっていると、whenなどでテストがコケてしまうのでメソッドにもopenをつける。この方法ならテストコードは書き換えなくても出切る</p>
 
 <p>ちなみにallOpenっていう公式プラグインも存在するそうです(やりません)</p>
-<h4 id="11890734969039121885">方法2: Userをインターフェースにする</h4><pre class="line-numbers"><code class="language-kotlin">interface User {
+<h4 id="section-6">方法2: Userをインターフェースにする</h4><pre class="line-numbers"><code class="language-kotlin">interface User {
     fun getAge(): Int
 }
 </code></pre>
@@ -174,7 +181,7 @@ class UserTest {
 <p>こうすればなんとかopenにしなくてもイケる模様</p>
 
 <p>終わりだけど、まぁKotlin UnitTestingネタは続くかもねｗ</p>
-<h4 id="4788134925681936128">余談: allopenに関して</h4>
+<h4 id="section-7">余談: allopenに関して</h4>
 <p>上記の対策法のopenのやつをやるにあたって自分でopenをがちゃがちゃしなくてもallOpenっていう公式プラグインがあるのでそれを使ってやることもできる</p>
 
 <p>参考: <a href="https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin">https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin</a></p>
@@ -217,13 +224,13 @@ allOpen {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#11463438264927884347" class="my-1">余談</a>
-                <a href="#4351085530051794013" class="my-1">build.gradle</a>
-                <a href="#15778997430629943487" class="my-1">User.kt</a>
-                <a href="#5459494394535237917" class="my-1">UserTest.kt</a>
-                <a href="#15753426729493520777" class="my-1">方法1: open classにする</a>
-                <a href="#11890734969039121885" class="my-1">方法2: Userをインターフェースにする</a>
-                <a href="#4788134925681936128" class="my-1">余談: allopenに関して</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">余談</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">build.gradle</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">User.kt</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">UserTest.kt</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">方法1: open classにする</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">方法2: Userをインターフェースにする</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">余談: allopenに関して</a>
               </div>
             </div>
             <div class="paginator d-flex my-5">
@@ -232,7 +239,7 @@ allOpen {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -250,6 +257,21 @@ allOpen {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

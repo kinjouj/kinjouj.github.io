@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -75,11 +82,11 @@
 <p>jersey-mvcなAPIを使えばViewableをぶん投げたりする事によりテンプレートエンジンによりレスポンスを出したりする事も出来る。※現時点で公式でサポートされているテンプレートエンジンがfreemarkerとmustacheとjsp</p>
 
 <p>っていう事でやってみる</p>
-<h4 id="16849392617903646875">その前に</h4>
+<h4 id="section-1">その前に</h4>
 <p>jersey-mvc-jspなJSPをレンダリングする仕組みを使う場合にテスト書くとエラーを引き起こす。※freemarkerとmustacheでは起きない(HttpServletRequest等をマッピングしない為かと)</p>
 
 <p>っていう事でthymeleafを使ってテンプレートエンジンによりレスポンスを送信する仕組みのTemplateProcessorを作りながらやる</p>
-<h4 id="5690223642930177554">依存性</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+<h4 id="section-2">依存性</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;jetty&quot;
 apply plugin: &quot;eclipse&quot;
 
@@ -105,7 +112,7 @@ dependencies {
 }
 </code></pre>
 <p>んでまずThymeleafなテンプレートエンジンを使ってレスポンスを処理するのを作る</p>
-<h4 id="9710516703271422358">ThymeleafFeature.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-3">ThymeleafFeature.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ConstrainedTo;
 import javax.ws.rs.RuntimeType;
@@ -135,7 +142,7 @@ public class ThymeleafFeature implements Feature {
         return true;
     }
 }
-</code></pre><h4 id="11354008782034503743">ThymeleafTemplateProcessor.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4 id="section-4">ThymeleafTemplateProcessor.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -223,7 +230,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
 <p>@Injectで注入するのが正しいかは微妙。mvc-jspな奴はProvider&lt;Ref&lt;HttpServletRequest&gt;&gt;的な感じなのを注入しているが、これだとどうもテスト時の注入でAbstractBinder使っても上手く作用してくれないので</p>
 
 <p>んまぁてな感じでThymeleafを使ってテンプレートエンジンによるレスポンスの処理なところはこれだけ。設定しないと使えませんが</p>
-<h4 id="5543107596896037127">web.xml</h4>
+<h4 id="section-5">web.xml</h4>
 <p>MVCによる処理を利用する場合においてはweb.xmlでfilter周りを設定しないといけないみたいな制約がある模様なので</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;web-app
@@ -249,7 +256,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
 &lt;/web-app&gt;
 </code></pre>
 <p>な感じで</p>
-<h4 id="8655157877042394683">beans.xml</h4>
+<h4 id="section-6">beans.xml</h4>
 <p>glassfishとかで動かす場合に</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
@@ -261,7 +268,7 @@ public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;Str
 &lt;/beans&gt;
 </code></pre>
 <p>となっているとデプロイエラーを起こすので、<span style="color: red">bean-discovery-mode=&quot;annotated&quot;</span>にしておく</p>
-<h4 id="16813755993468910337">SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-7">SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -283,7 +290,7 @@ public class SampleApplication extends ResourceConfig {
 }
 </code></pre>
 <p>あとはリソースで使うだけ。</p>
-<h4 id="6222468897603068326">Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
+<h4 id="section-8">Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -369,7 +376,7 @@ public class Home {
 }
 </code></pre>
 <p>んまぁという感じで大体どういうレスポンスになるかは想像出来るのはないかと</p>
-<h4 id="18151286352897184828">HomeTest.java</h4>
+<h4 id="section-9">HomeTest.java</h4>
 <p>テストする際にHttpServletRequest等の@Injectは行われないのでエラーになる。なのでSpring Framework Testingに入ってるMockHttpServletRequest等をAbstractBinderを使って差し込む的な事をする事で対処出来る模様</p>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
@@ -439,15 +446,15 @@ public class HomeTest extends JerseyTest {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#16849392617903646875" class="my-1">その前に</a>
-                <a href="#5690223642930177554" class="my-1">依存性</a>
-                <a href="#9710516703271422358" class="my-1">ThymeleafFeature.java</a>
-                <a href="#11354008782034503743" class="my-1">ThymeleafTemplateProcessor.java</a>
-                <a href="#5543107596896037127" class="my-1">web.xml</a>
-                <a href="#8655157877042394683" class="my-1">beans.xml</a>
-                <a href="#16813755993468910337" class="my-1">SampleApplication.java</a>
-                <a href="#6222468897603068326" class="my-1">Home.java</a>
-                <a href="#18151286352897184828" class="my-1">HomeTest.java</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">その前に</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">依存性</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">ThymeleafFeature.java</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">ThymeleafTemplateProcessor.java</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">web.xml</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">beans.xml</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">SampleApplication.java</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">Home.java</a>
+                <a href="#section-9" class="d-block p-2 overflow-hidden">HomeTest.java</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -478,7 +485,7 @@ public class HomeTest extends JerseyTest {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -496,6 +503,21 @@ public class HomeTest extends JerseyTest {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -75,7 +82,7 @@
 <p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p>
 
 <p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p>
-<h4 id="12714656707000067377">SampleItemReader.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-1">SampleItemReader.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.batch.api.chunk.ItemReader;
 import javax.batch.api.chunk.AbstractItemReader;
@@ -110,7 +117,7 @@ public class SampleItemProcessor implements ItemProcessor {
 }
 </code></pre>
 <p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p>
-<h4 id="2378321290984294625">SampleItemWriter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-2">SampleItemWriter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 import javax.batch.api.chunk.AbstractItemWriter;
@@ -123,7 +130,7 @@ public class SampleItemWriter extends AbstractItemWriter {
 }
 </code></pre>
 <p>とまぁBatch Processingを動かすのに必要なのは書いたので</p>
-<h4 id="11808183431808240847">Main.java</h4><pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
+<h4 id="section-3">Main.java</h4><pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 
 public class Main {
@@ -134,7 +141,7 @@ public class Main {
 }
 </code></pre>
 <p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p>
-<h4 id="13306156590082898639">META-INF/batch-jobs/sample.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+<h4 id="section-4">META-INF/batch-jobs/sample.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;job id=&quot;sample&quot; xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;  version=&quot;1.0&quot;&gt;
     &lt;step id=&quot;sample-chunk&quot;&gt;
         &lt;chunk item-count=&quot;5&quot;&gt;
@@ -150,7 +157,7 @@ public class Main {
 <p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p>
 
 <p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p>
-<h4 id="18109269984825517428">baseContext.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="section-5">baseContext.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
     xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
     xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
@@ -217,7 +224,7 @@ public class Main {
 &lt;/beans&gt;
 </code></pre>
 <p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p>
-<h4 id="12997841961096598108">実行</h4>
+<h4 id="section-6">実行</h4>
 <p>実装して処理の流れなログとってみると</p>
 
 <pre>
@@ -275,12 +282,12 @@ public class Main {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#12714656707000067377" class="my-1">SampleItemReader.java</a>
-                <a href="#2378321290984294625" class="my-1">SampleItemWriter.java</a>
-                <a href="#11808183431808240847" class="my-1">Main.java</a>
-                <a href="#13306156590082898639" class="my-1">META-INF/batch-jobs/sample.xml</a>
-                <a href="#18109269984825517428" class="my-1">baseContext.xml</a>
-                <a href="#12997841961096598108" class="my-1">実行</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">SampleItemReader.java</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">SampleItemWriter.java</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">Main.java</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">META-INF/batch-jobs/sample.xml</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">baseContext.xml</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">実行</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -311,7 +318,7 @@ public class Main {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -329,6 +336,21 @@ public class Main {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

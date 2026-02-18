@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -68,10 +75,10 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>サービス監視をNagiosを使ってやってみる</p>
-<h4 id="13414315132327122443">ユーザー関連の設定</h4><pre class="line-numbers"><code class="language-bash">useradd -d /usr/local/nagios nagios
+<h4 id="section-1">ユーザー関連の設定</h4><pre class="line-numbers"><code class="language-bash">useradd -d /usr/local/nagios nagios
 mkdir /usr/local/nagios
 chown nagios:nagios /usr/local/nagios
-</code></pre><h4 id="13003197296465387225">インストール</h4>
+</code></pre><h4 id="section-2">インストール</h4>
 <p>まず<a href="http://www.nagios.org%E3%81%8B%E3%82%89Nagios%E6%9C%AC%E4%BD%93%E3%81%A8Nagios-Plugins%E3%82%92%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E3%80%82%E3%81%9F%E3%81%A0%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%83%91%E3%83%83%E3%83%81%E3%82%92%E5%BD%93%E3%81%A6%E3%82%8B%E3%81%AE%E3%81%A7%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3%E3%81%AF2%E7%B3%BB%E3%82%92%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E3%81%99%E3%82%8B%E3%80%82%E3%82%93%E3%81%A7%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%83%91%E3%83%83%E3%83%81%E3%81%A8%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88%E3%82%92http://nagios-jp.sourceforge.jp%E3%81%8B%E3%82%89%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E3%81%99%E3%82%8B%E3%80%82%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E3%81%97%E3%81%9F%E3%82%89Nagios%E6%9C%AC%E4%BD%93%E3%81%ABNagios-JP%E3%81%AE%E3%83%91%E3%83%83%E3%83%81%E3%82%92%E5%BD%93%E3%81%A6%E3%82%8B%E3%80%82%E3%81%9D%E3%81%AE%E5%BE%8C">http://www.nagios.orgからNagios本体とNagios-Pluginsをダウンロード。ただ日本語パッチを当てるのでバージョンは2系をダウンロードする。んで日本語パッチとドキュメントをhttp://nagios-jp.sourceforge.jpからダウンロードする。ダウンロードしたらNagios本体にNagios-JPのパッチを当てる。その後</a></p>
 <pre class="line-numbers"><code class="language-bash">./configure
 make all
@@ -79,7 +86,7 @@ make fullinstall
 make install-config
 </code></pre>
 <p>インストールが完了したら、/usr/local/nagios/share/docsを削除し、Nagios-JPからダウンロードした日本語ドキュメントと入れ替える。その後、Nagios本体ソース内にあるsample-config/httpd.confをApache2の設定ファイルディレクトリ内にnagios.confとしてコピー。更にNAGIOS_HOME/etc/htpasswd.usersというファイルをhtpasswdを使用してnagiosadminっていうユーザーを追加し作成しておく</p>
-<h4 id="3180008255942924784">設定1(nagios.cfg)</h4>
+<h4 id="section-3">設定1(nagios.cfg)</h4>
 <p>$NAGIOS_HOME/etcにある設定ファイルを.cfg形式にコピーする。nagios.cfgを以下のように設定する</p>
 <pre class="line-numbers"><code class="language-ini"># 今回は使用しないので除外する
 # cfg_file=/usr/local/nagios/etc/localhost/cfg
@@ -99,7 +106,7 @@ check_external_commands=1
 date_format=iso8601
 </code></pre>
 <p>nagios.cfgの設定はこんくらい。上で設定したファイルを作成・設定していく</p>
-<h4 id="6776150254297168030">設定2(cgi.cfg)</h4>
+<h4 id="section-4">設定2(cgi.cfg)</h4>
 <p>主にWebコンソール関連の設定を行う</p>
 <pre class="line-numbers"><code class="language-ini"># 以下が全てコメントで無効化されているので外して有効にし、アクセスできるユーザーを指定する
 authorized_for_system_information=nagiosadmin
@@ -111,7 +118,7 @@ authorized_for_all_service_commands=nagiosadmin
 authorized_for_all_host_commands=nagiosadmin
 </code></pre>
 <p>nagiosadminはhtpasswdで作成したユーザー名を指定する</p>
-<h4 id="13586821385899637226">設定3(timeperiods.cfg)</h4><pre class="line-numbers"><code class="language-">define timeperiod{
+<h4 id="section-5">設定3(timeperiods.cfg)</h4><pre class="line-numbers"><code class="language-">define timeperiod{
     timeperiod_name 24×7
     alias           24 Hours A Day, 7 Days A Week
     sunday          00:00-24:00
@@ -122,7 +129,7 @@ authorized_for_all_host_commands=nagiosadmin
     friday          00:00-24:00
     saturday        00:00-24:00
 }
-</code></pre><h4 id="161441279855790800">設定4(contacts.cfg)</h4><pre class="line-numbers"><code class="language-">define contact{
+</code></pre><h4 id="section-6">設定4(contacts.cfg)</h4><pre class="line-numbers"><code class="language-">define contact{
     contact_name                    nagios-admin
     alias                           Nagios Admin
     service_notification_period     24×7
@@ -133,12 +140,12 @@ authorized_for_all_host_commands=nagiosadmin
     host_notification_commands      host-notify-by-email
     email                           nagios@hoge.com
 }
-</code></pre><h4 id="11577492857001434347">設定5(contactgroups.cfg)</h4><pre class="line-numbers"><code class="language-">define contactgroup{
+</code></pre><h4 id="section-7">設定5(contactgroups.cfg)</h4><pre class="line-numbers"><code class="language-">define contactgroup{
     contactgroup_name       admins
     alias                   Nagios Administrators
     members                 nagios-admin
 }
-</code></pre><h4 id="15301643659356649561">設定6(hosts.cfg)</h4><pre class="line-numbers"><code class="language-">define host{
+</code></pre><h4 id="section-8">設定6(hosts.cfg)</h4><pre class="line-numbers"><code class="language-">define host{
     name                            generic-host
     notifications_enabled           1
     event_handler_enabled           1
@@ -163,12 +170,12 @@ define host{
     alias                   localhost
     address                 127.0.0.1
 }
-</code></pre><h4 id="15516895031091344764">設定7(hostgroups.cfg)</h4><pre class="line-numbers"><code class="language-">define hostgroup{
+</code></pre><h4 id="section-9">設定7(hostgroups.cfg)</h4><pre class="line-numbers"><code class="language-">define hostgroup{
     hostgroup_name  home_servers
     alias           Home Servers
     members         localhost
 }
-</code></pre><h4 id="15152053263133572438">設定8(services.cfg)</h4><pre class="line-numbers"><code class="language-">define service{
+</code></pre><h4 id="section-10">設定8(services.cfg)</h4><pre class="line-numbers"><code class="language-">define service{
     name                            generic-service
     active_checks_enabled           1
     passive_checks_enabled          1
@@ -207,7 +214,7 @@ define service{
 ./nagios -v ../etc/nagios.cfg
 </code></pre>
 <p>エラーが出ずにサーバーウェイトモードになればオッケー</p>
-<h4 id="9647807912372422881">使ってみる</h4>
+<h4 id="section-11">使ってみる</h4>
 <p>実際にサービスがちゃんと監視できてるかチェックしてみる。例としてMySQLサーバーが起動しているかチェックしてみる。最初に/usr/local/nagios/etc/commands.cfgに以下を設定</p>
 <pre class="line-numbers"><code class="language-">define command{
     command_name check_mysql
@@ -223,7 +230,7 @@ define service{
 }
 </code></pre>
 <p>&quot;service nagios start&quot;を行い、異常な場合はcontacts.cfgで指定したemail部分のメールアドレスに警告メールが送信される</p>
-<h4 id="14795887074983666642">ApacheでのVirtualHost設定メモ</h4><pre class="line-numbers"><code class="language-apache">&lt;VirtualHost *:80&gt;
+<h4 id="section-12">ApacheでのVirtualHost設定メモ</h4><pre class="line-numbers"><code class="language-apache">&lt;VirtualHost *:80&gt;
     ServerName nagios.kdeveloper.biz
     DocumentRoot /usr/local/nagios/share
     ScriptAlias /cgi-bin &quot;/usr/local/nagios/sbin&quot;
@@ -246,18 +253,18 @@ define service{
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#13414315132327122443" class="my-1">ユーザー関連の設定</a>
-                <a href="#13003197296465387225" class="my-1">インストール</a>
-                <a href="#3180008255942924784" class="my-1">設定1(nagios.cfg)</a>
-                <a href="#6776150254297168030" class="my-1">設定2(cgi.cfg)</a>
-                <a href="#13586821385899637226" class="my-1">設定3(timeperiods.cfg)</a>
-                <a href="#161441279855790800" class="my-1">設定4(contacts.cfg)</a>
-                <a href="#11577492857001434347" class="my-1">設定5(contactgroups.cfg)</a>
-                <a href="#15301643659356649561" class="my-1">設定6(hosts.cfg)</a>
-                <a href="#15516895031091344764" class="my-1">設定7(hostgroups.cfg)</a>
-                <a href="#15152053263133572438" class="my-1">設定8(services.cfg)</a>
-                <a href="#9647807912372422881" class="my-1">使ってみる</a>
-                <a href="#14795887074983666642" class="my-1">ApacheでのVirtualHost設定メモ</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">ユーザー関連の設定</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">インストール</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">設定1(nagios.cfg)</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">設定2(cgi.cfg)</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">設定3(timeperiods.cfg)</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">設定4(contacts.cfg)</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">設定5(contactgroups.cfg)</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">設定6(hosts.cfg)</a>
+                <a href="#section-9" class="d-block p-2 overflow-hidden">設定7(hostgroups.cfg)</a>
+                <a href="#section-10" class="d-block p-2 overflow-hidden">設定8(services.cfg)</a>
+                <a href="#section-11" class="d-block p-2 overflow-hidden">使ってみる</a>
+                <a href="#section-12" class="d-block p-2 overflow-hidden">ApacheでのVirtualHost設定メモ</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -288,7 +295,7 @@ define service{
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -306,6 +313,21 @@ define service{
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

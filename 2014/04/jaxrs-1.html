@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -75,7 +82,7 @@
 <p>JavaでRESTfulなWebアプリケーションを作るっていう場合とかだとJAX-RSを使えば何かと便利っぽそうなのでいろいろ勉強してみたのでちょっとだけまとめる</p>
 
 <p>※JAX-RSのバージョンは2.x系をターゲットにしてます。又、以下で書くのはあくまでサーバーを起動して利用する前提ではなくテストを書いて実行しているだけなのでサーバー関係に伴ってくる部分に関しては今後に書く予定</p>
-<h4 id="16646592135562246531">セットアップ</h4><pre class="line-numbers"><code class="language-groovy">// javaプラグインじゃなくてwarプラグインを利用するべきかも
+<h4 id="section-1">セットアップ</h4><pre class="line-numbers"><code class="language-groovy">// javaプラグインじゃなくてwarプラグインを利用するべきかも
 apply plugin: &quot;java&quot;
 apply plugin: &quot;jetty&quot;
 apply plugin: &quot;eclipse&quot;
@@ -95,7 +102,7 @@ dependencies {
 <p>バージョン指定周りは適当ですけど、実際にこっちで使ってるバージョンは2.9.x系な模様なので</p>
 
 <p>まぁこれでデプロイ出来るwar作ってアプリケーションサーバーにデプロイしたらなんらかの問題出そうだけど</p>
-<h4 id="6668549572126683843">web.xml</h4>
+<h4 id="section-2">web.xml</h4>
 <p><a href="https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet">https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet</a>にも書いてあるけど、javax.ws.rs.Applicationに該当するクラスを作るか、アノテーションを探索するパッケージを指定するかの2つを指定出来る</p>
 
 <p>例えば前者のjavax.ws.rs.Applicationに該当するようなクラスを作る場合とかだと</p>
@@ -146,7 +153,7 @@ public class SampleApplication extends ResourceConfig {
 &lt;/web-app&gt;
 </code></pre>
 <p>んまぁここまでが開発環境構築的な所。ちなみに上記のjavax.ws.rs.Applicationに該当するクラスにある@ApplicationPathはJAX-RSに準拠しているアプリケーションサーバー以外では作用しないのではないかと(あくまで&lt;servlet-mapping&gt;によるパスをオーバーライドする目的な模様。詳しくないのでggrks)</p>
-<h4 id="2996662520144990423">コントローラーを作成</h4>
+<h4 id="section-3">コントローラーを作成</h4>
 <p>JAX-RSアプリケーションのコントローラーは特に何かを継承したりはしない。ほとんどがアノテーションを利用してマッピングなどを利用する為アノテーションを使ったコードを書けば良いだけ</p>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
@@ -188,7 +195,7 @@ public class Home {
 <p>@Producesや@ConsumesはSpring WebMVCにもあるけど受け手や出し手に対するメディアタイプを指定するような物だと思うので、上記の場合indexListToJsonで返されたListはJSONとしてレンダリングするように出来る。だけど、それのメディアタイプのコンバーターが無いと返す値によってはレンダリングは出来ない。Listやオブジェクトなどの場合においては上記のbuild.gradleで書いてるjersey-media-moxyっていうのを使えば出来る模様</p>
 
 <p>んまぁコントローラーはざっくりとこんなもんで。他のアノテーションも以降で記述するので(ry</p>
-<h4 id="8011524211105807128">コントローラーのテストを書く</h4>
+<h4 id="section-4">コントローラーのテストを書く</h4>
 <p>んまぁJerseyTestを使えば簡単に出来る</p>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
@@ -250,7 +257,7 @@ public class HomeTest extends JerseyTest {
 <p>んまぁそんな感じでJAX-RSを使ってアノテーションベースでRESTful Webアプリケーションを作る事が出来るっていう感じで。んまぁ今後もドキュメントなり読みつつ勉強する予定なのでその都度色々ネタ書く予定って事で、おさわり的な所はこんなもんで</p>
 
 <p>※以降がその他のアノテーションの紹介</p>
-<h4 id="3217676397810797041">@QueryParamアノテーション</h4>
+<h4 id="section-5">@QueryParamアノテーション</h4>
 <p>@QueryParamを使えばクエリパラメータをメソッドの引数等(フィールド等に定義したりする事も可能)に指定する事で値を引数にマッピングしたり出来る。又、@DefualtValueを使えばデフォルト値の設定なども出来る</p>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
@@ -346,7 +353,7 @@ public class HomeTest extends JerseyTest {
 }
 </code></pre>
 <p>又、引数にInteger等を指定した場合にInteger型ではないデータを指定しているような場合だと、javax.ws.rs.NotFoundExceptionになる模様</p>
-<h4 id="6082096017456860139">@PathParamアノテーション</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
+<h4 id="section-6">@PathParamアノテーション</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
@@ -368,7 +375,7 @@ public class Home {
 }
 </code></pre>
 <p>URLパスの一部をマッピングするアノテーションで、正規表現によるパターンマッチングも可能な模様。テストする場合には普通にパス指定すれば良いだけなのでこの件に関しては省略</p>
-<h4 id="11879355574115910343">@MatrixParamアノテーション</h4>
+<h4 id="section-7">@MatrixParamアノテーション</h4>
 <p>参考サイトによるとセミコロンで区切った形式の値をマッピング出来る模様</p>
 <pre class="line-numbers"><code class="language-java">package sample.controller;
 
@@ -442,7 +449,7 @@ public class HomeTest extends JerseyTest {
 }
 </code></pre>
 <p>っていう感じで、martixParamを用いてパラメーターを設定してリクエストしてテスト出来る</p>
-<h4 id="13590941896053745512">@FormParam</h4>
+<h4 id="section-8">@FormParam</h4>
 <p>@FormParamを用いるとフォーム送信(application/x-www-form-urlencoded?)によるパラメーターの取得が可能になる。又、@BeanParamを使う事でフォームから送信されたデータをオブジェクトにマッピングしたりも出来る。その場合はオブジェクトに@FormParamアノテーションを付与する</p>
 <pre class="line-numbers"><code class="language-java">package sample.bean;
 
@@ -569,7 +576,7 @@ public class HomeTest extends JerseyTest {
 <p>っていうようにEntity.entityでやれば良い模様</p>
 
 <p>以上でアノテーションの紹介は終わりだけど、まだまだアノテーションたくさんあると思われるので状況次第でネタを書く</p>
-<h4 id="6664355495477938275">追記: @Encodedアノテーションについて</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
+<h4 id="section-9">追記: @Encodedアノテーションについて</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import javax.ws.rs.Encoded;
 import javax.ws.rs.GET;
@@ -638,15 +645,15 @@ public class HomeTest extends JerseyTest {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#16646592135562246531" class="my-1">セットアップ</a>
-                <a href="#6668549572126683843" class="my-1">web.xml</a>
-                <a href="#2996662520144990423" class="my-1">コントローラーを作成</a>
-                <a href="#8011524211105807128" class="my-1">コントローラーのテストを書く</a>
-                <a href="#3217676397810797041" class="my-1">@QueryParamアノテーション</a>
-                <a href="#6082096017456860139" class="my-1">@PathParamアノテーション</a>
-                <a href="#11879355574115910343" class="my-1">@MatrixParamアノテーション</a>
-                <a href="#13590941896053745512" class="my-1">@FormParam</a>
-                <a href="#6664355495477938275" class="my-1">追記: @Encodedアノテーションについて</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">セットアップ</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">web.xml</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">コントローラーを作成</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">コントローラーのテストを書く</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">@QueryParamアノテーション</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">@PathParamアノテーション</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">@MatrixParamアノテーション</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">@FormParam</a>
+                <a href="#section-9" class="d-block p-2 overflow-hidden">追記: @Encodedアノテーションについて</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -677,7 +684,7 @@ public class HomeTest extends JerseyTest {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -695,6 +702,21 @@ public class HomeTest extends JerseyTest {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

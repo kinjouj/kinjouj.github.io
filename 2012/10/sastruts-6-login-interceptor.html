@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -69,11 +76,11 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p><a href="http://d.hatena.ne.jp/idesaku/20081226/1230263190">http://d.hatena.ne.jp/idesaku/20081226/1230263190</a> をそのまま試してみる。まぁちょっとだけ違いますけど</p>
-<h4 id="6177217346024174885">要件</h4>
+<h4 id="section-1">要件</h4>
 <p>sample.action.dashboardなパッケージにあるアクションを参照する場合にはログインが必要なのでLoginActionに飛ばす。但し、sample.action.dashboard.LoginActionだけは非認証でアクセス出来るようにしないといけないので(ry</p>
 
 <p>んまぁ上記のリンクにあるようにインターセプタでそこら辺をコントロールする。で、必要なのはインターセプタ及びその設定と各種アクションクラスとビュー、んでユーザー情報を参照するEntityとその情報をセッションで管理するDtoオブジェクトクラス</p>
-<h4 id="303874103507929535">User.java</h4>
+<h4 id="section-2">User.java</h4>
 <p>ユーザー情報を参照するエンティティクラス</p>
 <pre class="line-numbers"><code class="language-java">package sample.entity;
 
@@ -104,7 +111,7 @@ public class User implements Serializable {
 }
 </code></pre>
 <p>というような感じでテーブルも作っておく</p>
-<h4 id="13156125443796543598">UserDto.java</h4>
+<h4 id="section-3">UserDto.java</h4>
 <p>ユーザー情報を保持しているEntityから情報をセッションで管理するクラス</p>
 <pre class="line-numbers"><code class="language-java">package sample.dto;
 
@@ -124,7 +131,7 @@ public class UserDto implements Serializable {
 }
 </code></pre>
 <p><a href="http://sastruts.seasar.org/featureReference.html#Action">http://sastruts.seasar.org/featureReference.html#Action</a> によると「ログインしたユーザに関する情報など、 アクションフォーム以外をセッションで管理する場合、 ルートパッケージ.dtoにXxxDto作成し、@Componentでセッションで管理されるように定義します」との事らしい。でこれを下にインターセプタで認証済みユーザーセッションがあるかないかとかをチェックする</p>
-<h4 id="16729967647765606795">LoginInterceptor.java</h4><pre class="line-numbers"><code class="language-java">package sample.interceptor;
+<h4 id="section-4">LoginInterceptor.java</h4><pre class="line-numbers"><code class="language-java">package sample.interceptor;
 
 import javax.annotation.Resource;
 
@@ -160,7 +167,7 @@ public class LoginInterceptor extends AbstractInterceptor {
 }
 </code></pre>
 <p>nullを返すべきかで悩んだのですが、とりあえずそのままにしておく。でこれのパッケージ名なんすけど、「NamingContextImpl.addRootPackageName(convension.dicon) + &quot;.interceptor&quot;」という感じにすれば、規約に沿って注入される模様げ。でこいつを作動させる為にcustomizer.diconをいじる</p>
-<h4 id="9623973972370208360">customizer.dicon</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+<h4 id="section-5">customizer.dicon</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;!DOCTYPE components PUBLIC &quot;-//SEASAR//DTD S2Container 2.4//EN&quot; &quot;http://www.seasar.org/dtd/components24.dtd&quot;&gt;
 &lt;components&gt;
     &lt;include path=&quot;default-customizer.dicon&quot; /&gt;
@@ -208,7 +215,7 @@ public class LoginInterceptor extends AbstractInterceptor {
 
     &lt;!-- 以下省略 --&gt;
 &lt;/components&gt;
-</code></pre><h4 id="15496612816235784104">IndexAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
+</code></pre><h4 id="section-6">IndexAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
 
 import org.seasar.framework.aop.annotation.RemoveSession;
 import org.seasar.struts.annotation.Execute;
@@ -228,7 +235,7 @@ public class IndexAction {
 }
 </code></pre>
 <p>sample.action.dashboard.IndexActionなんでLoginInterceptorをもろにくらうので非認証状態でアクセスしてもLoginActionにぶっ飛ばされる事を確認する</p>
-<h4 id="2331685617257738022">LoginAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
+<h4 id="section-7">LoginAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
 
 import javax.annotation.Resource;
 
@@ -286,7 +293,7 @@ public class LoginAction {
 }
 </code></pre>
 <p>セッション管理されているDtoオブジェクトは値をぶち込むだけで良いみたい。という感じで作ればセッション管理による認証な所を作る事は可能な模様。まぁインターセプタなテスト法とかまだ調べてないんすけど</p>
-<h4 id="18215375751811859735">余談</h4>
+<h4 id="section-8">余談</h4>
 <p>UserService.javaはこんな感じ</p>
 <pre class="line-numbers"><code class="language-java">package sample.service;
 
@@ -317,14 +324,14 @@ public class UserService extends S2AbstractService&lt;User&gt; {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#6177217346024174885" class="my-1">要件</a>
-                <a href="#303874103507929535" class="my-1">User.java</a>
-                <a href="#13156125443796543598" class="my-1">UserDto.java</a>
-                <a href="#16729967647765606795" class="my-1">LoginInterceptor.java</a>
-                <a href="#9623973972370208360" class="my-1">customizer.dicon</a>
-                <a href="#15496612816235784104" class="my-1">IndexAction.java</a>
-                <a href="#2331685617257738022" class="my-1">LoginAction.java</a>
-                <a href="#18215375751811859735" class="my-1">余談</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">要件</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">User.java</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">UserDto.java</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">LoginInterceptor.java</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">customizer.dicon</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">IndexAction.java</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">LoginAction.java</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">余談</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -355,7 +362,7 @@ public class UserService extends S2AbstractService&lt;User&gt; {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -373,6 +380,21 @@ public class UserService extends S2AbstractService&lt;User&gt; {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

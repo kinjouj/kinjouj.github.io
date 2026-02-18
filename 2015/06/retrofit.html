@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -79,7 +86,7 @@
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 <p>っていうように単純なデータのやりとりだけなのであればそういうのがあれば良いんじゃねって思ってたんですが、ソースとかを生成したりはしない(はずだ)けど、retrofitっていうのがあるみたいで使ってみた</p>
-<h4 id="9716179006790082505">サーバー側</h4>
+<h4 id="section-1">サーバー側</h4>
 <p>とりあえずRailsで適当にResource Controller辺りを使って</p>
 <pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
 
@@ -122,7 +129,7 @@ entry_index GET    /entry          entry#index
 </pre>
 
 <p>というような感じになる。これをretrofitで使う</p>
-<h4 id="2015523978548858270">retrofitの概要</h4>
+<h4 id="section-2">retrofitの概要</h4>
 <p>retrofitでは基本的にインターフェースを定義して、メソッドに適切なアノテーションを付与する事によって利用する事が出来る</p>
 
 <p>でretrofitで使用されるHTTPクライアントの実装はデフォルト(retrofitの依存性だけ追加した場合)で使用されるのはソースまでちょっと追いかけれてないので分からないのだけど</p>
@@ -136,7 +143,7 @@ Retrofit will automatically use OkHttp (version 2.0 or newer) when it is present
 <p>あと後述するが、RxJavaを使ったObservableを使う事も出来るので</p>
 
 <p>んまぁ概要はこんなもんで</p>
-<h4 id="13396709509647311528">全件を取得する</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-3">全件を取得する</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 
@@ -232,7 +239,7 @@ public class SampleServiceTest {
 }
 </code></pre>
 <p>RestAdapterのインスタンスでエンドポイントを設定してcreateメソッドで作成したインターフェースを指定してインスタンスを取得。あとはインターフェースのメソッドを呼ぶだけでHTTPリクエストを行い結果を取得してくれる模様(JSONの実装は多分GSON)</p>
-<h4 id="1274030258991986084">URLパスに埋め込んでリクエスト</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-4">URLパスに埋め込んでリクエスト</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 
@@ -289,7 +296,7 @@ public class SampleServiceTest {
 }
 </code></pre>
 <p>特に言う事無いので次</p>
-<h4 id="11764312986067781267">POSTでデータを送信する場合 (@Bodyを使用)</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-5">POSTでデータを送信する場合 (@Bodyを使用)</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import retrofit.Callback;
 import retrofit.http.POST;
@@ -388,7 +395,7 @@ public class SampleServiceTest {
 <p>というようにテストする際にはExecutorで一定の待機処理等を行わないと正常にテスト実行されないはずなので</p>
 
 <p>という感じで@Bodyを持った引数を持った場合にはapplication/jsonとしてリクエストされてデータを送信できる</p>
-<h4 id="13525007220710316004">POSTでデータを送信する場合 (@FormUrlEncodedを使用)</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-6">POSTでデータを送信する場合 (@FormUrlEncodedを使用)</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import retrofit.Callback;
 import retrofit.http.FormUrlEncoded;
@@ -410,7 +417,7 @@ public interface SampleService {
 <p>但し、@Bodyが使えないので送るデータはメソッドに一つづつ持つようになる。それか@Fieldじゃなくて@FieldMapで持つ事で可能な模様。又、TypedString(クエリーのようにid=1&amp;name=hogeのようにフォームデータとしてエンコードしたデータ)等を使ってなんとかする方法もあるらしい</p>
 
 <p>というような感じで使用する事が出来る</p>
-<h4 id="18274141755376768215">余談: その他のアノテーションやAPI</h4>
+<h4 id="section-7">余談: その他のアノテーションやAPI</h4>
 <ul>
 <li>@Multipart及び@Part、TypedFile等を利用する事でマルチパートリクエスト等も出来る</li>
 <li>RequestInterceptorを使う事でリクエストを行う前に共通する設定等を仕込む事も可能</li>
@@ -422,13 +429,13 @@ public interface SampleService {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#9716179006790082505" class="my-1">サーバー側</a>
-                <a href="#2015523978548858270" class="my-1">retrofitの概要</a>
-                <a href="#13396709509647311528" class="my-1">全件を取得する</a>
-                <a href="#1274030258991986084" class="my-1">URLパスに埋め込んでリクエスト</a>
-                <a href="#11764312986067781267" class="my-1">POSTでデータを送信する場合 (@Bodyを使用)</a>
-                <a href="#13525007220710316004" class="my-1">POSTでデータを送信する場合 (@FormUrlEncodedを使用)</a>
-                <a href="#18274141755376768215" class="my-1">余談: その他のアノテーションやAPI</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">サーバー側</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">retrofitの概要</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">全件を取得する</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">URLパスに埋め込んでリクエスト</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">POSTでデータを送信する場合 (@Bodyを使用)</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">POSTでデータを送信する場合 (@FormUrlEncodedを使用)</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">余談: その他のアノテーションやAPI</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -459,7 +466,7 @@ public interface SampleService {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -477,6 +484,21 @@ public interface SampleService {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

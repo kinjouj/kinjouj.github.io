@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -70,7 +77,7 @@
                 <p>WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた</p>
 
 <p>(Hadoopのバージョンは1.0.4です)</p>
-<h4 id="16646592135562246531">セットアップ</h4>
+<h4 id="section-1">セットアップ</h4>
 <p>デフォルトでWebHDFSはサポートしてないので設定しないと使えない模様。なのでhdfs-site.xmlに追加する</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
@@ -88,15 +95,15 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start namenode
 sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 </code></pre>
 <p>でデータノードが立ち上がったら、初期時は何も無いのでユーザーディレクトリを作っておく。でユーザーディレクトリな所の所有者権限とかも直しておく。それは昨日の記事で書いたので省略</p>
-<h4 id="15199430561684021406">WebHDFS Rest APIを使って操作する</h4>
+<h4 id="section-2">WebHDFS Rest APIを使って操作する</h4>
 <p>WebHDFS Rest APIのエントリーポイントとなるURLのベースが、「 <a href="http://host:port/webhdfs/v1">http://host:port/webhdfs/v1</a> 」になる。でポートっていうのはネームノードフロントエンドページとなる、恐らくはデフォルトでは50070のポート番号になる。そこにリクエストをぶっ飛ばす</p>
-<h4 id="16935082212962731658">ユーザーディレクトリ内にdataディレクトリを作る</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&amp;user.name=kinjouj&quot;
+<h4 id="section-3">ユーザーディレクトリ内にdataディレクトリを作る</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&amp;user.name=kinjouj&quot;
 </code></pre>
 <p>user.nameっていうのは指定しない場合はデフォルトの「webuser」っていうのが使用されるので、所有者関係上がある場合には指定しておく。この場合は自分のkinjoujアカウント。レスポンスが</p>
 <pre class="line-numbers"><code class="language-json">{&quot;boolean&quot;: true}
 </code></pre>
 <p>な感じでJSONで返ってくる</p>
-<h4 id="9762934278387532974">作ったディレクトリのステータスを見る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS&quot;
+<h4 id="section-4">作ったディレクトリのステータスを見る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS&quot;
 </code></pre>
 <p>結果として</p>
 <pre class="line-numbers"><code class="language-json">{
@@ -115,10 +122,10 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 }
 </code></pre>
 <p>なレスポンスが返ってくる</p>
-<h4 id="6681937110696742158">ディレクトリにファイルを突っ込んでみる</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&amp;user.name=kinjouj&quot; -T accesslog.json
+<h4 id="section-5">ディレクトリにファイルを突っ込んでみる</h4><pre class="line-numbers"><code class="language-">curl -i -X PUT &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&amp;user.name=kinjouj&quot; -T accesslog.json
 </code></pre>
 <p>ここポートが50075ってなってるのが50070で投げると50075に要求しろみたいにHTTP/307が出る。まぁ実際はそのLocationヘッダーに投げれば良い</p>
-<h4 id="6576136017133736806">ディレクトリにあるファイルステータスを取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus&quot;
+<h4 id="section-6">ディレクトリにあるファイルステータスを取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus&quot;
 </code></pre>
 <p>レスポンスとして</p>
 <pre class="line-numbers"><code class="language-json">{
@@ -153,23 +160,23 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
 }
 </code></pre>
 <p>な感じで返ってくるくる。そこに更にディレクトリがあったらどうなるのかの検証のためにテストなディレクトリを作ってる</p>
-<h4 id="18009764847498373541">ファイルを読み取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open&quot;
+<h4 id="section-7">ファイルを読み取る</h4><pre class="line-numbers"><code class="language-">curl -i &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open&quot;
 </code></pre>
 <p>こちらも50070なNamenodeな所のポートにぶん投げるとDatanode側にアクセスしろっと要求される。ちょっと気になるのがブロックサイズでチャンクされてるファイルとかどうなるんだっけと。ビッグデータが無いんでそこ未確認</p>
-<h4 id="16331800077296555778">ファイル等を消す</h4><pre class="line-numbers"><code class="language-">curl -i -X DELETE &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&amp;user.name=kinjouj&quot;
+<h4 id="section-8">ファイル等を消す</h4><pre class="line-numbers"><code class="language-">curl -i -X DELETE &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&amp;user.name=kinjouj&quot;
 </code></pre>
 <p>な感じでファイル・ディレクトリ等を削除可能</p>
 
 <p>という感じでHTTPリクエストぶん投げるだけでHDFS操作が出来る模様。まぁ詳しい事は <a href="http://hadoop.apache.org/docs/r1.1.0/webhdfs.html">http://hadoop.apache.org/docs/r1.1.0/webhdfs.html</a> 見た方が良いかも</p>
 
 <p>ちなみにPerlでWebHDFSを利用する場合にNet::Hadoop::WebHDFSっていうモジュールがある模様</p>
-<h4 id="5203442330862790260">追記1</h4>
+<h4 id="section-9">追記1</h4>
 <p>appendサポートをするにはhdfs-site.xmlに設定が必要な模様</p>
 <pre class="line-numbers"><code class="language-xml">&lt;property&gt;
   &lt;name&gt;dfs.support.append&lt;/name&gt;
   &lt;value&gt;true&lt;/value&gt;
 &lt;/property&gt;
-</code></pre><h4 id="1904707976347203785">追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</h4><pre class="line-numbers"><code class="language-">&lt;source&gt;
+</code></pre><h4 id="section-10">追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</h4><pre class="line-numbers"><code class="language-">&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -189,16 +196,16 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#16646592135562246531" class="my-1">セットアップ</a>
-                <a href="#15199430561684021406" class="my-1">WebHDFS Rest APIを使って操作する</a>
-                <a href="#16935082212962731658" class="my-1">ユーザーディレクトリ内にdataディレクトリを作る</a>
-                <a href="#9762934278387532974" class="my-1">作ったディレクトリのステータスを見る</a>
-                <a href="#6681937110696742158" class="my-1">ディレクトリにファイルを突っ込んでみる</a>
-                <a href="#6576136017133736806" class="my-1">ディレクトリにあるファイルステータスを取る</a>
-                <a href="#18009764847498373541" class="my-1">ファイルを読み取る</a>
-                <a href="#16331800077296555778" class="my-1">ファイル等を消す</a>
-                <a href="#5203442330862790260" class="my-1">追記1</a>
-                <a href="#1904707976347203785" class="my-1">追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">セットアップ</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">WebHDFS Rest APIを使って操作する</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">ユーザーディレクトリ内にdataディレクトリを作る</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">作ったディレクトリのステータスを見る</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">ディレクトリにファイルを突っ込んでみる</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">ディレクトリにあるファイルステータスを取る</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">ファイルを読み取る</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">ファイル等を消す</a>
+                <a href="#section-9" class="d-block p-2 overflow-hidden">追記1</a>
+                <a href="#section-10" class="d-block p-2 overflow-hidden">追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -229,7 +236,7 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -247,6 +254,21 @@ sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

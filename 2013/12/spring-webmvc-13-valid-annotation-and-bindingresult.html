@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -69,7 +76,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>簡単に入力検証なのを実現したいのであれば@ValidとBindingResultを利用する事で出来るらしい。色々突っかかる所があるのであくまで暫定的ではあるけどメモっておく</p>
-<h4 id="9472554239089508422">必要なライブラリ</h4>
+<h4 id="section-1">必要なライブラリ</h4>
 <p>Spring Frameworkには@Validではなく、@Validatedっていうアノテーションがある。今回やるのは前者な方で後者に関しては今後やる可能性もあるのでとりあえずは「<a href="http://d.hatena.ne.jp/tatsu-no-toshigo/20131006/1381031027">アノテーション「@Validated」と「@Valid」</a>」を参考されたしという事で(ry</p>
 
 <p>で本題の必要なライブラリに関して、javax.validationとその実装であるライブラリが必要。んまぁ後者のその実装に関してはHibernate Validatorがサポートされているのでそれを使う。という事でそのライブラリ参照を追加する</p>
@@ -88,7 +95,7 @@ dependencies {
     testCompile &quot;org.hamcrest:hamcrest-all:1.3&quot;
     testCompile &quot;org.springframework:spring-test:3.2.5.RELEASE&quot;
 }
-</code></pre><h4 id="14369249015493369408">SampleForm.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4 id="section-2">SampleForm.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.Serializable;
 import javax.validation.constraints.NotNull;
@@ -123,10 +130,10 @@ public class SampleForm implements Serializable {
 }
 </code></pre>
 <p>@NotEmptyで引数を指定しているが、引数を指定しない場合には<span style="color: red">org.hibernate.validator.constraints.NotEmpty.message</span>というメッセージリソースなプロパティが参照される。これに関しては後術するので(ry</p>
-<h4 id="6305484314775422172">ValidationMessages_ja.properties</h4><pre class="line-numbers"><code class="language-ini">#org.hibernate.validator.constraints.NotEmpty.message={sample_form.name}が未入力です
+<h4 id="section-3">ValidationMessages_ja.properties</h4><pre class="line-numbers"><code class="language-ini">#org.hibernate.validator.constraints.NotEmpty.message={sample_form.name}が未入力です
 error.empty.sample_form.name=&quot;{sample_form.name}&quot;が入力されてません
 sample_form.name=名前
-</code></pre><h4 id="6460073647732174325">SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4 id="section-4">SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -203,7 +210,7 @@ public class SampleController {
 </ul>
 
 <p>というような方法がある模様。まぁテストも書きましょうって事で</p>
-<h4 id="290514269686002679">SampleControllerTest.java</h4><pre class="line-numbers"><code class="language-java">package swmvc;
+<h4 id="section-5">SampleControllerTest.java</h4><pre class="line-numbers"><code class="language-java">package swmvc;
 
 import org.junit.Test;
 
@@ -235,7 +242,7 @@ public class SampleControllerTest extends AbstractTestCase {
 }
 </code></pre>
 <p>終わり。ただ書いたやり方だと、フォーム検証でエラーが発生したらindexビューをレンダリングするようになっているのでリロードするとPOSTなデータを再送信するような方式になってしまうのでそこら辺の対処法は後日書く</p>
-<h4 id="6747248125769284853">余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</h4>
+<h4 id="section-6">余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</h4>
 <p>上記でも書いたように検証エラーメッセージ等はValidationMessages_[locale].properties等から読まれる訳ですけど、Springが使うMessageSourceと共通化する形で</p>
 <pre class="line-numbers"><code class="language-xml">&lt;bean
     id=&quot;messageSource&quot;
@@ -283,12 +290,12 @@ public class SampleControllerTest extends AbstractTestCase {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#9472554239089508422" class="my-1">必要なライブラリ</a>
-                <a href="#14369249015493369408" class="my-1">SampleForm.java</a>
-                <a href="#6305484314775422172" class="my-1">ValidationMessages_ja.properties</a>
-                <a href="#6460073647732174325" class="my-1">SampleController.java</a>
-                <a href="#290514269686002679" class="my-1">SampleControllerTest.java</a>
-                <a href="#6747248125769284853" class="my-1">余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">必要なライブラリ</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">SampleForm.java</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">ValidationMessages_ja.properties</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">SampleController.java</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">SampleControllerTest.java</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">余談: javax.validationが読み込むメッセージリソースとSpringが利用するメッセージリソースを共通化する</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -319,7 +326,7 @@ public class SampleControllerTest extends AbstractTestCase {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -337,6 +344,21 @@ public class SampleControllerTest extends AbstractTestCase {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

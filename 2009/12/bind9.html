@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -70,7 +77,7 @@
                 <p>bind9(+chroot)でDNSサーバーを構築してみる</p>
 
 <p>※サーバーのIPは192.168.1.10と定義</p>
-<h4 id="10009625898629168565">/etc/named.confを作成</h4><pre class="line-numbers"><code class="language-conf">options {
+<h4 id="section-1">/etc/named.confを作成</h4><pre class="line-numbers"><code class="language-conf">options {
     directory &quot;/var/named&quot;;
     dump-file &quot;/var/named/data/cache.db&quot;;
     statistics-file &quot;/var/named/data/stats.txt&quot;;
@@ -117,9 +124,9 @@ zone &quot;1.168.192.in-addr.arpa&quot; IN {
 include &quot;rndc.key&quot;;
 </code></pre>
 <p>以上のファイルを作成していく</p>
-<h4 id="683891672553835796">rndc.keyを作成</h4><pre class="line-numbers"><code class="language-">rndc-confgen &gt; /etc/rndc.key
-</code></pre><h4 id="13636544185929285638">named.caを作成</h4><pre class="line-numbers"><code class="language-">dig @a.root-servers.net . ns &gt; /var/named/named.ca
-</code></pre><h4 id="5539785141386135236">localhost.zoneを作成</h4>
+<h4 id="section-2">rndc.keyを作成</h4><pre class="line-numbers"><code class="language-">rndc-confgen &gt; /etc/rndc.key
+</code></pre><h4 id="section-3">named.caを作成</h4><pre class="line-numbers"><code class="language-">dig @a.root-servers.net . ns &gt; /var/named/named.ca
+</code></pre><h4 id="section-4">localhost.zoneを作成</h4>
 <p>ローカルネットワーク?の正引きゾーン</p>
 <pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    localhost.    postmaster.3brains.net. (
@@ -131,7 +138,7 @@ include &quot;rndc.key&quot;;
 
     IN    NS    @
     IN    A      127.0.0.1
-</code></pre><h4 id="17423633925945025148">localhost-rev.zoneを作成</h4>
+</code></pre><h4 id="section-5">localhost-rev.zoneを作成</h4>
 <p>ローカルネットワークの逆引きゾーン</p>
 <pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    localhost.    postmaster.3brains.net. (
@@ -143,7 +150,7 @@ include &quot;rndc.key&quot;;
 
     IN    NS    localhost.
 1   IN    PTR   localhost.
-</code></pre><h4 id="952860535427012062">3brains.zone</h4>
+</code></pre><h4 id="section-6">3brains.zone</h4>
 <p>3brains.netドメインの正引きゾーン</p>
 <pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    3brains.net.    postmaster.3brains.net. (
@@ -159,7 +166,7 @@ ns1      IN    A      192.168.1.10
          IN    MX    10    mail.3brains.net.
 </code></pre>
 <p>サブドメインを利用する場合はAレコードとして定義しておくこと</p>
-<h4 id="17534844519212160381">3brains-rev.zoneを作成</h4>
+<h4 id="section-7">3brains-rev.zoneを作成</h4>
 <p>3brains.netの逆引きゾーン</p>
 <pre class="line-numbers"><code class="language-dns-zone">$TTL 86400
 @    IN    SOA    3brains.net.    postmaster.3brains.net. (
@@ -171,21 +178,21 @@ ns1      IN    A      192.168.1.10
 
       IN    NS    3brains.net.
 10    IN    PTR    3brains.net.
-</code></pre><h4 id="13639157359751929563">/etc/resolv.confを設定</h4><pre class="line-numbers"><code class="language-">nameserver 192.168.1.10
+</code></pre><h4 id="section-8">/etc/resolv.confを設定</h4><pre class="line-numbers"><code class="language-">nameserver 192.168.1.10
 </code></pre>
 <p>終わり。サーバーを起動しエラーが出ていない事をチェック。その後外部からドメインがちゃんと引けるかチェック</p>
 
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#10009625898629168565" class="my-1">/etc/named.confを作成</a>
-                <a href="#683891672553835796" class="my-1">rndc.keyを作成</a>
-                <a href="#13636544185929285638" class="my-1">named.caを作成</a>
-                <a href="#5539785141386135236" class="my-1">localhost.zoneを作成</a>
-                <a href="#17423633925945025148" class="my-1">localhost-rev.zoneを作成</a>
-                <a href="#952860535427012062" class="my-1">3brains.zone</a>
-                <a href="#17534844519212160381" class="my-1">3brains-rev.zoneを作成</a>
-                <a href="#13639157359751929563" class="my-1">/etc/resolv.confを設定</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">/etc/named.confを作成</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">rndc.keyを作成</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">named.caを作成</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">localhost.zoneを作成</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">localhost-rev.zoneを作成</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">3brains.zone</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">3brains-rev.zoneを作成</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">/etc/resolv.confを設定</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -216,7 +223,7 @@ ns1      IN    A      192.168.1.10
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -234,6 +241,21 @@ ns1      IN    A      192.168.1.10
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

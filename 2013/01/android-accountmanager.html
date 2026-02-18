@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -73,13 +80,13 @@
 <p><img src="/images/2013/01/20130119095120.png" alt="image" /></p>
 
 <p>まぁWebサービスとかのアカウントを端末内に保管して、認証要求だとかをAccountManagerな機能を通じて行えたり出来るAPIが存在する訳ですが、これの独自のを作る方法。まぁ結構書く量が多いので</p>
-<h4 id="10287780238156474074">認証方式</h4>
+<h4 id="section-1">認証方式</h4>
 <p>OAuthとか使って権限管理の元で色々出来たりするのが一番良いんですが、今回は適当にトークン取得リクエストしたらトークン返して、でAPIを実行する際にトークンをヘッダーにぶち込んでリクエストしたら結果が返ってくる的な感じ</p>
 
 <p>まぁ良くあるかどうかは定かじゃないけど、RailsとかだとDeviseとかそういうのがあったりもする訳で。これもとりあえずおいといて</p>
 
 <p>という事で本題な所のAndroidの方を実装する。もっかいいうけどクソ長いんでww</p>
-<h4 id="17604156503138820600">AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="section-2">AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;net.kinjouj.test&quot;
@@ -124,7 +131,7 @@
 &lt;/manifest&gt;
 </code></pre>
 <p>な感じ。で必要な設定リソースから作る</p>
-<h4 id="4305108992685844624">res/values/strings.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="section-3">res/values/strings.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;resources&gt;
     &lt;string name=&quot;app_name&quot;&gt;Sample&lt;/string&gt;
 
@@ -140,7 +147,7 @@
 &lt;/resources&gt;
 </code></pre>
 <p>でAccountAuthenticatorを使う際に必要となる設定リソース(AndroidManifest.xmlだとres/xml/authenticator.xml)を作る</p>
-<h4 id="9731027577587484766">res/xml/authenticator.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="section-4">res/xml/authenticator.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;account-authenticator
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:accountType=&quot;@string/account_type&quot;
@@ -150,7 +157,7 @@
     android:accountPreferences=&quot;@xml/prefs&quot; /&gt;
 </code></pre>
 <p>でアカウント設定でオプションで設定出来るPreferenceな設定ファイルも必要</p>
-<h4 id="3890534654385604765">res/xml/prefs.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="section-5">res/xml/prefs.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
     &lt;PreferenceCategory android:title=&quot;設定&quot; /&gt;
     &lt;PreferenceScreen android:key=&quot;account_settings&quot; android:title=&quot;Account Settings&quot;&gt;
@@ -163,7 +170,7 @@
 <p>な感じ。設定画面はAuthenticatorPreferenceActivityにintentする方向で</p>
 
 <p>んでPreferenceな所からちょっと作っておく</p>
-<h4 id="15551322667997089523">AuthenticatorPreferenceActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h4 id="section-6">AuthenticatorPreferenceActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.preference.PreferenceActivity;
 import android.preference.Preference;
@@ -187,7 +194,7 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
 }
 </code></pre>
 <p>でPreferenceで参照するリソースが必要</p>
-<h4 id="9378397001584355383">res/xml/pref.xml</h4>
+<h4 id="section-7">res/xml/pref.xml</h4>
 <p>prefs.xmlでは無いので注意</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
@@ -203,7 +210,7 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
 <p>まぁニックネームを設定出来るようにするだけ</p>
 
 <p>あとはアプリのActivity(MainActivity)とか認証要求を行うActivity(AuthenticatorActivity)とService(AuthenticatorService)とかをもろもろ作る</p>
-<h4 id="15174771445362214999">MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h4 id="section-8">MainActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -353,7 +360,7 @@ public class MainActivity extends Activity {
 <p>アカウントがなければAndroidのアカウント設定画面にintentしてアカウントを作るように要求</p>
 
 <p>でアカウントを追加する際に今回の独自のアカウントを選択した場合にはAuthenticatorServiceが作用するのでそれを作る</p>
-<h4 id="17842596023556147270">AuthenticatorService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h4 id="section-9">AuthenticatorService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.accounts.AccountManager;
 import android.app.Service;
@@ -373,7 +380,7 @@ public class AuthenticatorService extends Service {
 }
 </code></pre>
 <p>でonBindでAbstractAccountAuthenticatorを継承したクラスをnewしでgetIBinderを返す</p>
-<h4 id="3823628936133877829">SampleAccountAuthenticator.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h4 id="section-10">SampleAccountAuthenticator.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -516,7 +523,7 @@ class SampleAccountAuthenticator extends AbstractAccountAuthenticator {
 <p>でアカウント追加から来た時にはaddAccountが呼び出されて、そこからAuthenticatorActivity.ACTION(AuthenticatorActivityを発生させるアクションintent)が投げられて、登録に伴う認証開始が行われるという感じ</p>
 
 <p>でそのAuthenticatorActivityを作る</p>
-<h4 id="9678188848910283512">AuthenticatorActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h4 id="section-11">AuthenticatorActivity.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -612,17 +619,17 @@ public class AuthenticatorActivity extends Activity {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#10287780238156474074" class="my-1">認証方式</a>
-                <a href="#17604156503138820600" class="my-1">AndroidManifest.xml</a>
-                <a href="#4305108992685844624" class="my-1">res/values/strings.xml</a>
-                <a href="#9731027577587484766" class="my-1">res/xml/authenticator.xml</a>
-                <a href="#3890534654385604765" class="my-1">res/xml/prefs.xml</a>
-                <a href="#15551322667997089523" class="my-1">AuthenticatorPreferenceActivity.java</a>
-                <a href="#9378397001584355383" class="my-1">res/xml/pref.xml</a>
-                <a href="#15174771445362214999" class="my-1">MainActivity.java</a>
-                <a href="#17842596023556147270" class="my-1">AuthenticatorService.java</a>
-                <a href="#3823628936133877829" class="my-1">SampleAccountAuthenticator.java</a>
-                <a href="#9678188848910283512" class="my-1">AuthenticatorActivity.java</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">認証方式</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">AndroidManifest.xml</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">res/values/strings.xml</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">res/xml/authenticator.xml</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">res/xml/prefs.xml</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">AuthenticatorPreferenceActivity.java</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">res/xml/pref.xml</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">MainActivity.java</a>
+                <a href="#section-9" class="d-block p-2 overflow-hidden">AuthenticatorService.java</a>
+                <a href="#section-10" class="d-block p-2 overflow-hidden">SampleAccountAuthenticator.java</a>
+                <a href="#section-11" class="d-block p-2 overflow-hidden">AuthenticatorActivity.java</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -653,7 +660,7 @@ public class AuthenticatorActivity extends Activity {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -671,6 +678,21 @@ public class AuthenticatorActivity extends Activity {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

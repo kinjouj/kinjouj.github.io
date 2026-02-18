@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -68,8 +75,8 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>まず前提として２つのnginxサーバーをDockerコンテナを使って起動する。あえてnginxの設定とかは省略するが</p>
-<h4 id="10206921844267564383">Server A(リバースプロキシ側)</h4><pre class="line-numbers"><code class="language-bash">docker run -d -p 80:80 -t server-a
-</code></pre><h4 id="4879054997957729474">Server B(バックエンド側)</h4><pre class="line-numbers"><code class="language-bash">docker run -d -p 8080:80 -t server-b
+<h4 id="section-1">Server A(リバースプロキシ側)</h4><pre class="line-numbers"><code class="language-bash">docker run -d -p 80:80 -t server-a
+</code></pre><h4 id="section-2">Server B(バックエンド側)</h4><pre class="line-numbers"><code class="language-bash">docker run -d -p 8080:80 -t server-b
 </code></pre>
 <p>というようにServer AからServer Bにリバースプロキシをするように設定した場合、通常であればバックエンド側は外部からはアクセスできないはずだ。しかし</p>
 <pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
@@ -84,15 +91,15 @@ server b
 <p>-pを使ってコンテナポートとホストポートだけをマッピングしてしまうとそれが全面公開設定になってしまう模様なので上記のようにServer B側で8080をホストでマッピングしてると外部からでも普通にアクセスできちゃうっていうらしい</p>
 
 <p>でそれを解決する方法としてコンテナポートのみを開放する方法があるのでそれをやってみる</p>
-<h4 id="15899007217986376405">docker networkでDocker Networkを作成</h4><pre class="line-numbers"><code class="language-bash">docker network create --subnet 172.16.0.0/16 --attachable mynet
+<h4 id="section-3">docker networkでDocker Networkを作成</h4><pre class="line-numbers"><code class="language-bash">docker network create --subnet 172.16.0.0/16 --attachable mynet
 </code></pre>
 <p>mynetっていう名前でDocker Networkを作成する。どうやらDockerでコンテナを作成した際に使用されるDocker Networkはおそらく最初からあるbridgeを使用するらしいのだがこのbridgeネットワークどうやらDNSによる名前解決を行わないらしい</p>
 
 <p>なので新しくDocker Networkを作成して以下で作るコンテナで同一のネットワークを使用するように起動する</p>
-<h4 id="5675378752241045046">Server Bの起動</h4><pre class="line-numbers"><code class="language-bash">docker run --name server-b -d --expose=8080 --net=mynet -t server-b
+<h4 id="section-4">Server Bの起動</h4><pre class="line-numbers"><code class="language-bash">docker run --name server-b -d --expose=8080 --net=mynet -t server-b
 </code></pre>
 <p>--nameでコンテナに名前をつける。これはServer Aでproxy_passを指定する際にコンテナ名で指定できるようになるのでそれを利用するためにコンテナ名を指定しておく。-pではなく--exposeでコンテナポートを開放、んで--netでそのコンテナが所属するネットワークを指定</p>
-<h4 id="14206313294456480308">Server A側のnginx.conf</h4><pre class="line-numbers"><code class="language-nginx">listen 80;
+<h4 id="section-5">Server A側のnginx.conf</h4><pre class="line-numbers"><code class="language-nginx">listen 80;
 server_name localhost;
 location / {
     proxy_pass http://server-b;
@@ -100,7 +107,7 @@ location / {
 }
 </code></pre>
 <p>上記で指定したコンテナ名をproxy_passに指定することができる。ただし同一のDocker Networkに所属してないとhost not found in upstreamって言われるので注意</p>
-<h4 id="5960804535559728179">Server Aを起動</h4><pre class="line-numbers"><code class="language-bash">docker run -p 80:80 --net=mynet -t server-a
+<h4 id="section-6">Server Aを起動</h4><pre class="line-numbers"><code class="language-bash">docker run -p 80:80 --net=mynet -t server-a
 </code></pre>
 <p>接続できるかやってみる</p>
 <pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
@@ -111,19 +118,19 @@ curl: (28) Connection timed out after 1001 milliseconds
 <p>以上！長い！ややこしい！</p>
 
 <p>んまあ安直に-pオプションでポートオープンにするのは止めようねっていうオチなんかなと</p>
-<h4 id="13360964620889526233">まとめ</h4><h3>安易に-pを使用しない</h3><h3>コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</h3>
+<h4 id="section-7">まとめ</h4><h3>安易に-pを使用しない</h3><h3>コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</h3>
 <p>てな感じかな</p>
 
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#10206921844267564383" class="my-1">Server A(リバースプロキシ側)</a>
-                <a href="#4879054997957729474" class="my-1">Server B(バックエンド側)</a>
-                <a href="#15899007217986376405" class="my-1">docker networkでDocker Networkを作成</a>
-                <a href="#5675378752241045046" class="my-1">Server Bの起動</a>
-                <a href="#14206313294456480308" class="my-1">Server A側のnginx.conf</a>
-                <a href="#5960804535559728179" class="my-1">Server Aを起動</a>
-                <a href="#13360964620889526233" class="my-1">まとめ</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">Server A(リバースプロキシ側)</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">Server B(バックエンド側)</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">docker networkでDocker Networkを作成</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">Server Bの起動</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">Server A側のnginx.conf</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">Server Aを起動</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">まとめ</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -154,7 +161,7 @@ curl: (28) Connection timed out after 1001 milliseconds
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -172,6 +179,21 @@ curl: (28) Connection timed out after 1001 milliseconds
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

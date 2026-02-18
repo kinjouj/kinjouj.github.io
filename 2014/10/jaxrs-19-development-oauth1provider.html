@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -72,11 +79,11 @@
                 <p>以前やった「<a href="/2014/10/jaxrs-18-oauth1provider.html">JAX-RSをやってみる (18) – OAuth1Provider -</a>」のだと、jersey-oauthに含まれているDefaultOAuth1Providerを使ってるので、アクセストークンなどはインスタンス上で管理されるはずなのでサーバーダウンしたりするとアクセストークンなどが失効するのではないかと思われる。まぁ要はDefaultOAuth1Providerのようなのをつくればいいだけなので、OAuth1Providerを実装することでできるのでやってみた</p>
 
 <p>※前回の「<a href="/2014/10/gradle-jetty-jdbcrealm.html">gradle jettyでJDBCRealm</a>」の設定が別途で必要になるのでそれも前提となる</p>
-<h4 id="8983981613198554968">データベースを作る</h4>
+<h4 id="section-1">データベースを作る</h4>
 <p>jetty JDBCRealmでusersとrolesとuser_rolesに関わる部分は前回で作ってるのをそのまま使うのでいいとして、コンシュマーキーなどを格納するconsumerテーブル及び発行済みアクセストークンを格納するtokenテーブルを作っておく</p>
 
 <p>下準備が出来たのであとはOAuth1Providerを実装するだけ</p>
-<h4 id="14728620586376946666">Consumer.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-2">Consumer.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
 
@@ -115,7 +122,7 @@ public class Consumer implements OAuth1Consumer {
 }
 </code></pre>
 <p>まぁ単純にOAuth1Consumerを実装したクラスを作る</p>
-<h4 id="986429712077788717">Token.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-3">Token.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
 import java.util.HashSet;
@@ -187,7 +194,7 @@ public class Token implements OAuth1Token {
 }
 </code></pre>
 <p>リクエストトークンだったりアクセストークンだったりで使うクラス、これも同様にOAuth1Tokenを実装するだけ。ただisInRoleメソッドは内部から(RolesAllowed等を利用することで)呼ばれるので、アクセストークンを生成する際のインスタンスにそのトークンを持つユーザーのロール権限を持っておく必要がある</p>
-<h4 id="13134814623501747946">OAuthService.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-4">OAuthService.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
 import java.sql.ResultSet;
@@ -219,7 +226,7 @@ public class OAuthService {
 }
 </code></pre>
 <p>まぁSpring JDBCを使ってデータベースからデータを引くだけのクラス。残りはOAuth1Providerを実装したクラスだけ</p>
-<h4 id="2629396020491505848">SampleOAuth1Provider.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-5">SampleOAuth1Provider.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
 import java.util.List;
@@ -352,7 +359,7 @@ sample.SampleOAuth1Provider - getAccessToken
 <p>てな感じな処理フローになる模様(若干の誤差はある、ちょっと前のログなのでクラス内からメソッド呼び出しでログ取ってるものもあるはずなので)</p>
 
 <p>終わり。てな感じでやれば以降は前回と変わらない(OAuth.java以外は)</p>
-<h4 id="15083938972684423357">SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-6">SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
@@ -371,7 +378,7 @@ public class SampleApplication extends ResourceConfig {
         packages(&quot;sample&quot;);
     }
 }
-</code></pre><h4 id="2024517501488523711">OAuth.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4 id="section-7">OAuth.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.security.Principal;
 
@@ -408,7 +415,7 @@ public class OAuth {
         return defProvider.authorize(requestToken, user);
     }
 }
-</code></pre><h4 id="17768246626281356582">API.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h4 id="section-8">API.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
@@ -425,7 +432,7 @@ public class API {
         return &quot;Hello World &quot; + sc.getUserPrincipal().getName();
     }
 }
-</code></pre><h4 id="10962275288185726797">client.rb</h4><pre class="line-numbers"><code class="language-ruby">require &#39;oauth&#39;
+</code></pre><h4 id="section-9">client.rb</h4><pre class="line-numbers"><code class="language-ruby">require &#39;oauth&#39;
 
 consumer = OAuth::Consumer.new(
   &#39;key1&#39;,
@@ -451,15 +458,15 @@ puts &quot;response: #{response.body}&quot;
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#8983981613198554968" class="my-1">データベースを作る</a>
-                <a href="#14728620586376946666" class="my-1">Consumer.java</a>
-                <a href="#986429712077788717" class="my-1">Token.java</a>
-                <a href="#13134814623501747946" class="my-1">OAuthService.java</a>
-                <a href="#2629396020491505848" class="my-1">SampleOAuth1Provider.java</a>
-                <a href="#15083938972684423357" class="my-1">SampleApplication.java</a>
-                <a href="#2024517501488523711" class="my-1">OAuth.java</a>
-                <a href="#17768246626281356582" class="my-1">API.java</a>
-                <a href="#10962275288185726797" class="my-1">client.rb</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">データベースを作る</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">Consumer.java</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">Token.java</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">OAuthService.java</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">SampleOAuth1Provider.java</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">SampleApplication.java</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">OAuth.java</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">API.java</a>
+                <a href="#section-9" class="d-block p-2 overflow-hidden">client.rb</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -490,7 +497,7 @@ puts &quot;response: #{response.body}&quot;
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -508,6 +515,21 @@ puts &quot;response: #{response.body}&quot;
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

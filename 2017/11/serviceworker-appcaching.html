@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -76,7 +83,7 @@
 <p>※上記参考を必読推奨</p>
 
 <p>※あくまで個人的なメモです</p>
-<h4 id="14140229333128485192">前提条件</h4>
+<h4 id="section-1">前提条件</h4>
 <p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p>
 <pre class="line-numbers"><code class="language-js">navigator.serviceWorker.register(&quot;sw.js&quot;).then(() =&gt; {
   fetch(&quot;省略&quot;);
@@ -87,14 +94,14 @@
 <p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p>
 
 <p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p>
-<h4 id="9056823463150708519">index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
+<h4 id="section-2">index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;body&gt;
     &lt;div id=&quot;msg&quot;&gt;&lt;/div&gt;
     &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><h4 id="4232658483631756810">app.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre><h4 id="section-3">app.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 if (&quot;serviceWorker&quot; in navigator) {
   let controller = new Promise((resolve, reject) =&gt; {
@@ -131,7 +138,7 @@ if (&quot;serviceWorker&quot; in navigator) {
 }
 </code></pre>
 <p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p>
-<h4 id="17350324392654733764">service-worker.js</h4><pre class="line-numbers"><code class="language-js">let cacheName = &quot;sample-pwa-cache-v1&quot;;
+<h4 id="section-4">service-worker.js</h4><pre class="line-numbers"><code class="language-js">let cacheName = &quot;sample-pwa-cache-v1&quot;;
 let cacheDataName = &quot;sample-pwa-data-cache-v1&quot;;
 let filesToCache = [ &quot;/&quot;, &quot;/index.html&quot;, &quot;/app.js&quot; ];
 
@@ -189,7 +196,7 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
     );
   }
 });
-</code></pre><h4 id="15313310385445752611">結果</h4>
+</code></pre><h4 id="section-5">結果</h4>
 <p>初回リクエスト時にはAPIコールにしつつそのデータをキャッシュすることになるので</p>
 
 <p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-1.png" alt="image" /></p>
@@ -207,11 +214,11 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#14140229333128485192" class="my-1">前提条件</a>
-                <a href="#9056823463150708519" class="my-1">index.html</a>
-                <a href="#4232658483631756810" class="my-1">app.js</a>
-                <a href="#17350324392654733764" class="my-1">service-worker.js</a>
-                <a href="#15313310385445752611" class="my-1">結果</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">前提条件</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">index.html</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">app.js</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">service-worker.js</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">結果</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -242,7 +249,7 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -260,6 +267,21 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

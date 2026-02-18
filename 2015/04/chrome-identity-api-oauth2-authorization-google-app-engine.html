@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -73,7 +80,7 @@
                 <p>参考: <a href="http://www.ciiycode.com/0z6ziWjWxjjP/google-app-engine-oauth2-provider">http://www.ciiycode.com/0z6ziWjWxjjP/google-app-engine-oauth2-provider</a></p>
 
 <p>Google Account OAuth1.0aがdeprecated化したのがつい先日くらいの話なので、そのまま放置しておくと問題にもなりそうなので検証してみる</p>
-<h4 id="8578203719347004872">概要</h4>
+<h4 id="section-1">概要</h4>
 <p>Google App EngineにはOAuthServiceっていうAPIがあるのでOAuth2認証を利用する事も出来る。OAuth1.0aの場合はOAuthServiceでgetCurrentUserメソッドを使う場合等にはクエリーストリングにOAuth認証に必要なパラメーターを設置する必要があるがOAuth2の場合にはAuthorizationヘッダーに取得したアクセストークンを指定するような形式になる。又、OAuth1.0aの時とは違いクライアント側で取得のトークンは有効期限は自前でトークンを削除しない限りは問題無いが、OAuth2の場合には一定時間でトークンの有効期限が設定されているので定期的にチェックしつつ再取得する必要性がある</p>
 
 <p>でOAuth2を利用するにあたって <a href="https://console.developers.google.com">https://console.developers.google.com</a> からプロジェクトのクライアントID及びクライアントシークレットを取得する必要がある。今回のはInstalled Applicationを使うのでクライアントのタイプはそっちで登録する</p>
@@ -81,7 +88,7 @@
 <p><img src="/images/2015/04/201504222145-1.jpg" alt="image" /></p>
 
 <p>まぁ下準備はこれくらい</p>
-<h4 id="9767568604122242965">サーバー側のOAuth2への対応修正</h4>
+<h4 id="section-2">サーバー側のOAuth2への対応修正</h4>
 <p>確証は無いけどOAuthService.getCurrentUserやisUserAdmin等のメソッドの引数にscopeを指定しないと正常にUserインスタンスを取得できない模様なので</p>
 <pre class="line-numbers"><code class="language-java">OAuthService service = OAuthServiceFactory.getOAuthService();
 User user = null;
@@ -95,7 +102,7 @@ try {
 <p>っていう感じで取得したりするような処理に書き換える必要がある模様。これを行わないでクライアント側で取得したトークンを使ってリクエストを投げるとInvalidOAuthTokenException等の例外が送出されてしまう模様。但し、これを修正してしまうとOAuth1.0aの際に指定していたscopeと一致しないような場合とかだとOAuth1.0aがすぐに通らなくなるので</p>
 
 <p>んまぁサーバー側のGoogle App Engineの修正はこれだけ。修正してコンパイル後に修正版をデプロイしておく</p>
-<h4 id="17623708723311490936">chrome.identity APIを使ったクライアント側を実装</h4>
+<h4 id="section-3">chrome.identity APIを使ったクライアント側を実装</h4>
 <p>Chrome Extensionにはidentityパーミッションを付与すればchrome.identityが使えるようになる。chrome.identityを使うとGoogle Accountやそれ以外のOAuth2フローによるアクセストークンなどの取得が出来るようになる。但し、chrome.identity.getAuthTokenを使う場合だとChrome Syncの有効が必要になるっぽい気がするのでchrome.identity.launchWebAuthFlowのAPIを使ってGoogle Account認証を行ってそれからアクセストークンを取得して、その取得したアクセストークンを利用してサーバー側のGoogle App Engine側にAuthorizationヘッダーを付与してリクエストしてOAuth2によるユーザー処理を行えるようにする</p>
 
 <p>※微妙と長いので</p>
@@ -256,9 +263,9 @@ function start_authorization() {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#8578203719347004872" class="my-1">概要</a>
-                <a href="#9767568604122242965" class="my-1">サーバー側のOAuth2への対応修正</a>
-                <a href="#17623708723311490936" class="my-1">chrome.identity APIを使ったクライアント側を実装</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">概要</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">サーバー側のOAuth2への対応修正</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">chrome.identity APIを使ったクライアント側を実装</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -289,7 +296,7 @@ function start_authorization() {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -307,6 +314,21 @@ function start_authorization() {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

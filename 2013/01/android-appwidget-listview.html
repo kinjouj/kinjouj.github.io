@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -71,11 +78,11 @@
                 <p>検証したのいつかは覚えてないんですが、ネタとして書いておく</p>
 
 <p>Android API Level 11(Android3.x)くらいから(RemoteViews.setRemoteAdapter辺りがAPI Level14が必要なのでAndroid4.0以降)だと思うんですが、AppWidgetにListViewが使えるようになってる。それを検証したという件</p>
-<h4 id="6177217346024174885">要件</h4>
+<h4 id="section-1">要件</h4>
 <p>AppWidgetで自分のTwitterのTLの10件を取得してそれをListViewとして表示する。OAuth使いません、まだ普通にリクエストしても取得できる模様なので(正確にはTwitter API 1.1を使う場合には認証が必須かと)</p>
 
 <p>あとAndroid4.2(Emulator)で検証</p>
-<h4 id="17604156503138820600">AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<h4 id="section-2">AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;net.kinjouj.test.android_appwidget_listview_demo&quot;
@@ -111,7 +118,7 @@
 <p>API Level 11以上なんですが、RemoteViews.setRemoteAdapterのメソッドがAPI Level 14以上じゃないといけないのでminSdkVersionは14で良いんじゃないかと</p>
 
 <p>んでAppWidgetの定義ファイルを作る</p>
-<h4 id="4114303559410617702">res/xml/widget.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="section-3">res/xml/widget.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;appwidget-provider
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:minWidth=&quot;294dp&quot;
@@ -121,7 +128,7 @@
 <p>確かAppWidgetのWidth/Heightの計算式が「74 * セル数 - 2」なので、今回4面を使うので「74 * 4 - 2 = 294」になるような感じかと</p>
 
 <p>でinitialLayoutで指定されているレイアウト定義を使うのでそれを作る</p>
-<h4 id="11983384042290580688">res/layout/widget_layout.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h4 id="section-4">res/layout/widget_layout.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;RelativeLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;fill_parent&quot;
@@ -156,7 +163,7 @@
 &lt;/RelativeLayout&gt;
 </code></pre>
 <p>reload_btn_labelは適当にres/values/strings.xmlに設定しとく。まぁただのレイアウトなんだが、ListViewを使ってるっていう所。でListViewを使うのにデータをレンダリングする際に使うレイアウトファイルも必要なのでそれも作る</p>
-<h4 id="11019043506189604778">res/layout/widget_listview_row.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<h4 id="section-5">res/layout/widget_listview_row.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;LinearLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;fill_parent&quot;
@@ -180,7 +187,7 @@
 <p>プロフィール画像とツイートだけを表示するだけ</p>
 
 <p>でここからAppWidgetのプログラミングを書く</p>
-<h4 id="8077701591284787446">SampleWidgetProvider.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
+<h4 id="section-6">SampleWidgetProvider.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -268,7 +275,7 @@ public class SampleWidgetProvider extends AppWidgetProvider {
 <p>まぁやりたいならAlarmManagerとか使ってやる方で良いかと</p>
 
 <p>でRemoteViews自体の画面処理自体はSampleWidgetServiceに要求している?ので作る</p>
-<h4 id="4576907414450729226">SampleWidgetService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
+<h4 id="section-7">SampleWidgetService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.test.android_appwidget_listview_demo;
 
 import java.io.IOException;
 
@@ -432,20 +439,20 @@ public class SampleWidgetService extends RemoteViewsService {
 <p><img src="/images/2013/01/20130118104310.png" alt="image" /></p>
 
 <p>っつー感じでAppWidgetでListView使えるみたいな感じ</p>
-<h4 id="888620345048677983">追記</h4>
+<h4 id="section-8">追記</h4>
 <p>AndoidAnnotations使われているけど、一応上記同様なソースは <a href="https://github.com/kinjouj/android_appwidget_listview_demo">https://github.com/kinjouj/android_appwidget_listview_demo</a> にて公開してます</p>
 
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#6177217346024174885" class="my-1">要件</a>
-                <a href="#17604156503138820600" class="my-1">AndroidManifest.xml</a>
-                <a href="#4114303559410617702" class="my-1">res/xml/widget.xml</a>
-                <a href="#11983384042290580688" class="my-1">res/layout/widget_layout.xml</a>
-                <a href="#11019043506189604778" class="my-1">res/layout/widget_listview_row.xml</a>
-                <a href="#8077701591284787446" class="my-1">SampleWidgetProvider.java</a>
-                <a href="#4576907414450729226" class="my-1">SampleWidgetService.java</a>
-                <a href="#888620345048677983" class="my-1">追記</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">要件</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">AndroidManifest.xml</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">res/xml/widget.xml</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">res/layout/widget_layout.xml</a>
+                <a href="#section-5" class="d-block p-2 overflow-hidden">res/layout/widget_listview_row.xml</a>
+                <a href="#section-6" class="d-block p-2 overflow-hidden">SampleWidgetProvider.java</a>
+                <a href="#section-7" class="d-block p-2 overflow-hidden">SampleWidgetService.java</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">追記</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -476,7 +483,7 @@ public class SampleWidgetService extends RemoteViewsService {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -494,6 +501,21 @@ public class SampleWidgetService extends RemoteViewsService {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>

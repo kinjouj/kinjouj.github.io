@@ -27,9 +27,16 @@
     <nav class="navbar navbar-expand p-0 sticky-top">
       <div class="container-fluid p-0">
         <div class="navbar-collapse p-3">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav gap-3">
             <li class="nav-item">
-              <a href="mailto:kinjouj@gmail.com" class="nav-link">Contact</a>
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto mx-2">
@@ -47,7 +54,7 @@
     </header>
     <div class="container mt-5">
       <div class="row g-0">
-        <div class="col col-lg-7">
+        <div class="col col-lg-8">
           <main id="content" role="main">
             <div class="post">
               <div class="post-date fs-4 fw-bold my-2">
@@ -73,7 +80,7 @@
 <p>JAX-RSに準拠しているアプリケーションサーバー(glassfish等)ではデプロイ時の設定が若干異なる模様。またJAX-RSに準拠しているアプリケーションサーバーであれば特にデプロイメントデスクリプタ(web.xml)を定義しなくても@ApplicationPathを使う事で引数に指定したパスを&lt;servlet-mapping&gt;のベースとして利用できるようになるっぽい。微妙にややこしいけど</p>
 
 <p>※記述している内容が正しいかは微妙なのであくまで個人的なメモとして</p>
-<h4 id="3923322970445552327">glassfishの環境構築</h4>
+<h4 id="section-1">glassfishの環境構築</h4>
 <p>glassfishのオープンソース版をダウンロードしてきてインストールする。でglassfishはTomcat等とは違い?ドメインっていう形でアプリケーションをデプロイする。で初期状態でもドメインが存在するのだけど、適当に別なドメインを作るので</p>
 <pre class="line-numbers"><code class="language-">/path/to/glassfish/bin/asadmin create-domain --profile developer --adminport 14848 --instanceport 10080 devDomain
 </code></pre>
@@ -83,7 +90,7 @@
 <p>あたりをやって作ったドメインなサーバーを起動する。でglassfishではアプリケーションをデプロイするには/path/to/glassfish/domains/ドメイン名/autodeployにwarファイルなり打ち込めばデプロイしてくれる模様なので</p>
 
 <p>とりあえずはglassfishな環境構築はこんなもんで</p>
-<h4 id="6668549572126683843">web.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+<h4 id="section-2">web.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;web-app
     xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -104,7 +111,7 @@
 &lt;/web-app&gt;
 </code></pre>
 <p>@ApplicationPathを使ってJAX-RSアプリケーションなリソースパスをマッピングするので特に記述する必要性は無いけど、もし上記のようにweb.xmlで指定する場合には&lt;servlet-name&gt;にApplicationクラス(又はResourceConfig?)を指定すれば良い(&lt;serlet-class&gt;は必要ないっぽい)。又、特にApplicationクラスを拡張しないで使うようなケースであれば、<span style="color: red">javax.ws.rs.core.Application</span>を指定すれば良い模様</p>
-<h4 id="3912191353540976446">SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h4 id="section-3">SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -123,7 +130,7 @@ public class SampleApplication extends ResourceConfig {
 <pre class="line-numbers"><code class="language-">mv jaxrs.war /path/to/glassfish/domains/devDomain/autodeploy
 </code></pre>
 <p>にぶん投げる。で@ApplicationPathで指定したリソースパスでアクセス出来るかを確認してみりゃ良い。</p>
-<h4 id="10009901319284187180">余談: glassfishでJSONをレンダリングするにあたって</h4>
+<h4 id="section-4">余談: glassfishでJSONをレンダリングするにあたって</h4>
 <p>※GlassFish4だと問題が発生しない模様</p>
 
 <p>JSONとしてレンダリングする場合であってもオブジェクトに@XmlRootElementが無い場合とかだとWebApplicationExceptionが発生する模様。又、アクション側において</p>
@@ -162,10 +169,10 @@ public class Home {
               </div>
               <div class="post-toc rounded-3 p-2">
                 <h6 class="text-center">Table of Contents</h6>
-                <a href="#3923322970445552327" class="my-1">glassfishの環境構築</a>
-                <a href="#6668549572126683843" class="my-1">web.xml</a>
-                <a href="#3912191353540976446" class="my-1">SampleApplication.java</a>
-                <a href="#10009901319284187180" class="my-1">余談: glassfishでJSONをレンダリングするにあたって</a>
+                <a href="#section-1" class="d-block p-2 overflow-hidden">glassfishの環境構築</a>
+                <a href="#section-2" class="d-block p-2 overflow-hidden">web.xml</a>
+                <a href="#section-3" class="d-block p-2 overflow-hidden">SampleApplication.java</a>
+                <a href="#section-4" class="d-block p-2 overflow-hidden">余談: glassfishでJSONをレンダリングするにあたって</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -196,7 +203,7 @@ public class Home {
             </div>
           </main>
         </div>
-        <aside class="sidebar col-12 col-lg-4 ms-5 px-5">
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
           <div id="recent_posts">
             <h4>Recent Posts</h4>
             <ul id="recent_posts">
@@ -214,6 +221,21 @@ public class Home {
               </li>
               <li class="recent-post">
                 <a href="/2025/11/react-useimperativehandle.html">ReactのuseImperativeHandle使ってみた</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/11/typescript-react-electron-desktop-app.html">TypeScript+React+Electronでデスクトップアプリを作る</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/10/ffmpeg-rtmp-streaming.html">ffmpegを使ってRTMPストリーミング</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/08/typescript-building-basic.html">TypeScriptのビルド環境を構築する</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/zsh-gitkeep-ignore.html">zshで.gitkeepを補完しない方法</a>
+              </li>
+              <li class="recent-post">
+                <a href="/2025/07/css-scroll-snap-type.html">scroll-snap-type</a>
               </li>
             </ul>
           </div>
