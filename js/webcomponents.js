@@ -12,7 +12,6 @@ class SearchModal extends LitElement {
 
   firstUpdated() {
     const modalElement = this.querySelector('#searchModal');
-    
     modalElement.addEventListener('shown.bs.modal', () => this.querySelector('input[name="q"]')?.focus());
     modalElement.addEventListener('hide.bs.modal', () => {
       if (document.activeElement instanceof HTMLElement) {
@@ -36,7 +35,7 @@ class SearchModal extends LitElement {
                 <div class="input-group">
                   <input type="hidden" name="hl" value="ja" />
                   <input type="hidden" name="sitesearch" value="kinjouj.github.io" />
-                  <input type="search" name="q" class="form-control rounded-2 py-4" placeholder="Search" />
+                  <input type="search" name="q" class="form-control rounded-2 py-4" placeholder="Search" data-bs-theme="dark" />
                 </div>
               </form>
             </div>
