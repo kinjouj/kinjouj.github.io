@@ -9,6 +9,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="Rails環境なのを除外して、例えばRubyのオブジェクトをJSON化するときってto_jsonを実装してあーだらこーだらするわけですが
 そのときにJSONに出力するキーとかをフィルターしたいとかってあると思うんですが..." />
+    <meta property="og:title" content="Ojを使ってArrayでラップしたオブジェクトをフィルターしたい件" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2026/02/oj-dump-array-object-filter.html">
     <title>Ojを使ってArrayでラップしたオブジェクトをフィルターしたい件 - kinjouj.github.io</title>
     <link rel="canonical" href="https://kinjouj.github.io/2026/02/oj-dump-array-object-filter.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,12 +20,11 @@
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link rel="stylesheet" type="text/css" href="/css/prism.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
     <script src="/js/bootstrap.min.js" defer></script>
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
-    <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-56169419-1', 'auto');ga("send", "pageview");</script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -103,7 +105,12 @@ samples = [
 puts Oj.dump(samples, mode: :rails, keys: [:name])
 </code></pre>
 <p>まあ要はdumpの引数にkeysを指定して出力するデータをsliceで切り出したりとかするわけですが、これ実行するとどうなるかっていうと</p>
-<pre class="line-numbers"><code class="language-bash">[{&quot;name&quot;:&quot;hoge&quot;},{&quot;id&quot;:1,&quot;name&quot;:&quot;fuga&quot;},{&quot;id&quot;:1,&quot;name&quot;:&quot;foobar&quot;}]
+<pre class="line-numbers"><code class="language-bash"># みやすいように整形済み
+[
+  {&quot;name&quot;:&quot;hoge&quot;},
+  {&quot;id&quot;:1,&quot;name&quot;:&quot;fuga&quot;},
+  {&quot;id&quot;:1,&quot;name&quot;:&quot;foobar&quot;}
+]
 </code></pre>
 <p>ってわけになる。最初のオブジェクトにはちゃんとsliceで切り出せれてるけどそれ以降ではそれが正しく作用してない。<br>
 これ何が根本的な原因なのかはちょっと不明なんだけど、mode: :railsをするとas_jsonに渡される引数にちゃんと伝番されないっぽい</p>
@@ -134,7 +141,11 @@ samples = [
 puts Oj.dump(samples, mode: :compat, keys: [:name])
 </code></pre>
 <p>これで実行すると</p>
-<pre class="line-numbers"><code class="language-bash">[{&quot;name&quot;:&quot;hoge&quot;},{&quot;name&quot;:&quot;fuga&quot;},{&quot;name&quot;:&quot;foobar&quot;}]
+<pre class="line-numbers"><code class="language-bash">[
+  {&quot;name&quot;:&quot;hoge&quot;},
+  {&quot;name&quot;:&quot;fuga&quot;},
+  {&quot;name&quot;:&quot;foobar&quot;}
+]
 </code></pre>
 <p>っていう感じになる。ということで配列でラップしたオブジェクトを実装したto_jsonなどを使って出力する場合がある場合にはここらへん注意かもね</p>
 
