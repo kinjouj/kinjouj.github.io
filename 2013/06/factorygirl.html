@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "FactoryGirlを使ってみる",
+  "datePublished": "2013-06-21T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">6</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">21</span>
                   </a>
                 </time>
@@ -83,7 +96,7 @@
 <p>ActiveRecordにもfixtureな機能自体はあるけど、こっちはyamlとかで定義したりすると思うのだけど、事細かいリレーション構造とかだとテストデータをどう表現するのかはちょっと謎。っていうかそこまで使いこなせてないっていうオチな気もするけど</p>
 
 <p>とりまぁ使ってみる</p>
-<h4 id="section-1">導入</h4>
+<h2 id="section-1">導入</h2>
 <p>Gemfileに</p>
 <pre class="line-numbers"><code class="language-rb">gem &quot;factory_girl_rails&quot;, :group =&gt; [:development, :test]
 </code></pre>
@@ -99,7 +112,7 @@
 end
 </code></pre>
 <p>を追加</p>
-<h4 id="section-2">モデル仕様</h4>
+<h2 id="section-2">モデル仕様</h2>
 <p><img src="/images/2013/06/201304241014072.png" alt="image" /></p>
 
 <ul>
@@ -112,7 +125,7 @@ end
 <p>っていうような仕様がぶち込まれている。それをやってるのがhas_and_belongs_to_many辺り</p>
 
 <p>んまぁ仕様的なはこんなもんかなと。あとはspec/factories等やモデルテストを書く</p>
-<h4 id="section-3">spec/factories/categories.rb</h4><pre class="line-numbers"><code class="language-">rails g factory_girl:model category
+<h2 id="section-3">spec/factories/categories.rb</h2><pre class="line-numbers"><code class="language-">rails g factory_girl:model category
 </code></pre>
 <p>で生成したFactoryGirlの定義を書く</p>
 <pre class="line-numbers"><code class="language-rb"># Read about factories at https://github.com/thoughtbot/factory_girl
@@ -129,7 +142,7 @@ FactoryGirl.define do
 end
 </code></pre>
 <p>2つのカテゴリーを定義するけど、カテゴリーBはカテゴリーAの子カテゴリーとなりCategoryクラスのparent_categoryを参照する事で親カテゴリーなカテゴリーAを取得できるっていうような形になっているので、associationでカテゴリーAなfactoryを指定する</p>
-<h4 id="section-4">spec/factories/entries.rb</h4><pre class="line-numbers"><code class="language-">rails g factory_girl:model entry
+<h2 id="section-4">spec/factories/entries.rb</h2><pre class="line-numbers"><code class="language-">rails g factory_girl:model entry
 </code></pre>
 <p>で生成したFactoryGirlの定義を書いていく</p>
 <pre class="line-numbers"><code class="language-rb"># Read about factories at https://github.com/thoughtbot/factory_girl
@@ -148,7 +161,7 @@ end
 <p>entryを作った後にafter :createが発生する模様で、そこでカテゴリーな参照をぶち込まないとちゃんとhas_and_belongs_to_manyなリレーション関係が解決出来なかった。これはちょっと要確認</p>
 
 <p>で見て分かるようにentryからはcategory1な参照は含まれていない。だけどcategory2側からはcategory1なfactoryを参照する方式で親カテゴリーの参照をぶち込んでるのでそれで利用されるっていう感じ</p>
-<h4 id="section-5">spec/models/entry_spec.rb</h4>
+<h2 id="section-5">spec/models/entry_spec.rb</h2>
 <p>まぁテストを書く。要件的には</p>
 
 <ul>

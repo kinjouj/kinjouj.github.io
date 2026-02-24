@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "JAX-RSをやってみる (3) - AutoDiscoverable -",
+  "datePublished": "2014-06-10T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">6</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">10</span>
                   </a>
                 </time>
@@ -80,13 +93,13 @@
                 <p>JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。</p>
 
 <p>という事でやってみた</p>
-<h4 id="section-1">備考: glassfishのバージョンに関して</h4>
+<h2 id="section-1">備考: glassfishのバージョンに関して</h2>
 <p>(記事投稿時の)glasshfish4では組み込まれているJAX-RS(Jersey2)のバージョンが古い模様なので、実装側とAPIのバージョンの整合性が合わないが為にエラーが起きる模様。なのでglassfishに同梱されているライブラリをアップデートするか、glassfish4.0.1(現時点では正式版は出ていない)を使う事で解決出来る模様</p>
 
 <p>参考: <a href="http://qiita.com/opengl-8080/items/cfdde684b36efec50477">GlassFish4.0でJAX-RSのクラスにCDIでインジェクションしようとしたらUnsatisfiedDependencyExceptionが発生するバグ？</a></p>
-<h4 id="section-2">概要</h4>
+<h2 id="section-2">概要</h2>
 <p>gsonを使って返された値をJSONにエンコードするだけのMessageBodyWriterをAutoDiscoverableを使って別パッケージにしてロード出来るようにする</p>
-<h4 id="section-3">SampleAutoDiscoverable.java</h4><pre class="line-numbers"><code class="language-java">package sample.internal;
+<h2 id="section-3">SampleAutoDiscoverable.java</h2><pre class="line-numbers"><code class="language-java">package sample.internal;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -103,7 +116,7 @@ public class SampleAutoDiscoverable implements AutoDiscoverable {
         }
     }
 }
-</code></pre><h4 id="section-4">SampleFeature.java</h4><pre class="line-numbers"><code class="language-java">package sample.internal;
+</code></pre><h2 id="section-4">SampleFeature.java</h2><pre class="line-numbers"><code class="language-java">package sample.internal;
 
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Feature;
@@ -151,7 +164,7 @@ public class SampleFeature implements Feature {
         return true;
     }
 }
-</code></pre><h4 id="section-5">GsonProvider.java</h4><pre class="line-numbers"><code class="language-java">package sample.provider;
+</code></pre><h2 id="section-5">GsonProvider.java</h2><pre class="line-numbers"><code class="language-java">package sample.provider;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -202,14 +215,14 @@ public class GsonProvider implements MessageBodyWriter&lt;Object&gt; {
         }
     }
 }
-</code></pre><h4 id="section-6">META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverableを作成</h4>
+</code></pre><h2 id="section-6">META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverableを作成</h2>
 <p>AutoDiscoverableを使う場合にはServiceLoader周りを設定しとけば良い</p>
 <pre class="line-numbers"><code class="language-">sample.internal.SampleAutoDiscoverable
 </code></pre>
 <p>中身はAutoDiscoverableのパッケージ名を含むクラス名を指定するだけ</p>
 
 <p>あとはこのプロジェクトをjar化してJAX-RSアプリケーションに含めるだけ</p>
-<h4 id="section-7">SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-7">SampleApplication.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -226,7 +239,7 @@ public class SampleApplication extends ResourceConfig {
 }
 </code></pre>
 <p>デフォでMOXyなJSONシリアライザ的なので処理されちゃって上記のFeatureでJSON_FEATUREによりGsonProviderでの処理がスキップされちゃうので、そこら辺の使えるようにするように設定しとかなあかんっぽい</p>
-<h4 id="section-8">Home.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
+<h2 id="section-8">Home.java</h2><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -264,7 +277,7 @@ public class Home {
         return data;
     }
 }
-</code></pre><h4 id="section-9">HomeTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><h2 id="section-9">HomeTest.java</h2><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.List;
 import java.util.Map;

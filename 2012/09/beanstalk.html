@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "beanstalkを使ってみる",
+  "datePublished": "2012-09-13T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "※Amazon Elastic Beanstalkは関係ありません"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">9</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">13</span>
                   </a>
                 </time>
@@ -79,15 +92,15 @@
                 <p>※Amazon Elastic Beanstalkは関係ありません</p>
 
 <p><a href="http://kr.github.com/beanstalkd">http://kr.github.com/beanstalkd</a> がちょっと気になったので使ってみた</p>
-<h4 id="section-1">インストール</h4><pre class="line-numbers"><code class="language-sh">sudo apt-get install beanstalkd
+<h2 id="section-1">インストール</h2><pre class="line-numbers"><code class="language-sh">sudo apt-get install beanstalkd
 </code></pre>
 <p>でインストール出来る。 もちディストリビューションによって違うと思うので、そこら辺はドキュメント参照するかapt-getなりyumなりで検索して探してインストールする</p>
 
 <p>んでその後起動しておく。デフォルト推奨ポート番号は11300な模様</p>
-<h4 id="section-2">Rubyのライブラリをインストール</h4><pre class="line-numbers"><code class="language-sh">gem install beanstalk-client
+<h2 id="section-2">Rubyのライブラリをインストール</h2><pre class="line-numbers"><code class="language-sh">gem install beanstalk-client
 </code></pre>
 <p>まぁ色々クライアントライブラリはあるみたいですが、とりあえずbeanstalk-clientってのを使う</p>
-<h4 id="section-3">worker.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;beanstalk-client&quot;
+<h2 id="section-3">worker.rb</h2><pre class="line-numbers"><code class="language-rb">require &quot;beanstalk-client&quot;
 
 beanstalk = Beanstalk::Pool.new([&quot;127.0.0.1:11300&quot;])
 beanstalk.watch(&quot;sample&quot;)
@@ -119,14 +132,14 @@ end
 end
 </code></pre>
 <p>っていうふうになってるので普通にjob[name]で参照可能。だけどこれyputされた際に限るものだと思われるので、普通の文字列なようなのがputでぶっこんで来られた場合にはjob.bodyで取得できる</p>
-<h4 id="section-4">client.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;beanstalk-client&quot;
+<h2 id="section-4">client.rb</h2><pre class="line-numbers"><code class="language-rb">require &quot;beanstalk-client&quot;
 
 beanstalk = Beanstalk::Pool.new([&quot;127.0.0.1:11300&quot;])
 beanstalk.use(&quot;sample&quot;)
 beanstalk.yput({ :name =&gt; &quot;hoge&quot; })
 </code></pre>
 <p>まぁ上でも書いたようにyputを使えばHashとかでも流せる。一応シリアライザー的なのはYAMLな模様。まぁだから接頭辞にyが付いてるんだと思うけど</p>
-<h4 id="section-5">追記</h4>
+<h2 id="section-5">追記</h2>
 <p>beanstalkのEM(EventMachine)なライブラリもある模様で</p>
 
 <p>worker.rbが</p>

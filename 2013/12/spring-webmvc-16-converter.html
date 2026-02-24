@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Spring WebMVCをやってみる (16) - Converter -",
+  "datePublished": "2013-12-26T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "以前にも引数にDateを使う場合だとかはConversionServiceな設定が必要だって件を書いたけど、そういう所を自分で作って利用したい場合どうすれば良いのかって所を検証してみた"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">12</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">26</span>
                   </a>
                 </time>
@@ -78,7 +91,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>以前にも引数にDateを使う場合だとかはConversionServiceな設定が必要だって件を書いたけど、そういう所を自分で作って利用したい場合どうすれば良いのかって所を検証してみた</p>
-<h4 id="section-1">SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-1">SampleController.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -96,7 +109,7 @@ public class SampleController {
 }
 </code></pre>
 <p>っていうようにidパラメーターを取ってそこからSampleFormなインスタンスを引数で利用したい場合とかを普通にやると<span style="color: red">org.springframework.beans.ConversionNotSupportedException</span>になる訳だけど、上記でも書いたように以前だとDateを利用する引数な場合には@DateTimeFormatなアノテーションを付与する事で利用できるがConversionServiceの設定をしておかないといけない。でこの場合においてidパラメーターからSampleFormに変換するConversionServiceのconverterを用意する事で対処できる</p>
-<h4 id="section-2">StringToSampleFormConverter.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-2">StringToSampleFormConverter.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.springframework.core.convert.converter.Converter;
 
@@ -118,7 +131,7 @@ public class StringToSampleFormConverter implements Converter&lt;String, SampleF
 <p>Converterインターフェースを実装すれば良い。</p>
 
 <p>まぁ定義しただけじゃなくて設定したいと作用しないので</p>
-<h4 id="section-3">spring-web-servlet.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+<h2 id="section-3">spring-web-servlet.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
     xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
@@ -156,7 +169,7 @@ public class StringToSampleFormConverter implements Converter&lt;String, SampleF
 &lt;/beans&gt;
 </code></pre>
 <p>っていう感じで作ったConverterな実装をConversionSerivceのconvertersに入れてやれば良い模様で</p>
-<h4 id="section-4">余談1: ConversionServiceを@Autowiredしてやる場合</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-4">余談1: ConversionServiceを@Autowiredしてやる場合</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Date;
 
@@ -188,7 +201,7 @@ public class SampleController {
 <p>っていう感じにやっても出来る模様ではあるけれどもまぁ普通ならXMLに定義するなりでしておいた方がいいのかも</p>
 
 <p>ちなみに@InitBinderの引数で使用されるWebDataBinderでもConversionServiceなインスタンスは取れる</p>
-<h4 id="section-5">余談2: オブジェクト等からString等へconvertする場合</h4>
+<h2 id="section-5">余談2: オブジェクト等からString等へconvertする場合</h2>
 <p>Stringからオブジェクトへ変換する方式は上記でやってるけど、その逆の場合どういう動作によって行われるのか</p>
 <pre class="line-numbers"><code class="language-java">package sample;
 

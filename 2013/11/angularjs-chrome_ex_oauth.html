@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "angular.js+chrome_ex_oauth",
+  "datePublished": "2013-11-18T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "angular.jsを使いつつ、chrome\_ex\_oauthを使ってTwitter APIを使うデモとか出来るんじゃないかなーって思ってやってみた"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">11</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">18</span>
                   </a>
                 </time>
@@ -79,7 +92,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>angular.jsを使いつつ、chrome_ex_oauthを使ってTwitter APIを使うデモとか出来るんじゃないかなーって思ってやってみた</p>
-<h4 id="section-1">manifest.json</h4><pre class="line-numbers"><code class="language-json">{
+<h2 id="section-1">manifest.json</h2><pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;sample&quot;,
   &quot;version&quot;: &quot;0.1&quot;,
   &quot;manifest_version&quot;: 2,
@@ -108,7 +121,7 @@
 }
 </code></pre>
 <p>Twitter APIだとoauth_callback?でchrome-extension://な方式が使えない以前に、通常のアプリケーション方式だとリクエストトークンを取得する時点でoauth_callbackパラメーターが許容されない為、authorizeからのアクセストークンを取得する流れをコントロールする必要がある。そこはコンテントスクリプトを使ってアクセストークンを取得して保管する</p>
-<h4 id="section-2">popup.html</h4><pre class="line-numbers"><code class="language-html">&lt;html ng-app&gt;
+<h2 id="section-2">popup.html</h2><pre class="line-numbers"><code class="language-html">&lt;html ng-app&gt;
   &lt;head&gt;
     &lt;script src=&quot;js/angular.js&quot;&gt;&lt;/script&gt;
     &lt;script src=&quot;js/chrome_ex_oauth.js&quot;&gt;&lt;/script&gt;
@@ -131,7 +144,7 @@
 &lt;/html&gt;
 </code></pre>
 <p>まぁ特にangular.js特有なの以外は無いので(ry</p>
-<h4 id="section-3">popup.js</h4><pre class="line-numbers"><code class="language-js">var TwitterController = (function() {
+<h2 id="section-3">popup.js</h2><pre class="line-numbers"><code class="language-js">var TwitterController = (function() {
 
   function TwitterController($scope, $http) {
     var bgPage = chrome.extension.getBackgroundPage();
@@ -155,7 +168,7 @@
 <p>angular.jsなコントローラーにchrome API依存するのもどうかとは思いますけど...</p>
 
 <p>要は認証されていればTwitter APIからタイムラインを取得する。認証されてなければChromeExOAuth方式の認証フローに入るっていう感じ</p>
-<h4 id="section-4">background.js</h4><pre class="line-numbers"><code class="language-js">var oauth = ChromeExOAuth.initBackgroundPage({
+<h2 id="section-4">background.js</h2><pre class="line-numbers"><code class="language-js">var oauth = ChromeExOAuth.initBackgroundPage({
   consumer_key: CONSUMER_KEY,
   consumer_secret: CONSUMER_SECRET,
   request_url: &quot;https://api.twitter.com/oauth/request_token&quot;,
@@ -183,7 +196,7 @@ chrome.runtime.onMessage.addListener(function(req, sender, res) {
 });
 </code></pre>
 <p>コンテントスクリプトから来たauthorizeをverifyするPINコードを受け取ったらそれを利用してアクセストークンを取得する</p>
-<h4 id="section-5">callback.html</h4><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+<h2 id="section-5">callback.html</h2><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;script src=&quot;js/chrome_ex_oauth.js&quot;&gt;&lt;/script&gt;
     &lt;script src=&quot;js/chrome_ex_oauthsimple.js&quot;&gt;&lt;/script&gt;
@@ -192,10 +205,10 @@ chrome.runtime.onMessage.addListener(function(req, sender, res) {
     &lt;script src=&quot;callback.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><h4 id="section-6">callback.js</h4><pre class="line-numbers"><code class="language-js">ChromeExOAuth.initCallbackPage();
+</code></pre><h2 id="section-6">callback.js</h2><pre class="line-numbers"><code class="language-js">ChromeExOAuth.initCallbackPage();
 </code></pre>
 <p>ただのChromeExOAuthによる認証フロー開始するだけなので(ry</p>
-<h4 id="section-7">content_script.js</h4><pre class="line-numbers"><code class="language-js">var pin = prompt(&quot;Enter the PIN displayed by Twitter&quot;);
+<h2 id="section-7">content_script.js</h2><pre class="line-numbers"><code class="language-js">var pin = prompt(&quot;Enter the PIN displayed by Twitter&quot;);
 chrome.runtime.sendMessage({ &quot;verifier&quot;: pin }, function(isSuccess) {
   if (isSuccess === true) {
     alert(&quot;Authorized, woot!&quot;);
@@ -203,7 +216,7 @@ chrome.runtime.sendMessage({ &quot;verifier&quot;: pin }, function(isSuccess) {
 });
 </code></pre>
 <p>とここまでがChrome拡張になる訳。あとはビルド(crx生成)するなりで使う訳ですが、そのままでは動かない。chrome_ex_oauth.jsに所々問題があって動かない箇所があるので修正する必要がある</p>
-<h4 id="section-8">chrome_ex_oauth.jsの修正</h4>
+<h2 id="section-8">chrome_ex_oauth.jsの修正</h2>
 <p>487行目辺り</p>
 <pre class="line-numbers"><code class="language-js">parameters: {
   &quot;xoauth_displayname&quot; : this.app_name,

@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "fluentdを使ってみる (2) - exec_filter -",
+  "datePublished": "2012-11-17T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "exec_filterを使えば指定したコマンドでフィルタリング(っていうか中継?)したり出来る模様"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">11</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">17</span>
                   </a>
                 </time>
@@ -77,7 +90,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>exec_filterを使えば指定したコマンドでフィルタリング(っていうか中継?)したり出来る模様</p>
-<h4 id="section-1">/etc/td-agent/td-agent.conf</h4><pre class="line-numbers"><code class="language-">&lt;source&gt;
+<h2 id="section-1">/etc/td-agent/td-agent.conf</h2><pre class="line-numbers"><code class="language-">&lt;source&gt;
     type tail
     format apache
     path /var/log/nginx/access.log
@@ -100,7 +113,7 @@
 &lt;/match&gt;
 </code></pre>
 <p>/var/log/nginx/access.logをtailした結果をexec_filterで/var/lib/fluentd/accesslog_filter.plをかましてから/var/log/td-agent/accesslogへ持っていく</p>
-<h4 id="section-2">/var/lib/fluentd/accesslog_filter.pl</h4><pre class="line-numbers"><code class="language-pl">#!/usr/bin/env perl
+<h2 id="section-2">/var/lib/fluentd/accesslog_filter.pl</h2><pre class="line-numbers"><code class="language-pl">#!/usr/bin/env perl
 
 use strict;
 use warnings;
@@ -137,7 +150,7 @@ while (my $data = &lt;STDIN&gt;) {
 }
 </code></pre>
 <p>/var/log/nginx/access.logをtailして、キャッチされた時点で標準入力にin_formatで指定した形式で入ってくる(んだと思われる)。なので、それをdecode_jsonでデコードしてそこからホストとパスだけを取って、MessagePack形式で出力する</p>
-<h4 id="section-3">結果</h4>
+<h2 id="section-3">結果</h2>
 <pre>
 2012-11-17T18:34:01+09:00   accesslog.filter.output {"host":"127.0.0.1","path":"/"}
 2012-11-17T18:34:01+09:00   accesslog.filter.output {"host":"127.0.0.1","path":"/favicon.ico"}

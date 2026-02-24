@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Rails3+RSpecでのテストを勉強してみる (4) - コントローラー及びヘルパーのテスト -",
+  "datePublished": "2012-09-09T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "#### app/controllers/sample_controller.rb"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">9</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">9</span>
                   </a>
                 </time>
@@ -78,7 +91,7 @@
                 <a href="/archives/category/rails" class="fs-5">Rails</a>
               </p>
               <div class="post-content fs-6 text-break my-4">
-                <h4 id="section-1">app/controllers/sample_controller.rb</h4><pre class="line-numbers"><code class="language-rb">class SampleController &lt; ApplicationController
+                <h2 id="section-1">app/controllers/sample_controller.rb</h2><pre class="line-numbers"><code class="language-rb">class SampleController &lt; ApplicationController
   def index
     if request.post?
       redirect_to :status =&gt; 404
@@ -89,14 +102,14 @@
 end
 </code></pre>
 <p>単純にPOSTメソッドでぶち込むと404になるようにする。</p>
-<h4 id="section-2">app/helpers/sample_helper.rb</h4><pre class="line-numbers"><code class="language-rb">module SampleHelper
+<h2 id="section-2">app/helpers/sample_helper.rb</h2><pre class="line-numbers"><code class="language-rb">module SampleHelper
   def say
     return content_tag(:h1, &quot;hoge&quot;)
   end
 end
 </code></pre>
 <p>まぁ機能自体使ってないけど。あくまでRSpecでテストする事だけが目的なので</p>
-<h4 id="section-3">spec/controllers/sample_controller_spec.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
+<h2 id="section-3">spec/controllers/sample_controller_spec.rb</h2><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 describe SampleController do
   it &quot;should be SampleController&quot; do
@@ -117,7 +130,7 @@ describe SampleController do
 end
 </code></pre>
 <p>コントローラーなテストな部分。GETで成功して、POSTで失敗するかだけをチェック</p>
-<h4 id="section-4">spec/helpers/sample_helper_spec.rb</h4><pre class="line-numbers"><code class="language-rb">describe SampleHelper do
+<h2 id="section-4">spec/helpers/sample_helper_spec.rb</h2><pre class="line-numbers"><code class="language-rb">describe SampleHelper do
   it &quot;helper.say test&quot; do
     helper.say().should == &quot;&lt;h1&gt;hoge&lt;/h1&gt;&quot;
   end
@@ -128,7 +141,7 @@ end
 <p>まぁとりあえずこの件はほっとく</p>
 
 <p>あとは普通どおりテストするコマンド投げれば良い</p>
-<h4 id="section-5">追記</h4>
+<h2 id="section-5">追記</h2>
 <p>コントローラーテストでcontrollerで参照できるはずなので、コントローラーにメソッド生やした場合はそれを介して出来るのはと思ったのだけど、例えば(あんまりやるべきでは無いとは思うのですが)コントローラーからViewHelperを参照して使った場合のテストってどうするんだろうと思ってたら、上記のままそんままSampleHelperをSampleControllerでincludeしちゃっても出来ない事が判明</p>
 <pre class="line-numbers"><code class="language-rb">class SampleController &lt; ApplicationController
   include ActionView::Helpers::TagHelper

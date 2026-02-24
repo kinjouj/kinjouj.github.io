@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "postfix",
+  "datePublished": "2009-12-12T09:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "PostfixでSMTP/SMTPSを構築してみる。認証システムはsaslauthdを使用する"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2009</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">12</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">12</span>
                   </a>
                 </time>
@@ -77,17 +90,17 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>PostfixでSMTP/SMTPSを構築してみる。認証システムはsaslauthdを使用する</p>
-<h4 id="section-1">saslauthdの設定</h4>
+<h2 id="section-1">saslauthdの設定</h2>
 <p>/usr/lib/sasl2/smtpd.confを設定</p>
 <pre class="line-numbers"><code class="language-conf">pwcheck_method: auxprop
 auxprop_plugin: sasldb
 mech_list: cram-md5 plain login
 </code></pre>
 <p>設定後、saslauthdのサービスを起動</p>
-<h4 id="section-2">証明書設定</h4>
+<h2 id="section-2">証明書設定</h2>
 <p>SMTP over SSLで使用する証明書を生成する</p>
 <pre class="line-numbers"><code class="language-bash">openssl req -new -nodes -x509 -keyout server.key -out server.crt -days 365
-</code></pre><h4 id="section-3">プロトコルタイプを設定</h4>
+</code></pre><h2 id="section-3">プロトコルタイプを設定</h2>
 <p>/etc/postfix/master.cfに以下のように設定を行う</p>
 <pre class="line-numbers"><code class="language-"># SMTPのタイプ設定
 smtp     inet  n       -       n       -       -       smtpd
@@ -98,7 +111,7 @@ smtps    inet  n       -       n       -       -       smtpd
     -o smtpd_sasl_auth_enable=yes
 </code></pre>
 <p>※smtpsの部分がコメントされているのでコメントを削除する</p>
-<h4 id="section-4">OP25Bの設定</h4>
+<h2 id="section-4">OP25Bの設定</h2>
 <p>プロバイダがOP25Bを適応している場合は設定をしてないと外部送信が許可されないので、/etc/postfix/authinfoにプ<br>
 ロバイダのサブミッションポートを設定する</p>
 <pre class="line-numbers"><code class="language-">[プロバイダのサーバー名]:587
@@ -107,7 +120,7 @@ smtps    inet  n       -       n       -       -       smtpd
 <pre class="line-numbers"><code class="language-">[プロバイダのサーバー名]:587 契約ID:パスワード
 </code></pre>
 <p>更にmain.cfにもrelayhostを設定する</p>
-<h4 id="section-5">postfix本体の設定</h4>
+<h2 id="section-5">postfix本体の設定</h2>
 <p>/etc/postfix/main.cfを設定。基本設定するもののみ記述</p>
 <pre class="line-numbers"><code class="language-postfix"># ドメイン名関連の設定
 myhostname = hoge.com

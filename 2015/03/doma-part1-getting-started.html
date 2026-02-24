@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "doma2を使ってみた",
+  "datePublished": "2015-03-10T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "http://doma.readthedocs.org/ja/latest/getting-started を見ながらやってみた"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">3</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">10</span>
                   </a>
                 </time>
@@ -80,7 +93,7 @@
                 <p><a href="http://doma.readthedocs.org/ja/latest/getting-started">http://doma.readthedocs.org/ja/latest/getting-started</a> を見ながらやってみた</p>
 
 <p>※ターゲットバージョンは2.x</p>
-<h4 id="section-1">構造</h4>
+<h2 id="section-1">構造</h2>
 <pre>
 .
 ├── build.gradle
@@ -106,7 +119,7 @@
                 └── dao
                     └── SampleDaoTest.java
 </pre>
-<h4 id="section-2">build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+<h2 id="section-2">build.gradle</h2><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 
 processResources.destinationDir = compileJava.destinationDir
 compileJava.dependsOn processResources
@@ -127,7 +140,7 @@ dependencies {
 <p>でdomaの方式としてはDAO(インターフェース)とSQLを書いてそのソースから実装をアノテーションプロセッサー周りを使ってクラスを生成する仕組みになっている模様</p>
 
 <p>で実行環境はこんなもんで、DAO(とエンティティクラスを含む)とSQLとデータソースなり回りなAppConfigクラスを作成する</p>
-<h4 id="section-3">AppConfig.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-3">AppConfig.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.sql.DataSource;
 
@@ -175,7 +188,7 @@ public class AppConfig implements Config {
 }
 </code></pre>
 <p>大体な所を <a href="http://doma.readthedocs.org/ja/latest/config/#id20">http://doma.readthedocs.org/ja/latest/config/#id20</a> を参考にして作成。DIコンテナ依存するような場合のケースは今後検証するので今回はパス</p>
-<h4 id="section-4">Sample.java</h4><pre class="line-numbers"><code class="language-java">package sample.entity;
+<h2 id="section-4">Sample.java</h2><pre class="line-numbers"><code class="language-java">package sample.entity;
 
 import java.util.Date;
 import org.seasar.doma.Column;
@@ -221,7 +234,7 @@ public class Sample {
 <p>変数名がそのままカラム名になるのでマッピングする際にあたって名称によって問題なる場合には@Columnアノテーションで紐付けするカラム名をマッピングするようにすれば良い。あとテーブル名もデフォルトではクラス名同等の名前になる模様。そういう問題が出るような場合(insert等のSQLを自動生成して実行するような場合)にはnamingパラメーターでクラス内で実行するSQLを生成する際に参照するテーブル名などの方式を設定すれば良い。上記だとクラス名をlowercaseした値でSQLを実行する</p>
 
 <p>※@Tableアノテーションで指定した名前で利用することも可能っぽい</p>
-<h4 id="section-5">SampleDao.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
+<h2 id="section-5">SampleDao.java</h2><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 
@@ -248,14 +261,14 @@ public interface SampleDao {
 }
 </code></pre>
 <p>で@Selectアノテーションで使うSQLファイルを定義する必要がある。resources/META-INF/DAOパッケージ名/メソッド名.sqlで定義すれば良い模様</p>
-<h4 id="section-6">resources/META-INF/sample/dao/SampleDao/findAll.sql</h4><pre class="line-numbers"><code class="language-sql">select
+<h2 id="section-6">resources/META-INF/sample/dao/SampleDao/findAll.sql</h2><pre class="line-numbers"><code class="language-sql">select
     /*%expand*/*
 from
     sample
 order by id
 </code></pre>
 <p>/<em>%expand</em>/っていう形として、オブジェクトが持つカラムを展開してくれる</p>
-<h4 id="section-7">resources/META-INF/sample/dao/SampleDao/find.sql</h4><pre class="line-numbers"><code class="language-sql">SELECT
+<h2 id="section-7">resources/META-INF/sample/dao/SampleDao/find.sql</h2><pre class="line-numbers"><code class="language-sql">SELECT
     /*%expand*/*
 FROM
     sample
@@ -265,7 +278,7 @@ WHERE
 <p>/* id */の箇所にメソッドの引数で指定した値が展開される</p>
 
 <p>っていう感じでこれで実装終わりなので、テスト書いて実際にデータベースの問い合わせをテストしてみる</p>
-<h4 id="section-8">SampleDaoTest.java</h4><pre class="line-numbers"><code class="language-java">package sample.dao;
+<h2 id="section-8">SampleDaoTest.java</h2><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 

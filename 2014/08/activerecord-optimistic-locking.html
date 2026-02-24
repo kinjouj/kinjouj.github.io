@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ActiveRecord Optimistic Locking",
+  "datePublished": "2014-08-02T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "参考: &lt;http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html&gt;"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">8</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">2</span>
                   </a>
                 </time>
@@ -82,7 +95,7 @@
 <p>Rails(っていうかActiveRecord)での楽観的ロックを使う場合のドキュメント見ながらやってみた</p>
 
 <p>とりあえず実検証でのアプリケーションを作る必要があるので(ry</p>
-<h4 id="section-1">app/controllers/entries_controller.rb</h4><pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
+<h2 id="section-1">app/controllers/entries_controller.rb</h2><pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
   def show
     @entries = Entry.all
   end
@@ -99,10 +112,10 @@
     redirect_to :action =&gt; :show
   end
 end
-</code></pre><h4 id="section-2">app/views/entries/show.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;% @entries.each do |sample| %&gt;
+</code></pre><h2 id="section-2">app/views/entries/show.erb</h2><pre class="line-numbers"><code class="language-erb">&lt;% @entries.each do |sample| %&gt;
     &lt;%= link_to sample.name, { :action =&gt; &quot;edit&quot;, :id =&gt; sample.id } %&gt;
 &lt;% end %&gt;
-</code></pre><h4 id="section-3">app/views/entries/edit.erb</h4><pre class="line-numbers"><code class="language-erb">&lt;%= form_for @entry do |f| %&gt;
+</code></pre><h2 id="section-3">app/views/entries/edit.erb</h2><pre class="line-numbers"><code class="language-erb">&lt;%= form_for @entry do |f| %&gt;
   &lt;%= f.hidden_field :id %&gt;
   &lt;%= f.text_field :name  %&gt;
   &lt;%= f.submit &quot;update&quot; %&gt;
@@ -111,7 +124,7 @@ end
 <p>な感じで作ったとして、/entry/editに複数からアクセスしてアップデート処理を行った場合、一方が処理したのを他でアップデートされてデータが破壊されるっていうオチになる</p>
 
 <p>でそういう風にならないようにデータをロックするなりで一方がアップデートして他が同時にアップデートしようとしたような場合にはエラーが起こるように出来る</p>
-<h4 id="section-4">Entryモデルのマイグレーションを修正</h4><pre class="line-numbers"><code class="language-rb">class CreateEntries &lt; ActiveRecord::Migration
+<h2 id="section-4">Entryモデルのマイグレーションを修正</h2><pre class="line-numbers"><code class="language-rb">class CreateEntries &lt; ActiveRecord::Migration
   def change
     create_table :entries do |t|
       t.string :name
@@ -129,7 +142,7 @@ end
 <p>のようにlocking_columnでロックに使用するカラムを指定出来る。だから別にlock_versionじゃなきゃダメっていうわけでもない模様</p>
 
 <p>これやれば良いだけのとちょっとアプリケーション自体を修正する必要もある</p>
-<h4 id="section-5">app/controllers/entries_controller.rbを修正</h4><pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
+<h2 id="section-5">app/controllers/entries_controller.rbを修正</h2><pre class="line-numbers"><code class="language-rb">class EntriesController &lt; ApplicationController
   def show
     @entries = Entry.all
   end
@@ -147,7 +160,7 @@ end
     redirect_to :action =&gt; :show
   end
 end
-</code></pre><h4 id="section-6">app/views/entries/edit.erbを修正</h4><pre class="line-numbers"><code class="language-erb">&lt;%= form_for @entry do |f| %&gt;
+</code></pre><h2 id="section-6">app/views/entries/edit.erbを修正</h2><pre class="line-numbers"><code class="language-erb">&lt;%= form_for @entry do |f| %&gt;
   &lt;%= f.hidden_field :id %&gt;
 
   &lt;!-- 追加 --&gt;

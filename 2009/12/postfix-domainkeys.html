@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "postfixでDomainKeys",
+  "datePublished": "2009-12-15T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "PostfixでDomainKeysを行う方法をメモ"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2009</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">12</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">15</span>
                   </a>
                 </time>
@@ -77,24 +90,24 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>PostfixでDomainKeysを行う方法をメモ</p>
-<h4 id="section-1">インストール</h4>
+<h2 id="section-1">インストール</h2>
 <p><a href="http://jason.long.name/dkfilter">http://jason.long.name/dkfilter</a>からDomainKeys Filter dkfilterをダウンロードしてインストールする</p>
-<h4 id="section-2">秘密鍵、公開鍵を生成</h4><pre class="line-numbers"><code class="language-shell"># 秘密鍵を生成
+<h2 id="section-2">秘密鍵、公開鍵を生成</h2><pre class="line-numbers"><code class="language-shell"># 秘密鍵を生成
 openssl genrsa -out private.key 1024
 
 # 公開鍵を生成
 openssl rsa -in private.key -pubout -out public.key
-</code></pre><h4 id="section-3">DNSレコードの設定</h4>
+</code></pre><h2 id="section-3">DNSレコードの設定</h2>
 <p>domainkeyとselector1._domainkeyの二つが必要になるので、以下のように設定を行う</p>
 <pre class="line-numbers"><code class="language-dns"># _domainkey TXTレコードを設定
 _domainkey IN TXT &quot;t=y; o=~&quot;
 
 # selector1._domainkey TXTレコードを設定
 selector1._domainkey IN TXT k=rsa; t=y; p=公開鍵内のデータを指定
-</code></pre><h4 id="section-4">受信時のDomainKeysフィルターを起動</h4>
+</code></pre><h2 id="section-4">受信時のDomainKeysフィルターを起動</h2>
 <p>メールを受信する際にDomainKeysの検証を行うフィルターを起動</p>
 <pre class="line-numbers"><code class="language-shell">dkfilter.in --hostname=ドメイン名 127.0.0.1:10025 127.0.0.1:10026
-</code></pre><h4 id="section-5">送信時のDomainKeysフィルターを起動</h4><pre class="line-numbers"><code class="language-shell">dkfilter.out \
+</code></pre><h2 id="section-5">送信時のDomainKeysフィルターを起動</h2><pre class="line-numbers"><code class="language-shell">dkfilter.out \
     # 秘密鍵のパスを指定
     --keyfile=/etc/postfix/dk/private.key \
     # DomainKeysのセレクタ名を指定
@@ -103,7 +116,7 @@ selector1._domainkey IN TXT k=rsa; t=y; p=公開鍵内のデータを指定
     --method=nofws \
     --headers \
     127.0.0.1:10027 127.0.0.1:10028
-</code></pre><h4 id="section-6">/etc/postfix/master.cfを設定</h4><pre class="line-numbers"><code class="language-">smtp inet n - n - - smtpd
+</code></pre><h2 id="section-6">/etc/postfix/master.cfを設定</h2><pre class="line-numbers"><code class="language-">smtp inet n - n - - smtpd
    # 追加
    -o smtpd_proxy_filter=127.0.0.1:10025
 

@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Kotlin Unit Testing (1)",
+  "datePublished": "2017-09-07T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "参考: https://www.slideshare.net/shoma2da/kotlin-63635954"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2017</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">9</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">7</span>
                   </a>
                 </time>
@@ -79,11 +92,11 @@
                 <p>参考: <a href="https://www.slideshare.net/shoma2da/kotlin-63635954">https://www.slideshare.net/shoma2da/kotlin-63635954</a></p>
 
 <p>KotlinでUnitTestingをやってみた</p>
-<h4 id="section-1">余談</h4>
+<h2 id="section-1">余談</h2>
 <p>Kotlinでは基本的にデフォルトでclassはfinal、メソッドにもfinalがついてる。つまりMockitoなどを使って普通にMockしたりする事が出来ない(Mockitoではfinal classそのものをサポートしていないため)。でまぁそうなるとPowerMockitoとかを使う必要があるのだけど、一応open classにすることで継承可能にしたりすることが可能らしいので今回のスコープはそこにあてて使う</p>
 
 <p>※追記: <a href="/2017/09/mockito-final-class-mocking.html">mockito2を使う</a>事でfinalクラスでも出来る模様</p>
-<h4 id="section-2">build.gradle</h4><pre class="line-numbers"><code class="language-groovy">buildscript {
+<h2 id="section-2">build.gradle</h2><pre class="line-numbers"><code class="language-groovy">buildscript {
     ext.kotlin_version = &#39;1.1.4-3&#39;
 
     repositories {
@@ -112,12 +125,12 @@ dependencies {
 <p>※めんどくさいので一部バージョンは適当にしてありますので(ry</p>
 
 <p>まぁAndroidとかでKotlin使う人が多いんでしょうけど(多分)、そこまでする必要性もなかったので普通にgradleプラグインを使って検証します</p>
-<h4 id="section-3">User.kt</h4>
+<h2 id="section-3">User.kt</h2>
 <p>※資料からのコードを利用してます</p>
 <pre class="line-numbers"><code class="language-kotlin">class User(birthYear: Int) {
     fun getAge() = 2017 - birthYear
 }
-</code></pre><h4 id="section-4">UserTest.kt</h4><pre class="line-numbers"><code class="language-kotlin">import org.junit.Test
+</code></pre><h2 id="section-4">UserTest.kt</h2><pre class="line-numbers"><code class="language-kotlin">import org.junit.Test
 import org.assertj.core.api.Assertions.*
 import org.mockito.Mockito.*
 
@@ -143,14 +156,14 @@ class UserTest {
 
 <p>というようにfinalクラスはmockできねーよって怒られるわけです。<br>
 ということでそれを解決する方法(ここからが本題)</p>
-<h4 id="section-5">方法1: open classにする</h4><pre class="line-numbers"><code class="language-kotlin">open class User(birthYear: Int) {
+<h2 id="section-5">方法1: open classにする</h2><pre class="line-numbers"><code class="language-kotlin">open class User(birthYear: Int) {
     open fun getAge() = 2017 - birthYear
 }
 </code></pre>
 <p>ちなみにクラスだけではなくメソッドにもnon-publicではない状態になっていると、whenなどでテストがコケてしまうのでメソッドにもopenをつける。この方法ならテストコードは書き換えなくても出切る</p>
 
 <p>ちなみにallOpenっていう公式プラグインも存在するそうです(やりません)</p>
-<h4 id="section-6">方法2: Userをインターフェースにする</h4><pre class="line-numbers"><code class="language-kotlin">interface User {
+<h2 id="section-6">方法2: Userをインターフェースにする</h2><pre class="line-numbers"><code class="language-kotlin">interface User {
     fun getAge(): Int
 }
 </code></pre>
@@ -183,7 +196,7 @@ class UserTest {
 <p>こうすればなんとかopenにしなくてもイケる模様</p>
 
 <p>終わりだけど、まぁKotlin UnitTestingネタは続くかもねｗ</p>
-<h4 id="section-7">余談: allopenに関して</h4>
+<h2 id="section-7">余談: allopenに関して</h2>
 <p>上記の対策法のopenのやつをやるにあたって自分でopenをがちゃがちゃしなくてもallOpenっていう公式プラグインがあるのでそれを使ってやることもできる</p>
 
 <p>参考: <a href="https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin">https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin</a></p>

@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "RubyOnRailsの標準テストをやってみる",
+  "datePublished": "2012-10-16T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "標準テストなのかどうかは定かじゃないのですが、RSpecじゃなくてActiveSupport::TestCase/ActionController::TestCaseとかを使って単体テストとかやってみた。あくまで「どう使うのか」っていうのがポイントなんでコード上は特に意味の無い内容になってますんで"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">10</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">16</span>
                   </a>
                 </time>
@@ -80,7 +93,7 @@
                 <p>標準テストなのかどうかは定かじゃないのですが、RSpecじゃなくてActiveSupport::TestCase/ActionController::TestCaseとかを使って単体テストとかやってみた。あくまで「どう使うのか」っていうのがポイントなんでコード上は特に意味の無い内容になってますんで</p>
 
 <p>ちなみにベースは某イベントで開催されたRailsなLTの物をベースとされたのを参加者が自身で起こした物な模様</p>
-<h4 id="section-1">app/controllers/sample_controller.rb</h4><pre class="line-numbers"><code class="language-rb">class SampleController &lt; ApplicationController
+<h2 id="section-1">app/controllers/sample_controller.rb</h2><pre class="line-numbers"><code class="language-rb">class SampleController &lt; ApplicationController
 
   def index
     render :text =&gt; &quot;hoge&quot;
@@ -100,17 +113,17 @@
     end
   end
 end
-</code></pre><h4 id="section-2">app/models/sample_model.rb</h4><pre class="line-numbers"><code class="language-rb">class SampleModel &lt; ActiveRecord::Base
+</code></pre><h2 id="section-2">app/models/sample_model.rb</h2><pre class="line-numbers"><code class="language-rb">class SampleModel &lt; ActiveRecord::Base
   attr_accessible :name
 end
-</code></pre><h4 id="section-3">app/helpers/sample_helper.rb</h4><pre class="line-numbers"><code class="language-rb">module SampleHelper
+</code></pre><h2 id="section-3">app/helpers/sample_helper.rb</h2><pre class="line-numbers"><code class="language-rb">module SampleHelper
   def hoge
     return SampleModel.find_by_name(&quot;hoge&quot;)
   end
 end
 </code></pre>
 <p>んじゃ、ここまで書いたのをテストする</p>
-<h4 id="section-4">test/fixtures/sample_models.yml</h4>
+<h2 id="section-4">test/fixtures/sample_models.yml</h2>
 <p>テスト時に投入されるデータをYAMLで定義すれば良い模様</p>
 <pre class="line-numbers"><code class="language-yml">one:
   name: hoge
@@ -120,7 +133,7 @@ two:
 
 three:
   name: foobar
-</code></pre><h4 id="section-5">test/unit/sample_model_test.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
+</code></pre><h2 id="section-5">test/unit/sample_model_test.rb</h2><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
 
 class SampleModelTestCase &lt; ActiveSupport::TestCase
 
@@ -134,7 +147,7 @@ class SampleModelTestCase &lt; ActiveSupport::TestCase
 end
 </code></pre>
 <p>まぁ特にモデルにメソッドを実装したりしてないので(ry</p>
-<h4 id="section-6">test/unit/helper/sample_helper_test.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
+<h2 id="section-6">test/unit/helper/sample_helper_test.rb</h2><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
 
 class SampleHelperTestCase &lt; ActiveSupport::TestCase
 
@@ -149,7 +162,7 @@ class SampleHelperTestCase &lt; ActiveSupport::TestCase
 end
 </code></pre>
 <p>ヘルパーテストのやり方あってるかは微妙なんすけど、とりあえずincludeしちゃって(ry</p>
-<h4 id="section-7">test/functional/sample_controller_test.rb</h4><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
+<h2 id="section-7">test/functional/sample_controller_test.rb</h2><pre class="line-numbers"><code class="language-rb">require &quot;test_helper&quot;
 require &quot;json&quot;
 
 class SampleControllerTest &lt; ActionController::TestCase

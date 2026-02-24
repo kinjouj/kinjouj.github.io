@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hadoop (6) - MapWritable -",
+  "datePublished": "2011-04-06T09:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "MapReduceの対象がテキストと数値以外の他に多数ある場合にはMapWritableを利用する事でMapインターフェースの型も使用する事ができる"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2011</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">4</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">6</span>
                   </a>
                 </time>
@@ -78,7 +91,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>MapReduceの対象がテキストと数値以外の他に多数ある場合にはMapWritableを利用する事でMapインターフェースの型も使用する事ができる</p>
-<h4 id="section-1">SampleMapper.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-1">SampleMapper.javaを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -114,7 +127,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, MapWritabl
 }
 </code></pre>
 <p>MapWritableはキーもバリューも両方Writableなので注意する。又、containsKey等のメソッドもあるが、対象がWritableな為通常どおりStringのような文字列を指定してもマッチしない</p>
-<h4 id="section-2">SampleReducer.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-2">SampleReducer.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import java.util.Map;
@@ -176,7 +189,7 @@ public class SampleReducer extends Reducer&lt;Text, MapWritable, Text, MapWritab
 }
 </code></pre>
 <p>というようにする事で使用する事ができるがMapWritable自体を通常のようにTextOutputFormat等を使用して書き込んでもキーバリューを出力したり等はしないので別途OutputFormatを拡張しておく必要がある</p>
-<h4 id="section-3">TestOutputFormat.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-3">TestOutputFormat.javaを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -245,7 +258,7 @@ public class TestOutputFormat extends TextOutputFormat&lt;Text, MapWritable&gt; 
 }
 </code></pre>
 <p>あとはClientクラスでsetOutputKeyClassでMapWritableを使用すれば良い</p>
-<h4 id="section-4">備考1 MapWritableをジェネリックスで利用する場合の注意点</h4>
+<h2 id="section-4">備考1 MapWritableをジェネリックスで利用する場合の注意点</h2>
 <p>MapperやReducerでMapWritable等をpushする場合においてはMapperとReducer間で型が違う場合には正常に渡されない。つまりOutputValueClassはIntWritableになっているのにMapWritableを渡すとおかしくなる。又、Mapperが&lt;Text,IntWritable&gt;なのに対し、Reducerでは&lt;Text,MapWritable&gt;をpushすると正常に処理されない。なのでそういう場合にはMapperからReducerに渡されるデータ型を設定しておく必要がある</p>
 <pre class="line-numbers"><code class="language-java">package sample;
 

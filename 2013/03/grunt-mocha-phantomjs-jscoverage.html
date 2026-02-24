@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植する",
+  "datePublished": "2013-03-17T12:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "今までは"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">3</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">17</span>
                   </a>
                 </time>
@@ -81,7 +94,7 @@
 mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
 </code></pre>
 <p>な感じなのを普通に実行してカバレッジを出力していた。こういうのもどうかと思うので、最近というかちょっと前だと思うけどGruntっていうNode.jsベースなビルドタスクツールな感じなので移植してみた</p>
-<h4 id="section-1">前提</h4>
+<h2 id="section-1">前提</h2>
 <p>以下が出来るタスクを定義する</p>
 
 <ul>
@@ -94,7 +107,7 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
 <p>な感じ。でその前に問題があってjson2htmlcovが何やらおかしい。<a href="https://github.com/metaskills/mocha-phantomjs/issues/10#issuecomment-11702761">mocha-phantomjsのissue</a>によるとjson2htmlcovが/dev/stdin使ってるのはよくないっていう話なんだと思いますが、まさに合致していてそれが原因で正常に出力が出来なかった。なのでこのhtml-cov.jsをマージしておく</p>
 
 <p>あとはディレクトリにpackage.jsonとGruntfile.jsを書く</p>
-<h4 id="section-2">package.json</h4><pre class="line-numbers"><code class="language-json">{
+<h2 id="section-2">package.json</h2><pre class="line-numbers"><code class="language-json">{
   &quot;name&quot;: &quot;twitter4chrome&quot;,
   &quot;version&quot;: &quot;0.0.1&quot;,
   &quot;devDependencies&quot;: {
@@ -104,7 +117,7 @@ mocha-phantomjs -R json-cov test/runner.html | json2htmlcov &gt; coverage.html
 }
 </code></pre>
 <p>yuidocタスクはgrunt-contrib-yuidocを使う事で可能らしいのでそれを使う。それ以外は自前で書く。そういうのがあるみたいだけど(ry</p>
-<h4 id="section-3">Gruntfile.js</h4><pre class="line-numbers"><code class="language-js">module.exports = function(grunt) {
+<h2 id="section-3">Gruntfile.js</h2><pre class="line-numbers"><code class="language-js">module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON(&quot;package.json&quot;),
     yuidoc: {

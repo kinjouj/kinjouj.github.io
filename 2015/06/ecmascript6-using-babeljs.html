@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "babel.jsでECMAScript6",
+  "datePublished": "2015-06-02T16:14:42+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "参考: http://yoshiko-pg.github.io/slides/20150425-jsfes/"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">6</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">2</span>
                   </a>
                 </time>
@@ -81,7 +94,7 @@
 <p>babel.jsの<a href="https://babeljs.io/docs/learn-es2015/">Learn ES2015</a>を読みつつECMAScript6を色々勉強してみた</p>
 
 <p>※一部省略しているのもあり</p>
-<h4 id="section-1">検証環境の構築</h4>
+<h2 id="section-1">検証環境の構築</h2>
 <p>.jsを書いてテスト(jest)を書いてみたいな事をするのでそこら辺をサポートしてくれる環境を構築する。なのでとりあえずnpmでやるのでpackage.jsonを定義</p>
 <pre class="line-numbers"><code class="language-json">{
   &quot;scripts&quot;: {
@@ -104,7 +117,7 @@
 <p>今回、(jestの)モック的な機能を一切使わないのでunmockedModulePathPatternsを指定しておく。でECMAScript6で書く場合にはbabel-jestをscriptProcessorに指定する必要があるっぽいので</p>
 
 <p>という感じの環境で.jsを書いてテスト書いてみた事をしつつ進める</p>
-<h4 id="section-2">Arrows</h4><pre class="line-numbers"><code class="language-js">export default () =&gt; {
+<h2 id="section-2">Arrows</h2><pre class="line-numbers"><code class="language-js">export default () =&gt; {
   var messages = [&quot;hoge&quot;, &quot;fuga&quot;, &quot;foobar&quot;];
 
   return messages.map(v =&gt; { return v.toUpperCase(); }).join(&#39; &#39;);
@@ -126,7 +139,7 @@ describe(&#39;Exam1&#39;, () =&gt; {
     expect(message).toBe(&quot;HOGE FUGA FOOBAR&quot;);
   });
 })
-</code></pre><h4 id="section-3">Classes</h4>
+</code></pre><h2 id="section-3">Classes</h2>
 <p>まぁ要はクラス定義みたいにオブジェクトを定義出来ますよ的な</p>
 <pre class="line-numbers"><code class="language-js">class Hoge {
   say() {
@@ -169,7 +182,7 @@ describe(&quot;Fuga&quot;, () =&gt; {
     expect(fuga.say2()).toBe(&quot;hoge&quot;);
   });
 });
-</code></pre><h4 id="section-4">Template Strings</h4>
+</code></pre><h2 id="section-4">Template Strings</h2>
 <p>backticks(`の事)で文字列表現を使えばそこで${}によって変数展開が出来る</p>
 <pre class="line-numbers"><code class="language-js">export default () =&gt; {
   var name = &quot;hoge&quot;;
@@ -184,7 +197,7 @@ describe(&quot;Exam3&quot;, () =&gt; {
     expect(say()).toBe(&quot;name: hoge&quot;);
   });
 });
-</code></pre><h4 id="section-5">Destructuring</h4>
+</code></pre><h2 id="section-5">Destructuring</h2>
 <p>日本語でいうと「分配束縛」っていうらしい。まぁわかりづらいのでやってみた方が早いかと</p>
 <pre class="line-numbers"><code class="language-js">export default class Exam4 {
   array() {
@@ -295,7 +308,7 @@ describe(&quot;Exam5&quot;, () =&gt; {
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">最後の引数以外には使用できない &gt; Rest Parmaeters</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/604717612002459648">2015, 5月 30</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-<h4 id="section-6">Iterator</h4>
+<h2 id="section-6">Iterator</h2>
 <p>Symbol.iteratorを使ってIteratorを利用する事も出来るっぽい</p>
 <pre class="line-numbers"><code class="language-js">// browserifyして実行する場合には必要無いけど、テストする場合の環境によっては必要
 var Symbol = require(&quot;es6-symbol&quot;);
@@ -352,7 +365,7 @@ browserify -t babelify js/exam6/index.js > index.js
 </pre>
 
 <p>っていう風にして一度browserifyしてからHTMLで読み込むと普通に処理されてる模様(ちなみに余談に書いてるbabel --modules ignoreでやっても出来る。但しrequireは取り除く必要あり)</p>
-<h4 id="section-7">Generator</h4>
+<h2 id="section-7">Generator</h2>
 <p>Iteratorではnextメソッドを持つ物をを定義して、それでdone: trueになるまでやるかループ自体を制御するかっていう話だと思うんすけど。それをよりシンプルにかけるのがgenerator的な所(詳しくは<a href="http://qiita.com/tomotaka_ito/items/35f3eb108f587022fa09">Pythonのイテレータとジェネレータ</a>とか)</p>
 <pre class="line-numbers"><code class="language-js">var generator = {
   [Symbol.iterator]: function*() {
@@ -427,7 +440,7 @@ for (var n of g) {
 <p>というようにメソッドから取得したのを適切なブロックコンテキストで利用すれば良いだけ</p>
 
 <p>まぁ今回はブラウザで動かすっていうのを前提にしているけど、そうじゃないようなケースの場合にはbrowser-polyfill.jsを持ってくるんじゃなくて「require(&quot;babel/polyfill&quot;)」しろっとの事</p>
-<h4 id="section-8">Symbols</h4>
+<h2 id="section-8">Symbols</h2>
 <p>Symbolは基本的に同じのが作れない(インスタンス的な所として?)らしいのでそれを使ってクラスプロパティに格納する値のキーとかに使えば文字列として参照するのではなくSymbolとして参照するような事も出来るとか。まぁ用途は色々だろうと</p>
 <pre class="line-numbers"><code class="language-js">/* hoge.js
 
@@ -453,7 +466,7 @@ console.log(hoge.get());
 <p>hoge.jsで内部的にSymbolを作ったので格納しているのでそのオブジェクト側の外から作ったSymbolを使ってもアクセス出来ない</p>
 
 <p>以上。色々これからも勉強なり調査するなりで得られた事はレポートする予定で</p>
-<h4 id="section-9">余談1: デフォルト値に関して</h4>
+<h2 id="section-9">余談1: デフォルト値に関して</h2>
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">undefinedを渡した場合はデフォルト値が使用される</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/604716791244324865">2015, 5月 30</a></blockquote>
 
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -463,7 +476,7 @@ console.log(hoge.get());
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 <p>っていう事らしい</p>
-<h4 id="section-10">余談2: babelの--modules ignore</h4><pre class="line-numbers"><code class="language-">babel --modules ignore hoge.js fuga.js
+<h2 id="section-10">余談2: babelの--modules ignore</h2><pre class="line-numbers"><code class="language-">babel --modules ignore hoge.js fuga.js
 </code></pre>
 <p>なんてやると</p>
 <pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;

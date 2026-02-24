@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hadoop (9) - DBInputFormat/DBOutputFormat -",
+  "datePublished": "2011-04-09T09:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "MySQLのデータをHadoopで利用するにはDBInputFormat及びDBOutputFormatを使用すれば良い"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2011</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">4</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">9</span>
                   </a>
                 </time>
@@ -80,7 +93,7 @@
                 <p>MySQLのデータをHadoopで利用するにはDBInputFormat及びDBOutputFormatを使用すれば良い</p>
 
 <p>DBOutputFormatだけを使う前提であればJDBCドライバー自体はHDFSに格納しDistributedCacheを利用する事ができるが、InputFormatでは依存性の解決ができない。なのでJDBCドライバーはHadoopコンテナに事前にコピーしておく</p>
-<h4 id="section-1">TestWritable.javaを作成</h4>
+<h2 id="section-1">TestWritable.javaを作成</h2>
 <p>DBInputFormatでテーブルから読み込んでMapperで利用する為、別途Writable実装が必要になる</p>
 <pre class="line-numbers"><code class="language-java">package sample;
 
@@ -131,7 +144,7 @@ public class TestWritable implements Writable, DBWritable {
 }
 </code></pre>
 <p>InputFormat側から動的にインスタンスが作られる為に空コンストラクタは必ず必要になる。又、今回はファイルから読み込む訳ではないので、引数がDataInput/DataOutputの物はサポートしないようにする</p>
-<h4 id="section-2">SampleWritable.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-2">SampleWritable.javaを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -177,7 +190,7 @@ public class SampleWritable implements Writable, DBWritable {
 }
 </code></pre>
 <p>ReducerからOutputFormat側に明示的に流す為、空引数なコンストラクタは必要ない</p>
-<h4 id="section-3">SampleMapper.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-3">SampleMapper.javaを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 
@@ -208,7 +221,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, TestWritable, Text, In
 }
 </code></pre>
 <p>DBInputFormatで行を読み込んで、TestWritableのreadFieldsが呼び出され引数に渡されるので、ジェネリックスの2番目はTestWritableを指定しなければならない</p>
-<h4 id="section-4">SampleReducer.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-4">SampleReducer.javaを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 
@@ -238,7 +251,7 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, SampleWritable,
 }
 </code></pre>
 <p>OutputFormatにはSampleWritableを流す為、値部の型はNullWritableにしておく。ジェネリックスの型もキー部はSampleWritableにする</p>
-<h4 id="section-5">Client.javaを作成</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-5">Client.javaを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Cluster;

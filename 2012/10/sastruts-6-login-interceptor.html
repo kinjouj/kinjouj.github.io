@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "SAStrutsを勉強してみる (6) - LoginInterceptor -",
+  "datePublished": "2012-10-07T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "&lt;http://d.hatena.ne.jp/idesaku/20081226/1230263190&gt; をそのまま試してみる。まぁちょっとだけ違いますけど"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">10</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">7</span>
                   </a>
                 </time>
@@ -78,11 +91,11 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p><a href="http://d.hatena.ne.jp/idesaku/20081226/1230263190">http://d.hatena.ne.jp/idesaku/20081226/1230263190</a> をそのまま試してみる。まぁちょっとだけ違いますけど</p>
-<h4 id="section-1">要件</h4>
+<h2 id="section-1">要件</h2>
 <p>sample.action.dashboardなパッケージにあるアクションを参照する場合にはログインが必要なのでLoginActionに飛ばす。但し、sample.action.dashboard.LoginActionだけは非認証でアクセス出来るようにしないといけないので(ry</p>
 
 <p>んまぁ上記のリンクにあるようにインターセプタでそこら辺をコントロールする。で、必要なのはインターセプタ及びその設定と各種アクションクラスとビュー、んでユーザー情報を参照するEntityとその情報をセッションで管理するDtoオブジェクトクラス</p>
-<h4 id="section-2">User.java</h4>
+<h2 id="section-2">User.java</h2>
 <p>ユーザー情報を参照するエンティティクラス</p>
 <pre class="line-numbers"><code class="language-java">package sample.entity;
 
@@ -113,7 +126,7 @@ public class User implements Serializable {
 }
 </code></pre>
 <p>というような感じでテーブルも作っておく</p>
-<h4 id="section-3">UserDto.java</h4>
+<h2 id="section-3">UserDto.java</h2>
 <p>ユーザー情報を保持しているEntityから情報をセッションで管理するクラス</p>
 <pre class="line-numbers"><code class="language-java">package sample.dto;
 
@@ -133,7 +146,7 @@ public class UserDto implements Serializable {
 }
 </code></pre>
 <p><a href="http://sastruts.seasar.org/featureReference.html#Action">http://sastruts.seasar.org/featureReference.html#Action</a> によると「ログインしたユーザに関する情報など、 アクションフォーム以外をセッションで管理する場合、 ルートパッケージ.dtoにXxxDto作成し、@Componentでセッションで管理されるように定義します」との事らしい。でこれを下にインターセプタで認証済みユーザーセッションがあるかないかとかをチェックする</p>
-<h4 id="section-4">LoginInterceptor.java</h4><pre class="line-numbers"><code class="language-java">package sample.interceptor;
+<h2 id="section-4">LoginInterceptor.java</h2><pre class="line-numbers"><code class="language-java">package sample.interceptor;
 
 import javax.annotation.Resource;
 
@@ -169,7 +182,7 @@ public class LoginInterceptor extends AbstractInterceptor {
 }
 </code></pre>
 <p>nullを返すべきかで悩んだのですが、とりあえずそのままにしておく。でこれのパッケージ名なんすけど、「NamingContextImpl.addRootPackageName(convension.dicon) + &quot;.interceptor&quot;」という感じにすれば、規約に沿って注入される模様げ。でこいつを作動させる為にcustomizer.diconをいじる</p>
-<h4 id="section-5">customizer.dicon</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+<h2 id="section-5">customizer.dicon</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;!DOCTYPE components PUBLIC &quot;-//SEASAR//DTD S2Container 2.4//EN&quot; &quot;http://www.seasar.org/dtd/components24.dtd&quot;&gt;
 &lt;components&gt;
     &lt;include path=&quot;default-customizer.dicon&quot; /&gt;
@@ -217,7 +230,7 @@ public class LoginInterceptor extends AbstractInterceptor {
 
     &lt;!-- 以下省略 --&gt;
 &lt;/components&gt;
-</code></pre><h4 id="section-6">IndexAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
+</code></pre><h2 id="section-6">IndexAction.java</h2><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
 
 import org.seasar.framework.aop.annotation.RemoveSession;
 import org.seasar.struts.annotation.Execute;
@@ -237,7 +250,7 @@ public class IndexAction {
 }
 </code></pre>
 <p>sample.action.dashboard.IndexActionなんでLoginInterceptorをもろにくらうので非認証状態でアクセスしてもLoginActionにぶっ飛ばされる事を確認する</p>
-<h4 id="section-7">LoginAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
+<h2 id="section-7">LoginAction.java</h2><pre class="line-numbers"><code class="language-java">package sample.action.dashboard;
 
 import javax.annotation.Resource;
 
@@ -295,7 +308,7 @@ public class LoginAction {
 }
 </code></pre>
 <p>セッション管理されているDtoオブジェクトは値をぶち込むだけで良いみたい。という感じで作ればセッション管理による認証な所を作る事は可能な模様。まぁインターセプタなテスト法とかまだ調べてないんすけど</p>
-<h4 id="section-8">余談</h4>
+<h2 id="section-8">余談</h2>
 <p>UserService.javaはこんな感じ</p>
 <pre class="line-numbers"><code class="language-java">package sample.service;
 

@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Docker (2) - 別サーバーのDockerを利用する -",
+  "datePublished": "2025-05-23T03:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "別サーバー上にあるDockerにイメージをデプロイしたりコンテナを起動したりの操作をしたい時"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2025</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">5</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">23</span>
                   </a>
                 </time>
@@ -82,13 +95,13 @@
 <p>とやったりすることで別サーバー上にあるDockerを操作できたりとかできるんですが既に推奨されておらず実際にやると警告が出たりする</p>
 
 <p>じゃあどうやるのかと。docker contextを使えとのこと</p>
-<h4 id="section-1">contextを登録</h4><pre class="line-numbers"><code class="language-bash">docker context create \
+<h2 id="section-1">contextを登録</h2><pre class="line-numbers"><code class="language-bash">docker context create \
     --docker host=ssh://192.168.1.100 \
     --description=&quot;remote sevrer&quot; \
     my-remote-server
 </code></pre>
 <p>でcontextを作る。もちろんsshって書いてるのでSSH Serverが必要</p>
-<h4 id="section-2">登録したcontextを使用するように設定</h4><pre class="line-numbers"><code class="language-bash">docker context use my-remote-server
+<h2 id="section-2">登録したcontextを使用するように設定</h2><pre class="line-numbers"><code class="language-bash">docker context use my-remote-server
 </code></pre>
 <p>これでdocker infoとかやると別サーバー上のDockerが使用されているかを確認。ちなみに元に戻す場合は</p>
 <pre class="line-numbers"><code class="language-bash">docker context use default
@@ -96,13 +109,13 @@
 <p>でオッケーっぽい</p>
 
 <p>参考: <a href="https://docs.docker.com/engine/security/protect-access">https://docs.docker.com/engine/security/protect-access</a></p>
-<h4 id="section-3">ちなみに</h4>
+<h2 id="section-3">ちなみに</h2>
 <p>Dockerのsystemdで</p>
 <pre class="line-numbers"><code class="language-">[Service]
 ExecStart=/usr/bin/dockerd -H &quot;tcp://192.168.1.100:2375&quot; -H fd:// --containerd=/run/containerd/containerd.sock
 </code></pre>
 <p>みたいに-HオプションつければDocker Daemonのポート開けれる</p>
-<h4 id="section-4">追記</h4>
+<h2 id="section-4">追記</h2>
 <p><a href="https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket">https://docs.docker.com/engine/security/protect-access/#use-tls-https-to-protect-the-docker-daemon-socket</a></p>
 
 <p>TLS接続もできるので上記サイト通りに証明書生成してサーバー側のdockerd起動オプションの書き換えを設定したら問題なくTLS接続できる模様。その際Docker Contextを作ってやる場合</p>

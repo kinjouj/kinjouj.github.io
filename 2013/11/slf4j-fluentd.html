@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "slf4j+fluentd",
+  "datePublished": "2013-11-16T21:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "まぁタイトルで分かるようにslf4jで送出されるログをfluentdにぶん投げるネタ"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">11</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">16</span>
                   </a>
                 </time>
@@ -78,7 +91,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>まぁタイトルで分かるようにslf4jで送出されるログをfluentdにぶん投げるネタ</p>
-<h4 id="section-1">fluentd.conf</h4><pre class="line-numbers"><code class="language-">&lt;source&gt;
+<h2 id="section-1">fluentd.conf</h2><pre class="line-numbers"><code class="language-">&lt;source&gt;
   type forward
 &lt;/source&gt;
 
@@ -88,7 +101,7 @@
 &lt;/match&gt;
 </code></pre>
 <p>まぁ単純に</p>
-<h4 id="section-2">build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+<h2 id="section-2">build.gradle</h2><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;eclipse&quot;
 
 repositories {
@@ -101,7 +114,7 @@ dependencies {
 }
 </code></pre>
 <p>slf4j-apiとfluent-loggerなライブラリが必要なので(ry</p>
-<h4 id="section-3">StaticLoggerBinder.java</h4>
+<h2 id="section-3">StaticLoggerBinder.java</h2>
 <p>slf4jでログを出力する実装基盤はorg.slf4j.impl.StaticLoggerBinder的なのを実装すれば良い模様。fluent-loggerにそういうのあるかなーって思ったけど無さそうだったので自分で書く</p>
 <pre class="line-numbers"><code class="language-java">package org.slf4j.impl;
 
@@ -135,7 +148,7 @@ public class StaticLoggerBinder implements LoggerFactoryBinder {
         return instance;
     }
 }
-</code></pre><h4 id="section-4">FluentLoggerFactory.java</h4><pre class="line-numbers"><code class="language-java">package org.slf4j.impl;
+</code></pre><h2 id="section-4">FluentLoggerFactory.java</h2><pre class="line-numbers"><code class="language-java">package org.slf4j.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -161,7 +174,7 @@ public class FluentLoggerFactory implements ILoggerFactory {
         }
     }
 }
-</code></pre><h4 id="section-5">FluentLoggerAdapter.java</h4>
+</code></pre><h2 id="section-5">FluentLoggerAdapter.java</h2>
 <p>debugとinfoなログレベルだけ実装してみた</p>
 <pre class="line-numbers"><code class="language-java">package org.slf4j.impl;
 
@@ -450,7 +463,7 @@ public class FluentLoggerAdapter implements Logger {
     public void error(Marker marker, String msg, Throwable t) {
     }
 }
-</code></pre><h4 id="section-6">動かしてみる</h4>
+</code></pre><h2 id="section-6">動かしてみる</h2>
 <p>fluentdを起動しておいて、普通にslf4jを動かす感じでdebugとinfoなログを出す</p>
 
 <pre>

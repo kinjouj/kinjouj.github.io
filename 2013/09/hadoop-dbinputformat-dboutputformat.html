@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hadoop DBInputFormat/DBOutputFormat を使ってみる",
+  "datePublished": "2013-09-02T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "今更って感じですが... っていうか元ブログ(自宅用)からの現在のバージョンで動くか確認しつつの転用っていう形"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">9</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">2</span>
                   </a>
                 </time>
@@ -81,7 +94,7 @@
                 <p>今更って感じですが... っていうか元ブログ(自宅用)からの現在のバージョンで動くか確認しつつの転用っていう形</p>
 
 <p>※ちなみに検証したHadoopのバージョンは1.2.1</p>
-<h4 id="section-1">概要</h4>
+<h2 id="section-1">概要</h2>
 <p>まぁ必要かどうかに関してはおいといて、MySQL等のデータベースからデータを取り出して別のテーブルにレポートとして出力する方法的な感じになるかなと。まぁBasic Construction的な形の使い方的にはHDFSにデータをうｐしてそれをMapReduceで処理する感じじゃねーかなと。まぁ今回あんま関係ないので(ry</p>
 
 <p>とりあえず入力側なテーブルからデータをカウントして別テーブルにレポートとして出力する感じかと。作る必要性があるのは</p>
@@ -94,7 +107,7 @@
 </ul>
 
 <p>の計5つのクラスが必要</p>
-<h4 id="section-2">DBInputWritable.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-2">DBInputWritable.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -143,7 +156,7 @@ public class DBInputWritable implements Writable, DBWritable {
 }
 </code></pre>
 <p>InputFormat側から動的にインスタンスが作られる為に空コンストラクタは必ず必要になる。又、今回はファイルから読み込む訳ではないので、引数がDataInput/DataOutputの物はサポートしないようにする</p>
-<h4 id="section-3">DBOutputWritable.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-3">DBOutputWritable.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -189,7 +202,7 @@ public class DBOutputWritable implements Writable, DBWritable {
 }
 </code></pre>
 <p>ReducerからOutputFormat側に明示的に流す為、空引数なコンストラクタは必要ない</p>
-<h4 id="section-4">SampleMapper.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-4">SampleMapper.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 
@@ -219,7 +232,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, DBInputWritable, Text,
 }
 </code></pre>
 <p>DBInputFormatで行を読み込んで、DBInputWritableのreadFieldsが呼び出され引数に渡されるので、ジェネリックスの2番目はDBInputWritableを指定しなければならない</p>
-<h4 id="section-5">SampleReducer.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-5">SampleReducer.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 
@@ -248,7 +261,7 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, DBOutputWritabl
 }
 </code></pre>
 <p>OutputFormatにはDBOutputWritableを流す為、値部の型はNullWritableにしておく。ジェネリックスの型もキー部はDBOutputWritableにする</p>
-<h4 id="section-6">Client.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-6">Client.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;

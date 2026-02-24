@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Docker (6) - Dockerdの起動オプション設定に関して",
+  "datePublished": "2025-05-30T12:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "以前にやったDockerに接続する際にTLSを使っての接続をするためにサーバー側の設定をしたけどこれ/usr/lib/systemd/system/docker.serviceとかに書くのはどうなの？っていう話"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2025</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">5</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">30</span>
                   </a>
                 </time>
@@ -77,14 +90,14 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>以前にやったDockerに接続する際にTLSを使っての接続をするためにサーバー側の設定をしたけどこれ/usr/lib/systemd/system/docker.serviceとかに書くのはどうなの？っていう話</p>
-<h4 id="section-1">Dockerdの設定ファイルに関して</h4>
+<h2 id="section-1">Dockerdの設定ファイルに関して</h2>
 <ol>
 <li><p>/usr/lib/systemd/system/docker.serviceのExecStartに記述する方法(場合によって場所が異なる)</p></li>
 <li><p>/etc/docker/daemon.jsonに記述する方法</p></li>
 </ol>
 
 <p>1の場合だとDockerがアップデートしたりしてしまった場合に設定が初期化されてしまうため問題になる場合もある。一応公式的には基本的なものに関しては2の方式で設定するのがいいっぽい？ただしdaemon.jsonで設定できないのもあるらしいので</p>
-<h4 id="section-2">/etc/docker/daemon.json</h4><pre class="line-numbers"><code class="language-json">{
+<h2 id="section-2">/etc/docker/daemon.json</h2><pre class="line-numbers"><code class="language-json">{
   &quot;hosts&quot;: [ &quot;tcp://0.0.0.0:2376&quot; ],
   &quot;tlsverify&quot;: true,
   &quot;tlscacert&quot;: &quot;/etc/docker/ca.pem&quot;,
@@ -95,7 +108,7 @@
 <p>今までは/usr/lib/systemd/system/docker.serviceのExecStartにオプションを追加してTLS関連設定をしていたが/etc/docker/daemon.jsonでも設定は可能</p>
 
 <p>ただし、hostsに関してはdaemon.jsonで記述したうえで/usr/lib/systemd/system/docker.serviceでも-Hオプションを使用していたりするとDockerdの起動に失敗する。なのでそういう場合には以下を設定する</p>
-<h4 id="section-3">systemd/dockerの設定</h4>
+<h2 id="section-3">systemd/dockerの設定</h2>
 <ol>
 <li><p>/usr/lib/systemd/system/docker.serivce.dディレクトリを作る</p></li>
 <li><p>/usr/lib/systemd/system/docker.service.d/docker.confファイルを以下のように作成</p></li>
@@ -103,7 +116,7 @@
 <pre class="line-numbers"><code class="language-">[Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd
-</code></pre><h4 id="section-4">まとめ</h4>
+</code></pre><h2 id="section-4">まとめ</h2>
 <p>Docker Daemonの設定するときは可能な限りは/etc/docker/daemon.jsonで設定する方がいいっぽい？</p>
 
 <p>hostsと-Hの設定を共存するには別途なsystemd側の設定が必要</p>

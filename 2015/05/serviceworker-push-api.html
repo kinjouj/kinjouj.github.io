@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ServiceWorkerを使ったPush APIをやってみた",
+  "datePublished": "2015-05-17T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式ドラフトドキュメント?: http://www.w3.org/TR/push-api/"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2015</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">5</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">17</span>
                   </a>
                 </time>
@@ -83,9 +96,9 @@
 <p>参考2: <a href="http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d">http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d</a></p>
 
 <p>前から気になってたServiceWorkerを使ってPush APIを実装するっていうのが話題になってた気がするので、ざっくりと参考を読みつつやってみた</p>
-<h4 id="section-1">その前に</h4>
+<h2 id="section-1">その前に</h2>
 <p>以前にChrome Extensionで使えるchrome.gcmっていうのがあるネタを書いたけど、今回はこれをChrome Extensionではなく普通のWebアプリケーションから使える基盤的な仕組みみたいなのっぽい</p>
-<h4 id="section-2">必要なのを揃える</h4>
+<h2 id="section-2">必要なのを揃える</h2>
 <p>GoogleのPush Messagingサービスを使うので、まず必要なのが</p>
 
 <ul>
@@ -96,7 +109,7 @@
 </ul>
 
 <p>の4つが最低限でも必要っぽいので取得しておく。上記で書いたchrome.gcmのネタ中にも多分書いてるはずなので省略(APIへのアクセス権の設定項目)</p>
-<h4 id="section-3">manifest.json</h4>
+<h2 id="section-3">manifest.json</h2>
 <p>※Chrome Extensionのmanifest.jsonでは無い</p>
 
 <p>Push Notification APIを使う際に必要となる情報を定義したJSONファイル</p>
@@ -110,7 +123,7 @@
 }
 </code></pre>
 <p>これに関するリファレンスがちょっとどこにあるのか分かってないので省略</p>
-<h4 id="section-4">index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+<h2 id="section-4">index.html</h2><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;link rel=&quot;manifest&quot; href=&quot;manifest.json&quot; /&gt;
@@ -123,7 +136,7 @@
 &lt;/html&gt;
 </code></pre>
 <p>上記で書いたmanifest.jsonを&lt;link rel=“manifest”&gt;で読み込む。んまぁあとはJSをダラっと書くだけ</p>
-<h4 id="section-5">main.js</h4><pre class="line-numbers"><code class="language-js">window.addEventListener(&quot;load&quot;, function() {
+<h2 id="section-5">main.js</h2><pre class="line-numbers"><code class="language-js">window.addEventListener(&quot;load&quot;, function() {
   var el = document.querySelector(&quot;.js-push-button&quot;);
   el.addEventListener(&quot;click&quot;, function() {
     subscribe();
@@ -164,7 +177,7 @@ function subscribe() {
 function renderSubscription(subscription) {
   document.querySelector(&#39;#subscription&#39;).innerHTML = subscription.subscriptionId;
 }
-</code></pre><h4 id="section-6">push.js</h4><pre class="line-numbers"><code class="language-js">self.addEventListener(&quot;install&quot;, function() {
+</code></pre><h2 id="section-6">push.js</h2><pre class="line-numbers"><code class="language-js">self.addEventListener(&quot;install&quot;, function() {
   console.log(&quot;install&quot;);
 }, false);
 
@@ -196,7 +209,7 @@ self.addEventListener(&quot;push&quot;, function(event) {
 <p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p>
 
 <p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p>
-<h4 id="section-7">send.sh</h4><pre class="line-numbers"><code class="language-sh">#!/bin/sh
+<h2 id="section-7">send.sh</h2><pre class="line-numbers"><code class="language-sh">#!/bin/sh
 
 ID=&quot;上記のSubscription ID&quot;
 KEY=&quot;Google Consoleで取得したGoogle Apis Key&quot;

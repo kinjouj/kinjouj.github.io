@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "TypeScript+React+Electronでデスクトップアプリを作る",
+  "datePublished": "2025-11-03T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "TypeScript+React+Electronでデスクトップアプリケーションを作ってみる"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2025</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">11</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">3</span>
                   </a>
                 </time>
@@ -79,11 +92,11 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>TypeScript+React+Electronでデスクトップアプリケーションを作ってみる</p>
-<h4 id="section-1">環境構築</h4>
+<h2 id="section-1">環境構築</h2>
 <p>まずTypeScript+React+Electronをビルドできる環境を作る。作るのはpackage.json/tsconfig.json/vite.config.js</p>
 
 <p>それぞれを作っていく</p>
-<h4 id="section-2">package.json</h4><pre class="line-numbers"><code class="language-json">{
+<h2 id="section-2">package.json</h2><pre class="line-numbers"><code class="language-json">{
   &quot;main&quot;: &quot;dist/main.js&quot;,
   &quot;license&quot;: &quot;MIT&quot;,
   &quot;scripts&quot;: {
@@ -110,7 +123,7 @@
 <p>dependenciesで実行に必要なReactの依存性を設定。devDependenciesでTypeScriptやviteでビルドする環境に必要なのを設定しておく。今回は普通にvite-plugin-electronを使って作る</p>
 
 <p>mainにはElectronアプリが起動するのに使うエントリーポイントファイルを指定する</p>
-<h4 id="section-3">tsconfig.json</h4><pre class="line-numbers"><code class="language-json">{
+<h2 id="section-3">tsconfig.json</h2><pre class="line-numbers"><code class="language-json">{
   &quot;compilerOptions&quot;: {
     &quot;incremental&quot;: true,
     &quot;tsBuildInfoFile&quot;: &quot;node_modules/.tsBuildInfo&quot;,
@@ -130,7 +143,7 @@
 }
 </code></pre>
 <p>typesでnodeとelectronの型定義を有効にしておく。あとは省略</p>
-<h4 id="section-4">vite.config.js</h4><pre class="line-numbers"><code class="language-js">import { resolve } from &#39;node:path&#39;
+<h2 id="section-4">vite.config.js</h2><pre class="line-numbers"><code class="language-js">import { resolve } from &#39;node:path&#39;
 import { defineConfig } from &#39;vite&#39;
 import electron from &#39;vite-plugin-electron&#39;;
 import react from &#39;@vitejs/plugin-react-swc&#39;;
@@ -181,7 +194,7 @@ export default defineConfig({
 <p>vite-plugin-electornを使ってElectronアプリをビルドするように設定</p>
 
 <p>これでビルドできる環境はできたので上記にあるアプリのファイルを作っていく</p>
-<h4 id="section-5">index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+<h2 id="section-5">index.html</h2><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;meta charset=&quot;utf-8&quot; /&gt;
@@ -203,11 +216,11 @@ export default defineConfig({
     ├── app.tsx
     ├── electron.d.ts
     └── index.tsx
-</code></pre><h4 id="section-6">作るアプリについて</h4>
+</code></pre><h2 id="section-6">作るアプリについて</h2>
 <p>ざっくりとElectronで画面を作ってそれをReactでレンダリング。でReactでレンダリングする際にReact側からElectronのプロセス側にデータを要求してElectron側からデータを返す。でそれを描画するだけ</p>
 
 <div class="note"><i class="fa-solid fa-circle-exclamation"></i>ちなみに逆(Electron側からReact側にデータをプッシュ)も可能なのでそれは余談で書く</div>
-<h4 id="section-7">src/main/main.ts</h4>
+<h2 id="section-7">src/main/main.ts</h2>
 <p>Electronアプリケーションのエントリーポイントファイル</p>
 <pre class="line-numbers"><code class="language-typescript">import { app, BrowserWindow, ipcMain } from &#39;electron&#39;;
 import * as path from &#39;node:path&#39;;
@@ -245,7 +258,7 @@ app.whenReady().then(async () =&gt; {
 <p>file:request-fileっていうのはReact側からElectronプロセス側にデータを要求する際に使うチャネル名</p>
 
 <p>でElectronアプリプロセス側とReactでレンダリングしている側と繋げるためのipcスクリプトが必要なのでそれをipc/preload.tsに定義する</p>
-<h4 id="section-8">src/ipc/preload.ts</h4><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &#39;electron&#39;;
+<h2 id="section-8">src/ipc/preload.ts</h2><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &#39;electron&#39;;
 
 contextBridge.exposeInMainWorld(&#39;electronAPI&#39;, {
   requestFile: (): Promise&lt;string&gt; =&gt; {
@@ -256,7 +269,7 @@ contextBridge.exposeInMainWorld(&#39;electronAPI&#39;, {
 <p>main.ts側で定義したElectronメインプロセス側にデータ要求リクエストを送信してデータを受信するだけ。invokeの引数にはElectronメインプロセスで指定したチャネル名を指定する</p>
 
 <p>これでElectronアプリ側の実装は終わり。あとはReactでレンダリングする側のアプリケーションの実装を作る</p>
-<h4 id="section-9">src/renderer/electron.d.ts</h4>
+<h2 id="section-9">src/renderer/electron.d.ts</h2>
 <p>まあただの型定義なんで(ry</p>
 <pre class="line-numbers"><code class="language-typescript">type ElectronAPI = {
   requestFile: () =&gt; Promise&lt;string&gt;
@@ -269,7 +282,7 @@ declare global {
 }
 
 export {}
-</code></pre><h4 id="section-10">src/renderer/app.tsx</h4><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &#39;react&#39;;
+</code></pre><h2 id="section-10">src/renderer/app.tsx</h2><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &#39;react&#39;;
 
 const App = (): React.JSX.Element =&gt; {
   const [ file, setFile ] = useState&lt;string | null&gt;(null);
@@ -296,9 +309,9 @@ export default App;
 <p>終わり。これでビルドするとReact側でwindow.electronAPI.requestFile();でElectronメインプロセスにデータを要求する、そしてメインプロセス側のipcMain.handleが対応するチャネルで処理されて値がReact側に返されそれが描画される(今回はただ画像を表示しているだけなのでそれが表示されるだけ)</p>
 
 <p>んまあという感じでElectronでデスクトップアプリを作ってそのUIとかをReactとかで作ったりすることもできるよ〜ってことで終わり</p>
-<h4 id="section-11">余談１</h4>
+<h2 id="section-11">余談１</h2>
 <p>今回のは紹介用に一部を切り出して作ったやつなので切り出してないやつは<a href="https://github.com/kinjouj/typescript-react-electron-photoviewer">https://github.com/kinjouj/typescript-react-electron-photoviewer</a>にあります</p>
-<h4 id="section-12">余談２: ElectronメインプロセスからReactレンダラープロセスに値をぶんなげる方法</h4>
+<h2 id="section-12">余談２: ElectronメインプロセスからReactレンダラープロセスに値をぶんなげる方法</h2>
 <p>上記で書いた方法はReact側からメインプロセス側にデータ要求リスエストを出してそれを受け取るような形でやったがメインプロセス側からReactなどのレンダリング側にデータを受け取らせるようなこともできる。なのでそういう方法を取りたい場合は以下のように修正する</p>
 <h5>src/ipc/preload.ts</h5><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &#39;electron&#39;;
 

@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "JAX-RSをやってみる (2) - glassfish deployment -",
+  "datePublished": "2014-06-08T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "参考: &lt;https://jersey.java.net/documentation/latest/deployment.html#deployment.servlet.3&gt;"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">6</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">8</span>
                   </a>
                 </time>
@@ -82,7 +95,7 @@
 <p>JAX-RSに準拠しているアプリケーションサーバー(glassfish等)ではデプロイ時の設定が若干異なる模様。またJAX-RSに準拠しているアプリケーションサーバーであれば特にデプロイメントデスクリプタ(web.xml)を定義しなくても@ApplicationPathを使う事で引数に指定したパスを&lt;servlet-mapping&gt;のベースとして利用できるようになるっぽい。微妙にややこしいけど</p>
 
 <p>※記述している内容が正しいかは微妙なのであくまで個人的なメモとして</p>
-<h4 id="section-1">glassfishの環境構築</h4>
+<h2 id="section-1">glassfishの環境構築</h2>
 <p>glassfishのオープンソース版をダウンロードしてきてインストールする。でglassfishはTomcat等とは違い?ドメインっていう形でアプリケーションをデプロイする。で初期状態でもドメインが存在するのだけど、適当に別なドメインを作るので</p>
 <pre class="line-numbers"><code class="language-">/path/to/glassfish/bin/asadmin create-domain --profile developer --adminport 14848 --instanceport 10080 devDomain
 </code></pre>
@@ -92,7 +105,7 @@
 <p>あたりをやって作ったドメインなサーバーを起動する。でglassfishではアプリケーションをデプロイするには/path/to/glassfish/domains/ドメイン名/autodeployにwarファイルなり打ち込めばデプロイしてくれる模様なので</p>
 
 <p>とりあえずはglassfishな環境構築はこんなもんで</p>
-<h4 id="section-2">web.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+<h2 id="section-2">web.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;web-app
     xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -113,7 +126,7 @@
 &lt;/web-app&gt;
 </code></pre>
 <p>@ApplicationPathを使ってJAX-RSアプリケーションなリソースパスをマッピングするので特に記述する必要性は無いけど、もし上記のようにweb.xmlで指定する場合には&lt;servlet-name&gt;にApplicationクラス(又はResourceConfig?)を指定すれば良い(&lt;serlet-class&gt;は必要ないっぽい)。又、特にApplicationクラスを拡張しないで使うようなケースであれば、<span style="color: red">javax.ws.rs.core.Application</span>を指定すれば良い模様</p>
-<h4 id="section-3">SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-3">SampleApplication.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -132,7 +145,7 @@ public class SampleApplication extends ResourceConfig {
 <pre class="line-numbers"><code class="language-">mv jaxrs.war /path/to/glassfish/domains/devDomain/autodeploy
 </code></pre>
 <p>にぶん投げる。で@ApplicationPathで指定したリソースパスでアクセス出来るかを確認してみりゃ良い。</p>
-<h4 id="section-4">余談: glassfishでJSONをレンダリングするにあたって</h4>
+<h2 id="section-4">余談: glassfishでJSONをレンダリングするにあたって</h2>
 <p>※GlassFish4だと問題が発生しない模様</p>
 
 <p>JSONとしてレンダリングする場合であってもオブジェクトに@XmlRootElementが無い場合とかだとWebApplicationExceptionが発生する模様。又、アクション側において</p>

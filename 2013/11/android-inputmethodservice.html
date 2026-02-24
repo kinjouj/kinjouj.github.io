@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "InputMethodServiceを使ってIMを作るメモ",
+  "datePublished": "2013-11-06T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをやってた。とりあえず書いておこうかと"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">11</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">6</span>
                   </a>
                 </time>
@@ -78,9 +91,9 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをやってた。とりあえず書いておこうかと</p>
-<h4 id="section-1">方式</h4>
+<h2 id="section-1">方式</h2>
 <p>bluetooth RFCOMMなプロファイルを利用してPC側からスマフォ側にbluetooth経由でテキストを送信。それをアクティブなIMで受け取って入力を反映させるっていうだけ</p>
-<h4 id="section-2">AndroidManifest.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<h2 id="section-2">AndroidManifest.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;net.kinjouj.app.bluetooth_keyboard&quot;
@@ -100,7 +113,7 @@
         &lt;/service&gt;
     &lt;/application&gt;
 &lt;/manifest&gt;
-</code></pre><h4 id="section-3">res/layout/input.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+</code></pre><h2 id="section-3">res/layout/input.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.inputmethodservice.KeyboardView
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:id=&quot;@+id/keyboard&quot;
@@ -109,12 +122,12 @@
     android:layout_height=&quot;wrap_content&quot; /&gt;
 </code></pre>
 <p>後々必要になるので</p>
-<h4 id="section-4">res/xml/inputmethod.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h2 id="section-4">res/xml/inputmethod.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;input-method
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; /&gt;
 </code></pre>
 <p>設定要件は<a href="http://developer.android.com/reference/android/R.styleable.html#InputMethod">R.styleable#InputMethod</a>を参照</p>
-<h4 id="section-5">res/xml/keyboard.xml</h4>
+<h2 id="section-5">res/xml/keyboard.xml</h2>
 <p>ソフトウェアキーボードなレイアウトを定義</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;Keyboard xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
@@ -138,7 +151,7 @@
 <p>codesで指定されたコードはキーをタッチしたい等な場合に引数に指定される(primaryCodeとか)。又、設定要件は　<a href="http://developer.android.com/reference/android/inputmethodservice/Keyboard.html">http://developer.android.com/reference/android/inputmethodservice/Keyboard.html</a> を参照</p>
 
 <p>まぁ設定ファイル系はこれだけ。あとはサービスクラスを書いたりとか</p>
-<h4 id="section-6">BluetoothKeyboardService.java</h4><pre class="line-numbers"><code class="language-java">package net.kinjouj.app.bluetooth_keyboard;
+<h2 id="section-6">BluetoothKeyboardService.java</h2><pre class="line-numbers"><code class="language-java">package net.kinjouj.app.bluetooth_keyboard;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -331,7 +344,7 @@ public class BluetoothKeyboardService extends InputMethodService implements Keyb
 }
 </code></pre>
 <p>キーボード入力が開始される(ソフトウェアキーボードが起動される?)際にbluetoothの接続を行なってRFCOMMプロファイルで要求を待ち受ける。でテキストな要求が来た際にはソフトウェアキーボードに対してテキストをコミットする。まぁそんだけ</p>
-<h4 id="section-7">動かしてみる</h4>
+<h2 id="section-7">動かしてみる</h2>
 <p>アプリを入れるとキーボード設定で</p>
 
 <p><img src="/images/2013/11/201311061735_1.png" alt="image" /></p>

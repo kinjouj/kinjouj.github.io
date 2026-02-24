@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "JAX-RS+CDIをArquillianでテスト",
+  "datePublished": "2014-09-08T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式ドキュメント: [http://arquillian.org/guides/getting\_started\_ja/][1]"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2014</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">9</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">8</span>
                   </a>
                 </time>
@@ -82,7 +95,7 @@
 <p>参考: <a href="http://d.hatena.ne.jp/backpaper0/20121202/1354465585">Arquillianでインテグレーションテスト最初の第一歩</a></p>
 
 <p>タイトル通り、JAX-RS+CDIなのをArquillianでテストしてみようっていうネタ</p>
-<h4 id="section-1">構成</h4>
+<h2 id="section-1">構成</h2>
 <pre>
 ├── build.gradle
 └── src
@@ -106,7 +119,7 @@
 </pre>
 
 <p>てな感じで。まずアプリケーション側を先に</p>
-<h4 id="section-2">SampleApplication.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-2">SampleApplication.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -118,7 +131,7 @@ public class SampleApplication extends ResourceConfig {
         packages(&quot;sample&quot;);
     }
 }
-</code></pre><h4 id="section-3">Hoge.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h2 id="section-3">Hoge.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 public class Hoge implements Greeter {
     @Override
@@ -128,7 +141,7 @@ public class Hoge implements Greeter {
 }
 </code></pre>
 <p>※Greeterはただのインターフェースなので省略する</p>
-<h4 id="section-4">SampleController.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-4">SampleController.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -146,7 +159,7 @@ public class SampleController {
         return greeter.greet();
     }
 }
-</code></pre><h4 id="section-5">src/main/WEB-INF/web.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</code></pre><h2 id="section-5">src/main/WEB-INF/web.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;web-app
     xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -155,7 +168,7 @@ public class SampleController {
 &lt;/web-app&gt;
 </code></pre>
 <p>JAX-RS準拠なglassfishを使うので特に設定する必要なく、SampleApplicationで@ApplicationPathで設定しているので、/resources/sample/greetでアクションを実行出来るっていう感じで</p>
-<h4 id="section-6">src/main/WEB-INF/beans.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h2 id="section-6">src/main/WEB-INF/beans.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
     xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
@@ -170,7 +183,7 @@ public class SampleController {
 <p>これでアプリケーション側はオッケー。まぁ試しにglassfishとかにデプロイしてみりゃ実行出来るかと思うので</p>
 
 <p>でこれをarquillianを使ってテストする</p>
-<h4 id="section-7">build.gradle</h4><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+<h2 id="section-7">build.gradle</h2><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;war&quot;
 apply plugin: &quot;eclipse&quot;
 
@@ -193,7 +206,7 @@ dependencies {
 }
 </code></pre>
 <p>※適当なので使ってるやつのバージョン指定は適当にしてますが(ry</p>
-<h4 id="section-8">src/test/resouces/arquillian.xml</h4>
+<h2 id="section-8">src/test/resouces/arquillian.xml</h2>
 <p>Container Adapterな設定が必要になるので</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;arquillian
@@ -206,7 +219,7 @@ dependencies {
 &lt;/arquillian&gt;
 </code></pre>
 <p>あとはテストを書くだけ</p>
-<h4 id="section-9">SampleTest.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+<h2 id="section-9">SampleTest.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.File;
 import java.net.URL;

@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "mongodbを使ってみる (7) - MapReduce -",
+  "datePublished": "2013-01-17T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "MongoDBにもれなく付いてくる(笑)MapReduceを使ってみる。ただ使っても面白くないので"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">1</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">17</span>
                   </a>
                 </time>
@@ -86,7 +99,7 @@
 </ul>
 
 <p>という流れで</p>
-<h4 id="section-1">fluentd側のセットアップ</h4><pre class="line-numbers"><code class="language-">sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
+<h2 id="section-1">fluentd側のセットアップ</h2><pre class="line-numbers"><code class="language-">sudo /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-mongo
 </code></pre>
 <p>でとりあえずfluent-plugin-mongoを入れる。んで</p>
 <pre class="line-numbers"><code class="language-">&lt;source&gt;
@@ -106,7 +119,7 @@
 <pre class="line-numbers"><code class="language-">/usr/lib/fluent/ruby/bin/fluentd -c td-agent.conf
 </code></pre>
 <p>で起動。fluent-plugin-mongoな詳解は後日やろうかと</p>
-<h4 id="section-2">MongoDB側を確認</h4>
+<h2 id="section-2">MongoDB側を確認</h2>
 <p>nginxなWebサーバーにアクセスした後にMongoDB側を見ると</p>
 <pre class="line-numbers"><code class="language-json">{ &quot;_id&quot; : ObjectId(&quot;50f664408cdabd1739000001&quot;), &quot;path&quot; : &quot;/&quot; }
 { &quot;_id&quot; : ObjectId(&quot;50f664408cdabd1739000002&quot;), &quot;path&quot; : &quot;/favicon.ico&quot; }
@@ -147,7 +160,7 @@
 { &quot;_id&quot; : ObjectId(&quot;50f664408cdabd1739000003&quot;) }
 </code></pre>
 <p>という風にpath属性が無いのもあるので</p>
-<h4 id="section-3">MongoDBでMapReduce APIを使うJavaScriptを書く</h4><pre class="line-numbers"><code class="language-js">var res = db.accesslog.mapReduce(
+<h2 id="section-3">MongoDBでMapReduce APIを使うJavaScriptを書く</h2><pre class="line-numbers"><code class="language-js">var res = db.accesslog.mapReduce(
   // Map
   function() {
     // fluentからmongoへプッシュされたログの行毎のデータはthisからアクセス出来る模様
@@ -214,10 +227,10 @@ printjson(res)
 }
 </code></pre>
 <p>な感じで出力される。で結果を取得せずにコレクションとかにぶちこんでくれっていう場合にはoutオプションを変えてやれば良い。それが以下な感じ(inlineは除外する)</p>
-<h4 id="section-4">コレクション名</h4><pre class="line-numbers"><code class="language-json">{ out: &quot;コレクション名&quot; }
+<h2 id="section-4">コレクション名</h2><pre class="line-numbers"><code class="language-json">{ out: &quot;コレクション名&quot; }
 </code></pre>
 <p>で指定すると指定したコレクション名にぶち込まれる</p>
-<h4 id="section-5">mergeとreplace</h4>
+<h2 id="section-5">mergeとreplace</h2>
 <ul>
 <li>  既存するデータをぶち消して、新しい結果をぶち込むのがreplace</li>
 <li>  既存するデータを消さずにそのまま新しい結果をマージするのがmerge</li>

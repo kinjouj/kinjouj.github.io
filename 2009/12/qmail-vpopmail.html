@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "qmail+vpopmail",
+  "datePublished": "2009-12-18T09:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "qmail+vpopmailでのメールサーバー(SMTPS、POPS対応)の構築方法をメモ"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2009</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">12</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">18</span>
                   </a>
                 </time>
@@ -79,7 +92,7 @@
                 <p>qmail+vpopmailでのメールサーバー(SMTPS、POPS対応)の構築方法をメモ</p>
 
 <p>※ドメイン名はhoge.comとしてあります</p>
-<h4 id="section-1">必要な物</h4>
+<h2 id="section-1">必要な物</h2>
 <p>qmail<br>
 <a href="http://www.qmail.org">http://www.qmail.org</a></p>
 
@@ -97,7 +110,7 @@
 
 <p>ucspi-tcp-ssl<br>
 <a href="http://www.nrg4u.com/">http://www.nrg4u.com/</a></p>
-<h4 id="section-2">事前設定</h4><pre class="line-numbers"><code class="language-bash"># qmail関連のユーザー・グループを作成groupadd nofiles
+<h2 id="section-2">事前設定</h2><pre class="line-numbers"><code class="language-bash"># qmail関連のユーザー・グループを作成groupadd nofiles
 groupadd qmail
 useradd -g nofiles -d /var/qmail -s /bin/false qmaild
 useradd -g nofiles -d /var/qmail -s /bin/false qmaill
@@ -110,38 +123,38 @@ useradd -g qmail -d /var/qmail -s /bin/false qmails
 # vpopmail関連のユーザー・グループを作成
 groupadd -g 999 vchkpw
 useradd -u 999 -g 999 vpopmail -d /var/vpopmail
-</code></pre><h4 id="section-3">インストール</h4>
+</code></pre><h2 id="section-3">インストール</h2>
 <p>普通にmakeした後、qmailのソース内にあるconfig-fastを以下のように実行</p>
 <pre class="line-numbers"><code class="language-">./config-fast hoge.com
-</code></pre><h4 id="section-4">設定1(tcpserver)</h4>
+</code></pre><h2 id="section-4">設定1(tcpserver)</h2>
 <p>/etc/tcp.smtpを作成</p>
 <pre class="line-numbers"><code class="language-">192.168.3,:allow,RELAYCLIENT=&quot;&quot;
 </code></pre>
 <p>作成後、以下を実行</p>
 <pre class="line-numbers"><code class="language-bash">tcprule /etc/tcp.smtp.cdb /etc/tcp.smtp.tmp &lt; /etc/tcp.smtp
-</code></pre><h4 id="section-5">設定2(vpopmail)</h4>
+</code></pre><h2 id="section-5">設定2(vpopmail)</h2>
 <p>最初にvpopmailが認識するドメイン名を設定しないといけないっぽいので、$VPOPMAIL_ROOT/etc/defaultdomainを以下みたいに設定</p>
 <pre class="line-numbers"><code class="language-">hoge.com
 </code></pre>
 <p>その後、binディレクトリ内にあるvadddomain、vadduser等でドメイン・ユーザーを追加する</p>
-<h4 id="section-6">設定3(qmailその1)</h4>
+<h2 id="section-6">設定3(qmailその1)</h2>
 <p>$QMAIL_ROOT/boot/hogeを$QMAIL_ROOT/rcとかにコピー後、Maildir形式に対応させる為以下みたいに修正</p>
 <pre class="line-numbers"><code class="language-bash">exec env - PATH=&quot;/path/to/qmail/bin:$PATH&quot; \
 qmail-start ./Maildir/ splogger qmail
 </code></pre>
 <p>変えるのは./Maildirにするだけ。んでcontrolにあるファイルを設定</p>
-<h4 id="section-7">ファイル名: me</h4><pre class="line-numbers"><code class="language-">hoge.com
-</code></pre><h4 id="section-8">ファイル名: rcpthosts</h4><pre class="line-numbers"><code class="language-">localhost
+<h2 id="section-7">ファイル名: me</h2><pre class="line-numbers"><code class="language-">hoge.com
+</code></pre><h2 id="section-8">ファイル名: rcpthosts</h2><pre class="line-numbers"><code class="language-">localhost
 hoge.com
-</code></pre><h4 id="section-9">設定4(qmailその2)</h4>
+</code></pre><h2 id="section-9">設定4(qmailその2)</h2>
 <p>ここでOutBound Port 25 Blockingの対策として$QMAIL_ROOT/control/smtproutesを作成する。事前にプロバイダのサブミッションを調査する必要あり</p>
 <pre class="line-numbers"><code class="language-">:プロバイダSMTPサーバーを指定:587
 </code></pre>
 <p>※プロバイダによっては契約IDやパスワードが必要になります</p>
-<h4 id="section-10">設定(qmailその3)</h4>
+<h2 id="section-10">設定(qmailその3)</h2>
 <p>んでSMTP over SSL等も使いたいので、以下で証明書を作成</p>
 <pre class="line-numbers"><code class="language-bash">openssl req -new -nodes -x509 -keyout qmail.pem -out qmail.pem -days 365
-</code></pre><h4 id="section-11">サーバーの起動</h4>
+</code></pre><h2 id="section-11">サーバーの起動</h2>
 <p>サーバーの起動は以下のようにする</p>
 <pre class="line-numbers"><code class="language-bash"># SMTP
 tcpserver \
@@ -183,7 +196,7 @@ tcpserver \
     | /var/qmail/bin/splogger pop3s 3 &amp;
 </code></pre>
 <p>ちなみにalias関連は$VPOPMAIL_ROOT/domains/ドメイン名の場所になるっぽい</p>
-<h4 id="section-12">補足1</h4>
+<h2 id="section-12">補足1</h2>
 <p>qmail+vpopmailでSMTP認証を行う際にCRAM-MD5で認証させる場合には、vpopmailのvchkpw.cに以下のような修正が必要らしい</p>
 <pre class="line-numbers"><code class="language-c">int authcram(unsigned char *response, 以下省略) {
     hmac_md5(
@@ -209,7 +222,7 @@ tcpserver \
 }
 </code></pre>
 <p>のように修正しないとCRAM-MD5での認証に失敗する模様</p>
-<h4 id="section-13">補足2</h4>
+<h2 id="section-13">補足2</h2>
 <p>qmailで携帯にメールしようとするとエラーになり返ってくるので、/path/to/qmail/control/smtproutesを以下のように設定</p>
 <pre class="line-numbers"><code class="language-">docomo.ne.jp:中継メールサーバー
 ezweb.ne.jp:中継メールサーバー

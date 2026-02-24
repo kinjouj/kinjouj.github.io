@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ServiceWorkerを使ったアプリケーションキャッシング",
+  "datePublished": "2017-11-07T08:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "参考1: https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2017</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">11</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">7</span>
                   </a>
                 </time>
@@ -85,7 +98,7 @@
 <p>※上記参考を必読推奨</p>
 
 <p>※あくまで個人的なメモです</p>
-<h4 id="section-1">前提条件</h4>
+<h2 id="section-1">前提条件</h2>
 <p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p>
 <pre class="line-numbers"><code class="language-js">navigator.serviceWorker.register(&quot;sw.js&quot;).then(() =&gt; {
   fetch(&quot;省略&quot;);
@@ -96,14 +109,14 @@
 <p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p>
 
 <p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p>
-<h4 id="section-2">index.html</h4><pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
+<h2 id="section-2">index.html</h2><pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;body&gt;
     &lt;div id=&quot;msg&quot;&gt;&lt;/div&gt;
     &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><h4 id="section-3">app.js</h4><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+</code></pre><h2 id="section-3">app.js</h2><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
 
 if (&quot;serviceWorker&quot; in navigator) {
   let controller = new Promise((resolve, reject) =&gt; {
@@ -140,7 +153,7 @@ if (&quot;serviceWorker&quot; in navigator) {
 }
 </code></pre>
 <p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p>
-<h4 id="section-4">service-worker.js</h4><pre class="line-numbers"><code class="language-js">let cacheName = &quot;sample-pwa-cache-v1&quot;;
+<h2 id="section-4">service-worker.js</h2><pre class="line-numbers"><code class="language-js">let cacheName = &quot;sample-pwa-cache-v1&quot;;
 let cacheDataName = &quot;sample-pwa-data-cache-v1&quot;;
 let filesToCache = [ &quot;/&quot;, &quot;/index.html&quot;, &quot;/app.js&quot; ];
 
@@ -198,7 +211,7 @@ self.addEventListener(&quot;fetch&quot;, event =&gt; {
     );
   }
 });
-</code></pre><h4 id="section-5">結果</h4>
+</code></pre><h2 id="section-5">結果</h2>
 <p>初回リクエスト時にはAPIコールにしつつそのデータをキャッシュすることになるので</p>
 
 <p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-1.png" alt="image" /></p>

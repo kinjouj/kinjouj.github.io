@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "RailsでJWT認証",
+  "datePublished": "2018-07-09T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "RailsでのWeb API呼び出しにJWT認証を使ってみる"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2018</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">7</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">9</span>
                   </a>
                 </time>
@@ -80,16 +93,16 @@
                 <p>RailsでのWeb API呼び出しにJWT認証を使ってみる</p>
 
 <p>※あくまでJWTを使ってみた的な感じなので本当ならknock等を利用したりだとかdeviseなどと連携出来るのを使うべきなんでしょうけど今回はそういう趣旨じゃないので</p>
-<h4 id="section-1">Gemfile</h4>
+<h2 id="section-1">Gemfile</h2>
 <p>単純に</p>
 <pre class="line-numbers"><code class="language-ruby">gems &quot;jwt&quot;
 </code></pre>
 <p>を追加するだけ</p>
-<h4 id="section-2">config/routes.rb</h4><pre class="line-numbers"><code class="language-ruby">Rails.application.routes.draw do
+<h2 id="section-2">config/routes.rb</h2><pre class="line-numbers"><code class="language-ruby">Rails.application.routes.draw do
   get &quot;/user&quot;, to: &quot;auth#user&quot;
   post &quot;/auth&quot;, to: &quot;auth#auth&quot;
 end
-</code></pre><h4 id="section-3">app/controllers/auth_controller.rb</h4><pre class="line-numbers"><code class="language-ruby">require &quot;jwt&quot;
+</code></pre><h2 id="section-3">app/controllers/auth_controller.rb</h2><pre class="line-numbers"><code class="language-ruby">require &quot;jwt&quot;
 
 # ApplicationController = ActionController::API
 class AuthController &lt; ApplicationController
@@ -118,7 +131,7 @@ class AuthController &lt; ApplicationController
 end
 </code></pre>
 <p>要は/userのAPIをコールするにはAuthorizationヘッダーにJWTトークンを仕込んでリクエストしなければならない。でそのトークン自体は/authから取得する事が出来るので、それをリクエストした結果をAuthorizationヘッダーに指定した上でリクエストする事でAPIをコールする事が出来るようになる感じ。でそのチェックをbefore_actionを使って呼び出してるだけ</p>
-<h4 id="section-4">public/index.html</h4>
+<h2 id="section-4">public/index.html</h2>
 <p>JavaScript部分だけ抜粋</p>
 <pre class="line-numbers"><code class="language-javascript">function getToken(userid) {
   const token = localStorage[&quot;token&quot;];

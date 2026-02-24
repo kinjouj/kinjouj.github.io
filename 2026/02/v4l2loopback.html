@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "v4l2loopbackで遊ぶ",
+  "datePublished": "2026-02-14T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "v4l2loopbackを使うことで仮想カメラデバイスを作ってそこに映像とかをffmpegとかで流し込んだりすることでそのデバイスを使って映像を取得できたりできるみたいなのでちょっと使って遊んでみた"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2026</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">2</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">14</span>
                   </a>
                 </time>
@@ -77,10 +90,10 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>v4l2loopbackを使うことで仮想カメラデバイスを作ってそこに映像とかをffmpegとかで流し込んだりすることでそのデバイスを使って映像を取得できたりできるみたいなのでちょっと使って遊んでみた</p>
-<h4 id="section-1">セットアップ</h4><pre class="line-numbers"><code class="language-bash">sudo modprobe v4l2loopback exclusive_caps=1
+<h2 id="section-1">セットアップ</h2><pre class="line-numbers"><code class="language-bash">sudo modprobe v4l2loopback exclusive_caps=1
 </code></pre>
 <p>これで/dev/video[n]みたいなデバイスが作られるのでそこに映像を流し込んでいく</p>
-<h4 id="section-2">ffmpegを使って特定のウィンドウをキャプチャして流し込む</h4><pre class="line-numbers"><code class="language-bash">INFO=$(xwininfo)
+<h2 id="section-2">ffmpegを使って特定のウィンドウをキャプチャして流し込む</h2><pre class="line-numbers"><code class="language-bash">INFO=$(xwininfo)
 W=$(echo &quot;$INFO&quot; | grep -oP &#39;Width: \K\d+&#39;)
 H=$(echo &quot;$INFO&quot; | grep -oP &#39;Height: \K\d+&#39;)
 X=$(echo &quot;$INFO&quot; | grep &quot;Absolute upper-left X&quot; | awk &#39;{print $4}&#39;)
@@ -92,10 +105,10 @@ H=$(( H / 2 * 2 ))
 ffmpeg -f x11grab -video_size &quot;${W}x${H}&quot; -i :0.0+${X},${Y} -vcodec rawvideo -f v4l2 -pix_fmt yuv420p /dev/video2
 </code></pre>
 <p>自分の場合は/dev/video2になったのでそこにウィンドウをキャプチャしたのを流しこんでいく</p>
-<h4 id="section-3">テスト</h4><pre class="line-numbers"><code class="language-bash">ffplay /dev/video2
+<h2 id="section-3">テスト</h2><pre class="line-numbers"><code class="language-bash">ffplay /dev/video2
 </code></pre>
 <p>これでウィンドウをキャプチャしてる画面が表示されればおｋ</p>
-<h4 id="section-4">OBSでv4l2デバイスを取り込む</h4>
+<h2 id="section-4">OBSでv4l2デバイスを取り込む</h2>
 <p>ソースから映像キャプチャデバイス(V4L2)を選択してデバイスでv4l2loopbackで作ったデバイスを指定すればそこに流し込んでる映像がOBSのプレビューに表示されるはず</p>
 
 <div class="note"><i class="fa-solid fa-circle-exclamation"></i>OBSにはウィンドウをキャプチャして配信するような機能がそもそもあるので別にこれ使わなくてもできる</div>
@@ -105,14 +118,14 @@ ffmpeg -f x11grab -video_size &quot;${W}x${H}&quot; -i :0.0+${X},${Y} -vcodec ra
 <p><img src="/images/2026/02/20260214.jpg" alt="image" /></p>
 
 <p>みたいな感じらしい</p>
-<h4 id="section-5">余談1: IP WebCamアプリを使ってスマホの画面をv4l2loopbackに流し込む</h4>
+<h2 id="section-5">余談1: IP WebCamアプリを使ってスマホの画面をv4l2loopbackに流し込む</h2>
 <p>IP WebCamアプリを入れてから配信をスタート(特に別サービスと連携とか必要無し)させた状態で</p>
 <pre class="line-numbers"><code class="language-bash">ffmpeg -i http://スマホのIP:8080/video -vf &quot;format=yuv420p&quot; -f v4l2 /dev/video2
 </code></pre>
 <p>とかをやるとスマホで配信してる画面をv4l2デバイスに流し込めてそれを見ることができるようになる</p>
 
 <div class="note"><i class="fa-solid fa-circle-exclamation"></i>普通にhttp://IP:8080/videoで見れるけどねｗ</div>
-<h4 id="section-6">余談2: scrcpyを使ってスマホの画面を流し込む</h4><pre class="line-numbers"><code class="language-bash">scrcpy --v4l2-sink=/dev/video2 -N
+<h2 id="section-6">余談2: scrcpyを使ってスマホの画面を流し込む</h2><pre class="line-numbers"><code class="language-bash">scrcpy --v4l2-sink=/dev/video2 -N
 </code></pre>
 <p>あとはffplay /dev/video2とかで見れる。見れるだけで操作とかはできないけどｗ</p>
 

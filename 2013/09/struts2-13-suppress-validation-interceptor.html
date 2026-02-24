@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Struts2をやってみる (13) -validationインターセプターを抑制する -",
+  "datePublished": "2013-09-27T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "[validateメソッドによる入力検証][1]だったり、[XML定義による入力検証][2]っていうような方式がある。でこういう処理はフレームワークレベルで判断される訳だけど、これを抑制して自動で処理せずに自分でコントロールしたい場合とかの方法も用意されているようで"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2013</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">9</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">27</span>
                   </a>
                 </time>
@@ -87,7 +100,7 @@
 </ul>
 
 <p>的な感じじゃないかなと。ってな訳で自分でコントロールする方式をやってみた</p>
-<h4 id="section-1">src/main/resources/sample/controllers/SampleAction-validation.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h2 id="section-1">src/main/resources/sample/controllers/SampleAction-validation.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;!DOCTYPE validators PUBLIC &quot;-//Apache Struts//XWork Validator 1.0.3//EN&quot; &quot;http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd&quot;&gt;
 &lt;validators&gt;
     &lt;validator type=&quot;requiredstring&quot;&gt;
@@ -97,7 +110,7 @@
 &lt;/validators&gt;
 </code></pre>
 <p>これも作用しないけどとりあえず書いておく</p>
-<h4 id="section-2">SampleAction.java</h4><pre class="line-numbers"><code class="language-java">package sample.controllers;
+<h2 id="section-2">SampleAction.java</h2><pre class="line-numbers"><code class="language-java">package sample.controllers;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -146,7 +159,7 @@ public class SampleAction extends ActionSupport {
 }
 </code></pre>
 <p>という感じで。でvalidateメソッドもフォローせずXML定義もフォローしない設定を行いこれをサポートさせる設定を行う</p>
-<h4 id="section-3">struts.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+<h2 id="section-3">struts.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;!DOCTYPE struts PUBLIC &quot;-//Apache Software Foundation//DTD Struts Configuration 2.0//EN&quot; &quot;http://struts.apache.org/dtds/struts-2.0.dtd&quot;&gt;
 &lt;struts&gt;
     &lt;package name=&quot;sample&quot; extends=&quot;struts-default&quot;&gt;
@@ -173,7 +186,7 @@ public class SampleAction extends ActionSupport {
 <p>んまぁデフォルトなインターセプターのスタックにvalidationが入ってるのでそれのパラメーターをいじる感じでprogrammaticとdeclarativeをfalseにする。後者のdeclarativeをfalseにする事でXML定義なのはフォローされない模様。programmaticは別にvalidateメソッド実装していなければ良いんじゃないかと思うので</p>
 
 <p>という感じでオプションパラメーターを使う事でデフォルトなバリデーションインターセプターが行う検証機構なフローをすっ飛ばして自分でコントロールする事も可能な模様</p>
-<h4 id="section-4">追記</h4>
+<h2 id="section-4">追記</h2>
 <blockquote class="twitter-tweet" lang="ja">
   <p>
     <a href="https://twitter.com/kinjou_j">@kinjou_j</a> ＠SkipValidation でそのActionクラスのメソッドだけキャンセルできますね。

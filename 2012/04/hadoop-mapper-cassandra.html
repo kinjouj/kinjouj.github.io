@@ -24,6 +24,19 @@
     <script src="/js/prism.js" defer></script>
     <script type="module" src="/js/webcomponents.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld-json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hadoop+Cassandra (1) - MapperでCassandra -",
+  "datePublished": "2012-04-06T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "HadoopからCassandraのColumn Familyを読んで云々してみる。とりあえずまったく意味の無いことで書くので、あくまでHadoopからCassandraを使う場合の設定例とか"
+}
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand p-0 sticky-top">
@@ -65,7 +78,7 @@
                   <span class="post-date-year">2012</span>
                   <span class="hyphen">-</span>
                   <span class="post-date-month">4</span>
-                  <span classs="hyphen">-</span>
+                  <span class="hyphen">-</span>
                   <span class="post-date-day">6</span>
                   </a>
                 </time>
@@ -81,12 +94,12 @@
                 <p>HadoopからCassandraのColumn Familyを読んで云々してみる。とりあえずまったく意味の無いことで書くので、あくまでHadoopからCassandraを使う場合の設定例とか</p>
 
 <p>(基礎的なHadoopのセットアップは省略します)</p>
-<h4 id="section-1">環境</h4>
+<h2 id="section-1">環境</h2>
 <p>Hadoopのバージョンは0.20.205.0<br>
 Cassandraのバージョンは1.0.8辺り</p>
 
 <p>(CassandraがサポートしているHadoopバージョンは0.20.x系らしいので)</p>
-<h4 id="section-2">Hadoop側の設定</h4>
+<h2 id="section-2">Hadoop側の設定</h2>
 <p>特に設定する項目無いんですが、HadoopからCassandraのライブラリを参照出来ないといけないので</p>
 
 <ul>
@@ -96,7 +109,7 @@ Cassandraのバージョンは1.0.8辺り</p>
 </ul>
 
 <p>を参照できるようにしないといけないので$HADOOP_HOME/conf/hadoop-env.shのHADOOP_CLASSPATH辺りに設定しとく。でCassandraに伴う設定はmapred-site.xmlでも設定しておくことが可能みたいだけど、それはとりあえずやらない((JobConfにぶっこむ))。とりあえずここまでやったらHadoopのMapReduce JobTrackerあたりを起動するまでをやっておく(start-dfs.shとstart-mapred.shとか)</p>
-<h4 id="section-3">Cassandra側の設定</h4>
+<h2 id="section-3">Cassandra側の設定</h2>
 <p>Cassandra側に以下を実行して、Column Familyなどを作っておく</p>
 <pre class="line-numbers"><code class="language-">create keyspace Keyspace1;
 use Keyspace1;
@@ -109,7 +122,7 @@ set Sample[1][name] = &quot;fuga&quot;;
 set Sample[2][name] = &quot;foobar&quot;;
 set Sample[3][name] = &quot;hoge&quot;;
 set Sample[4][name] = &quot;hoge&quot;;
-</code></pre><h4 id="section-4">HadoopClient1.java</h4><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h2 id="section-4">HadoopClient1.java</h2><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Arrays;
 
@@ -163,7 +176,7 @@ public class HadoopClient1 extends Configured implements Tool {
         return job.waitForCompletion(true) ? 0 : 1;
     }
 }
-</code></pre><h4 id="section-5">SampleCassandraMapper.java</h4><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
+</code></pre><h2 id="section-5">SampleCassandraMapper.java</h2><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -189,7 +202,7 @@ public class SampleCassandraMapper extends Mapper&lt;ByteBuffer, SortedMap&lt;By
         ctx.write(new Text(str), new IntWritable(1));
     }
 }
-</code></pre><h4 id="section-6">SampleReducer.java</h4><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
+</code></pre><h2 id="section-6">SampleReducer.java</h2><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
 
@@ -209,7 +222,7 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, Text, IntWritab
         ctx.write(word, new IntWritable(cnt));
     }
 }
-</code></pre><h4 id="section-7">pom.xml</h4><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre><h2 id="section-7">pom.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;project
     xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
