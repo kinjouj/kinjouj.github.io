@@ -99,7 +99,7 @@
 </ul>
 
 <p>っていう工程を行う事で可能らしい。後述する参考ではPowerMockitoを使ってる模様。とりまぁやってみるか</p>
-<h2 id="section-1">モックするクラス</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-1">モックするクラス</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 public interface Sample {
     String say();
@@ -115,7 +115,7 @@ public final class SampleImpl implements Sample {
 }
 </code></pre>
 <p>というようなクラスを対象にする</p>
-<h2 id="section-2">ClassLoaderを継承したクラスを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-2">ClassLoaderを継承したクラスを作成</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.lang.reflect.Modifier;
 
@@ -161,7 +161,7 @@ public class SampleClassLoader extends ClassLoader {
 }
 </code></pre>
 <p>利用するにはjavassistが必要</p>
-<h2 id="section-3">テストを書く</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-3">テストを書く</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -195,18 +195,17 @@ public class SampleTestCase {
 <pre class="line-numbers"><code class="language-java">when(sample.say()).thenCallRealMethod();
 </code></pre>
 <p>とかにしとけばテストは通る。でテストスタックトレース的には</p>
-
 <pre>
 java.lang.AssertionError:
 Expected: is "hoge"
      but: was "fuga"
 </pre>
 
+
 <p>んで</p>
 <pre class="line-numbers"><code class="language-java">Sample sample = (Sample)mock(SampleImpl.class);
 </code></pre>
 <p>なんていうのをやるとどうなるか</p>
-
 <pre>
 org.mockito.exceptions.base.MockitoException:
 Cannot mock/spy class sample.SampleImpl
@@ -216,10 +215,11 @@ Mockito cannot mock/spy following:
   - primitive types
 </pre>
 
+
 <p>というようにfinal classはmock出来ねーよって怒られる。っていうような感じでfinalクラスをmock化する方法があったのでやってみた程度で</p>
 
 <p>参考: <a href="http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests">http://www.objectpartners.com/2012/03/15/how-to-mock-final-classes-in-unit-tests</a></p>
-<h2 id="section-4">追記</h2>
+<h3 id="section-4">追記</h3>
 <p><a href="/2013/10/mockito-mocked-final-class-2.html">続きとなる別アプローチ</a>を書きました</p>
 
               </div>
@@ -531,9 +531,7 @@ Mockito cannot mock/spy following:
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

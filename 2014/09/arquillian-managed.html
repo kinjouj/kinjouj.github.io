@@ -98,9 +98,9 @@
 </ul>
 
 <p>っていう感じなのでだけど、ローカルにあるサーバーとかを使ってテスト出来る仕組み的なのがarquillian-managedに相当するのではないかと。という事でやってみた</p>
-<h2 id="section-1">その前に</h2>
+<h3 id="section-1">その前に</h3>
 <p>glassfishなarquillian-managedがどうも実体がglassfish4な場合だと動作してくれないのでTomcat(tomee-jaxrs)を使ってテストする</p>
-<h2 id="section-2">tomcat側の設定</h2>
+<h3 id="section-2">tomcat側の設定</h3>
 <p>ユーザー設定をしておく必要がある(デプロイを利用する為にmanaged-scriptを使う為に必要かと)</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;tomcat-users&gt;
@@ -108,7 +108,7 @@
 &lt;/tomcat-users&gt;
 </code></pre>
 <p>んまぁユーザー名とかは適当に。これはarquillian.xmlでも指定するので(ry</p>
-<h2 id="section-3">build.gradle</h2><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+<h3 id="section-3">build.gradle</h3><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;war&quot;
 apply plugin: &quot;eclipse&quot;
 
@@ -126,7 +126,7 @@ dependencies {
 
     providedRuntime &quot;org.jboss.arquillian.container:arquillian-tomcat-managed-7:+&quot;
 }
-</code></pre><h2 id="section-4">JAX-RSアプリケーション側の設定</h2>
+</code></pre><h3 id="section-4">JAX-RSアプリケーション側の設定</h3>
 <p>jersey実装が使えないはずなので</p>
 <pre class="line-numbers"><code class="language-java">package sample;
 
@@ -152,7 +152,7 @@ public class SampleApplication extends Application {
 <p>な感じでResourceConfigではなく、javax.ws.rs.core.Applicationを使う</p>
 
 <p>でこの時点でwar化してTomcatにデプロイして動くか確認</p>
-<h2 id="section-5">SampleTest.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-5">SampleTest.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.File;
 import java.net.URL;
@@ -202,9 +202,8 @@ public class SampleTest {
         return ClientBuilder.newClient().target(uri);
     }
 }
-</code></pre><h2 id="section-6">arquillian.xml</h2>
+</code></pre><h3 id="section-6">arquillian.xml</h3>
 <p><a href="https://docs.jboss.org/author/display/ARQ/Tomcat+7.0+-+Managed">https://docs.jboss.org/author/display/ARQ/Tomcat+7.0+-+Managed</a> を参考にすれば良いんですが</p>
-
 <blockquote class="twitter-tweet" lang="ja">
   <p>
     公式的にはcatalinaHomeなプロパティしか明記されてないけど、その実体となるTomcatManagedContainerのソース見ると「new File(CATALINA_BASE).getAbsolutePath()」みたいなのがある。これがNPE吐いてる
@@ -224,6 +223,7 @@ public class SampleTest {
     &mdash; kinjouj (@kinjou_j) <a href="https://twitter.com/kinjou_j/status/511407663385546752">2014, 9月 15</a>
   </p>
 </blockquote>
+
 
 <p>っていう事なので</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
@@ -560,9 +560,7 @@ public class SampleTest {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

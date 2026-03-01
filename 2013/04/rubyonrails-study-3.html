@@ -91,7 +91,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>ページング及びカテゴリーの親子関係のネスト構造をrender :partial等を用いて出力出来るようにしてみた</p>
-<h2 id="section-1">ページングなライブラリ</h2>
+<h3 id="section-1">ページングなライブラリ</h3>
 <p>昔Rails使ってた時とかはwill_paginateとか使ってたような記憶があるのだけど、kaminariっていうライブラリがあるらしいのでそれを使う事にする</p>
 
 <p>Gemfileに</p>
@@ -104,7 +104,7 @@
 <pre class="line-numbers"><code class="language-">rails g kaminari:views bootstrap
 </code></pre>
 <p>等で出せる。app/views/kaminariに出力されるのでそれをいじればページングなUIを修正出来るっていう感じ。んまぁkaminariに関してはドキュメント読んだ方が良さそうなんで以降はある程度省略</p>
-<h2 id="section-2">app/controllers/entry_controller.rb</h2>
+<h3 id="section-2">app/controllers/entry_controller.rb</h3>
 <p>サイドバー的なところにカテゴリーをネストして出力出来るようにする為に、特定のアクションが起きる前に事前にカテゴリーデータを取得をおこなっておく。それはbefore_filterとかで良いと思う。利用されるアクションが1特定であれば普通にそのアクションでも良いとは思うけど、そうじゃないケースがあると思うので</p>
 <pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
   before_filter :load_sidebar, :only =&gt; :index
@@ -119,7 +119,7 @@
 end
 </code></pre>
 <p>とりあえず関係無い所なアクションは省略。load_sidebarでparentカラムが0(ルートカテゴリー)なデータを取得。それはrender :partialで利用する</p>
-<h2 id="section-3">app/views/entry/index.erb</h2><pre class="line-numbers"><code class="language-erb">&lt;div class=&quot;row&quot;&gt;
+<h3 id="section-3">app/views/entry/index.erb</h3><pre class="line-numbers"><code class="language-erb">&lt;div class=&quot;row&quot;&gt;
   &lt;div class=&quot;span4&quot;&gt;
     &lt;!-- app/views/sidebar/_index.erbな部分テンプレートを読み込み --&gt;
     &lt;%= render :partial =&gt; &quot;sidebar/index&quot; %&gt;
@@ -139,12 +139,12 @@ end
 &lt;/div&gt;
 </code></pre>
 <p>今回関係ない所は省略。paginateなView Helperでページングなビューを表示。恐らくはapp/views/kaminari/_paginator.html.erbがレンダリングされるんだと</p>
-<h2 id="section-4">app/views/sidebar/_index.erb</h2><pre class="line-numbers"><code class="language-erb">&lt;% @categories.each do |category| %&gt;
+<h3 id="section-4">app/views/sidebar/_index.erb</h3><pre class="line-numbers"><code class="language-erb">&lt;% @categories.each do |category| %&gt;
   &lt;%= render :partial =&gt; &quot;sidebar/category&quot;, :locals =&gt; { :category =&gt; category } %&gt;
 &lt;% end %&gt;
 </code></pre>
 <p>load_sidebarで取得したカテゴリーなデータをレンダリングする。ここから更にapp/views/sidebar_category.erbに部分レンダリングされる</p>
-<h2 id="section-5">app/views/sidebar/_category.erb</h2><pre class="line-numbers"><code class="language-erb">&lt;!-- エントリー数が無いカテゴリーもあるけど、そのカテゴリーがサブカテゴリーを持ってないとは限らない --&gt;
+<h3 id="section-5">app/views/sidebar/_category.erb</h3><pre class="line-numbers"><code class="language-erb">&lt;!-- エントリー数が無いカテゴリーもあるけど、そのカテゴリーがサブカテゴリーを持ってないとは限らない --&gt;
 &lt;% if category.entry.size &gt; 0 || category.sub_category.size &gt; 0 %&gt;
 &lt;ul&gt;
   &lt;li style=&quot;list-style: none;padding: 3px&quot;&gt;
@@ -470,9 +470,7 @@ end
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

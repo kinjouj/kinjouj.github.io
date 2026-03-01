@@ -91,14 +91,14 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>Android4.0以前だとonReceiveメソッドをそのままインスタンスメソッドとしてAndroidTestCaseを使ってテスト出来たんですけど、Android4.0からだとエラーになる。そのエラーになるケースがsetResultExtrasを使った場合になるんですが[APIドキュメント][1]によると</p>
-
 <blockquote>
 Change the current result extras of this broadcast; only works with broadcasts sent through Context.sendOrderedBroadcast. This is a Bundle holding arbitrary data, whose interpretation is up to the broadcaster. Can be set to null. Calling this method completely replaces the current map (if any).
 This method does not work with non-ordered broadcasts such as those sent with Context.sendBroadcast
 </blockquote>
 
+
 <p>って書いちゃってんすよね。英語読める訳じゃないけど、要するにsetResultExtrasを使う場合はonReceiveをそのまま実行してもsendBroadcastでやっても出来ないらしいっぽい事を書いてる気がする。じゃあどないすんねんと。まぁ書いてあるとおりにsendBroadcastではなく、sendOrderedBroadcastを使えとの事らしいので</p>
-<h2 id="section-1">SampleBroadcastReceiver.java</h2><pre class="line-numbers"><code class="language-java">package sample.test;
+<h3 id="section-1">SampleBroadcastReceiver.java</h3><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -123,7 +123,7 @@ public class SampleBroadcastReceiver extends BroadcastReceiver {
 }
 </code></pre>
 <p>まぁあくまで検証目的なので適当に。OrderedBroadcastが必要な部分だけisOrderedBroadcastでブロック切り分ければ良いはず</p>
-<h2 id="section-2">SampleBroadcastReceiverTestCase.java</h2><pre class="line-numbers"><code class="language-java">package sample.test;
+<h3 id="section-2">SampleBroadcastReceiverTestCase.java</h3><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -173,7 +173,7 @@ public class SampleBroadcastReceiverTestCase extends AndroidTestCase {
 
 <p>まぁこれで良いかは非常に微妙な所なんだけど、とりあえずはこんな感じでテスト出来る模様</p>
 
-<p>[1]: <a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html#setResultExtras">http://developer.android.com/reference/android/content/BroadcastReceiver.html#setResultExtras</a><br /></p>
+<p>[1]: <a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html#setResultExtras">http://developer.android.com/reference/android/content/BroadcastReceiver.html#setResultExtras</a>&lt;br /&gt;</p>
 
               </div>
               <div class="post-toc rounded-3 p-2">
@@ -482,9 +482,7 @@ public class SampleBroadcastReceiverTestCase extends AndroidTestCase {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

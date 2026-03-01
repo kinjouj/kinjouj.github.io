@@ -93,13 +93,13 @@
                 <p>JAX-RSで返される値の型に対してレスポンスを変換するような仕組みはMessageBodyWriter(MessageBodyReaderっていうのもある)で利用する事が出来る。@Providerアノテーションを使う事でJAX-RSアプリケーションプロジェクト内にクラスを定義すれば良いだけなのだけど、例えばそういう仕組みな所を外部のライブラリにした場合でアノテーションが処理されるパッケージフィルターに該当しないような場合にどうやってその仕組みをロードするのか調べてみるとAutoDiscoverableっていうのを使う事で外部ライブラリで定義されたクラスをコンポーネント的な形として登録して利用できる模様。</p>
 
 <p>という事でやってみた</p>
-<h2 id="section-1">備考: glassfishのバージョンに関して</h2>
+<h3 id="section-1">備考: glassfishのバージョンに関して</h3>
 <p>(記事投稿時の)glasshfish4では組み込まれているJAX-RS(Jersey2)のバージョンが古い模様なので、実装側とAPIのバージョンの整合性が合わないが為にエラーが起きる模様。なのでglassfishに同梱されているライブラリをアップデートするか、glassfish4.0.1(現時点では正式版は出ていない)を使う事で解決出来る模様</p>
 
 <p>参考: <a href="http://qiita.com/opengl-8080/items/cfdde684b36efec50477">GlassFish4.0でJAX-RSのクラスにCDIでインジェクションしようとしたらUnsatisfiedDependencyExceptionが発生するバグ？</a></p>
-<h2 id="section-2">概要</h2>
+<h3 id="section-2">概要</h3>
 <p>gsonを使って返された値をJSONにエンコードするだけのMessageBodyWriterをAutoDiscoverableを使って別パッケージにしてロード出来るようにする</p>
-<h2 id="section-3">SampleAutoDiscoverable.java</h2><pre class="line-numbers"><code class="language-java">package sample.internal;
+<h3 id="section-3">SampleAutoDiscoverable.java</h3><pre class="line-numbers"><code class="language-java">package sample.internal;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -116,7 +116,7 @@ public class SampleAutoDiscoverable implements AutoDiscoverable {
         }
     }
 }
-</code></pre><h2 id="section-4">SampleFeature.java</h2><pre class="line-numbers"><code class="language-java">package sample.internal;
+</code></pre><h3 id="section-4">SampleFeature.java</h3><pre class="line-numbers"><code class="language-java">package sample.internal;
 
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Feature;
@@ -164,7 +164,7 @@ public class SampleFeature implements Feature {
         return true;
     }
 }
-</code></pre><h2 id="section-5">GsonProvider.java</h2><pre class="line-numbers"><code class="language-java">package sample.provider;
+</code></pre><h3 id="section-5">GsonProvider.java</h3><pre class="line-numbers"><code class="language-java">package sample.provider;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -215,14 +215,14 @@ public class GsonProvider implements MessageBodyWriter&lt;Object&gt; {
         }
     }
 }
-</code></pre><h2 id="section-6">META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverableを作成</h2>
+</code></pre><h3 id="section-6">META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverableを作成</h3>
 <p>AutoDiscoverableを使う場合にはServiceLoader周りを設定しとけば良い</p>
 <pre class="line-numbers"><code class="language-">sample.internal.SampleAutoDiscoverable
 </code></pre>
 <p>中身はAutoDiscoverableのパッケージ名を含むクラス名を指定するだけ</p>
 
 <p>あとはこのプロジェクトをjar化してJAX-RSアプリケーションに含めるだけ</p>
-<h2 id="section-7">SampleApplication.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-7">SampleApplication.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -239,7 +239,7 @@ public class SampleApplication extends ResourceConfig {
 }
 </code></pre>
 <p>デフォでMOXyなJSONシリアライザ的なので処理されちゃって上記のFeatureでJSON_FEATUREによりGsonProviderでの処理がスキップされちゃうので、そこら辺の使えるようにするように設定しとかなあかんっぽい</p>
-<h2 id="section-8">Home.java</h2><pre class="line-numbers"><code class="language-java">package sample.controller;
+<h3 id="section-8">Home.java</h3><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -277,7 +277,7 @@ public class Home {
         return data;
     }
 }
-</code></pre><h2 id="section-9">HomeTest.java</h2><pre class="line-numbers"><code class="language-java">package sample.controller;
+</code></pre><h3 id="section-9">HomeTest.java</h3><pre class="line-numbers"><code class="language-java">package sample.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -653,9 +653,7 @@ public class HomeTest extends JerseyTest {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

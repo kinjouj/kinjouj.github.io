@@ -97,7 +97,7 @@
 <p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p>
 
 <p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p>
-<h2 id="section-1">SampleItemReader.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-1">SampleItemReader.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.batch.api.chunk.ItemReader;
 import javax.batch.api.chunk.AbstractItemReader;
@@ -132,7 +132,7 @@ public class SampleItemProcessor implements ItemProcessor {
 }
 </code></pre>
 <p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p>
-<h2 id="section-2">SampleItemWriter.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-2">SampleItemWriter.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 import javax.batch.api.chunk.AbstractItemWriter;
@@ -145,7 +145,7 @@ public class SampleItemWriter extends AbstractItemWriter {
 }
 </code></pre>
 <p>とまぁBatch Processingを動かすのに必要なのは書いたので</p>
-<h2 id="section-3">Main.java</h2><pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
+<h3 id="section-3">Main.java</h3><pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 
 public class Main {
@@ -156,7 +156,7 @@ public class Main {
 }
 </code></pre>
 <p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p>
-<h2 id="section-4">META-INF/batch-jobs/sample.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+<h3 id="section-4">META-INF/batch-jobs/sample.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;job id=&quot;sample&quot; xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;  version=&quot;1.0&quot;&gt;
     &lt;step id=&quot;sample-chunk&quot;&gt;
         &lt;chunk item-count=&quot;5&quot;&gt;
@@ -172,7 +172,7 @@ public class Main {
 <p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p>
 
 <p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p>
-<h2 id="section-5">baseContext.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h3 id="section-5">baseContext.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
     xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
     xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
@@ -239,9 +239,8 @@ public class Main {
 &lt;/beans&gt;
 </code></pre>
 <p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p>
-<h2 id="section-6">実行</h2>
+<h3 id="section-6">実行</h3>
 <p>実装して処理の流れなログとってみると</p>
-
 <pre>
 情報: Executing step: [sample-chunk]
 
@@ -289,6 +288,7 @@ public class Main {
 12 28, 2014 4:32:26 午後 sample.SampleItemWriter writeItems
 情報: writeItems: 9
 </pre>
+
 
 <p>てな感じで実行結果になる。item-countで指定した分のチャンクサイズに応じてItemWriter#writeItemsが作用するようになっている模様。またreadItemがnullを返した場合にはprocessItemは発生せずにすでにたまっているチャンクをそのままwriteItemsに作用するように受け流している模様</p>
 
@@ -605,9 +605,7 @@ public class Main {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

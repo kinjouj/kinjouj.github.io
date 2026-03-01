@@ -92,11 +92,11 @@
                 <p>参考: <a href="https://www.slideshare.net/shoma2da/kotlin-63635954">https://www.slideshare.net/shoma2da/kotlin-63635954</a></p>
 
 <p>KotlinでUnitTestingをやってみた</p>
-<h2 id="section-1">余談</h2>
+<h3 id="section-1">余談</h3>
 <p>Kotlinでは基本的にデフォルトでclassはfinal、メソッドにもfinalがついてる。つまりMockitoなどを使って普通にMockしたりする事が出来ない(Mockitoではfinal classそのものをサポートしていないため)。でまぁそうなるとPowerMockitoとかを使う必要があるのだけど、一応open classにすることで継承可能にしたりすることが可能らしいので今回のスコープはそこにあてて使う</p>
 
-<p>※追記: <a href="/2017/09/mockito-final-class-mocking.html">mockito2を使う</a>事でfinalクラスでも出来る模様</p>
-<h2 id="section-2">build.gradle</h2><pre class="line-numbers"><code class="language-groovy">buildscript {
+<p>※追記: &lt;a href=&quot;/2017/09/mockito-final-class-mocking.html&quot;&gt;mockito2を使う&lt;/a&gt;事でfinalクラスでも出来る模様</p>
+<h3 id="section-2">build.gradle</h3><pre class="line-numbers"><code class="language-groovy">buildscript {
     ext.kotlin_version = &#39;1.1.4-3&#39;
 
     repositories {
@@ -125,12 +125,12 @@ dependencies {
 <p>※めんどくさいので一部バージョンは適当にしてありますので(ry</p>
 
 <p>まぁAndroidとかでKotlin使う人が多いんでしょうけど(多分)、そこまでする必要性もなかったので普通にgradleプラグインを使って検証します</p>
-<h2 id="section-3">User.kt</h2>
+<h3 id="section-3">User.kt</h3>
 <p>※資料からのコードを利用してます</p>
 <pre class="line-numbers"><code class="language-kotlin">class User(birthYear: Int) {
     fun getAge() = 2017 - birthYear
 }
-</code></pre><h2 id="section-4">UserTest.kt</h2><pre class="line-numbers"><code class="language-kotlin">import org.junit.Test
+</code></pre><h3 id="section-4">UserTest.kt</h3><pre class="line-numbers"><code class="language-kotlin">import org.junit.Test
 import org.assertj.core.api.Assertions.*
 import org.mockito.Mockito.*
 
@@ -156,14 +156,14 @@ class UserTest {
 
 <p>というようにfinalクラスはmockできねーよって怒られるわけです。<br>
 ということでそれを解決する方法(ここからが本題)</p>
-<h2 id="section-5">方法1: open classにする</h2><pre class="line-numbers"><code class="language-kotlin">open class User(birthYear: Int) {
+<h3 id="section-5">方法1: open classにする</h3><pre class="line-numbers"><code class="language-kotlin">open class User(birthYear: Int) {
     open fun getAge() = 2017 - birthYear
 }
 </code></pre>
 <p>ちなみにクラスだけではなくメソッドにもnon-publicではない状態になっていると、whenなどでテストがコケてしまうのでメソッドにもopenをつける。この方法ならテストコードは書き換えなくても出切る</p>
 
 <p>ちなみにallOpenっていう公式プラグインも存在するそうです(やりません)</p>
-<h2 id="section-6">方法2: Userをインターフェースにする</h2><pre class="line-numbers"><code class="language-kotlin">interface User {
+<h3 id="section-6">方法2: Userをインターフェースにする</h3><pre class="line-numbers"><code class="language-kotlin">interface User {
     fun getAge(): Int
 }
 </code></pre>
@@ -196,7 +196,7 @@ class UserTest {
 <p>こうすればなんとかopenにしなくてもイケる模様</p>
 
 <p>終わりだけど、まぁKotlin UnitTestingネタは続くかもねｗ</p>
-<h2 id="section-7">余談: allopenに関して</h2>
+<h3 id="section-7">余談: allopenに関して</h3>
 <p>上記の対策法のopenのやつをやるにあたって自分でopenをがちゃがちゃしなくてもallOpenっていう公式プラグインがあるのでそれを使ってやることもできる</p>
 
 <p>参考: <a href="https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin">https://kotlinlang.org/docs/reference/compiler-plugins.html#all-open-compiler-plugin</a></p>
@@ -526,9 +526,7 @@ allOpen {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

@@ -100,7 +100,6 @@ autostart=false
 <pre class="line-numbers"><code class="language-">ps aux | grep unicorn
 </code></pre>
 <p>すると</p>
-
 <pre>
 kinjouj  26991  6.6  2.9  88236 60680 pts/2    Sl   12:59   0:04 unicorn_rails master -E production -c /var/www/redmine/config/unicorn.rb
 
@@ -109,6 +108,7 @@ kinjouj  27020  0.0  2.7  88236 56408 pts/2    Sl   12:59   0:00 unicorn_rails w
 kinjouj  27138  0.0  0.0   4452   832 pts/3    S+   13:00   0:00 grep unicorn
 </pre>
 
+
 <p>っていうようにサービスが起動している状態が確認できる。でこのプロセスID(26991)をkillするとどうなるかっていうとサービスがもろもろオチる。でオチた場合にsupervisordにより自動で再起動されるようにしたい場合には</p>
 <pre class="line-numbers"><code class="language-ini">[program:redmine]
 ; 省略
@@ -116,7 +116,7 @@ autostart=false
 autorestart=true
 </code></pre>
 <p>っていう感じで追加する。でautostart=falseにしているので起動しておいて、再度上記のようにプロセスIDを調べて落としてみると、その後にsupervisordによりunicornなプロセスが再起動される模様。ちなみにautorestartなオプションは「unexpected」となっている模様でデフォルトでtrueでは無い模様</p>
-<h2 id="section-1">余談1: 設定ファイルの読み込みに関して</h2>
+<h3 id="section-1">余談1: 設定ファイルの読み込みに関して</h3>
 <p>supervisord.confは</p>
 
 <ul>
@@ -126,7 +126,7 @@ autorestart=true
 </ul>
 
 <p>から読まれるらしい。多分コマンドオプションとかで指定しない限りは上記のどれかから読み込まれる模様</p>
-<h2 id="section-2">余談2: [inet_http_server]と[unix_http_server]に関して</h2>
+<h3 id="section-2">余談2: [inet_http_server]と[unix_http_server]に関して</h3>
 <p>別にwebによる管理は必要ない、でもsupervisorctlを使いたい場合には</p>
 <pre class="line-numbers"><code class="language-ini">;[inet_http_server]
 ;port=127.0.0.1:9001
@@ -440,9 +440,7 @@ serverurl=unix:///var/lib/supervisord/supervisor.sock
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

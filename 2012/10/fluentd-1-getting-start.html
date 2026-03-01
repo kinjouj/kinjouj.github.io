@@ -90,13 +90,13 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>以前から流行ってるfluentdを色々使ってみようと。とりあえずnginxのログをfluentdに流してみる。環境はあくまで勉強用途なのでUbuntu12.10</p>
-<h2 id="section-1">セットアップ</h2>
+<h3 id="section-1">セットアップ</h3>
 <p><a href="http://help.treasure-data.com/kb/installing-td-agent-daemon/installing-td-agent-for-debian-and-ubuntu">http://help.treasure-data.com/kb/installing-td-agent-daemon/installing-td-agent-for-debian-and-ubuntu</a></p>
 
 <p>通りにapt-getでtd-agentを入れる。で、td-agentっていうユーザーも作られるのでnginxからのログをfluentdでtailする際に出力先として/var/log/fluentd辺りを作って権限もtd-agentユーザーでアクセス出来るようにしとく(しないとPermission Deniedになる模様)</p>
 
 <p>で今回使わないけど、fluent-catとか色々コマンドがあるんだがこれが/usr/lib/fluent/ruby/binっていうところになってる模様げなので、そこをパス設定しておく</p>
-<h2 id="section-2">td-agent.conf</h2>
+<h3 id="section-2">td-agent.conf</h3>
 <p>/etc/td-agentにtd-agent.confがあるので、それをいじる</p>
 <pre class="line-numbers"><code class="language-">&lt;source&gt;
     type tail
@@ -109,18 +109,18 @@
     type file
     path /var/log/fluentd/nginx
 &lt;/match&gt;
-</code></pre><h2 id="section-3">起動</h2>
+</code></pre><h3 id="section-3">起動</h3>
 <p>普通にサービスを起動するか</p>
 <pre class="line-numbers"><code class="language-sh">sudo -u td-agent /usr/lib/fluent/ruby/bin/fluentd -c /etc/td-agent/td-agent.conf
 </code></pre>
 <p>な感じでtd-agentユーザーでfluentdを起動する、その際に-cオプションで設定ファイルを指定する感じかなと。で起動した状態でnginxなWebサーバーにアクセスすると</p>
-
 <pre>
 2012-10-29T16:54:00+09:00   nginx.accesslog {"host":"127.0.0.1","user":"-","method":"GET","path":"/","code":"502","size":"568","referer":"-","agent":"Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4"}
 </pre>
 
+
 <p>な感じでログがフォーマットにより解析されて、それがJSONとして書き込まれる模様</p>
-<h2 id="section-4">余談: 設定ファイルに関して</h2>
+<h3 id="section-4">余談: 設定ファイルに関して</h3>
 <p>今回は/etc/td-agent/td-agent.confをそのままいじりましたけど、 <a href="http://fluentd.org/doc/config.html">http://fluentd.org/doc/config.html</a> に普通にincludeも出来る模様なので、/etc/td-agent/conf.dとかに設定ファイルを書いてそれをincludeする方が良いのかなと</p>
 
               </div>
@@ -426,9 +426,7 @@
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

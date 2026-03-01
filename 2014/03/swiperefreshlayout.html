@@ -95,9 +95,8 @@
 <p>上記参考によるとAndorid Support v4 packageにSwipeRefreshLayoutっていうのが追加された模様。んまぁ見る限りだとAndroid PullToRefreshとActionBar PullToRefreshを組み合わせたのっぽいような感じもするんですが</p>
 
 <p>という事で使ってみた。ちなみに/path/to/android_sdk/extras/android/support/samples/Support4Demosにサンプルが入ってる</p>
-<h2 id="section-1">プロジェクトを作る</h2>
+<h3 id="section-1">プロジェクトを作る</h3>
 <p>んまぁ今時ならAndroid Studio(+gradle-android-toolkit)辺りを使うのが結構モダンなのではっていう所なので、それ向けな構造を作るだけ</p>
-
 <pre>
 ├── app
 │   ├── build.gradle
@@ -123,10 +122,11 @@
 └── settings.gradle (include ":app"だけ)
 </pre>
 
+
 <p>gradleとかならandroid-support-v4.jarは&quot;com.google.android:support-v4&quot;な参照をcompileスコープに突っ込めば良いんだけど、これ更新されてない模様なのでそれでやるとSwipeRefreshLayoutが参照できない。なのでlibsディレクトリに突っ込んどいてapp/build.gradleでクラスパス参照を追加しておく</p>
 
 <p>んまぁ一つづつファイルを書いてく</p>
-<h2 id="section-2">app/build.gradle</h2><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;android&quot;
+<h3 id="section-2">app/build.gradle</h3><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;android&quot;
 
 dependencies {
     compile &quot;com.actionbarsherlock:actionbarsherlock:4.4.0@aar&quot;
@@ -139,7 +139,7 @@ android {
 }
 </code></pre>
 <p>先で書いたようにandroid-support-v4.jarな参照は別途ディレクトリに突っ込んであるのを使う。多分、actionbarsherlockも使ってるのでこれでcom.google.androidなやつも参照されるんじゃねーかって思うけどそこはexcludeとかしておいた方がいいのかなと(やらなくても一応ビルド上問題はない模様)</p>
-<h2 id="section-3">app/src/main/res/values/colors.xml</h2>
+<h3 id="section-3">app/src/main/res/values/colors.xml</h3>
 <p>ActionBar PullToRefreshのようなプログレスな所の色をカスタマイズしているのでこれを使う</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;resource&gt;
@@ -150,7 +150,7 @@ android {
 &lt;/resource&gt;
 </code></pre>
 <p>んまぁ公式なやつのサンプルからコピペで</p>
-<h2 id="section-4">app/src/main/res/layout/activity_main.xml</h2>
+<h3 id="section-4">app/src/main/res/layout/activity_main.xml</h3>
 <p>上記参考な所ではActivityでやっている模様だけど、今回ListFragment関係上でそういう所をやる。なので&lt;fragment&gt;を書くだけ</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;FrameLayout
@@ -165,7 +165,7 @@ android {
         android:layout_height=&quot;match_parent&quot; /&gt;
 
 &lt;/FrameLayout&gt;
-</code></pre><h2 id="section-5">app/src/main/res/layout/list_fragment.xml</h2>
+</code></pre><h3 id="section-5">app/src/main/res/layout/list_fragment.xml</h3>
 <p>ListFragmentから使うレイアウトでSwipeRefreshLayoutを使うようにしなきゃならんので</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;android.support.v4.widget.SwipeRefreshLayout
@@ -180,7 +180,7 @@ android {
         android:layout_height=&quot;match_parent&quot; /&gt;
 
 &lt;/android.support.v4.widget.SwipeRefreshLayout&gt;
-</code></pre><h2 id="section-6">app/src/main/java/sample/test/MainActivity.java</h2><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><h3 id="section-6">app/src/main/java/sample/test/MainActivity.java</h3><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.os.Bundle;
 
@@ -193,7 +193,7 @@ public class MainActivity extends SherlockFragmentActivity {
         setContentView(R.layout.activity_main);
     }
 }
-</code></pre><h2 id="section-7">app/src/main/java/sample/test/MainListFragment.java</h2><pre class="line-numbers"><code class="language-java">package sample.test;
+</code></pre><h3 id="section-7">app/src/main/java/sample/test/MainListFragment.java</h3><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -253,8 +253,8 @@ public class MainListFragment extends SherlockListFragment implements SwipeRefre
 <p>上記参考なやつをちょいと変えただけなので詳しいことはそちらを参照。んまぁOnRefreshListenerなonRefreshがListViewを上から下に引っ張る際にイベントとして発生するようになる。んでsetRefreshing(false)にすることでプログレス終了な通知を出す。上記参考によるとsetRefreshing(true)を呼び出す事でonRefreshを発生させられる模様</p>
 
 <p>以上、という事で動作画面をキャプチャしてYouTubeにうｐしました</p>
-
 <iframe width="560" height="315" src="https://www.youtube.com/embed/6Ee0n6mITyU?si=-LLWLBFXVZxjnkR2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 
 <p>[1]: <a href="http://www.adakoda.com/adakoda/2014/03/android-support-library-swiperefreshlayout.html">http://www.adakoda.com/adakoda/2014/03/android-support-library-swiperefreshlayout.html</a></p>
 
@@ -570,9 +570,7 @@ public class MainListFragment extends SherlockListFragment implements SwipeRefre
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

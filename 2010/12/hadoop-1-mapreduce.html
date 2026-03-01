@@ -91,9 +91,9 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>HadoopでMapReduceをやってみる</p>
-<h2 id="section-1">セットアップ</h2>
+<h3 id="section-1">セットアップ</h3>
 <p><a href="http://hadoop.apache.org">http://hadoop.apache.org</a> から辿ってHadoopをインストール。JAVA_HOMEが無いと言われた場合にはconf/hadoop-env.shを修正する。んで以下のファイルを修正していく</p>
-<h2 id="section-2">core-site.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h3 id="section-2">core-site.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
 &lt;configuration&gt;
     &lt;property&gt;
@@ -101,7 +101,7 @@
         &lt;value&gt;hdfs://localhost:9000&lt;/value&gt;
     &lt;/property&gt;
 &lt;/configuration&gt;
-</code></pre><h2 id="section-3">hdfs-site.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+</code></pre><h3 id="section-3">hdfs-site.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
 &lt;configuration&gt;
     &lt;property&gt;
@@ -111,7 +111,7 @@
 &lt;/configuration&gt;
 </code></pre>
 <p>今回はシングルモードなのでレプリケーションは1で良い</p>
-<h2 id="section-4">mapred-site.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+<h3 id="section-4">mapred-site.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
 &lt;configuration&gt;
     &lt;property&gt;
@@ -124,10 +124,10 @@
 <pre class="line-numbers"><code class="language-shell">hadoop namenode -format
 </code></pre>
 <p>を実行しておく</p>
-<h2 id="section-5">データをアップロード</h2><pre class="line-numbers"><code class="language-shell">hadoop fs -put data input
+<h3 id="section-5">データをアップロード</h3><pre class="line-numbers"><code class="language-shell">hadoop fs -put data input
 </code></pre>
 <p>を実行するとHadoop HDFS上に/user/ユーザー名/input/dataとしてアップロードされる。これをする事でマルチレプリケーション時には全てのサーバーに同期される</p>
-<h2 id="section-6">SampleMapperを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-6">SampleMapperを作成</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.StringTokenizer;
 import java.io.IOException;
@@ -156,7 +156,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
         }
     }
 }
-</code></pre><h2 id="section-7">SampleReducer.javaを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h3 id="section-7">SampleReducer.javaを作成</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -180,7 +180,7 @@ public class SampleReducer extends Reducer&lt;Text, IntWritable, Text, IntWritab
         }
     }
 }
-</code></pre><h2 id="section-8">SamplePartitioner.javaを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h3 id="section-8">SamplePartitioner.javaを作成</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.io.Text;
@@ -197,7 +197,7 @@ public class SamplePartitioner extends Partitioner&lt;Text, IntWritable&gt; {
 }
 </code></pre>
 <p>※必ず必要というわけではない</p>
-<h2 id="section-9">SampleCombiner.javaを作成</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-9">SampleCombiner.javaを作成</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -231,7 +231,7 @@ public class SampleCombiner extends Reducer&lt;Text, IntWritable, Text, IntWrita
 <p>※必ず必要というわけでは無い</p>
 
 <p>MapperからReducerに渡される前にフィルタする事ができる。条件に合うのを選別してReducerに渡す事ができる</p>
-<h2 id="section-10">Sample.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-10">Sample.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.conf.Configuration;
@@ -277,7 +277,7 @@ public class Sample extends Configured implements Tool {
 これを作成後、コンパイルしclassファイルをjarにまとめる
 
 
-#### 実行
+### 実行
 
 
 ```shell
@@ -598,9 +598,7 @@ hadoop jar sample.jar sample.Sample
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

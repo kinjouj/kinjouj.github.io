@@ -34,7 +34,7 @@
     "@type": "Person",
     "name": "kinjouj"
   },
-  "description": "公式ドキュメント(Guide): &lt;http://guides.rubyonrails.org/association_basics.html#polymorphic-associations&gt;"
+  "description": "公式ドキュメント(Guide): <http://guides.rubyonrails.org/association_basics.html#polymorphic-associations>"
 }
     </script>
   </head>
@@ -100,13 +100,13 @@
 <p>公式的なのをそのまま使うと、ProductとEmployeeとPictureモデルがあるけど、ProductとEmployee両方がPictureモデルを使うような場合になるとPictureモデル側が所有するデータ自体がどこのモデルに所属する物か判別する目的としてpolymorphicを使用する事で、アソシエーション名_typeのカラムによってどこに所属するのかっていう識別を出来るようになる。まぁそんな感じで一つのモデル(テーブル)で複数のモデル等でレコードを参照するような多様性を持つモデルとして機能させる事が出来る仕様みたいな感じかな</p>
 
 <p>やってみた結果を見た方が分かりやすいような気がするので(※プロジェクト自体はRailsプロジェクトじゃない方で検証)</p>
-<h2 id="section-1">lib/product.rb</h2><pre class="line-numbers"><code class="language-rb">class Product &lt; ActiveRecord::Base
+<h3 id="section-1">lib/product.rb</h3><pre class="line-numbers"><code class="language-rb">class Product &lt; ActiveRecord::Base
   has_many :pictures, :as =&gt; :imageable
 end
-</code></pre><h2 id="section-2">lib/employee.rb</h2><pre class="line-numbers"><code class="language-rb">class Employee &lt; ActiveRecord::Base
+</code></pre><h3 id="section-2">lib/employee.rb</h3><pre class="line-numbers"><code class="language-rb">class Employee &lt; ActiveRecord::Base
   has_many :pictures, :as =&gt; :imageable
 end
-</code></pre><h2 id="section-3">lib/picture.rb</h2>
+</code></pre><h3 id="section-3">lib/picture.rb</h3>
 <p><code>rbclass Picture &lt; ActiveRecord::Base<br>
   belongs_to :imageable, polymorphic: true<br>
 end<br>
@@ -137,7 +137,7 @@ end
 <p>な感じで作れる模様</p>
 
 <p>んじゃ必要なのは定義したんでテストなり書いてる方向で検証</p>
-<h2 id="section-4">spec/spec_helper.rb</h2><pre class="line-numbers"><code class="language-rb">require &quot;logger&quot;
+<h3 id="section-4">spec/spec_helper.rb</h3><pre class="line-numbers"><code class="language-rb">require &quot;logger&quot;
 require &quot;database_cleaner&quot;
 require &quot;active_record&quot;
 require &quot;factory_girl&quot;
@@ -175,7 +175,7 @@ RSpec.configure do |config|
 end
 </code></pre>
 <p>な感じでActiveRecord及びFactoryGirl、あとテスト時に処理したデータベースのクリーンアップ関係を設定しておく</p>
-<h2 id="section-5">spec/factories/fixture.rb</h2><pre class="line-numbers"><code class="language-rb">FactoryGirl.define do
+<h3 id="section-5">spec/factories/fixture.rb</h3><pre class="line-numbers"><code class="language-rb">FactoryGirl.define do
   factory :product, :class =&gt; Product do
     name &quot;hoge&quot;
     after :create do |product|
@@ -197,7 +197,7 @@ end
 end
 </code></pre>
 <p>な感じで、ProductとEmployeeなレコードを一つづつ定義。そしてPictureにそれぞれの参照するレコードを定義(この場合はPictureには2つのレコードが入る)</p>
-<h2 id="section-6">spec/models/product_spec.rb</h2><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
+<h3 id="section-6">spec/models/product_spec.rb</h3><pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
 
 describe Product do
   it &quot;product test&quot; do
@@ -216,7 +216,7 @@ describe Product do
 end
 </code></pre>
 <p>というようにProductを取って、そのpicturesなアソシエーションからPictureの参照(has_manyなので配列)を取る。で上記でPictureには2つ突っ込んだけど参照されてるのは1つというのはimageable_typeによってモデルの型により取れるレコードが限られるので</p>
-<h2 id="section-7">spec/models/employee_spec.rb</h2><pre class="line-numbers"><code class="language-rb">describe Employee do
+<h3 id="section-7">spec/models/employee_spec.rb</h3><pre class="line-numbers"><code class="language-rb">describe Employee do
   it &quot;employee test&quot; do
     create(:employee)
 
@@ -233,7 +233,7 @@ end
 end
 </code></pre>
 <p>Productの時と同様なので説明不要</p>
-<h2 id="section-8">ログに出力したSQL</h2>
+<h3 id="section-8">ログに出力したSQL</h3>
 <p>※説明不明なログは省略(部分的な値は埋め込みで記載)</p>
 <pre class="line-numbers"><code class="language-sql">[Employeeのfixture投入]
 begin transaction
@@ -608,9 +608,7 @@ LIMIT 1
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

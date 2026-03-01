@@ -93,7 +93,7 @@
                 <p>前回でSimpleAuthを使って認証する方法がありましたが、これを独自実装でやりたい場合にAuthパッケージな機能を利用し認証ドライバを開発する事で組み込める模様。なのでちょっとやってみた</p>
 
 <p>※一応、暫定版です。色々追記するかも</p>
-<h2 id="section-1">データベーステーブル仕様</h2><pre class="line-numbers"><code class="language-sql">CREATE TABLE `user` (
+<h3 id="section-1">データベーステーブル仕様</h3><pre class="line-numbers"><code class="language-sql">CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(80) NOT NULL,
   `password` varchar(50) NOT NULL,
@@ -108,7 +108,7 @@
 <p>というようなテーブルを作る。で前回はやらなかったけど、指定したページのアクセス権限となる機能(Authパッケージで言うとGroupとかAclとか)を組み込む為にpermissionカラムに権限的なのを付ける</p>
 
 <p>でまずはAuthドライバーパッケージは後回しで機能そういう機能的な所をコントローラー等に実装する</p>
-<h2 id="section-2">fuel/app/classess/controller/home.php</h2><pre class="line-numbers"><code class="language-php">&lt;?php
+<h3 id="section-2">fuel/app/classess/controller/home.php</h3><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
 
@@ -135,7 +135,7 @@ class Controller_Home extends Controller {
 <p>まぁ前回同様ですが、今回はアクセス権限があるかまでチェックしたいのでそこら辺を使う。has_accessでログインユーザーが持つ権限でアクセス可能かをチェックする</p>
 
 <p>でログインフォームだとかログイン処理を行うauthコントローラーを作る</p>
-<h2 id="section-3">fuel/app/classess/controller/auth.php</h2><pre class="line-numbers"><code class="language-php">&lt;?php
+<h3 id="section-3">fuel/app/classess/controller/auth.php</h3><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Auth extends Controller {
 
@@ -165,9 +165,8 @@ class Controller_Auth extends Controller {
 <p>これも前回のSimpleAuthとほとんど同じ。ビューはそのまま再利用しているので省略</p>
 
 <p>でここから独自のAuthドライバーを作って、ログイン処理等を実装する</p>
-<h2 id="section-4">Authドライバの構成</h2>
+<h3 id="section-4">Authドライバの構成</h3>
 <p>fuel/app/classes/authに置く。で必要なのがLogin・Group・Aclなクラスの3つが必要になる。で今回はLiteっていうドライバ名にしたので</p>
-
 <pre>
 auth
 ├── acl
@@ -177,6 +176,7 @@ auth
 └── login
 └── lite.php
 </pre>
+
 
 <p>っていうのが必要になるような感じで。んで認証ドライバを設定しなきゃならんのでfuel/app/config/auth.phpを</p>
 <pre class="line-numbers"><code class="language-php">&lt;?php
@@ -188,7 +188,7 @@ return array(
 );
 </code></pre>
 <p>な感じで以降で作るAuthドライバを指定しておく</p>
-<h2 id="section-5">fuel/app/classes/auth/login/lite.php</h2><pre class="line-numbers"><code class="language-php">&lt;?php
+<h3 id="section-5">fuel/app/classes/auth/login/lite.php</h3><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Auth_Login_Lite extends Auth\Auth_Login_Driver {
 
@@ -320,7 +320,7 @@ class Auth_Login_Lite extends Auth\Auth_Login_Driver {
 <p>コメント書かなくても何してるかは大体は分かると思うのですが、でどうやらhas_accessでもAuth::checkか何やらが走る模様なので、このクラスのperform_checkが数回走るので既にログインチェック済みかを検証して行った方が良いかと(そうしないとDBアクセスが数回走るという微妙な事になる)</p>
 
 <p>んでhas_accessでアクセス権限チェックするのはGroupとAclの方になるのでそこを実装する</p>
-<h2 id="section-6">fuel/app/classes/auth/group/lite.php</h2><pre class="line-numbers"><code class="language-php">&lt;?php
+<h3 id="section-6">fuel/app/classes/auth/group/lite.php</h3><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Auth_Group_Lite extends Auth\Auth_Group_Driver {
 
@@ -343,7 +343,7 @@ class Auth_Group_Lite extends Auth\Auth_Group_Driver {
 }
 </code></pre>
 <p>で実際に権限チェックを行う側はAclになる(Authのmemberメソッドでも呼び出せる)。memberメソッドはAclから呼び出すので</p>
-<h2 id="section-7">fuel/app/classes/auth/acl/lite.php</h2><pre class="line-numbers"><code class="language-php">&lt;?php
+<h3 id="section-7">fuel/app/classes/auth/acl/lite.php</h3><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
     public function has_access($condition, Array $entity) {
@@ -675,9 +675,7 @@ class Auth_Acl_Lite extends Auth\Auth_Acl_Driver {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

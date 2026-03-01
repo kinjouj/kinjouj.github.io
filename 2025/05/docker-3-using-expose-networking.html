@@ -90,8 +90,8 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>まず前提として２つのnginxサーバーをDockerコンテナを使って起動する。あえてnginxの設定とかは省略するが</p>
-<h2 id="section-1">Server A(リバースプロキシ側)</h2><pre class="line-numbers"><code class="language-bash">docker run -d -p 80:80 -t server-a
-</code></pre><h2 id="section-2">Server B(バックエンド側)</h2><pre class="line-numbers"><code class="language-bash">docker run -d -p 8080:80 -t server-b
+<h3 id="section-1">Server A(リバースプロキシ側)</h3><pre class="line-numbers"><code class="language-bash">docker run -d -p 80:80 -t server-a
+</code></pre><h3 id="section-2">Server B(バックエンド側)</h3><pre class="line-numbers"><code class="language-bash">docker run -d -p 8080:80 -t server-b
 </code></pre>
 <p>というようにServer AからServer Bにリバースプロキシをするように設定した場合、通常であればバックエンド側は外部からはアクセスできないはずだ。しかし</p>
 <pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
@@ -106,15 +106,15 @@ server b
 <p>-pを使ってコンテナポートとホストポートだけをマッピングしてしまうとそれが全面公開設定になってしまう模様なので上記のようにServer B側で8080をホストでマッピングしてると外部からでも普通にアクセスできちゃうっていうらしい</p>
 
 <p>でそれを解決する方法としてコンテナポートのみを開放する方法があるのでそれをやってみる</p>
-<h2 id="section-3">docker networkでDocker Networkを作成</h2><pre class="line-numbers"><code class="language-bash">docker network create --subnet 172.16.0.0/16 --attachable mynet
+<h3 id="section-3">docker networkでDocker Networkを作成</h3><pre class="line-numbers"><code class="language-bash">docker network create --subnet 172.16.0.0/16 --attachable mynet
 </code></pre>
 <p>mynetっていう名前でDocker Networkを作成する。どうやらDockerでコンテナを作成した際に使用されるDocker Networkはおそらく最初からあるbridgeを使用するらしいのだがこのbridgeネットワークどうやらDNSによる名前解決を行わないらしい</p>
 
 <p>なので新しくDocker Networkを作成して以下で作るコンテナで同一のネットワークを使用するように起動する</p>
-<h2 id="section-4">Server Bの起動</h2><pre class="line-numbers"><code class="language-bash">docker run --name server-b -d --expose=8080 --net=mynet -t server-b
+<h3 id="section-4">Server Bの起動</h3><pre class="line-numbers"><code class="language-bash">docker run --name server-b -d --expose=8080 --net=mynet -t server-b
 </code></pre>
 <p>--nameでコンテナに名前をつける。これはServer Aでproxy_passを指定する際にコンテナ名で指定できるようになるのでそれを利用するためにコンテナ名を指定しておく。-pではなく--exposeでコンテナポートを開放、んで--netでそのコンテナが所属するネットワークを指定</p>
-<h2 id="section-5">Server A側のnginx.conf</h2><pre class="line-numbers"><code class="language-nginx">listen 80;
+<h3 id="section-5">Server A側のnginx.conf</h3><pre class="line-numbers"><code class="language-nginx">listen 80;
 server_name localhost;
 location / {
     proxy_pass http://server-b;
@@ -122,7 +122,7 @@ location / {
 }
 </code></pre>
 <p>上記で指定したコンテナ名をproxy_passに指定することができる。ただし同一のDocker Networkに所属してないとhost not found in upstreamって言われるので注意</p>
-<h2 id="section-6">Server Aを起動</h2><pre class="line-numbers"><code class="language-bash">docker run -p 80:80 --net=mynet -t server-a
+<h3 id="section-6">Server Aを起動</h3><pre class="line-numbers"><code class="language-bash">docker run -p 80:80 --net=mynet -t server-a
 </code></pre>
 <p>接続できるかやってみる</p>
 <pre class="line-numbers"><code class="language-bash">kinjouj@kinjouj-pc:/home/kinjouj:$ curl http://192.168.1.100
@@ -133,7 +133,7 @@ curl: (28) Connection timed out after 1001 milliseconds
 <p>以上！長い！ややこしい！</p>
 
 <p>んまあ安直に-pオプションでポートオープンにするのは止めようねっていうオチなんかなと</p>
-<h2 id="section-7">まとめ</h2><h3>安易に-pを使用しない</h3><h3>コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</h3>
+<h3 id="section-7">まとめ</h3><h3 id="section-8">安易に-pを使用しない</h3><h3 id="section-9">コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</h3>
 <p>てな感じかな</p>
 
               </div>
@@ -146,6 +146,8 @@ curl: (28) Connection timed out after 1001 milliseconds
                 <a href="#section-5" class="d-block p-2 overflow-hidden">Server A側のnginx.conf</a>
                 <a href="#section-6" class="d-block p-2 overflow-hidden">Server Aを起動</a>
                 <a href="#section-7" class="d-block p-2 overflow-hidden">まとめ</a>
+                <a href="#section-8" class="d-block p-2 overflow-hidden">安易に-pを使用しない</a>
+                <a href="#section-9" class="d-block p-2 overflow-hidden">コンテナ間で通信するならDocker Networkを作って同一のネットワークに所属するように設定すること(っていうかあんまりデフォルトブリッジネットワークを使用しない方がいいとのこと)</a>
               </div>
               <div class="post-similarity">
                 <fieldset class="rounded-1 p-2 pb-0">
@@ -448,9 +450,7 @@ curl: (28) Connection timed out after 1001 milliseconds
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

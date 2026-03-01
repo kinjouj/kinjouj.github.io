@@ -95,7 +95,7 @@
 <p>参考: <a href="http://qiita.com/nyasba/items/1e22c2401f3849f9071d">http://qiita.com/nyasba/items/1e22c2401f3849f9071d</a></p>
 
 <p>前回にも記述した通り前回ではdomaで使うConfig実装なAppConfig上でDataSource等の設定をそのまま埋め込んでる。でそういう所をDI Containerに設定されているDataSource等を依存性注入して使うような形の場合には設定がいろいろ異なるっていうことでやってみた(使うDI ContainerはSpring Framework)</p>
-<h2 id="section-1">build.gradle</h2><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+<h3 id="section-1">build.gradle</h3><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 
 processResources.destinationDir = compileJava.destinationDir
 compileJava.dependsOn processResources
@@ -122,7 +122,7 @@ dependencies {
 }
 </code></pre>
 <p>Spring Frameworkを使うのとそれとSpring JDBCな設定を使うのとSpring Transactionを使うのでそれに必要な依存性を追加するだけ</p>
-<h2 id="section-2">applicationContext.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h3 id="section-2">applicationContext.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
     xmlns=&quot;http://www.springframework.org/schema/beans&quot;
     xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
@@ -173,7 +173,7 @@ dependencies {
 &lt;/beans&gt;
 </code></pre>
 <p>まぁDataSource関連とTransaction関連の設定をやっておく</p>
-<h2 id="section-3">AppConfig.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-3">AppConfig.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import javax.sql.DataSource;
 
@@ -208,7 +208,7 @@ public class AppConfig {
 }
 </code></pre>
 <p>な感じで@AutowiredでDataSourceなインスタンスを引っ張ってきてBean登録したConfigの実装でそれを返すようにするような感じ。上記参考ではgetSqlFileRepositoryとかも実装しているけど、デフォルト実装を使えば良いんだと思われるのであえてオーバーライドはしてないけど必要なら実装しておくと良いんじゃないかと。あんま事細かくチェックしてないので何か問題起きそうな気もしなくもないんだけど</p>
-<h2 id="section-4">DomaRepository.java</h2><pre class="line-numbers"><code class="language-java">package sample.dao;
+<h3 id="section-4">DomaRepository.java</h3><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import org.seasar.doma.AnnotateWith;
 import org.seasar.doma.Annotation;
@@ -229,7 +229,7 @@ public @interface DomaRepository {
 <p>簡単に言うとDAOオブジェクトなのがSpringでAutowired出来るようにするにはそれに応じたアノテーションなりを実装するか自前で登録するかのどっちかをしなきゃならないんだけど、DAO実装クラスは自動生成されるのでそれに応じたアノテーションを付与するようにしなきゃならない。でDAO毎にこの設定が必要になるのだけど、毎回毎回DAOに設定するのもめんどいと思うのでこういうアノテーションインターフェースを書いておいてDAOインターフェースでアノテーション定義しておけば良い。それは以下に書くので</p>
 
 <p>ちなみに今回はSpring Frameworkを使ってるからこうなってるけど、javax.injectなのを使うのならtype属性で指定するクラスを変える必要があるかと</p>
-<h2 id="section-5">SampleDao.java</h2><pre class="line-numbers"><code class="language-java">package sample.dao;
+<h3 id="section-5">SampleDao.java</h3><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 
@@ -255,7 +255,7 @@ public interface SampleDao {
 }
 </code></pre>
 <p>先ほど書いた@DomaRepositoryを追加するだけ。@Daoのconfig属性は実装クラスのコンストラクタで@Autowiredされるので必要無いんじゃないかと</p>
-<h2 id="section-6">SampleService.java</h2><pre class="line-numbers"><code class="language-java">package sample.service;
+<h3 id="section-6">SampleService.java</h3><pre class="line-numbers"><code class="language-java">package sample.service;
 
 import java.util.List;
 
@@ -288,7 +288,7 @@ public class SampleService {
 }
 </code></pre>
 <p>んまぁ@AutowiredでDAOを注入して使うオブジェクトなだけ(@Repositoryでも良かったんじゃないのかって思ったけど、そこ詳しくないので今回はパス)。@Transactionalをつけたメソッドをコールする場合にはトランザクション処理が行われるけど、applicationContext.xmlで指定したようにトランザクション情報に関わるAOPをしていない場合にはアノテーションの属性で指定すれば良い</p>
-<h2 id="section-7">SampleDaoTest.java</h2><pre class="line-numbers"><code class="language-java">package sample.dao;
+<h3 id="section-7">SampleDaoTest.java</h3><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 
@@ -345,7 +345,7 @@ public class SampleDaoTest {
 <p>まぁざっくりとざらーっと書いたけど、domaとSpring Frameworkを連携するような感じでやる場合はこんな所かと</p>
 
 <p>んまぁSpring Bootを使う場合な要件においては上記参考先がSpring Bootを使う場合のテクになってるのでそれ参考にすれば良いかと</p>
-<h2 id="section-8">追記</h2>
+<h3 id="section-8">追記</h3>
 <p>上記で&lt;tx:annotation-driven /&gt;と&lt;aop:advice&gt;を利用した場合に@Repositoryを使うと問題が起きる。その件は近い内に記事書く</p>
 
               </div>
@@ -661,9 +661,7 @@ public class SampleDaoTest {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

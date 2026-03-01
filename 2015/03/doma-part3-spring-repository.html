@@ -92,7 +92,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>doma2の機能ではなくSpring Frameworkの@Repositoryで定義した場合どうなるのか気になったのでやってみた</p>
-<h2 id="section-1">SampleRepository.java</h2>
+<h3 id="section-1">SampleRepository.java</h3>
 <p>正式的?だと@Repositoryを付けるのはインターフェースだという概念があるっぽいけど、めんどくさいので普通にクラスにつけちゃう</p>
 <pre class="line-numbers"><code class="language-java">package sample.repository;
 
@@ -139,7 +139,7 @@ public class SampleRepository {
 <p>まぁ@Repositoryを付けてDAOとのやりとりをした結果を返すだけのしょうもないのを作っておく(前回は@Serviceにそういうのをやってたけど、あれはあれで微妙なんじゃないかって思う所もあるので)</p>
 
 <p>でこの状態のまま前回のテストをちょいと書き換えてテストを実行する</p>
-<h2 id="section-2">SampleDaoTest.java</h2><pre class="line-numbers"><code class="language-java">package sample.dao;
+<h3 id="section-2">SampleDaoTest.java</h3><pre class="line-numbers"><code class="language-java">package sample.dao;
 
 import java.util.List;
 
@@ -174,10 +174,10 @@ public class SampleDaoTest {
 }
 </code></pre>
 <p>まぁsave側でExceptionをスローしているからテストは落ちる。でもその例外が</p>
-
 <blockquote>
 org.springframework.transaction.UnexpectedRollbackException: Transaction rolled back because it has been marked as rollback-only
 </blockquote>
+
 
 <p>となる。詳解な原因がちゃんと特定できた訳じゃないのだけど、恐らくはTransactionInterceptor等によるトランザクションが重なってしまっているのではないかと。要は&lt;tx:annotation-driven /&gt;によるTransactionInterceptorと&lt;aop:advice/&gt;によるTransactionInterceptorによってトランザクションが重なりメソッドで例外を創出するとsetRollbackOnlyはしているので問題なくロールバックはされるが結果的にその上のトランザクションスコープによってcommit実行しようとして結果上記のような例外が送出されてしまうのではないかという予測(あくまで予測なので確証はありません)</p>
 
@@ -189,7 +189,7 @@ org.springframework.transaction.UnexpectedRollbackException: Transaction rolled 
 </ul>
 
 <p>のどっちかをやれば良い</p>
-<h2 id="section-3">applicationContext.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h3 id="section-3">applicationContext.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;beans
     xmlns=&quot;http://www.springframework.org/schema/beans&quot;
     xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
@@ -229,7 +229,7 @@ org.springframework.transaction.UnexpectedRollbackException: Transaction rolled 
 &lt;/beans&gt;
 </code></pre>
 <p>んまぁ&lt;aop:advice&gt;を使わないので@Transactionalには適切な属性を設定する必要がある</p>
-<h2 id="section-4">SampleRepository.java (修正)</h2><pre class="line-numbers"><code class="language-java">package sample.repository;
+<h3 id="section-4">SampleRepository.java (修正)</h3><pre class="line-numbers"><code class="language-java">package sample.repository;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -588,9 +588,7 @@ public class SampleRepository {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

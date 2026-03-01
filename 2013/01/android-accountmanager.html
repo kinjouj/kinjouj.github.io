@@ -95,13 +95,13 @@
 <p><img src="/images/2013/01/20130119095120.png" alt="image" /></p>
 
 <p>まぁWebサービスとかのアカウントを端末内に保管して、認証要求だとかをAccountManagerな機能を通じて行えたり出来るAPIが存在する訳ですが、これの独自のを作る方法。まぁ結構書く量が多いので</p>
-<h2 id="section-1">認証方式</h2>
+<h3 id="section-1">認証方式</h3>
 <p>OAuthとか使って権限管理の元で色々出来たりするのが一番良いんですが、今回は適当にトークン取得リクエストしたらトークン返して、でAPIを実行する際にトークンをヘッダーにぶち込んでリクエストしたら結果が返ってくる的な感じ</p>
 
 <p>まぁ良くあるかどうかは定かじゃないけど、RailsとかだとDeviseとかそういうのがあったりもする訳で。これもとりあえずおいといて</p>
 
 <p>という事で本題な所のAndroidの方を実装する。もっかいいうけどクソ長いんでww</p>
-<h2 id="section-2">AndroidManifest.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h3 id="section-2">AndroidManifest.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;manifest
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     package=&quot;net.kinjouj.test&quot;
@@ -146,7 +146,7 @@
 &lt;/manifest&gt;
 </code></pre>
 <p>な感じ。で必要な設定リソースから作る</p>
-<h2 id="section-3">res/values/strings.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h3 id="section-3">res/values/strings.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;resources&gt;
     &lt;string name=&quot;app_name&quot;&gt;Sample&lt;/string&gt;
 
@@ -162,7 +162,7 @@
 &lt;/resources&gt;
 </code></pre>
 <p>でAccountAuthenticatorを使う際に必要となる設定リソース(AndroidManifest.xmlだとres/xml/authenticator.xml)を作る</p>
-<h2 id="section-4">res/xml/authenticator.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h3 id="section-4">res/xml/authenticator.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;account-authenticator
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:accountType=&quot;@string/account_type&quot;
@@ -172,7 +172,7 @@
     android:accountPreferences=&quot;@xml/prefs&quot; /&gt;
 </code></pre>
 <p>でアカウント設定でオプションで設定出来るPreferenceな設定ファイルも必要</p>
-<h2 id="section-5">res/xml/prefs.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h3 id="section-5">res/xml/prefs.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
     &lt;PreferenceCategory android:title=&quot;設定&quot; /&gt;
     &lt;PreferenceScreen android:key=&quot;account_settings&quot; android:title=&quot;Account Settings&quot;&gt;
@@ -185,7 +185,7 @@
 <p>な感じ。設定画面はAuthenticatorPreferenceActivityにintentする方向で</p>
 
 <p>んでPreferenceな所からちょっと作っておく</p>
-<h2 id="section-6">AuthenticatorPreferenceActivity.java</h2><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h3 id="section-6">AuthenticatorPreferenceActivity.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.preference.PreferenceActivity;
 import android.preference.Preference;
@@ -209,7 +209,7 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
 }
 </code></pre>
 <p>でPreferenceで参照するリソースが必要</p>
-<h2 id="section-7">res/xml/pref.xml</h2>
+<h3 id="section-7">res/xml/pref.xml</h3>
 <p>prefs.xmlでは無いので注意</p>
 <pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
@@ -225,7 +225,7 @@ public class AuthenticatorPreferenceActivity extends PreferenceActivity {
 <p>まぁニックネームを設定出来るようにするだけ</p>
 
 <p>あとはアプリのActivity(MainActivity)とか認証要求を行うActivity(AuthenticatorActivity)とService(AuthenticatorService)とかをもろもろ作る</p>
-<h2 id="section-8">MainActivity.java</h2><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h3 id="section-8">MainActivity.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -375,7 +375,7 @@ public class MainActivity extends Activity {
 <p>アカウントがなければAndroidのアカウント設定画面にintentしてアカウントを作るように要求</p>
 
 <p>でアカウントを追加する際に今回の独自のアカウントを選択した場合にはAuthenticatorServiceが作用するのでそれを作る</p>
-<h2 id="section-9">AuthenticatorService.java</h2><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h3 id="section-9">AuthenticatorService.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import android.accounts.AccountManager;
 import android.app.Service;
@@ -395,7 +395,7 @@ public class AuthenticatorService extends Service {
 }
 </code></pre>
 <p>でonBindでAbstractAccountAuthenticatorを継承したクラスをnewしでgetIBinderを返す</p>
-<h2 id="section-10">SampleAccountAuthenticator.java</h2><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h3 id="section-10">SampleAccountAuthenticator.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -533,12 +533,12 @@ class SampleAccountAuthenticator extends AbstractAccountAuthenticator {
     }
 }
 </code></pre>
-<p>AccountManager.getAuthTokenをするとコールバックでAccountManagerFuture<Bundle>.getResultsでgetAuthTokenから返したBundleを取得できる。</p>
+<p>AccountManager.getAuthTokenをするとコールバックでAccountManagerFuture&lt;Bundle&gt;.getResultsでgetAuthTokenから返したBundleを取得できる。</p>
 
 <p>でアカウント追加から来た時にはaddAccountが呼び出されて、そこからAuthenticatorActivity.ACTION(AuthenticatorActivityを発生させるアクションintent)が投げられて、登録に伴う認証開始が行われるという感じ</p>
 
 <p>でそのAuthenticatorActivityを作る</p>
-<h2 id="section-11">AuthenticatorActivity.java</h2><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+<h3 id="section-11">AuthenticatorActivity.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -947,9 +947,7 @@ public class AuthenticatorActivity extends Activity {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

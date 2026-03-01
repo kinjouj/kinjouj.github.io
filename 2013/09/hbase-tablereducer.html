@@ -93,18 +93,18 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>タイトル通り、Hadoop MapReduce上でReducer側から処理したデータをHBaseにぶっこむ為にTableReducerを使う事が出来る。やってみた</p>
-<h2 id="section-1">セットアップ</h2>
+<h3 id="section-1">セットアップ</h3>
 <p>Hadoop(1.2.1)は既にあるのでHBase(0.94.11)を構築する。んまぁ特筆する事も無いけど</p>
-
 <pre>
 [/bin/sh] hbase shell
 hbase(main) > create "output", "score"
 </pre>
 
+
 <p>的な事を行なってHadoopで処理したデータをHBaseに突っ込む為の所を作っておく。あとHDFS上にデータ突っ込んでおくのも忘れずに。んまぁこんかいは「hoge fuga foobar」が含まれるテキストを適当に書いて突っ込んだけ</p>
 
 <p>あとはクラスをだらだらと書く</p>
-<h2 id="section-2">SampleMapper.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-2">SampleMapper.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
@@ -129,7 +129,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
 }
 </code></pre>
 <p>とりあえずスルー</p>
-<h2 id="section-3">SampleReducer.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-3">SampleReducer.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.io.IOException;
 import org.apache.hadoop.hbase.client.Put;
@@ -169,7 +169,7 @@ public class SampleReducer extends TableReducer&lt;Text, IntWritable, NullWritab
 }
 </code></pre>
 <p>ReducerクラスじゃなくてHBaseのTableReducerを継承する。公式ではwriteの第1引数の型がImmutableByteWritable的なのになってるけど、まぁnullしか指定してないならNullWritableでええんじゃないのかという事で</p>
-<h2 id="section-4">SampleTaskRunner.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-4">SampleTaskRunner.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -209,7 +209,7 @@ public class SampleTaskRunner {
 <pre class="line-numbers"><code class="language-">hadoop jar sample.jar sample.SampleTaskRunner
 </code></pre>
 <p>辺りすれば良いんだけど依存性関係でめんどくさい。という事でgradleのJavaExecを使いつつのProgramDriverで処理する方向で</p>
-<h2 id="section-5">Client.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-5">Client.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import org.apache.hadoop.util.ProgramDriver;
 
@@ -232,7 +232,7 @@ public class Client {
 <pre class="line-numbers"><code class="language-">java sample.Client sample
 </code></pre>
 <p>っていう感じでやれば動かせられますよっていう事で</p>
-<h2 id="section-6">build.gradle</h2><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+<h3 id="section-6">build.gradle</h3><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
 apply plugin: &quot;eclipse&quot;
 
 repositories {
@@ -251,7 +251,6 @@ task run(type: JavaExec) {
 }
 </code></pre>
 <p>runタスクを実行するだけで良い。んまぁこれで終わり。実行し、HBaseシェル側で見てみる</p>
-
 <pre>
 hbase(main) > scan "output"
 ROW                    COLUMN+CELL
@@ -259,6 +258,7 @@ ROW                    COLUMN+CELL
  fuga                  column=score:count, timestamp=1379472861619, value=2
  hoge                  column=score:count, timestamp=1379472861619, value=3
 </pre>
+
 
 <p>という感じでHadoop MapReduceで処理されて最終的にHBaseにぶっこまれるっていう感じ</p>
 
@@ -575,9 +575,7 @@ ROW                    COLUMN+CELL
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

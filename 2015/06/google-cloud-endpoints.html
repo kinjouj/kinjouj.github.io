@@ -96,7 +96,7 @@
 <p>今までGoogle App Engineを使ってWeb API的なのを定義する際、Slim3を使ってOAuthServiceで認証情報を取得してJSONでレスポンス返す的な事を一から実装してたりとかしてたけど、今時そんな事しなくてもGoogle Cloud Endpointsを使う事で同等な事をさらっと出来るようになってるらしい</p>
 
 <p>っていう事でドキュメントを読みつつやってみた</p>
-<h2 id="section-1">環境構築</h2><pre class="line-numbers"><code class="language-groovy">buildscript {
+<h3 id="section-1">環境構築</h3><pre class="line-numbers"><code class="language-groovy">buildscript {
     repositories {
         mavenCentral()
     }
@@ -144,7 +144,7 @@ test {
 }
 </code></pre>
 <p>んまぁこれだけ。テストする際に実際にサーバーを動かしてURLFetchServiceを使って結果をテストするので</p>
-<h2 id="section-2">WebApi.java</h2>
+<h3 id="section-2">WebApi.java</h3>
 <p>基本的には@Apiと@ApiMethodを使うのだけど、@Apiで共通項目だけを設定したクラスを用意しておいて、一部実際のAPI実装クラス上で特有する設定部分は@ApiClassで定義するのがよろしい模様。っていうか複数の@Apiを持つクラスを定義して同一のnameを持つ場合に設定項目が異なるとエラーになるので</p>
 <pre class="line-numbers"><code class="language-java">package sample;
 
@@ -155,7 +155,7 @@ public class WebApi {
 }
 </code></pre>
 <p>っていうように@Apiを使ったクラスをベースとしたのを定義しておいて、クラスを継承するか@ApiReferenceでこのクラスを指定するなどの方式を取れば基底となる@Apiを継承して定義出来るような感じっぽい</p>
-<h2 id="section-3">HogeApi.java</h2><pre class="line-numbers"><code class="language-java">{% raw %}
+<h3 id="section-3">HogeApi.java</h3><pre class="line-numbers"><code class="language-java">{% raw %}
 package sample;
 
 import javax.annotation.Nullable;
@@ -185,10 +185,9 @@ public class HogeApi {
 {% endraw %}
 </code></pre>
 <p>っていうように@ApiMethodを使ってAPIを定義出来る。その際にhttpMethodを指定しないような場合にはそのメソッド名から特定されたhttpMethodが自動で設定される模様。例えば上記のgetSayのような場合であればhttpMethod=&quot;GET&quot;しなくてもGETメソッドで作用するようになる</p>
-
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr"><a href="https://t.co/D4Wfyijp2i">https://t.co/D4Wfyijp2i</a> によるとhttpMethodは指定しなければメソッド名から推定される処理されるべきhttpMethodが採用される。例えばgetが接頭辞とかについてればGETメソッドで処理されるみたいで、ついてなければPOSTっぽい。確証は無い</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612359638789390336">2015, 6月 20</a></blockquote>
-
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 
 <p>んで、@ApiMethodのpathにはパスパラメーターを含むようにする事も可能。コメントしてるけどgetFugaのpathように指定する事が出来るが</p>
 
@@ -196,17 +195,16 @@ public class HogeApi {
 <li>@Namedで引数に指定したパスパラメーターをメソッドの引数に適応出来る</li>
 <li>但し、パスパラメーターをマッピングする場合には@Nullableと@DefaultValueを同時に併用する事は出来ない</li>
 </ul>
-
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">一応念の為にやってみた所、「<a href="http://t.co/KOQe04U1g4">http://t.co/KOQe04U1g4</a>.api.server.spi.config.validation.InvalidParameterAnnotationsException」っていう例外ぶっ飛ぶ</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/613354241004998656">2015, 6月 23</a></blockquote>
-
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 
 <p>てな感じで定義する事でAPI定義することが出来る。まだ設定が足りないので動かす事は出来ないけど、実際サーバーを動かすと [<a href="http://localhost:8080/_ah/api/explorer">http://localhost:8080/_ah/api/explorer</a>] っていうようなURLにアクセスしてAPI定義上から上記のgetSayを動かすと</p>
 
 <p><img src="/images/2015/06/201506242115_1.jpg" alt="image" /></p>
 
 <p>っていうようなレスポンス結果が得られるようになる</p>
-<h2 id="section-4">SampleApi.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-4">SampleApi.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.Arrays;
 import java.util.List;
@@ -256,7 +254,7 @@ public class SampleApi extends WebApi {
 <p>っていうようなレスポンス結果が得られるようになる</p>
 
 <p>んまぁここまでがざっくりとしたAPI実装部分。動かすには設定(web.xml)が必要</p>
-<h2 id="section-5">web.xml</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+<h3 id="section-5">web.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;!DOCTYPE web-app PUBLIC &quot;-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN&quot; &quot;http://java.sun.com/dtd/web-app_2_3.dtd&quot;&gt;
 &lt;web-app xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; version=&quot;2.5&quot;&gt;
 
@@ -283,7 +281,7 @@ public class SampleApi extends WebApi {
 <p><img src="/images/2015/06/201506242115_2.jpg" alt="image" /></p>
 
 <p>ていうようなAPIが定義されそれぞれ適切なリクエストを行う事で結果をJSON等で取得出来るようになる</p>
-<h2 id="section-6">Google API Clieng Library for JavaScriptを使ってAPIをコールする</h2><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+<h3 id="section-6">Google API Clieng Library for JavaScriptを使ってAPIをコールする</h3><pre class="line-numbers"><code class="language-html">&lt;html&gt;
   &lt;head&gt;
     &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
   &lt;/head&gt;
@@ -321,18 +319,15 @@ function init() {
 <p>っていうような感じで使う事が出来る</p>
 
 <p>んまぁそんな感じで今時のGoogle App Engineを使ってWeb APIを実装するような場合であればGoogle Cloud Endpointsを利用する事も出来るって事で</p>
-<h2 id="section-7">余談1: 例外について</h2>
-<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr"><a href="https://t.co/g6lOKpa5PF">https://t.co/g6lOKpa5PF</a> に書いてるけど、API側で例外ぶん投げた場合はその後にServiceUnavailableになると思うのでそれによるサービスの例外エラーが503になるとか</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612666965790887937">2015, 6月 21</a></blockquote>
-
+<h3 id="section-7">余談1: 例外について</h3><blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr"><a href="https://t.co/g6lOKpa5PF">https://t.co/g6lOKpa5PF</a> に書いてるけど、API側で例外ぶん投げた場合はその後にServiceUnavailableになると思うのでそれによるサービスの例外エラーが503になるとか</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612666965790887937">2015, 6月 21</a></blockquote>
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">ちょっと余談入ったけど、送出したいHTTPステータスに一致する例外をthrowすればそのHTTPステータスで処理されるんだと思われる。んでにServiceExceptionを継承した例外クラスを作ってその例外をぶっ飛ばせば例外クラスで指定されてるステータスなレスポンスが送出される</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612669712674131968">2015, 6月 21</a></blockquote>
-
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">「All HTTP 5xx status codes are converted to be HTTP 503 in the client response.」って書いとるがな</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612669940844236800">2015, 6月 21</a></blockquote>
-
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 
 <p>っていう事でまとめると</p>
 
@@ -345,7 +340,7 @@ function init() {
 </ul>
 
 <p>っていうような感じになる</p>
-<h2 id="section-8">余談2: ApiResourcePropertyに関して</h2>
+<h3 id="section-8">余談2: ApiResourcePropertyに関して</h3>
 <p>APIのレスポンスを出す際にオブジェクトのこのプロパティは出したくないとかそういうような制御をする事も出来る</p>
 <pre class="line-numbers"><code class="language-java">package sample;
 
@@ -378,7 +373,7 @@ public class Sample implements Serializable {
 }
 </code></pre>
 <p>っていうような@ApiResourcePropertyでignoredを指定する事でこのプロパティを出力しない等の設定を定義する事が出来る。又、nameパラメーターでこのプロパティを出力する際の名前等も変更する事が可能っぽい</p>
-<h2 id="section-9">余談3: @ApiTransformerについて</h2>
+<h3 id="section-9">余談3: @ApiTransformerについて</h3>
 <p>ようなオブジェクトとかをJSONとかに変換や解析するような仕組み等をオブジェクトに組み込む機能かと。まったく検証してないので詳しくは書かないけど、デフォルトとかだとjacksonを使ってJSONをエンコード/デコードしているんじゃないかと</p>
 
 <p>んまぁ詳しくは<a href="https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer">ドキュメント</a>読めって事で</p>
@@ -697,9 +692,7 @@ public class Sample implements Serializable {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

@@ -95,7 +95,7 @@
                 <p>参考: <a href="http://www.ciiycode.com/0z6ziWjWxjjP/google-app-engine-oauth2-provider">http://www.ciiycode.com/0z6ziWjWxjjP/google-app-engine-oauth2-provider</a></p>
 
 <p>Google Account OAuth1.0aがdeprecated化したのがつい先日くらいの話なので、そのまま放置しておくと問題にもなりそうなので検証してみる</p>
-<h2 id="section-1">概要</h2>
+<h3 id="section-1">概要</h3>
 <p>Google App EngineにはOAuthServiceっていうAPIがあるのでOAuth2認証を利用する事も出来る。OAuth1.0aの場合はOAuthServiceでgetCurrentUserメソッドを使う場合等にはクエリーストリングにOAuth認証に必要なパラメーターを設置する必要があるがOAuth2の場合にはAuthorizationヘッダーに取得したアクセストークンを指定するような形式になる。又、OAuth1.0aの時とは違いクライアント側で取得のトークンは有効期限は自前でトークンを削除しない限りは問題無いが、OAuth2の場合には一定時間でトークンの有効期限が設定されているので定期的にチェックしつつ再取得する必要性がある</p>
 
 <p>でOAuth2を利用するにあたって <a href="https://console.developers.google.com">https://console.developers.google.com</a> からプロジェクトのクライアントID及びクライアントシークレットを取得する必要がある。今回のはInstalled Applicationを使うのでクライアントのタイプはそっちで登録する</p>
@@ -103,7 +103,7 @@
 <p><img src="/images/2015/04/201504222145-1.jpg" alt="image" /></p>
 
 <p>まぁ下準備はこれくらい</p>
-<h2 id="section-2">サーバー側のOAuth2への対応修正</h2>
+<h3 id="section-2">サーバー側のOAuth2への対応修正</h3>
 <p>確証は無いけどOAuthService.getCurrentUserやisUserAdmin等のメソッドの引数にscopeを指定しないと正常にUserインスタンスを取得できない模様なので</p>
 <pre class="line-numbers"><code class="language-java">OAuthService service = OAuthServiceFactory.getOAuthService();
 User user = null;
@@ -117,7 +117,7 @@ try {
 <p>っていう感じで取得したりするような処理に書き換える必要がある模様。これを行わないでクライアント側で取得したトークンを使ってリクエストを投げるとInvalidOAuthTokenException等の例外が送出されてしまう模様。但し、これを修正してしまうとOAuth1.0aの際に指定していたscopeと一致しないような場合とかだとOAuth1.0aがすぐに通らなくなるので</p>
 
 <p>んまぁサーバー側のGoogle App Engineの修正はこれだけ。修正してコンパイル後に修正版をデプロイしておく</p>
-<h2 id="section-3">chrome.identity APIを使ったクライアント側を実装</h2>
+<h3 id="section-3">chrome.identity APIを使ったクライアント側を実装</h3>
 <p>Chrome Extensionにはidentityパーミッションを付与すればchrome.identityが使えるようになる。chrome.identityを使うとGoogle Accountやそれ以外のOAuth2フローによるアクセストークンなどの取得が出来るようになる。但し、chrome.identity.getAuthTokenを使う場合だとChrome Syncの有効が必要になるっぽい気がするのでchrome.identity.launchWebAuthFlowのAPIを使ってGoogle Account認証を行ってそれからアクセストークンを取得して、その取得したアクセストークンを利用してサーバー側のGoogle App Engine側にAuthorizationヘッダーを付与してリクエストしてOAuth2によるユーザー処理を行えるようにする</p>
 
 <p>※微妙と長いので</p>
@@ -583,9 +583,7 @@ function start_authorization() {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

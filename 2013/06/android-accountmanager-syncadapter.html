@@ -95,9 +95,9 @@
 <p>その前に現状だとSyncAdapterを使える仕様じゃないので、そこら辺をまず修正しなければならない。SyncAdapterを使う為にはContent Providerが必要な模様、なのでアクティビティ等のアプリに関わる部分(AccountAuthenticator以外)からサーバーに通信してデータを取る部分を全てContent Provider経由で取る。でバックグラウンドで同期が行われる際に、サーバー側から取得したデータをSQLiteデータベースに保管しておいて、それをContent Providerでやり取りをする</p>
 
 <p>という感じな仕様に変えないといけない。んまぁそこら辺はちゃちゃっと修正して、SyncAdapterの本体辺りな所だけ書く</p>
-<h2 id="section-1">SyncAdapterを使う手順</h2>
+<h3 id="section-1">SyncAdapterを使う手順</h3>
 <ul>
-<li>  AndroidManifest.xmlにandroid.content.SyncAdapterを持つ<service>を定義。さらにSyncAdapterから使うContent Providerの定義(<provider>)も必要</li>
+<li>  AndroidManifest.xmlにandroid.content.SyncAdapterを持つ&lt;service&gt;を定義。さらにSyncAdapterから使うContent Providerの定義(&lt;provider&gt;)も必要</li>
 <li>  SyncAdapterなXMLリソース定義を作成</li>
 <li>  SyncAdapterなandroid.app.Serviceを実装</li>
 <li>  SyncAdapterなandroid.content.AbstractThreadedSyncAdapterを実装</li>
@@ -121,7 +121,7 @@
 </ul>
 
 <p>っていう権限が必要になる模様</p>
-<h2 id="section-2">AndroidManifest.xmlを修正する</h2>
+<h3 id="section-2">AndroidManifest.xmlを修正する</h3>
 <p>SyncAdapterな所を追加する。上記でも書いてるようにパーミッションな所はすっ飛ばす</p>
 <pre class="line-numbers"><code class="language-xml">&lt;service android:name=&quot;.SampleSyncService&quot; android:exported=&quot;true&quot;&gt;
     &lt;intent-filter&gt;
@@ -138,14 +138,14 @@
     android:label=&quot;@string/provider_name&quot;
     android:exported=&quot;false&quot;
     android:permission=&quot;sample.provider.permission&quot; /&gt;
-</code></pre><h2 id="section-3">res/xml/sync.xmlを作成</h2><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+</code></pre><h3 id="section-3">res/xml/sync.xmlを作成</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
 &lt;sync-adapter
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:accountType=&quot;@string/account_type&quot;
     android:contentAuthority=&quot;@string/provider_name&quot; /&gt;
 </code></pre>
 <p><a href="http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html">http://developer.android.com/reference/android/content/AbstractThreadedSyncAdapter.html</a> に書いてるのでそれ参考に</p>
-<h2 id="section-4">SampleSyncService.java</h2><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
+<h3 id="section-4">SampleSyncService.java</h3><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
 
 import android.app.Service;
 import android.content.Intent;
@@ -172,7 +172,7 @@ public class SampleSyncService extends Service {
 }
 </code></pre>
 <p>AbstractThreadedSyncAdapter#getSyncAdapterBinderを返すだけ</p>
-<h2 id="section-5">SampleSyncAdapter.java</h2><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
+<h3 id="section-5">SampleSyncAdapter.java</h3><pre class="line-numbers"><code class="language-java">package kinjouj.sample.authadapter;
 
 import java.io.IOException;
 import java.util.Date;
@@ -547,9 +547,7 @@ public class SampleSyncAdapter extends AbstractThreadedSyncAdapter {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

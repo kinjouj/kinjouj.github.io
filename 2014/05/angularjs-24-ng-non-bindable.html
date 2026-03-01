@@ -99,26 +99,26 @@
 <p>上記参考にも書いてるのですが、例えばクエリーなどにおいてangular.jsが処理されるような記法なクエリーが含まれているとXSSになるっていう話があるのですが、実際自分でやってみた。</p>
 
 <p>※実検証はRails4を使ってやった</p>
-<h2 id="section-1">app/assets/javascripts/app.js</h2><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
+<h3 id="section-1">app/assets/javascripts/app.js</h3><pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
   .controller(&quot;SampleController&quot;, function($scope) {
     $scope.onClick = function() {
       alert(&quot;click&quot;);
     };
   });
 </code></pre>
-<p>んまぁ適当に$scopeに関数を打ち込む。で例えばこのコントローラーの内部にサーバーサイドなテンプレートエンジンを利用してクエリーで指定したデータで<span style="color: red">&quot;{% raw %}{{onClick()}}{% endraw %}&quot;</span>がそのまま参照されたらどうなるのかっていう</p>
-<h2 id="section-2">app/controllers/sample_controller.rb</h2><pre class="line-numbers"><code class="language-rb">class SamplesController &lt; ApplicationController
+<p>んまぁ適当に$scopeに関数を打ち込む。で例えばこのコントローラーの内部にサーバーサイドなテンプレートエンジンを利用してクエリーで指定したデータで&lt;span style=&quot;color: red&quot;&gt;&quot;{% raw %}{{onClick()}}{% endraw %}&quot;&lt;/span&gt;がそのまま参照されたらどうなるのかっていう</p>
+<h3 id="section-2">app/controllers/sample_controller.rb</h3><pre class="line-numbers"><code class="language-rb">class SamplesController &lt; ApplicationController
   def show
     @query = params[:query]
   end
 end
 </code></pre>
-<p>単純に<http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}>のようなクエリーを送れるような形で、そのデータをビューにバインドする</p>
-<h2 id="section-3">app/views/sample/show.erb</h2><pre class="line-numbers"><code class="language-erb">&lt;div ng-controller=&quot;SampleController&quot;&gt;
+<p>単純に&lt;http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}&gt;のようなクエリーを送れるような形で、そのデータをビューにバインドする</p>
+<h3 id="section-3">app/views/sample/show.erb</h3><pre class="line-numbers"><code class="language-erb">&lt;div ng-controller=&quot;SampleController&quot;&gt;
     &lt;h2&gt;&lt;%= @query %&gt;&lt;/h2&gt;
 &lt;/div&gt;
 </code></pre>
-<p>終わり。でこのまま動かしてコントローラーのところに書いてるURL( <http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}> ) にアクセスしてみると$scopeに突っ込んだ関数な処理が発生してしまう。つまりalertが出るっていうオチになる</p>
+<p>終わり。でこのまま動かしてコントローラーのところに書いてるURL( &lt;http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}&gt; ) にアクセスしてみると$scopeに突っ込んだ関数な処理が発生してしまう。つまりalertが出るっていうオチになる</p>
 
 <p>っていうことでサーバーサイドからテンプレートエンジンを用いてレンダリングされる部分において、angular.jsで評価される可能性のあるのはng-non-bindableを指定すればいい模様。なので上記のビューを</p>
 <pre class="line-numbers"><code class="language-erb">&lt;div ng-controller=&quot;SampleController&quot;&gt;
@@ -439,9 +439,7 @@ end
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

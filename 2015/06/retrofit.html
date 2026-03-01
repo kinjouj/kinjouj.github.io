@@ -95,13 +95,12 @@
                 <p>公式: <a href="http://square.github.io/retrofit/">http://square.github.io/retrofit/</a></p>
 
 <p>以前に</p>
-
 <blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">っていうかインターフェース定義してアノテーションつけてみたいな事して、Webクライアントのクラスとなるソースを生成するの作れば良いんじゃないの</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/609336030387245056">2015, 6月 12</a></blockquote>
-
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
+
 <p>っていうように単純なデータのやりとりだけなのであればそういうのがあれば良いんじゃねって思ってたんですが、ソースとかを生成したりはしない(はずだ)けど、retrofitっていうのがあるみたいで使ってみた</p>
-<h2 id="section-1">サーバー側</h2>
+<h3 id="section-1">サーバー側</h3>
 <p>とりあえずRailsで適当にResource Controller辺りを使って</p>
 <pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
 
@@ -135,7 +134,6 @@ end
 </ul>
 
 <p>っていうようなのを作っておく。よってルーティング定義は</p>
-
 <pre>
      Prefix Verb   URI Pattern     Controller#Action
 entry_index GET    /entry          entry#index
@@ -143,22 +141,23 @@ entry_index GET    /entry          entry#index
       entry GET    /entry/:id      entry#show
 </pre>
 
+
 <p>というような感じになる。これをretrofitで使う</p>
-<h2 id="section-2">retrofitの概要</h2>
+<h3 id="section-2">retrofitの概要</h3>
 <p>retrofitでは基本的にインターフェースを定義して、メソッドに適切なアノテーションを付与する事によって利用する事が出来る</p>
 
 <p>でretrofitで使用されるHTTPクライアントの実装はデフォルト(retrofitの依存性だけ追加した場合)で使用されるのはソースまでちょっと追いかけれてないので分からないのだけど</p>
-
 <blockquote>
 Retrofit will automatically use OkHttp (version 2.0 or newer) when it is present.
 </blockquote>
+
 
 <p>というようにokhttp及びokhttp-urlconnectionの依存性を追加していると自動でokhttpを使うようになる模様</p>
 
 <p>あと後述するが、RxJavaを使ったObservableを使う事も出来るので</p>
 
 <p>んまぁ概要はこんなもんで</p>
-<h2 id="section-3">全件を取得する</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-3">全件を取得する</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 
@@ -254,7 +253,7 @@ public class SampleServiceTest {
 }
 </code></pre>
 <p>RestAdapterのインスタンスでエンドポイントを設定してcreateメソッドで作成したインターフェースを指定してインスタンスを取得。あとはインターフェースのメソッドを呼ぶだけでHTTPリクエストを行い結果を取得してくれる模様(JSONの実装は多分GSON)</p>
-<h2 id="section-4">URLパスに埋め込んでリクエスト</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-4">URLパスに埋め込んでリクエスト</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.util.List;
 
@@ -311,7 +310,7 @@ public class SampleServiceTest {
 }
 </code></pre>
 <p>特に言う事無いので次</p>
-<h2 id="section-5">POSTでデータを送信する場合 (@Bodyを使用)</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-5">POSTでデータを送信する場合 (@Bodyを使用)</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import retrofit.Callback;
 import retrofit.http.POST;
@@ -332,10 +331,10 @@ public interface SampleService {
 </ul>
 
 <p>2つ目のCallbackを持つ件に関しては</p>
-
 <blockquote>
 Asynchronous execution requires the last parameter of the method be a Callback.
 </blockquote>
+
 
 <p>と明記されており、Callbackを引数の最後に持つ場合には非同期処理によって実行される模様</p>
 <pre class="line-numbers"><code class="language-java">package sample;
@@ -410,7 +409,7 @@ public class SampleServiceTest {
 <p>というようにテストする際にはExecutorで一定の待機処理等を行わないと正常にテスト実行されないはずなので</p>
 
 <p>という感じで@Bodyを持った引数を持った場合にはapplication/jsonとしてリクエストされてデータを送信できる</p>
-<h2 id="section-6">POSTでデータを送信する場合 (@FormUrlEncodedを使用)</h2><pre class="line-numbers"><code class="language-java">package sample;
+<h3 id="section-6">POSTでデータを送信する場合 (@FormUrlEncodedを使用)</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import retrofit.Callback;
 import retrofit.http.FormUrlEncoded;
@@ -432,7 +431,7 @@ public interface SampleService {
 <p>但し、@Bodyが使えないので送るデータはメソッドに一つづつ持つようになる。それか@Fieldじゃなくて@FieldMapで持つ事で可能な模様。又、TypedString(クエリーのようにid=1&amp;name=hogeのようにフォームデータとしてエンコードしたデータ)等を使ってなんとかする方法もあるらしい</p>
 
 <p>というような感じで使用する事が出来る</p>
-<h2 id="section-7">余談: その他のアノテーションやAPI</h2>
+<h3 id="section-7">余談: その他のアノテーションやAPI</h3>
 <ul>
 <li>@Multipart及び@Part、TypedFile等を利用する事でマルチパートリクエスト等も出来る</li>
 <li>RequestInterceptorを使う事でリクエストを行う前に共通する設定等を仕込む事も可能</li>
@@ -753,9 +752,7 @@ public interface SampleService {
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

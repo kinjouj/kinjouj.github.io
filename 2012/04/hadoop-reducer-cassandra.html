@@ -92,9 +92,8 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>前回はCassandraなデータを使うMapperを作って、HDFS上にMapReduce結果を出したので今回はその逆をやってみる。HDFSにインプットデータを用意して、それをMapReduceで処理後CassandraのColumn Familyにプッシュしてみる</p>
-<h2 id="section-1">Hadoop側の設定</h2>
+<h3 id="section-1">Hadoop側の設定</h3>
 <p>適当に</p>
-
 <pre>
 hoge
 fuga
@@ -103,12 +102,13 @@ hoge
 hoge
 </pre>
 
+
 <p>なデータ(data/data.txt)をinputとしてプッシュしておく</p>
 <pre class="line-numbers"><code class="language-sh">hadoop fs -put data input
-</code></pre><h2 id="section-2">Cassandra側の設定</h2>
+</code></pre><h3 id="section-2">Cassandra側の設定</h3>
 <p>Outputする側のColumn Familyを作っておく</p>
 <pre class="line-numbers"><code class="language-">create column family Outputs with default_validation_class = UTF8Type and key_validation_class = UTF8Type and comparator = UTF8Type
-</code></pre><h2 id="section-3">HadoopClient2.java</h2><pre class="line-numbers"><code class="language-java">package sample;
+</code></pre><h3 id="section-3">HadoopClient2.java</h3><pre class="line-numbers"><code class="language-java">package sample;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -172,7 +172,7 @@ public class HadoopClient2 extends Configured implements Tool {
 <p>今回はCassandraのデータを読み込まないで、アウトプット先がCassandraなのでConfigHelper.setOutputColumnFamilyで設定。でsetPartitionerは設定しておく必要がある(TokenRing関係っぽい) 。あとsetOutputFormatClass(ColumnFamilyOutputFormat.class)も</p>
 
 <p>であとはSampleMapperとSampleCassandraReducerを作る</p>
-<h2 id="section-4">SampleMapper.java</h2><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
+<h3 id="section-4">SampleMapper.java</h3><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
 
@@ -188,7 +188,7 @@ public class SampleMapper extends Mapper&lt;LongWritable, Text, Text, IntWritabl
         ctx.write(value, new IntWritable(1));
     }
 }
-</code></pre><h2 id="section-5">SampleCassandraReducer.java</h2><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
+</code></pre><h3 id="section-5">SampleCassandraReducer.java</h3><pre class="line-numbers"><code class="language-java">package sample.mapreduce;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -541,9 +541,7 @@ list Outputs; # MapReduceで処理された結果一覧が出る
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

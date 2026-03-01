@@ -91,7 +91,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>CSRF関係のAPIも存在するのでそれを利用すれば良い模様。あくまでFuelPHP APIの話なだけですので</p>
-<h2 id="section-1">fuel/app/views/home.php</h2><pre class="line-numbers"><code class="language-php">&lt;html&gt;
+<h3 id="section-1">fuel/app/views/home.php</h3><pre class="line-numbers"><code class="language-php">&lt;html&gt;
   &lt;body&gt;
     &lt;form action=&quot;/&quot; method=&quot;POST&quot;&gt;
       &lt;input type=&quot;hidden&quot; name=&quot;&lt;?php echo Config::get(&quot;security.csrf_token_key&quot;) ?&gt;&quot; value=&quot;&lt;?php echo Security::fetch_token() ?&gt;&quot; /&gt;
@@ -101,7 +101,7 @@
 &lt;/html&gt;
 </code></pre>
 <p>Security::fetch_tokenを使ってCSRFに使うワンタイムトークンのような物を生成出来る模様。んでCSRFチェックを行う際にSecurityクラスで使うメソッドがConfig::get(&quot;security.csrf_token_key&quot;)を参照してポストされたトークンを取得すると思われるのでそれを確認しておく(デフォルトはfuel_csrf_token)。まぁ要はキー名ってだけなんだけど</p>
-<h2 id="section-2">fuel/app/classes/controller/home.php</h2><pre class="line-numbers"><code class="language-php">&lt;?php
+<h3 id="section-2">fuel/app/classes/controller/home.php</h3><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Controller_Home extends Controller {
     public function get_index() {
@@ -124,7 +124,7 @@ class Controller_Home extends Controller {
 <p>でhiddenを設定しない、もしくは別の領域からポストされている場合には送信元認証がされてない事によりCSRFチェックはfailする</p>
 
 <p>っていう感じでしょうかね。んじゃこのコントローラーのテストケースを書くには</p>
-<h2 id="section-3">fuel/app/tests/controller/home_test.php</h2><pre class="line-numbers"><code class="language-php">&lt;?php
+<h3 id="section-3">fuel/app/tests/controller/home_test.php</h3><pre class="line-numbers"><code class="language-php">&lt;?php
 
 class Test_Controller_Home extends TestCase {
     public function test_post_index() {
@@ -150,7 +150,7 @@ class Test_Controller_Home extends TestCase {
 <p>っていう感じじゃないですかね。CurlドライバーなRequestクラスを使い、クッキーにfetch_tokenした結果をぶち込んでおく。んでPOSTする際にも同じトークンをぶち込む(ここの値を変えるとCSRFチェックがfailする)</p>
 
 <p>な感じですかねと。ぶっちゃけこれ気休め程度にしかならないんじゃないのかっていう疑問もちょっとあるんですが</p>
-<h2 id="section-4">備考1: JavaScript用のCSRFトークン機能に関して</h2>
+<h3 id="section-4">備考1: JavaScript用のCSRFトークン機能に関して</h3>
 <p>Security::js_fetch_tokenを使うとJavaScriptで利用する用のCSRFトークンを取得する関数が定義されるのですが、これを使うと</p>
 <pre class="line-numbers"><code class="language-js">function fuel_csrf_token() {
     if (document.cookie.length &gt; 0) {
@@ -490,9 +490,7 @@ return array(
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

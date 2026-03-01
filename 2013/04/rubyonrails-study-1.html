@@ -108,7 +108,7 @@
 <p><img src="/images/2013/04/20130423111524.jpg" alt="image" /></p>
 
 <p>んな感じで</p>
-<h2 id="section-1">app/models/category.rb</h2><pre class="line-numbers"><code class="language-rb">class Category &lt; ActiveRecord::Base
+<h3 id="section-1">app/models/category.rb</h3><pre class="line-numbers"><code class="language-rb">class Category &lt; ActiveRecord::Base
   has_and_belongs_to_many :entry, :join_table =&gt; &quot;entry_category&quot;
   has_many :sub_category, :class_name =&gt; &quot;Category&quot;, :foreign_key =&gt; &quot;parent&quot;
   belongs_to :parent_category, :class_name =&gt; &quot;Category&quot;, :foreign_key =&gt; &quot;parent&quot;
@@ -119,7 +119,6 @@
 end
 </code></pre>
 <p>上記仕様な画像中には書かれて無いけど、Categoryにはparentっていうカラムでカテゴリー自体が参照する親カテゴリーなIDを持つ。それをhas_manyしてサブカテゴリーを参照できるように。例的に「Category.find(ID).sub_category」すると</p>
-
 <pre>
 [
   #&lt;Category id: 5, name: "JavaScript", parent: 15, sort: 2>,
@@ -131,18 +130,19 @@ end
 ]
 </pre>
 
+
 <p>な感じでカテゴリーが持つ子カテゴリーを参照できるようにと。sortはやつは今回は無視</p>
 
 <p>で更にbelongs_toでもってカテゴリーが参照されている親カテゴリーを認識出来るように。こちらも例的に「Category.find(ID).parent_category」をすると(上記でID=5は親が15になっているので)</p>
-
 <pre>
 #&lt;Category id: 15, name: "その他", parent: 0, sort: 8>
 </pre>
 
+
 <p>というように親カテゴリの参照が取れる。無ければnil</p>
 
 <p>まぁ今回そこまったく使ってないのであくまで余談的なネタとして</p>
-<h2 id="section-2">app/models/entry.rb</h2><pre class="line-numbers"><code class="language-rb">class Entry &lt; ActiveRecord::Base
+<h3 id="section-2">app/models/entry.rb</h3><pre class="line-numbers"><code class="language-rb">class Entry &lt; ActiveRecord::Base
   has_and_belongs_to_many :category, :join_table =&gt; &quot;entry_category&quot;
   default_scope :order =&gt; &quot;created_at DESC&quot;
   attr_accessible :title, :content, :category
@@ -169,7 +169,7 @@ end
 end
 </code></pre>
 <p>categoryに代入な辺りで文字列をカンマ区切りでスプリットして、それからCategoryな参照を取得する処理を突っ込む。で更新する際に再構築しないと重複する部分が出てきてしまうので、clearする事で中間参照なデータを消せる模様。それを利用して、削除する際にも中間参照なデータをclearで消すっていう感じかと</p>
-<h2 id="section-3">app/controllers/entry_controller.rb</h2><pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
+<h3 id="section-3">app/controllers/entry_controller.rb</h3><pre class="line-numbers"><code class="language-rb">class EntryController &lt; ApplicationController
 
   def index
     @entries = Entry.all(:limit =&gt; 10)
@@ -519,9 +519,7 @@ end
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

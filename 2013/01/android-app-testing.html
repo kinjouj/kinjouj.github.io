@@ -91,7 +91,7 @@
               </p>
               <div class="post-content fs-6 text-break my-4">
                 <p>色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く</p>
-<h2 id="section-1">前提</h2>
+<h3 id="section-1">前提</h3>
 <p>アプリとテストはプロジェクトを分ける。テストプロジェクトはアプリプロジェクトを参照として設定する(普通にADT使えば特にやる必要ない。テストプロジェクト作成段階で設定される)</p>
 
 <p>で以下もテストプロジェクト作成段階で設定されるので必要ないけど</p>
@@ -116,7 +116,7 @@
 <p>あとはクラス書きつつテストケースを書く感じ。でテストを対象とするクラスはアプリプロジェクト、テストケースはテストプロジェクトに書く。でテストケースの方式はJUnit4方式じゃなくてJUnit3方式</p>
 
 <p>あとテストプロジェクトのアプリもしっかり端末に入るので(ry</p>
-<h2 id="section-2">ApplicationTestCase</h2>
+<h3 id="section-2">ApplicationTestCase</h3>
 <p>android.app.Applicationを拡張して使用する場合、ApplicationTestCaseを使えばAndroid JUnitでテスト出来る。例えば以下のようなApplicationクラスを継承したクラスがあった場合</p>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
@@ -157,7 +157,7 @@ public class MainApplicationTestCase extends ApplicationTestCase&lt;MainApplicat
 }
 </code></pre>
 <p>な感じでテスト出来る</p>
-<h2 id="section-3">AndroidTestCase</h2>
+<h3 id="section-3">AndroidTestCase</h3>
 <p>AndroidのContextに依存するようなクラスをテストするケースにおいてはAndroidTestCaseを使えば良い模様。</p>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
@@ -172,7 +172,7 @@ public class MainAndroidTestCase extends AndroidTestCase {
 }
 </code></pre>
 <p>で、同様な例としてBroadcastReceiverをテストする場合等でもAndroidTestCaseを使えば出来なくもない。それは<a href="/2012/01/android-broadcastreceiver-testing-androidtestcase.html">以前に書いた</a>ので省略</p>
-<h2 id="section-4">ServiceTestCase</h2>
+<h3 id="section-4">ServiceTestCase</h3>
 <p>android.app.Serviceをテストする目的で使用。とりあえずてきとーに</p>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
@@ -265,7 +265,7 @@ public class SampleServiceTestCase extends ServiceTestCase&lt;SampleService&gt; 
 <p>テストする場合にはアプリ側に&lt;service&gt;で設定しておかなくても良い模様。又、タイミング処理をする場合にはフラグ等を持たせておいて完了するまで処理をThread.sleepさせておく、んでデータをチェックしたりすれば良いんじゃないかなーっと</p>
 
 <p>例えば一定時間で変わるLive Wallpaperのような場合だとサービスをstartさせてから一定時間変わったら表示されている現在のandroid.graphics.Bitmap?とかをチェックするとか。んまぁ要件によりきりかなと</p>
-<h2 id="section-5">ProviderTestCase2</h2><pre class="line-numbers"><code class="language-java">package sample.test;
+<h3 id="section-5">ProviderTestCase2</h3><pre class="line-numbers"><code class="language-java">package sample.test;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -355,9 +355,9 @@ public class SampleProviderTestCase extends ProviderTestCase2&lt;SampleProvider&
 }
 </code></pre>
 <p>な感じでProviderTestCase2を継承してgetProviderでProviderクラスの実体クラスが取得できてテスト出来る模様。ただ気になるのがコンストラクタの第2引数のプロバイダーのAuthorityがなぜ必要なのかっていう所。空にしてもテストコケないし... 謎なので分かり次第追記する</p>
-<h2 id="section-6">LoaderTestCase</h2>
+<h3 id="section-6">LoaderTestCase</h3>
 <p><a href="/2011/12/android-loader-testing-loadertestcase.html">以前に検証した</a>ので省略</p>
-<h2 id="section-7">ActivityUnitTestCase</h2>
+<h3 id="section-7">ActivityUnitTestCase</h3>
 <p>アクティビティ操作をテスト出来るクラスな模様</p>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
@@ -482,7 +482,7 @@ public class MainActivityTestCase extends ActivityUnitTestCase&lt;MainActivity&g
 }
 </code></pre>
 <p>アクティビティは自動自動等しない模様なのでstartActivityで起動。んでsetApplicationで使用するApplicationクラスを指定出来る。でcallAcvitityOnStartでOnStartを発生させて、runOnUiThreadを使ってボタンをクリックしたり等の操作を行い、waitForIdelSyncで操作が完了するのを待つっていう感じかと</p>
-<h2 id="section-8">ActivityInstrumentationTestCase2</h2>
+<h3 id="section-8">ActivityInstrumentationTestCase2</h3>
 <p>ActivityUnitTestCaseを使わずにAndroidManifest.xmlに沿った形式でAcvitityテストを行うにはこれでも出来る。ActivityUnitTestCaseで使ったAcvitityをそのままAcitvityInstrumentationTestCase2に移行させる場合には以下のような感じ</p>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
@@ -539,7 +539,7 @@ public class MainActivityTestCase extends ActivityInstrumentationTestCase2&lt;Ma
         assertEquals(0, adapter.getCount());
     }
 }
-</code></pre><h2 id="section-9">SingleLaunchActivityTestCase</h2>
+</code></pre><h3 id="section-9">SingleLaunchActivityTestCase</h3>
 <p>恐らくは上記のActivityテストの場合であるとテスト毎にActivityが初期化される。でテストで実行したアクティビティの状態を維持させたい場合には一度しか初期化されない模様</p>
 <pre class="line-numbers"><code class="language-java">package sample.test;
 
@@ -931,9 +931,7 @@ public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainAc
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>

@@ -121,7 +121,6 @@ public class SampleTest {
 }
 </code></pre>
 <p>なんていうテストを普通にぶちかますと</p>
-
 <pre>
 org.mockito.exceptions.base.MockitoException:
 Cannot mock/spy class sample.Sample
@@ -130,6 +129,7 @@ Mockito cannot mock/spy following:
   - anonymous classes
   - primitive types
 </pre>
+
 
 <p>っていうようにfinalクラスはモック化出来ねーよって怒られる訳ですが。で前回だと独自のクラスローダーを利用してjavassistを使ってfinal modifierを消したクラスバイトコードを動的にロードするっていう方式だったんですが、これだとこのクラスローダーからロードしないといけないとかめんどくさいよねっていう事で色々調べつつやってみた。無論上記のコードでテストは一切書き換えないっていう条件付き</p>
 
@@ -142,7 +142,7 @@ public @interface FinalMock {
 <p>なアノテーションインターフェースを作ってSampleクラスにこのアノテーションを付与しておく</p>
 
 <p>あとはクラスロードな仕組み辺りでこのアノテーションが付与されてるのだけfinal modifierを消して動的にロードするっていう方式を採用する</p>
-<h2 id="section-1">ClassFileTransformerを実装したクラスを作る</h2>
+<h3 id="section-1">ClassFileTransformerを実装したクラスを作る</h3>
 <p>簡単に言うと-javaagentな仕組みを使ってクラスからfinal modifierを消してロードするっていう仕組みを作るだけ</p>
 <pre class="line-numbers"><code class="language-java">import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
@@ -211,12 +211,12 @@ Premain-Class: JavaAgent
 <p>を定義して、上記のJavaAgentクラスとSampleClassTransformerクラスをぶち込んでjar化する</p>
 
 <p>終わり。あとは実行時に-javaagent:sample.jar(作成したjarファイル)でテストを実行すると</p>
-
 <pre>
 java.lang.AssertionError:
 Expected: is "hoge fuga foobar"
      but: was "hoge"
 </pre>
+
 
 <p>っていうように「when(sample.say()).thenReturn(&quot;hoge&quot;)」としているのでまぁどっちにしろテストは成功しないけど、モック化してメソッドが返す値をfinalクラスでもぶち込んだり出来るっていう訳</p>
 
@@ -526,9 +526,7 @@ Expected: is "hoge fuga foobar"
         </aside>
       </div>
     </div>
-    <footer class="text-center mt-5 py-5">
-      Powered by simpress(octopress like site generator)
-    </footer>
+    <footer class="text-center mt-5 py-5">Powered by simpress(octopress like site generator)</footer>
     <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
       <i class="fas fa-arrow-up"></i>
     </a>
