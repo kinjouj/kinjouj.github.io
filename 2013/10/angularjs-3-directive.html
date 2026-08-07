@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="&lt;http://docs.angularjs.org/guide/directive&gt; を読みつつドキュメント読みを遂行してみる" />
+    <meta property="og:title" content="angular.jsをやってみる (3) - directive -" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/10/angularjs-3-directive.html">
+    <title>angular.jsをやってみる (3) - directive - - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/10/angularjs-3-directive.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "angular.jsをやってみる (3) - directive -",
+  "datePublished": "2013-10-26T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "\u003chttp://docs.angularjs.org/guide/directive\u003e を読みつつドキュメント読みを遂行してみる"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/10">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">10</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">26</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">angular.jsをやってみる (3) - directive -</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/angular-dot-js" class="fs-5">angular.js</a>
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p><a href="http://docs.angularjs.org/guide/directive" target="_blank" rel="noopener">http://docs.angularjs.org/guide/directive</a> を読みつつドキュメント読みを遂行してみる</p>
+<h3 id="section-1">directive</h3><pre class="line-numbers"><code class="language-html">&lt;span alert&gt;alert!!&lt;/span&gt;
+</code></pre>
+<p>的だったり</p>
+<pre class="line-numbers"><code class="language-html">&lt;pane&gt;alert!!&lt;/pane&gt;
+</code></pre>
+<p>っていうようなタグ(エレメント)で定義したりした場合にangularによるコンパイルを行なって動的な処理を組み込む的な事をサポートする機能みたいな物っぽい。</p>
+<h3 id="section-2">app.html</h3><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src=&quot;http://code.angularjs.org/1.0.8/angular.js&quot;&gt;&lt;/script&gt;
+    &lt;!-- SampleController --&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;sample.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div ng-controller=&quot;sample1&quot;&gt;
+      &lt;input type=&quot;text&quot; ng-model=&quot;name&quot;/&gt;
+      &lt;ul class=&quot;entries&quot;&gt;
+        &lt;li ng-repeat=&quot;sample in samples | filter:name&quot;&gt;
+          &lt;!-- alertっていう属性をangular.directiveで処理してclickイベントを登録して処理するようにする --&gt;
+          &lt;span ng-bind-template=&quot;text: {% raw %}{{sample.text}}{% endraw %}&quot; alert&gt;&lt;/span&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;app.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>コメントで書いてる通りなので</p>
+<h3 id="section-3">sample.js</h3><pre class="line-numbers"><code class="language-js">var SampleController = (function () {
+  function SampleController($scope) {
+    $scope.samples = [
+      { id: 1, text: &quot;hoge&quot; },
+      { id: 2, text: &quot;fuga&quot; },
+      { id: 3, text: &quot;foobar&quot; }
+    ];
+
+    $scope.doClick = function(attr) {
+      if (&quot;ngBindTemplate&quot; in attr) alert(attr.ngBindTemplate);
+    };
+  }
+
+  return SampleController;
+})();
+</code></pre>
+<p>ただdoClickメソッドを生やしただけ</p>
+<h3 id="section-4">app.js</h3><pre class="line-numbers"><code class="language-js">angular.element(document).ready(function() {
+  var app = angular.module(&quot;hogeApp&quot;, []);
+  app.controller(&quot;sample1&quot;, SampleController);
+
+  app.directive(
+    &quot;alert&quot;,
+    function() {
+      return function(scope, element, attr) {
+        element.bind(&quot;click&quot;, function() { scope.doClick(attr); });
+      };
+    }
+  );
+
+  angular.bootstrap(document, [&quot;hogeApp&quot;]);
+});
+</code></pre>
+<p>単にapp(angular).directiveでdirective名とそれを利用した際に発生する第2引数なコールバックにて関数を返す事でそのエレメントに処理を追加したりスコープやらにごちゃごちゃと出来るっていう</p>
+
+<p>この場合だと&lt;span ng-bind-template=&quot;text: {% raw %}{{sample.text}}{% endraw %}&quot; alert&gt;&lt;/span&gt;っていうようなエレメントにclickイベントを登録して、クリックした際にscopeにあるdoClickを呼び出すっていう事を処理しているだけ</p>
+
+<p>でangular.directiveの第2引数から返せる値は関数であるかオブジェクトであるかを指定出来る。上記では関数を返したけどオブジェクトの場合(別途なdirective)には</p>
+<pre class="line-numbers"><code class="language-js">angular.element(document).ready(function() {
+  var app = angular.module(&quot;hogeApp&quot;, []);
+  app.controller(&quot;sample1&quot;, SampleController);
+
+  app.directive(
+    &quot;pane&quot;,
+    function() {
+      return {
+        // restrictはEACMの文字を指定する。組み合わせても問題無い、デフォルトはAでAttributeのみ(後術している所参照)
+        restrict: &quot;E&quot;,
+
+        scope: { &quot;text&quot;: &quot;@&quot; },
+
+        // このdirectiveを使用するにあたって別途なdirectiveが必要な場合にはrequireに指定すれば良い。例えばng-modelが必要ならngModelを指定する等
+
+        require: [],
+
+        //template: &quot;&lt;span&gt;{% raw %}{{text}}{% endraw %}&lt;/span&gt;&quot;,
+
+        // templateとして使用するURLを指定XHRで取得される
+        templateUrl: &quot;template.html&quot;,
+
+        // デフォルトはfalse。trueにすると元なエレメントを書き換えされる模様
+        replace: true,
+
+        controller: function($scope, $element, $attrs, $transclude) {
+          if (!(&quot;$parent&quot; in $scope))
+            return;
+
+          var parent = $scope.$parent;
+
+          if (!(&quot;sample&quot; in parent))
+            return;
+
+          var sample = parent.sample;
+
+          if (!(&quot;id&quot; in sample))
+            return;
+
+          $scope.dataId = sample.id;
+        },
+
+        compile: function(tElement, tAttrs, trasclude) {
+          /* postLinkのみであればそのままFucntionを返せば良い
+          return function(scope, element, attrs, controller) {
+            element.css(&quot;color&quot;, &quot;blue&quot;);
+          };
+          */
+
+          return {
+            // preを定義している場合にdirectiveから返すオブジェクトにrequireパラメータが設定されてないとエラーが起きる
+            pre: function(scope, element, attr, ngModels) {
+              element.css(&quot;color&quot;, &quot;red&quot;);
+            },
+            post: function(scope, element, attr, controller) {
+              element.attr(&quot;data-id&quot;, scope.dataId);
+            }
+          };
+        },
+
+        // compileが定義されていると作用しない。これはドキュメントに「This property is used only if the compile property is not defined.」と明記されている
+        link: function(scope, element, attr, controller) {
+          element.css(&quot;color&quot;, &quot;red&quot;);
+          element.attr(&quot;data-id&quot;, scope.dataId);
+        }
+      };
+    }
+  );
+
+  angular.bootstrap(document, [&quot;hogeApp&quot;]);
+});
+</code></pre>
+<p>っていうような感じかと。で先程関数を返した場合には</p>
+<pre class="line-numbers"><code class="language-js">app.directive(&quot;alert&quot;, function() {
+  return {
+    link: function(scope, element, attr, controller) {
+      // 省略
+    }
+  }
+});
+</code></pre>
+<p>的な事をしているのと同じかと。んで更に上記コード中にも書いてるけどrestrictに関しては</p>
+
+<ul>
+<li>  E: Element</li>
+<li>  A: Attribute</li>
+<li>  C: Class</li>
+<li>  M: Comment</li>
+</ul>
+
+<p>で指定出来る。デフォルトは書いてる通りAなので、関数を返した場合にはデフォルトのAが使われて結果E方式なdirectiveは使用できないんじゃないかと。そこに伴うソースをまだ追えていないので憶測ですが</p>
+
+<p>で上記のdirectiveだと</p>
+<pre class="line-numbers"><code class="language-html">&lt;pane text=&quot;{% raw %}{{sample.text}}{% endraw %}&quot;&gt;&lt;/pane&gt;
+</code></pre>
+<p>的に利用できる。で上記ではtemplateUrlを指定しているが内容はコメントアウトしているtemplate属性と同じ。でコンパイル後には</p>
+<pre class="line-numbers"><code class="language-html">&lt;span text=&quot;...&quot; ng-model=&quot;name&quot; class=&quot;ng-pristine ng-valid ng-binding&quot; data-id=&quot;5&quot; style=&quot;color: red;&quot;&gt;...&lt;/span&gt;
+</code></pre>
+<p>的な感じでコンパイルされる。&lt;pane&gt;のtext属性はscope属性で指定している通りにscopeに格納されて利用できたはず(忘れた)。@や&amp;とか=で指定出来る。後術しているリファレンスを見た方が良いかと</p>
+
+<p>んまぁこのオブジェクト形式で返せる値の属性に関する件は<a href="http://docs.angularjs.org/api/ng.$compile" target="_blank" rel="noopener">ng.$compile</a>に書かれているので、困ったらこれ読めば良いはずなので(ry</p>
+
+<p>若干微妙な所もあるので色々追記・修正するかも</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">directive</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">app.html</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">sample.js</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">app.js</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/10/angularjs-1.html" class="d-block p-2">angular.jsをやってみる (1)</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/07/scope-eval-arguments.html" class="d-block p-2">scope.$evalで引数を設定する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/07/angularjs-ng-init-func-evaluate.html" class="d-block p-2">angular.jsでng-initのような式評価を使う</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/07/angularjs-ng-directive-scope.html" class="d-block p-2">ng-directiveのscope</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/07/angularjs-directive-multielement.html" class="d-block p-2">directiveのmultiElement</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/10/supervisord-1.html" rel="prev">&lt;&nbsp;supervisord (1)</a>
+              <a href="/2013/10/angularjs-protractor-e2e-testing.html" rel="next">protractorを使ったangular.jsのe2eテスト&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

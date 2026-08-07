@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Google Analytics APIからアクセスデータを取得し、それを &lt;http://www.jqplot.com&gt; を使ってバーチャートとラインチャートをレンダリングしてみた" />
+    <meta property="og:title" content="jqplot" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2012/09/jqplot.html">
+    <title>jqplot - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2012/09/jqplot.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "jqplot",
+  "datePublished": "2012-09-17T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "Google Analytics APIからアクセスデータを取得し、それを \u003chttp://www.jqplot.com\u003e を使ってバーチャートとラインチャートをレンダリングしてみた"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2012/09">
+                  <span class="post-date-year">2012</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">9</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">17</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">jqplot</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>Google Analytics APIからアクセスデータを取得し、それを <a href="http://www.jqplot.com" target="_blank" rel="noopener">http://www.jqplot.com</a> を使ってバーチャートとラインチャートをレンダリングしてみた</p>
+<h3 id="section-1">その前に</h3>
+<p>Google Analytics APIなどから取得したデータをJSONとして出力出来るようにしておく。ざっくりとしたJSONデータ構造がこんな感じ</p>
+
+<p><img src="/images/2012/09/20120917003653.png" alt="image" /></p>
+
+<p>んまぁ一ヶ月間のアクセスデータのうち、ga:pagePathが^/entryなのだけをフィルタリングして取得する。カウントなどの処理はJavaScript側で行う(yearなどはga:yearをdimensionsに指定すれば取得可能)</p>
+<h3 id="section-2">準備</h3>
+<p><a href="http://www.jqplot.com" target="_blank" rel="noopener">http://www.jqplot.com</a> からダウンロードしてくる。んで展開したディレクトリ内にある</p>
+
+<ul>
+<li>  jqplot.js</li>
+<li>  jqplot.cs</li>
+<li>  plugins/jqplot.barRenderer.js</li>
+<li>  plugins/jqplot.categoryAxisRenderer.js</li>
+<li>  plugins/jqplot.pointLabels.js</li>
+<li>  plugins/jqplot.highlighter.js</li>
+</ul>
+
+<p>をコピる、もしくは展開ディレクトリをそのまま移す。今回は上記のファイルのみ使う。当たり前だけど、jQuery本体は(ry</p>
+<h3 id="section-3">report.html</h3><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+
+    &lt;script type=&quot;text/javascript&quot; src=&quot;/static/jquery.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;/static/jqplot.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;/static/jqplot.barRenderer.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;/static/jqplot.categoryAxisRenderer.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;/static/jqplot.pointLabels.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;/static/jqplot.highlighter.js&quot;&gt;&lt;/script&gt;
+    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;/static/jqplot.css&quot; /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;chart&quot; style=&quot;margin: auto;width: 500px; height: 500px&quot;&gt;&lt;/div&gt;
+
+    &lt;script type=&quot;text/javascript&quot;&gt;
+(function(undefined) {
+  $.getJSON(&quot;/report&quot;, function(results) {
+    var report = {};
+
+    results.forEach(function(result) {
+      var date = new Date(result.year, result.month, result.day);
+
+      if (date.getTime() in report) {
+        report[date.getTime()][&quot;count&quot;]++;
+      } else {
+        report[date.getTime()] = result;
+      }
+    });
+
+    var ticks = new Array; // xaxisに表示するラベル
+    var reports = new Array; // レンダリングするデータ
+
+    for (var key in report) {
+      ticks.push(String(report[key][&quot;day&quot;]));
+      reports.push(report[key][&quot;count&quot;]);
+    }
+
+    $.jqplot(&quot;chart&quot;, [reports, reports], {
+      &quot;title&quot;: &quot;はてなブログ アクセス統計&quot;,
+      &quot;series&quot;: [
+        {
+          &quot;renderer&quot;: $.jqplot.BarRenderer,
+          &quot;rendererOptions&quot;: {
+            &quot;barWidth&quot;: 15
+          }
+        },
+        {
+          &quot;pointLabels&quot;: {
+            &quot;show&quot;: true,
+            &quot;formatString&quot;: &quot;%d&quot; // これをしないとyaxisでのformatStringと同等なフォーマットになる模様
+          }
+        }
+      ],
+      &quot;axes&quot;: {
+        &quot;xaxis&quot;: {
+          &quot;renderer&quot;: $.jqplot.CategoryAxisRenderer,
+          &quot;ticks&quot;: ticks
+        },
+        &quot;yaxis&quot;: {
+          &quot;pad&quot;: 1.05,
+          &quot;max&quot;: 50,
+          &quot;tickOptions&quot;: {
+            &quot;formatString&quot;: &quot;%dpt&quot;
+          }
+        }
+      },
+      &quot;highlighter&quot;: {
+        &quot;show&quot;: true,
+        &quot;tooltipAxes&quot;: &quot;y&quot;
+      }
+    });
+  });
+})();
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>pointLabels.showをtrueにすると、デフォルトでチャートのポイントな部分に値が表示される。highlighter.showをtrueにするとチャートがマウスでフォーカスされた際に値を表示する事も出来る。その際に表示されるデータがtooltipAxesで指定する。yだとyaxisなデータ、xだとxaxisなデータになる</p>
+
+<p>でちょっと判明はしてないんですが、例えば今回はチャートを2つ(棒と線)出すのですが、ひとつのデータで2つのチャートを出す方法が見つからなかった。なので今回では同じデータを$.plotの引数で2つ渡して、それをseries側でレンダリングする方式を設定している。例えば上記の場合だと1つ目は棒チャートで、2つ目がデフォルト(だと思われる)な線チャートを出してる</p>
+
+<p>んまぁそんな感じでやると</p>
+
+<p><img src="/images/2012/09/20120917010510.png" alt="image" /></p>
+<h3 id="section-4">追記</h3>
+<p>$.jqplotでlegendを指定する事でLegend(凡例)を出せるが、凡例が少なくても(1以上の場合で)凡例が縦に並ぶので、それを横にしたい場合には</p>
+<pre class="line-numbers"><code class="language-js">(function(undefined) {
+  $.getJSON(&quot;/report&quot;, function(results) {
+    var report = {};
+
+    results.forEach(function(result) {
+      var date = new Date(result.year, result.month, result.day);
+
+      if (date.getTime() in report) {
+        report[date.getTime()][&quot;count&quot;]++;
+      } else {
+        report[date.getTime()] = result;
+      }
+    });
+
+    var ticks = new Array; // xaxisに表示するラベル
+    var reports = new Array; // レンダリングするデータ
+
+    for (var key in report) {
+      ticks.push(String(report[key][&quot;day&quot;]));
+      reports.push(report[key][&quot;count&quot;]);
+    }
+
+    $.jqplot(&quot;chart&quot;, [reports, reports], {
+      &quot;title&quot;: &quot;はてなブログ アクセス統計&quot;,
+      &quot;series&quot;: [
+        {
+          &quot;label&quot;: &quot;棒グラフ&quot;,
+          &quot;renderer&quot;: $.jqplot.BarRenderer,
+          &quot;rendererOptions&quot;: {
+            &quot;barWidth&quot;: 15,
+            &quot;highlightMouseDown&quot;: false
+          }
+        },
+        {
+          &quot;label&quot;: &quot;線グラフ&quot;,
+          &quot;pointLabels&quot;: {
+            &quot;show&quot;: true,
+            &quot;formatString&quot;: &quot;%d&quot;
+          }
+        }
+      ],
+      // 追加
+      &quot;legend&quot;: {
+        &quot;renderer&quot;: $.jqplot.EnhancedLegendRenderer, // EnhancedLegendRendererでレンダリングする
+        &quot;show&quot;: true,
+        &quot;location&quot;: &quot;s&quot;, // 場所はsouth
+        &quot;placement&quot;: &quot;outsideGrid&quot;, // チャートレンダリング内ではない領域にレンダリング
+        &quot;rendererOptions&quot;: {
+          &quot;numberRows&quot;: 1 // 凡例をレンダリングする行数を指定。この場合1行で表現される
+        }
+      },
+      &quot;axes&quot;: {
+        &quot;xaxis&quot;: {
+          &quot;renderer&quot;: $.jqplot.CategoryAxisRenderer,
+          &quot;ticks&quot;: ticks
+        },
+        &quot;yaxis&quot;: {
+          &quot;min&quot;: 0,
+          &quot;max&quot;: 50,
+          &quot;tickOptions&quot;: {
+            &quot;formatString&quot;: &quot;%d件&quot;
+          }
+        }
+      },
+      &quot;highlighter&quot;: {
+        &quot;show&quot;: true,
+        &quot;tooltipAxes&quot;: &quot;y&quot;
+      }
+    });
+  });
+})();
+</code></pre>
+<p>な感じ。別途jqplot.enhancedLegendRenderer.jsを読み込んでおく必要がある</p>
+<h3 id="section-5">追記</h3>
+<p>上記のenhancedLegendRenderer.jsを使ったパターンをちょっと修正してスクリーンショットを取った</p>
+<pre class="line-numbers"><code class="language-js">(function(undefined) {
+  /*
+  データの取得結果は
+  [
+    { year: &quot;2015&quot;, &quot;month&quot;: 06&quot;, &quot;count&quot;: 100
+  ]
+  のように月別でカウント総計が出るようなデータを利用
+  */
+  $.getJSON(&quot;/report.json&quot;, function(results) {
+    var ticks = new Array; // xaxisに表示するラベル
+    var reports = new Array; // レンダリングするデータ
+
+    results.forEach(function(result) {
+      ticks.push(result[&quot;year&quot;] + &quot;/&quot; + result[&quot;month&quot;]);
+      reports.push(result[&quot;count&quot;]);
+    });
+
+    var max = Math.max.apply(null, reports);
+    var len = parseInt(&quot;1&quot; + Array(max.toString(10).length).join(&#39;0&#39;));
+
+    $.jqplot(&quot;chart&quot;, [reports, reports], {
+      &quot;series&quot;: [
+        {
+          &quot;label&quot;: &quot;棒グラフ&quot;,
+          &quot;renderer&quot;: $.jqplot.BarRenderer,
+          &quot;rendererOptions&quot;: {
+            &quot;barWidth&quot;: 15,
+            &quot;highlightMouseDown&quot;: false
+          }
+        },
+        {
+          &quot;label&quot;: &quot;線グラフ&quot;,
+          &quot;pointLabels&quot;: {
+            &quot;show&quot;: true,
+            &quot;formatString&quot;: &quot;%d&quot;
+          }
+        }
+      ],
+      // 追加
+      &quot;legend&quot;: {
+        &quot;renderer&quot;: $.jqplot.EnhancedLegendRenderer, // EnhancedLegendRendererでレンダリングする
+        &quot;show&quot;: true,
+        &quot;location&quot;: &quot;s&quot;, // 場所はsouth
+        &quot;placement&quot;: &quot;outsideGrid&quot;, // チャートレンダリング内ではない領域にレンダリング
+        &quot;rendererOptions&quot;: {
+          &quot;numberRows&quot;: 1 // 凡例をレンダリングする行数を指定。この場合1行で表現される
+        }
+      },
+      &quot;axes&quot;: {
+        &quot;xaxis&quot;: {
+          &quot;renderer&quot;: $.jqplot.CategoryAxisRenderer,
+          &quot;ticks&quot;: ticks
+        },
+        &quot;yaxis&quot;: {
+          &quot;min&quot;: 0,
+          &quot;max&quot;: Math.ceil(max / len) * len,
+          &quot;tickOptions&quot;: {
+            &quot;formatString&quot;: &quot;%d件&quot;
+          }
+        }
+      },
+      &quot;highlighter&quot;: {
+        &quot;show&quot;: true,
+        &quot;tooltipAxes&quot;: &quot;y&quot;
+      }
+    });
+  });
+})();
+</code></pre>
+<p>実行すると以下のようになる</p>
+
+<p><img src="/images/2015/06/201506032220.jpg" alt="image" /></p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">その前に</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">準備</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">report.html</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">追記</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">追記</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2012/09/google-api-client-library-for-javascript-analytics-api.html" class="d-block p-2">Google API Client Library for JavaScriptを使ってAnalytics APIに接続するメモ</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/03/backgrid.html" class="d-block p-2">Backgridを試してみる</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/09/google-api-client-library-for-javascript-2-dimensions-and-metrics.html" class="d-block p-2">Google API Client Library for JavaScriptを使ってAnalytics APIに接続するメモ (2) - dimensionsとかmetricsとか -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/03/mocha-phantomjs-jscoverage.html" class="d-block p-2">mocha-phantomjs+jscoverageでコードカバレッジ出力</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/07/chrome-extension-6.html" class="d-block p-2">Chrome Extension開発を勉強してみる (6) - Page Action -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2012/09/cassandra-jmx.html" rel="prev">&lt;&nbsp;CassandraのJMX</a>
+              <a href="/2012/09/beanstalk.html" rel="next">beanstalkを使ってみる&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

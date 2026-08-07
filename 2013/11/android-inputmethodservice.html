@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをやってた。とりあえず書いておこうかと" />
+    <meta property="og:title" content="InputMethodServiceを使ってIMを作るメモ" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/11/android-inputmethodservice.html">
+    <title>InputMethodServiceを使ってIMを作るメモ - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/11/android-inputmethodservice.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "InputMethodServiceを使ってIMを作るメモ",
+  "datePublished": "2013-11-06T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをやってた。とりあえず書いておこうかと"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/11">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">11</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">6</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">InputMethodServiceを使ってIMを作るメモ</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/android" class="fs-5">Android</a>
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>ネタ帳からの大体そのままな引用(要は雑って事)。以前、Androidのソフトウェアキーボードを作って、PC側とbluetoothを経由してスマフォ上のテキスト入力をPCから入力させるとかっていうのをやってた。とりあえず書いておこうかと</p>
+<h3 id="section-1">方式</h3>
+<p>bluetooth RFCOMMなプロファイルを利用してPC側からスマフォ側にbluetooth経由でテキストを送信。それをアクティブなIMで受け取って入力を反映させるっていうだけ</p>
+<h3 id="section-2">AndroidManifest.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;net.kinjouj.app.bluetooth_keyboard&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot;&gt;
+
+    &lt;uses-sdk android:minSdkVersion=&quot;8&quot; android:targetSdkVersion=&quot;8&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
+
+    &lt;application android:icon=&quot;@drawable/icon&quot; android:label=&quot;@string/app_name&quot;&gt;
+        &lt;service android:name=&quot;.BluetoothKeyboardService&quot; android:label=&quot;@string/app_name&quot; android:permission=&quot;android.permission.BIND_INPUT_METHOD&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.view.InputMethod&quot; /&gt;
+            &lt;/intent-filter&gt;
+            &lt;meta-data android:name=&quot;android.view.im&quot; android:resource=&quot;@xml/inputmethod&quot; /&gt;
+        &lt;/service&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre><h3 id="section-3">res/layout/input.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;android.inputmethodservice.KeyboardView
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:id=&quot;@+id/keyboard&quot;
+    android:layout_alignParentBottom=&quot;true&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot; /&gt;
+</code></pre>
+<p>後々必要になるので</p>
+<h3 id="section-4">res/xml/inputmethod.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;input-method
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; /&gt;
+</code></pre>
+<p>設定要件は<a href="http://developer.android.com/reference/android/R.styleable.html#InputMethod" target="_blank" rel="noopener">R.styleable#InputMethod</a>を参照</p>
+<h3 id="section-5">res/xml/keyboard.xml</h3>
+<p>ソフトウェアキーボードなレイアウトを定義</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;Keyboard xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;Row android:rowEdgeFlags=&quot;top&quot; android:keyHeight=&quot;100px&quot;&gt;
+        &lt;Key
+            android:codes=&quot;-5&quot;
+            android:keyIcon=&quot;@*android:drawable/sym_keyboard_delete&quot;
+            android:keyWidth=&quot;50%p&quot;
+            android:keyEdgeFlags=&quot;right&quot;
+            android:isRepeatable=&quot;true&quot; /&gt;
+
+        &lt;Key
+            android:codes=&quot;10&quot;
+            android:keyIcon=&quot;@*android:drawable/sym_keyboard_return&quot;
+            android:keyWidth=&quot;50%p&quot;
+            android:keyEdgeFlags=&quot;right&quot;/&gt;
+
+    &lt;/Row&gt;
+&lt;/Keyboard&gt;
+</code></pre>
+<p>codesで指定されたコードはキーをタッチしたい等な場合に引数に指定される(primaryCodeとか)。又、設定要件は　<a href="http://developer.android.com/reference/android/inputmethodservice/Keyboard.html" target="_blank" rel="noopener">http://developer.android.com/reference/android/inputmethodservice/Keyboard.html</a> を参照</p>
+
+<p>まぁ設定ファイル系はこれだけ。あとはサービスクラスを書いたりとか</p>
+<h3 id="section-6">BluetoothKeyboardService.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.app.bluetooth_keyboard;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.UUID;
+
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
+import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.KeyboardView;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+
+import static android.view.KeyEvent.*;
+
+public class BluetoothKeyboardService extends InputMethodService implements KeyboardView.OnKeyboardActionListener {
+
+    private final String TAG = getClass().getSimpleName();
+
+    private BluetoothServerSocket server;
+    private BluetoothSocket socket;
+    private KeyboardView kv;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.v(TAG, &quot;onCreate&quot;);
+    }
+
+    @Override
+    public void onInitializeInterface() {
+        super.onInitializeInterface();
+        Log.v(TAG,&quot;onInitializeInterface&quot;);
+    }
+
+    @Override
+    public View onCreateInputView() {
+        kv = (KeyboardView)getLayoutInflater().inflate(R.layout.input, null);
+        kv.setKeyboard(new Keyboard(this, R.xml.keyboard));
+        kv.setOnKeyboardActionListener(this);
+
+        return kv;
+    }
+
+    @Override
+    public View onCreateCandidatesView() {
+        return super.onCreateCandidatesView();
+    }
+
+    @Override
+    public void onStartInput(EditorInfo attribute, boolean restarting) {
+        super.onStartInput(attribute, restarting);
+
+        Log.v(TAG, &quot;onStartInput&quot;);
+
+        if(server == null) {
+            startBluetooth();
+        }
+    }
+
+    @Override
+    public void onFinishInput() {
+        super.onFinishInput();
+
+        if(kv != null) {
+            kv.closing();
+        }
+    }
+
+    public void onKey(int primaryCode, int[] keyCodes) {
+    }
+
+    public void onPress(int primaryCode) {
+        Log.v(TAG, &quot;onPress&quot;);
+        Log.v(TAG, &quot;primaryCode: &quot; + primaryCode);
+
+        InputConnection conn = getCurrentInputConnection();
+        switch(primaryCode) {
+            case 10:
+                //shutdownBluetooth();
+
+                conn.sendKeyEvent(new KeyEvent(ACTION_DOWN, KEYCODE_ENTER));
+                conn.sendKeyEvent(new KeyEvent(ACTION_UP, KEYCODE_ENTER));
+
+                break;
+
+            case -5:
+                // deleteキーを押した場合の動作
+                break;
+        }
+    }
+
+    public void onRelease(int primaryCode) {
+    }
+
+    public void onText(CharSequence text) {
+    }
+
+    public void swipeDown() {
+    }
+
+    public void swipeLeft() {
+    }
+
+    public void swipeRight() {
+    }
+
+    public void swipeUp() {
+    }
+
+    private void startBluetooth() {
+        try {
+            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+            server = adapter.listenUsingRfcommWithServiceRecord(
+                &quot;RFCOMM Service&quot;,
+                UUID.fromString(&quot;00001101-0000-1000-8000-00805F9B34FB&quot;)
+            );
+
+            new Thread(&quot;server&quot;) {
+                @Override
+                public void run() {
+                    while(true) {
+                        try {
+                            socket = server.accept();
+
+                            if(socket != null) {
+                                InputStream is = null;
+
+                                try {
+                                    is = socket.getInputStream();
+
+                                    BufferedReader br = null;
+
+                                    try {
+                                        br = new BufferedReader(new InputStreamReader(is));
+
+                                        String str = null;
+
+                                        while((str = br.readLine()) != null) {
+                                            InputConnection conn = getCurrentInputConnection();
+
+                                            if(conn != null) {
+                                                if(!TextUtils.isEmpty(str)) {
+                                                    conn.commitText(str, 0);
+                                                }
+                                            }
+                                        }
+                                    } catch(IOException e) {
+                                        e.printStackTrace();
+                                    } finally {
+                                        if(br != null) {
+                                            br.close();
+                                        }
+                                    }
+                                } catch(IOException e) {
+                                    e.printStackTrace();
+
+                                    break;
+                                }
+                            }
+                        } catch(IOException e) {
+                            e.printStackTrace();
+
+                            break;
+                        }
+                    }
+                }
+            }.start();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private void shutdownBluetooth() {
+        try {
+            if(socket != null) {
+                socket.close();
+                socket = null;
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+<p>キーボード入力が開始される(ソフトウェアキーボードが起動される?)際にbluetoothの接続を行なってRFCOMMプロファイルで要求を待ち受ける。でテキストな要求が来た際にはソフトウェアキーボードに対してテキストをコミットする。まぁそんだけ</p>
+<h3 id="section-7">動かしてみる</h3>
+<p>アプリを入れるとキーボード設定で</p>
+
+<p><img src="/images/2013/11/201311061735_1.png" alt="image" /></p>
+
+<p>っていうように表示されるようになる。でチェックを入れておかないと使えるようにならないのでチェックしておく</p>
+
+<p>あとはテキストを入力するフォーカスで入力方式でBluetoothKeyboardを選択すると</p>
+
+<p><img src="/images/2013/11/201311061735_2.png" alt="image" /></p>
+
+<p>って言うように出る。あとはPC側から入力を反映させる適当なスクリプトを書く</p>
+<pre class="line-numbers"><code class="language-py">from bluetooth import find_service,RFCOMM,BluetoothSocket,BluetoothError
+
+host = None
+port = 0
+
+for service in find_service():
+    if service[&quot;protocol&quot;] == &quot;RFCOMM&quot; and service[&quot;name&quot;] == &quot;RFCOMM Service&quot;:
+        host = service[&quot;host&quot;]
+        port = service[&quot;port&quot;]
+
+if host is not None:
+    sock = BluetoothSocket(RFCOMM)
+    sock.connect((host, port))
+
+    print &quot;Connected: %s:%d&quot; % (host, port)
+
+    while True:
+        data = raw_input(&quot;message: &quot;)
+
+        if data is not None and len(data) &gt; 0:
+            try:
+                sock.send(&quot;%sn&quot; % data)
+            except BluetoothError, e:
+                break
+
+    sock.close()
+</code></pre>
+<p>っていう感じでやればPC側からスマフォ側にbluetoothを経由してIMでキャッチしてテキスト入力をさせたりとかっていう事案もまぁ出来るっちゃ出来る</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">方式</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">AndroidManifest.xml</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">res/layout/input.xml</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">res/xml/inputmethod.xml</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">res/xml/keyboard.xml</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">BluetoothKeyboardService.java</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">動かしてみる</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/01/ubuntu-android-bluetooth-rfcomm.html" class="d-block p-2">UbuntuとAndroidをbluetooth RFCOMMで通信する</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/01/android-accountmanager.html" class="d-block p-2">Android AccountManagerで使えるカスタムアカウントを開発する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/03/android-spellcheckerservice.html" class="d-block p-2">(非常に適当に)Android ICS SpellCheckerServiceを使ってみる</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/11/android-speechrecognizer-retrieve-text-and-voice-data.html" class="d-block p-2">SpeechRecognizerを使って音声テキスト及び音声データを取得する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/07/android-bluetooth-keyboard.html" class="d-block p-2">Android+Bluetoothを使ってPC側からテキストの入力を行う</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/11/fuelphp-30-model_nestedset.html" rel="prev">&lt;&nbsp;FuelPHPをやってみる (30) - Model_Nestedset -</a>
+              <a href="/2013/11/android-speechrecognizer-retrieve-text-and-voice-data.html" rel="next">SpeechRecognizerを使って音声テキスト及び音声データを取得する方法&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

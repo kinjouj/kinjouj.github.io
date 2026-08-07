@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Cookpad・Shopify・GitHub・Airbnb・コミュニティ（bbatsov/rubocop）の各スタイルガイドを項目別にマージしたものです。" />
+    <meta property="og:title" content="私的Rubyのコーディングガイド" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2026/06/ruby-coding-guide.html">
+    <title>私的Rubyのコーディングガイド - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2026/06/ruby-coding-guide.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "私的Rubyのコーディングガイド",
+  "datePublished": "2026-06-11T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "Cookpad・Shopify・GitHub・Airbnb・コミュニティ（bbatsov/rubocop）の各スタイルガイドを項目別にマージしたものです。"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2026/06">
+                  <span class="post-date-year">2026</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">11</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">私的Rubyのコーディングガイド</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/ruby" class="fs-5">Ruby</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>Cookpad・Shopify・GitHub・Airbnb・コミュニティ（bbatsov/rubocop）の各スタイルガイドを項目別にマージしたものです。</p>
+<h3 id="section-1">全般</h3>
+<ul>
+<li><code>private</code>/<code>protected</code> の可視性を迂回しないよう、<code>send</code> より <code>public_send</code> を優先する。</li>
+</ul>
+<pre class="line-numbers"><code class="language-ruby"># ❌
+obj.send(:private_method)
+
+# ✅
+obj.public_send(:public_method)
+</code></pre><h3 id="section-2">インデントと改行</h3>
+<ul>
+<li>インデントはスペース2つ。タブ文字は使わない。</li>
+<li>改行コードは Unix 形式（LF）を使う。</li>
+<li><code>;</code> を使って複数の式を1行に書かない。1行1式を原則とする。</li>
+</ul>
+<h3 id="section-3">複数行の整形</h3>
+<ul>
+<li>複数行に展開する場合（メソッド呼び出し・ハッシュ・配列）、各要素・引数は必ず1要素1行にする。閉じ括弧は最後の要素の次の行に単独で置く。</li>
+</ul>
+<pre class="line-numbers"><code class="language-ruby"># ❌
+[value_1, value_2,
+ value_3]
+
+# ✅
+[
+  value_1,
+  value_2,
+  value_3,
+]
+</code></pre><h3 id="section-4">デフォルト引数</h3>
+<p>デフォルト引数の <code>=</code> の前後にスペースを入れる。</p>
+<pre class="line-numbers"><code class="language-ruby"># ❌
+def foo(x=1, y=2); end
+
+# ✅
+def foo(x = 1, y = 2); end
+</code></pre><h3 id="section-5">命名規則</h3>
+<ul>
+<li>シンボル・メソッド・変数・ファイル名・ディレクトリ名: <code>snake_case</code></li>
+<li>クラス・モジュール: <code>CamelCase</code>（HTTP・RFC・XML のような略語は大文字を維持）</li>
+<li>その他の定数: <code>SCREAMING_SNAKE_CASE</code></li>
+<li>ソースファイル1つにクラス・モジュール1つを定義し、ファイル名はクラス名を <code>snake_case</code> に変換したものにする。</li>
+<li>真偽値を返すメソッドの名前は <code>?</code> をつける</li>
+<li>破壊的メソッドには<code>!</code>（bang）をつける</li>
+<li>使わないブロック引数・ローカル変数には <code>_</code> プレフィックスをつけるか、<code>_</code> 単独で使う。</li>
+</ul>
+<h3 id="section-6">文字列</h3>
+<ul>
+<li>文字列連結（<code>+</code>）ではなく、文字列補間（<code>&quot;#{...}&quot;</code>）またはフォーマット（<code>format()</code>）を使う。</li>
+<li>補間の <code>#{}</code> 内部の前後にスペースを入れない。インスタンス変数・グローバル変数の補間は <code>#{}</code> で囲む。補間内の不要な <code>.to_s</code> は省略する。</li>
+<li><code>gsub</code> が使える場面でより特化したメソッドを優先する。</li>
+<li>複数行文字列にはヒアドキュメントを使い、Ruby 2.3+ では <code>&lt;&lt;~</code> 構文を使う。</li>
+</ul>
+<h3 id="section-7">配列</h3>
+<ul>
+<li><code>Array.new</code> より配列リテラル <code>[]</code> を使う。</li>
+<li>複数行の配列リテラルは末尾の要素の後にもカンマを付ける（trailing comma）。</li>
+</ul>
+<h3 id="section-8">ハッシュ</h3>
+<ul>
+<li><code>Hash.new</code> よりハッシュリテラル <code>{}</code> を使う。Symbol をキーにする場合は新記法 <code>{ key: value }</code> を使う。</li>
+<li>複数行のハッシュリテラルでは、開き <code>{</code> の後で改行し、各要素を1段インデント、閉じ <code>}</code> は独立した行に、末尾要素の後にもカンマを付ける。</li>
+</ul>
+<pre class="line-numbers"><code class="language-ruby"># ✅
+hash = {
+  first: 42,
+  second: &#39;foo&#39;,
+}
+</code></pre>
+<ul>
+<li>存在が必須のキーには <code>Hash#fetch</code> を使う。デフォルト値の設定にも <code>Hash#fetch</code> を使い、<code>||</code> による falsy 誤判定を避ける。(場合による)</li>
+</ul>
+<pre class="line-numbers"><code class="language-ruby">heroes = { batman: &#39;Bruce Wayne&#39; }
+
+# タイポしても nil が返りエラーに気づかない
+heroes[:supermann]  # =&gt; nil
+
+# KeyError が即座に発生
+heroes.fetch(:superman)
+
+# デフォルト値の設定
+config = { enabled: false }
+
+# false が true に上書きされる
+config[:enabled] || true   # =&gt; true
+
+config.fetch(:enabled, true)  # =&gt; false
+</code></pre><h3 id="section-9">演算子と代入</h3>
+<ul>
+<li><code>and</code>・<code>or</code>・<code>not</code> を使わない。常に <code>&amp;&amp;</code>・<code>||</code>・<code>!</code> を使う。</li>
+<li>三項演算子のネストは禁止。複数段になる場合は <code>if/else</code> を使う。</li>
+<li><code>||=</code> を使って変数をデフォルト値で初期化してよい。ただし Boolean 変数への <code>||=</code> は使わない。</li>
+<li>ミュータブルな定数オブジェクト（文字列・配列・ハッシュなど）には <code>freeze</code> を呼ぶ。</li>
+</ul>
+<pre class="line-numbers"><code class="language-ruby"># ✅
+GREETING = &#39;Hello&#39;.freeze
+STATES   = [&#39;draft&#39;, &#39;open&#39;].freeze
+CONFIG   = { timeout: 30 }.freeze
+</code></pre>
+<hr>
+<h3 id="section-10">制御構造</h3>
+<ul>
+<li>ifなどで代入演算をしない</li>
+<li>複数行の <code>if</code>/<code>unless</code> には <code>then</code> を書かない。</li>
+<li>1行ボディの場合は修飾子形式を使う。<code>if/unless</code> の条件を <code>()</code> で囲まない。</li>
+<li><code>for</code> ループを避け、イテレータを使う。</li>
+<li>ガード節（guard clause）を使い、無効データに対して早期 return する。また、ガード節後には必ず空行を入れる</li>
+</ul>
+<h3 id="section-11">メソッド定義と呼び出し</h3>
+<ul>
+<li>パラメータがある場合は括弧を使い、ない場合は省略する。</li>
+<li><code>return</code> が制御フローに必要でなければ省略する。<code>self</code> が必要でなければ省略する。</li>
+<li>キーワード引数をオプションハッシュより優先する。</li>
+</ul>
+<pre class="line-numbers"><code class="language-ruby"># ❌
+def create_user(options = {})
+  name = options[:name]
+  role = options[:role]
+end
+
+# ✅
+def create_user(name:, role:)
+  # ...
+end
+</code></pre>
+<ul>
+<li><code>Time</code> を <code>DateTime</code> より優先する。ISO8601 形式の文字列には <code>Time.parse</code> より <code>Time.iso8601</code> を使う。</li>
+</ul>
+<pre class="line-numbers"><code class="language-ruby"># ❌
+DateTime.now
+Time.parse(&#39;2025-01-01T00:00:00+09:00&#39;)
+
+# ✅
+Time.now
+Time.iso8601(&#39;2025-01-01T00:00:00+09:00&#39;)
+</code></pre><h3 id="section-12">ブロック・Lambda・Proc</h3>
+<ul>
+<li>基本は <code>do...end</code> を使う。メソッドチェーンをする場合や、戻り値を使う関数的なブロックには <code>{...}</code> を使う。1行で済む場合はdo..endを使わなず<code>{...}</code>を使う</li>
+</ul>
+<h3 id="section-13">クラスボディの定義順序</h3>
+<p>クラス・モジュール内の要素は次の順序で並べる。</p>
+
+<ol>
+<li><code>include</code> / <code>extend</code> / <code>prepend</code></li>
+<li>定数</li>
+<li>クラス変数（<code>@@</code>）</li>
+<li>クラスメソッド（<code>class &lt;&lt; self</code> ブロック）</li>
+<li><code>attr_reader</code> / <code>attr_writer</code> / <code>attr_accessor</code></li>
+<li><code>initialize</code></li>
+<li>public インスタンスメソッド</li>
+<li><code>protected</code> / <code>private</code> メソッド</li>
+<li>ネストしたクラス・モジュール</li>
+</ol>
+
+<ul>
+<li>クラスメソッドを定義する際は <code>def self.method</code> より <code>class &lt;&lt; self</code> ブロックを使い、クラスメソッドをまとめる。</li>
+<li>単純なアクセサ・ミューテータには <code>attr_accessor</code>・<code>attr_reader</code>・<code>attr_writer</code> を使う。<code>attr</code> は使わない。</li>
+<li>クラス変数（<code>@@</code>）を避ける（継承での動作が直感に反するため）。</li>
+<li><code>public</code>・<code>protected</code>・<code>private</code> はメソッド定義と同じインデントレベルで書き、上下に空行を入れる。</li>
+<li><code>alias</code> より <code>alias_method</code> を使う。</li>
+</ul>
+<h3 id="section-14">正規表現</h3>
+<ul>
+<li>文字列の単純な検索には正規表現よりプレーンテキスト検索を使う。</li>
+<li>キャプチャ結果を使わない場合は非キャプチャグループ <code>(?:...)</code> を使う。</li>
+<li>Perl 由来のグローバル変数（<code>$1</code> など）より <code>Regexp#match</code> の戻り値を使う。番号付きキャプチャより名前付きキャプチャ <code>(?&lt;name&gt;...)</code> を使う。</li>
+<li>文字列全体の先頭・末尾にマッチさせる場合は <code>^</code>/<code>$</code> より <code>\A</code>/<code>\z</code> を使う。</li>
+</ul>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">全般</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">インデントと改行</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">複数行の整形</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">デフォルト引数</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">命名規則</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">文字列</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">配列</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">ハッシュ</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">演算子と代入</a>
+                <a href="#section-10" class="d-block p-1 overflow-hidden ms-0">制御構造</a>
+                <a href="#section-11" class="d-block p-1 overflow-hidden ms-0">メソッド定義と呼び出し</a>
+                <a href="#section-12" class="d-block p-1 overflow-hidden ms-0">ブロック・Lambda・Proc</a>
+                <a href="#section-13" class="d-block p-1 overflow-hidden ms-0">クラスボディの定義順序</a>
+                <a href="#section-14" class="d-block p-1 overflow-hidden ms-0">正規表現</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2025/06/ruby-json-convert-object.html" class="d-block p-2">RubyでのJSONからオブジェクトに変換するっていう話</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/11/jsonpullparser.html" class="d-block p-2">jsonpullparser</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2025/05/ruby-array-values-object-convert.html" class="d-block p-2">Rubyで配列内をオブジェクトに変換する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2009/12/nagios.html" class="d-block p-2">Nagios</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/08/activerecord-validation-4-validates_each.html" class="d-block p-2">ActiveRecord Validation #4 - validates_each -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2026/06/calculate-cursor-direction.html" rel="prev">&lt;&nbsp;マウスカーソルが乗っかってる方角を算出する方法</a>
+              <a href="/2026/06/torch-rb.html" rel="next">Torch.rbを使ってみた&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

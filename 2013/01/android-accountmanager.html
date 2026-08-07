@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="んまぁAndroid端末使ってる人とかだと見た事あるし、触った事もある人もいるだろう" />
+    <meta property="og:title" content="Android AccountManagerで使えるカスタムアカウントを開発する方法" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/01/android-accountmanager.html">
+    <title>Android AccountManagerで使えるカスタムアカウントを開発する方法 - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/01/android-accountmanager.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Android AccountManagerで使えるカスタムアカウントを開発する方法",
+  "datePublished": "2013-01-19T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "んまぁAndroid端末使ってる人とかだと見た事あるし、触った事もある人もいるだろう"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/01">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">1</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">19</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">Android AccountManagerで使えるカスタムアカウントを開発する方法</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/android" class="fs-5">Android</a>
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>んまぁAndroid端末使ってる人とかだと見た事あるし、触った事もある人もいるだろう</p>
+
+<p><img src="/images/2013/01/20130119095120.png" alt="image" /></p>
+
+<p>まぁWebサービスとかのアカウントを端末内に保管して、認証要求だとかをAccountManagerな機能を通じて行えたり出来るAPIが存在する訳ですが、これの独自のを作る方法。まぁ結構書く量が多いので</p>
+<h3 id="section-1">認証方式</h3>
+<p>OAuthとか使って権限管理の元で色々出来たりするのが一番良いんですが、今回は適当にトークン取得リクエストしたらトークン返して、でAPIを実行する際にトークンをヘッダーにぶち込んでリクエストしたら結果が返ってくる的な感じ</p>
+
+<p>まぁ良くあるかどうかは定かじゃないけど、RailsとかだとDeviseとかそういうのがあったりもする訳で。これもとりあえずおいといて</p>
+
+<p>という事で本題な所のAndroidの方を実装する。もっかいいうけどクソ長いんでww</p>
+<h3 id="section-2">AndroidManifest.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;manifest
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;net.kinjouj.test&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot;&gt;
+
+    &lt;uses-sdk android:minSdkVersion=&quot;5&quot; android:maxSdkVersion=&quot;17&quot; android:targetSdkVersion=&quot;17&quot; /&gt;
+
+    &lt;uses-permission android:name=&quot;android.permission.AUTHENTICATE_ACCOUNTS&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.GET_ACCOUNTS&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.USE_CREDENTIALS&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+
+    &lt;application android:label=&quot;@string/app_name&quot; android:icon=&quot;@drawable/icon&quot;&gt;
+        &lt;!-- AccountManagerを使って認証してAPIを使ってデータを表示するだけのActivity --&gt;
+        &lt;activity android:name=&quot;.MainActivity&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+
+        &lt;!-- 認証要求の際のAcitvity --&gt;
+        &lt;activity android:name=&quot;.AuthenticatorActivity&quot; android:exported=&quot;false&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;net.kinjouj.test.account.LOGIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+
+        &lt;!-- アカウントのオプション設定のActivity(Preferences) --&gt;
+        &lt;activity android:name=&quot;.AuthenticatorPreferenceActivity&quot; /&gt;
+
+        &lt;!-- AccountAuthenticatorなサービス --&gt;
+        &lt;service android:name=&quot;.AuthenticatorService&quot; android:exported=&quot;true&quot; android:process=&quot;:auth&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.accounts.AccountAuthenticator&quot; /&gt;
+            &lt;/intent-filter&gt;
+            &lt;meta-data android:name=&quot;android.accounts.AccountAuthenticator&quot; android:resource=&quot;@xml/authenticator&quot; /&gt;
+        &lt;/service&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+<p>な感じ。で必要な設定リソースから作る</p>
+<h3 id="section-3">res/values/strings.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;resources&gt;
+    &lt;string name=&quot;app_name&quot;&gt;Sample&lt;/string&gt;
+
+    &lt;string name=&quot;account_missing_dialog_title&quot;&gt;認証アカウントがありません&lt;/string&gt;
+    &lt;string name=&quot;account_missing_dialog_summary&quot;&gt;認証アカウントの設定がされていません。アカウント設定画面を開きます&lt;/string&gt;
+
+    &lt;string name=&quot;account_type&quot;&gt;net.kinjouj.test.account&lt;/string&gt;
+    &lt;string name=&quot;account_label&quot;&gt;サンプルアプリ認証アカウント&lt;/string&gt;
+
+    &lt;string name=&quot;preference_category_extra_title&quot;&gt;その他&lt;/string&gt;
+    &lt;string name=&quot;preference_category_extra_nickname_title&quot;&gt;ニックネーム&lt;/string&gt;
+    &lt;string name=&quot;preference_category_extra_nickname_summary&quot;&gt;ニックネームを設定&lt;/string&gt;
+&lt;/resources&gt;
+</code></pre>
+<p>でAccountAuthenticatorを使う際に必要となる設定リソース(AndroidManifest.xmlだとres/xml/authenticator.xml)を作る</p>
+<h3 id="section-4">res/xml/authenticator.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;account-authenticator
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:accountType=&quot;@string/account_type&quot;
+    android:icon=&quot;@drawable/icon&quot;
+    android:smallIcon=&quot;@drawable/icon&quot;
+    android:label=&quot;@string/account_label&quot;
+    android:accountPreferences=&quot;@xml/prefs&quot; /&gt;
+</code></pre>
+<p>でアカウント設定でオプションで設定出来るPreferenceな設定ファイルも必要</p>
+<h3 id="section-5">res/xml/prefs.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;PreferenceCategory android:title=&quot;設定&quot; /&gt;
+    &lt;PreferenceScreen android:key=&quot;account_settings&quot; android:title=&quot;Account Settings&quot;&gt;
+        &lt;intent
+            android:targetPackage=&quot;net.kinjouj.test&quot;
+            android:targetClass=&quot;net.kinjouj.test.AuthenticatorPreferenceActivity&quot; /&gt;
+    &lt;/PreferenceScreen&gt;
+&lt;/PreferenceScreen&gt;
+</code></pre>
+<p>な感じ。設定画面はAuthenticatorPreferenceActivityにintentする方向で</p>
+
+<p>んでPreferenceな所からちょっと作っておく</p>
+<h3 id="section-6">AuthenticatorPreferenceActivity.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+
+import android.preference.PreferenceActivity;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
+import android.os.Bundle;
+
+public class AuthenticatorPreferenceActivity extends PreferenceActivity {
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        addPreferencesFromResource(R.xml.pref);
+
+        findPreference(&quot;user_nickname&quot;).setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                // newValueで新しい設定値を取得出来る
+
+                return true;
+            }
+        });
+    }
+}
+</code></pre>
+<p>でPreferenceで参照するリソースが必要</p>
+<h3 id="section-7">res/xml/pref.xml</h3>
+<p>prefs.xmlでは無いので注意</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;PreferenceCategory android:title=&quot;@string/preference_category_extra_title&quot;&gt;
+        &lt;EditTextPreference
+            android:key=&quot;user_nickname&quot;
+            android:title=&quot;@string/preference_category_extra_nickname_title&quot;
+            android:dialogTitle=&quot;@string/preference_category_extra_nickname_title&quot;
+            android:summary=&quot;@string/preference_category_extra_nickname_summary&quot; /&gt;
+    &lt;/PreferenceCategory&gt;
+&lt;/PreferenceScreen&gt;
+</code></pre>
+<p>まぁニックネームを設定出来るようにするだけ</p>
+
+<p>あとはアプリのActivity(MainActivity)とか認証要求を行うActivity(AuthenticatorActivity)とService(AuthenticatorService)とかをもろもろ作る</p>
+<h3 id="section-8">MainActivity.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+public class MainActivity extends Activity {
+
+    public static final String TAG = &quot;AndroidAuthenticator&quot;;
+
+    private ArrayAdapter&lt;String&gt; adapter;
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+
+        adapter = new ArrayAdapter&lt;String&gt;(this, android.R.layout.simple_list_item_1);
+
+        ListView lv = new ListView(this);
+        lv.setAdapter(adapter);
+
+        setContentView(lv);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        adapter.clear();
+
+        final String type = getString(R.string.account_type); // net.kinjouj.test.account
+        final AccountManager am = AccountManager.get(this);
+        Account[] accounts = am.getAccountsByType(type);
+
+        if(accounts.length &gt; 0) {
+            Account account = accounts[0];
+
+            if(account == null) {
+                return;
+            }
+
+            final ProgressDialog dialog = new ProgressDialog(this);
+            dialog.show();
+
+            // 設定したアカウントでgetAuthTokenしてトークンを取得
+            am.getAuthToken(account, type, false, new AccountManagerCallback&lt;Bundle&gt;() {
+                public void run(AccountManagerFuture&lt;Bundle&gt; result) {
+                    String token = null;
+
+                    try {
+                        Bundle b = result.getResult();
+
+                        try {
+                            token = b.getString(AccountManager.KEY_AUTHTOKEN);
+
+                            if(token == null) {
+                                return;
+                            }
+
+                            try {
+                                // 取得したトークンでAPIにヘッダーをつけてリクエスト
+                                DefaultHttpClient httpClient = new DefaultHttpClient();
+                                HttpGet request = new HttpGet(&quot;http://192.168.1.1:5000/api/data&quot;);
+                                request.setHeader(&quot;X-Android-Security-Token&quot;, token);
+
+                                HttpResponse res = httpClient.execute(request);
+
+                                if(res.getStatusLine().getStatusCode() == 200) {
+                                    // データをパースしてAdapterにぶちこむ
+
+                                    String data = EntityUtils.toString(res.getEntity());
+
+                                    if(data != null) {
+                                        try {
+                                            JSONArray jsons = new JSONArray(data);
+
+                                            for(int i = 0;i &lt; jsons.length();i++) {
+                                                JSONObject json = jsons.getJSONObject(i);
+
+                                                adapter.add(json.getString(&quot;name&quot;));
+                                            }
+                                        } catch(JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            } catch(Exception e) {
+                                e.printStackTrace();
+                            }
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        am.invalidateAuthToken(type, token);
+
+                        try {
+                            if(dialog.isShowing()) {
+                                dialog.dismiss();
+                            }
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            },null);
+        } else {
+            // アカウントが無いので端末上でアカウント認証を行う要求を出す。ただAndroidのアカウント管理画面にintentするだけ
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getString(R.string.account_missing_dialog_title));
+            builder.setMessage(getString(R.string.account_missing_dialog_summary));
+            builder.setPositiveButton(&quot;OK&quot;, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    startActivity(new Intent(Settings.ACTION_ADD_ACCOUNT));
+                }
+            });
+            builder.setNegativeButton(&quot;Cancel&quot;, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    MainActivity.this.finish();
+                }
+            });
+            builder.create().show();
+        }
+    }
+}
+</code></pre>
+<p>アカウントがあれば、そのアカウントでgetAuthTokenしてそのトークンを使ってWeb APIにヘッダーをつけてリクエストしレスポンスをパースしてListViewにバインド</p>
+
+<p>アカウントがなければAndroidのアカウント設定画面にintentしてアカウントを作るように要求</p>
+
+<p>でアカウントを追加する際に今回の独自のアカウントを選択した場合にはAuthenticatorServiceが作用するのでそれを作る</p>
+<h3 id="section-9">AuthenticatorService.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+
+import android.accounts.AccountManager;
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+
+public class AuthenticatorService extends Service {
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        if(intent.getAction().equals(AccountManager.ACTION_AUTHENTICATOR_INTENT)) {
+            return new SampleAccountAuthenticator(this).getIBinder();
+        }
+
+        return null;
+    }
+}
+</code></pre>
+<p>でonBindでAbstractAccountAuthenticatorを継承したクラスをnewしでgetIBinderを返す</p>
+<h3 id="section-10">SampleAccountAuthenticator.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
+import android.accounts.AbstractAccountAuthenticator;
+import android.accounts.Account;
+import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.AccountManager;
+import android.accounts.NetworkErrorException;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+
+import static net.kinjouj.test.MainActivity.TAG;
+
+class SampleAccountAuthenticator extends AbstractAccountAuthenticator {
+
+    private Context ctx;
+
+    public SampleAccountAuthenticator(Context ctx) {
+        super(ctx);
+
+        this.ctx = ctx;
+    }
+
+    @Override
+    public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures,Bundle options) throws NetworkErrorException {
+        Intent intent = new Intent();
+        intent.setAction(AuthenticatorActivity.ACTION);
+        intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+
+        Bundle b = new Bundle();
+        b.putParcelable(AccountManager.KEY_INTENT, intent);
+
+        return b;
+    }
+
+    @Override
+    public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account, Bundle options) throws NetworkErrorException {
+        Log.v(TAG, &quot;confirmCredentials&quot;);
+
+        return null;
+    }
+
+    @Override
+    public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
+        Log.v(TAG, &quot;editProperties&quot;);
+
+        return null;
+    }
+
+    @Override
+    public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) {
+        Log.v(TAG, &quot;getAuthToken&quot;);
+
+        if(account == null) {
+            return null;
+        }
+
+        /* ここでアカウント設定でオプショナルな設定項目(Preference)を取る事も出来る
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        String nickname = prefs.getString(&quot;user_nickname&quot;, null);
+        */
+
+        AccountManager am = AccountManager.get(ctx);
+
+        String username = account.name;
+        String password = am.getPassword(account);
+
+        if(username == null || password == null) {
+            return null;
+        }
+
+        String token = null;
+
+        try {
+            List&lt;NameValuePair&gt; pairs = new ArrayList&lt;NameValuePair&gt;(2);
+            pairs.add(new BasicNameValuePair(&quot;username&quot;, username));
+            pairs.add(new BasicNameValuePair(&quot;password&quot;, password));
+
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpPost request = new HttpPost(&quot;http://192.168.1.1:5000/user_token&quot;);
+            request.setEntity(new UrlEncodedFormEntity(pairs));
+
+            HttpResponse res = httpClient.execute(request);
+
+            if(res.getStatusLine().getStatusCode() == 200) {
+                token = EntityUtils.toString(res.getEntity());
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        Bundle b = new Bundle();
+
+        // トークンを取得できた場合にはBundleに格納する
+
+        if (token != null) {
+            b.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            b.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+            b.putString(AccountManager.KEY_AUTHTOKEN, token);
+        }
+
+        return b;
+    }
+
+    @Override
+    public String getAuthTokenLabel(String authTokenType) {
+        Log.v(TAG,&quot;getAuthTokenLabel&quot;);
+
+        return null;
+    }
+
+    @Override
+    public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account, String[] features) throws NetworkErrorException {
+        Log.v(TAG,&quot;hasFeatures&quot;);
+
+        return null;
+    }
+
+    @Override
+    public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
+        Log.v(TAG,&quot;updateCredentials&quot;);
+
+        return null;
+    }
+}
+</code></pre>
+<p>AccountManager.getAuthTokenをするとコールバックでAccountManagerFuture&lt;Bundle&gt;.getResultsでgetAuthTokenから返したBundleを取得できる。</p>
+
+<p>でアカウント追加から来た時にはaddAccountが呼び出されて、そこからAuthenticatorActivity.ACTION(AuthenticatorActivityを発生させるアクションintent)が投げられて、登録に伴う認証開始が行われるという感じ</p>
+
+<p>でそのAuthenticatorActivityを作る</p>
+<h3 id="section-11">AuthenticatorActivity.java</h3><pre class="line-numbers"><code class="language-java">package net.kinjouj.test;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import android.app.Activity;
+import android.accounts.Account;
+import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.AccountManager;
+import android.content.Intent;
+import android.os.Bundle;
+
+public class AuthenticatorActivity extends Activity {
+
+    public static final String ACTION = &quot;net.kinjouj.test.account.LOGIN&quot;;
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+
+        Intent intent = getIntent();
+
+        if(intent != null &amp;&amp; ACTION.equals(intent.getAction())) {
+            bundle = intent.getExtras();
+
+            String password = toSHA1(&quot;test&quot;.getBytes());
+
+            if(password != null) {
+                // ここで認証出来るかチェックするのが良いかと。そうしないと認証できないアカウントをaddAccountされる
+
+                AccountManager am = AccountManager.get(this);
+                Account account = new Account(&quot;test&quot;, getString(R.string.account_type));
+                boolean accountCreateSuccessful = am.addAccountExplicitly(account, password, null);
+
+                if(accountCreateSuccessful) {
+                    AccountAuthenticatorResponse response = bundle.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+                    response.onResult(null);
+                }
+            }
+        }
+
+        finish();
+    }
+
+    private String toSHA1(byte[] data) {
+        byte[] digest = null;
+
+        try {
+            digest = MessageDigest.getInstance(&quot;SHA1&quot;).digest(data);
+        } catch(NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        if(digest != null) {
+            return new BigInteger(1, digest).toString(16).toLowerCase();
+        }
+
+        return null;
+    }
+}
+</code></pre>
+<p>AccountManager.addAccountExplicitlyでアカウントを登録できる模様。という感じで作れる</p>
+
+<p>で流れをまとめると</p>
+
+<ul>
+<li>MainActivityが起動する。この時点でアカウントが無いので、アカウント設定画面にintentを送出される</li>
+<li>アカウント設定画面が開き、今回定義したアカウントを選択するとAuthenticatorServiceが呼ばれる</li>
+<li>AuthenticatorServiceからAbstractAccountAuthenticator(SampleAccountAuthenticator)に処理が流れる</li>
+<li>AbstractAccountAuthenticator.addAccountからアカウント設定に伴う要求処理でAuthenticatorActivityが起動される</li>
+<li>AuthenticatorActivityからAccountManager.addAccountExplicitlyを使ってアカウントを登録する。この際フォームなどを使ってユーザーIDやパスワード等を利用して認証させるっていうのが本式かも(今回はやってない)</li>
+<li>アカウント登録が終わったらAccountManager.getAuthTokenを使ってトークンを取得、その後Web APIへリクエストしてレスポンスのデータをListViewへバインド</li>
+</ul>
+
+<p>大体はこういう流れかと。で実際に動作させてみると</p>
+
+<p><img src="/images/2013/01/20130119175902.png" alt="image" /></p>
+
+<p>まずアカウント無いので登録を促される。でそのままOKするとアカウント登録画面に行くので</p>
+
+<p><img src="/images/2013/01/20130119175939.png" alt="image" /></p>
+
+<p>今回作ったアカウント方式を選択する。この際にAuthenticatorActivityでフォームとか出してるのならそれをごにょごにょしてやって終わると</p>
+
+<p><img src="/images/2013/01/20130119180044.png" alt="image" /></p>
+
+<p>という風にアカウントを使って取得したトークンを使ってWeb APIからデータを取得してバインド</p>
+
+<p>まぁこんな感じ。すっごいややこしいですけど</p>
+
+<p>ちなみに、 <a href="http://www.c99.org/2010/01/23/writing-an-android-sync-provider-part-1/" target="_blank" rel="noopener">http://www.c99.org/2010/01/23/writing-an-android-sync-provider-part-1/</a> というLast.fmのサービスのアカウントをAndroidで使うデモ・方式、そしてソースも公開されてたはずなのでそれも参考にすると良いかも</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">認証方式</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">AndroidManifest.xml</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">res/values/strings.xml</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">res/xml/authenticator.xml</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">res/xml/prefs.xml</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">AuthenticatorPreferenceActivity.java</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">res/xml/pref.xml</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">MainActivity.java</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">AuthenticatorService.java</a>
+                <a href="#section-10" class="d-block p-1 overflow-hidden ms-0">SampleAccountAuthenticator.java</a>
+                <a href="#section-11" class="d-block p-1 overflow-hidden ms-0">AuthenticatorActivity.java</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/01/android-appwidget-listview.html" class="d-block p-2">AppWidgetでListView</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/09/android-oauth-signpost-google-app-engine-oauth.html" class="d-block p-2">oauth-signpost(Android)でGoogle App Engine(+OAuth)</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/06/android-accountmanager-syncadapter.html" class="d-block p-2">Android AccountManager+SyncAdapter</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/03/android-spellcheckerservice.html" class="d-block p-2">(非常に適当に)Android ICS SpellCheckerServiceを使ってみる</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/01/android-search-hardware-key-suggestion.html" class="d-block p-2">Androidアプリ上でのサーチハードウェアキーによる振る舞い機能を実装</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/01/mongodb-9-js.html" rel="prev">&lt;&nbsp;mongodbを使ってみる (9) - JSファイルでごにょごにょ -</a>
+              <a href="/2013/01/mongodb-8-user-configuration.html" rel="next">mongodbを使ってみる (8) - ユーザー設定 -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

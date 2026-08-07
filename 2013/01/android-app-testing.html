@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く" />
+    <meta property="og:title" content="Androidアプリのテスト関係な件" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/01/android-app-testing.html">
+    <title>Androidアプリのテスト関係な件 - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/01/android-app-testing.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Androidアプリのテスト関係な件",
+  "datePublished": "2013-01-27T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/01">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">1</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">27</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">Androidアプリのテスト関係な件</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/android" class="fs-5">Android</a>
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>色々まとめてみようかと思う。以前勉強したのをAndroid v4.1ベースで検証して書く</p>
+<h3 id="section-1">前提</h3>
+<p>アプリとテストはプロジェクトを分ける。テストプロジェクトはアプリプロジェクトを参照として設定する(普通にADT使えば特にやる必要ない。テストプロジェクト作成段階で設定される)</p>
+
+<p>で以下もテストプロジェクト作成段階で設定されるので必要ないけど</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;sample.test.test&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot; &gt;
+
+    &lt;uses-sdk android:minSdkVersion=&quot;16&quot; android:maxSdkVersion=&quot;16&quot; android:targetSdkVersion=&quot;16&quot; /&gt;
+
+    &lt;instrumentation android:name=&quot;android.test.InstrumentationTestRunner&quot; android:targetPackage=&quot;sample.test&quot; /&gt;
+
+    &lt;application android:icon=&quot;@drawable/ic_launcher&quot; android:label=&quot;@string/app_name&quot; android:allowBackup=&quot;false&quot;&gt;
+        &lt;uses-library android:name=&quot;android.test.runner&quot; /&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;
+</code></pre>
+<p>な感じで&lt;instrumentation&gt;と&lt;uses-library&gt;とかの設定が必要</p>
+
+<p>あとはクラス書きつつテストケースを書く感じ。でテストを対象とするクラスはアプリプロジェクト、テストケースはテストプロジェクトに書く。でテストケースの方式はJUnit4方式じゃなくてJUnit3方式</p>
+
+<p>あとテストプロジェクトのアプリもしっかり端末に入るので(ry</p>
+<h3 id="section-2">ApplicationTestCase</h3>
+<p>android.app.Applicationを拡張して使用する場合、ApplicationTestCaseを使えばAndroid JUnitでテスト出来る。例えば以下のようなApplicationクラスを継承したクラスがあった場合</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.app.Application;
+
+public class MainApplication extends Application {
+    public String getAppName() {
+        return getResources().getString(R.string.app_name);
+    }
+}
+</code></pre>
+<p>getAppNameメソッドをテストしたい場合</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.app.Application;
+import android.test.ApplicationTestCase;
+
+public class MainApplicationTestCase extends ApplicationTestCase&lt;MainApplication&gt; {
+
+    public MainApplicationTestCase() {
+        super(MainApplication.class);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        createApplication();
+    }
+
+    public void test_getAppNameのテスト() {
+        Application app = getApplication();
+        assertNotNull(app);
+        assertTrue(app instanceof MainApplication);
+
+        assertEquals(&quot;sample&quot;, ((MainApplication)app).getAppName());
+    }
+}
+</code></pre>
+<p>な感じでテスト出来る</p>
+<h3 id="section-3">AndroidTestCase</h3>
+<p>AndroidのContextに依存するようなクラスをテストするケースにおいてはAndroidTestCaseを使えば良い模様。</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.test.AndroidTestCase;
+
+public class MainAndroidTestCase extends AndroidTestCase {
+    public void test_getAppName() {
+        String appName = getContext().getString(R.string.app_name);
+        assertNotNull(appName);
+        assertEquals(&quot;sample&quot;, appName);
+    }
+}
+</code></pre>
+<p>で、同様な例としてBroadcastReceiverをテストする場合等でもAndroidTestCaseを使えば出来なくもない。それは<a href="/2012/01/android-broadcastreceiver-testing-androidtestcase.html" target="_blank" rel="noopener">以前に書いた</a>ので省略</p>
+<h3 id="section-4">ServiceTestCase</h3>
+<p>android.app.Serviceをテストする目的で使用。とりあえずてきとーに</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+
+public class SampleService extends Service {
+
+    private List&lt;String&gt; names;
+    private boolean completed = false;
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flag, int startId) {
+        super.onStartCommand(intent, flag, startId);
+
+        names = new ArrayList&lt;String&gt;();
+
+        new Thread() {
+            @Override
+            public void run() {
+                names.add(&quot;hoge&quot;);
+                names.add(&quot;fuga&quot;);
+                names.add(&quot;foobar&quot;);
+
+                completed = true;
+            }
+        }.start();
+
+        return START_STICKY;
+    }
+
+    public List&lt;String&gt; getNames() {
+        return names;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+}
+</code></pre>
+<p>な感じで作っといて、onStartCommand等で実行される処理をテストする際に</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+import java.util.List;
+
+import android.app.Service;
+import android.content.Intent;
+import android.test.ServiceTestCase;
+
+import sample.test.SampleService;
+
+public class SampleServiceTestCase extends ServiceTestCase&lt;SampleService&gt; {
+
+    public SampleServiceTestCase() {
+        super(SampleService.class);
+    }
+
+    public void testSampleService() {
+        startService(new Intent(getContext(), SampleService.class));
+
+        Service service = getService();
+        assertNotNull(service);
+        assertTrue(service instanceof SampleService);
+
+        SampleService ss = (SampleService)service;
+
+        try {
+            do {
+                Thread.sleep(1000);
+            } while (!ss.isCompleted());
+        } catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        List&lt;String&gt; names = ss.getNames();
+        assertNotNull(names);
+        assertEquals(3, names.size());
+    }
+}
+</code></pre>
+<p>テストする場合にはアプリ側に&lt;service&gt;で設定しておかなくても良い模様。又、タイミング処理をする場合にはフラグ等を持たせておいて完了するまで処理をThread.sleepさせておく、んでデータをチェックしたりすれば良いんじゃないかなーっと</p>
+
+<p>例えば一定時間で変わるLive Wallpaperのような場合だとサービスをstartさせてから一定時間変わったら表示されている現在のandroid.graphics.Bitmap?とかをチェックするとか。んまぁ要件によりきりかなと</p>
+<h3 id="section-5">ProviderTestCase2</h3><pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.content.ContentProvider;
+import android.content.ContentValues;
+import android.content.UriMatcher;
+import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.net.Uri;
+
+public class SampleProvider extends ContentProvider {
+
+    private static UriMatcher matcher;
+    private static final String AUTHORITIES = &quot;sample.test.provider&quot;;
+    private static final int SAMPLES = 0;
+
+    public static final String CONTENT_URI_STRING = &quot;content://&quot; + AUTHORITIES + &quot;/samples&quot;;
+    public static final Uri CONTENT_URI = Uri.parse(CONTENT_URI_STRING);
+
+    static {
+        matcher = new UriMatcher(UriMatcher.NO_MATCH);
+        matcher.addURI(AUTHORITIES, &quot;samples&quot;, SAMPLES);
+    }
+
+    @Override
+    public boolean onCreate() {
+        return true;
+    }
+
+    @Override
+    public String getType(Uri uri) {
+        if (matcher.match(uri) == SAMPLES) {
+            return &quot;vnd.android.cursor.dir/&quot; + AUTHORITIES;
+        }
+
+        return null;
+    }
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        MatrixCursor csr = new MatrixCursor(new String[]{ &quot;ID&quot;, &quot;NAME&quot; });
+
+        for (int i = 0;i &lt; 10;i++) {
+            csr.addRow(new Object[]{ i, &quot;hoge&quot; + (i + 1) });
+        }
+
+        return csr;
+    }
+
+    @Override
+    public Uri insert(Uri uri, ContentValues values) {
+        return null;
+    }
+
+    @Override
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        return 0;
+    }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        return 0;
+    }
+}
+</code></pre>
+<p>な感じでqueryの検証をProviderTestCase2で行える。Service同様にテストする状態であれば&lt;provider&gt;定義しなくても良い模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.database.Cursor;
+import android.test.ProviderTestCase2;
+
+import sample.test.SampleProvider;
+
+public class SampleProviderTestCase extends ProviderTestCase2&lt;SampleProvider&gt; {
+
+    public SampleProviderTestCase() {
+        super(SampleProvider.class, SampleProvider.CONTENT_URI_STRING);
+    }
+
+    public void test_query() {
+        SampleProvider provider = getProvider();
+        assertNotNull(provider);
+
+        Cursor csr = provider.query(SampleProvider.CONTENT_URI, null, null, null, null);
+        assertNotNull(csr);
+        assertEquals(2, csr.getColumnCount());
+        assertEquals(10, csr.getCount());
+    }
+}
+</code></pre>
+<p>な感じでProviderTestCase2を継承してgetProviderでProviderクラスの実体クラスが取得できてテスト出来る模様。ただ気になるのがコンストラクタの第2引数のプロバイダーのAuthorityがなぜ必要なのかっていう所。空にしてもテストコケないし... 謎なので分かり次第追記する</p>
+<h3 id="section-6">LoaderTestCase</h3>
+<p><a href="/2011/12/android-loader-testing-loadertestcase.html" target="_blank" rel="noopener">以前に検証した</a>ので省略</p>
+<h3 id="section-7">ActivityUnitTestCase</h3>
+<p>アクティビティ操作をテスト出来るクラスな模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+
+public class MainActivity extends Activity {
+
+    private ArrayAdapter&lt;String&gt; adapter;
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        setContentView(R.layout.main);
+
+        adapter = new ArrayAdapter&lt;String&gt;(this, android.R.layout.simple_list_item_1);
+
+        ((ListView)findViewById(R.id.listView)).setAdapter(adapter);
+
+        ((Button)findViewById(R.id.btn)).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (adapter != null) {
+                    adapter.clear();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        fetchSamples();
+    }
+
+    public void fetchSamples() {
+        if (adapter != null) {
+            for (int i = 0;i &lt; 10;i++) {
+                adapter.add(&quot;test&quot; + (i + 1));
+            }
+        }
+    }
+}
+</code></pre>
+<p>な感じで、onStartでデータを取得してListViewにバインド。んでボタンを押すとそれが消える。そういう操作をエミュレーションしてテストしてみるには</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.app.Application;
+import android.content.Intent;
+import android.test.ActivityUnitTestCase;
+import android.widget.Button;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+
+public class MainActivityTestCase extends ActivityUnitTestCase&lt;MainActivity&gt; {
+
+    public MainActivityTestCase() {
+        super(MainActivity.class);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        setApplication(new MainApplication());
+        startActivity(new Intent(Intent.ACTION_MAIN), null, null);
+    }
+
+    public void test_ActivityApplication() {
+        MainActivity activity = getActivity();
+        assertNotNull(activity);
+
+        Application app = activity.getApplication();
+        assertNotNull(app);
+        assertTrue(app instanceof MainApplication);
+    }
+
+    public void test_fetchSamples1() {
+        MainActivity activity = getActivity();
+        getInstrumentation().callActivityOnStart(activity);
+
+        assertNotNull(activity);
+
+        ListView listView = (ListView)activity.findViewById(R.id.listView);
+        assertNotNull(listView);
+
+        ListAdapter adapter = listView.getAdapter();
+        assertNotNull(adapter);
+        assertEquals(10, adapter.getCount());
+    }
+
+    public void test_fetchSamples2() {
+        MainActivity activity = getActivity();
+        assertNotNull(activity);
+
+        getInstrumentation().callActivityOnStart(activity);
+
+        ListView listView = (ListView)activity.findViewById(R.id.listView);
+        ListAdapter adapter = listView.getAdapter();
+        assertNotNull(adapter);
+        assertEquals(10, adapter.getCount());
+
+        final Button btn = (Button)activity.findViewById(R.id.btn);
+
+        activity.runOnUiThread(new Thread() {
+            @Override
+            public void run() {
+                btn.performClick();
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+
+        adapter = listView.getAdapter();
+        assertNotNull(adapter);
+        assertEquals(0, adapter.getCount());
+    }
+}
+</code></pre>
+<p>アクティビティは自動自動等しない模様なのでstartActivityで起動。んでsetApplicationで使用するApplicationクラスを指定出来る。でcallAcvitityOnStartでOnStartを発生させて、runOnUiThreadを使ってボタンをクリックしたり等の操作を行い、waitForIdelSyncで操作が完了するのを待つっていう感じかと</p>
+<h3 id="section-8">ActivityInstrumentationTestCase2</h3>
+<p>ActivityUnitTestCaseを使わずにAndroidManifest.xmlに沿った形式でAcvitityテストを行うにはこれでも出来る。ActivityUnitTestCaseで使ったAcvitityをそのままAcitvityInstrumentationTestCase2に移行させる場合には以下のような感じ</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.app.Application;
+import android.test.ActivityInstrumentationTestCase2;
+import android.widget.ListView;
+import android.widget.ListAdapter;
+import android.widget.Button;
+
+public class MainActivityTestCase extends ActivityInstrumentationTestCase2&lt;MainActivity&gt; {
+
+    public MainActivityTestCase() {
+        super(MainActivity.class);
+    }
+
+    public void test_getApplication() {
+        MainActivity activity = getActivity();
+        assertNotNull(activity);
+
+        Application app = activity.getApplication();
+        assertNotNull(app);
+        assertTrue(app instanceof MainApplication);
+    }
+
+    public void test_fetchSamples1() {
+        MainActivity activity = getActivity();
+        assertNotNull(activity);
+
+        ListView listView = (ListView)activity.findViewById(R.id.listView);
+        assertNotNull(listView);
+
+        ListAdapter adapter = listView.getAdapter();
+        assertNotNull(adapter);
+        assertEquals(10, adapter.getCount());
+    }
+
+    public void test_fetchSamples2() {
+        MainActivity activity = getActivity();
+        assertNotNull(activity);
+
+        final Button btn = (Button)activity.findViewById(R.id.btn);
+
+        activity.runOnUiThread(new Thread() {
+            @Override
+            public void run() {
+                btn.performClick();
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+
+        ListView listView = (ListView)activity.findViewById(R.id.listView);
+        ListAdapter adapter = listView.getAdapter();
+        assertNotNull(adapter);
+        assertEquals(0, adapter.getCount());
+    }
+}
+</code></pre><h3 id="section-9">SingleLaunchActivityTestCase</h3>
+<p>恐らくは上記のActivityテストの場合であるとテスト毎にActivityが初期化される。でテストで実行したアクティビティの状態を維持させたい場合には一度しか初期化されない模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.app.Application;
+import android.test.SingleLaunchActivityTestCase;
+import android.widget.Button;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+
+public class MainActivityTestCase extends SingleLaunchActivityTestCase&lt;MainActivity&gt; {
+
+    public MainActivityTestCase() {
+        super(&quot;sample.test&quot;, MainActivity.class);
+    }
+
+    public void testActivity() {
+        MainActivity activity = getActivity();
+        assertNotNull(activity);
+
+        Application app = activity.getApplication();
+        assertNotNull(app);
+        assertTrue(app instanceof MainApplication);
+    }
+
+    public void test_fetchSamples1() {
+        MainActivity activity = getActivity();
+        assertNotNull(activity);
+
+        ListView listView = (ListView)activity.findViewById(R.id.listView);
+        assertNotNull(listView);
+
+        ListAdapter adapter = listView.getAdapter();
+        assertNotNull(adapter);
+        assertEquals(10, adapter.getCount());
+    }
+
+    public void test_fetchSamples2() {
+        MainActivity activity = getActivity();
+        assertNotNull(activity);
+
+        ListView listView = (ListView)activity.findViewById(R.id.listView);
+
+        ListAdapter adapter = listView.getAdapter();
+        assertNotNull(adapter);
+        assertEquals(10, adapter.getCount());
+
+        final Button btn = (Button)activity.findViewById(R.id.btn);
+
+        activity.runOnUiThread(new Thread() {
+            @Override
+            public void run() {
+                btn.performClick();
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+
+        adapter = listView.getAdapter();
+        assertNotNull(adapter);
+        assertEquals(0, adapter.getCount());
+    }
+
+    public void test_fetchSamples3() {
+        MainActivity activity = getActivity();
+        assertNotNull(activity);
+
+        ListView listView = (ListView)activity.findViewById(R.id.listView);
+
+        ListAdapter adapter = listView.getAdapter();
+        assertNotNull(adapter);
+        assertEquals(10, adapter.getCount()); // fail
+    }
+}
+</code></pre>
+<p>ちなみにこのテストは成功しない。test_fetchSamples3ではListAdapterを取得してデータ数をカウントしているだけだけど、test_fetchSamples2で既にAdapterをボタンクリックによりクリアされているので、以降のテストにおいてデータをチェックするとテスト毎にアクティビティが初期化されずに状態維持されたままなのでテストがfailする。テストの順序がポイントになりそうな気もする</p>
+
+<p>ってな感じでAndroidコアに入ってるテストスイートなAPIは以上なんじゃないかなーって所。最近増えたのかどうかは定かじゃないけど、んまぁ以上な事を踏まえてテストする部分の所を適切なAPI選択すれば良いんじゃねーかと</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">前提</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">ApplicationTestCase</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">AndroidTestCase</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">ServiceTestCase</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">ProviderTestCase2</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">LoaderTestCase</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">ActivityUnitTestCase</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">ActivityInstrumentationTestCase2</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">SingleLaunchActivityTestCase</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/01/contentprovider-returned-cursor.html" class="d-block p-2">ContentProviderから返されたCursor実装を取る</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/01/android-search-hardware-key-suggestion.html" class="d-block p-2">Androidアプリ上でのサーチハードウェアキーによる振る舞い機能を実装</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/07/android-localbroadcastmanager.html" class="d-block p-2">LocalBroadcastManager</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/05/android-dialogfragment-testing.html" class="d-block p-2">DialogFragmentのテスト</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/01/android-accountmanager.html" class="d-block p-2">Android AccountManagerで使えるカスタムアカウントを開発する方法</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/01/nginx-root-alias.html" rel="prev">&lt;&nbsp;nginxのrootとalias</a>
+              <a href="/2013/01/fluent-plugin-mongo.html" rel="next">fluent-plugin-mongoに突っ込んでみる&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

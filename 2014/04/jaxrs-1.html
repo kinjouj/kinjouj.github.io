@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Jerseyドキュメント: &lt;https://jersey.java.net/documentation/latest/index.html&gt;" />
+    <meta property="og:title" content="JAX-RSをやってみる (1)" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2014/04/jaxrs-1.html">
+    <title>JAX-RSをやってみる (1) - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2014/04/jaxrs-1.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "JAX-RSをやってみる (1)",
+  "datePublished": "2014-06-05T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "Jerseyドキュメント: \u003chttps://jersey.java.net/documentation/latest/index.html\u003e"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2014/06">
+                  <span class="post-date-year">2014</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">5</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">JAX-RSをやってみる (1)</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+                <a href="/archives/categories/jax-rs" class="fs-5">JAX-RS</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>Jerseyドキュメント: <a href="https://jersey.java.net/documentation/latest/index.html" target="_blank" rel="noopener">https://jersey.java.net/documentation/latest/index.html</a>  </p>
+
+<p>参考: <a href="http://backpaper0.github.io/2013/05/02/jaxrs.html" target="_blank" rel="noopener">http://backpaper0.github.io/2013/05/02/jaxrs.html</a></p>
+
+<p>JavaでRESTfulなWebアプリケーションを作るっていう場合とかだとJAX-RSを使えば何かと便利っぽそうなのでいろいろ勉強してみたのでちょっとだけまとめる</p>
+
+<p>※JAX-RSのバージョンは2.x系をターゲットにしてます。又、以下で書くのはあくまでサーバーを起動して利用する前提ではなくテストを書いて実行しているだけなのでサーバー関係に伴ってくる部分に関しては今後に書く予定</p>
+<h3 id="section-1">セットアップ</h3><pre class="line-numbers"><code class="language-groovy">// javaプラグインじゃなくてwarプラグインを利用するべきかも
+apply plugin: &quot;java&quot;
+apply plugin: &quot;jetty&quot;
+apply plugin: &quot;eclipse&quot;
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile &quot;org.glassfish.jersey.containers:jersey-container-servlet:2.+&quot;
+    runtime &quot;org.glassfish.jersey.media:jersey-media-moxy:+&quot;
+
+    testCompile &quot;org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:+&quot;
+    testCompile &quot;org.hamcrest:hamcrest-all:+&quot;
+}
+</code></pre>
+<p>バージョン指定周りは適当ですけど、実際にこっちで使ってるバージョンは2.9.x系な模様なので</p>
+
+<p>まぁこれでデプロイ出来るwar作ってアプリケーションサーバーにデプロイしたらなんらかの問題出そうだけど</p>
+<h3 id="section-2">web.xml</h3>
+<p><a href="https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet" target="_blank" rel="noopener">https://jersey.java.net/documentation/latest/user-guide.html#deployment.servlet</a>にも書いてあるけど、javax.ws.rs.Applicationに該当するクラスを作るか、アノテーションを探索するパッケージを指定するかの2つを指定出来る</p>
+
+<p>例えば前者のjavax.ws.rs.Applicationに該当するようなクラスを作る場合とかだと</p>
+<pre class="line-numbers"><code class="language-java">package sample;
+
+import javax.ws.rs.ApplicationPath;
+import org.glassfish.jersey.server.ResourceConfig;
+
+@ApplicationPath(&quot;/aaa&quot;)
+public class SampleApplication extends ResourceConfig {
+
+    public SampleApplication() {
+        packages(&quot;sample&quot;);
+    }
+}
+</code></pre>
+<p>のようにしてコンストラクタでpackagesメソッドを用いてアノテーションを探索するパッケージを指定する。で後者のパッケージ名をweb.xml自体に記述する事でも可能</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app
+    xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;
+    version=&quot;3.0&quot;&gt;
+
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;jersey&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;org.glassfish.jersey.servlet.ServletContainer&lt;/servlet-class&gt;
+        &lt;init-param&gt;
+            &lt;param-name&gt;jersey.config.server.provider.packages&lt;/param-name&gt;
+            &lt;param-value&gt;sample&lt;/param-value&gt;
+        &lt;/init-param&gt;
+
+        &lt;!-- javax.ws.rs.Applicationを使う場合はこっちで指定
+        &lt;init-param&gt;
+            &lt;param-name&gt;javax.ws.rs.Application&lt;/param-name&gt;
+            &lt;param-value&gt;sample.SampleApplication&lt;/param-value&gt;
+        &lt;/init-param&gt;
+        --&gt;
+
+        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+    &lt;/servlet&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;jersey&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+
+&lt;/web-app&gt;
+</code></pre>
+<p>んまぁここまでが開発環境構築的な所。ちなみに上記のjavax.ws.rs.Applicationに該当するクラスにある@ApplicationPathはJAX-RSに準拠しているアプリケーションサーバー以外では作用しないのではないかと(あくまで&lt;servlet-mapping&gt;によるパスをオーバーライドする目的な模様。詳しくないのでggrks)</p>
+<h3 id="section-3">コントローラーを作成</h3>
+<p>JAX-RSアプリケーションのコントローラーは特に何かを継承したりはしない。ほとんどがアノテーションを利用してマッピングなどを利用する為アノテーションを使ったコードを書けば良いだけ</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.Path;
+import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+
+import sample.bean.SampleBean;
+
+import static javax.ws.rs.core.MediaType.*;
+
+@Path(&quot;/sample&quot;)
+public class Home {
+
+    @GET
+    @Produces({ TEXT_PLAIN, TEXT_HTML })
+    public Response index() {
+        return Response.ok(&quot;hoge&quot;).build();
+    }
+
+    @Path(&quot;list&quot;)
+    @GET
+    @Produces(APPLICATION_JSON)
+    public List&lt;SampleBean&gt; indexListToJson() {
+        List&lt;SampleBean&gt; beans = new ArrayList&lt;SampleBean&gt;(2);
+        beans.add(new SampleBean(&quot;hoge&quot;));
+        beans.add(new SampleBean(&quot;fuga&quot;));
+
+        return beans;
+    }
+}
+</code></pre>
+<p>んまぁ@Pathだとか@GETは単純に名称だけでどういう役割を持つかわかると思うので省略するが、@Producesやここには書いてないけど@Consumesっていうのもある(以降で記述しているのでここでは避ける)</p>
+
+<p>@Producesや@ConsumesはSpring WebMVCにもあるけど受け手や出し手に対するメディアタイプを指定するような物だと思うので、上記の場合indexListToJsonで返されたListはJSONとしてレンダリングするように出来る。だけど、それのメディアタイプのコンバーターが無いと返す値によってはレンダリングは出来ない。Listやオブジェクトなどの場合においては上記のbuild.gradleで書いてるjersey-media-moxyっていうのを使えば出来る模様</p>
+
+<p>んまぁコントローラーはざっくりとこんなもんで。他のアノテーションも以降で記述するので(ry</p>
+<h3 id="section-4">コントローラーのテストを書く</h3>
+<p>んまぁJerseyTestを使えば簡単に出来る</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import java.util.List;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.bean.SampleBean;
+
+import static javax.ws.rs.core.MediaType.*;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        // org.glassfish.jersey.server.ResourceConfig を継承したクラスを定義してjavax.ws.rs.Applicationとしてweb.xmlで設定しているような場合にはそのインスタンスをぶん投げれば良い模様
+        // return new SampleApplication();
+
+        return new ResourceConfig(Home.class);
+    }
+
+    @Test
+    public void test_index() {
+        String data = target(&quot;/sample&quot;).request(TEXT_PLAIN).get(String.class);
+        assertThat(data, notNullValue());
+        assertThat(data, is(&quot;hoge&quot;));
+
+        // Response型と利用してテストするケース
+        Response response = target(&quot;/sample&quot;).request(TEXT_PLAIN).get();
+        assertThat(response, notNullValue());
+        assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+        String readData = response.readEntity(String.class);
+        assertThat(readData, notNullValue());
+        assertThat(readData, is(&quot;hoge&quot;));
+    }
+
+    @Test
+    public void test_indexListToJson() {
+        List&lt;SampleBean&gt; beans = target(&quot;/sample/list&quot;)
+            .request()
+            .accept(APPLICATION_JSON)
+            .get(new GenericType&lt;List&lt;SampleBean&gt;&gt;() {});
+
+        assertThat(beans, hasSize(2));
+    }
+}
+</code></pre>
+<p>てな感じでテスト書いて実行</p>
+
+<p>んまぁそんな感じでJAX-RSを使ってアノテーションベースでRESTful Webアプリケーションを作る事が出来るっていう感じで。んまぁ今後もドキュメントなり読みつつ勉強する予定なのでその都度色々ネタ書く予定って事で、おさわり的な所はこんなもんで</p>
+
+<p>※以降がその他のアノテーションの紹介</p>
+<h3 id="section-5">@QueryParamアノテーション</h3>
+<p>@QueryParamを使えばクエリパラメータをメソッドの引数等(フィールド等に定義したりする事も可能)に指定する事で値を引数にマッピングしたり出来る。又、@DefualtValueを使えばデフォルト値の設定なども出来る</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Path;
+import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+
+import sample.bean.SampleBean;
+import static javax.ws.rs.core.MediaType.*;
+
+@Path(&quot;/sample&quot;)
+public class Home {
+
+    @Path(&quot;get&quot;)
+    @GET
+    @Produces(APPLICATION_JSON)
+    public SampleBean get(@QueryParam(&quot;name&quot;) @DefaultValue(&quot;hoge&quot;) SampleBean bean) {
+        return bean;
+    }
+}
+</code></pre>
+<p>でこの場合引数の型がSampleBeanっていうのになっているけど、引数にオブジェクト型を指定するような場合だとそのクラスのvalueOfかfromStringメソッドを呼び出してオブジェクトのインスタンス化出来るようにするので</p>
+<pre class="line-numbers"><code class="language-java">package sample.bean;
+
+import java.io.Serializable;
+
+public class SampleBean implements Serializable {
+
+    private String name;
+
+    public SampleBean() {
+    }
+
+    public SampleBean(String name) {
+        setName(name);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public static SampleBean fromString(String value) {
+        return new SampleBean(value);
+    }
+}
+</code></pre>
+<p>っていうようにfromStringメソッドなりを実装しておけば引数にオブジェクト型を指定した場合には型変換の仕組みを利用する事が出来る模様</p>
+
+<p>でこの場合テストは</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import javax.ws.rs.core.Application;
+
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.bean.SampleBean;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig(Home.class);
+    }
+
+    @Test
+    public void test_get() {
+        SampleBean bean = target(&quot;/sample/get&quot;)
+            .queryParam(&quot;name&quot;, &quot;test_get&quot;)
+            .request()
+            .get(SampleBean.class);
+
+        assertThat(bean, notNullValue());
+        assertThat(bean.getName(), is(&quot;test_get&quot;));
+    }
+
+    @Test
+    public void test_get_default() {
+        SampleBean bean = target(&quot;/sample/get&quot;).request().get(SampleBean.class);
+        assertThat(bean, notNullValue());
+        assertThat(bean.getName(), is(&quot;hoge&quot;));
+    }
+}
+</code></pre>
+<p>又、引数にInteger等を指定した場合にInteger型ではないデータを指定しているような場合だと、javax.ws.rs.NotFoundExceptionになる模様</p>
+<h3 id="section-6">@PathParamアノテーション</h3><pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import javax.ws.rs.Path;
+import javax.ws.rs.GET;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
+import sample.bean.SampleBean;
+import static javax.ws.rs.core.MediaType.*;
+
+@Path(&quot;/sample&quot;)
+public class Home {
+
+    @Path(&quot;show/{name}&quot;)
+    @GET
+    @Produces(APPLICATION_JSON)
+    public SampleBean show(@PathParam(&quot;name&quot;) SampleBean bean) {
+        return bean;
+    }
+}
+</code></pre>
+<p>URLパスの一部をマッピングするアノテーションで、正規表現によるパターンマッチングも可能な模様。テストする場合には普通にパス指定すれば良いだけなのでこの件に関しては省略</p>
+<h3 id="section-7">@MatrixParamアノテーション</h3>
+<p>参考サイトによるとセミコロンで区切った形式の値をマッピング出来る模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.MatrixParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
+
+import sample.bean.SampleBean;
+import static javax.ws.rs.core.MediaType.*;
+
+@Path(&quot;/sample&quot;)
+public class Home {
+
+    @Path(&quot;pair&quot;)
+    @GET
+    @Produces(APPLICATION_JSON)
+    public List&lt;SampleBean&gt; pair(
+        @MatrixParam(&quot;first&quot;) SampleBean first,
+        @MatrixParam(&quot;second&quot;) SampleBean second
+    ) {
+        List&lt;SampleBean&gt; beans = new ArrayList&lt;SampleBean&gt;(2);
+        beans.add(first);
+        beans.add(second);
+
+        return beans;
+    }
+}
+</code></pre>
+<p>っていう風に定義すると&lt;span style=&quot;color: red&quot;&gt;/sample/pair;first=first;second=second&lt;/span&gt;のようなリクエストを利用出来る</p>
+
+<p>テストは</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import java.util.List;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.GenericType;
+
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.bean.SampleBean;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig(Home.class);
+    }
+
+    @Test
+    public void test_pair() {
+        List&lt;SampleBean&gt; beans = target(&quot;/sample/pair&quot;)
+            .matrixParam(&quot;first&quot;, &quot;sample_first&quot;)
+            .matrixParam(&quot;second&quot;, &quot;sample_second&quot;)
+            .request()
+            .get(new GenericType&lt;List&lt;SampleBean&gt;&gt;() {});
+
+        assertThat(beans, hasSize(2));
+        assertThat(beans.get(0).getName(), is(&quot;sample_first&quot;));
+        assertThat(beans.get(1).getName(), is(&quot;sample_second&quot;));
+    }
+}
+</code></pre>
+<p>っていう感じで、martixParamを用いてパラメーターを設定してリクエストしてテスト出来る</p>
+<h3 id="section-8">@FormParam</h3>
+<p>@FormParamを用いるとフォーム送信(application/x-www-form-urlencoded?)によるパラメーターの取得が可能になる。又、@BeanParamを使う事でフォームから送信されたデータをオブジェクトにマッピングしたりも出来る。その場合はオブジェクトに@FormParamアノテーションを付与する</p>
+<pre class="line-numbers"><code class="language-java">package sample.bean;
+
+import java.io.Serializable;
+import javax.ws.rs.FormParam;
+
+public class SampleBean implements Serializable {
+
+    @FormParam(&quot;name&quot;)
+    private String name;
+
+    public SampleBean() {
+    }
+
+    public SampleBean(String name) {
+        setName(name);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+</code></pre>
+<p>っていうように@FormParamアノテーションを引数にマッピングするオブジェクトに付与しておく</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import javax.ws.rs.BeanParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
+import sample.bean.SampleBean;
+import static javax.ws.rs.core.MediaType.*;
+
+@Path(&quot;/sample&quot;)
+public class Home {
+
+    @Path(&quot;save&quot;)
+    @POST
+    // 明示的に@Consumesをつけておいた方が良いのかも
+    @Produces(APPLICATION_JSON)
+    public SampleBean save(@BeanParam SampleBean bean) {
+        return bean;
+    }
+}
+</code></pre>
+<p>っていうように@BeanParamを付与したパラメーターを指定する事で@FormParamで参照されるパラメーターがマッピングされたオブジェクトを利用出来る。でフォームテストをする場合には</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.Form;
+
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.bean.SampleBean;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig(Home.class);
+    }
+
+    @Test
+    public void test_save_form() {
+        Form form = new Form();
+        form.param(&quot;name&quot;, &quot;test_save_form&quot;);
+
+        SampleBean bean = target(&quot;/sample/save&quot;)
+            .request()
+            .post(Entity.form(form), SampleBean.class);
+
+        assertThat(bean, notNullValue());
+        assertThat(bean.getName(), is(&quot;test_save_form&quot;));
+    }
+}
+</code></pre>
+<p>っていう感じでpostメソッドの引数に指定すりゃ良い。ちなみにリクエストメソッドがサポートされていないような場合とかだとjavax.ws.rs.NotAllowedExceptionがスローされる</p>
+
+<p>余談としてJSONをPOSTしてぶん投げるような場合のテストは</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
+
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.bean.SampleBean;
+
+import static javax.ws.rs.core.MediaType.*;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig(Home.class);
+    }
+
+    @Test
+    public void test_save_json() {
+        SampleBean bean = target(&quot;/sample/save&quot;)
+            .request()
+            .post(Entity.entity(new SampleBean(&quot;test_save&quot;), APPLICATION_JSON), SampleBean.class);
+
+        assertThat(bean, notNullValue());
+        assertThat(bean.getName(), is(&quot;test_save&quot;));
+    }
+}
+</code></pre>
+<p>っていうようにEntity.entityでやれば良い模様</p>
+
+<p>以上でアノテーションの紹介は終わりだけど、まだまだアノテーションたくさんあると思われるので状況次第でネタを書く</p>
+<h3 id="section-9">追記: @Encodedアノテーションについて</h3><pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import javax.ws.rs.Encoded;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+@Path(&quot;/sample&quot;)
+public class Home {
+
+    @GET
+    @Path(&quot;save&quot;)
+    public String saveEncode(@Encoded @QueryParam(&quot;q&quot;) String query) {
+        return query;
+    }
+
+    @GET
+    @Path(&quot;save/noenc&quot;)
+    public String saveNonEncode(@QueryParam(&quot;q&quot;) String query) {
+        return query;
+    }
+}
+</code></pre>
+<p>っていう感じで@Encodedがついてるメソッドとついてないメソッドを定義しておく</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import javax.ws.rs.core.Application;
+
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+
+import sample.SampleApplication;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new SampleApplication();
+    }
+
+    @Test
+    public void test_save() {
+        String response = target(&quot;/sample/save&quot;)
+            .queryParam(&quot;q&quot;, &quot;&lt;script&gt;alert(&quot;hoge&quot;);&lt;/script&gt;&quot;)
+            .request()
+            .get(String.class);
+        assertThat(response, is(&quot;%3Cscript%3Ealert(&quot;hoge&quot;);%3C/script%3E&quot;));
+    }
+
+    @Test
+    public void test_saveNonEncode() {
+        String response = target(&quot;/sample/save/noenc&quot;)
+            .queryParam(&quot;q&quot;, &quot;&lt;script&gt;alert(&quot;hoge&quot;);&lt;/script&gt;&quot;)
+            .request()
+            .get(String.class);
+        assertThat(response, is(&quot;&lt;script&gt;alert(&quot;hoge&quot;);&lt;/script&gt;&quot;));
+    }
+}
+</code></pre>
+<p>っていう事になる。JAX-RSではクエリー等を受け取る際にエンコードされたデータを自動でデコードしてメソッド等にマッピングするが、@Encodedをついてる場合に限っては生データが直接渡される模様</p>
+
+<p>ロクな検証してないけど、@Encodedをついてないでデータベースに登録してテンプレートエンジン等を用いてそのデータをレンダリングした場合等にはXSSの可能性が出てくるのはないかと</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">セットアップ</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">web.xml</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">コントローラーを作成</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">コントローラーのテストを書く</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">@QueryParamアノテーション</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">@PathParamアノテーション</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">@MatrixParamアノテーション</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">@FormParam</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">追記: @Encodedアノテーションについて</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2014/06/jaxrs-11-server-sent-events.html" class="d-block p-2">JAX-RSをやってみる (11) - Server Sent Events -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/06/jaxrs-3-autodiscoverable.html" class="d-block p-2">JAX-RSをやってみる (3) - AutoDiscoverable -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/06/jaxrs-12-mvc.html" class="d-block p-2">JAX-RSをやってみる (12) - MVC -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/04/jaxrs-2-glassfish-deployment.html" class="d-block p-2">JAX-RSをやってみる (2) - glassfish deployment -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/10/jaxrs-17-securitycontext.html" class="d-block p-2">JAX-RSをやってみる (17) - SecurityContext -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2014/04/jaxrs-2-glassfish-deployment.html" rel="prev">&lt;&nbsp;JAX-RSをやってみる (2) - glassfish deployment -</a>
+              <a href="/2014/05/android-engineio.html" rel="next">Androidでengine.io&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

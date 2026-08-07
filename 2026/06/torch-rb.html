@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="PyTorchのRuby版？のTorch.rbを使って関連記事を推測できるようなのをなんとなく作ってみた" />
+    <meta property="og:title" content="Torch.rbを使ってみた" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2026/06/torch-rb.html">
+    <title>Torch.rbを使ってみた - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2026/06/torch-rb.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Torch.rbを使ってみた",
+  "datePublished": "2026-06-02T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "PyTorchのRuby版？のTorch.rbを使って関連記事を推測できるようなのをなんとなく作ってみた"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2026/06">
+                  <span class="post-date-year">2026</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">2</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">Torch.rbを使ってみた</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/ruby" class="fs-5">Ruby</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>PyTorchのRuby版？のTorch.rbを使って関連記事を推測できるようなのをなんとなく作ってみた</p>
+<h4 id="section-1">train.rb</h4><pre class="line-numbers"><code class="language-ruby"># frozen_string_literal: true
+
+require &quot;torch&quot;
+require &quot;natto&quot;
+
+class DocumentRepository
+  VOCAB_LIMIT = 50_000
+
+  attr_reader :db, :vocab, :embed_weight
+
+  def initialize(model_file)
+    @model_file   = model_file
+    checkpoint    = File.exist?(model_file) ? (Torch.load(model_file) rescue {}) : {} # rubocop:disable Style/RescueModifier
+    @db           = checkpoint[&quot;db&quot;] || {}
+    @vocab        = checkpoint[&quot;vocab&quot;] || {}
+    @embed_weight = checkpoint[&quot;embed_weight&quot;]
+  end
+
+  def add_article(title, body)
+    tokens = tokenize(body)
+    update_vocab(tokens)
+
+    new_id = ((@db.keys.map(&amp;:to_i).max || 0) + 1).to_s
+    @db[new_id] = { &quot;title&quot; =&gt; title, &quot;content&quot; =&gt; body, &quot;tokens&quot; =&gt; tokens }
+    new_id
+  end
+
+  def build_jaccard_matrix
+    v_size = [vocab.size, 1].max
+    word_docs = Hash.new {|h, k| h[k] = [] }
+    @db.each {|post_id, data| data[&quot;tokens&quot;].each {|w| word_docs[w] &lt;&lt; post_id if @vocab[w] } }
+    word_docs.each_value(&amp;:uniq!)
+
+    raw_matrix = Array.new(v_size) { Array.new(v_size, 0.0) }
+    @vocab.each do |w1, idx1|
+      @vocab.each do |w2, idx2|
+        next if idx1 &gt; idx2
+
+        union = (word_docs[w1] | word_docs[w2]).size.to_f
+        jaccard = union &gt; 0 ? (word_docs[w1] &amp; word_docs[w2]).size.to_f / union : 0.0
+        raw_matrix[idx1][idx2] = jaccard
+        raw_matrix[idx2][idx1] = jaccard
+      end
+    end
+    raw_matrix
+  end
+
+  def update_relations(normalized_weight)
+    @db.each_value do |data|
+      token_ids = data[&quot;tokens&quot;].filter_map {|w| @vocab[w] }
+      data[&quot;vector&quot;] = token_ids.empty? ? nil : normalized_weight[Torch.tensor(token_ids)].mean(0)
+      data[&quot;related&quot;] = {}
+    end
+
+    ids = @db.keys
+    ids.each_with_index do |post_id, idx|
+      vec1 = @db[post_id][&quot;vector&quot;] or next
+
+      ((idx + 1)...ids.size).each do |j|
+        other_id = ids[j]
+        vec2 = @db[other_id][&quot;vector&quot;] or next
+
+        cos_sim = Torch.dot(vec1, vec2).item
+        @db[post_id][&quot;related&quot;][other_id] = cos_sim
+        @db[other_id][&quot;related&quot;][post_id] = cos_sim
+      end
+    end
+  end
+
+  def save(final_embed_weight)
+    Torch.save({ &quot;db&quot; =&gt; @db, &quot;vocab&quot; =&gt; @vocab, &quot;embed_weight&quot; =&gt; final_embed_weight }, @model_file)
+  end
+
+  private
+
+  def tokenize(body)
+    tokens = []
+    Natto::MeCab.new.parse(body).each_line do |line|
+      break if line.strip == &quot;EOS&quot;
+
+      tokens &lt;&lt; Regexp.last_match(1).downcase if line =~ /\A([[:alnum:]]{4,}|[^\t\n]{2,})\t名詞,(?:固有名詞|一般|サ変接続),[^\n]*/
+    end
+    tokens
+  end
+
+  def update_vocab(tokens)
+    tokens.each do |word|
+      @vocab[word] = @vocab.size if @vocab[word].nil? &amp;&amp; @vocab.size &lt; VOCAB_LIMIT
+    end
+  end
+end
+
+class EmbeddingTrainer # rubocop:disable Style/OneClassPerFile
+  DIM = 32
+
+  def initialize(v_size, old_weight = nil)
+    @v_size = v_size
+    @weight_tensor = prepare_weight_tensor(old_weight)
+    @embed = Torch::NN::Embedding.new(@v_size, DIM)
+    @embed.load_state_dict({ &quot;weight&quot; =&gt; @weight_tensor })
+  end
+
+  def train(jaccard_matrix, epochs: 50)
+    target_tensor = Torch.tensor(jaccard_matrix, dtype: :float32)
+    optimizer     = Torch::Optim::Adam.new(@embed.parameters, lr: 0.05)
+    criterion     = Torch::NN::MSELoss.new
+
+    epochs.times do
+      weights    = @embed.weight
+      norms      = weights.norm(2, 1, true) + 1e-8
+      normalized = weights / norms
+      pred       = Torch.mm(normalized, normalized.t)
+      loss       = criterion.call(pred, target_tensor)
+
+      optimizer.zero_grad
+      loss.backward
+      optimizer.step
+    end
+  end
+
+  def embed_weight
+    @embed.weight.data
+  end
+
+  def normalized_weight
+    @embed.weight / (@embed.weight.norm(2, 1, true) + 1e-8)
+  end
+
+  private
+
+  def prepare_weight_tensor(old_weight)
+    return Torch.randn(@v_size, DIM) * 0.1 unless old_weight
+
+    old_v_size = old_weight.size(0)
+    return old_weight if @v_size &lt;= old_v_size
+
+    new_weight = Torch.randn(@v_size - old_v_size, DIM) * 0.1
+    Torch.cat([old_weight, new_weight], 0)
+  end
+end
+
+title = ARGV[0] || &quot;&quot;
+body  = ARGV[1] or raise &quot;Not found: data&quot;
+
+repo = DocumentRepository.new(&quot;model.pth&quot;)
+new_id = repo.add_article(title, body)
+jaccard_matrix = repo.build_jaccard_matrix
+v_size = [repo.vocab.size, 1].max
+
+trainer = EmbeddingTrainer.new(v_size, repo.embed_weight)
+trainer.train(jaccard_matrix, epochs: 50)
+
+repo.update_relations(trainer.normalized_weight)
+repo.save(trainer.embed_weight)
+
+puts &quot;最新追加ID: #{new_id}（タイトル: #{title}）&quot;
+</code></pre>
+<p>データを形態素で解析して単語の相関行列を生成、Torchで学習処理を行った後コサイン類似度（または内積）で関連度を取得し保存</p>
+
+<p>てな感じで</p>
+<h4 id="section-2">read.rb</h4>
+<p>train.rbで作ったmodel.pthを使ってそれを読み取って取得するだけ</p>
+<pre class="line-numbers"><code class="language-ruby">#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require &quot;torch&quot;
+
+class Recommender
+  def initialize(model_file)
+    raise &quot;Not found: #{model_file}&quot; unless File.exist?(model_file)
+
+    checkpoint = Torch.load(model_file)
+    @db = checkpoint[&quot;db&quot;] || {}
+  end
+
+  def find_post(id)
+    @db[id.to_s] or raise &quot;Error: Not found #{id}&quot;
+  end
+
+  def related_posts(id)
+    target = find_post(id)
+
+    posts = (target[&quot;related&quot;] || {}).filter_map do |post_id, score|
+      next if @db[post_id].nil?
+
+      { id: post_id, score: score, title: @db[post_id][&quot;title&quot;] }
+    end
+
+    posts.max_by(10) {|r| r[:score] }.sort_by {|r| -r[:score] }
+  end
+end
+
+target_id = ARGV[0] or raise &quot;Not found: id&quot;
+
+engine = Recommender.new(&quot;model.pth&quot;)
+
+target = engine.find_post(target_id)
+puts &quot;ID:#{target_id} #{target[&#39;title&#39;]}\n\n&quot;
+
+related_list = engine.related_posts(target_id)
+related_list.each do |res|
+  puts &quot;[ID:#{res[:id]}] (#{res[:score]})\t#{res[:title]}&quot;
+end
+</code></pre><h4 id="section-3">結果</h4>
+<p><img src="/images/2026/06/2026060201.jpg" alt="image" /></p>
+
+<p>という感じでTorchの機械学習を使ってこういうような事もできるよってことでｗ</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">train.rb</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">read.rb</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">結果</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2025/06/ruby-json-convert-object.html" class="d-block p-2">RubyでのJSONからオブジェクトに変換するっていう話</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/11/fuelphp-8-orm-model.html" class="d-block p-2">FuelPHPをやってみる (8) - OrmModelを試す -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/08/activerecord-polymorphic-association.html" class="d-block p-2">ActiveRecordのpolymorphic</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/10/jaxrs-18-oauth1provider.html" class="d-block p-2">JAX-RSをやってみる (18) - OAuth1Provider -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2026/06/ruby-coding-guide.html" class="d-block p-2">私的Rubyのコーディングガイド</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2026/06/ruby-coding-guide.html" rel="prev">&lt;&nbsp;私的Rubyのコーディングガイド</a>
+              <a href="/2026/02/react-router-outlet.html" rel="next">react-routerの&lt;Outlet&gt;&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

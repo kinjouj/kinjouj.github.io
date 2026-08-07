@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="公式リファレンス: &lt;http://docs.angularjs.org/api/ng/service/$q&gt;" />
+    <meta property="og:title" content="angular.jsをやってみる (20) - $q -" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2014/04/angularjs-20-q-deferred-object.html">
+    <title>angular.jsをやってみる (20) - $q - - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2014/04/angularjs-20-q-deferred-object.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "angular.jsをやってみる (20) - $q -",
+  "datePublished": "2014-04-10T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式リファレンス: \u003chttp://docs.angularjs.org/api/ng/service/$q\u003e"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2014/04">
+                  <span class="post-date-year">2014</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">4</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">10</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">angular.jsをやってみる (20) - $q -</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/angular-dot-js" class="fs-5">angular.js</a>
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>公式リファレンス: <a href="http://docs.angularjs.org/api/ng/service/$q" target="_blank" rel="noopener">http://docs.angularjs.org/api/ng/service/$q</a></p>
+
+<p>以下の例だと非常に微妙なんだけれども、例えば</p>
+<pre class="line-numbers"><code class="language-js">var Sample = (function() {
+
+  var values = [&quot;hoge&quot;, &quot;fuga&quot;, &quot;foobar&quot;];
+
+  function Sample() {
+  }
+
+  Sample.prototype.getName = function(cb) {
+    setTimeout(function() {
+      var index = Math.floor(Math.random() * values.length);
+      cb(values[index]);
+    }, 1000);
+  }
+
+  return Sample;
+
+})();
+</code></pre>
+<p>なんていうのがあった場合に</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
+  .factory(&quot;SampleFactory&quot;, function() {
+    return {
+      getName: function() {
+        var name;
+
+        var sample = new Sample();
+        sample.getName(function(value) {
+          name = value;
+        });
+
+        return name;
+      }
+   };
+  })
+  .controller(&quot;SampleController&quot;, function($scope, SampleFactory) {
+    $scope.name = SampleFactory.getName();
+  });
+</code></pre>
+<p>だなんてやってもSampleFactory.getNameで返される値はundefinedにしかならない。そりゃその値が返される際にまだコールバックが発生していないのでname変数は初期化すらされずundefinedになるっていうオチ</p>
+
+<p>んまぁこういうパターンだと別にfactoryしなくても良いケースなので分かりづらいけど、要は非同期処理等が行われるにあたって、それが完了した際に通知するような仕組みを利用しなければ正常に値が取得できないような場合には$qなDeferredオブジェクトを利用する事で可能っぽい。っていう事で$qを使って上記コードを書き換えると</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;app&quot;, [])
+  .factory(&quot;SampleFactory&quot;, function($q) {
+    return {
+      getName: function() {
+        var deferred = $q.defer();
+
+        var sample = new Sample();
+        sample.getName(function(value) {
+          deferred.resolve(value);
+        });
+
+        return deferred.promise;
+      }
+   };
+  })
+  .controller(&quot;SampleController&quot;, function($scope, SampleFactory) {
+    SampleFactory.getName().then(function(value) {
+      $scope.name = value;
+    });
+  });
+</code></pre>
+<p>っていう感じかと。まぁ大体な使い方自体はjQuery.Deferredと同じ感じかと</p>
+
+<p>で結局はserviceやfactory(controllerだとコールバックで$scope.$applyすりゃいいので)等において、結果が非同期によって処理されるようなケースの場合だと値を$q.promiseなDeferredオブジェクトを返しておいてthen等によって値を受け取るような仕組みを採用する事でカバー出来る感じ</p>
+<h3 id="section-1">余談</h3>
+<p>Chrome Extensionとかだとchrome.runtime.getBackgroundPageを使うもあると思うが、それ自体は非同期で処理されるのでservice等でChrome Extension Background Pageなスコープなオブジェクトを使う場合に</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;twitterApp&quot;, [&quot;ngRoute&quot;, &quot;ngSanitize&quot;])
+  .service(&quot;twitter&quot;, function() {
+    var twitter;
+
+    chrome.runtime.getBackgroundPage(function(bg) {
+      twitter = bg.twitter;
+    });
+
+    return twitter;
+  })
+</code></pre>
+<p>なんていうのをやってもコントローラーで処理される際にこの値が返ってくるとは限らない(Event Pagesによりバックグラウンドページのインスタンスがアイドル化する事がある為に結果が返ってくるまでに遅延する事がある)。よってこういうケースにおいても</p>
+<pre class="line-numbers"><code class="language-js">angular.module(&quot;twitterApp&quot;, [&quot;ngRoute&quot;, &quot;ngSanitize&quot;])
+  .service(&quot;twitter&quot;, function($q) {
+    var deferred = $q.defer();
+
+    chrome.runtime.getBackgroundPage(function(bg) {
+      deferred.resolve(bg.twitter);
+    });
+
+    return deferred.promise;
+  })
+</code></pre>
+<p>というようにDeferredオブジェクトを利用して値を取得するようなパターンにするべきかと</p>
+
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2014/03/angularjs-9-resource-paramsdefault-atmark-prefix.html" class="d-block p-2">angular.jsをやってみる (9) - $resourceのparamsDefaultにおける@接頭辞 -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/03/angularjs-13-sce-ng-sanitize.html" class="d-block p-2">angular.jsをやってみる (13) - $sceとngSanitize -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/03/angularjs-4-filter.html" class="d-block p-2">angular.jsをやってみる (4) - filter -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/07/scope-eval-arguments.html" class="d-block p-2">scope.$evalで引数を設定する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/10/rails-assets-pipeline.html" class="d-block p-2">Rails assets pipeline</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2014/04/angularjs-21-logprovider.html" rel="prev">&lt;&nbsp;angular.jsをやってみる (21) - $logProvider -</a>
+              <a href="/2014/04/angularjs-19-append-element-animate-enter.html" rel="next">angular.jsをやってみる (19) - 動的に追加したエレメントに対して$animate.enter -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

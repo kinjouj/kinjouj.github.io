@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Javaなテンプレートエンジンらしい。[ドキュメント][1]読みつつちょっとやってみた。とりあえずは暫定的なメモ" />
+    <meta property="og:title" content="thymeleaf" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/12/thymeleaf.html">
+    <title>thymeleaf - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/12/thymeleaf.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "thymeleaf",
+  "datePublished": "2013-12-31T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "Javaなテンプレートエンジンらしい。[ドキュメント][1]読みつつちょっとやってみた。とりあえずは暫定的なメモ"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/12">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">12</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">31</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">thymeleaf</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>Javaなテンプレートエンジンらしい。<a href="http://www.thymeleaf.org/doc/html/Using-Thymeleaf.html" target="_blank" rel="noopener">ドキュメント</a>読みつつちょっとやってみた。とりあえずは暫定的なメモ</p>
+
+<p>※日本語情報的には<a href="http://tech.nulab.co.jp/2012/02/thymeleaf/" target="_blank" rel="noopener">http://tech.nulab.co.jp/2012/02/thymeleaf/</a>が良いかと</p>
+<h3 id="section-1">src/main/java/Main.java</h3><pre class="line-numbers"><code class="language-java">import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+import org.thymeleaf.templateresolver.TemplateResolver;
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+        TemplateResolver resolver = new ClassLoaderTemplateResolver();
+        resolver.setSuffix(&quot;.html&quot;);
+
+        TemplateEngine engine = new TemplateEngine();
+        engine.setTemplateResolver(resolver);
+
+        Context context = new Context();
+        context.setVariable(&quot;welcome&quot;, &quot;&lt;script&gt;alert(&quot;hoge&quot;);&lt;/script&gt;&quot;);
+        context.setVariable(&quot;now&quot;, new Date());
+        context.setVariable(&quot;cal&quot;, Calendar.getInstance());
+        context.setVariable(&quot;sample&quot;, new Sample(&quot;foobar&quot;));
+        context.setVariable(&quot;samples&quot;, Arrays.asList(new Sample(&quot;a&quot;), new Sample(&quot;b&quot;)));
+        context.setVariable(&quot;ok&quot;, true);
+
+        System.out.println(engine.process(&quot;test&quot;, context));
+    }
+}
+</code></pre>
+<p>Sampleクラスに関してはただのnameフィールドを持ちゲッターメソッドなりがあるクラス</p>
+<h3 id="section-2">src/main/resources/test.html</h3><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;
+&lt;body&gt;
+&lt;!--
+変数を評価するのであればth:text等を使う事で可能。utextを使うとエスケープされない
+変数でもコンテキスト変数とメッセージ変数があり、前者では${}で評価される
+後者なメッセージ変数はレンダリングされるテンプレート?.propertiesで指定されるデータを
+#{}形式で参照する事が出来る
+
+又、th:textのような形式はHTML5 Friendlyなdata-[prefix]-[name]な形式でも
+指定することが可能。そこは以下のループなところを参照
+--&gt;
+&lt;p th:utext=&quot;|ok: ${welcome}|&quot;&gt;&lt;/p&gt;
+&lt;p th:text=&quot;#{welcome}&quot;&gt;&lt;/p&gt;
+
+&lt;!--
+*{}な変数評価を使えばゲッターメソッドで値を取ってきたり出来る。${sample.name}のように
+でも出来るけど、*{}を使うことでコンテキストスタックをth:objectで指定されたのを使用する事
+が出来る?
+--&gt;
+&lt;div th:object=&quot;${sample}&quot;&gt;
+    &lt;p th:text=&quot;*{name}&quot; /&gt;
+&lt;/div&gt;
+
+&lt;!--
+http://www.thymeleaf.org/doc/html/Using-Thymeleaf.html#expression-utility-objects
+
+を参照
+
+ちなみに#datesユーティリティの実体はhttp://www.thymeleaf.org/apidocs/thymeleaf/2.0.2/org/thymeleaf/expression/Dates.html
+--&gt;
+&lt;p th:text=&quot;${#dates.year(now)}&quot;&gt;&lt;/p&gt;
+&lt;p th:text=&quot;${#calendars.format(cal, &quot;yyyy/MM/dd&quot;)}&quot;/&gt;
+
+&lt;!--
+th:ifで評価することも可能。以下のように特定の属性をbooleanでサポートするのもある
+
+http://www.thymeleaf.org/doc/html/Using-Thymeleaf.html#fixed-value-boolean-attributes
+
+を参照
+--&gt;
+&lt;div th:if=&quot;${ok} == true&quot;&gt;OK&lt;/div&gt;
+&lt;input type=&quot;checkbox&quot; th:checked=&quot;${ok}&quot; /&gt;
+
+&lt;!--
+ループを使いたいならth:eachで出来る。又、そのループ内状態変数を「ループ内変数+Stat」
+で利用する事が出来る
+--&gt;
+&lt;ul&gt;
+&lt;li th:each=&quot;sample : ${samples}&quot;&gt;
+    &lt;span th:attr=&quot;id=|sample_${sampleStat.count}|&quot; data-th-text=&quot;${sample.name}&quot; /&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--
+別のテンプレートの部分的なのを評価する事も出来る
+th:withを使えば
+--&gt;
+&lt;div th:include=&quot;footer :: footer&quot; th:with=&quot;message=${welcome}&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>んまぁざっくりとしてますけど、他にもth:switch/th:caseを使ったswitch/case文とかもサポートされていたりとかで非常に使いやすいのではという印象</p>
+
+<p>とりあえず今後調査予定として</p>
+
+<ul>
+<li>WebContext及びサーブレット環境下での動作 (上記だと@{}なリンク方式を使うとエラーを起こすため)</li>
+<li>Spring Frameworkとの連携とか</li>
+<li>thymeleaf-testingパッケージに関して</li>
+</ul>
+
+<p>を色々調査する予定</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">src/main/java/Main.java</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">src/main/resources/test.html</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2014/06/jaxrs-12-mvc.html" class="d-block p-2">JAX-RSをやってみる (12) - MVC -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/06/jaxrs-13-ref-dependey-injection.html" class="d-block p-2">JAX-RSをやってみる (13) - Refの依存性注入に関して -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/01/spring-webmvc-18-annotationformatterfactory.html" class="d-block p-2">Spring WebMVCをやってみる (18) - AnnotationFormatterFactory -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/10/sastruts-3-s2jdbc.html" class="d-block p-2">SAStrutsを勉強してみる (3) - S2JDBCを使う -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/01/thymeleaf-spring-framework-webmvc.html" class="d-block p-2">thymeleaf+spring mvc</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2014/01/thymeleaf-spring-framework-webmvc.html" rel="prev">&lt;&nbsp;thymeleaf+spring mvc</a>
+              <a href="/2013/12/spring-webmvc-16-converter.html" rel="next">Spring WebMVCをやってみる (16) - Converter -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

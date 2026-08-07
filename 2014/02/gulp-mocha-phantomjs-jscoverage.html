@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="以前に[「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植する][1]っていうのをやったのですが、それのgulp版" />
+    <meta property="og:title" content="gulpでmocha-phantomjs+jscoverage" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2014/02/gulp-mocha-phantomjs-jscoverage.html">
+    <title>gulpでmocha-phantomjs+jscoverage - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2014/02/gulp-mocha-phantomjs-jscoverage.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "gulpでmocha-phantomjs+jscoverage",
+  "datePublished": "2014-02-14T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "以前に[「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植する][1]っていうのをやったのですが、それのgulp版"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2014/02">
+                  <span class="post-date-year">2014</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">2</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">14</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">gulpでmocha-phantomjs+jscoverage</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+                <a href="/archives/categories/node-dot-js" class="fs-5">Node.js</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>以前に<a href="/grunt-mocha-phantomjs-jscoverage.html" target="_blank" rel="noopener">「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植する</a>っていうのをやったのですが、それのgulp版</p>
+<h3 id="section-1">その前に</h3>
+<p>以前でも書いたようにjson2htmlcovをやるとエラーにしかならないケースが存在するのですが、これのfixがなくなってるので</p>
+<pre class="line-numbers"><code class="language-js">#!/usr/bin/env node
+
+// https://github.com/metaskills/mocha-phantomjs/issues/10
+var jade = require(&quot;jade&quot;);
+var fs = require(&quot;fs&quot;);
+
+// Strings for code coverage classes
+function coverageClass(n) {
+  if (n &gt;= 75) return &quot;high&quot;;
+  if (n &gt;= 50) return &quot;medium&quot;;
+  if (n &gt;= 25) return &quot;low&quot;;
+  return &quot;terrible&quot;;
+}
+
+// Read in templates
+var file = __dirname + &quot;/templates/coverage.jade&quot;;
+var str = fs.readFileSync(file, &quot;utf8&quot;);
+var fn = jade.compile(str, { filename: file });
+
+// ここから修正
+
+var json = &quot;&quot;;
+process.stdin.on(&quot;data&quot;, function(data) {
+    json += data.toString();
+});
+process.stdin.on(&quot;end&quot;, function() {
+  // Read JSON from stdin
+  var cov = JSON.parse(json);
+
+  // Dump HTML
+  process.stdout.write(fn({
+    cov: cov,
+    coverageClass: coverageClass
+  }));
+});
+</code></pre>
+<p>的な感じで修正しておかないと無理ポなので(ry</p>
+<h3 id="section-2">本題</h3>
+<p>mocha-phantomjsでテストしつつコードカバレッジを出力するわけですが、そのテストコード等は前回のをそのまま使う。なので今回はgulpfile.jsというタスク定義なだけを書く</p>
+<pre class="line-numbers"><code class="language-js">var fs            =  require(&quot;fs&quot;),
+    spawn         =  require(&quot;child_process&quot;).spawn,
+    gulp          =  require(&quot;gulp&quot;),
+    yuidoc        =  require(&quot;gulp-yuidoc&quot;);
+
+gulp.task(&quot;jscoverage&quot;, function() {
+  spawn(&quot;jscoverage&quot;, [&quot;src&quot;]);
+});
+
+gulp.task(&quot;test-mocha-phantomjs&quot;, function(done) {
+  var jsonData = &quot;&quot;;
+  var res = spawn(&quot;mocha-phantomjs&quot;, [&quot;-R&quot;, &quot;json-cov&quot;, &quot;test/runner.html&quot;]);
+  res.stdout.on(&quot;data&quot;, function(data) {
+    jsonData += data.toString();
+  });
+  res.on(&quot;exit&quot;, function() {
+    var stream = fs.createWriteStream(&quot;coverage.html&quot;, { flags: &quot;w&quot; });
+
+    var cov = spawn(&quot;json2htmlcov&quot;);
+    cov.stdout.pipe(stream);
+    cov.stdout.on(&quot;end&quot;, function() {
+      stream.close();
+      done();
+    });
+    cov.stderr.on(&quot;data&quot;, function(data) {
+      throw new Error(data);
+    });
+    cov.stdin.write(jsonData);
+    cov.stdin.end();
+  });
+});
+
+gulp.task(&quot;yuidoc&quot;, function() {
+  return gulp.src(&quot;src/*.js&quot;)
+    .pipe(yuidoc())
+    .pipe(gulp.dest(&quot;doc&quot;));
+});
+
+gulp.task(&quot;test&quot;, [&quot;jscoverage&quot;, &quot;test-mocha-phantomjs&quot;]);
+</code></pre>
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">その前に</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">本題</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/03/grunt-mocha-phantomjs-jscoverage.html" class="d-block p-2">「mocha-phantomjs+jscoverageでコードカバレッジ出力」な流れをgruntに移植する</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/03/mocha-phantomjs-jscoverage.html" class="d-block p-2">mocha-phantomjs+jscoverageでコードカバレッジ出力</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/02/supervisord-4-eventlistener.html" class="d-block p-2">supervisord (4) - eventlistener -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/08/mocha-coverjs-code-coverage.html" class="d-block p-2">mocha+coverjsでコードカバレッジ</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/03/mocha-chai-javascript-testing.html" class="d-block p-2">mochaとchaiでJavaScriptをテスト</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2014/02/gradle-android-test-plugin-robolectric-testing.html" rel="prev">&lt;&nbsp;gradle-android-test-plugin+Robolectricでテスト</a>
+              <a href="/2014/02/actionbar-pulltorefresh-reload-menu-button.html" rel="next">ActionBar-PullToRefreshをメニューボタン等で連動させる&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

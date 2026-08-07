@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="公式ドキュメント: http://doma.readthedocs.org/ja/latest/config/#id21" />
+    <meta property="og:title" content="doma2を使ってみた (2) - DI Containerを使う場合 -" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2015/03/doma-part2-di-container.html">
+    <title>doma2を使ってみた (2) - DI Containerを使う場合 - - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2015/03/doma-part2-di-container.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "doma2を使ってみた (2) - DI Containerを使う場合 -",
+  "datePublished": "2015-03-14T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式ドキュメント: http://doma.readthedocs.org/ja/latest/config/#id21"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2015/03">
+                  <span class="post-date-year">2015</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">3</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">14</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">doma2を使ってみた (2) - DI Containerを使う場合 -</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+                <a href="/archives/categories/doma" class="fs-5">doma</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>公式ドキュメント: <a href="http://doma.readthedocs.org/ja/latest/config/#id21" target="_blank" rel="noopener">http://doma.readthedocs.org/ja/latest/config/#id21</a></p>
+
+<p>参考: <a href="http://qiita.com/nyasba/items/1e22c2401f3849f9071d" target="_blank" rel="noopener">http://qiita.com/nyasba/items/1e22c2401f3849f9071d</a></p>
+
+<p>前回にも記述した通り前回ではdomaで使うConfig実装なAppConfig上でDataSource等の設定をそのまま埋め込んでる。でそういう所をDI Containerに設定されているDataSource等を依存性注入して使うような形の場合には設定がいろいろ異なるっていうことでやってみた(使うDI ContainerはSpring Framework)</p>
+<h3 id="section-1">build.gradle</h3><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+
+processResources.destinationDir = compileJava.destinationDir
+compileJava.dependsOn processResources
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    runtime &quot;mysql:mysql-connector-java:+&quot;
+    runtime &quot;org.springframework:spring-jdbc:+&quot;
+    // AOPでトランザクション情報をaspectする場合は必要
+    // あとspring-aopは依存性に入れてないけど結局入るので使うなら入れてた方が良いのかと
+    runtime &quot;org.aspectj:aspectjweaver:+&quot;
+
+    compile &quot;org.seasar.doma:doma:2.1.0&quot;
+    compile &quot;org.springframework:spring-beans:+&quot;
+    compile &quot;org.springframework:spring-context:+&quot;
+    compile &quot;org.springframework:spring-tx:+&quot;
+
+    testCompile &quot;org.springframework:spring-test:+&quot;
+    testCompile &quot;junit:junit:+&quot;
+    testCompile &quot;org.hamcrest:hamcrest-all:+&quot;
+}
+</code></pre>
+<p>Spring Frameworkを使うのとそれとSpring JDBCな設定を使うのとSpring Transactionを使うのでそれに必要な依存性を追加するだけ</p>
+<h3 id="section-2">applicationContext.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;beans
+    xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:tx =&quot;http://www.springframework.org/schema/tx&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd&quot;&gt;
+
+    &lt;context:annotation-config /&gt;
+    &lt;context:component-scan base-package=&quot;sample&quot; /&gt;
+
+    &lt;bean id=&quot;dataSource&quot; class=&quot;org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy&quot;&gt;
+        &lt;constructor-arg&gt;
+            &lt;bean class=&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot;&gt;
+                &lt;property name=&quot;driverClassName&quot; value=&quot;com.mysql.jdbc.Driver&quot; /&gt;
+                &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://localhost:3306/sample&quot; /&gt;
+                &lt;property name=&quot;username&quot; value=&quot;user&quot; /&gt;
+                &lt;property name=&quot;password&quot; value=&quot;pass&quot; /&gt;
+            &lt;/bean&gt;
+        &lt;/constructor-arg&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&gt;
+        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&gt;
+    &lt;/bean&gt;
+
+    &lt;tx:annotation-driven /&gt;
+
+    &lt;!-- AOPでトランザクション情報を設定しない場合には以降は恐らく必要ない --&gt;
+    &lt;tx:advice id=&quot;txDefault&quot; transaction-manager=&quot;transactionManager&quot;&gt;
+        &lt;tx:attributes&gt;
+            &lt;tx:method name=&quot;*&quot; propagation=&quot;REQUIRED&quot; rollback-for=&quot;Exception&quot; /&gt;
+        &lt;/tx:attributes&gt;
+    &lt;/tx:advice&gt;
+
+    &lt;aop:config&gt;
+        &lt;aop:advisor advice-ref=&quot;txDefault&quot; pointcut=&quot;execution(* sample.service.*Service.*(..))&quot; /&gt;
+    &lt;/aop:config&gt;
+
+&lt;/beans&gt;
+</code></pre>
+<p>まぁDataSource関連とTransaction関連の設定をやっておく</p>
+<h3 id="section-3">AppConfig.java</h3><pre class="line-numbers"><code class="language-java">package sample;
+
+import javax.sql.DataSource;
+
+import org.seasar.doma.jdbc.Config;
+import org.seasar.doma.jdbc.dialect.Dialect;
+import org.seasar.doma.jdbc.dialect.MysqlDialect;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Configuration
+public class AppConfig {
+
+    @Autowired
+    private DataSource dataSource;
+
+    @Bean
+    public Config domaConfig() {
+        return new Config() {
+            @Override
+            public Dialect getDialect() {
+                return new MysqlDialect();
+            }
+
+            @Override
+            public DataSource getDataSource() {
+                return dataSource;
+            }
+        };
+    }
+}
+</code></pre>
+<p>な感じで@AutowiredでDataSourceなインスタンスを引っ張ってきてBean登録したConfigの実装でそれを返すようにするような感じ。上記参考ではgetSqlFileRepositoryとかも実装しているけど、デフォルト実装を使えば良いんだと思われるのであえてオーバーライドはしてないけど必要なら実装しておくと良いんじゃないかと。あんま事細かくチェックしてないので何か問題起きそうな気もしなくもないんだけど</p>
+<h3 id="section-4">DomaRepository.java</h3><pre class="line-numbers"><code class="language-java">package sample.dao;
+
+import org.seasar.doma.AnnotateWith;
+import org.seasar.doma.Annotation;
+import org.seasar.doma.AnnotationTarget;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@AnnotateWith(annotations = {
+    // 生成されたDAO実装クラスに@Component
+    @Annotation(target = AnnotationTarget.CLASS, type = Component.class),
+    // 生成されたDAO実装クラスのコンストラクタに@Autowired
+    @Annotation(target = AnnotationTarget.CONSTRUCTOR, type = Autowired.class)
+})
+public @interface DomaRepository {
+}
+</code></pre>
+<p>簡単に言うとDAOオブジェクトなのがSpringでAutowired出来るようにするにはそれに応じたアノテーションなりを実装するか自前で登録するかのどっちかをしなきゃならないんだけど、DAO実装クラスは自動生成されるのでそれに応じたアノテーションを付与するようにしなきゃならない。でDAO毎にこの設定が必要になるのだけど、毎回毎回DAOに設定するのもめんどいと思うのでこういうアノテーションインターフェースを書いておいてDAOインターフェースでアノテーション定義しておけば良い。それは以下に書くので</p>
+
+<p>ちなみに今回はSpring Frameworkを使ってるからこうなってるけど、javax.injectなのを使うのならtype属性で指定するクラスを変える必要があるかと</p>
+<h3 id="section-5">SampleDao.java</h3><pre class="line-numbers"><code class="language-java">package sample.dao;
+
+import java.util.List;
+
+import org.seasar.doma.Dao;
+import org.seasar.doma.Insert;
+import org.seasar.doma.Select;
+
+import sample.AppConfig;
+import sample.entity.Sample;
+
+@DomaRepository
+@Dao
+public interface SampleDao {
+
+    @Select
+    List&lt;Sample&gt; findAll();
+
+    @Select
+    Sample find(int id);
+
+    @Insert
+    int save(Sample s);
+}
+</code></pre>
+<p>先ほど書いた@DomaRepositoryを追加するだけ。@Daoのconfig属性は実装クラスのコンストラクタで@Autowiredされるので必要無いんじゃないかと</p>
+<h3 id="section-6">SampleService.java</h3><pre class="line-numbers"><code class="language-java">package sample.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import sample.dao.SampleDao;
+import sample.entity.Sample;
+
+@Service
+public class SampleService {
+
+    @Autowired
+    private SampleDao dao;
+
+    public List&lt;Sample&gt; findAll() {
+        return dao.findAll();
+    }
+
+    public Sample find(int id) {
+        return dao.find(id);
+    }
+
+    @Transactional(rollbackFor=Exception.class)
+    public int save(Sample sample) throws Exception {
+        // rollbackforで指定した例外が送出されるとロールバックされる
+        return dao.save(sample);
+    }
+}
+</code></pre>
+<p>んまぁ@AutowiredでDAOを注入して使うオブジェクトなだけ(@Repositoryでも良かったんじゃないのかって思ったけど、そこ詳しくないので今回はパス)。@Transactionalをつけたメソッドをコールする場合にはトランザクション処理が行われるけど、applicationContext.xmlで指定したようにトランザクション情報に関わるAOPをしていない場合にはアノテーションの属性で指定すれば良い</p>
+<h3 id="section-7">SampleDaoTest.java</h3><pre class="line-numbers"><code class="language-java">package sample.dao;
+
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import sample.entity.Sample;
+import sample.service.SampleService;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations=&quot;classpath:applicationContext.xml&quot;)
+public class SampleDaoTest {
+
+    @Autowired
+    SampleService service;
+
+    @Test
+    public void test_findAll() {
+        List&lt;Sample&gt; samples = service.findAll();
+        assertThat(samples.size(), greaterThan(0));
+
+        Sample sample = samples.get(0);
+        assertThat(sample, notNullValue());
+        assertThat(sample.getId(), is(1));
+        assertThat(sample.getName(), is(&quot;hoge&quot;));
+    }
+
+    @Test
+    public void test_find() {
+        Sample sample = service.find(1);
+        assertThat(sample, notNullValue());
+        assertThat(sample.getName(), is(&quot;hoge&quot;));
+    }
+
+    @Test
+    public void test_save() throws Exception {
+        Sample sample = new Sample();
+        sample.setName(&quot;hoge fuga foobar&quot;);
+
+        service.save(sample);
+    }
+}
+</code></pre>
+<p>ってな感じでテスト書けば良いんだけど、SampleServiceのsaveメソッドでDAO側のsaveをコールしたあとに例外等が送出された場合、@Transactionalによるトランザクション情報に応じてトランザクションがロールバックされる</p>
+
+<p>まぁざっくりとざらーっと書いたけど、domaとSpring Frameworkを連携するような感じでやる場合はこんな所かと</p>
+
+<p>んまぁSpring Bootを使う場合な要件においては上記参考先がSpring Bootを使う場合のテクになってるのでそれ参考にすれば良いかと</p>
+<h3 id="section-8">追記</h3>
+<p>上記で&lt;tx:annotation-driven /&gt;と&lt;aop:advice&gt;を利用した場合に@Repositoryを使うと問題が起きる。その件は近い内に記事書く</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">build.gradle</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">applicationContext.xml</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">AppConfig.java</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">DomaRepository.java</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">SampleDao.java</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">SampleService.java</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">SampleDaoTest.java</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">追記</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2015/03/doma-part3-spring-repository.html" class="d-block p-2">doma2を使ってみた (3) - @Repositoryを使う -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/03/doma-part1-getting-started.html" class="d-block p-2">doma2を使ってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/12/spring-webmvc-1.html" class="d-block p-2">Spring WebMVCをやってみる (1)</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/12/spring-webmvc-10-gson.html" class="d-block p-2">Spring WebMVCをやってみる (10) - gsonを使う -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/12/spring-webmvc-2-controller-without-annotation.html" class="d-block p-2">Spring WebMVCをやってみる (2) - アノテーションを使わないコントローラー -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2015/03/doma-part3-spring-repository.html" rel="prev">&lt;&nbsp;doma2を使ってみた (3) - @Repositoryを使う -</a>
+              <a href="/2015/03/doma-part1-getting-started.html" rel="next">doma2を使ってみた&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

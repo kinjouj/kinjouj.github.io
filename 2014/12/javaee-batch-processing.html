@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="公式リファレンス: http://www.oracle.com/technetwork/articles/java/batch-1965499.html" />
+    <meta property="og:title" content="Java EE Batch Processingに触ってみた" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2014/12/javaee-batch-processing.html">
+    <title>Java EE Batch Processingに触ってみた - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2014/12/javaee-batch-processing.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Java EE Batch Processingに触ってみた",
+  "datePublished": "2014-12-28T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式リファレンス: http://www.oracle.com/technetwork/articles/java/batch-1965499.html"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2014/12">
+                  <span class="post-date-year">2014</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">12</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">28</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">Java EE Batch Processingに触ってみた</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+                <a href="/archives/categories/java-ee" class="fs-5">Java EE</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>公式リファレンス: <a href="http://www.oracle.com/technetwork/articles/java/batch-1965499.html" target="_blank" rel="noopener">http://www.oracle.com/technetwork/articles/java/batch-1965499.html</a></p>
+
+<p>参考(jBatch): <a href="http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf" target="_blank" rel="noopener">http://qiita.com/opengl-8080/items/0293bcff97261cb7d0cf</a></p>
+
+<p>Java EE7?から追加されたっぽいJSR352のBatch Processingが色々気になってたのでやってみた</p>
+
+<p>でBatch Processingを動かすにはJSR352に対応したなコンテナ(Glassfishとか)が必要になるっぽいけど、めんどくさいのでSpring BatchがJSR352に対応している模様なのでそれを利用して実行する方式を使う</p>
+<h3 id="section-1">SampleItemReader.java</h3><pre class="line-numbers"><code class="language-java">package sample;
+
+import javax.batch.api.chunk.ItemReader;
+import javax.batch.api.chunk.AbstractItemReader;
+import javax.inject.Named;
+
+@Named(&quot;batch-reader&quot;)
+public class SampleItemReader extends AbstractItemReader {
+
+    private int count = 0;
+
+    @Override
+    public Object readItem() throws Exception {
+        count++;
+        return count &lt; 10 ? &quot;hoge&quot; : null;
+    }
+}
+</code></pre>
+<p>上記のjBatch参考に書いてけど、後々設定ファイルで参照するクラスは@Namedで指定した名前でも参照させる事が可能な模様。あと公式ではItemReaderっていうインターフェースを実装しているけど、今回はそれの抽象クラスにあたると思われるAbstractItemReaderを継承して実装</p>
+
+<p>おそらくはここでnullを返す事をすればバッチチャンク終了となり、すでにあるバッチチャンクをItemWriterに流して終了的な感じになるのではと</p>
+
+<p>**** SampleItemProcessor.java</p>
+<pre class="line-numbers"><code class="language-java">package sample;
+
+import javax.batch.api.chunk.ItemProcessor;
+
+public class SampleItemProcessor implements ItemProcessor {
+    @Override
+    public Object processItem(Object item) {
+        return ((String)item).toUpperCase();
+    }
+}
+</code></pre>
+<p>ItemReader#readItemで返されたデータをここでなんらかの処理をしてItemWriterに受け流す役割な感じなのではと。でItemWriterに受け流す際には指定したチャンクサイズ?(item-count)に応じてItemWriterが作用するような仕組みっぽい</p>
+<h3 id="section-2">SampleItemWriter.java</h3><pre class="line-numbers"><code class="language-java">package sample;
+
+import java.util.List;
+import javax.batch.api.chunk.AbstractItemWriter;
+
+public class SampleItemWriter extends AbstractItemWriter {
+    @Override
+    public void writeItems(List&lt;Object&gt; items) {
+        // ItemProcessor側で処理したデータをチャンクサイズに応じてたまった分がこちらで処理出来るので、書き出し処理等を実装
+    }
+}
+</code></pre>
+<p>とまぁBatch Processingを動かすのに必要なのは書いたので</p>
+<h3 id="section-3">Main.java</h3><pre class="line-numbers"><code class="language-java">import javax.batch.operations.JobOperator;
+import javax.batch.runtime.BatchRuntime;
+
+public class Main {
+    public static void main(String[] args) {
+        JobOperator job = BatchRuntime.getJobOperator();
+        job.start(&quot;sample&quot;, new java.util.Properties());
+    }
+}
+</code></pre>
+<p>な感じで実行してバッチ処理を開始させる事が出来る。但し設定ファイル関連をまだ書いてないので実行してもエラーになる</p>
+<h3 id="section-4">META-INF/batch-jobs/sample.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;job id=&quot;sample&quot; xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;  version=&quot;1.0&quot;&gt;
+    &lt;step id=&quot;sample-chunk&quot;&gt;
+        &lt;chunk item-count=&quot;5&quot;&gt;
+            &lt;!-- &lt;reader ref=&quot;sample.SampleItemReader&quot; /&gt; --&gt;
+            &lt;!-- @Namedで指定した名前でも指定可能 --&gt;
+            &lt;reader ref=&quot;batch-reader&quot; /&gt;
+            &lt;processor ref=&quot;sample.SampleItemProcessor&quot; /&gt;
+            &lt;writer ref=&quot;sample.SampleItemWriter&quot; /&gt;
+        &lt;/chunk&gt;
+    &lt;/step&gt;
+&lt;/job&gt;
+</code></pre>
+<p>JobOperator#startの引数で指定したジョブ名と同等の名前なxmlファイルを作るべきな模様。んまぁここまでならJSR352に対応したコンテナで実行すれば出来るんだと思われる(但し、Webコンテナに置く場合はこのファイルの配置場所は異なる。詳しくは上記参考リンク)</p>
+
+<p>んでSpring Batchで動かしてみるのでそれに応じたSpringな設定が必要になる(※別記事にて補足済み)</p>
+<h3 id="section-5">baseContext.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
+    xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;
+        http://xmlns.jcp.org/xml/ns/javaee
+        http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd&quot;&gt;
+
+    &lt;import resource=&quot;database.xml&quot; /&gt;
+    &lt;context:component-scan base-package=&quot;sample&quot; /&gt;
+
+    &lt;bean id=&quot;jobParametersConverter&quot; class=&quot;org.springframework.batch.core.jsr.JsrJobParametersConverter&quot;&gt;
+        &lt;constructor-arg ref=&quot;dataSource&quot; /&gt;
+    &lt;/bean&gt;
+
+    &lt;bean
+        id=&quot;jobExplorer&quot;
+        class=&quot;org.springframework.batch.core.explore.support.JobExplorerFactoryBean&quot;
+        p:dataSource-ref=&quot;dataSource&quot;
+        p:tablePrefix=&quot;BATCH_&quot; /&gt;
+
+    &lt;bean
+        id=&quot;jobRepository&quot;
+        class=&quot;org.springframework.batch.core.repository.support.JobRepositoryFactoryBean&quot;
+        p:dataSource-ref=&quot;dataSource&quot;
+        p:transactionManager-ref=&quot;transactionManager&quot;
+        p:maxVarCharLength=&quot;2000&quot;
+        p:isolationLevelForCreate=&quot;ISOLATION_SERIALIZABLE&quot; /&gt;
+
+&lt;/beans&gt;
+</code></pre>
+<p>database.xmlは</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;beans
+    xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+    xmlns:jdbc=&quot;http://www.springframework.org/schema/jdbc&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/jdbc 
+        http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd&quot;&gt;
+
+    &lt;bean
+        id=&quot;dataSource&quot;
+        class=&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot;&gt;
+
+        &lt;property name=&quot;driverClassName&quot; value=&quot;com.mysql.jdbc.Driver&quot; /&gt;
+        &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://localhost:3306/sample&quot; /&gt;
+        &lt;property name=&quot;username&quot; value=&quot;kinjouj&quot; /&gt;
+        &lt;property name=&quot;password&quot; value=&quot;1234&quot; /&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.batch.support.transaction.ResourcelessTransactionManager&quot; /&gt;
+
+    &lt;jdbc:initialize-database data-source=&quot;dataSource&quot;&gt;
+        &lt;jdbc:script location=&quot;org/springframework/batch/core/schema-drop-mysql.sql&quot; /&gt;
+        &lt;jdbc:script location=&quot;org/springframework/batch/core/schema-mysql.sql&quot; /&gt;
+    &lt;/jdbc:initialize-database&gt;
+&lt;/beans&gt;
+</code></pre>
+<p>なSpring JDBCに関わる設定とSpring Batchで使うデータベース上の定義が必要になるSQLを実行するような仕組みをやっておく</p>
+<h3 id="section-6">実行</h3>
+<p>実装して処理の流れなログとってみると</p>
+<pre>
+情報: Executing step: [sample-chunk]
+
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 0
+12 28, 2014 4:32:26 午後 sample.SampleItemProcessor processItem
+情報: processItem: hoge
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 1
+12 28, 2014 4:32:26 午後 sample.SampleItemProcessor processItem
+情報: processItem: hoge
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 2
+12 28, 2014 4:32:26 午後 sample.SampleItemProcessor processItem
+情報: processItem: hoge
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 3
+12 28, 2014 4:32:26 午後 sample.SampleItemProcessor processItem
+情報: processItem: hoge
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 4
+12 28, 2014 4:32:26 午後 sample.SampleItemProcessor processItem
+情報: processItem: hoge
+12 28, 2014 4:32:26 午後 sample.SampleItemWriter writeItems
+情報: writeItems: 5
+
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 5
+12 28, 2014 4:32:26 午後 sample.SampleItemProcessor processItem
+情報: processItem: hoge
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 6
+12 28, 2014 4:32:26 午後 sample.SampleItemProcessor processItem
+情報: processItem: hoge
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 7
+12 28, 2014 4:32:26 午後 sample.SampleItemProcessor processItem
+情報: processItem: hoge
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 8
+12 28, 2014 4:32:26 午後 sample.SampleItemProcessor processItem
+情報: processItem: hoge
+12 28, 2014 4:32:26 午後 sample.SampleItemReader readItem
+情報: readItem: 9
+12 28, 2014 4:32:26 午後 sample.SampleItemWriter writeItems
+情報: writeItems: 9
+</pre>
+
+
+<p>てな感じで実行結果になる。item-countで指定した分のチャンクサイズに応じてItemWriter#writeItemsが作用するようになっている模様。またreadItemがnullを返した場合にはprocessItemは発生せずにすでにたまっているチャンクをそのままwriteItemsに作用するように受け流している模様</p>
+
+<p>んまぁそんなざっくりとした感じでやってみた。まだざっくりとした調査しかしてないので今後も色々勉強しつつ書く予定。今回はこんくらいで</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">SampleItemReader.java</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">SampleItemWriter.java</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">Main.java</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">META-INF/batch-jobs/sample.xml</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">baseContext.xml</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">実行</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2015/03/doma-part2-di-container.html" class="d-block p-2">doma2を使ってみた (2) - DI Containerを使う場合 -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/12/spring-webmvc-4-abstractview.html" class="d-block p-2">Spring WebMVCをやってみる (4) - AbstractViewを利用した独自Viewを利用する -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/09/struts2-12-spring-framework.html" class="d-block p-2">Struts2をやってみる (12) - Spring Framework -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/12/spring-webmvc-5-pathvariable.html" class="d-block p-2">Spring WebMVCをやってみる (5) - PathVariable -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/03/doma-part3-spring-repository.html" class="d-block p-2">doma2を使ってみた (3) - @Repositoryを使う -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2015/01/spring-batch-configuration.html" rel="prev">&lt;&nbsp;Spring Batchの設定ファイルに関して</a>
+              <a href="/2014/12/okhttp-mockwebserver.html" rel="next">okhttp+mockwebserver&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

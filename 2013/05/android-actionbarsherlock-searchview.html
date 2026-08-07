@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="android.widget.SearchViewなメニューのActionView自体が多分Android3.xくらいからサポートされたんだと思うんだけど、ActionBarSherlockにそれと同等な感じのWidgetが存在する模様。という事でAndroidAnnotations+ActionBarSherlockな構成でやってみた" />
+    <meta property="og:title" content="ActionBarSherlockでSearchView" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/05/android-actionbarsherlock-searchview.html">
+    <title>ActionBarSherlockでSearchView - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/05/android-actionbarsherlock-searchview.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ActionBarSherlockでSearchView",
+  "datePublished": "2013-05-27T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "android.widget.SearchViewなメニューのActionView自体が多分Android3.xくらいからサポートされたんだと思うんだけど、ActionBarSherlockにそれと同等な感じのWidgetが存在する模様。という事でAndroidAnnotations+ActionBarSherlockな構成でやってみた"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/05">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">5</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">27</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">ActionBarSherlockでSearchView</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/android" class="fs-5">Android</a>
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>android.widget.SearchViewなメニューのActionView自体が多分Android3.xくらいからサポートされたんだと思うんだけど、ActionBarSherlockにそれと同等な感じのWidgetが存在する模様。という事でAndroidAnnotations+ActionBarSherlockな構成でやってみた</p>
+<h3 id="section-1">要件</h3>
+<p>検索メニューを選択すると</p>
+
+<p><img src="/images/2013/05/20130527214047.png" alt="image" /></p>
+
+<p>んな感じで上に検索入力が出る。でまぁ「f」だけ入力してみると</p>
+
+<p><img src="/images/2013/05/20130527214125.png" alt="image" /></p>
+
+<p>みたいな感じでインクレメンタル検索的な事が出来て、✕を押すと</p>
+
+<p><img src="/images/2013/05/20130527214151.png" alt="image" /></p>
+
+<p>まぁフィルターから元に戻る的な感じな事をやる</p>
+
+<p>※上記スクリーンショットのAndroidバージョンは2.2.1</p>
+<h3 id="section-2">サーバー側な処理に検索機能をぶちこむ</h3>
+<p>サーバー側はRailsなので</p>
+<pre class="line-numbers"><code class="language-rb">App::Application.routes.draw do
+  resources :entry do
+    match &quot;search/:query&quot;, :action =&gt; :search, :on =&gt; :collection
+  end
+end
+</code></pre>
+<p>な感じでconfig/routes.rbを設定。rake routesすると</p>
+
+<ul>
+<li>/entry/search/:query(.:format) entry#search</li>
+</ul>
+
+<p>な感じで処理出来るように。でコントローラーにアクションを定義するのだけど、検索方式はとりまぁLIKE検索で</p>
+<pre class="line-numbers"><code class="language-text">class EntryController &lt; ApplicationController
+  def search
+    query = params[:query]
+    samples = Sample.where(&quot;name like ?&quot;, &quot;%#{query}%&quot;)
+
+    render :json =&gt; samples
+  end
+end
+</code></pre>
+<p>な感じで。これでサーバー側な仕込み完了。AndroidAnnotationsなところにもちょっとした仕込みが必要</p>
+<h3 id="section-3">AndroidAnnotations Restな仕込み</h3>
+<p>上記でサーバー側にAPIを追加したので@Restアノテーションなインターフェースにも追加せばならぬ</p>
+<pre class="line-numbers"><code class="language-java">package kinjouj.sample;
+
+import com.googlecode.androidannotations.annotations.rest.Accept;
+import com.googlecode.androidannotations.annotations.rest.Get;
+import com.googlecode.androidannotations.annotations.rest.Post;
+import com.googlecode.androidannotations.annotations.rest.Rest;
+
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
+
+import static com.googlecode.androidannotations.api.rest.MediaType.APPLICATION_JSON;
+
+@Rest(converters = { GsonHttpMessageConverter.class })
+public interface AAService {
+
+    public void setRootUrl(String rootUrl);
+    public RestTemplate getRestTemplate();
+
+    @Get(&quot;/entry&quot;)
+    @Accept(APPLICATION_JSON)
+    public Sample[] getSamples();
+
+    // 追加
+    @Get(&quot;/entry/search/{query}&quot;)
+    @Accept(APPLICATION_JSON)
+    public Sample[] search(String query);
+
+    @Get(&quot;/entry/{id}&quot;)
+    @Accept(APPLICATION_JSON)
+    public Sample getSample(long id);
+
+    @Post(&quot;/entry&quot;)
+    @Accept(APPLICATION_JSON)
+    public Long save(Sample sample);
+}
+</code></pre>
+<p>んまぁそんな感じで。でこいつをブリッジしちゃう@EBeanアノテーションなクラスも実装追加するんだけど、これはSample[] -&gt; List&lt;Sample&gt;にするだけなので省略</p>
+
+<p>本題はここから</p>
+<h3 id="section-4">res/menu/main.xmlにactionViewClassを持つメニューアイテムを追加</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;menu xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+
+    &lt;item
+        android:id=&quot;@+id/menu_item_search&quot;
+        android:showAsAction=&quot;always|collapseActionView&quot;
+        android:icon=&quot;@drawable/search&quot;
+        android:title=&quot;@string/menu_search_label&quot;
+        android:actionViewClass=&quot;com.actionbarsherlock.widget.SearchView&quot; /&gt;
+
+    &lt;!-- 以下省略 --&gt;
+
+&lt;/menu&gt;
+</code></pre>
+<p>Android本式だとandroid.widget.SearchViewなんだけど、ActionBarSherlockにあるのはcom.actionbarsherlock.widget.SearchView。これを指定する。あと本式はどうかは知らないけど、ActionBarSherlockでタイトルを指定しないとぬるぽでオチるので注意</p>
+<h3 id="section-5">MainActivity.java にSearchViewな処理を実装する</h3>
+<p>でAndroidAnnotationsを使う場合は基本的にonCreateOptionsMenuは実装しない。@OptionsMenuを使ってメニューをinflateする訳なんだけど、SearchViewを使う為にはそれが必要なのでオーバーライドする</p>
+<pre class="line-numbers"><code class="language-java">package kinjouj.sample;
+
+import android.annotation.SuppressLint;
+import android.support.v4.app.FragmentManager;
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.SearchView;
+import com.googlecode.androidannotations.annotations.AfterInject;
+import com.googlecode.androidannotations.annotations.AfterViews;
+import com.googlecode.androidannotations.annotations.EActivity;
+import com.googlecode.androidannotations.annotations.OptionsItem;
+import com.googlecode.androidannotations.annotations.OptionsMenu;
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
+
+@EActivity(R.layout.main)
+@OptionsMenu(R.menu.main)
+public class MainActivity extends SherlockFragmentActivity {
+
+    private static final String TAG = MainActivity.class.getName();
+
+    private SlidingMenu mSlidingMenu;
+    private ActionMode mMode;
+    private MainListFragment_ fragment;
+
+    @AfterInject
+    public void init() {
+        Log.v(TAG, &quot;init&quot;);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @AfterViews
+    public void initViews() {
+        Log.v(TAG, &quot;initViews&quot;);
+        mSlidingMenu = new SlidingMenu(this);
+        mSlidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+        mSlidingMenu.setBehindOffsetRes(R.dimen.sliding_offset);
+        mSlidingMenu.setShadowWidthRes(R.dimen.shadow_width);
+        mSlidingMenu.setShadowDrawable(R.drawable.shadow);
+        mSlidingMenu.setFadeDegree(0.35f);
+        mSlidingMenu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
+        mSlidingMenu.setMenu(R.layout.menu);
+    }
+
+    @SuppressLint(&quot;InlinedApi&quot;)
+    @OptionsItem(android.R.id.home)
+    public void onMenuHome() {
+        Log.v(TAG, &quot;onMenuHome&quot;);
+
+        if (mSlidingMenu != null) {
+            mSlidingMenu.toggle();
+        }
+    }
+
+    @OptionsItem(R.id.menu_item_reload)
+    protected void onMenuReload() {
+        Log.v(TAG, &quot;onMenuReload&quot;);
+        getFragment().loadSamples();
+    }
+
+    @OptionsItem(R.id.menu_item_add)
+    public void onMenuAdd() {
+        Log.v(TAG, &quot;onMenuAdd&quot;);
+
+        AddFormDialogFragment dialogFragment = new AddFormDialogFragment();
+        dialogFragment.show(getSupportFragmentManager(), &quot;add_form_dialog_fragment&quot;);
+    }
+
+    @OptionsItem(R.id.menu_item_destroy)
+    public void onMenuDestroy() {
+        Log.v(TAG, &quot;onMenuDestroy&quot;);
+        getFragment().destroySelected();
+    }
+
+    @OptionsItem(R.id.menu_item_info)
+    public void onMenuExit() {
+        Log.v(TAG, &quot;onMenuExit&quot;);
+
+        mMode = startActionMode(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                Log.v(TAG, &quot;onCreateActionMode&quot;);
+                getSupportMenuInflater().inflate(R.menu.action_mode, menu);
+
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                Log.v(TAG, &quot;onPrepareActionMode&quot;);
+
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                Log.v(TAG, &quot;onActionItemClicked&quot;);
+
+                switch (item.getItemId()) {
+                    case R.id.action_mode_app_info:
+                        AppInfoDialogFragment_ fragment = (AppInfoDialogFragment_)AppInfoDialogFragment_.builder().build();
+                        fragment.show(getSupportFragmentManager(), &quot;app_info_dialog_fragment&quot;);
+
+                        break;
+
+                    case R.id.action_mode_app_exit:
+                        finish();
+                        break;
+
+                }
+
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                Log.v(TAG, &quot;onDestroyActionMode&quot;);
+
+                mMode = null;
+            }
+        });
+    }
+
+    // 追加
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.v(TAG, &quot;onCreateOptionsMenu&quot;);
+
+        SearchView searchView = (SearchView)menu.findItem(R.id.menu_item_search).getActionView();
+        searchView.setSubmitButtonEnabled(false);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (!TextUtils.isEmpty(newText)) {
+                    getFragment().getListView().setFilterText(newText);
+                } else {
+                    getFragment().getListView().clearTextFilter();
+                }
+
+                return false;
+            }
+        });
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public void onBackPressed() {
+        Log.v(TAG, &quot;onBackPressed&quot;);
+
+        if (mSlidingMenu != null &amp;&amp; mSlidingMenu.isMenuShowing()) {
+            mSlidingMenu.toggle();
+            return;
+        }
+
+        finish();
+    }
+
+    public MainListFragment_ getFragment() {
+        if (fragment == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragment = (MainListFragment_)fragmentManager.findFragmentById(R.id.main_fragment);
+        }
+
+        return fragment;
+    }
+
+    public SlidingMenu getSlidingMenu() {
+        return mSlidingMenu;
+    }
+
+    public ActionMode getActionMode() {
+        return mMode;
+    }
+}
+</code></pre>
+<p>ListView自体はListFragmentで処理しているので、そのFragmentなインスタンスを取得してgetListViewしつつのsetFilterTextをするっつー感じ。でonQueryTextChangeが発生する毎にそれをやるっていう所</p>
+<h3 id="section-6">MainListFragment.java にフィルターする処理を実装する</h3>
+<p>上記でサーバー側にクエリーをぶん投げる事でマッチする結果をJSONで取って、それをSample[]でデコードしつつ返してくれるのは実装したのでそれを利用する。方式はAdapterクラスのgetFilterメソッドでandroid.widget.Filterを返す事で出来るのでそこに実装する。</p>
+<pre class="line-numbers"><code class="language-java">package kinjouj.sample;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.support.v4.app.ListFragment;
+import android.text.TextUtils;
+import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.googlecode.androidannotations.annotations.AfterInject;
+import com.googlecode.androidannotations.annotations.AfterViews;
+import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.Bean;
+import com.googlecode.androidannotations.annotations.EFragment;
+import com.googlecode.androidannotations.annotations.UiThread;
+import org.springframework.web.client.RestClientException;
+
+@EFragment(R.layout.main_fragment_layout)
+public class MainListFragment extends ListFragment {
+
+    private static final String TAG = MainListFragment.class.getName();
+
+    private List&lt;Sample&gt; samples = new ArrayList&lt;Sample&gt;();
+    private Filter filter;
+    private Toast errorToast;
+
+    @Bean
+    protected AAServiceBean serviceBean;
+
+    @AfterInject
+    public void init() {
+        Log.v(TAG, &quot;init&quot;);
+        loadSamples();
+    }
+
+    @AfterViews
+    public void initViews() {
+        Log.v(TAG, &quot;initViews&quot;);
+        getListView().setTextFilterEnabled(true);
+        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        registerAdapter();
+    }
+
+    public void registerAdapter() {
+        ArrayAdapter&lt;Sample&gt; adapter = new ArrayAdapter&lt;Sample&gt;(
+            getActivity(),
+            android.R.layout.simple_list_item_checked,
+            android.R.id.text1,
+            samples
+        ) {
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                Log.v(TAG, &quot;getView&quot;);
+
+                View view = super.getView(position, convertView, parent);
+
+                if (view instanceof TextView) {
+                    Sample sample = getItem(position);
+
+                    ((TextView)view).setText(sample.getName());
+                }
+
+                return view;
+            }
+
+            // ここから追加
+            @Override
+            public Filter getFilter() {
+                Log.v(TAG, &quot;getFilter&quot;);
+
+                if (filter == null) {
+                    Filterクラスのインスタンス生成時に初期状態を取っておく。だけど、こんな風にやるのはNG
+                    final List&lt;Sample&gt; _samples = new ArrayList&lt;Sample&gt;(samples);
+
+                    filter = new Filter() {
+                        @Override
+                        protected FilterResults performFiltering(CharSequence constraint) {
+                            Log.v(TAG, &quot;performFiltering&quot;);
+
+                            FilterResults results = new FilterResults();
+                            List&lt;Sample&gt; filterItems = new ArrayList&lt;Sample&gt;();
+
+                            if (!TextUtils.isEmpty(constraint)) {
+                                // サーバー側にsearch APIを要求して結果を取る
+                                List&lt;Sample&gt; samples = serviceBean.search(constraint.toString());
+                                filterItems.addAll(samples);
+                            } else {
+                                filterItems = _samples;
+                            }
+
+                            results.values = filterItems;
+                            results.count = filterItems.size();
+
+                            return results;
+                        }
+
+                        @Override
+                        protected void publishResults(CharSequence constraint, FilterResults results) {
+                            Log.v(TAG, &quot;publishResults&quot;);
+
+                            if (results.count &gt; 0) {
+                                @SuppressWarnings(&quot;unchecked&quot;)
+                                List&lt;Sample&gt; filterItems = (ArrayList&lt;Sample&gt;)results.values;
+
+                                notifyDataSetChanged();
+                                clear();
+
+                                for (Sample filterItem : filterItems) {
+                                    add(filterItem);
+                                }
+                            }
+                        }
+                    };
+
+                }
+
+                return filter;
+            }
+        };
+
+        setListAdapter(adapter);
+    }
+
+    @Background
+    public void loadSamples() {
+        Log.v(TAG, &quot;loadSamples&quot;);
+
+        try {
+            List&lt;Sample&gt; _samples = serviceBean.getSamples();
+
+            samples.clear();
+            samples.addAll(_samples);
+        } catch (RestClientException e) {
+            handleError(e);
+        }
+
+        notifyAdapter();
+    }
+
+    @Background
+    public void addSample(Sample sample) {
+        Log.v(TAG, &quot;addSample&quot;);
+
+        if (sample == null) {
+            throw new IllegalArgumentException(&quot;argument(sample) is null&quot;);
+        }
+
+        try {
+            serviceBean.save(sample);
+            samples.add(sample);
+
+            notifyAdapter();
+        } catch (RestClientException e) {
+            handleError(e);
+        }
+    }
+
+    public void destroySelected() {
+        Log.v(TAG, &quot;destroySelected&quot;);
+
+        SparseBooleanArray checkedArray = getListView().getCheckedItemPositions();
+        int checkedSize = checkedArray.size();
+
+        List&lt;Sample&gt; selectedSamples = new ArrayList&lt;Sample&gt;();
+
+        for (int i = 0; i &lt; checkedSize; i++) {
+            int key = checkedArray.keyAt(i);
+            boolean checked = checkedArray.get(key);
+
+            if (!checked) {
+                continue;
+            }
+
+            Object o = getListView().getItemAtPosition(key);
+
+            if (o instanceof Sample) {
+                Sample sample = (Sample)o;
+
+                if (!selectedSamples.contains(sample)) {
+                    selectedSamples.add(sample);
+                }
+            }
+        }
+
+        if (selectedSamples.size() &gt; 0) {
+            try {
+                serviceBean.destroy(selectedSamples);
+                samples.removeAll(selectedSamples);
+
+                notifyAdapter();
+            } catch (RestClientException e) {
+                handleError(e);
+            }
+        }
+    }
+
+    @UiThread
+    public void handleError(Throwable t) {
+        Log.v(TAG, &quot;handleError&quot;);
+        clearChoices();
+
+        if (t == null) {
+            throw new IllegalArgumentException(&quot;argument(Throwable) is null&quot;);
+        }
+
+        errorToast = Toast.makeText(
+            getActivity(),
+            &quot;ERROR: &quot; + t.getMessage(),
+            Toast.LENGTH_LONG
+        );
+        errorToast.show();
+    }
+
+    @UiThread
+    public void notifyAdapter() {
+        Log.v(TAG, &quot;notifyAdapter&quot;);
+        clearChoices();
+        notifyDataSetChanged();
+    }
+
+    private void clearChoices() {
+        Log.v(TAG, &quot;clearChoices&quot;);
+        ListView listView = getListView();
+
+        if (listView != null) {
+            getListView().clearChoices();
+        }
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private void notifyDataSetChanged() {
+        Log.v(TAG, &quot;notifyDataSetChanged&quot;);
+        ListAdapter adapter = getListAdapter();
+
+        if (adapter != null) {
+            ((ArrayAdapter&lt;Sample&gt;)adapter).notifyDataSetChanged();
+        }
+    }
+}
+</code></pre>
+<p>んまぁ今回のと関係ないコード多すぎだけどね。要はsetListAdapterで指定するAdapterクラスのgetFilterメソッドをオーバーライドして処理する。performFilteringで受け取った検索キーワードをサーバーにリクエストして結果を取る。でその結果をListViewにバインドする。まぁそんだけ</p>
+
+<p>ってな感じで本題な所は短かったけど、ActionBarSherlockなSearchViewを使えばAndroid3.x以下系でも同様な感じの事は出来るんでねーかと</p>
+
+<p>※Android4.x向けに検証していないのでずっこける可能性もあります</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">要件</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">サーバー側な処理に検索機能をぶちこむ</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">AndroidAnnotations Restな仕込み</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">res/menu/main.xmlにactionViewClassを持つメニューアイテムを追加</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">MainActivity.java にSearchViewな処理を実装する</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">MainListFragment.java にフィルターする処理を実装する</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/10/android-sherlocknavigationdrawer.html" class="d-block p-2">SherlockNavigationDrawerを使ってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/02/actionbar-pulltorefresh-reload-menu-button.html" class="d-block p-2">ActionBar-PullToRefreshをメニューボタン等で連動させる</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/05/universal-image-loader-for-android.html" class="d-block p-2">Universal Image Loader for Androidを使ってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/01/android-search-hardware-key-suggestion.html" class="d-block p-2">Androidアプリ上でのサーチハードウェアキーによる振る舞い機能を実装</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/02/android-widget-arrayadapter-filtering.html" class="d-block p-2">android.widget.ArrayAdapterでのフィルタリングの拡張</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/05/android-baseadapter-getfilter.html" rel="prev">&lt;&nbsp;BaseAdapterでgetFilter</a>
+              <a href="/2013/05/android-mockito-hamcrest-trouble.html" rel="next">Androidでmockito+hamcrestを使うとエラーになる件&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

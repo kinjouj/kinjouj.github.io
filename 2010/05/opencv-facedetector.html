@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="OpenCVで顔認識をしてみる" />
+    <meta property="og:title" content="OpenCV FaceDetector" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2010/05/opencv-facedetector.html">
+    <title>OpenCV FaceDetector - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2010/05/opencv-facedetector.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OpenCV FaceDetector",
+  "datePublished": "2010-05-16T09:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "OpenCVで顔認識をしてみる"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2010/05">
+                  <span class="post-date-year">2010</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">5</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">16</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">OpenCV FaceDetector</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/php" class="fs-5">PHP</a>
+                <a href="/archives/categories/perl" class="fs-5">Perl</a>
+                <a href="/archives/categories/ruby" class="fs-5">Ruby</a>
+                <a href="/archives/categories/c" class="fs-5">C</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>OpenCVで顔認識をしてみる</p>
+<h3 id="section-1">PHP</h3>
+<p><a href="http://hirokawa.netflowers.jp/entry/4874" target="_blank" rel="noopener">http://hirokawa.netflowers.jp/entry/4874</a> にあるPHP Bindingを利用</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+    $faces = face_detect(&#39;test.jpg&#39;, &#39;/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml&#39;);
+    $im = imagecreatefromjpeg(&#39;test.jpg&#39;);
+    $color = imagecolorallocate($im, 255, 255, 0);
+
+    foreach($faces as $face) {
+        imagerectangle($img, $face[&#39;x&#39;], $face[&#39;y&#39;], $face[&#39;x&#39;] + $face[&#39;width&#39;], $face[&#39;y&#39;] + $face[&#39;height&#39;], $color);
+    }
+    imagejpeg($im, &#39;output.jpg&#39;, 100);
+    imagedestroy($img);
+?&gt;
+</code></pre><h3 id="section-2">Perl</h3>
+<p>Image::ObjectDetectを利用する</p>
+<pre class="line-numbers"><code class="language-perl">use strict;
+use warnings;
+use Imager;
+use Image::ObjectDetect;
+
+my $img = Imager-&gt;new-&gt;read(file =&gt; &#39;test.jpg&#39;);
+my $detector = Image::ObjectDetect-&gt;new(&#39;/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml&#39;);
+my @faces = $detecttor-&gt;detect(&#39;test.jpg&#39;);
+
+for my $face (@faces) {
+    $img-&gt;box(
+        xmin =&gt; $face-&gt;{x},
+        xmax =&gt; $face-&gt;{x} + $face-&gt;{width},
+        ymin =&gt; $face-&gt;{y},
+        ymax =&gt; $face-&gt;{y} + $face-&gt;{height}
+    );
+}
+$img-&gt;write(file =&gt; &#39;output.jpg&#39;);
+</code></pre><h3 id="section-3">Ruby</h3>
+<p>RubyGems::objectdetectを利用</p>
+<pre class="line-numbers"><code class="language-ruby">require &#39;rubygems&#39;
+require &#39;objectdetect&#39;
+require &#39;RMagick&#39;
+
+d = Magick::Draw.new.stroke(&#39;yellow&#39;).stroke_width(1).fill_opacity(0)
+ObjectDetect::detect(&#39;/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml&#39;, &#39;test.jpg&#39;).map do |p|
+    x, y, w, h = p;
+    d.rectangle(x, y , x+w, y+h)
+end
+
+image = Magick::ImageList.new(&#39;test.jpg&#39;)
+d.draw(image)
+image.write(&#39;output.jpg&#39;)
+</code></pre><h3 id="section-4">C/C++</h3>
+<p>opencv以外にlibgdが必要</p>
+<pre class="line-numbers"><code class="language-c">#include &lt;opencv/cv.h&gt;
+#include &lt;opencv/highgui.h&gt;
+#include &lt;gd.h&gt;
+
+int main(void) {
+    CvHaarClassifierCascade* cascade;
+    IplImage *img,*gray_scale;
+    CvMemStorage *storage;
+    CvSeq *objects;
+    CvRect *rect;
+    FILE *fp_in,*fp_out;
+    gdImagePtr im;
+    int i,color;
+
+    cascade = (CvHaarClassifierCascade*)cvLoad(&quot;/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml&quot;, 0, 0, 0);
+    img = cvLoadImage(&quot;test.jpg&quot;, 1);
+    gray_scale = cvCreateImage(cvSize(img-&gt;width, img-&gt;height), 8, 1);
+
+    cvCvtColor(img,gray_scale, CV_BGR2GRAY);
+    cvEqualizeHist(gray_scale, gray_scale);
+
+    storage = cvCreateMemStorage(0);
+    objects = cvHaarDetectObjects(gray_scale, cascade,storage, 1.2, 2, CV_HAAR_DO_CANNY_PRUNING, cvSize(0, 0));
+
+    fp_in = fopen(&quot;test.jpg&quot;, &quot;rb&quot;);
+    im = gdImageCreateFromJpeg(fp_in);
+    color = gdImageColorAllocate(im, 255, 255, 0);
+
+    for(i = 0; i &lt; (objects ? objects-&gt;total : 0); i++) {
+        rect = (CvRect*)cvGetSeqElem(objects, i);
+        gdImageRectangle(im, rect-&gt;x, rect-&gt;y, rect-&gt;x + rect-&gt;width, rect-&gt;y + rect-&gt;height, color);
+    }
+    fp_out = fopen(&quot;output.jpg&quot;, &quot;wb&quot;);
+    gdImageJpeg(im,fp_out, 100);
+
+    cvReleaseMemStorage(storage)
+    cvReleaseImage(img)
+    cvReleaseImage(gray_scale)
+    cvReleaseHaarClassifierCascade(cascade)
+    gdImageDestroy(im);
+    fclose(fp_out);
+    fclose(fp_in);
+    return 0;
+}
+</code></pre>
+<p>ビルドは</p>
+<pre class="line-numbers"><code class="language-bash">gcc -lgd -lcv -lhighgui opencv.c
+</code></pre>
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">PHP</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">Perl</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">Ruby</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">C/C++</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2014/02/loadmorelistview.html" class="d-block p-2">LoadMoreListView</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2011/05/avro.html" class="d-block p-2">avro</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/02/chrome-extension-browseraction-icon-rotation.html" class="d-block p-2">Chrome拡張のブラウザアクションなアイコンを回転させる技</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/03/swiperefreshlayout.html" class="d-block p-2">SwipeRefreshLayout</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2010/10/pack-unpack.html" class="d-block p-2">pack/unpack</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2010/07/php-calculate-age.html" rel="prev">&lt;&nbsp;PHPで年齢算出</a>
+              <a href="/2010/05/jni.html" rel="next">JNI&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

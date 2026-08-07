@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="公式ドキュメント: https://cloud.google.com/appengine/docs/java/endpoints" />
+    <meta property="og:title" content="Google Cloud Endpoints(Java)を使ってみた" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2015/06/google-cloud-endpoints.html">
+    <title>Google Cloud Endpoints(Java)を使ってみた - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2015/06/google-cloud-endpoints.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Google Cloud Endpoints(Java)を使ってみた",
+  "datePublished": "2015-06-24T17:03:46+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式ドキュメント: https://cloud.google.com/appengine/docs/java/endpoints"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2015/06">
+                  <span class="post-date-year">2015</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">24</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">Google Cloud Endpoints(Java)を使ってみた</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+                <a href="/archives/categories/google-app-engine" class="fs-5">Google App Engine</a>
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>公式ドキュメント: <a href="https://cloud.google.com/appengine/docs/java/endpoints" target="_blank" rel="noopener">https://cloud.google.com/appengine/docs/java/endpoints</a></p>
+
+<p>今までGoogle App Engineを使ってWeb API的なのを定義する際、Slim3を使ってOAuthServiceで認証情報を取得してJSONでレスポンス返す的な事を一から実装してたりとかしてたけど、今時そんな事しなくてもGoogle Cloud Endpointsを使う事で同等な事をさらっと出来るようになってるらしい</p>
+
+<p>っていう事でドキュメントを読みつつやってみた</p>
+<h3 id="section-1">環境構築</h3><pre class="line-numbers"><code class="language-groovy">buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath &#39;com.google.appengine:gradle-appengine-plugin:1.9.21&#39;
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply {
+    plugin &quot;war&quot;
+    plugin &quot;appengine&quot;
+}
+
+dependencies {
+    compile &quot;javax.servlet:servlet-api:2.5&quot;
+
+    // javax.injectの解決に必要
+    compile &quot;javax.inject:javax.inject:1&quot;
+
+    // javax.annotationの解決に必要
+    compile &quot;com.google.code.findbugs:jsr305:3.0.0&quot;
+
+    compile &quot;com.google.appengine:appengine-api-1.0-sdk:1.9.22&quot;
+    compile &quot;com.google.appengine:appengine-endpoints:1.9.22&quot;
+
+    providedRuntime &quot;com.google.appengine:appengine-api-stubs:1.9.22&quot;
+
+    testCompile &quot;junit:junit:4.11&quot;
+    testCompile &quot;org.hamcrest:hamcrest-all:1.3&quot;
+    testCompile &quot;com.google.appengine:appengine-testing:1.9.22&quot;
+}
+
+// daemon=trueにするとテスト時にdaemonしたままテスト実行する
+// appengineRunだけを普通に動かす事できなくなるので注意
+test {
+    appengine {
+        daemon = true
+    }
+    dependsOn += [&#39;appengineRun&#39;]
+}
+</code></pre>
+<p>んまぁこれだけ。テストする際に実際にサーバーを動かしてURLFetchServiceを使って結果をテストするので</p>
+<h3 id="section-2">WebApi.java</h3>
+<p>基本的には@Apiと@ApiMethodを使うのだけど、@Apiで共通項目だけを設定したクラスを用意しておいて、一部実際のAPI実装クラス上で特有する設定部分は@ApiClassで定義するのがよろしい模様。っていうか複数の@Apiを持つクラスを定義して同一のnameを持つ場合に設定項目が異なるとエラーになるので</p>
+<pre class="line-numbers"><code class="language-java">package sample;
+
+import com.google.api.server.spi.config.Api;
+
+@Api(name = &quot;sample&quot;)
+public class WebApi {
+}
+</code></pre>
+<p>っていうように@Apiを使ったクラスをベースとしたのを定義しておいて、クラスを継承するか@ApiReferenceでこのクラスを指定するなどの方式を取れば基底となる@Apiを継承して定義出来るような感じっぽい</p>
+<h3 id="section-3">HogeApi.java</h3><pre class="line-numbers"><code class="language-java">{% raw %}
+package sample;
+
+import javax.annotation.Nullable;
+import javax.inject.Named;
+
+import com.google.api.server.spi.config.ApiReference;
+import com.google.api.server.spi.config.ApiMethod;
+import com.google.api.server.spi.config.DefaultValue;
+
+@ApiReference(WebApi.class)
+public class HogeApi {
+    @ApiMethod(path = &quot;hoge&quot;, httpMethod = &quot;GET&quot;)
+    public Sample getSay(@Named(&quot;name&quot;) @Nullable @DefaultValue(&quot;hoge&quot;) String name) {
+        Sample sample = new Sample();
+        sample.setName(name);
+
+        return sample;
+    }
+
+    /*
+    @ApiMethod(path = &quot;fuga/{name}&quot;, httpMethod = &quot;GET&quot;)
+    public Sample getFuga(@Named(&quot;name&quot;) @Nullable @DefaultValue(&quot;fuga&quot;) String name) {
+        return getSay(name);
+    }
+    */
+}
+{% endraw %}
+</code></pre>
+<p>っていうように@ApiMethodを使ってAPIを定義出来る。その際にhttpMethodを指定しないような場合にはそのメソッド名から特定されたhttpMethodが自動で設定される模様。例えば上記のgetSayのような場合であればhttpMethod=&quot;GET&quot;しなくてもGETメソッドで作用するようになる</p>
+<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr"><a href="https://t.co/D4Wfyijp2i">https://t.co/D4Wfyijp2i</a> によるとhttpMethodは指定しなければメソッド名から推定される処理されるべきhttpMethodが採用される。例えばgetが接頭辞とかについてればGETメソッドで処理されるみたいで、ついてなければPOSTっぽい。確証は無い</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612359638789390336">2015, 6月 20</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<p>んで、@ApiMethodのpathにはパスパラメーターを含むようにする事も可能。コメントしてるけどgetFugaのpathように指定する事が出来るが</p>
+
+<ul>
+<li>@Namedで引数に指定したパスパラメーターをメソッドの引数に適応出来る</li>
+<li>但し、パスパラメーターをマッピングする場合には@Nullableと@DefaultValueを同時に併用する事は出来ない</li>
+</ul>
+<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">一応念の為にやってみた所、「<a href="http://t.co/KOQe04U1g4">http://t.co/KOQe04U1g4</a>.api.server.spi.config.validation.InvalidParameterAnnotationsException」っていう例外ぶっ飛ぶ</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/613354241004998656">2015, 6月 23</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<p>てな感じで定義する事でAPI定義することが出来る。まだ設定が足りないので動かす事は出来ないけど、実際サーバーを動かすと [<a href="http://localhost:8080/_ah/api/explorer" target="_blank" rel="noopener">http://localhost:8080/_ah/api/explorer</a>] っていうようなURLにアクセスしてAPI定義上から上記のgetSayを動かすと</p>
+
+<p><img src="/images/2015/06/201506242115_1.jpg" alt="image" /></p>
+
+<p>っていうようなレスポンス結果が得られるようになる</p>
+<h3 id="section-4">SampleApi.java</h3><pre class="line-numbers"><code class="language-java">package sample;
+
+import java.util.Arrays;
+import java.util.List;
+import javax.inject.Named;
+
+import com.google.api.server.spi.ServiceException;
+import com.google.api.server.spi.config.ApiClass;
+import com.google.api.server.spi.config.ApiMethod;
+import com.google.api.server.spi.config.ApiReference;
+import com.google.api.server.spi.response.UnauthorizedException;
+
+import com.google.appengine.api.users.User;
+
+@ApiClass(clientIds = { &quot;省略&quot; })
+public class SampleApi extends WebApi {
+
+    @ApiMethod(path = &quot;say&quot;)
+    public List&lt;Sample&gt; getSay(Sample sample) {
+        return Arrays.asList(sample);
+    }
+
+    @ApiMethod(path = &quot;user&quot;)
+    public User getUser(User user) throws ServiceException {
+        if (user == null) {
+            throw new UnauthorizedException(&quot;not found user&quot;);
+        }
+
+        return user;
+    }
+}
+</code></pre>
+<p>まずgetSayから、引数にオブジェクトを持つ場合クエリーからの内容を元にオブジェクトのインスタンスを生成して注入してくれる模様。但し@Namedを指定して利用できるクラスはプリミティブ型と一部のオブジェクト型のみサポートされているだけなので、自前のクラスを@Namedを使って注入する事は出来ないっぽい</p>
+
+<p>んでgetUser、引数にcom.google.appengine.users.Userを持つ事で@Api及び@ApiClass等で指定しているclientIdsによるOAuth2認証を利用してユーザー情報を取得出来るようになる。ちなみにOAuth2関係無く認証情報が取得出来ないようなケースの場合にはnullが入る模様。で上記ではUnauthorizedExceptionをスローしているのでレスポンス結果は</p>
+<pre class="line-numbers"><code class="language-json">{
+  &quot;error&quot; : {
+    &quot;message&quot; : &quot;not found user&quot;,
+    &quot;code&quot; : 401,
+    &quot;errors&quot; : [ {
+      &quot;domain&quot; : &quot;global&quot;,
+      &quot;reason&quot; : &quot;required&quot;,
+      &quot;message&quot; : &quot;not found user&quot;
+    } ]
+  }
+}
+</code></pre>
+<p>っていうようなレスポンス結果が得られるようになる</p>
+
+<p>んまぁここまでがざっくりとしたAPI実装部分。動かすには設定(web.xml)が必要</p>
+<h3 id="section-5">web.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;!DOCTYPE web-app PUBLIC &quot;-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN&quot; &quot;http://java.sun.com/dtd/web-app_2_3.dtd&quot;&gt;
+&lt;web-app xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; version=&quot;2.5&quot;&gt;
+
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;SystemServiceServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.google.api.server.spi.SystemServiceServlet&lt;/servlet-class&gt;
+        &lt;init-param&gt;
+            &lt;param-name&gt;services&lt;/param-name&gt;
+            &lt;param-value&gt;sample.SampleApi&lt;/param-value&gt;
+        &lt;/init-param&gt;
+    &lt;/servlet&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;SystemServiceServlet&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/_ah/spi/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+
+&lt;/web-app&gt;
+</code></pre>
+<p>っていうようにservicesに@Api及び@ApiClassで定義しているAPI実装クラスを指定する必要がある模様で</p>
+
+<p>んまぁここまで設定を行った上でサーバーを起動して <a href="http://localhost:8080/_ah/api/explorer" target="_blank" rel="noopener">http://localhost:8080/_ah/api/explorer</a> にアクセスすると</p>
+
+<p><img src="/images/2015/06/201506242115_2.jpg" alt="image" /></p>
+
+<p>ていうようなAPIが定義されそれぞれ適切なリクエストを行う事で結果をJSON等で取得出来るようになる</p>
+<h3 id="section-6">Google API Clieng Library for JavaScriptを使ってAPIをコールする</h3><pre class="line-numbers"><code class="language-html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;user&quot;&gt;&lt;/div&gt;
+    &lt;script src=&quot;https://apis.google.com/js/client.js?onload=init&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>みたいなHTMLでapp.jsで</p>
+<pre class="line-numbers"><code class="language-js">const CLIENT_ID = &quot;省略&quot;;
+const SCOPE = &quot;https://www.googleapis.com/auth/userinfo.email&quot;;
+
+function init() {
+  var callback = function() {
+    gapi.auth.authorize(
+      {
+        client_id: CLIENT_ID,
+        scope: SCOPE,
+        immediate: false
+      },
+      function(res) {
+        gapi.client.sample.sampleApi.getUser().execute(function(user) {
+          document.querySelector(&quot;#user&quot;).innerText = &quot;Hello: &quot; + user.nickname;
+        });
+      }
+    );
+  };
+
+  gapi.client.load(&#39;sample&#39;, &#39;v1&#39;, callback, &quot;//&quot; + window.location.host + &quot;/_ah/api&quot;);
+}
+</code></pre>
+<p>のような感じでgapiを使ってAPI定義をインポートして利用する事も出来る模様(ちなみに <a href="https://kinjouj-test.appspot.com" target="_blank" rel="noopener">https://kinjouj-test.appspot.com</a> にてこの記事投稿時点では見れるので)</p>
+
+<p>っていうような感じで使う事が出来る</p>
+
+<p>んまぁそんな感じで今時のGoogle App Engineを使ってWeb APIを実装するような場合であればGoogle Cloud Endpointsを利用する事も出来るって事で</p>
+<h3 id="section-7">余談1: 例外について</h3><blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr"><a href="https://t.co/g6lOKpa5PF">https://t.co/g6lOKpa5PF</a> に書いてるけど、API側で例外ぶん投げた場合はその後にServiceUnavailableになると思うのでそれによるサービスの例外エラーが503になるとか</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612666965790887937">2015, 6月 21</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">ちょっと余談入ったけど、送出したいHTTPステータスに一致する例外をthrowすればそのHTTPステータスで処理されるんだと思われる。んでにServiceExceptionを継承した例外クラスを作ってその例外をぶっ飛ばせば例外クラスで指定されてるステータスなレスポンスが送出される</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612669712674131968">2015, 6月 21</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<blockquote class="twitter-tweet" lang="ja"><p lang="ja" dir="ltr">「All HTTP 5xx status codes are converted to be HTTP 503 in the client response.」って書いとるがな</p>&mdash; kinjouj (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/612669940844236800">2015, 6月 21</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<p>っていう事でまとめると</p>
+
+<ul>
+<li>特定の例外を送出する事でそれに対応したレスポンスが送出されるようになる</li>
+<li>nullを返すと204(No Content?)になる</li>
+<li>3xxとははすべて404になる?</li>
+<li>500とかは503で変換される</li>
+<li>自前の例外を実装する場合にはcom.google.api.server.spi.ServiceExceptionを継承したクラスを定義する事でその例外を送出した場合に対応するレスポンスを送出する事が可能</li>
+</ul>
+
+<p>っていうような感じになる</p>
+<h3 id="section-8">余談2: ApiResourcePropertyに関して</h3>
+<p>APIのレスポンスを出す際にオブジェクトのこのプロパティは出したくないとかそういうような制御をする事も出来る</p>
+<pre class="line-numbers"><code class="language-java">package sample;
+
+import java.io.Serializable;
+
+import com.google.api.server.spi.config.AnnotationBoolean;
+import com.google.api.server.spi.config.ApiResourceProperty;
+
+public class Sample implements Serializable {
+
+    private int id;
+    private String name;
+
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+</code></pre>
+<p>っていうような@ApiResourcePropertyでignoredを指定する事でこのプロパティを出力しない等の設定を定義する事が出来る。又、nameパラメーターでこのプロパティを出力する際の名前等も変更する事が可能っぽい</p>
+<h3 id="section-9">余談3: @ApiTransformerについて</h3>
+<p>ようなオブジェクトとかをJSONとかに変換や解析するような仕組み等をオブジェクトに組み込む機能かと。まったく検証してないので詳しくは書かないけど、デフォルトとかだとjacksonを使ってJSONをエンコード/デコードしているんじゃないかと</p>
+
+<p>んまぁ詳しくは<a href="https://cloud.google.com/appengine/docs/java/endpoints/annotations#apitransformer" target="_blank" rel="noopener">ドキュメント</a>読めって事で</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">環境構築</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">WebApi.java</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">HogeApi.java</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">SampleApi.java</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">web.xml</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">Google API Clieng Library for JavaScriptを使ってAPIをコールする</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">余談1: 例外について</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">余談2: ApiResourcePropertyに関して</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">余談3: @ApiTransformerについて</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2015/07/google-cloud-endpoints-apitransformer.html" class="d-block p-2">Google Cloud Endpoints(Java)のApiTransformer</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/06/ecmascript6-using-babeljs.html" class="d-block p-2">babel.jsでECMAScript6</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/04/jaxrs-1.html" class="d-block p-2">JAX-RSをやってみる (1)</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/09/arquillian-managed.html" class="d-block p-2">arquillian-managed</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/11/babel6.html" class="d-block p-2">babel6の件</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2015/06/sed-remove-newline.html" rel="prev">&lt;&nbsp;sedで改行を含めて削除する</a>
+              <a href="/2015/06/angularjs-directive-bindtocontroller.html" rel="next">angular.js directiveのbindToController&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

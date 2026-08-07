@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="引き続きドキュメント読み。 &lt;http://laravel.com/docs/configuration&gt; をやってみる" />
+    <meta property="og:title" content="Laravel使ってみた (2) - Configuration -" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/06/laravel-2-configuration.html">
+    <title>Laravel使ってみた (2) - Configuration - - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/06/laravel-2-configuration.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Laravel使ってみた (2) - Configuration -",
+  "datePublished": "2013-06-09T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "引き続きドキュメント読み。 \u003chttp://laravel.com/docs/configuration\u003e をやってみる"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/06">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">9</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">Laravel使ってみた (2) - Configuration -</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/laravel" class="fs-5">Laravel</a>
+                <a href="/archives/categories/php" class="fs-5">PHP</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>引き続きドキュメント読み。 <a href="http://laravel.com/docs/configuration" target="_blank" rel="noopener">http://laravel.com/docs/configuration</a> をやってみる</p>
+<h3 id="section-1">Config.getとか</h3>
+<p>app/configに設定ファイルを定義すれば良い。設定ファイルはPHPファイルで内容はreturn arrayをする。例えばapp/config/hoge.phpを作る</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+
+return array(
+    &quot;message&quot; =&gt; &quot;hoge fuga foobar&quot;
+);
+</code></pre>
+<p>とかしたら</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+
+Config.get(&quot;hoge.message&quot;);
+</code></pre>
+<p>みたいにファイル名がaliasな感じ?でキー名をドットでつなげて利用できる模様</p>
+<h3 id="section-2">App::environmentに関して</h3>
+<p>App::environmentメソッドを使って環境名?的なを取る事が出来る模様。デフォルトではproductionが返されるけど、bootstrap/start.phpとかにそういう処理を書く事で制御する事が可能な模様</p>
+
+<p>でローカル環境で検証しているとか場合だと</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+
+$env = $app-&gt;detectEnvironment(
+    array(
+        &quot;local&quot; =&gt; array(&quot;your-machine-name&quot;)
+    )
+);
+</code></pre>
+<p>みたいな感じになってる。your-machine-nameとローカルのマシン名?(恐らくは`hostname`とかでマッチする名)がマッチした場合にはこの環境名が使われる。つまりyour-machine-nameと一致したらApp::environmentはlocalが利用される事になる。でdetectEnvironmentはfunctionを渡すことも出来る</p>
+
+<p>今回検証している環境がnginx+php-fpmなので。nginxに</p>
+<pre class="line-numbers"><code class="language-nginx">fastcgi_param LARAVEL_ENV development
+</code></pre>
+<p>と設定しておき</p>
+<pre class="line-numbers"><code class="language-php">&lt;?php
+
+$env = $app-&gt;detectEnvironment(function() {
+    if (isset($_SERVER[&quot;LARAVEL_ENV&quot;])) {
+        return $_SERVER[&quot;LARAVEL_ENV&quot;];
+    }
+
+    return &quot;development&quot;;
+});
+</code></pre>
+<p>のようにしておけば、Webサーバーとのやり取りで環境名を設定する事も可能な模様。でapp/config/環境名とかにも設定を置く事が出来る模様。例えば上記で作成したhoge.phpをapp/config/development/hoge.phpと定義(値を変えて)した場合には、こっちの読み込みが優先される模様。</p>
+
+<p>更に</p>
+
+<ul>
+<li>app/config/database.phpが無い</li>
+<li>app/config/[development|production]/database.phpはある</li>
+<li>app/config/testing/database.phpは無い</li>
+</ul>
+
+<p>場合にLaravelのテストを実行するとコントローラーとかでデータベースを使ってるとエラーになる。要はapp/config/環境名/設定ファイルが無ければ、app/configディレクトリ直下にある設定を利用する。でそれも無ければ読み込まれない的な感じかなと。</p>
+
+<p>ちなみにテスト時の環境名はtestingになるのでテスト時に使用するデータベースとかを切り替えたりも出来る。その際にmigration辺りは</p>
+<pre class="line-numbers"><code class="language-text">artisan --env=testing migrate
+</code></pre>
+<p>とかでテスト向けのmigrationを実行する事も可能な模様</p>
+<h3 id="section-3">artisan up/downに関して</h3>
+<ul>
+<li>  artisan downでメンテナンスモード</li>
+<li>  artisan upでメンテナンスモードから復旧</li>
+</ul>
+
+<p>的な事が出来る。でそこでの処理自体がapp/start/global.phpなどに、down時のレスポンスを処理したり出来る模様。デフォルトではHTTP503なエラーを送出</p>
+
+<p>まぁ特に突っ込みどころも無い気がするので(ry</p>
+
+<p>という感じ。環境名による設定の制御だとかは可能だというのが判明かなと</p>
+<h3 id="section-4">追記</h3><blockquote class="twitter-tweet">
+  <p>
+    App::environmentでマッチするのが、app/start/environment名.phpが呼ばれるっぽい
+  </p>
+  
+  <p>
+    &mdash; kinjouj (@kinjou_j) <a href="https://twitter.com/kinjou_j/statuses/343968862162804736">June 10, 2013</a>
+  </p>
+</blockquote>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">Config.getとか</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">App::environmentに関して</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">artisan up/downに関して</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">追記</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2025/06/ruby-global-library.html" class="d-block p-2">Globalっていうライブラリを使ってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/07/laravel-17-queue.html" class="d-block p-2">Laravel使ってみた (17) - Queue -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/11/fuelphp-2-using-database.html" class="d-block p-2">FuelPHPをやってみる (2) - データベースを使う -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/06/laravel-1-getting-start.html" class="d-block p-2">Laravel使ってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/07/laravel-19-security-password-reminder.html" class="d-block p-2">Laravel使ってみた (19) - Security(パスワードリマインダーとその他) -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/06/rspec-rails.html" rel="prev">&lt;&nbsp;rspec-railsのドキュメント読み</a>
+              <a href="/2013/06/laravel-1-getting-start.html" rel="next">Laravel使ってみた&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

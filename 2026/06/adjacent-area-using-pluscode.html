@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Google Mapsとかで位置情報(緯度経度)をコード化して使われてるアルゴリズムなんだけど、まぁ似たものだとGeoHashとかがあるんだけど
+そのpluscodeを使ってポイントとなる近接エリアを描画してみた" />
+    <meta property="og:title" content="pluscodeを使って位置情報の近接エリアを取得する方法" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2026/06/adjacent-area-using-pluscode.html">
+    <title>pluscodeを使って位置情報の近接エリアを取得する方法 - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2026/06/adjacent-area-using-pluscode.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "pluscodeを使って位置情報の近接エリアを取得する方法",
+  "datePublished": "2026-06-26T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "Google Mapsとかで位置情報(緯度経度)をコード化して使われてるアルゴリズムなんだけど、まぁ似たものだとGeoHashとかがあるんだけど\nそのpluscodeを使ってポイントとなる近接エリアを描画してみた"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2026/06">
+                  <span class="post-date-year">2026</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">26</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">pluscodeを使って位置情報の近接エリアを取得する方法</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>Google Mapsとかで位置情報(緯度経度)をコード化して使われてるアルゴリズムなんだけど、まぁ似たものだとGeoHashとかがあるんだけど<br>
+そのpluscodeを使ってポイントとなる近接エリアを描画してみた</p>
+<div class="note"><i class="fa-solid fa-circle-exclamation"></i><span>Google Maps APIが現在有料化されてて使えないのでopenstreetmapとleafletを使って描画する</span></div>
+
+<h3 id="section-1">pluscodeをエンコードとデコードできる関数を作る</h3><div class="note"><i class="fa-solid fa-circle-exclamation"></i><span>別になくてもopen-location-codeのパッケージを使えばできる</span></div>
+
+<pre class="line-numbers"><code class="language-js">const CODE_ALPHABET = &quot;23456789CFGHJMPQRVWX&quot;;
+
+function encode_pluscode(lat, lng, codeLength = 8) {
+  let remLat = lat + 90;
+  let remLng = lng + 180;
+  let size = 20;
+  let code = &quot;&quot;;
+
+  const loops = codeLength / 2;
+
+  for (let i = 0; i &lt; loops; i++) {
+    let latIndex = Math.floor(remLat / size);
+    let lngIndex = Math.floor(remLng / size);
+
+    const maxLatIndex = (i === 0) ? 8 : 19;
+    const maxLngIndex = (i === 0) ? 17 : 19;
+
+    if (latIndex &gt; maxLatIndex) {
+      latIndex = maxLatIndex;
+    }
+
+    if (lngIndex &gt; maxLngIndex) {
+      lngIndex = maxLngIndex;
+    }
+
+    code += CODE_ALPHABET[latIndex] + CODE_ALPHABET[lngIndex];
+    remLat -= latIndex * size;
+    remLng -= lngIndex * size;
+    size /= 20;
+
+    if (i === 3) {
+      code += &quot;+&quot;;
+    }
+  }
+
+  return code;
+}
+
+function decode_pluscode(code) {
+  const cleanCode = code.replace(&quot;+&quot;, &quot;&quot;);
+  let remLat = 0;
+  let remLng = 0;
+  let size = 20;
+
+  const loops = cleanCode.length / 2;
+
+  for (let i = 0; i &lt; loops; i++) {
+    if (i &gt; 0) {
+      size /= 20;
+    }
+
+    const latChar = cleanCode[i * 2];
+    const lngChar = cleanCode[i * 2 + 1];
+    const latIndex = CODE_ALPHABET.indexOf(latChar.toUpperCase());
+    const lngIndex = CODE_ALPHABET.indexOf(lngChar.toUpperCase());
+
+    remLat += latIndex * size;
+    remLng += lngIndex * size;
+  }
+
+  const latMin = remLat - 90;
+  const lngMin = remLng - 180;
+  const latMax = latMin + size;
+  const lngMax = lngMin + size;
+
+  return {
+    lat: (latMin + latMax) / 2,
+    lng: (lngMin + lngMax) / 2,
+    size: size,
+    bounds: {
+      southWest: [latMin, lngMin], 
+      northEast: [latMax, lngMax] 
+    }
+  };
+}
+</code></pre>
+<p>これを使ってpluscodeを描画しつつ近接エリアをブロックで描画していく</p>
+<h3 id="section-2">描画HTML側</h3>
+<ol>
+<li>中心となるポイント(ここでは帝国ホテル)にピンを設定</li>
+<li>近接のエリアにあるポイント(ここでは日比谷公園)にピンを設定</li>
+<li>中心から隣接するエリアのpluscodeを取得して描画</li>
+</ol>
+<div class="note"><i class="fa-solid fa-circle-exclamation"></i><span>HTMLは省略</span></div>
+
+<pre class="line-numbers"><code class="language-js">// leafletを初期化
+const map = L.map(&quot;map&quot;).setView([35.6725, 139.7570], 16);
+L.tileLayer(&quot;https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png&quot;).addTo(map);
+
+// 日比谷公園のピンを設定
+const hibiyaPark = { name: &quot;日比谷公園&quot;, lat: 35.6732, lng: 139.7558 };
+const parkCode8 = encode_pluscode(hibiyaPark.lat, hibiyaPark.lng, 8);      
+const parkMarker = L.marker([hibiyaPark.lat, hibiyaPark.lng]).addTo(map);
+parkMarker.bindTooltip(`${hibiyaPark.name}(${parkCode8})`, { permanent: true, direction: &quot;top&quot;, offset: [0, -10] });
+
+// 帝国ホテルのピンを設定
+const userLocation = { name: &quot;帝国ホテル&quot;, lat: 35.6723, lng: 139.7583 };
+const userExactCode = encode_pluscode(userLocation.lat, userLocation.lng, 10);
+const userAreaCode8 = encode_pluscode(userLocation.lat, userLocation.lng, 8); 
+const userMarker = L.marker([userLocation.lat, userLocation.lng]).addTo(map);
+userMarker.bindTooltip(`${userLocation.name}(${userExactCode})`, { permanent: true, direction: &quot;top&quot;, offset: [0, -10] });
+
+const centerInfo = decode_pluscode(userAreaCode8);
+const centerLat = centerInfo.lat;
+const centerLng = centerInfo.lng;
+const step = centerInfo.size; 
+
+for (let dLat = 1; dLat &gt;= -1; dLat--) {
+  for (let dLng = -1; dLng &lt;= 1; dLng++) {
+    // 隣マスの中心座標を計算
+    const nLat = centerLat + (dLat * step);
+    const nLng = centerLng + (dLng * step);
+    const neighborCode8 = encode_pluscode(nLat, nLng, 8);
+
+    // 隣マスの四角形の範囲を中心点からサイズ(step)の半分ずつ広げて計算
+    const half = step / 2;
+    const nBounds = { southWest: [nLat - half, nLng - half], northEast: [nLat + half, nLng + half] };
+
+    L.rectangle([nBounds.southWest, nBounds.northEast], { weight: 2, fillColor: &quot;#0066cc&quot;, fillOpacity: 0.1 })
+      .addTo(map)
+      .bindTooltip(`&lt;code&gt;${neighborCode8}&lt;/code&gt;`, { permanent: true, direction: &quot;center&quot;});
+  }
+}
+</code></pre>
+<p>実際、描画してみると</p>
+
+<p><img src="/images/2026/06/2026062600.jpg" alt="image" /></p>
+
+<p>という感じに中央となるポイントから隣接するエリアのpluscodeを取得してエリアを描画している</p>
+<h3 id="section-3">余談</h3>
+<p>実はこんなことしなくてもpluscodeの桁数を変える事で領域となるエリアを大きさがちゃんと存在する</p>
+
+<ul>
+<li>6桁だと約5.5kmほど</li>
+<li>8桁だと約270mほど</li>
+<li>10桁だと約14mほど</li>
+</ul>
+
+<p>という感じなのでそれでエリアを特定したりはできるのだが8桁から6桁に下げた場合の距離の大きさがあまりにもでかすぎるということで<br>
+今回のような起点となるポイントから隣接するエリアのpluscodeを取得してエリアを描画するっていう仕組みを利用している</p>
+
+<p>また、空間インデックスライブラリ(turf.jsなど)を使ってやるっていう手もあるっぽい</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">pluscodeをエンコードとデコードできる関数を作る</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">描画HTML側</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">余談</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/03/android-mapfragment.html" class="d-block p-2">MapFragmentを使ってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2026/06/calculate-cursor-direction.html" class="d-block p-2">マウスカーソルが乗っかってる方角を算出する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/05/serviceworker-push-api.html" class="d-block p-2">ServiceWorkerを使ったPush APIをやってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/04/chrome-identity-api-oauth2-authorization-google-app-engine.html" class="d-block p-2">chrome.identity APIを使ってGoogle App Engine OAuth2を使う</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/06/google-cloud-endpoints.html" class="d-block p-2">Google Cloud Endpoints(Java)を使ってみた</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2026/06/firebase-2-cloud-messaging.html" rel="prev">&lt;&nbsp;Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html" rel="next">Github Actionsを使ってAndroidアプリをビルドする&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

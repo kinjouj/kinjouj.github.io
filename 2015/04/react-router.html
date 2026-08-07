@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="react-routerを使ってみた。" />
+    <meta property="og:title" content="react-router" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2015/04/react-router.html">
+    <title>react-router - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2015/04/react-router.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "react-router",
+  "datePublished": "2015-04-01T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "react-routerを使ってみた。"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2015/04">
+                  <span class="post-date-year">2015</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">4</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">1</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">react-router</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+                <a href="/archives/categories/react" class="fs-5">React</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>react-routerを使ってみた。</p>
+
+<p>※React.jsな構成の考え方とかとりあえず反映せずにざらーって書いてるので(ry</p>
+
+<p>※やたらと長い上に書いた本人以外わかりづらいと思うので公式ドキュメント読んだ方が良い</p>
+<h3 id="section-1">環境構築</h3>
+<p>とりあえずnpmでreact及びreact-routerの依存性とbrowserifyを使ったビルドの定義をしておく</p>
+<pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;sample&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
+  &quot;main&quot;: &quot;js/app.js&quot;,
+  &quot;dependencies&quot;: {
+    &quot;react&quot;: &quot;^0.13.1&quot;,
+    &quot;react-router&quot;: &quot;^0.13.2&quot;
+  },
+  &quot;devDependencies&quot;: {
+    &quot;browserify&quot;: &quot;^8.0.3&quot;,
+    &quot;envify&quot;: &quot;^3.0.0&quot;,
+    &quot;reactify&quot;: &quot;^0.15.2&quot;,
+    &quot;watchify&quot;: &quot;^2.6.2&quot;
+  },
+  &quot;scripts&quot;: {
+    &quot;start&quot;: &quot;watchify -o bundle.js -v -d js/app.js&quot;,
+    &quot;build&quot;: &quot;browserify . -t [envify --NODE_ENV production] -o bundle.js&quot;,
+    &quot;postinstall&quot;: &quot;npm run build&quot;
+  },
+  &quot;browserify&quot;: {
+    &quot;transform&quot;: [&quot;reactify&quot;, &quot;envify&quot;]
+  }
+}
+</code></pre>
+<p>でコード中にはReact.jsで使うJSX構文が含まれているのでreactifyのトランスフォームを使ってビルドする事で可能。envifyはnode.jsのprocess.env.NODE_ENVを静的な文字列に置き換えるトランスフォーマーかと(それ以外に何かあるのかは未調査)</p>
+
+<p>でプロジェクト構成を整えたらnpm installで必要な依存性の取得をした後にpostinstallでビルドするようにしているのでjs/app.jsをビルドしたbundle.jsが生成される。それを以下のHTMLで利用する(以降にて共通で使用するHTML)</p>
+<pre class="line-numbers"><code class="language-html">&lt;html&gt;
+  &lt;head&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;hello-app&quot;&gt;&lt;/div&gt;
+    &lt;script src=&quot;bundle.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>あとはガシガシとコード書いてドキュメント読みつつ進める</p>
+<h3 id="section-2">js/app.js</h3><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+var React  = require(&quot;react&quot;),
+    Router = require(&quot;react-router&quot;),
+    routes = require(&quot;./routes&quot;);
+
+/*
+HTML5 Hisotry Locationを使う場合
+Router.run(routes, Router.HistoryLocation, function(Handler) {
+*/
+
+// hashbang方式を使う場合には第2引数にRouter.HistoryLocation等を指定しない
+Router.run(routes, function(Handler) {
+  React.render(
+    &lt;Handler /&gt;,
+    document.querySelector(&#39;#hello-app&#39;)
+  );
+});
+</code></pre>
+<p>Router.runしてマッチしたルーティングを指定したセレクターでハンドラー(ReactClass)で描画するっていう感じかと</p>
+<h3 id="section-3">js/routes.js</h3><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+var React        = require(&quot;react&quot;),
+    Router       = require(&quot;react-router&quot;),
+    Route        = Router.Route,
+    Link         = Router.Link,
+    RouteHandler = Router.RouteHandler,
+    DefaultRoute = Router.DefaultRoute;
+
+var MainNav = React.createClass({
+  render: function() {
+    /*
+    Linkを使えば現在見ているページに対してclass=&quot;active&quot;がつく
+    &lt;a&gt;で記述するとHTML5モード使ったりhashbang方式使ったりの切り替えしないといけないはずので&lt;Link&gt;を使った方が良いかも
+    */
+
+    return (
+      &lt;div&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;Link to=&quot;hello&quot;&gt;hello&lt;/Link&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var App = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;MainNav /&gt;
+        {/* 要はルーティングマッチしたコンテンツがレンダリングされる領域? */}
+        &lt;RouteHandler /&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var Root = React.createClass({
+  render: function() {
+    return (
+      &lt;h2&gt;Root&lt;/h2&gt;
+    );
+  }
+});
+
+var Hello = React.createClass({
+  render: function() {
+    return (
+      &lt;h2&gt;Hello&lt;/h2&gt;
+    );
+  }
+});
+
+var routes = (
+  &lt;Route name=&quot;app&quot; path=&quot;/&quot; handler={App}&gt;
+    &lt;Route name=&quot;hello&quot; path=&quot;/hello&quot; handler={Hello} /&gt;
+    &lt;DefaultRoute handler={Root} /&gt;
+  &lt;/Route&gt;
+);
+
+module.exports = routes;
+</code></pre>
+<p>先ほど書いた上記のHTMLにアクセスにするとまず&lt;DefaultRoute&gt;で定義しているRootハンドラーが作用してそこが&lt;RouteHandler&gt;な領域に描画されるような形かと。で&lt;MainNav&gt;なので定義している&lt;Link&gt;が変換された&lt;a&gt;をクリックするとHelloハンドラーが作用して同様な描画処理が行われる感じ</p>
+<h3 id="section-4">&lt;NotFoundRoute&gt;と&lt;Redirect&gt;</h3><h3 id="section-5">js/route.js</h3><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+var React         = require(&quot;react&quot;),
+    Router        = require(&quot;react-router&quot;),
+    Route         = Router.Route,
+    Link          = Router.Link,
+    RouteHandler  = Router.RouteHandler,
+    DefaultRoute  = Router.DefaultRoute,
+    Redirect      = Router.Redirect,
+    NotFoundRoute = Router.NotFoundRoute;
+
+var MainNav = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;Link to=&quot;hello&quot;&gt;hello&lt;/Link&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var App = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;MainNav /&gt;
+        &lt;RouteHandler /&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var Root = React.createClass({
+  render: function() {
+    return (
+      &lt;h2&gt;Root&lt;/h2&gt;
+    );
+  }
+});
+
+var Hello = React.createClass({
+  render: function() {
+    return (
+      &lt;h2&gt;Hello&lt;/h2&gt;
+    );
+  }
+});
+
+var NotFound = React.createClass({
+  render: function() {
+    return (
+      &lt;h2&gt;Not Found&lt;/h2&gt;
+    );
+  }
+});
+
+
+var routes = (
+  &lt;Route name=&quot;app&quot; path=&quot;/&quot; handler={App}&gt;
+    &lt;Route name=&quot;hello&quot; path=&quot;/hello&quot; handler={Hello} /&gt;
+    &lt;Redirect from=&quot;hoge&quot; to=&quot;hello&quot; /&gt;
+    &lt;DefaultRoute handler={Root} /&gt;
+    &lt;NotFoundRoute handler={NotFound} /&gt;
+  &lt;/Route&gt;
+);
+
+module.exports = routes;
+</code></pre>
+<p>ルーティングの定義とNotFoundハンドラーの定義だけ修正しただけだけど。存在しないルーティングにアクセスしたような場合には&lt;NotFoundRoute&gt;で定義したハンドラーが作用するようになる。で&lt;Redirect&gt;で定義するとfromで指定したルーティングにアクセスした場合にはtoで指定したルーティング名にリダイレクトされるようになる</p>
+<h3 id="section-6">ルーティングパラメーターを利用する</h3>
+<p>ルーティングパラメーターも利用する事も出来るし、ルーティングライブラリとかによくあるアスタリスクを使ったsplatルーティングパラメーターも利用する事が可能 (詳しくは <a href="https://github.com/rackt/react-router/blob/master/docs/guides/path-matching.md#splats" target="_blank" rel="noopener">https://github.com/rackt/react-router/blob/master/docs/guides/path-matching.md#splats</a> )</p>
+<h3 id="section-7">js/routes.js</h3><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+var React        = require(&quot;react&quot;),
+    Router       = require(&quot;react-router&quot;),
+    Route        = Router.Route,
+    Link         = Router.Link,
+    RouteHandler = Router.RouteHandler,
+    DefaultRoute = Router.DefaultRoute;
+
+var MainNav = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;ul&gt;
+          {/* &lt;Link&gt;でパラメーターを利用する場合にはparams=で指定 */}
+          &lt;li&gt;&lt;Link to=&quot;user&quot; params={% raw %}{{ id: 1}}{% endraw %}&gt;user1&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to=&quot;user&quot; params={% raw %}{{ id: 2}}{% endraw %}&gt;user2&lt;/Link&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var App = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;MainNav /&gt;
+        &lt;RouteHandler /&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var Root = React.createClass({
+  render: function() {
+    return (
+      &lt;h2&gt;Root&lt;/h2&gt;
+    );
+  }
+});
+
+var User = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  render: function() {
+    var params = this.context.router.getCurrentParams();
+
+    return (
+      &lt;h2&gt;User{params.id}&lt;/h2&gt;
+    );
+  }
+});
+
+var routes = (
+  &lt;Route name=&quot;app&quot; path=&quot;/&quot; handler={App}&gt;
+    &lt;Route name=&quot;user&quot; path=&quot;/user/:id&quot; handler={User} /&gt;
+    &lt;DefaultRoute handler={Root} /&gt;
+  &lt;/Route&gt;
+);
+
+module.exports = routes;
+</code></pre>
+<p>&lt;Route&gt;のpathで:idのようなパラメーターを設定して、それをRouter APIのgetCurrentParamsを介して利用する事が出来る</p>
+
+<p>又、Router APIを介さなくてもルーティングパラメーターをハンドラーのプロパティ(React.createClass内のprops)で参照する事も可能。それを利用する場合は以下のように修正する</p>
+<h3 id="section-8">js/app.js</h3><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+var React  = require(&quot;react&quot;),
+    Router = require(&quot;react-router&quot;),
+    routes = require(&quot;./routes&quot;);
+
+Router.run(routes, function(Handler, state) {
+  React.render(
+    // 修正
+    &lt;Handler params={% raw %}{state.params}{% endraw %} /&gt;,
+    document.querySelector(&#39;#hello-app&#39;)
+  );
+});
+</code></pre><h3 id="section-9">js/routes.js</h3><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+var React        = require(&quot;react&quot;),
+    Router       = require(&quot;react-router&quot;),
+    Route        = Router.Route,
+    Link         = Router.Link,
+    RouteHandler = Router.RouteHandler,
+    DefaultRoute = Router.DefaultRoute;
+
+var MainNav = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;Link to=&quot;user&quot; params={% raw %}{{ id: 1}}{% endraw %}&gt;user1&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to=&quot;user&quot; params={% raw %}{{ id: 2}}{% endraw %}&gt;user2&lt;/Link&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var App = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;MainNav /&gt;
+        {/* 修正 */}
+        &lt;RouteHandler {...this.props} /&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var Root = React.createClass({
+  render: function() {
+    return (
+      &lt;h2&gt;Root&lt;/h2&gt;
+    );
+  }
+});
+
+var User = React.createClass({
+  render: function() {
+    // paramsをthis.context.router.getCurrentParamsじゃなくてthis.propsから参照するように
+    var params = this.props.params;
+    return (
+      &lt;h2&gt;User{params.id}&lt;/h2&gt;
+    );
+  }
+});
+
+var routes = (
+  &lt;Route name=&quot;app&quot; path=&quot;/&quot; handler={App}&gt;
+    &lt;Route name=&quot;user&quot; path=&quot;/user/:id&quot; handler={User} /&gt;
+    &lt;DefaultRoute handler={Root} /&gt;
+  &lt;/Route&gt;
+);
+
+module.exports = routes;
+</code></pre>
+<p>っていう感じでハンドラーにパラメーターをプロパティにマージ?するような形として利用する事も出来る</p>
+<h3 id="section-10">Dynamic Segmentを使う場合の注意</h3>
+<p>Dynamic Segment(ルーティングパラメーター)を使ってる場合において、&lt;Link&gt;等で切り替えを行うような際(公式的にはトランジションを行う場合)にはそのハンドラーのgetInitialStateが発生しなくなる。getInitialStateで返した値をrenderでstateを使うような場合にはcomponentWillReceivePropsでsetStateするような形を利用するようにとの事。つまり以下みたいな感じでやれって事らしい</p>
+<h3 id="section-11">js/routes.js</h3><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+var React        = require(&quot;react&quot;),
+    Router       = require(&quot;react-router&quot;),
+    Route        = Router.Route,
+    Link         = Router.Link,
+    RouteHandler = Router.RouteHandler,
+    DefaultRoute = Router.DefaultRoute;
+
+var MainNav = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;Link to=&quot;user&quot; params={% raw %}{{ id: 1}}{% endraw %}&gt;user1&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to=&quot;user&quot; params={% raw %}{{ id: 2}}{% endraw %}&gt;user2&lt;/Link&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var App = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;MainNav /&gt;
+        &lt;RouteHandler /&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var Root = React.createClass({
+  render: function() {
+    return (
+      &lt;h2&gt;Root&lt;/h2&gt;
+    );
+  }
+});
+
+var User = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  getInitialState: function() {
+    return this.getStateFromStore();
+  },
+  componentWillReceiveProps: function() {
+    this.setState(this.getStateFromStore());
+  },
+  render: function() {
+    return (
+      &lt;h2&gt;User{this.state.id}&lt;/h2&gt;
+    );
+  },
+  getStateFromStore: function() {
+    return this.context.router.getCurrentParams();
+  }
+});
+
+var routes = (
+  &lt;Route name=&quot;app&quot; path=&quot;/&quot; handler={App}&gt;
+    &lt;Route name=&quot;user&quot; path=&quot;/user/:id&quot; handler={User} /&gt;
+    &lt;DefaultRoute handler={Root} /&gt;
+  &lt;/Route&gt;
+);
+
+module.exports = routes;
+</code></pre>
+<p>getInitialStateは実装しないっていう訳じゃなくて、&lt;Link&gt;でトランジションされるような際においてはgetInitialStateが発生しないので、そこで返すと同等なstateを保持するような形になる模様</p>
+
+<p>公式的には <a href="https://github.com/rackt/react-router/blob/master/examples/master-detail/app.js#L91" target="_blank" rel="noopener">https://github.com/rackt/react-router/blob/master/examples/master-detail/app.js#L91</a> を参考にしろとの事</p>
+<h3 id="section-12">ルーティングをネストする場合</h3><h3 id="section-13">js/routes.js</h3><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+var React        = require(&quot;react&quot;),
+    Router       = require(&quot;react-router&quot;),
+    Route        = Router.Route,
+    Link         = Router.Link,
+    RouteHandler = Router.RouteHandler,
+    DefaultRoute = Router.DefaultRoute;
+
+var MainNav = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;Link to=&quot;users&quot;&gt;users&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to=&quot;user&quot; params={% raw %}{{ id: 1}}{% endraw %}&gt;user1&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to=&quot;user&quot; params={% raw %}{{ id: 2}}{% endraw %}&gt;user2&lt;/Link&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var App = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;MainNav /&gt;
+        &lt;RouteHandler /&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var Root = React.createClass({
+  render: function() {
+    return (
+      &lt;h2&gt;Root&lt;/h2&gt;
+    );
+  }
+});
+
+var Users = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;h2&gt;Users&lt;/h2&gt;
+        &lt;div&gt;
+          {/* ネストされたルーティングがあるような場合であれば&lt;RouteHandler /&gt;しないとネストされた部分まで作用しない模様 */}
+          &lt;RouteHandler /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var User = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  render: function() {
+    var params = this.context.router.getCurrentParams();
+
+    return (
+      &lt;h2&gt;User{params.id}&lt;/h2&gt;
+    );
+  }
+});
+
+var routes = (
+  &lt;Route name=&quot;app&quot; path=&quot;/&quot; handler={App}&gt;
+    &lt;Route name=&quot;users&quot; handler={Users}&gt;
+      &lt;Route name=&quot;user&quot; path=&quot;:id&quot; handler={User} /&gt;
+    &lt;/Route&gt;
+    &lt;DefaultRoute handler={Root} /&gt;
+  &lt;/Route&gt;
+);
+
+module.exports = routes;
+</code></pre>
+<p>書いてる通り、ルーティングがネストされている場合にネストされた側のルーティングにマッチしても親側で&lt;RouteHandler&gt;してない場合にはネストされた部分まで処理が作用しない模様(んまぁ、今までを考えればルートなappルーティングで&lt;RouteHandler&gt;してるから当たり前な事だと)</p>
+
+<p>んまぁ難癖ありそうだなって思ったら出来る限りそういう定義にならないようにルーティング設計を考えるべきかと</p>
+<h3 id="section-14">renderする際にリダイレクトしたい場合</h3>
+<p>そういう事するような要件になるようにならないようにするべきなんですが、あくまで疑問として描画される際にあたって問題があればリダイレクトしたいような要件の場合は以下のようにAPI使って出来なくもない模様</p>
+<pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+var React        = require(&quot;react&quot;),
+    Router       = require(&quot;react-router&quot;),
+    Route        = Router.Route,
+    RouteHandler = Router.RouteHandler;
+
+var App = React.createClass({
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;RouteHandler /&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+var Root = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  render: function(event) {
+    this.context.router.replaceWith(&quot;user&quot;, { &quot;id&quot;: &quot;123&quot; });
+    //this.context.router.transitionTo(&#39;user&#39;, { id: 123 });
+
+    return null;
+  }
+});
+
+var User = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  render: function() {
+    var params = this.context.router.getCurrentParams();
+    return (
+      &lt;h2&gt;User{params.id}&lt;/h2&gt;
+    );
+  }
+});
+
+var routes = (
+  &lt;Route name=&quot;app&quot; path=&quot;/&quot; handler={App}&gt;
+    &lt;Route name=&quot;root&quot; path=&quot;/&quot; handler={Root} /&gt;
+    &lt;Route name=&quot;user&quot; path=&quot;/user/:id&quot; handler={User} /&gt;
+  &lt;/Route&gt;
+);
+
+module.exports = routes;
+</code></pre>
+<p>これを使う事によりどういう問題が出てくるかって所までは把握してないので、先も言ったけどこういう事案にならないように避けるべきかと</p>
+
+<p>以上。長いけどまだ見落としてる部分もありそうなので色々分かったら追記なり新しくネタ書いたりするかも知れない</p>
+<h3 id="section-15">追記</h3>
+<p>Navigationっていうmixinを使うと</p>
+<pre class="line-numbers"><code class="language-js">var React = require(&quot;react&quot;)
+    Router = require(&quot;react-router&quot;),
+    Navigation = Router.Navigation;
+
+var Top = React.createClass({
+  mixins: [Navigation],
+  onClick: function(e) {
+    e.preventDefault();
+    this.replaceWith(&quot;user&quot;, { id: 1 });
+  },
+  render: function() {
+    return (
+      &lt;div&gt;
+        &lt;a href=&quot;#&quot; onClick={this.onClick}&gt;user&lt;/a&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+
+module.exports = Top;
+</code></pre>
+<p>なんて感じに使えますが、Navigationを使うルーティングの操作は現在deprecatedな模様。なので使わないのが良さそう</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">環境構築</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">js/app.js</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">js/routes.js</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">&amp;lt;NotFoundRoute&amp;gt;と&amp;lt;Redirect&amp;gt;</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">js/route.js</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">ルーティングパラメーターを利用する</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">js/routes.js</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">js/app.js</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">js/routes.js</a>
+                <a href="#section-10" class="d-block p-1 overflow-hidden ms-0">Dynamic Segmentを使う場合の注意</a>
+                <a href="#section-11" class="d-block p-1 overflow-hidden ms-0">js/routes.js</a>
+                <a href="#section-12" class="d-block p-1 overflow-hidden ms-0">ルーティングをネストする場合</a>
+                <a href="#section-13" class="d-block p-1 overflow-hidden ms-0">js/routes.js</a>
+                <a href="#section-14" class="d-block p-1 overflow-hidden ms-0">renderする際にリダイレクトしたい場合</a>
+                <a href="#section-15" class="d-block p-1 overflow-hidden ms-0">追記</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2015/04/react-router-testing.html" class="d-block p-2">react-routerのテストに関して</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/04/react-testing-using-jest.html" class="d-block p-2">jestを使ってReact.jsなスクリプトをテストする</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/04/react-css-animation.html" class="d-block p-2">React.jsのCSSアニメーション</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/04/jest-runalltimers-runonlypendingtimers.html" class="d-block p-2">jestのrunAllTimers/runOnlyPendingTimers</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2018/06/almin-and-react-routing-resolver.html" class="d-block p-2">almin+react-routing-resolver</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2015/04/jest-__mocks__-directory.html" rel="prev">&lt;&nbsp;jestの__mocks__ディレクトリに関して</a>
+              <a href="/2015/03/doma-part4-domain.html" rel="next">doma2を使ってみる (4) - Domain -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

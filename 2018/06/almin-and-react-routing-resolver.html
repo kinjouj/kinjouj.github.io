@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="[hatebupwa](https://github.com/azu/hatebupwa)を読んでる時に気になったreact-routing-resolverを使ってみた" />
+    <meta property="og:title" content="almin+react-routing-resolver" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2018/06/almin-and-react-routing-resolver.html">
+    <title>almin+react-routing-resolver - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2018/06/almin-and-react-routing-resolver.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "almin+react-routing-resolver",
+  "datePublished": "2018-06-22T09:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "[hatebupwa](https://github.com/azu/hatebupwa)を読んでる時に気になったreact-routing-resolverを使ってみた"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2018/06">
+                  <span class="post-date-year">2018</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">22</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">almin+react-routing-resolver</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+                <a href="/archives/categories/react" class="fs-5">React</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p><a href="https://github.com/azu/hatebupwa" target="_blank" rel="noopener">hatebupwa</a>を読んでる時に気になったreact-routing-resolverを使ってみた</p>
+
+<p>※almin自体にはあまり触れないのでドキュメント参照</p>
+<h3 id="section-1">package.json</h3><pre class="line-numbers"><code class="language-javascript">{
+  &quot;name&quot;: &quot;sample&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;scripts&quot;: {
+    &quot;build&quot;: &quot;webpack&quot;,
+    &quot;lint&quot;: &quot;eslint src&quot;
+  },
+  &quot;dependencies&quot;: {
+    &quot;almin&quot;: &quot;^0.16.0&quot;,
+    &quot;core-decorators&quot;: &quot;^0.20.0&quot;,
+    &quot;history&quot;: &quot;^4.7.2&quot;,
+    &quot;office-ui-fabric-react&quot;: &quot;^5.100.0&quot;,
+    &quot;react&quot;: &quot;^16.3.1&quot;,
+    &quot;react-dom&quot;: &quot;^16.3.1&quot;,
+    &quot;react-routing-resolver&quot;: &quot;^3.0.0&quot;
+  },
+  &quot;devDependencies&quot;: {
+    &quot;babel-core&quot;: &quot;^6.26.3&quot;,
+    &quot;babel-eslint&quot;: &quot;^8.2.3&quot;,
+    &quot;babel-loader&quot;: &quot;^7.1.4&quot;,
+    &quot;babel-plugin-transform-decorators-legacy&quot;: &quot;^1.3.4&quot;,
+    &quot;babel-preset-env&quot;: &quot;^1.6.1&quot;,
+    &quot;babel-preset-react&quot;: &quot;^6.24.1&quot;,
+    &quot;eslint&quot;: &quot;^4.19.1&quot;,
+    &quot;eslint-plugin-react&quot;: &quot;^7.9.1&quot;,
+    &quot;webpack&quot;: &quot;^3.8.1&quot;
+  }
+}
+</code></pre>
+<p>まぁ普通にインストール周りをやるだけなんだけど、ES7 Decorators関連をちょっと使うのでbabel-plugin-transform-decorators-legacyを入れておく</p>
+
+<p>※eslint関連は省略</p>
+<h3 id="section-2">.babelrc</h3><pre class="line-numbers"><code class="language-javascript">{
+  &quot;presets&quot;: [&quot;react&quot;, &quot;env&quot;],
+  &quot;plugins&quot;: [
+    &quot;transform-decorators-legacy&quot;
+  ]
+}
+</code></pre><h3 id="section-3">store/AppStore.js</h3><pre class="line-numbers"><code class="language-javascript">import { Store } from &quot;almin&quot;;
+
+export default class AppStore extends Store {
+
+  constructor() {
+    super();
+    this.state = {};
+  }
+
+  getState() {
+    return this.state;
+  }
+
+}
+</code></pre><h3 id="section-4">Context.js</h3><pre class="line-numbers"><code class="language-javascript">import { Context, StoreGroup } from &quot;almin&quot;;
+import createHistory from &quot;history/createHashHistory&quot;;
+import AppStore from &quot;./store/AppStore&quot;;
+
+const storeGroup = new StoreGroup({
+  sample: new AppStore()
+});
+
+export const context = new Context({
+  store: storeGroup
+});
+
+export const browserHistory = new createHistory();
+</code></pre>
+<p>余談として</p>
+<blockquote class="twitter-tweet" data-lang="ja"><p lang="ja" dir="ltr">おお、書いてある &gt; almin@0.16.0ではContextのdispatcherがオプショナルになりました。 <a href="https://t.co/3kn3Ak98YG">https://t.co/3kn3Ak98YG</a></p>&mdash; JK (@kinjou__j) <a href="https://twitter.com/kinjou__j/status/1006172856391102464?ref_src=twsrc%5Etfw">2018年6月11日</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<p>だとのこと</p>
+<h3 id="section-5">components/User.js</h3><pre class="line-numbers"><code class="language-javascript">import * as React from &quot;react&quot;;
+import { context } from &quot;../Context&quot;;
+
+export default class User extends React.PureComponent {
+
+  constructor({ name }) {
+    super();
+    this.name = name;
+  }
+
+  render() {
+    return (
+      &lt;div&gt;
+        &lt;h1&gt;Hello, {this.name}&lt;/h1&gt;
+      &lt;/div&gt;
+    );
+  }
+}
+</code></pre>
+<p>一応、Storeによる状態管理を使ってデータをやりとりすることも出来るのですが今回省略(簡略化したため)</p>
+<h3 id="section-6">components/App.js</h3><pre class="line-numbers"><code class="language-javascript">import React from &quot;react&quot;;
+import { autobind } from &quot;core-decorators&quot;;
+import { Route, Router } from &quot;react-routing-resolver&quot;;
+import { context, browserHistory } from &quot;../Context&quot;;
+import User from &quot;./User&quot;;
+import HomeDispatcherUseCase from &quot;../use-case/HomeDispatcherUseCase&quot;;
+import { DefaultButton, TextField } from &quot;office-ui-fabric-react&quot;;
+
+export default class App extends React.PureComponent {
+
+  constructor() {
+    super();
+    this.nameTextRef = React.createRef();
+  }
+
+  componentWillMount() {
+    const onChangeHandler = () =&gt; {
+      this.setState(context.getState());
+    };
+    onChangeHandler();
+    this.unSubscribe = context.onChange(onChangeHandler);
+  }
+
+  render() {
+    return (
+      &lt;React.Fragment&gt;
+        &lt;nav className=&quot;navbar navbar-inverse&quot; style={{ borderRadius: &quot;0&quot; }}&gt;
+          &lt;nav className=&quot;navbar-collapse&quot;&gt;
+            &lt;ul className=&quot;nav navbar-nav pull-right&quot;&gt;
+              &lt;li&gt;&lt;a href=&quot;#&quot;&gt;{this.state.sample.name}&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+          &lt;/nav&gt;
+        &lt;/nav&gt;
+        &lt;div className=&quot;container-fluid&quot;&gt;
+          &lt;Router history={browserHistory}&gt;
+            &lt;Route pattern=&quot;/user/:name&quot; onMatch={this.onMatchUser} render={this.onRenderUser} /&gt;
+            &lt;Route pattern=&quot;/home&quot; onMatch={this.onMatchHome} render={this.onRenderHome} /&gt;
+            &lt;Route pattern={&quot;*&quot;} onMatch={this.onMatchOther} /&gt;
+          &lt;/Router&gt;
+        &lt;/div&gt;
+      &lt;/React.Fragment&gt;
+    );
+  }
+
+  @autobind
+  onMatchHome() {
+    this.setState({ sample: { name: &quot;guest&quot; }});
+  }
+
+  @autobind
+  onMatchUser({ name }) {
+    this.setState({ sample: { name }});
+  }
+
+  onMatchOther() {
+    context.useCase(new HomeDispatcherUseCase()).execute();
+  }
+
+  @autobind
+  onRenderHome() {
+    return (
+      &lt;div&gt;
+        &lt;form onSubmit={this.onClick} className=&quot;form-inline&quot;&gt;
+          &lt;div className=&quot;form-group&quot;&gt;
+            &lt;TextField className=&quot;form-control&quot; ref={this.nameTextRef} /&gt;
+          &lt;/div&gt;
+          &lt;DefaultButton
+            primary
+            text=&quot;click&quot;
+            onClick={this.onClick}
+            className=&quot;btn btn-default&quot;
+            style={{ marginLeft: &quot;10px&quot; }} /&gt;
+        &lt;/form&gt;
+      &lt;/div&gt;
+    );
+  }
+
+  onRenderUser({ name }) {
+    return (
+      &lt;User name={name} /&gt;
+    );
+  }
+
+  @autobind
+  onClick(event) {
+    event.preventDefault();
+    const value = this.nameTextRef.current.value || &quot;&quot;;
+    browserHistory.push(`/user/${value}`);
+  }
+}
+</code></pre><h3 id="section-7">use-case/HomeDispatcherUseCase.js</h3><pre class="line-numbers"><code class="language-javascript">import { UseCase } from &quot;almin&quot;;
+import { browserHistory } from &quot;../Context&quot;;
+
+export default class HomeDispatcherUseCase extends UseCase {
+  execute() {
+    browserHistory.push(&quot;/home&quot;);
+  }
+}
+</code></pre><h3 id="section-8">index.js</h3><pre class="line-numbers"><code class="language-javascript">&quot;use strict&quot;;
+
+import React from &quot;react&quot;;
+import ReactDOM from &quot;react-dom&quot;;
+import App from &quot;./component/App.js&quot;;
+
+ReactDOM.render(&lt;App /&gt;, document.querySelector(&quot;#app&quot;));
+</code></pre><h3 id="section-9">実際に動かしてみる</h3>
+<p><img src="/images/2018/06/20180622-1.jpg" alt="image" /></p>
+
+<p>まず/にアクセスした場合にはonMatchOtherでHomeDispatcherUseCaseにより/homeへpushされて移動される。でそのpush先の/homeではonMatchHomeが先に処理されてonRenderHomeで返されたビューがレンダリングされるようになる</p>
+
+<p>でなんか入れてclickを押すとonClickによって#/user/{name}に飛ばされるようになる</p>
+
+<p><img src="/images/2018/06/20180622-2.jpg" alt="image" /></p>
+
+<p>というようにonMatchUserでデータをセットされてonRenderUserによってビューがレンダリングされる</p>
+
+<p>まぁとりあえず使ってドキュメント読めばいいだけなので(ry</p>
+
+<p>終わり！</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">package.json</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">.babelrc</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">store/AppStore.js</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">Context.js</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">components/User.js</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">components/App.js</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">use-case/HomeDispatcherUseCase.js</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">index.js</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">実際に動かしてみる</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2018/05/es7-function-bind.html" class="d-block p-2">ES7でのfunction bind</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/11/redux-react-component-testing.html" class="d-block p-2">reduxを使うReact Componentのテスト</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/11/babel6.html" class="d-block p-2">babel6の件</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/11/babel6-es6-test-coverage.html" class="d-block p-2">babel6(ES6)のテストコードカバレッジ</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/04/react-router.html" class="d-block p-2">react-router</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2018/07/graphql-1-graphqljs-getting-started.html" rel="prev">&lt;&nbsp;graphql.jsを使ってみた</a>
+              <a href="/2018/06/typescript-project-building-using-webpack.html" rel="next">webpackでTypeScriptプロジェクトをビルド&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

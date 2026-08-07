@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="参考: &lt;http://qiita.com/chuross/items/e3ca79065d9b67716ace&gt;" />
+    <meta property="og:title" content="Universal Image Loader for Androidを使ってみた" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/05/universal-image-loader-for-android.html">
+    <title>Universal Image Loader for Androidを使ってみた - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/05/universal-image-loader-for-android.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Universal Image Loader for Androidを使ってみた",
+  "datePublished": "2013-05-10T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "参考: \u003chttp://qiita.com/chuross/items/e3ca79065d9b67716ace\u003e"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/05">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">5</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">10</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">Universal Image Loader for Androidを使ってみた</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/android" class="fs-5">Android</a>
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>参考: <a href="http://qiita.com/chuross/items/e3ca79065d9b67716ace" target="_blank" rel="noopener">http://qiita.com/chuross/items/e3ca79065d9b67716ace</a></p>
+
+<p><a href="https://github.com/nostra13/Android-Universal-Image-Loader" target="_blank" rel="noopener">https://github.com/nostra13/Android-Universal-Image-Loader</a></p>
+
+<p>ちょうど、AndroidAnnotations+Twitter4jで作ってたデモアプリ的なのがあったので、そいつでプロフィール画像をロードする仕組みな所をこのUniversal Image Loaderを使ってプロフィール画像を読み込むっていうのを処理してみた</p>
+<h3 id="section-1">インストール</h3>
+<p>JARが提供されているし、maven repositoriesにもある模様。とりまぁいつもどおりgithubからcloneした後にそいつをライブラリプロジェクトとしてEclipseでインポート。で使うプロジェクトで参照追加的な感じで</p>
+
+<p>あと、Universal Image LoaderのStorageUtilsっていうクラスで画像のキャッシュディレクトリとかを操作するにあたってSDカードにキャッシュする場合にはWRITE_EXTERNAL_STORAGEなパーミッションが必要なので使うプロジェクトで設定しておく</p>
+<h3 id="section-2">MainActivity.java</h3>
+<p>Universal Image Loaderの初期化辺りとかを行う。Universal Image Loader公式なサンプルではandroid.app.Applicationを継承したクラスを作ってそこで初期化処理している</p>
+<pre class="line-numbers"><code class="language-java">package kinjouj.aatwitter;
+
+import java.io.File;
+
+import android.app.ListActivity;
+import android.util.Log;
+
+import com.googlecode.androidannotations.annotations.AfterInject;
+import com.googlecode.androidannotations.annotations.AfterViews;
+import com.googlecode.androidannotations.annotations.Bean;
+import com.googlecode.androidannotations.annotations.EActivity;
+import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.utils.StorageUtils;
+
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+
+@EActivity(R.layout.main)
+public class MainActivity extends ListActivity {
+
+    private static final String TAG = MainActivity.class.getName();
+
+    @Bean
+    protected Token token;
+
+    private Twitter twitter;
+
+    @AfterInject
+    public void init() {
+        Log.v(TAG, &quot;init&quot;);
+
+        twitter = token.getTwitter();
+    }
+
+    @AfterViews
+    public void initViews() {
+        Log.v(TAG, &quot;initViews&quot;);
+
+        File cacheDir = StorageUtils.getCacheDirectory(this);
+
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+            .cacheOnDisc()
+            .build();
+
+        ImageLoader.getInstance().init(
+            new ImageLoaderConfiguration.Builder(this)
+                .discCache(new UnlimitedDiscCache(cacheDir))
+                .defaultDisplayImageOptions(options)
+                .build()
+        );
+
+        try {
+            AAAdapter adapter = new AAAdapter(
+                getApplicationContext(),
+                twitter.getHomeTimeline()
+            );
+
+            setListAdapter(adapter);
+        } catch (TwitterException e) {
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+<p>DisplayImageOptions的なのはImageLoaderのメソッドの引数でも指定出来る。ImageLoaderを使うには一度initを実行しなければならないらしいので(例外が出る)</p>
+<h3 id="section-3">AAAdapter.java</h3><pre class="line-numbers"><code class="language-java">package kinjouj.aatwitter;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+
+import twitter4j.ResponseList;
+import twitter4j.Status;
+
+public class AAAdapter extends BaseAdapter {
+
+    private static final String TAG = AAAdapter.class.getName();
+
+    private Context context;
+    private ResponseList&lt;Status&gt; statuses;
+
+    public AAAdapter(Context context, ResponseList&lt;Status&gt; statuses) {
+        this.context = context;
+        this.statuses = statuses;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        Log.v(TAG, &quot;getView&quot;);
+
+        View view = convertView;
+
+        if (view == null) {
+            LayoutInflater inflater = LayoutInflater.from(context);
+            view = (RelativeLayout)inflater.inflate(R.layout.tweet, null);
+        }
+
+        final RelativeLayout layout = (RelativeLayout)view;
+
+        Status status = (Status)getItem(position);
+
+        TextView tweetText = (TextView)layout.findViewById(R.id.tweetText);
+        tweetText.setText(status.getText());
+
+        ImageLoader imageLoader = ImageLoader.getInstance();
+
+        imageLoader.loadImage(
+            status.getUser().getProfileImageURLHttps(),
+            new SimpleImageLoadingListener() {
+                @Override
+                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                    ImageView imageView = (ImageView)layout.findViewById(R.id.userIcon);
+
+                    imageView.setImageBitmap(
+                        Bitmap.createScaledBitmap(loadedImage, 100, 100, true)
+                    );
+                }
+            }
+        );
+
+        return view;
+    }
+
+    @Override
+    public int getCount() {
+        return statuses.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return statuses.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        Status status = (Status)getItem(position);
+
+        return status.getId();
+    }
+}
+</code></pre>
+<p>ImageLoader.loadImageメソッドを使って、指定したURLの画像を取得。んでロードできたらImageViewに一度createScaledBitmapを介してから設定等。displayImageっていうメソッドを使う事で引数にImageViewとかを指定しても出来るんだけど、リサイズ的な方法がちょいと不明だったので、loadImageを使って自分でバインドする也でやってみた所</p>
+
+<p>まぁこんだけ。他にもキャッシュ数を制限できたりとかも出来るし、LRU方式なメモリキャッシュ機構なAPIも揃ってる模様なので、用途としては非常に良いのは無いかと</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">インストール</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">MainActivity.java</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">AAAdapter.java</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/05/android-actionbarsherlock-searchview.html" class="d-block p-2">ActionBarSherlockでSearchView</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/01/swipelistview.html" class="d-block p-2">SwipeListView</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/10/android-sherlocknavigationdrawer.html" class="d-block p-2">SherlockNavigationDrawerを使ってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/02/loadmorelistview.html" class="d-block p-2">LoadMoreListView</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/10/android-pager-title-tab-strip.html" class="d-block p-2">PagerTitle(Tab)Stripを使ってみる</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/05/virtualbox-vms-directory.html" rel="prev">&lt;&nbsp;「VirtualBox VMs」のディレクトリがウザい件</a>
+              <a href="/2013/05/fuelphp-29-ormauth.html" rel="next">FuelPHPをやってみる (29) - Orm\Auth -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

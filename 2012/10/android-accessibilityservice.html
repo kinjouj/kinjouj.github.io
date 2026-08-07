@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="ちょっと前にDeskNotifierっていうスマフォの通知をPCにプッシュするというアプリがあったのを見て思ったのですけど、(Android)スマフォのNotificationって監視して取得したり出来る物なのかっていう所が不明だったので色々と調査" />
+    <meta property="og:title" content="android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2012/10/android-accessibilityservice.html">
+    <title>android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2012/10/android-accessibilityservice.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する",
+  "datePublished": "2012-10-14T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "ちょっと前にDeskNotifierっていうスマフォの通知をPCにプッシュするというアプリがあったのを見て思ったのですけど、(Android)スマフォのNotificationって監視して取得したり出来る物なのかっていう所が不明だったので色々と調査"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2012/10">
+                  <span class="post-date-year">2012</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">10</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">14</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/android" class="fs-5">Android</a>
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>ちょっと前にDeskNotifierっていうスマフォの通知をPCにプッシュするというアプリがあったのを見て思ったのですけど、(Android)スマフォのNotificationって監視して取得したり出来る物なのかっていう所が不明だったので色々と調査</p>
+
+<p>で調査結果としてAccessibilityServiceを使う事で可能な模様、という事でやってみた。まぁ詳しい事は公式ドキュメントに書いてあるんですけど</p>
+<h3 id="section-1">AndroidManifest.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;manifest
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;sample.test&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot;&gt;
+
+    &lt;uses-sdk android:minSdkVersion=&quot;16&quot; android:targetSdkVersion=&quot;16&quot; /&gt;
+
+    &lt;application
+        android:label=&quot;@string/app_name&quot;
+        android:icon=&quot;@drawable/ic_launcher&quot;
+        android:theme=&quot;@style/AppTheme&quot;&gt;
+
+        &lt;activity android:name=&quot;.MainActivity&quot; android:label=&quot;sample&quot; android:exported=&quot;true&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+
+        &lt;service
+            android:name=&quot;.SampleAccessibilityService&quot;
+            android:permission=&quot;android.permission.BIND_ACCESSIBILITY_SERVICE&quot;&gt;
+
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.accessibilityservice.AccessibilityService&quot; /&gt;
+            &lt;/intent-filter&gt;
+
+            &lt;!-- AccessibilityService関係の設定リソースを設定 --&gt;
+            &lt;meta-data
+                android:name=&quot;android.accessibilityservice&quot;
+                android:resource=&quot;@xml/accessibility_service&quot; /&gt;
+
+        &lt;/service&gt;
+
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+<p>Activityはテスト名目でただNotificationを送るだけのActivity。でAccessibilityServiceを継承したクラスに&lt;service&gt;に設定しておく。んでそのサービスの設定が必要になるのでそれを&lt;meta-data&gt;で設定しておく</p>
+<h3 id="section-2">res/xml/accessibility_service.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;accessibility-service
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:accessibilityEventTypes=&quot;typeNotificationStateChanged&quot;
+    android:accessibilityFeedbackType=&quot;feedbackGeneric&quot;
+    android:accessibilityFlags=&quot;flagDefault&quot;
+    android:canRetrieveWindowContent=&quot;true&quot; /&gt;
+</code></pre>
+<p>こいつも公式ドキュメントに書いてあるので詳しい事は省略しますが、&lt;span style=&quot;color: red&quot;&gt;android:packageNames&lt;/span&gt;を定義すると対象とするパッケージを限定出来る模様。今回それを定義していないのでグローバルになる模様(確証は無い)</p>
+
+<p>でこれを設定してインストールした場合にAndroid端末の設定画面のユーザー補助な所にサービスとして表示されるようになる。デフォルトではOFFになっているのでこれを使う場合はONにしておく</p>
+<h3 id="section-3">MainActivity.java</h3><pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RemoteViews;
+
+public class MainActivity extends Activity {
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+
+        final NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
+        Button btn = new Button(this);
+        btn.setText(&quot;start&quot;);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RemoteViews rv = new RemoteViews(getPackageName(), R.layout.notify);
+                rv.setTextViewText(android.R.id.title, &quot;hoge fuga foobar&quot;);
+
+                Notification.Builder builder = new Notification.Builder(v.getContext());
+                builder.setTicker(&quot;ticker&quot;);
+                builder.setContent(rv);
+                builder.setSmallIcon(R.drawable.ic_launcher);
+
+                /*
+                 * 今回、カスタムなViewを使うのでここらへんは省略
+                builder.setContentTitle(&quot;ABC&quot;);
+                */
+
+                Notification n = builder.build();
+
+                nm.notify(1, n);
+            }
+        });
+
+        setContentView(btn);
+    }
+}
+</code></pre>
+<p>恐らくはデフォルトのNotificationのレイアウト構造自体はandroid.R.layout.notification_template_base(/path/to/aosp/framework/base/core/res/res/layout/notification_template_base.xml)だと思われる</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;!-- Copyright (C) 2012 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+--&gt;
+
+&lt;FrameLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:internal=&quot;http://schemas.android.com/apk/prv/res/android&quot;
+    android:background=&quot;@android:drawable/notification_bg&quot;
+    android:id=&quot;@+id/status_bar_latest_event_content&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;64dp&quot;
+    internal:layout_minHeight=&quot;64dp&quot;
+    internal:layout_maxHeight=&quot;64dp&quot;
+    &gt;
+    &lt;ImageView android:id=&quot;@+id/icon&quot;
+        android:layout_width=&quot;@dimen/notification_large_icon_width&quot;
+        android:layout_height=&quot;@dimen/notification_large_icon_height&quot;
+        android:background=&quot;@android:drawable/notification_template_icon_bg&quot;
+        android:scaleType=&quot;center&quot;
+        /&gt;
+    &lt;LinearLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_gravity=&quot;fill_vertical&quot;
+        android:layout_marginStart=&quot;@dimen/notification_large_icon_width&quot;
+        android:minHeight=&quot;@dimen/notification_large_icon_height&quot;
+        android:orientation=&quot;vertical&quot;
+        android:paddingEnd=&quot;8dp&quot;
+        android:paddingTop=&quot;2dp&quot;
+        android:paddingBottom=&quot;2dp&quot;
+        android:gravity=&quot;top&quot;
+        &gt;
+        &lt;LinearLayout
+            android:id=&quot;@+id/line1&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:paddingTop=&quot;6dp&quot;
+            android:layout_marginStart=&quot;8dp&quot;
+            android:orientation=&quot;horizontal&quot;
+            &gt;
+            &lt;TextView android:id=&quot;@+id/title&quot;
+                android:textAppearance=&quot;@style/TextAppearance.StatusBar.EventContent.Title&quot;
+                android:layout_width=&quot;match_parent&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:singleLine=&quot;true&quot;
+                android:ellipsize=&quot;marquee&quot;
+                android:fadingEdge=&quot;horizontal&quot;
+                android:layout_weight=&quot;1&quot;
+                /&gt;
+            &lt;ViewStub android:id=&quot;@+id/time&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_weight=&quot;0&quot;
+                android:visibility=&quot;gone&quot;
+                android:layout=&quot;@layout/notification_template_part_time&quot;
+                /&gt;
+            &lt;ViewStub android:id=&quot;@+id/chronometer&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_weight=&quot;0&quot;
+                android:visibility=&quot;gone&quot;
+                android:layout=&quot;@layout/notification_template_part_chronometer&quot;
+                /&gt;
+        &lt;/LinearLayout&gt;
+        &lt;TextView android:id=&quot;@+id/text2&quot;
+            android:textAppearance=&quot;@style/TextAppearance.StatusBar.EventContent.Line2&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:layout_marginTop=&quot;-2dp&quot;
+            android:layout_marginBottom=&quot;-2dp&quot;
+            android:layout_marginStart=&quot;8dp&quot;
+            android:singleLine=&quot;true&quot;
+            android:fadingEdge=&quot;horizontal&quot;
+            android:ellipsize=&quot;marquee&quot;
+            android:visibility=&quot;gone&quot;
+            /&gt;
+        &lt;ProgressBar
+            android:id=&quot;@android:id/progress&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;12dp&quot;
+            android:layout_marginStart=&quot;8dp&quot;
+            android:visibility=&quot;gone&quot;
+            style=&quot;?android:attr/progressBarStyleHorizontal&quot;
+            /&gt;
+        &lt;LinearLayout
+            android:id=&quot;@+id/line3&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:orientation=&quot;horizontal&quot;
+            android:gravity=&quot;center_vertical&quot;
+            android:layout_marginStart=&quot;8dp&quot;
+            &gt;
+            &lt;TextView android:id=&quot;@+id/text&quot;
+                android:textAppearance=&quot;@style/TextAppearance.StatusBar.EventContent&quot;
+                android:layout_width=&quot;0dp&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_weight=&quot;1&quot;
+                android:layout_gravity=&quot;center&quot;
+                android:singleLine=&quot;true&quot;
+                android:ellipsize=&quot;marquee&quot;
+                android:fadingEdge=&quot;horizontal&quot;
+                /&gt;
+            &lt;TextView android:id=&quot;@+id/info&quot;
+                android:textAppearance=&quot;@style/TextAppearance.StatusBar.EventContent.Info&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_gravity=&quot;center&quot;
+                android:layout_weight=&quot;0&quot;
+                android:singleLine=&quot;true&quot;
+                android:gravity=&quot;center&quot;
+                android:paddingStart=&quot;8dp&quot;
+                /&gt;
+            &lt;ImageView android:id=&quot;@+id/right_icon&quot;
+                android:layout_width=&quot;16dp&quot;
+                android:layout_height=&quot;16dp&quot;
+                android:layout_gravity=&quot;center&quot;
+                android:layout_weight=&quot;0&quot;
+                android:layout_marginStart=&quot;8dp&quot;
+                android:scaleType=&quot;centerInside&quot;
+                android:visibility=&quot;gone&quot;
+                android:drawableAlpha=&quot;153&quot;
+                /&gt;
+        &lt;/LinearLayout&gt;
+    &lt;/LinearLayout&gt;
+&lt;/FrameLayout&gt;
+</code></pre>
+<p>これでR.id.titleが定義されているので、パッケージを含めるとandroid.R.id.titleになるんだと思われる。なのでカスタムViewのレイアウトでも&lt;span style=&quot;color: red&quot;&gt;android:id&lt;/span&gt;な部分はandroidプレフィックスで指定する事でカスタムViewを使った場合にでもグローバルと差を無くして取得出来る(はず。これも確証無し)</p>
+<h3 id="section-4">res/layout/notify.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;FrameLayout
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;TextView
+        android:id=&quot;@android:id/title&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot; /&gt;
+
+&lt;/FrameLayout&gt;
+</code></pre>
+<p>上で言った通りなので詳しい事は省略。だけど、AndroidコアのNotificationのレイアウトだとFrameLayoutになってた気がするので、レイアウトベースはFrameLayoutを使用する</p>
+<h3 id="section-5">SampleAccessibilityService.java</h3><pre class="line-numbers"><code class="language-java">package sample.test;
+
+import android.accessibilityservice.AccessibilityService;
+import android.app.Notification;
+import android.util.Log;
+import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.widget.RemoteViews;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class SampleAccessibilityService extends AccessibilityService {
+
+    private static final String TAG = &quot;SampleAccessibilityService&quot;;
+
+    @Override
+    public void onAccessibilityEvent(AccessibilityEvent event) {
+        if (!(event.getClassName().toString().startsWith(&quot;android.widget.Toast&quot;))) {
+            for (CharSequence s : event.getText()) {
+                Toast.makeText(this, &quot;text: &quot; + s, Toast.LENGTH_LONG).show();
+            }
+        }
+
+        Notification n = (Notification)event.getParcelableData();
+
+        if (n == null) {
+            return;
+        }
+
+        RemoteViews rv = n.contentView;
+        View view = rv.apply(this, null);
+
+        if (view == null) {
+            return;
+        }
+
+        TextView textView = (TextView)view.findViewById(android.R.id.title);
+
+        if (textView == null) {
+            return;
+        }
+
+        Log.v(TAG, &quot;text: &quot; + textView.getText());
+    }
+
+    @Override
+    public void onInterrupt() {
+    }
+}
+</code></pre>
+<p>AccessibilityServiceを継承したクラスを作る。で検証はしてないんだけど、onServiceConnectedをオーバーライドして、setServiceInfo(AccessibilityServiceInfo)を設定する事で、上記で設定したaccessibility_service.xmlを使わずにサービスクラス側でコントロールする事も可能な模様(ってどっかのサイトに書いてた)</p>
+
+<p>それとToastもNotificationとして認識されるのでそこ注意しておく。でToastの実体?っぽいのがandroid.widget.Toast$TNってなってるのでstartsWithでそこら辺チェックしておく。あとは取得されたNotificationからRemoteViewsを取得してそこのビューを取得してandroid.R.id.titleなUIコンポーネントにアクセスしてテキストを取得する事が可能な模様</p>
+
+<p>ちなみにaccessibility_service.xmlの&lt;span style=&quot;color:red&quot;&gt;accessibilityEventTypes&lt;/span&gt;によってはAccessibilityEventで取得出来る情報は限られている模様。そこも公式ドキュメントにしっかり書かれているので参照</p>
+
+<p>公式ドキュメント: <a href="http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html" target="_blank" rel="noopener">http://developer.android.com/reference/android/accessibilityservice/AccessibilityService.html</a></p>
+<h3 id="section-6">追記</h3>
+<p>Android4.3からはNotificationListenerServiceを用いる事で容易に実現可能っぽい。既に<a href="/android43-notificationlistenerservice.html" target="_blank" rel="noopener">検証済み</a></p>
+<h3 id="section-7">追記2</h3>
+<p>古いAndroidのバージョンに関しては<a href="/android-accessibilityservice-legacy-firmware.html" target="_blank" rel="noopener">AccessibilityServiceを古いAndroidバージョンで動かす</a>にて補足済み</p>
+<h3 id="section-8">追記3</h3>
+<p>追記2のリンク先にも書いてますが</p>
+<blockquote class="twitter-tweet" lang="ja">
+  <p>
+    Android4.xだと4.1までなら問題無いらしいが、それ以降だとandroid.permission.BIND_ACCESSIBILITY_SERVICEを指定してないとユーザー補助機能に出てこない
+  </p>
+  
+  <p>
+    &mdash; kinjouj (@kinjou_j) <a href="https://twitter.com/kinjou_j/statuses/376672358133538817">2013, 9月 8</a>
+  </p>
+</blockquote>
+
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">AndroidManifest.xml</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">res/xml/accessibility_service.xml</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">MainActivity.java</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">res/layout/notify.xml</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">SampleAccessibilityService.java</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">追記</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">追記2</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">追記3</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/09/android-accessibilityservice-legacy-firmware.html" class="d-block p-2">AccessibilityServiceを古いAndroidバージョンで動かす</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/11/android-speechrecognizer-retrieve-text-and-voice-data.html" class="d-block p-2">SpeechRecognizerを使って音声テキスト及び音声データを取得する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/01/swipelistview.html" class="d-block p-2">SwipeListView</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/03/android-spellcheckerservice.html" class="d-block p-2">(非常に適当に)Android ICS SpellCheckerServiceを使ってみる</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/01/android-appwidget-listview.html" class="d-block p-2">AppWidgetでListView</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2012/10/android-pager-title-tab-strip.html" rel="prev">&lt;&nbsp;PagerTitle(Tab)Stripを使ってみる</a>
+              <a href="/2012/10/sastruts-9-usertransaction.html" rel="next">SAStrutsを勉強してみる (9) - UserTransaction -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

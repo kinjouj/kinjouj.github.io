@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="んまぁSlidingMenuだったりだとか色々あるのですけど、[Googleが公開したNavigationDrawer][1]方式をベースに使えるようにした物が[SherlockNavigationDrawer][2]らしい、正しいかは微妙だけど。ちなみに[デモアプリ][3]もあるのでちょっとどんな感じかってのを見たければそれ入れて確認してみるってのも可能" />
+    <meta property="og:title" content="SherlockNavigationDrawerを使ってみた" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/10/android-sherlocknavigationdrawer.html">
+    <title>SherlockNavigationDrawerを使ってみた - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/10/android-sherlocknavigationdrawer.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "SherlockNavigationDrawerを使ってみた",
+  "datePublished": "2013-10-23T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "んまぁSlidingMenuだったりだとか色々あるのですけど、[Googleが公開したNavigationDrawer][1]方式をベースに使えるようにした物が[SherlockNavigationDrawer][2]らしい、正しいかは微妙だけど。ちなみに[デモアプリ][3]もあるのでちょっとどんな感じかってのを見たければそれ入れて確認してみるってのも可能"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/10">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">10</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">23</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">SherlockNavigationDrawerを使ってみた</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/android" class="fs-5">Android</a>
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>んまぁSlidingMenuだったりだとか色々あるのですけど、<a href="http://developer.android.com/training/implementing-navigation/nav-drawer.html" target="_blank" rel="noopener">Googleが公開したNavigationDrawer</a>方式をベースに使えるようにした物が<a href="https://github.com/nicolasjafelle/SherlockNavigationDrawer" target="_blank" rel="noopener">SherlockNavigationDrawer</a>らしい、正しいかは微妙だけど。ちなみに<a href="https://play.google.com/store/apps/details?id=com.sherlock.navigationdrawer" target="_blank" rel="noopener">デモアプリ</a>もあるのでちょっとどんな感じかってのを見たければそれ入れて確認してみるってのも可能</p>
+
+<p>という事で使ってみた (ただ公式なサンプルを見て自分で書いてやってみただけなので、ほとんど同じ)</p>
+
+<p>※AndroidManifest.xmlは特に特殊な事するわけでも無いので省略する</p>
+<h3 id="section-1">事前事項</h3>
+<p>もちろんの事ながらActionBarSherlockが必要になる訳だけど、確かGoogleが公開したNavigation Drawerなやつはandroid-support-v13に依存し、ActionBarSherlockはandroid-support-v4に依存しているっていうのがあったような気がするのだけど。それはおいといて、とにかくSherlockNavigationDrawerのreadmeにも</p>
+<blockquote>
+Update android-support-v4.jar to revision 13 or higher, in ActionBarSherlock libs folder or maven.
+</blockquote>
+
+
+<p>っていう風に明記されているのでまぁそれを事前に行なっておく必要あり。</p>
+
+<p>あとはActionBarSherlockとSherlockNavigationDrawerなライブラリプロジェクトをインポートしておく。んでアプリプロジェクトでその2つのプロジェクトをライブラリとしてインポート出来るようにしておく</p>
+
+<p>まぁ事前設定的なのはこんだけかと</p>
+<h3 id="section-2">res/layout/main_fragment.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;android.support.v4.widget.DrawerLayout
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:id=&quot;@+id/layout&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;ScrollView
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:paddingLeft=&quot;16dp&quot;
+        android:paddingRight=&quot;16dp&quot;
+        android:scrollbarStyle=&quot;outsideOverlay&quot;&gt;
+
+        &lt;!-- ここにコンテンツ部な所のUIを指定? --&gt;
+    &lt;/ScrollView&gt;
+
+    &lt;ListView
+        android:id=&quot;@+id/drawer&quot;
+        android:layout_width=&quot;200dp&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:layout_gravity=&quot;left&quot;
+        android:background=&quot;@android:color/white&quot; /&gt;
+
+&lt;/android.support.v4.widget.DrawerLayout&gt;
+</code></pre><h3 id="section-3">MainActivity.java</h3><pre class="line-numbers"><code class="language-java">package com.example.sample2;
+
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.FrameLayout;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+public class MainActivity extends SherlockFragmentActivity {
+
+    private static final int FRAME_VIEW_ID = 666;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        FrameLayout layout = new FrameLayout(this);
+        layout.setId(FRAME_VIEW_ID);
+
+        setContentView(
+            layout,
+            new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        );
+
+        if (savedInstanceState != null)
+            return;
+
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction tx = fm.beginTransaction();
+        tx.add(FRAME_VIEW_ID, new MainFragment());
+        tx.commit();
+    }
+}
+</code></pre>
+<p>ほんと公式的な方式で書いてるのでまったく同じなんですが、別に&lt;fragment&gt;でレイアウト書いて的な感じでも良いと思うのだけど</p>
+<h3 id="section-4">MainFragment.java</h3><pre class="line-numbers"><code class="language-java">package com.example.sample2;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
+import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
+
+import android.content.res.Configuration;
+import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class MainFragment extends SherlockFragment {
+
+    private static final String TAG = MainFragment.class.getName();
+
+    private ActionBar mActionBar;
+    private DrawerLayout mDrawerLayout;
+    private SherlockActionBarDrawerToggle mDrawerToggle;
+    private ListView mListView;
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        setRetainInstance(true);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_main, container, false);
+
+        mActionBar = ((SherlockFragmentActivity)getActivity()).getSupportActionBar();
+        mActionBar.setHomeButtonEnabled(true);
+
+        mDrawerLayout = (DrawerLayout)view.findViewById(R.id.layout);
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                Log.v(TAG, &quot;onDrawerOpened&quot;);
+                mDrawerToggle.onDrawerOpened(drawerView);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                Log.v(TAG, &quot;onDrawerClosed&quot;);
+                mDrawerToggle.onDrawerClosed(drawerView);
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                Log.v(TAG, &quot;onDrawerSlide&quot;);
+                mDrawerToggle.onDrawerSlide(drawerView, slideOffset);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                Log.v(TAG, &quot;onDrawerStateChanged&quot;);
+                mDrawerToggle.onDrawerStateChanged(newState);
+            }
+        });
+
+        ArrayAdapter&lt;String&gt; adapter = new ArrayAdapter&lt;String&gt;(
+            getActivity(),
+            android.R.layout.simple_list_item_1
+        );
+        adapter.add(&quot;hoge&quot;);
+        adapter.add(&quot;fuga&quot;);
+        adapter.add(&quot;foobar&quot;);
+
+        mListView = (ListView)view.findViewById(R.id.drawer);
+        mListView.setAdapter(adapter);
+        mListView.setOnItemClickListener(new ListView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView&lt;?&gt; parent, View view, int pos, long id) {
+                if (!(view instanceof TextView))
+                    return;
+
+                Toast.makeText(
+                    getActivity(),
+                    &quot;text: &quot; + ((TextView)view).getText(),
+                    Toast.LENGTH_LONG
+                ).show();
+
+                mDrawerLayout.closeDrawer(mListView);
+            }
+        });
+
+        mDrawerToggle = new SherlockActionBarDrawerToggle(
+            getActivity(),
+            mDrawerLayout,
+            R.drawable.ic_drawer_light,
+            R.string.drawer_open,
+            R.string.drawer_close
+        );
+
+        /*
+        ActionBarにアイテムをおいてそれをタップする事でメニューを開いたりする必要性が
+        なければfalseにする事で表示しないようにすることも出来る?
+        */
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        mDrawerToggle.syncState();
+
+        return view;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (mDrawerToggle.onOptionsItemSelected(item))
+            return true;
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+}
+</code></pre>
+<p>まぁコンテンツ部に何を載せるとかそういう所以外は大体ざっくりとコード書いてるだけでやってる事はまーだいたい同じ。コメントにも書いてるが公式サンプルには無かったけど、ActionBar内にアイテムを設置しそれをタップすることでメニューを開いたりするのが必要ない場合には、SherlockActionBarDrawerToggle.setDrawerIndicatorEnabledをfalseにすることで表示もされないしアイコン部をタップしても反応はしなくなる</p>
+
+<p>で実際動かしてみると</p>
+
+<p><img src="/images/2013/10/201310231447.png" alt="image" /></p>
+
+<p>というような感じ。こういうUIを構築したいっていう場合の選択肢に入るかも</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">事前事項</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">res/layout/main_fragment.xml</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">MainActivity.java</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">MainFragment.java</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2014/01/swipelistview.html" class="d-block p-2">SwipeListView</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/03/swiperefreshlayout.html" class="d-block p-2">SwipeRefreshLayout</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/02/actionbar-pulltorefresh-reload-menu-button.html" class="d-block p-2">ActionBar-PullToRefreshをメニューボタン等で連動させる</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/02/loadmorelistview.html" class="d-block p-2">LoadMoreListView</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/10/android-pager-title-tab-strip.html" class="d-block p-2">PagerTitle(Tab)Stripを使ってみる</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/10/angularjs-protractor-e2e-testing.html" rel="prev">&lt;&nbsp;protractorを使ったangular.jsのe2eテスト</a>
+              <a href="/2013/10/angular-2-interpolate-provider.html" rel="next">angular.jsをやってみる (2) - $interpolateProvider -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

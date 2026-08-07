@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="TypeScript+React+Electronでデスクトップアプリケーションを作ってみる" />
+    <meta property="og:title" content="TypeScript+React+Electronでデスクトップアプリを作る" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2025/11/typescript-react-electron-desktop-app.html">
+    <title>TypeScript+React+Electronでデスクトップアプリを作る - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2025/11/typescript-react-electron-desktop-app.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "TypeScript+React+Electronでデスクトップアプリを作る",
+  "datePublished": "2025-11-03T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "TypeScript+React+Electronでデスクトップアプリケーションを作ってみる"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2025/11">
+                  <span class="post-date-year">2025</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">11</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">3</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">TypeScript+React+Electronでデスクトップアプリを作る</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/typescript" class="fs-5">Typescript</a>
+                <a href="/archives/categories/react" class="fs-5">React</a>
+                <a href="/archives/categories/electron" class="fs-5">Electron</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>TypeScript+React+Electronでデスクトップアプリケーションを作ってみる</p>
+<h3 id="section-1">環境構築</h3>
+<p>まずTypeScript+React+Electronをビルドできる環境を作る。作るのはpackage.json/tsconfig.json/vite.config.js</p>
+
+<p>それぞれを作っていく</p>
+<h3 id="section-2">package.json</h3><pre class="line-numbers"><code class="language-json">{
+  &quot;main&quot;: &quot;dist/main.js&quot;,
+  &quot;license&quot;: &quot;MIT&quot;,
+  &quot;scripts&quot;: {
+    &quot;check&quot;: &quot;tsc --noEmit&quot;,
+    &quot;build&quot;: &quot;npm run check &amp;&amp; vite build&quot;,
+    &quot;start&quot;: &quot;electron .&quot;
+  },
+  &quot;devDependencies&quot;: {
+    &quot;@types/react&quot;: &quot;^19.2.0&quot;,
+    &quot;@types/react-dom&quot;: &quot;^19.2.0&quot;,
+    &quot;@vitejs/plugin-react-swc&quot;: &quot;^4.1.0&quot;,
+    &quot;electron&quot;: &quot;^39.0.0&quot;,
+    &quot;typescript&quot;: &quot;^5.9.3&quot;,
+    &quot;vite&quot;: &quot;^7.1.9&quot;,
+    &quot;vite-plugin-electron&quot;: &quot;^0.29.0&quot;
+  },
+  &quot;dependencies&quot;: {
+    &quot;react&quot;: &quot;^19.2.0&quot;,
+    &quot;react-dom&quot;: &quot;^19.2.0&quot;,
+    &quot;react-router-dom&quot;: &quot;^7.9.4&quot;
+  }
+}
+</code></pre>
+<p>dependenciesで実行に必要なReactの依存性を設定。devDependenciesでTypeScriptやviteでビルドする環境に必要なのを設定しておく。今回は普通にvite-plugin-electronを使って作る</p>
+
+<p>mainにはElectronアプリが起動するのに使うエントリーポイントファイルを指定する</p>
+<h3 id="section-3">tsconfig.json</h3><pre class="line-numbers"><code class="language-json">{
+  &quot;compilerOptions&quot;: {
+    &quot;incremental&quot;: true,
+    &quot;tsBuildInfoFile&quot;: &quot;node_modules/.tsBuildInfo&quot;,
+    &quot;noEmit&quot;: true,
+    &quot;noUnusedLocals&quot;: true,
+    &quot;skipLibCheck&quot;: true,
+    &quot;target&quot;: &quot;ESNext&quot;,
+    &quot;module&quot;: &quot;ESNext&quot;,
+    &quot;moduleResolution&quot;: &quot;bundler&quot;,
+    &quot;strict&quot;: true,
+    &quot;jsx&quot;: &quot;react-jsx&quot;,
+    &quot;esModuleInterop&quot;: true,
+    &quot;isolatedModules&quot;: true,
+    &quot;types&quot;: [&quot;node&quot;, &quot;electron&quot;]
+  },
+  &quot;include&quot;: [&quot;src/**/*&quot;]
+}
+</code></pre>
+<p>typesでnodeとelectronの型定義を有効にしておく。あとは省略</p>
+<h3 id="section-4">vite.config.js</h3><pre class="line-numbers"><code class="language-js">import { resolve } from &#39;node:path&#39;
+import { defineConfig } from &#39;vite&#39;
+import electron from &#39;vite-plugin-electron&#39;;
+import react from &#39;@vitejs/plugin-react-swc&#39;;
+
+export default defineConfig({
+  base: &#39;./&#39;,
+  plugins: [
+    react(),
+    electron([
+      {
+        entry: &#39;src/main/main.ts&#39;,
+        vite: {
+          build: {
+            outDir: &#39;dist&#39;
+          }
+        }
+      },
+      {
+        entry: &#39;src/ipc/preload.ts&#39;,
+        vite: {
+          build: {
+            outDir: &#39;dist&#39;
+          }
+        }
+      }
+    ])
+  ],
+  build: {
+    minify: &#39;esbuild&#39;,
+    outDir: &#39;./dist&#39;,
+    emptyOutDir: true,
+    copyPublicDir: false,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === &#39;MODULE_LEVEL_DIRECTIVE&#39;) {
+          return;
+        }
+
+        warn(warning);
+      },
+      input: {
+        index: resolve(__dirname, &#39;index.html&#39;),
+      }
+    },
+  },
+});
+</code></pre>
+<p>vite-plugin-electornを使ってElectronアプリをビルドするように設定</p>
+
+<p>これでビルドできる環境はできたので上記にあるアプリのファイルを作っていく</p>
+<h3 id="section-5">index.html</h3><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;root&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;module&quot; src=&quot;./src/renderer/index.tsx&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>&lt;script type=&quot;module&quot;&gt;でReactで表示するエントリーポイントなファイルを指定</p>
+
+<p>あとはガシガシ実装を書いていくだけ。ちなみに以下のファイルを作っていくがrenderer/index.tsxはapp.tsxを描画してるだけなので省略する</p>
+<pre class="line-numbers"><code class="language-tree">├── ipc
+│   └── preload.ts
+├── main
+│   └── main.ts
+└── renderer
+    ├── app.tsx
+    ├── electron.d.ts
+    └── index.tsx
+</code></pre><h3 id="section-6">作るアプリについて</h3>
+<p>ざっくりとElectronで画面を作ってそれをReactでレンダリング。でReactでレンダリングする際にReact側からElectronのプロセス側にデータを要求してElectron側からデータを返す。でそれを描画するだけ</p>
+<div class="note"><i class="fa-solid fa-circle-exclamation"></i><span>ちなみに逆(Electron側からReact側にデータをプッシュ)も可能なのでそれは余談で書く</span></div>
+
+<h3 id="section-7">src/main/main.ts</h3>
+<p>Electronアプリケーションのエントリーポイントファイル</p>
+<pre class="line-numbers"><code class="language-typescript">import { app, BrowserWindow, ipcMain } from &#39;electron&#39;;
+import * as path from &#39;node:path&#39;;
+
+app.disableHardwareAcceleration();
+
+const setupIPCListener = (): void =&gt; {
+  ipcMain.handle(&#39;file:request-file&#39;, async (event) =&gt; {
+    return &#39;/path/to/test/test.jpg&#39;;
+  });
+};
+
+const createWindow = async (): Promise&lt;BrowserWindow&gt; =&gt; {
+  const win = new BrowserWindow({
+    darkTheme: true,
+    autoHideMenuBar: true,
+    center: true,
+    webPreferences: {
+      preload: path.resolve(__dirname, &#39;preload.js&#39;),
+      contextIsolation: true,
+      nodeIntegration: false,
+      webSecurity: true,
+    },
+  });
+  await win.loadFile(path.resolve(__dirname, &#39;index.html&#39;));
+
+  return win;
+};
+
+app.whenReady().then(async () =&gt; {
+  setupIPCListener();
+  const win = await createWindow();
+}).catch(() =&gt; app.quit());
+</code></pre>
+<p>file:request-fileっていうのはReact側からElectronプロセス側にデータを要求する際に使うチャネル名</p>
+
+<p>でElectronアプリプロセス側とReactでレンダリングしている側と繋げるためのipcスクリプトが必要なのでそれをipc/preload.tsに定義する</p>
+<h3 id="section-8">src/ipc/preload.ts</h3><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &#39;electron&#39;;
+
+contextBridge.exposeInMainWorld(&#39;electronAPI&#39;, {
+  requestFile: (): Promise&lt;string&gt; =&gt; {
+    return ipcRenderer.invoke(&quot;file:request-file&quot;);
+  }
+});
+</code></pre>
+<p>main.ts側で定義したElectronメインプロセス側にデータ要求リクエストを送信してデータを受信するだけ。invokeの引数にはElectronメインプロセスで指定したチャネル名を指定する</p>
+
+<p>これでElectronアプリ側の実装は終わり。あとはReactでレンダリングする側のアプリケーションの実装を作る</p>
+<h3 id="section-9">src/renderer/electron.d.ts</h3>
+<p>まあただの型定義なんで(ry</p>
+<pre class="line-numbers"><code class="language-typescript">type ElectronAPI = {
+  requestFile: () =&gt; Promise&lt;string&gt;
+};
+
+declare global {
+  interface Window {
+    electronAPI: ElectronAPI
+  }
+}
+
+export {}
+</code></pre><h3 id="section-10">src/renderer/app.tsx</h3><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &#39;react&#39;;
+
+const App = (): React.JSX.Element =&gt; {
+  const [ file, setFile ] = useState&lt;string | null&gt;(null);
+
+  // renderer(React) -&gt; electron -&gt; renderer(React)
+  useEffect(() =&gt; {
+    (async () =&gt; {
+      const requestFile = await window.electronAPI.requestFile();
+      setFile(requestFile);
+    })();
+  }, []);
+
+  if (file === null) {
+    return (&lt;div&gt;loading...&lt;/div&gt;);
+  }
+
+  return (
+    &lt;img src={file} /&gt;
+  );
+};
+
+export default App;
+</code></pre>
+<p>終わり。これでビルドするとReact側でwindow.electronAPI.requestFile();でElectronメインプロセスにデータを要求する、そしてメインプロセス側のipcMain.handleが対応するチャネルで処理されて値がReact側に返されそれが描画される(今回はただ画像を表示しているだけなのでそれが表示されるだけ)</p>
+
+<p>んまあという感じでElectronでデスクトップアプリを作ってそのUIとかをReactとかで作ったりすることもできるよ〜ってことで終わり</p>
+<h3 id="section-11">余談１</h3>
+<p>今回のは紹介用に一部を切り出して作ったやつなので切り出してないやつは<a href="https://github.com/kinjouj/typescript-react-electron-photoviewer" target="_blank" rel="noopener">https://github.com/kinjouj/typescript-react-electron-photoviewer</a>にあります</p>
+<h3 id="section-12">余談２: ElectronメインプロセスからReactレンダラープロセスに値をぶんなげる方法</h3>
+<p>上記で書いた方法はReact側からメインプロセス側にデータ要求リスエストを出してそれを受け取るような形でやったがメインプロセス側からReactなどのレンダリング側にデータを受け取らせるようなこともできる。なのでそういう方法を取りたい場合は以下のように修正する</p>
+<h3 id="section-13">src/ipc/preload.ts</h3><pre class="line-numbers"><code class="language-typescript">import { contextBridge, ipcRenderer } from &#39;electron&#39;;
+
+contextBridge.exposeInMainWorld(&#39;electronAPI&#39;, {
+  onReceived: (callback: (data: string) =&gt; void): void =&gt; {
+    ipcRenderer.on(&#39;file:request-file&#39;, (event, data: string) =&gt; callback(data));
+  }
+});
+</code></pre>
+<p>んまあReact側からElectronメインプロセスから送られてくるデータを受信するAPIを定義</p>
+<h3 id="section-14">src/renderer/electron.d.ts</h3><pre class="line-numbers"><code class="language-typescript">type ElectronAPI = {
+  onReceived: (data) =&gt; Promise&lt;string&gt;
+};
+
+declare global {
+  interface Window {
+    electronAPI: ElectronAPI
+  }
+}
+
+export {}
+</code></pre>
+<p>単純にElectronAPI側の定義を設定</p>
+<h3 id="section-15">src/renderer/app.tsx</h3><pre class="line-numbers"><code class="language-typescript">import { useEffect, useState } from &#39;react&#39;;
+
+const App = (): React.JSX.Element =&gt; {
+  const [ file, setFile ] = useState&lt;string | null&gt;(null);
+
+  useEffect(() =&gt; {
+    window.electronAPI.onReceived((data: string)  =&gt; {
+      setFile(data);
+    });
+  });
+
+  if (file === null) {
+    return (&lt;div&gt;loading...&lt;/div&gt;);
+  }
+
+  return (
+    &lt;img src={file} /&gt;
+  );
+};
+
+export default App;
+</code></pre>
+<p>定義したonReceivedを使ってデータを受信してそれを描画する</p>
+<h3 id="section-16">src/main/main.ts</h3><pre class="line-numbers"><code class="language-typescript">app.whenReady().then(async () =&gt; {
+  const win = await createWindow();
+  setTimeout(() =&gt; {
+    win.webContents.send(&#39;file:request-file&#39;, &#39;/path/to/test/test.jpg&#39;);
+  }, 3000);
+}).catch(() =&gt; app.quit());
+</code></pre>
+<p>BrowserWindow.webContents.sendを使ってチェネル名でデータを送信。これでElectronアプリ側からReactなどで表示してるレンダラープロセス側でデータを受信したりできるようになる</p>
+<div class="note"><i class="fa-solid fa-circle-exclamation"></i><span>ただし場合によっては受信するコールバックの登録が遅延してデータが正常に受け取れなくなる場合もあるので注意</span></div>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">環境構築</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">package.json</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">tsconfig.json</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">vite.config.js</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">index.html</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">作るアプリについて</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">src/main/main.ts</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">src/ipc/preload.ts</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">src/renderer/electron.d.ts</a>
+                <a href="#section-10" class="d-block p-1 overflow-hidden ms-0">src/renderer/app.tsx</a>
+                <a href="#section-11" class="d-block p-1 overflow-hidden ms-0">余談１</a>
+                <a href="#section-12" class="d-block p-1 overflow-hidden ms-0">余談２: ElectronメインプロセスからReactレンダラープロセスに値をぶんなげる方法</a>
+                <a href="#section-13" class="d-block p-1 overflow-hidden ms-0">src/ipc/preload.ts</a>
+                <a href="#section-14" class="d-block p-1 overflow-hidden ms-0">src/renderer/electron.d.ts</a>
+                <a href="#section-15" class="d-block p-1 overflow-hidden ms-0">src/renderer/app.tsx</a>
+                <a href="#section-16" class="d-block p-1 overflow-hidden ms-0">src/main/main.ts</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2025/08/typescript-building-basic.html" class="d-block p-2">TypeScriptのビルド環境を構築する</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2018/06/typescript-project-building-using-react-script-ts.markdown.html" class="d-block p-2">react-script-tsを使ってTypeScriptプロジェクトをビルド</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2026/07/firebase-3-google-provider-authentication.html" class="d-block p-2">Firebase (3) - Google Provider Authentication -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2025/11/react-useimperativehandle.html" class="d-block p-2">ReactのuseImperativeHandle使ってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2026/01/react-loading-skeleton.html" class="d-block p-2">react-loading-skeletonを使ってみた</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2025/11/react-useimperativehandle.html" rel="prev">&lt;&nbsp;ReactのuseImperativeHandle使ってみた</a>
+              <a href="/2025/10/ffmpeg-rtmp-streaming.html" rel="next">ffmpegを使ってRTMPストリーミング&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

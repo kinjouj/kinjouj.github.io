@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="公式ドキュメント: [http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1]" />
+    <meta property="og:title" content="strong parameters" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2014/07/rails-strong-parameters.html">
+    <title>strong parameters - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2014/07/rails-strong-parameters.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "strong parameters",
+  "datePublished": "2014-07-27T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式ドキュメント: [http://guides.rubyonrails.org/action\\_controller\\_overview.html#strong-parameters][1]"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2014/07">
+                  <span class="post-date-year">2014</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">7</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">27</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">strong parameters</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/rspec" class="fs-5">rspec</a>
+                <a href="/archives/categories/ruby" class="fs-5">Ruby</a>
+                <a href="/archives/categories/rails" class="fs-5">Rails</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>公式ドキュメント: [<a href="http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1" target="_blank" rel="noopener">http://guides.rubyonrails.org/action\_controller\_overview.html#strong-parameters][1</a>]</p>
+
+<p>ActionController::Parametersリファレンス: <a href="http://api.rubyonrails.org/classes/ActionController/Parameters.html" target="_blank" rel="noopener">http://api.rubyonrails.org/classes/ActionController/Parameters.html</a> </p>
+
+<p>参考: <a href="http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters" target="_blank" rel="noopener">http://www.techscore.com/tech/Ruby/rails-4.0/strong-parameters</a></p>
+
+<p>例えば以下のようなテストを実行したらどうなるか</p>
+<pre class="line-numbers"><code class="language-ruby">require &quot;rails_helper&quot;
+
+describe ApplicationController do
+  fixtures :entry, :author
+
+  controller do
+    def update
+      begin
+        entry = Entry.find(params[:id])
+        entry.update(params[:entry])
+      rescue =&gt; e
+        raise e
+      end
+
+      render :text =&gt; &quot;OK&quot;
+    end
+  end
+
+  it &quot;request POST /create&quot; do
+    post :update, :id =&gt; 1, :entry =&gt; { :author_id =&gt; 2, :name =&gt; &quot;fuga&quot; }
+    entry = Entry.find(1)
+    expect(entry).not_to be_nil
+
+    # fail: author_idがfilterされてないので通りそれがアップデートされる為
+    author = entry.author
+    expect(author).not_to be_nil
+  end
+end
+
+</code></pre>
+<p>※config/environments/test.rbにて「&lt;span style=&quot;color: red&quot;&gt;config.action_controller.permit_all_parameters = true&lt;/span&gt;」をしておく。設定しない場合にはホワイトリスト化されてないパラメーター?に対してActiveModel::ForbiddenAttributesErrorが発生してエラーになる模様</p>
+
+<p>テスト実行する前にspec/fixturesに</p>
+<pre class="line-numbers"><code class="language-yml">entry1:
+  id: 1
+  author_id: 1
+  name: hoge
+</code></pre>
+<p>と</p>
+<pre class="line-numbers"><code class="language-yml">author1:
+  id: 1
+  name: author1
+</code></pre>
+<p>初期データを突っ込んでおく。で、このテストを実行すると</p>
+<pre>
+F
+
+Failures:
+
+  1) ApplicationController request POST /create
+     Failure/Error: expect(author).not_to be_nil
+       expected: not nil
+            got: nil
+</pre>
+
+
+<p>意図しないデータを送ってしまう事により改変されてしまうような事態になる。こういう事態になるのを防ぐのがStrong Parametersっていう機能な模様。てな訳でStrong Parametersを使ってみる</p>
+<pre class="line-numbers"><code class="language-rb">require &quot;rails_helper&quot;
+
+describe ApplicationController do
+  fixtures :entry, :author
+
+  controller do
+    def update
+      begin
+        entry_params = params.require(:entry).permit(:name)
+        entry = Entry.find(params[:id])
+        entry.update(entry_params)
+      rescue =&gt; e
+        raise e
+      end
+
+      render :text =&gt; &quot;OK&quot;
+    end
+  end
+
+  it &quot;request POST /create&quot; do
+    post :update, :id =&gt; 1, :entry =&gt; { :author_id =&gt; 2, :name =&gt; &quot;fuga&quot; }
+    entry = Entry.find(1)
+    expect(entry).not_to be_nil
+
+    author = entry.author
+    expect(author).not_to be_nil
+  end
+end
+</code></pre>
+<p>っていうように:nameは通すけど:author_idは通さないようにする。又、config/environments/test.rbにて「&lt;span style=&quot;color: red&quot;&gt;config.action_controller.action_on_unpermitted_parameters = :raise&lt;/span&gt;」っていう設定をする事でpermitする段階において、許容されないパラメーターが含まれているような場合にはActionController::UnpermittedParametersのエラーが発生するようになる。なのでその設定をした状態で上記のテストを動かすと</p>
+<pre>
+F
+
+Failures:
+
+  1) ApplicationController request POST /create
+     Failure/Error: entry_params = params.require(:entry).permit(:name)
+     ActionController::UnpermittedParameters:
+       found unpermitted parameters: author_id
+</pre>
+
+
+<p>というようにauthor_idが許容されないパラメーターな為にエラーが発生するようになる。</p>
+
+<p>終わり。というのがStrong Parametersの機能概要的な感じかと。要はパラメーターをフィルターする事で不当な注入による処理をされないようにするっていう感じかと</p>
+
+<p>[1]: <a href="http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters" target="_blank" rel="noopener">http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters</a></p>
+
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/06/rspec-rails.html" class="d-block p-2">rspec-railsのドキュメント読み</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/08/activerecord-validation-3-validates_with.html" class="d-block p-2">ActiveRecord Validation #3 - validates_with -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/09/activerecord-validation-5-common-validation-options-and-strict-validation.html" class="d-block p-2">ActiveRecord Validation #5 - Common Validation Options/Strict Validation -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/08/activerecord-validation-1.html" class="d-block p-2">ActiveRecord Validation #1</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/08/activerecord-optimistic-locking.html" class="d-block p-2">ActiveRecord Optimistic Locking</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2014/07/rails-generate-factorygirl-fixtures.html" rel="prev">&lt;&nbsp;rails generateでFactoryGirl Fixtures</a>
+              <a href="/2014/07/angularjs-directive-multielement.html" rel="next">directiveのmultiElement&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

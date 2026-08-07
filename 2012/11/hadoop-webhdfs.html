@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた" />
+    <meta property="og:title" content="WebHDFSを使ってみる" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2012/11/hadoop-webhdfs.html">
+    <title>WebHDFSを使ってみる - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2012/11/hadoop-webhdfs.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "WebHDFSを使ってみる",
+  "datePublished": "2012-11-22T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2012/11">
+                  <span class="post-date-year">2012</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">11</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">22</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">WebHDFSを使ってみる</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/hadoop" class="fs-5">Hadoop</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>WebHDFS Rest APIを使えばHDFS操作をRESTサービスベースでHTTPリクエストをぶん投げる事で出来るようになった模様。ちょっと興味あったので使ってみた</p>
+
+<p>(Hadoopのバージョンは1.0.4です)</p>
+<h3 id="section-1">セットアップ</h3>
+<p>デフォルトでWebHDFSはサポートしてないので設定しないと使えない模様。なのでhdfs-site.xmlに追加する</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
+&lt;configuration&gt;
+    &lt;!-- 追加 --&gt;
+    &lt;property&gt;
+        &lt;name&gt;dfs.webhdfs.enabled&lt;/name&gt;
+        &lt;value&gt;true&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>設定はこんだけです。あとは</p>
+<pre class="line-numbers"><code class="language-text">sudo -u hadoop /opt/hadoop/bin/hadoop namenode -format
+sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start namenode
+sudo -u hadoop /opt/hadoop/bin/hadoop-daemon.sh start datanode
+</code></pre>
+<p>でデータノードが立ち上がったら、初期時は何も無いのでユーザーディレクトリを作っておく。でユーザーディレクトリな所の所有者権限とかも直しておく。それは昨日の記事で書いたので省略</p>
+<h3 id="section-2">WebHDFS Rest APIを使って操作する</h3>
+<p>WebHDFS Rest APIのエントリーポイントとなるURLのベースが、「 <a href="http://host:port/webhdfs/v1" target="_blank" rel="noopener">http://host:port/webhdfs/v1</a> 」になる。でポートっていうのはネームノードフロントエンドページとなる、恐らくはデフォルトでは50070のポート番号になる。そこにリクエストをぶっ飛ばす</p>
+<h3 id="section-3">ユーザーディレクトリ内にdataディレクトリを作る</h3><pre class="line-numbers"><code class="language-text">curl -i -X PUT &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=mkdirs&amp;user.name=kinjouj&quot;
+</code></pre>
+<p>user.nameっていうのは指定しない場合はデフォルトの「webuser」っていうのが使用されるので、所有者関係上がある場合には指定しておく。この場合は自分のkinjoujアカウント。レスポンスが</p>
+<pre class="line-numbers"><code class="language-json">{&quot;boolean&quot;: true}
+</code></pre>
+<p>な感じでJSONで返ってくる</p>
+<h3 id="section-4">作ったディレクトリのステータスを見る</h3><pre class="line-numbers"><code class="language-text">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=GETFILESTATUS&quot;
+</code></pre>
+<p>結果として</p>
+<pre class="line-numbers"><code class="language-json">{
+  &quot;FileStatus&quot;: {
+    &quot;accessTime&quot;:0,
+    &quot;blockSize&quot;:0,
+    &quot;group&quot;:&quot;kinjouj&quot;,
+    &quot;length&quot;:0,
+    &quot;modificationTime&quot;:1353549518275,
+    &quot;owner&quot;:&quot;kinjouj&quot;,
+    &quot;pathSuffix&quot;:&quot;&quot;,
+    &quot;permission&quot;:&quot;755&quot;,
+    &quot;replication&quot;:0,
+    &quot;type&quot;:&quot;DIRECTORY&quot;
+  }
+}
+</code></pre>
+<p>なレスポンスが返ってくる</p>
+<h3 id="section-5">ディレクトリにファイルを突っ込んでみる</h3><pre class="line-numbers"><code class="language-text">curl -i -X PUT &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=create&amp;user.name=kinjouj&quot; -T accesslog.json
+</code></pre>
+<p>ここポートが50075ってなってるのが50070で投げると50075に要求しろみたいにHTTP/307が出る。まぁ実際はそのLocationヘッダーに投げれば良い</p>
+<h3 id="section-6">ディレクトリにあるファイルステータスを取る</h3><pre class="line-numbers"><code class="language-text">curl -i &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data?op=liststatus&quot;
+</code></pre>
+<p>レスポンスとして</p>
+<pre class="line-numbers"><code class="language-json">{
+  &quot;FileStatuses&quot;:{
+    &quot;FileStatus&quot;:[
+      {
+        &quot;accessTime&quot;:1353550656744,
+        &quot;blockSize&quot;:67108864,
+        &quot;group&quot;:&quot;kinjouj&quot;,
+        &quot;length&quot;:175,
+        &quot;modificationTime&quot;:1353550656744,
+        &quot;owner&quot;:&quot;kinjouj&quot;,
+        &quot;pathSuffix&quot;:&quot;accesslog.txt&quot;,
+        &quot;permission&quot;:&quot;644&quot;,
+        &quot;replication&quot;:1,
+        &quot;type&quot;:&quot;FILE&quot;
+      },
+      {
+        &quot;accessTime&quot;:0,
+        &quot;blockSize&quot;:0,
+        &quot;group&quot;:&quot;kinjouj&quot;,
+        &quot;length&quot;:0,
+        &quot;modificationTime&quot;:1353551184724,
+        &quot;owner&quot;:&quot;kinjouj&quot;,
+        &quot;pathSuffix&quot;:&quot;test&quot;,
+        &quot;permission&quot;:&quot;755&quot;,
+        &quot;replication&quot;:0,
+        &quot;type&quot;:&quot;DIRECTORY&quot;
+      }
+    ]
+  }
+}
+</code></pre>
+<p>な感じで返ってくるくる。そこに更にディレクトリがあったらどうなるのかの検証のためにテストなディレクトリを作ってる</p>
+<h3 id="section-7">ファイルを読み取る</h3><pre class="line-numbers"><code class="language-text">curl -i &quot;http://localhost:50075/webhdfs/v1/user/kinjouj/data/accesslog.txt?op=open&quot;
+</code></pre>
+<p>こちらも50070なNamenodeな所のポートにぶん投げるとDatanode側にアクセスしろっと要求される。ちょっと気になるのがブロックサイズでチャンクされてるファイルとかどうなるんだっけと。ビッグデータが無いんでそこ未確認</p>
+<h3 id="section-8">ファイル等を消す</h3><pre class="line-numbers"><code class="language-text">curl -i -X DELETE &quot;http://localhost:50070/webhdfs/v1/user/kinjouj/data/test?op=delete&amp;user.name=kinjouj&quot;
+</code></pre>
+<p>な感じでファイル・ディレクトリ等を削除可能</p>
+
+<p>という感じでHTTPリクエストぶん投げるだけでHDFS操作が出来る模様。まぁ詳しい事は <a href="http://hadoop.apache.org/docs/r1.1.0/webhdfs.html" target="_blank" rel="noopener">http://hadoop.apache.org/docs/r1.1.0/webhdfs.html</a> 見た方が良いかも</p>
+
+<p>ちなみにPerlでWebHDFSを利用する場合にNet::Hadoop::WebHDFSっていうモジュールがある模様</p>
+<h3 id="section-9">追記1</h3>
+<p>appendサポートをするにはhdfs-site.xmlに設定が必要な模様</p>
+<pre class="line-numbers"><code class="language-xml">&lt;property&gt;
+  &lt;name&gt;dfs.support.append&lt;/name&gt;
+  &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+</code></pre><h3 id="section-10">追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</h3><pre class="line-numbers"><code class="language-text">&lt;source&gt;
+    type tail
+    format apache
+    path /var/log/nginx/access.log
+    pos_file /var/log/td-agent/nginx.pos
+    tag accesslog.output
+&lt;/source&gt;
+
+&lt;match accesslog.output&gt;
+    type webhdfs
+    host localhost
+    port 50070
+    path /user/kinjouj/%Y%m%d-accesslog.txt
+    username kinjouj
+    flush_interval 1s
+&lt;/match&gt;
+</code></pre>
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">セットアップ</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">WebHDFS Rest APIを使って操作する</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">ユーザーディレクトリ内にdataディレクトリを作る</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">作ったディレクトリのステータスを見る</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">ディレクトリにファイルを突っ込んでみる</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">ディレクトリにあるファイルステータスを取る</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">ファイルを読み取る</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">ファイル等を消す</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">追記1</a>
+                <a href="#section-10" class="d-block p-1 overflow-hidden ms-0">追記2 fluent-plugin-webhdfsでログをWebHDFSに飛ばす</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2012/11/hdfs-operations.html" class="d-block p-2">HDFS操作メモ</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/11/fluentd-2-exec_filter.html" class="d-block p-2">fluentdを使ってみる (2) - exec_filter -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2010/12/hadoop-1-mapreduce.html" class="d-block p-2">Hadoop (1) - Hadoop MapReduce -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/10/fluentd-1-getting-start.html" class="d-block p-2">fluentdを使ってみる</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2011/04/hadoop-13-compression.html" class="d-block p-2">Hadoop (13) - Compression -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2012/11/fuelphp-18-task.html" rel="prev">&lt;&nbsp;FuelPHPをやってみる (18) - タスクを使う -</a>
+              <a href="/2012/11/eclipse-birt-5-excel-rendering.html" rel="next">Eclipse BIRTを使ってみる (5) - Excelで出力 -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

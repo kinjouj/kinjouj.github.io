@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="公式ドキュメント: https://jersey.java.net/documentation/latest/security.html#d0e11010" />
+    <meta property="og:title" content="JAX-RSをやってみる (18) - OAuth1Provider -" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2014/10/jaxrs-18-oauth1provider.html">
+    <title>JAX-RSをやってみる (18) - OAuth1Provider - - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2014/10/jaxrs-18-oauth1provider.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "JAX-RSをやってみる (18) - OAuth1Provider -",
+  "datePublished": "2014-10-08T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式ドキュメント: https://jersey.java.net/documentation/latest/security.html#d0e11010"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2014/10">
+                  <span class="post-date-year">2014</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">10</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">8</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">JAX-RSをやってみる (18) - OAuth1Provider -</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+                <a href="/archives/categories/jax-rs" class="fs-5">JAX-RS</a>
+                <a href="/archives/categories/ruby" class="fs-5">Ruby</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/security.html#d0e11010" target="_blank" rel="noopener">https://jersey.java.net/documentation/latest/security.html#d0e11010</a></p>
+
+<p>参考: <a href="https://github.com/jersey/jersey/blob/master/tests/e2e/src/test/java/org/glassfish/jersey/tests/e2e/oauth/OAuthClientServerTest.java" target="_blank" rel="noopener">https://github.com/jersey/jersey/blob/master/tests/e2e/src/test/java/org/glassfish/jersey/tests/e2e/oauth/OAuthClientServerTest.java</a></p>
+
+<p>※暫定なので大幅修正する可能性あり</p>
+
+<p>org.glassfish.jersey.securityのoaut1-serverパッケージを使えばOAuth1Providerが使えるようになる模様。っていう事でやってみた</p>
+
+<p>※事前にorg.glassfish.jersey.security:oauth1-serverな依存性参照をしておく</p>
+
+<p>※基本的に上記のサンプルコードを参考にしているので実用的では無いと思われる</p>
+<h3 id="section-1">SampleApplication.java</h3><pre class="line-numbers"><code class="language-java">package sample;
+
+import javax.ws.rs.core.MultivaluedHashMap;
+
+import jersey.repackaged.com.google.common.collect.Sets;
+
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
+import org.glassfish.jersey.server.oauth1.DefaultOAuth1Provider;
+import org.glassfish.jersey.server.oauth1.OAuth1ServerFeature;
+
+import com.sun.security.auth.UserPrincipal;
+
+public class SampleApplication extends ResourceConfig {
+
+    private static final String CONSUMER_OWNER = &quot;owner1&quot;;
+    private static final String CONSUMER_KEY = &quot;key1&quot;;
+    private static final String CONSUMER_SECRET = &quot;secret1&quot;;
+
+    private static final String CONSUMER_TOKEN_KEY = &quot;token_key1&quot;;
+    private static final String CONSUMER_TOKEN_SECRET = &quot;token_secret1&quot;;
+
+    public SampleApplication() {
+        final DefaultOAuth1Provider provider = new DefaultOAuth1Provider();
+
+        provider.registerConsumer(
+            CONSUMER_OWNER,
+            CONSUMER_KEY,
+            CONSUMER_SECRET,
+            new MultivaluedHashMap&lt;String, String&gt;()
+        );
+
+        provider.addAccessToken(
+            CONSUMER_TOKEN_KEY,
+            CONSUMER_TOKEN_SECRET,
+            CONSUMER_KEY,
+            null, // callback url
+            null, // user principal
+            null, // roles
+            new MultivaluedHashMap&lt;String, String&gt;()
+        );
+
+        register(
+            new OAuth1ServerFeature(
+                provider,
+                &quot;oauth/request_token&quot;,
+                &quot;oauth/access_token&quot;
+            )
+        );
+        register(RolesAllowedDynamicFeature.class);
+        packages(&quot;sample&quot;);
+    }
+}
+</code></pre>
+<p>本来addAccessTokenはこっちでやるべき事ではない気がしますが(ユーザー登録などの処理をする際にユーザーに対してaddAccessTokenなどをするべきなのでは)</p>
+
+<p>で一般的にOAuth1な処理フロー的には</p>
+
+<ul>
+<li>/request_tokenにてリクエストトークンを取得</li>
+<li>/authorizeして検証コードなどを取得</li>
+<li>/access_tokenにてAPIにアクセスするのに必要なアクセストークンを取得</li>
+</ul>
+
+<p>というようなフローが必要なのだけど、上記のOAuth1ServerFeatureのコンストラクタで指定している引数で、そのURLのパスを指定出来る。なのでリクエストトークンを取得する場合には/[コンテキストルート]/resources/oauth/reuqest_tokenっていうような形になる。authorizeに関しては自身で実装する必要があるので(これは後記するので)</p>
+<h3 id="section-2">OAuth.java</h3>
+<p>/authorizeでリクエストトークンから認可する際に当たる検証コードを出力するだけのリソースアクションを定義する</p>
+<pre class="line-numbers"><code class="language-java">package sample;
+
+import java.security.Principal;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
+
+import jersey.repackaged.com.google.common.collect.Sets;
+
+import org.glassfish.jersey.server.oauth1.DefaultOAuth1Provider;
+import org.glassfish.jersey.server.oauth1.OAuth1Provider;
+import org.glassfish.jersey.server.oauth1.TokenResource;
+
+@Path(&quot;/oauth&quot;)
+public class OAuth {
+
+    @Context
+    private OAuth1Provider provider;
+
+    @TokenResource
+    @RolesAllowed(&quot;user&quot;)
+    @Path(&quot;/authorize&quot;)
+    @GET
+    public String authorize(@QueryParam(&quot;oauth_token&quot;) String token, @Context SecurityContext sc) {
+        Principal user = sc.getUserPrincipal();
+
+        if (user == null) {
+            throw new ForbiddenException();
+        }
+
+        DefaultOAuth1Provider       defProvider  = (DefaultOAuth1Provider)provider;
+        DefaultOAuth1Provider.Token requestToken = defProvider.getRequestToken(token);
+
+        return defProvider.authorizeToken(
+            requestToken,
+            // リソースメソッド等でSecurityContextを介して取得出来る
+            user,
+            // 認可するロールを間違えると利用するリソースでのRolesAllowedで許可されないのでエラーになる
+            Sets.newHashSet(&quot;user&quot;)
+        );
+    }
+}
+</code></pre>
+<p>authorizeする際にユーザーを特定するには、そこをsecurity-constraint等によって保護してアクセスする人を特定した後にauthorizeする必要がある。あとはコメントで書いてる通り</p>
+<h3 id="section-3">API.java</h3><pre class="line-numbers"><code class="language-java">package sample;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
+
+@Path(&quot;/api&quot;)
+public class API {
+
+    @RolesAllowed(&quot;user&quot;)
+    @Path(&quot;/greet&quot;)
+    @GET
+    public String greet(@Context SecurityContext sc) {
+        return &quot;Hello World &quot; + sc.getUserPrincipal().getName();
+    }
+}
+</code></pre>
+<p>っていう感じでやれば、OAuthリクエストを認可されアクセストークンを使ってRolesAllowedされたリソースにもアクセスする事が可能になる。</p>
+
+<p>上記のOAuth.javaにはちょろっと書いてるけど、@TokenResourceっていうアノテーションを使うとOAuth1ServerFilterによってOAuthアクセストークンを利用した保護領域へのアクセスに対してユーザー処理等が行われない。その為、このリソースクラスのメソッドに@TokenResourceを使ってしまうとOAuthによるユーザー処理されずに認証できない状態になるのでHTTP/403エラーとなる</p>
+
+<p>まぁざっくりとした使い方はこんな感じなんだけど、DefaultOAuth1Providerの実装自体がアクセストークンをインスタンスによる管理が行われる為にサーバーを再起動したりすると既に発行されているアクセストークンを利用してもアクセス出来なくなると思われる。なのでがっつりやるのであればOAuth1Providerインターフェースを実装したクラスでもって処理する必要があるのではないかと</p>
+
+<p>んまぁテストケースに関しては一番上の参考のリンク先がテストケースになっているのでテスト書いたりする際にはそれを参考にすれば良いのではないかと</p>
+<h3 id="section-4">余談: Rubyでクライアント書いてアクセスしてみる</h3><pre class="line-numbers"><code class="language-ruby">require &#39;oauth&#39;
+
+consumer = OAuth::Consumer.new(
+  &#39;key1&#39;,
+  &#39;secret1&#39;,
+  :site =&gt; &#39;http://localhost:8080/jersey/resources&#39;
+)
+
+request_token = consumer.get_request_token
+
+puts &quot;open #{request_token.authorize_url}&quot;
+
+print &#39;verify code: &#39;
+verify = gets.to_s.chomp
+
+access_token = request_token.get_access_token(oauth_verifier: verify)
+
+puts &quot;access_token: #{access_token.token}&quot;
+puts &quot;access_token_secret: #{access_token.secret}&quot;
+
+response = access_token.get(&#39;/api/greet&#39;)
+puts &quot;response: #{response.body}&quot;
+</code></pre>
+<p>っていう感じで書いて実行するとauthorizeするURLが表示されるので、そこにブラウザ等でアクセスして表示されるベリファイコードをコピーするとAPIにアクセス出来るような感じ。その際にアクセストークンが表示されるので</p>
+<pre class="line-numbers"><code class="language-ruby">require &#39;oauth&#39;
+
+consumer = OAuth::Consumer.new(
+  &#39;key1&#39;,
+  &#39;secret1&#39;,
+  :site =&gt; &#39;http://localhost:8080/jersey/resources&#39;
+)
+
+access_token = OAuth::AccessToken.new(
+  consumer,
+  &#39;access token&#39;,
+  &#39;access token secret&#39;
+)
+
+response = access_token.get(&#39;/api/greet&#39;)
+puts &quot;response: #{response.body}&quot;
+</code></pre>
+<p>っていう感じでやればアクセストークンを使ってAPIにアクセスする事も出来る。もちろん上記で書いてるようにDefaultOAuth1Providerをそのまま使ってる場合にはサーバーを落とすとそのアクセストークンは使えなくなる</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">SampleApplication.java</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">OAuth.java</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">API.java</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">余談: Rubyでクライアント書いてアクセスしてみる</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2014/10/jaxrs-19-development-oauth1provider.html" class="d-block p-2">JAX-RSをやってみる (19) - OAuth1Providerを実装する -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/10/jaxrs-17-securitycontext.html" class="d-block p-2">JAX-RSをやってみる (17) - SecurityContext -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/10/jaxrs-20-securityentityfiltering.html" class="d-block p-2">JAX-RSをやってみる (20) - SecurityEntityFiltering -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/08/chrome-extension-13.html" class="d-block p-2">Chrome Extension開発を勉強してみる (13) - oauth.jsでTwitter API -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/04/jaxrs-1.html" class="d-block p-2">JAX-RSをやってみる (1)</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2014/10/gradle-jetty-jdbcrealm.html" rel="prev">&lt;&nbsp;gradle jettyでJDBCRealm</a>
+              <a href="/2014/10/jaxrs-17-securitycontext.html" rel="next">JAX-RSをやってみる (17) - SecurityContext -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

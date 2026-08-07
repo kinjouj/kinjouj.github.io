@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様" />
+    <meta property="og:title" content="FactoryGirlを使ってみる" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/06/factorygirl.html">
+    <title>FactoryGirlを使ってみる - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/06/factorygirl.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "FactoryGirlを使ってみる",
+  "datePublished": "2013-06-21T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/06">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">21</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">FactoryGirlを使ってみる</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/rspec" class="fs-5">rspec</a>
+                <a href="/archives/categories/ruby" class="fs-5">Ruby</a>
+                <a href="/archives/categories/rails" class="fs-5">Rails</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>何やら色々Railsな情報を見てるとFactoryGirlっていうのがやたらと目に入ってくるので調べたりしつつちょっと使ってみた。単純に言うとテストで使用するフィクスチャを作成出来る物な模様</p>
+
+<p>ActiveRecordにもfixtureな機能自体はあるけど、こっちはyamlとかで定義したりすると思うのだけど、事細かいリレーション構造とかだとテストデータをどう表現するのかはちょっと謎。っていうかそこまで使いこなせてないっていうオチな気もするけど</p>
+
+<p>とりまぁ使ってみる</p>
+<h3 id="section-1">導入</h3>
+<p>Gemfileに</p>
+<pre class="line-numbers"><code class="language-rb">gem &quot;factory_girl_rails&quot;, :group =&gt; [:development, :test]
+</code></pre>
+<p>を記述して、bundle installしておく。んで</p>
+<pre class="line-numbers"><code class="language-text">rails g factory_girl:model モデル
+</code></pre>
+<p>な感じでファイルを生成する。RSpecとかの場合にはspec/factoriesディレクトリ内にファイルが生成される模様(RSpecじゃない場合にはtest/factories)</p>
+
+<p>んでもって、ドキュメント通りにテストで使用する環境によってFactoryGirlなメソッドをincludeしちゃったりする(しなくてもFactoryGirlクラスのメソッドを使う事で出来るのかも、それは未検証)。今回はRSpecを使ってるんでspec_helper.rbに</p>
+<pre class="line-numbers"><code class="language-rb">RSpec.configure do |config|
+  # 追加
+  config.include FactoryGirl::Syntax::Methods
+end
+</code></pre>
+<p>を追加</p>
+<h3 id="section-2">モデル仕様</h3>
+<p><img src="/images/2013/06/201304241014072.png" alt="image" /></p>
+
+<ul>
+<li>  Entry.categoryでカテゴリー(Category)参照を取得できる</li>
+<li>  Category.entryでカテゴリーを参照しているエントリー(Entry)参照を取得できる</li>
+<li>  Category.parent_categoryでカテゴリーが参照している親カテゴリーを取得できる</li>
+<li>  Category.sub_categoriesでカテゴリーを参照している子カテゴリーを参照できる</li>
+</ul>
+
+<p>っていうような仕様がぶち込まれている。それをやってるのがhas_and_belongs_to_many辺り</p>
+
+<p>んまぁ仕様的なはこんなもんかなと。あとはspec/factories等やモデルテストを書く</p>
+<h3 id="section-3">spec/factories/categories.rb</h3><pre class="line-numbers"><code class="language-text">rails g factory_girl:model category
+</code></pre>
+<p>で生成したFactoryGirlの定義を書く</p>
+<pre class="line-numbers"><code class="language-rb"># Read about factories at https://github.com/thoughtbot/factory_girl
+
+FactoryGirl.define do
+  factory :category1, :class =&gt; Category do
+    name &quot;A&quot;
+  end
+
+  factory :category2, :class =&gt; Category do
+    name &quot;B&quot;
+    association :parent_category, :factory =&gt; :category1
+  end
+end
+</code></pre>
+<p>2つのカテゴリーを定義するけど、カテゴリーBはカテゴリーAの子カテゴリーとなりCategoryクラスのparent_categoryを参照する事で親カテゴリーなカテゴリーAを取得できるっていうような形になっているので、associationでカテゴリーAなfactoryを指定する</p>
+<h3 id="section-4">spec/factories/entries.rb</h3><pre class="line-numbers"><code class="language-text">rails g factory_girl:model entry
+</code></pre>
+<p>で生成したFactoryGirlの定義を書いていく</p>
+<pre class="line-numbers"><code class="language-rb"># Read about factories at https://github.com/thoughtbot/factory_girl
+
+FactoryGirl.define do
+  factory :entry, :class =&gt; Entry do
+    title &quot;test&quot;
+    content &quot;test&quot;
+
+    after :create do |e|
+      e.category &lt;&lt; FactoryGirl.create(:category2)
+    end
+  end
+end
+</code></pre>
+<p>entryを作った後にafter :createが発生する模様で、そこでカテゴリーな参照をぶち込まないとちゃんとhas_and_belongs_to_manyなリレーション関係が解決出来なかった。これはちょっと要確認</p>
+
+<p>で見て分かるようにentryからはcategory1な参照は含まれていない。だけどcategory2側からはcategory1なfactoryを参照する方式で親カテゴリーの参照をぶち込んでるのでそれで利用されるっていう感じ</p>
+<h3 id="section-5">spec/models/entry_spec.rb</h3>
+<p>まぁテストを書く。要件的には</p>
+
+<ul>
+<li>  FactoryGirlでentryを作る</li>
+<li>  作ったエントリーのカテゴリー参照を取得。結果は1件のみで結果はcategory2なCategoryクラスが入ってる (hashは異なる)</li>
+<li>  category2なクラスから親カテゴリーを取得する</li>
+<li>  取得した親カテゴリーから子カテゴリー参照を取得。結果は1件のみで上記で書いてる category2なCategoryのインスタンスが入る (hashは異なる)</li>
+<li>  親カテゴリーから取得した子カテゴリー自体が参照するentryが最初に取得したEntryなインスタンスと同等なオブジェクトであるかをチェック</li>
+</ul>
+<pre class="line-numbers"><code class="language-rb">require &quot;spec_helper&quot;
+
+describe Entry do
+  it &quot;factory_girl test&quot; do
+    # FactoryGirlでEntryを作る
+    entry = create(:entry)
+    expect(entry).not_to be_nil
+    expect(entry.title).to eq(&quot;test&quot;)
+    expect(entry.content).to eq(&quot;test&quot;)
+
+    # Entryが参照しているCategoryを取得
+    categories = entry.category
+    expect(categories.size).to eq(1)
+
+    # Entryが参照しているカテゴリーを取得。category2であるかチェック
+    category = categories.first
+    expect(category).not_to be_nil
+    expect(category.name).to eq(&quot;B&quot;)
+
+    # 参照しているカテゴリーの親カテゴリーを取得。category1であるかチェック
+    parent = category.parent_category
+    expect(parent).not_to be_nil
+    expect(parent.name).to eq(&quot;A&quot;)
+    expect(parent.entry.size).to eq(0)
+
+    # 親カテゴリーを参照している子カテゴリーを取得
+    sub_categories = parent.sub_category
+    expect(sub_categories.size).to eq(1)
+
+    # 親カテゴリーを参照しているカテゴリー自体がentryが参照しているカテゴリーと同一?かをチェック
+    sub_category = sub_categories.first
+    expect(sub_category).not_to be_nil
+    expect(sub_category).to eq(category)
+
+    # 子カテゴリーが参照しているEntryを取得
+    sub_category_entries = sub_category.entry
+    expect(sub_category_entries.size).to eq(1)
+
+    # 子カテゴリーが参照しているEntryが上記のEntryと同一?かをチェック
+    sub_category_entry = sub_category_entries.first
+    expect(sub_category_entry).not_to be_nil
+    expect(sub_category_entry).to eq(entry)
+  end
+end
+</code></pre>
+<p>終わり。なかなか難しいような感じも否めないんだけど、ドキュメント読みつつやってみようかと。んまぁおさわり的にはこんなもんかなーっと</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">導入</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">モデル仕様</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">spec/factories/categories.rb</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">spec/factories/entries.rb</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">spec/models/entry_spec.rb</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/04/rubyonrails-study-1.html" class="d-block p-2">RubyOnRails演習 (1)</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/08/activerecord-polymorphic-association.html" class="d-block p-2">ActiveRecordのpolymorphic</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/08/factorygirl-fixture-loading-architecture.html" class="d-block p-2">FactoryGirlのロードの仕組み</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/07/rails-generate-factorygirl-fixtures.html" class="d-block p-2">rails generateでFactoryGirl Fixtures</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/04/activerecord-has-and-belongs-to-many.html" class="d-block p-2">HABTM(はびたむ)</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/06/laravel-5-subdomain-routing.html" rel="prev">&lt;&nbsp;Laravel使ってみた (5) - サブドメインルーティング -</a>
+              <a href="/2013/06/jenkins-job-curl-operation.html" rel="next">Jenkinsのジョブをcurlで処理する&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

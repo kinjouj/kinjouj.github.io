@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる" />
+    <meta property="og:title" content="Cassandra使ってみた" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2012/03/getting-start-cassandra.html">
+    <title>Cassandra使ってみた - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2012/03/getting-start-cassandra.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Cassandra使ってみた",
+  "datePublished": "2012-03-21T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2012/03">
+                  <span class="post-date-year">2012</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">3</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">21</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">Cassandra使ってみた</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/cassandra" class="fs-5">Cassandra</a>
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>現状は概念までは説明出来ないので、あくまでお触り程度な所をメモる</p>
+<h3 id="section-1">インストール</h3>
+<p><a href="http://cassandra.apache.org" target="_blank" rel="noopener">http://cassandra.apache.org</a> からダウンロード。一応、この記事の検証環境として1.0.8のバージョンを使用。んでtar.gzなりを展開後適当なディレクトリに配置して、そのディレクトリをCASSANDRA_HOMEってな感じで.bashrcなりに設定する。まぁそこら辺はCassandraに入ってるReadmeとかに書いてあるので</p>
+<h3 id="section-2">起動とその他もろもろ</h3>
+<p>起動する前にログとデータファイルを格納するディレクトリを作っておく</p>
+<pre class="line-numbers"><code class="language-sh">mkdir -p /var/{log,lib}/cassandra
+
+# ※各ディレクトリの所有者関係も設定する
+</code></pre>
+<p>まずサーバーを起動。</p>
+<pre class="line-numbers"><code class="language-sh">cassandra -f
+</code></pre>
+<p>で起動出来る。-fは-foregroundの略称っぽい、指定しなかった場合にはCassandraDaemonがバックグランド動作になる模様。で起動すると、サーバーが9160なポートを開放する。これはAPI通信を行う際に利用するThriftサーバーのポートな模様。詳しくはログを嫁ということにしときます</p>
+
+<p>んでクライアントから</p>
+<pre class="line-numbers"><code class="language-sh">cassandra-cli -h localhost```
+
+
+な感じでcassandra-cliを使って接続する。でデータモデルを理解しないといけないが今回は詳細をぶっ飛ばして、とりあえずこんな感じになるっぽい↓
+
+
+![](/images/2012/03/20120601181629.jpg)
+
+
+まぁKeyspaceがあって、そこにColumn Familyがあって更にその中にKey(以下省略
+
+
+とりあえずColumn Familyを作ってみる
+
+
+</code></pre><h1>Keyspaceを作成create keyspace Keyspace1;# 作成したKeyspaceを使用する</h1>
+<p>use Keyspace1;</p>
+<h1>Column Familyを作る</h1>
+<p>create column family Sample with comparator = UTF8Type and key_validation_class = UTF8Type and default_validation_class = UTF8Type<br>
+```</p>
+
+<p>まぁこんな感じで作る。で最後の所ですが、作ったColumn Familyをdescribeしてみると</p>
+<pre>
+ColumnFamily: Sample
+  Key Validation Class: org.apache.cassandra.db.marshal.UTF8Type
+  Default column value validator: org.apache.cassandra.db.marshal.UTF8Type
+  Columns sorted by: org.apache.cassandra.db.marshal.UTF8Type
+  Row cache size / save period in seconds / keys to save : 0.0/0/all
+  Row Cache Provider: org.apache.cassandra.cache.ConcurrentLinkedHashCacheProvider
+  Key cache size / save period in seconds: 200000.0/14400
+  GC grace seconds: 864000
+  Compaction min/max thresholds: 4/32
+  Read repair chance: 1.0
+  Replicate on write: true
+  Bloom Filter FP chance: default
+  Built indexes: []
+  Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
+</pre>
+
+
+<p>な感じになる(自分の環境の場合は)。でオプションを指定せずに「create column family Sample」だけにすると</p>
+<pre>ColumnFamily: Sample
+  Key Validation Class: org.apache.cassandra.db.marshal.BytesType
+  Default column value validator: org.apache.cassandra.db.marshal.BytesType
+  Columns sorted by: org.apache.cassandra.db.marshal.BytesType
+  Row cache size / save period in seconds / keys to save : 0.0/0/all
+  Row Cache Provider: org.apache.cassandra.cache.ConcurrentLinkedHashCacheProvider
+  Key cache size / save period in seconds: 200000.0/14400
+  GC grace seconds: 864000  Compaction min/max thresholds: 4/32  Read repair chance: 1.0  Replicate on write: true  Bloom Filter FP chance: default  Built indexes: []  Compaction Strategy: org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy
+</pre>
+
+
+<p>まぁ色々変わってくるようになる。そこら辺は「help create column family」で別途確認と。んでデータを突っ込んでみる</p>
+<pre class="line-numbers"><code class="language-text">use Keyspace1;
+set Sample[test1][name] = &quot;hoge&quot;;
+</code></pre>
+<p>で突っ込んだので</p>
+<pre class="line-numbers"><code class="language-text">use Keyspace1;
+get Sample[test1];
+
+# 出力 =&gt; (column=name, value=hoge, timestamp=省略)
+</code></pre>
+<p>まぁこんな感じ。んじゃついでにJava側から操作してみる。Maven使いたいのでとりあえずpom.xmlを書く</p>
+<h3 id="section-3">pom.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;project
+    xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4.0.0.xsd&quot;&gt;
+
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;groupId&gt;省略&lt;/groupId&gt;
+    &lt;artifactId&gt;省略&lt;/artifactId&gt;
+    &lt;version&gt;省略&lt;/version&gt;
+    &lt;name&gt;省略&lt;/name&gt;
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+                &lt;version&gt;2.3.2&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;source&gt;1.6&lt;/source&gt;
+                    &lt;target&gt;1.6&lt;/target&gt;
+                    &lt;encoding&gt;UTF-8&lt;/encoding&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+                &lt;artifactId&gt;exec-maven-plugin&lt;/artifactId&gt;
+                &lt;version&gt;1.2.1&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;mainClass&gt;Client&lt;/mainClass&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.cassandra&lt;/groupId&gt;
+            &lt;artifactId&gt;cassandra-all&lt;/artifactId&gt;
+            &lt;version&gt;1.0.7&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/project&gt;
+</code></pre>
+<p>んじゃJava側のClientクラスを書く</p>
+<h3 id="section-4">Client.java</h3><pre class="line-numbers"><code class="language-java">import java.nio.ByteBuffer;
+import java.io.UnsupportedEncodingException;
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TFramedTransport;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransportException;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.TException;
+
+public class Client {
+
+    private static final String KEYSPACE = &quot;Keyspace1&quot;;
+    private static final String COLUMN_FAMILY = &quot;Sample&quot;;
+    private static final String COLUMN_FAMILY_KEY = &quot;test1&quot;;
+    private static final String COLUMN_FAMILY_KEY_COLUMN = &quot;name&quot;;
+
+    public static void main(String[] args) {
+        TTransport transport = new TFramedTransport(new TSocket(&quot;localhost&quot;, 9160));
+        TProtocol proto = new TBinaryProtocol(transport);
+
+        try {
+            transport.open();
+
+            Cassandra.Client client = new Cassandra.Client(proto);
+            client.set_keyspace(KEYSPACE);
+
+            ColumnPath path = new ColumnPath(COLUMN_FAMILY);
+            path.setColumn(stringToBuffer(COLUMN_FAMILY_KEY_COLUMN));
+
+            ColumnOrSuperColumn result = client.get(stringToBuffer(COLUMN_FAMILY_KEY), path, ConsistencyLevel.ONE);
+            Column column = result.column;
+
+            String columnName = bufferToString(column.name);
+            String columnValue = bufferToString(column.value);
+            String output = String.format(&quot;%s[%s][%s] = %s&quot;, COLUMN_FAMILY, COLUMN_FAMILY_KEY, columnName, columnValue);
+
+            System.out.println(output);
+        } catch (TTransportException e) {
+            e.printStackTrace();
+        } catch (InvalidRequestException e) {
+            e.printStackTrace();
+        } catch (TException e) {
+            e.printStackTrace();
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+        } catch (UnavailableException e) {
+            e.printStackTrace();
+        } catch (TimedOutException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } finally {
+            transport.close();
+        }
+    }
+
+    public static ByteBuffer stringToBuffer(String str) throws UnsupportedEncodingException {
+        return ByteBuffer.wrap(str.getBytes(&quot;UTF-8&quot;));
+    }
+
+    public static String bufferToString(ByteBuffer buffer) throws UnsupportedEncodingException {
+        byte[] b = new byte[buffer.remaining()];
+        buffer.get(b);
+
+        return new String(b, &quot;UTF-8&quot;);
+    }
+}
+</code></pre>
+<p>(ByteBufferな変換あれこれはCassandraにByteBufferUtilっていうのがあるのでそれを使うべきかと思われる)</p>
+
+<p>あとはmvn compileしたあとにmvn exec:javaで実行してみる。現時点で勉強しているのはここまでなので終了乙</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">インストール</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">起動とその他もろもろ</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">pom.xml</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">Client.java</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2012/04/hadoop-mapper-cassandra.html" class="d-block p-2">Hadoop+Cassandra (1) - MapperでCassandra -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/09/hector-1.html" class="d-block p-2">Hectorを使ってみる (1)</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/04/apache-tika.html" class="d-block p-2">Apache tikaを使ってみる</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/11/selenium-maven-plugin-integration-test.html" class="d-block p-2">jetty-maven-plugin+selenium-maven-pluginでintegration-test</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/10/sastruts-1-getting-start.html" class="d-block p-2">SAStrutsを勉強してみる (1) - First Step -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2012/04/hadoop-mapper-cassandra.html" rel="prev">&lt;&nbsp;Hadoop+Cassandra (1) - MapperでCassandra -</a>
+              <a href="/2012/03/android-spellcheckerservice.html" rel="next">(非常に適当に)Android ICS SpellCheckerServiceを使ってみる&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

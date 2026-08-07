@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="公式ドラフトドキュメント?: http://www.w3.org/TR/push-api/" />
+    <meta property="og:title" content="ServiceWorkerを使ったPush APIをやってみた" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2015/05/serviceworker-push-api.html">
+    <title>ServiceWorkerを使ったPush APIをやってみた - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2015/05/serviceworker-push-api.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ServiceWorkerを使ったPush APIをやってみた",
+  "datePublished": "2015-05-17T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式ドラフトドキュメント?: http://www.w3.org/TR/push-api/"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2015/05">
+                  <span class="post-date-year">2015</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">5</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">17</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">ServiceWorkerを使ったPush APIをやってみた</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>公式ドラフトドキュメント?: <a href="http://www.w3.org/TR/push-api/" target="_blank" rel="noopener">http://www.w3.org/TR/push-api/</a></p>
+
+<p>参考1: <a href="http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web" target="_blank" rel="noopener">http://updates.html5rocks.com/2015/03/push-notificatons-on-the-open-web</a></p>
+
+<p>参考2: <a href="http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d" target="_blank" rel="noopener">http://qiita.com/tomoyukilabs/items/8fffb4280c1914b6aa3d</a></p>
+
+<p>前から気になってたServiceWorkerを使ってPush APIを実装するっていうのが話題になってた気がするので、ざっくりと参考を読みつつやってみた</p>
+<h3 id="section-1">その前に</h3>
+<p>以前にChrome Extensionで使えるchrome.gcmっていうのがあるネタを書いたけど、今回はこれをChrome Extensionではなく普通のWebアプリケーションから使える基盤的な仕組みみたいなのっぽい</p>
+<h3 id="section-2">必要なのを揃える</h3>
+<p>GoogleのPush Messagingサービスを使うので、まず必要なのが</p>
+
+<ul>
+<li>Cloud Messaging for Chromeを有効にする</li>
+<li>Cloud Messaging for Androidを有効にする</li>
+<li>Google APIsのAPI Key</li>
+<li>Google APIsのプロジェクト識別番号</li>
+</ul>
+
+<p>の4つが最低限でも必要っぽいので取得しておく。上記で書いたchrome.gcmのネタ中にも多分書いてるはずなので省略(APIへのアクセス権の設定項目)</p>
+<h3 id="section-3">manifest.json</h3>
+<p>※Chrome Extensionのmanifest.jsonでは無い</p>
+
+<p>Push Notification APIを使う際に必要となる情報を定義したJSONファイル</p>
+<pre class="line-numbers"><code class="language-json">{
+  &quot;name&quot;: &quot;sample&quot;,
+  &quot;short_name&quot;: &quot;sample&quot;,
+  &quot;start_url&quot;: &quot;http://localhost:8000/index.html&quot;,
+  &quot;display&quot;: &quot;standalone&quot;,
+  &quot;gcm_sender_id&quot;: &quot;上記で取得したGoogle APIsプロジェクトのプロジェクト番号&quot;,
+  &quot;gcm_user_visible_only&quot;: true
+}
+</code></pre>
+<p>これに関するリファレンスがちょっとどこにあるのか分かってないので省略</p>
+<h3 id="section-4">index.html</h3><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;link rel=&quot;manifest&quot; href=&quot;manifest.json&quot; /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;subscription&quot;&gt;&lt;/div&gt;&lt;p /&gt;
+    &lt;button class=&quot;js-push-button&quot;&gt;register&lt;/button&gt;
+    &lt;script src=&quot;main.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>上記で書いたmanifest.jsonを&lt;link rel=“manifest”&gt;で読み込む。んまぁあとはJSをダラっと書くだけ</p>
+<h3 id="section-5">main.js</h3><pre class="line-numbers"><code class="language-js">window.addEventListener(&quot;load&quot;, function() {
+  var el = document.querySelector(&quot;.js-push-button&quot;);
+  el.addEventListener(&quot;click&quot;, function() {
+    subscribe();
+  });
+
+  // 指定したスクリプトをServiceWorkerとしてインストール
+  navigator.serviceWorker.register(&quot;push.js&quot;).then(function() {
+    if (Notification.permission === &quot;denied&quot;) {
+      throw new &quot;Notification is denied&quot;;
+    }
+
+    navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+      serviceWorkerRegistration.pushManager
+        .getSubscription()
+        .then(function(subscription) {
+            // subscribeされてなければnullになる
+            if (!subscription) {
+              return;
+            }
+
+            el.disabled = true;
+            renderSubscription(subscription);
+        });
+    });
+  });
+}, false);
+
+function subscribe() {
+  navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+    serviceWorkerRegistration.pushManager.subscribe().then(function(subscription) {
+      var el = document.querySelector(&quot;.js-push-button&quot;);
+      el.disabled = true;
+      renderSubscription(subscription);
+    });
+  });
+}
+
+function renderSubscription(subscription) {
+  document.querySelector(&#39;#subscription&#39;).innerHTML = subscription.subscriptionId;
+}
+</code></pre><h3 id="section-6">push.js</h3><pre class="line-numbers"><code class="language-js">self.addEventListener(&quot;install&quot;, function() {
+  console.log(&quot;install&quot;);
+}, false);
+
+self.addEventListener(&quot;push&quot;, function(event) {
+  event.waitUntil(
+    self.registration.showNotification(
+      &quot;title&quot;,
+      {
+        &quot;body&quot;: &quot;body&quot;
+      }
+    )
+  );
+}, false);
+</code></pre>
+<p>registerされた時点でinstallイベントが発生してプッシュ通知を受信したらpushイベントが起きるみたいな感じ。他にもなんかイベントあるみたいですけど今回はパス(追記するかと)</p>
+
+<p>でとりあえず今までの流れを確認すると</p>
+
+<p>まず作成したHTMLにアクセスした時点でchrome://serviceworker-internalsを見ると</p>
+
+<p><img src="/images/2015/05/201505171800_1.jpg" alt="image" /></p>
+
+<p>んな感じになってる。でregisterボタンを押すと</p>
+
+<p><img src="/images/2015/05/201505171800_2.jpg" alt="image" /></p>
+
+<p>※Subscription IDは削ってるのでこのIDをやっても出来ません</p>
+
+<p>っていうようにSubscription IDが表示される。おそらくは一度subscribeしているとgetSubscriptionで取れるようになってると思うのでリロードするとボタンを押さなくても表示されるかと</p>
+
+<p>んまぁこのSubscription IDを使ってリクエストを送信すれば通知ができるって訳</p>
+<h3 id="section-7">send.sh</h3><pre class="line-numbers"><code class="language-sh">#!/bin/sh
+
+ID=&quot;上記のSubscription ID&quot;
+KEY=&quot;Google Consoleで取得したGoogle Apis Key&quot;
+
+
+curl \
+    -H &quot;Content-Type:application/json&quot; \
+    -H &quot;Authorization: key=$KEY&quot; \
+    -d &quot;{ \&quot;registration_ids\&quot;: [\&quot;$ID\&quot;] }&quot; \
+    https://android.googleapis.com/gcm/send
+</code></pre>
+<p>を実行すると</p>
+
+<p><img src="/images/2015/05/201505171800_3.jpg" alt="image" /></p>
+
+<p>みたいにデスクトップ通知が出るようになる。何やら通知をクリックした時のイベントがどうたらとかもあるらしい</p>
+
+<p>まぁざっくり書きましたが現状でもまだ策定中な所もあるようだし実装もまだできてなくて制限が一部あるんですが</p>
+
+<ul>
+<li>pushを受信したらshowNotificationしないといけないらしい</li>
+<li>データを現時点では受信出来ない(Chrome拡張のchrome.gcmはデータを受信することは可能)</li>
+<li>もしサービスに導入するならHTTPS環境にデプロイしないと出来ない(海外のHTML5のスペシャリストな人の記事では受信したらサーバーに通知情報をとりに行くみたいな事しているようなケースもある模様)</li>
+</ul>
+
+<p>他にも色々あるらしいので、詳しい事は上記の参考URLを見た方が良いかと</p>
+
+<p>んまぁとりあえず今後色々出来る事が増えると思うので分かった事なりを書いたり追記したりするとは思うって事で</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">その前に</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">必要なのを揃える</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">manifest.json</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">index.html</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">main.js</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">push.js</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">send.sh</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2017/11/serviceworker-appcaching.html" class="d-block p-2">ServiceWorkerを使ったアプリケーションキャッシング</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2026/06/firebase-2-cloud-messaging.html" class="d-block p-2">Firebase (2) - Cloud Messaging -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/10/chrome-extension-gcm-api.html" class="d-block p-2">chrome.gcm</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/05/chrome-extension-2.html" class="d-block p-2">Chrome Extension開発を勉強してみる (2) - background pageでWebSocket管理 -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/08/chrome-extension-google-app-engine-oauth.html" class="d-block p-2">Chrome Extension+Google App Engine(+OAuth)</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2015/05/npm-watch-run-test.html" rel="prev">&lt;&nbsp;npmだけでディレクトリを監視してテストを自動実行させる方法</a>
+              <a href="/2015/05/google-analytics-core-reporting-api-by-google-appengine.html" rel="next">Google AppEngineでGoogle Analytics Core Reporting API&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

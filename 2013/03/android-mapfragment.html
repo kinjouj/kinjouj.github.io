@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="タイトル通り。今更ながらMapFragmentを使ってGoogle MapsをAndroidアプリ上に表示させてみた" />
+    <meta property="og:title" content="MapFragmentを使ってみた" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/03/android-mapfragment.html">
+    <title>MapFragmentを使ってみた - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/03/android-mapfragment.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MapFragmentを使ってみた",
+  "datePublished": "2013-03-24T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "タイトル通り。今更ながらMapFragmentを使ってGoogle MapsをAndroidアプリ上に表示させてみた"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/03">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">3</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">24</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">MapFragmentを使ってみた</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/android" class="fs-5">Android</a>
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>タイトル通り。今更ながらMapFragmentを使ってGoogle MapsをAndroidアプリ上に表示させてみた</p>
+<h3 id="section-1">インストール</h3>
+<p>Google Play Serviceが必要になる。Android Package Manager?で入れておく。で自分の場合はAndroid SDKが/opt/androidにあるので/opt/android/extras/google/google_play_services/libproject/google-play-services_libをEclipseのライブラリプロジェクトとしてインポートする</p>
+
+<p>これがどうも「ファイル」-&gt;「インポート」で出来なかったので、「ファイル」-&gt;「新規」から「Android Project from Existing Code」からインポート処理をする。でどうやらこれが必要な理由としてcom.google.android.gcm.Rっていうクラスが必要なのだけど、これがこのプロジェクトしか入ってないので必要っぽい</p>
+<h3 id="section-2">Google Maps APIのAPI Keyを取得する</h3>
+<p><a href="https://code.google.com/apis/console" target="_blank" rel="noopener">https://code.google.com/apis/console</a> から</p>
+
+<ul>
+<li>Servicesで「Google Maps Android API v2」をonにする</li>
+<li>API Accessにて「Create new Android Key」でAPI Keyを取得する</li>
+</ul>
+
+<p>1は問題無いけど2ではキーストアのフィンガープリントが必要なので</p>
+<pre class="line-numbers"><code class="language-text">keytool -list -v -keystore debug.keystore
+</code></pre>
+<p>で出力されたSHA1なフィンガープリントをコピーして「フィンガープリント内容;パッケージ名」<br><br>
+でAPI Access時に指定して取得。ちなみにデバッグ用(Eclipseでやる場合)のキーストアは$HOME/.android/debug.keystoreっぽい。Windowsは知らん</p>
+
+<p>これで準備完了、あとはコードを書くだけ</p>
+<h3 id="section-3">AndroidManifest.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;manifest
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;sample.test&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot;&gt;
+
+    &lt;uses-sdk android:minSdkVersion=&quot;8&quot; android:targetSdkVersion=&quot;17&quot; /&gt;
+
+    &lt;permission android:name=&quot;sample.test.permission.MAPS_RECEIVE&quot; android:protectionLevel=&quot;signature&quot; /&gt;
+    &lt;uses-permission android:name=&quot;sample.test.permission.MAPS_RECEIVE&quot; /&gt;
+
+    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.ACCESS_NETWORK_STATE&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;/&gt;
+    &lt;uses-permission android:name=&quot;com.google.android.providers.gsf.permission.READ_GSERVICES&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
+
+    &lt;uses-feature android:glEsVersion=&quot;0x00020000&quot; android:required=&quot;true&quot; /&gt;
+
+    &lt;application
+        android:allowBackup=&quot;true&quot;
+        android:icon=&quot;@drawable/ic_launcher&quot;
+        android:label=&quot;@string/app_name&quot;
+        android:theme=&quot;@style/AppTheme&quot;&gt;
+
+        &lt;meta-data android:name=&quot;com.google.android.maps.v2.API_KEY&quot; android:value=&quot;Google Maps APIのAPI Key&quot; /&gt;
+
+        &lt;activity android:name=&quot;.MainActivity&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+<p>com.google.android.maps.v2.API_KEYが必要なくらいであとはパーミッションとかちょこちょこな事が必要なくらい</p>
+<h3 id="section-4">res/layout/main.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;fragment
+    class=&quot;com.google.android.gms.maps.SupportMapFragment&quot;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:id=&quot;@+id/map&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; /&gt;
+</code></pre>
+<p>古い端末で実検証したのでcom.google.android.gms.maps.SupportMapFragmentを使ってますが、新しめな場合はcom.google.android.gms.maps.MapFragmentでいいのかも</p>
+<h3 id="section-5">MainActivity.java</h3><pre class="line-numbers"><code class="language-java">package sample.test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import android.app.AlertDialog;
+import android.graphics.Color;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+
+public class MainActivity extends FragmentActivity {
+
+    private static final String TAG = &quot;MainActivity&quot;;
+
+    private GoogleMap map;
+
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        setContentView(R.layout.main);
+
+        map = ((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        map.setMyLocationEnabled(true);
+        map.setTrafficEnabled(true);
+
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                builder
+                    .setMessage(marker.getTitle())
+                    .create()
+                    .show();
+            }
+        });
+
+        map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(Location loc) {
+                LatLng pos1 = new LatLng(loc.getLatitude(), loc.getLongitude());
+
+                // 東京スカイツリー
+                LatLng pos2 = new LatLng(35.7105827, 139.81148759999996);
+
+                MarkerOptions marker1 = new MarkerOptions();
+                marker1
+                    .position(pos2)
+                    .title(&quot;タイトル&quot;)
+                    .snippet(&quot;スニペット&quot;);
+
+                map.addMarker(marker1);
+
+                PolylineOptions marker2 = new PolylineOptions();
+                marker2
+                    .add(pos1, pos2)
+                    .color(Color.argb(80, 255, 0, 0))
+                    .geodesic(true);
+
+                map.addPolyline(marker2);
+
+                int blueColor = Color.argb(80, 0, 0, 255);
+
+                CircleOptions marker3 = new CircleOptions();
+                marker3
+                    .fillColor(blueColor)
+                    .strokeWidth(0)
+                    .center(pos2)
+                    .radius(100);
+
+                // 以下のmarker4と位置がかぶる。一応見え無くもないけど
+                map.addCircle(marker3);
+
+                // GeoHashを使って近傍エリアを取得するだけ (APIはAndroidパッケージには含まれてない)
+                String geoCode = GeoHash.encode(pos2.latitude, pos2.longitude, 5);
+                List&lt;String&gt; geoCodes = GeoHash.neighbor(geoCode);
+                List&lt;LatLng&gt; positions = new ArrayList&lt;LatLng&gt;(geoCodes.size());
+
+                for (String code : geoCodes) {
+                    double[] latlng = GeoHash.decode(code);
+
+                    positions.add(new LatLng(latlng[0], latlng[1]));
+                }
+
+                PolygonOptions marker4 = new PolygonOptions();
+                marker4
+                    .addAll(positions)
+                    .strokeWidth(0)
+                    .fillColor(blueColor);
+
+                map.addPolygon(marker4);
+
+                map.moveCamera(
+                    CameraUpdateFactory.newCameraPosition(
+                        new CameraPosition.Builder()
+                            .target(pos2)
+                            .zoom(10f)
+                            .build()
+                    )
+                );
+
+                map.setOnMyLocationChangeListener(null);
+            }
+        });
+    }
+}
+</code></pre>
+<p>でおおまかな動作概要</p>
+
+<p><img src="/images/2013/03/20130324011541.png" alt="image" /></p>
+
+<p>ソースに書いてる通り現在地と東京スカイツリーをPolylineで線を繋ぐ。で東京スカイツリーにマーカーを設置している</p>
+
+<p>でちょいとズームしてマーカーをタップする</p>
+
+<p><img src="/images/2013/03/20130324011755.png" alt="image" /></p>
+
+<p>で出た吹き出しもタップすると</p>
+
+<p><img src="/images/2013/03/20130324011820.png" alt="image" /></p>
+
+<p>これがGoogleMap.OnInfoWindowClickListenerな模様。まぁ上で出てるけど、円なマーカーも付けてる。で最後にPolygonなマーカー</p>
+
+<p><img src="/images/2013/03/20130324012033.png" alt="image" /></p>
+
+<p>な感じでマーカーをつけれたりする</p>
+
+<p>んまぁあとは以下に記載している参考サイトを見る+公式ドキュメントに書いているのでそれ読めば良いかと</p>
+
+<p>参考: <a href="http://dev.classmethod.jp/smartphone/android/android-tips-25-google-maps-android-api-v2" target="_blank" rel="noopener">http://dev.classmethod.jp/smartphone/android/android-tips-25-google-maps-android-api-v2</a></p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">インストール</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">Google Maps APIのAPI Keyを取得する</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">AndroidManifest.xml</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">res/layout/main.xml</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">MainActivity.java</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2012/03/android-spellcheckerservice.html" class="d-block p-2">(非常に適当に)Android ICS SpellCheckerServiceを使ってみる</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/01/otto-library-and-activity-recognition.html" class="d-block p-2">ottoとActivityRecognition</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/11/android-speechrecognizer-retrieve-text-and-voice-data.html" class="d-block p-2">SpeechRecognizerを使って音声テキスト及び音声データを取得する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/01/android-accountmanager.html" class="d-block p-2">Android AccountManagerで使えるカスタムアカウントを開発する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/04/actionbarcompat.html" class="d-block p-2">ActionBarCompat</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/03/slim3-datastore-attribute.html" rel="prev">&lt;&nbsp;Slim3のDatastore Attribute</a>
+              <a href="/2013/03/yuidoc-underscore-trouble.html" rel="next">yuidocでアンダースコア(アンダーバー)を使うと消える件&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

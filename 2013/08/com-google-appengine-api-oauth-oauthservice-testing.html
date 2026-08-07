@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Slim3にて、com.google.appengine.api.oauth.OAuthServiceを使ってOAuthリクエストで認証されているかをチェックしているようなケースをコントローラーでチェックしているような場合においてテストをどうやるのかと" />
+    <meta property="og:title" content="com.google.appengine.api.oauth.OAuthServiceのテスト" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2013/08/com-google-appengine-api-oauth-oauthservice-testing.html">
+    <title>com.google.appengine.api.oauth.OAuthServiceのテスト - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2013/08/com-google-appengine-api-oauth-oauthservice-testing.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "com.google.appengine.api.oauth.OAuthServiceのテスト",
+  "datePublished": "2013-08-26T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "Slim3にて、com.google.appengine.api.oauth.OAuthServiceを使ってOAuthリクエストで認証されているかをチェックしているようなケースをコントローラーでチェックしているような場合においてテストをどうやるのかと"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2013/08">
+                  <span class="post-date-year">2013</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">8</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">26</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">com.google.appengine.api.oauth.OAuthServiceのテスト</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/google-app-engine" class="fs-5">Google App Engine</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>Slim3にて、com.google.appengine.api.oauth.OAuthServiceを使ってOAuthリクエストで認証されているかをチェックしているようなケースをコントローラーでチェックしているような場合においてテストをどうやるのかと</p>
+
+<p>例えば/readっていうのに対してReadControllerが発生するような場合</p>
+<pre class="line-numbers"><code class="language-java">public abstract class ShareController extends Controller {
+
+    protected ShareService service = new ShareService();
+
+    protected void protectOAuthRequest() throws IOException, OAuthRequestException {
+        OAuthService oauthService = OAuthServiceFactory.getOAuthService();
+
+        if (!oauthService.isUserAdmin()) {
+            throw new OAuthRequestException(&quot;unauthorized&quot;);
+        }
+    }
+}
+</code></pre>
+<p>というような基底抽象コントローラークラスがあってこれを継承してコントローラーを作る。で作った/readに対するReadControllerなテストをする場合</p>
+<pre class="line-numbers"><code class="language-java">package shareroid.controller.test;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.slim3.datastore.Datastore;
+
+import shareroid.controller.ReadController;
+import shareroid.model.Share;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+
+public class ReadControllerTest extends AbstractControllerTestCase {
+    @Test
+    public void test_run() throws Exception {
+        start(&quot;/read&quot;);
+        assertThat(getController(), instanceOf(ReadController.class));
+        assertThat(getStatus(), is(200));
+        assertThat(getContentType(), is(&quot;application/json; charset=utf-8&quot;));
+    }
+}
+</code></pre>
+<p>というようなテストをぶち込んだらどうなるか。もちろんテストはずっこける、OAuthService#isUserAdminでは無いので例外が発生して、handleErrorでキャッチ?されレスポンスが500で送出されるようになっている。そうなると普通にリクエストしてテストを実行してもテストずっこけるよねっていう事</p>
+
+<p>でこういう場合ってどうやってテストすんのって所なんですが、Google App Engine/Javaの場合大概のService APIなパッケージには末尾に.devがついてるパッケージにおいてLocalなんちゃらService的なローカルでテストするためのヘルパーAPI的ながついてると思うんだけど、OAuthServiceなそれが無いっぽい。んじゃこれどうやってテストすんのかって思ってとりあえず「モック差し込んじゃば良いんじゃね?」って思ったのでやってみる。前おきが長かったねww</p>
+<h3 id="section-1">OAuthServiceを実装したMockOAuthServiceクラスを作る</h3>
+<p>※あくまでテスト側に作る。デプロイはしないように</p>
+<pre class="line-numbers"><code class="language-java">package shareroid.controller.test;
+
+import com.google.appengine.api.oauth.OAuthRequestException;
+import com.google.appengine.api.oauth.OAuthService;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserServiceFactory;
+
+public class MockOAuthService implements OAuthService {
+
+    @Override
+    public boolean isUserAdmin(String arg0) throws OAuthRequestException {
+        return true;
+    }
+
+    @Override
+    public boolean isUserAdmin() throws OAuthRequestException {
+        return true;
+    }
+
+    @Override
+    public String getOAuthConsumerKey() throws OAuthRequestException {
+        return null;
+    }
+
+    @Override
+    public User getCurrentUser(String arg0) throws OAuthRequestException {
+        return null;
+    }
+
+    @Override
+    public User getCurrentUser() throws OAuthRequestException {
+        return UserServiceFactory.getUserService().getCurrentUser();
+    }
+
+    @Override
+    public String getClientId(String arg0) throws OAuthRequestException {
+        return null;
+    }
+}
+</code></pre>
+<p>まー、返す値とかは個人で調整すれば良いんじゃないのかと。今回isUserAdminメソッドくらいしか使ってないので微妙な所なんですが</p>
+<h3 id="section-2">テストを修正する</h3>
+<p>で何でモックを差し込むのか。まぁjmockitでという事で (めんどくさいので導入方法はググれ)</p>
+<pre class="line-numbers"><code class="language-java">package shareroid.controller.test;
+
+import mockit.Expectations;
+import mockit.Mocked;
+
+import org.junit.Test;
+
+import com.google.appengine.api.oauth.OAuthServiceFactory;
+
+import shareroid.controller.ReadController;
+
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+
+public class ReadControllerTest extends AbstractControllerTestCase {
+    @Test
+    public void test_run() throws Exception {
+        new Expectations() {
+
+            @Mocked(methods = &quot;getOAuthService&quot;)
+            final OAuthServiceFactory factory = null;
+
+            {
+                OAuthServiceFactory.getOAuthService();
+                times = 1;
+                result = new MockOAuthService();
+            };
+        };
+
+        start(&quot;/read&quot;);
+        assertThat(getController(), instanceOf(ReadController.class));
+        assertThat(getStatus(), is(200));
+        assertThat(getContentType(), is(&quot;application/json; charset=utf-8&quot;));
+    }
+}
+</code></pre>
+<p>というようにOAuthServiceFactory#getOAuthServiceなstaticメソッドから返される値をMockOAuthServiceに変えるだけ。で基底コントローラー上でgetOAuthServiceをSystem.out.println辺りしてみると</p>
+
+<ul>
+<li>  差し込んでない場合: com.google.appengine.api.oauth.OAuthServiceImpl</li>
+<li>  差し込んでる場合: shareroid.controller.test.MockOAuthService</li>
+</ul>
+
+<p>というような方式を使えばテスト出来ないも無い感じなのかなと。他に良い解決方法があるのかは微妙だけれども</p>
+
+<p>まーそんな感じで</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">OAuthServiceを実装したMockOAuthServiceクラスを作る</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">テストを修正する</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2013/10/android-testing-robolectric-mockito.html" class="d-block p-2">Robolectric+mockito</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/06/jmockit.html" class="d-block p-2">jmockit</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/08/slim3-respond_to.html" class="d-block p-2">Slim3でrespond_toもどき</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/06/jaxrs-10-asyncresponse.html" class="d-block p-2">JAX-RSをやってみる (10) - AsyncResponse -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/12/spring-webmvc-3-result-reponse-type.html" class="d-block p-2">Spring WebMVCをやってみる (3) - 返せるレスポンスタイプに関して -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2013/08/mocha-coverjs-code-coverage.html" rel="prev">&lt;&nbsp;mocha+coverjsでコードカバレッジ</a>
+              <a href="/2013/08/getting-started-indexeddb.html" rel="next">ざっくりとindexedDBを使ってみる&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

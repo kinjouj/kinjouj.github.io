@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="公式ドキュメント: &lt;https://jersey.java.net/documentation/latest/user-guide.html#mvc&gt;" />
+    <meta property="og:title" content="JAX-RSをやってみる (12) - MVC -" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2014/06/jaxrs-12-mvc.html">
+    <title>JAX-RSをやってみる (12) - MVC - - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2014/06/jaxrs-12-mvc.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "JAX-RSをやってみる (12) - MVC -",
+  "datePublished": "2014-06-25T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "公式ドキュメント: \u003chttps://jersey.java.net/documentation/latest/user-guide.html#mvc\u003e"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2014/06">
+                  <span class="post-date-year">2014</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">25</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">JAX-RSをやってみる (12) - MVC -</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/java" class="fs-5">Java</a>
+                <a href="/archives/categories/jax-rs" class="fs-5">JAX-RS</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>公式ドキュメント: <a href="https://jersey.java.net/documentation/latest/user-guide.html#mvc" target="_blank" rel="noopener">https://jersey.java.net/documentation/latest/user-guide.html#mvc</a></p>
+
+<p>参考: <a href="http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743" target="_blank" rel="noopener">http://qiita.com/opengl-8080/items/f4c25ad671e8a6dac743</a></p>
+
+<p>jersey-mvcなAPIを使えばViewableをぶん投げたりする事によりテンプレートエンジンによりレスポンスを出したりする事も出来る。※現時点で公式でサポートされているテンプレートエンジンがfreemarkerとmustacheとjsp</p>
+
+<p>っていう事でやってみる</p>
+<h3 id="section-1">その前に</h3>
+<p>jersey-mvc-jspなJSPをレンダリングする仕組みを使う場合にテスト書くとエラーを引き起こす。※freemarkerとmustacheでは起きない(HttpServletRequest等をマッピングしない為かと)</p>
+
+<p>っていう事でthymeleafを使ってテンプレートエンジンによりレスポンスを送信する仕組みのTemplateProcessorを作りながらやる</p>
+<h3 id="section-2">依存性</h3><pre class="line-numbers"><code class="language-groovy">apply plugin: &quot;java&quot;
+apply plugin: &quot;jetty&quot;
+apply plugin: &quot;eclipse&quot;
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile &quot;org.slf4j:slf4j-simple:1.7.7&quot;
+    compile &quot;org.thymeleaf:thymeleaf:+&quot;
+    providedCompile &quot;org.glassfish.jersey.containers:jersey-container-servlet:2.9.+&quot;
+    providedCompile &quot;org.glassfish.jersey.ext:jersey-mvc:2.9.+&quot;
+
+    // 他のを使う場合には以下を使えば良い
+    //compile &quot;org.glassfish.jersey.ext:jersey-mvc-freemarker:2.9.+&quot;
+    //compile &quot;org.glassfish.jersey.ext:jersey-mvc-mustache:2.9.+&quot;
+    //compile &quot;org.glassfish.jersey.ext:jersey-mvc-jsp:2.9.+&quot;
+
+    testCompile &quot;org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-bundle:2.9.+&quot;
+    // テスト時にMock系を使う為
+    testCompile &quot;org.springframework:spring-test:+&quot;
+    testCompile &quot;org.hamcrest:hamcrest-all:+&quot;
+}
+</code></pre>
+<p>んでまずThymeleafなテンプレートエンジンを使ってレスポンスを処理するのを作る</p>
+<h3 id="section-3">ThymeleafFeature.java</h3><pre class="line-numbers"><code class="language-java">package sample;
+
+import javax.ws.rs.ConstrainedTo;
+import javax.ws.rs.RuntimeType;
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+
+import org.glassfish.jersey.server.mvc.MvcFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@ConstrainedTo(RuntimeType.SERVER)
+public class ThymeleafFeature implements Feature {
+    @Override
+    public boolean configure(FeatureContext context) {
+        final Configuration config = context.getConfiguration();
+
+        if (!config.isRegistered(ThymeleafTemplateProcessor.class)) {
+            context.register(ThymeleafTemplateProcessor.class);
+
+            if (!config.isRegistered(MvcFeature.class)) {
+                // これしないとViewableMessageBodyWriter周りが作用しないので
+                context.register(MvcFeature.class);
+            }
+        }
+
+        return true;
+    }
+}
+</code></pre><h3 id="section-4">ThymeleafTemplateProcessor.java</h3><pre class="line-numbers"><code class="language-java">package sample;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+
+import org.glassfish.jersey.server.mvc.Viewable;
+import org.glassfish.jersey.server.mvc.spi.AbstractTemplateProcessor;
+import org.jvnet.hk2.annotations.Optional;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+
+public class ThymeleafTemplateProcessor extends AbstractTemplateProcessor&lt;String&gt; {
+
+    @Inject
+    HttpServletRequest request;
+
+    @Inject
+    HttpServletResponse response;
+
+    @Inject
+    ServletContext servletContext;
+
+    @Inject
+    public ThymeleafTemplateProcessor(Configuration config, @Optional ServletContext servletContext) {
+        super(config, servletContext, &quot;thymeleaf&quot;, &quot;html&quot;);
+        this.servletContext = servletContext;
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public void writeTo(String templateReference, Viewable viewable,
+        MediaType mediaType, MultivaluedMap&lt;tring, Object&gt; httpHeaders,
+        OutputStream out) throws IOException {
+
+
+        try(Writer writer = new OutputStreamWriter(out)) {
+            Object o = viewable.getModel();
+            Map&lt;String, Object&gt; stash;
+
+            if (o instanceof Map) {
+                stash = (Map&lt;String, Object&gt;)o;
+            } else {
+                stash = new HashMap&lt;String, Object&gt;();
+
+                // @ErrorTemplate時はパラメーターがExceptionで返ってくる
+
+                if (o instanceof Exception) {
+                    stash.put(&quot;error&quot;, o);
+                } else {
+                    // 返ってきた値がMapでない場合にitなキーで参照出来るように
+                    stash.put(&quot;it&quot;, o);
+                }
+            }
+
+            WebContext context = new WebContext(request, response, servletContext);
+            context.setVariables(stash);
+
+            TemplateEngine engine = new TemplateEngine();
+            engine.setTemplateResolver(new ClassLoaderTemplateResolver());
+            engine.process(templateReference, context, writer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected String resolve(String templatePath, Reader reader) throws Exception {
+        return templatePath;
+    }
+}
+</code></pre>
+<p>@Injectで注入するのが正しいかは微妙。mvc-jspな奴はProvider&lt;Ref&lt;HttpServletRequest&gt;&gt;的な感じなのを注入しているが、これだとどうもテスト時の注入でAbstractBinder使っても上手く作用してくれないので</p>
+
+<p>んまぁてな感じでThymeleafを使ってテンプレートエンジンによるレスポンスの処理なところはこれだけ。設定しないと使えませんが</p>
+<h3 id="section-5">web.xml</h3>
+<p>MVCによる処理を利用する場合においてはweb.xmlでfilter周りを設定しないといけないみたいな制約がある模様なので</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app
+    xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;
+    version=&quot;3.0&quot;&gt;
+
+    &lt;filter&gt;
+        &lt;filter-name&gt;jersey&lt;/filter-name&gt;
+        &lt;filter-class&gt;org.glassfish.jersey.servlet.ServletContainer&lt;/filter-class&gt;
+
+        &lt;init-param&gt;
+            &lt;param-name&gt;javax.ws.rs.Application&lt;/param-name&gt;
+            &lt;param-value&gt;sample.SampleApplication&lt;/param-value&gt;
+        &lt;/init-param&gt;
+    &lt;/filter&gt;
+
+    &lt;filter-mapping&gt;
+        &lt;filter-name&gt;jersey&lt;/filter-name&gt;
+        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+    &lt;/filter-mapping&gt;
+&lt;/web-app&gt;
+</code></pre>
+<p>な感じで</p>
+<h3 id="section-6">beans.xml</h3>
+<p>glassfishとかで動かす場合に</p>
+<pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; ?&gt;
+&lt;beans
+    xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd&quot;
+    version=&quot;1.1&quot;
+    bean-discovery-mode=&quot;all&quot;&gt;
+&lt;/beans&gt;
+</code></pre>
+<p>となっているとデプロイエラーを起こすので、&lt;span style=&quot;color: red&quot;&gt;bean-discovery-mode=&quot;annotated&quot;&lt;/span&gt;にしておく</p>
+<h3 id="section-7">SampleApplication.java</h3><pre class="line-numbers"><code class="language-java">package sample;
+
+import javax.ws.rs.ApplicationPath;
+
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.mvc.MvcFeature;
+
+@ApplicationPath(&quot;/&quot;)
+public class SampleApplication extends ResourceConfig {
+
+    public SampleApplication() {
+        // 設定しておかないとエラーになる
+        property(MvcFeature.TEMPLATE_BASE_PATH, &quot;templates&quot;);
+
+        // ThymeleafTemplateProcessorをregisterするFeatureをregister
+        register(ThymeleafFeature.class);
+
+        packages(&quot;sample&quot;);
+    }
+}
+</code></pre>
+<p>あとはリソースで使うだけ。</p>
+<h3 id="section-8">Home.java</h3><pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+import org.glassfish.jersey.server.mvc.ErrorTemplate;
+import org.glassfish.jersey.server.mvc.Template;
+import org.glassfish.jersey.server.mvc.Viewable;
+
+@Path(&quot;/sample&quot;)
+public class Home {
+
+    public String name;
+
+    /* Template
+    &lt;!DOCTYPE html&gt;
+    &lt;html xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;
+      &lt;body&gt;
+        &lt;p th:text=&quot;${it.name}&quot; /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+    */
+    @Path(&quot;test1&quot;)
+    @GET
+    public Viewable test1(@QueryParam(&quot;name&quot;) @DefaultValue(&quot;hoge&quot;) String name) {
+        this.name = name;
+        return new Viewable(&quot;/test1.html&quot;, this);
+    }
+
+    /* Template
+    &lt;!DOCTYPE html&gt;
+    &lt;html xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;
+      &lt;body&gt;
+        &lt;p th:text=&quot;${it}&quot; /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+    */
+    @Path(&quot;test2&quot;)
+    @GET
+    @Template(name = &quot;/test2.html&quot;)
+    public String test2() {
+        // Stringで返しているのでitとして参照出来るようになる
+        return &quot;test2&quot;;
+    }
+
+    /* Template
+    &lt;!DOCTYPE html&gt;
+    &lt;html xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;
+      &lt;body&gt;
+        &lt;p th:text=&quot;${message}&quot; /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+    */
+    @Path(&quot;test3&quot;)
+    @GET
+    @Template(name = &quot;/test3.html&quot;)
+    public Map&lt;String, Object&gt; test3() {
+        // Map型で返しているのでその内部のデータがそのままマッピングされる。
+        Map&lt;String, Object&gt; data = new HashMap&lt;String, Object&gt;(1);
+        data.put(&quot;message&quot;, &quot;hello world&quot;);
+
+        return data;
+    }
+
+    /* Template
+    &lt;!DOCTYPE html&gt;
+    &lt;html xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;
+      &lt;body&gt;
+        &lt;span th:text=&quot;|error: ${error.message}|&quot; /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+    */
+    @Path(&quot;test4&quot;)
+    @GET
+    @ErrorTemplate(name = &quot;/error.html&quot;)
+    public void error() throws Exception {
+        throw new Exception(&quot;hoge&quot;);
+    }
+}
+</code></pre>
+<p>んまぁという感じで大体どういうレスポンスになるかは想像出来るのはないかと</p>
+<h3 id="section-9">HomeTest.java</h3>
+<p>テストする際にHttpServletRequest等の@Injectは行われないのでエラーになる。なのでSpring Framework Testingに入ってるMockHttpServletRequest等をAbstractBinderを使って差し込む的な事をする事で対処出来る模様</p>
+<pre class="line-numbers"><code class="language-java">package sample.controller;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Application;
+
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
+
+import sample.SampleApplication;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+
+public class HomeTest extends JerseyTest {
+
+    MockHttpServletRequest  request  = new MockHttpServletRequest();
+    MockHttpServletResponse response = new MockHttpServletResponse();
+
+    @Override
+    protected Application configure() {
+        return new SampleApplication()
+            .register(new AbstractBinder() {
+                @Override
+                protected void configure() {
+                    bind(request).to(HttpServletRequest.class);
+                    bind(response).to(HttpServletResponse.class);
+                    bind(new MockServletContext()).to(ServletContext.class);
+                }
+            });
+    }
+
+    @Test
+    public void test1() {
+        String response = target(&quot;/sample/test1&quot;).request().get(String.class);
+        assertThat(response, containsString(&quot;hoge&quot;));
+    }
+
+    @Test
+    public void test2() {
+        String response = target(&quot;/sample/test2&quot;).request().get(String.class);
+        assertThat(response, containsString(&quot;test2&quot;));
+    }
+
+    @Test
+    public void test3() {
+        String response = target(&quot;/sample/test3&quot;).request().get(String.class);
+        assertThat(response, containsString(&quot;hello world&quot;));
+    }
+
+    @Test
+    public void test4() {
+        String response = target(&quot;/sample/test4&quot;).request().get(String.class);
+        assertThat(response, containsString(&quot;error: hoge&quot;));
+    }
+}
+</code></pre>
+<p>終わり。まぁテスト出来ないとか難がちょいとあったけど、リソースメソッドでViewableを返す事でテンプレートエンジンを利用してレスポンスを出したり出来る仕組みを利用するのであればこれ使えば良い</p>
+
+<p>あとテスト動いてもglassfishとかじゃ動かないとかあるあるなのでちゃんと確認した方が良い。ちなみにそういうテストをサポートするTestContainerFactoryがあるっぽいので</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">その前に</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">依存性</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">ThymeleafFeature.java</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">ThymeleafTemplateProcessor.java</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">web.xml</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">beans.xml</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">SampleApplication.java</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">Home.java</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">HomeTest.java</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2014/06/jaxrs-13-ref-dependey-injection.html" class="d-block p-2">JAX-RSをやってみる (13) - Refの依存性注入に関して -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/04/jaxrs-1.html" class="d-block p-2">JAX-RSをやってみる (1)</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/06/jaxrs-3-autodiscoverable.html" class="d-block p-2">JAX-RSをやってみる (3) - AutoDiscoverable -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/10/jaxrs-17-securitycontext.html" class="d-block p-2">JAX-RSをやってみる (17) - SecurityContext -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/06/jaxrs-5-context-dependency-injection.html" class="d-block p-2">JAX-RSをやってみる (5) - CDI -</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2014/06/jaxrs-13-ref-dependey-injection.html" rel="prev">&lt;&nbsp;JAX-RSをやってみる (13) - Refの依存性注入に関して -</a>
+              <a href="/2014/06/jaxrs-11-server-sent-events.html" rel="next">JAX-RSをやってみる (11) - Server Sent Events -&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

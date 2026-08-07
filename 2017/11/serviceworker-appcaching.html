@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="参考1: https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja" />
+    <meta property="og:title" content="ServiceWorkerを使ったアプリケーションキャッシング" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2017/11/serviceworker-appcaching.html">
+    <title>ServiceWorkerを使ったアプリケーションキャッシング - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2017/11/serviceworker-appcaching.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ServiceWorkerを使ったアプリケーションキャッシング",
+  "datePublished": "2017-11-07T08:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "参考1: https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2017/11">
+                  <span class="post-date-year">2017</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">11</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">7</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">ServiceWorkerを使ったアプリケーションキャッシング</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>参考1: <a href="https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja" target="_blank" rel="noopener">https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/?hl=ja</a></p>
+
+<p>参考2: <a href="https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja" target="_blank" rel="noopener">https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle?hl=ja</a></p>
+
+<p>PWA(Progressive Web Apps)などで、Webアプリケーションをネイティブアプリケーションのような内部にリソースを持つようにWebアプリケーションでもそういうリソースをServiceWorkerでキャッシュさせて利用する事が出来るとのことなのでちょっとやってみた</p>
+
+<p>※上記参考を必読推奨</p>
+
+<p>※あくまで個人的なメモです</p>
+<h3 id="section-1">前提条件</h3>
+<p>一番重要なのがServiceWorkerによってfetchによるリソース取得がコントロールされる事なのだが、普通にやってもAPIリクエストなどで使用されるfetchがServiceWorkerによってコントールされるタイミングがずれてしまって、初回アクセス時にはServiceWorkerがコントロール待機中などによりコントロールされなかったりする。それをちゃんと初回アクセス時にもコントロールされるようにする。つまり</p>
+<pre class="line-numbers"><code class="language-js">navigator.serviceWorker.register(&quot;sw.js&quot;).then(() =&gt; {
+  fetch(&quot;省略&quot;);
+});
+</code></pre>
+<p>みたいにやっても初回アクセス時はコントロール化に置かれるまではthenからのfetchがコントロール化になってない場合にはキャッシュなどの処理が行われないと思われる。よってfetch処理などはコントロール化に置かれてから処理する必要があるのでそこも考慮する</p>
+
+<p>詳しくは<a href="https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md" target="_blank" rel="noopener">https://github.com/Jxck/jxck.io/blob/master/blog.jxck.io/drafts/service-worker-bootcamp.md</a>を</p>
+
+<p>でここからが本題でWebアプリケーションで使うリソースをServiceWorkerを使ってキャッシュする仕組みを作る</p>
+<h3 id="section-2">index.html</h3><pre class="line-numbers"><code class="language-html">&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;msg&quot;&gt;&lt;/div&gt;
+    &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h3 id="section-3">app.js</h3><pre class="line-numbers"><code class="language-js">&quot;use strict&quot;;
+
+if (&quot;serviceWorker&quot; in navigator) {
+  let controller = new Promise((resolve, reject) =&gt; {
+    navigator.serviceWorker.addEventListener(&quot;controllerchange&quot;, resolve);
+  });
+
+  navigator.serviceWorker.register(&quot;service-worker.js&quot; ).then(() =&gt; {
+    if (navigator.serviceWorker.controller) {
+      return navigator.serviceWorker.controller;
+    }
+
+    return controller;
+  }).then(() =&gt; {
+    if (&quot;caches&quot; in window) {
+      caches.match(&quot;/data&quot;).then(res =&gt; {
+        // キャッシュがあればキャッシュのデータをレンダリング
+        // キャッシュが無ければAPIリクエストをコールしたのちそれをキャッシュ
+        if (res) {
+          res.text().then(data =&gt; {
+            console.log(&quot;from cache&quot;);
+            document.querySelector(&quot;#msg&quot;).innerHTML = &quot;cache data = &quot; + data;
+          });
+        } else {
+          fetch(&quot;/data&quot;).then(res =&gt; {
+            res.text().then(data =&gt; {
+              console.log(&quot;from realtime&quot;);
+              document.querySelector(&quot;#msg&quot;).innerHTML = &quot;realtime data = &quot; + data;
+            });
+          });
+        }
+      });
+    }
+  });
+}
+</code></pre>
+<p>APIを呼び出して結果をキャッシュするようにするので、初回時アクセスであってもキャッシュされるようにServiceWorkerによるコントロール化が行われてからやる必要があるのでcontrollerchangeを利用して出来るとのこと。初回時以外ですでにコントロール済みな場合においてはnavigator.serviceWorker.controllerに入ってるのでそれを利用する</p>
+<h3 id="section-4">service-worker.js</h3><pre class="line-numbers"><code class="language-js">let cacheName = &quot;sample-pwa-cache-v1&quot;;
+let cacheDataName = &quot;sample-pwa-data-cache-v1&quot;;
+let filesToCache = [ &quot;/&quot;, &quot;/index.html&quot;, &quot;/app.js&quot; ];
+
+self.addEventListener(&quot;install&quot;, event =&gt; {
+  console.log(&quot;install&quot;);
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(cacheName).then(cache =&gt; cache.addAll(filesToCache))
+  );
+});
+
+self.addEventListener(&#39;activate&#39;, event =&gt; {
+  console.log(&quot;activate&quot;);
+
+  event.waitUntil(
+    caches.keys().then(
+      keyList =&gt; Promise.all(
+        keyList.map(key =&gt; {
+          console.log(`key = ${key}`);
+
+          if (key !== cacheName) {
+            // activate発生時に特に指定していないのでAPIキャッシュも消える
+            console.log(`delete ${key}`);
+            return caches.delete(key);
+          }
+        })
+      )
+    ).then(() =&gt; {
+      return self.clients.claim();
+    })
+  );
+});
+
+self.addEventListener(&quot;fetch&quot;, event =&gt; {
+  console.log(`fetch ${event.request.url}`);
+  let url = new URL(event.request.url);
+
+  if (url.pathname === &quot;/data&quot;) {
+    event.respondWith(
+      fetch(event.request).then(res =&gt; {
+        return caches.open(cacheDataName).then(cache =&gt; {
+          cache.put(event.request.url, res.clone());
+          console.log(&quot;[SW] data cached&quot;);
+          return res;
+        });
+      })
+    );
+
+    //event.respondWith(fetch(event.request));
+  } else {
+    event.respondWith(
+      caches.match(event.request).then(res =&gt; {
+        return res || fetch(event.request)
+      })
+    );
+  }
+});
+</code></pre><h3 id="section-5">結果</h3>
+<p>初回リクエスト時にはAPIコールにしつつそのデータをキャッシュすることになるので</p>
+
+<p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-1.png" alt="image" /></p>
+
+<p>となる。次回リクエスト時には</p>
+
+<p><img src="/images/2017/11/2017-11-07-serviceworker-appcaching-2.png" alt="image" /></p>
+
+<p>となる。またindex.htmlやapp.jsなどもキャッシュしているので初回時にキャッシュされるので再度ロードされる際にはServiceWorkerからのキャッシュとして配信されるようになる。なので一度キャッシュした状態でサーバーを落としてみても結果はキャッシュされたのがServiceWorkerから配信されるようになる</p>
+
+<p>ちなみにこういうのを実現したいのであればそれをサポートしてくれるライブラリ(sw-precache等)があるのでそれを使っても良いかと</p>
+
+<p>今回はAPIコールした結果をキャッシュしてそれがある場合にはそれをレンダリングしているが、本式としてはキャッシュをしつつAPIをコールして得られる結果を取得する前にキャッシュからレンダリングしておいて、リアルタイムなデータをレンダリングするような形になるかと</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">前提条件</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">index.html</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">app.js</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">service-worker.js</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">結果</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2015/05/serviceworker-push-api.html" class="d-block p-2">ServiceWorkerを使ったPush APIをやってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2026/06/firebase-2-cloud-messaging.html" class="d-block p-2">Firebase (2) - Cloud Messaging -</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2015/04/chrome-identity-api-oauth2-authorization-google-app-engine.html" class="d-block p-2">chrome.identity APIを使ってGoogle App Engine OAuth2を使う</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2025/11/typescript-react-electron-desktop-app.html" class="d-block p-2">TypeScript+React+Electronでデスクトップアプリを作る</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2018/07/jwt-authentication-rails.html" class="d-block p-2">RailsでJWT認証</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2017/11/webpack-inject-variable.html" rel="prev">&lt;&nbsp;webpackで変数を注入</a>
+              <a href="/2017/10/serviceworker-self-signed-https.html" rel="next">ServiceWorkerでオレオレ証明を使って検証する場合&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>

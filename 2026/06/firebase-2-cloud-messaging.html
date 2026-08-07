@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ja" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="index,follow,noarchive" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="google-site-verification" content="AsHuqJn6JTx4Dv28BuiAGoIs12P5qrs4VtBmoBX2kow" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="FirebaseのCloud Messagingを使ってみる" />
+    <meta property="og:title" content="Firebase (2) - Cloud Messaging -" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://kinjouj.github.io/2026/06/firebase-2-cloud-messaging.html">
+    <title>Firebase (2) - Cloud Messaging - - kinjouj.github.io</title>
+    <link rel="author" href="https://www.hatena.ne.jp/kinjou__j/" />
+    <link rel="canonical" href="https://kinjouj.github.io/2026/06/firebase-2-cloud-messaging.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/prism.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="/js/bootstrap.min.js" defer></script>
+    <script src="/js/prism.js" defer></script>
+    <script type="module" src="/js/webcomponents.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3593764998780061" crossorigin="anonymous"></script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Firebase (2) - Cloud Messaging -",
+  "datePublished": "2026-06-28T00:00:00+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "kinjouj"
+  },
+  "description": "FirebaseのCloud Messagingを使ってみる"
+}
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand p-0 sticky-top">
+      <div class="container-fluid p-0">
+        <div class="navbar-collapse p-3">
+          <ul class="navbar-nav gap-3">
+            <li class="nav-item">
+              <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="https://x.com/kinjou_j" class="btn btn-primary">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mx-2">
+            <li class="nav-item">
+              <search-modal></search-modal>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header>
+      <div class="logo text-center py-6">
+        <a href="/" class="fw-bold">kinjouj.github.io</a>
+      </div>
+    </header>
+    <div class="container mt-5">
+      <div class="row g-0">
+        <div class="col col-lg-8 ms-auto">
+          <main id="content" role="main">
+            <div class="post">
+              <div class="post-date fs-4 fw-bold mb-2">
+                <time>
+                  <a href="/archives/2026/06">
+                  <span class="post-date-year">2026</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-month">6</span>
+                  <span class="hyphen">-</span>
+                  <span class="post-date-day">28</span>
+                  </a>
+                </time>
+              </div>
+              <h1 class="post-title fs-3 fw-bold my-3">Firebase (2) - Cloud Messaging -</h1>
+              <hr />
+              <p class="post-categories d-flex position-relative gap-3 m-0">
+                <a href="/archives/categories/firebase" class="fs-5">Firebase</a>
+                <a href="/archives/categories/javascript" class="fs-5">JavaScript</a>
+                <a href="/archives/categories/kotlin" class="fs-5">Kotlin</a>
+                <a href="/archives/categories/android" class="fs-5">Android</a>
+              </p>
+              <div class="post-content fs-6 text-break my-4">
+                <p>FirebaseのCloud Messagingを使ってみる</p>
+<h3 id="section-1">環境の設定</h3>
+<p><a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase Console</a>からプロジェクトを作成。その後に以下の手順をふむ</p>
+
+<ol>
+<li>設定・全般からマイアプリの登録を行いapiKeyなどの必要な情報の取得(WebとAndroid両方)</li>
+<li>設定・クラウドメッセージングからウェブプッシュ証明の生成(※Androidアプリ側は後述するgoogle-services.jsonを使用するので不要)</li>
+<li>設定・サービスアカウントから秘密鍵を生成(※クライアントとかからWeb Pushを実行する側で必要)</li>
+</ol>
+<h3 id="section-2">マイアプリの登録</h3>
+<p>Firebase Consoleから設定・全般タブからマイアプリを登録。今回はWeb PushとAndroidの両方を使うのでこの２つを登録する</p>
+
+<p><img src="/images/2026/06/2026062801.png" alt="image" /></p>
+
+<ul>
+<li>Webフロントエンド版側は表示されてるfirebaseConfigの変数(apiKeyなどが含まれてるHash Object)の情報をコピーする</li>
+<li>Androidアプリ側はgoogle-services.jsonをダウンロードしてプロジェクトのappディレクトリの直下に置く</li>
+</ul>
+<h3 id="section-3">Webプッシュ証明書を設定</h3>
+<p>Firebase Configから設定・クラウドメッセージングタブからウェブプッシュ証明書を生成する。</p>
+
+<p><img src="/images/2026/06/2026062802.png" alt="image" /></p>
+
+<p>そこに表示されてる鍵ペア値をコピーする</p>
+<div class="note"><i class="fa-solid fa-circle-exclamation"></i><span>Webフロントエンド側で使うだけなのでAndroid側では使用しない。おそらくスマホアプリ向けに使うのではあればこれは不要</span></div>
+
+<h3 id="section-4">送信側クライアントで使用する秘密鍵を取得</h3>
+<p><img src="/images/2026/06/2026062803.png" alt="image" /></p>
+
+<p>Cloud Messagingを送信する側でFirebaseを使用する為にこれが必要なのだが、これを利用するときの手法が２つあって</p>
+
+<ol>
+<li>&quot;firebase-admin/app&quot;パッケージのcertを使ってこのJSONをコード中で読み込んで実行する方法</li>
+<li>&quot;firebase-admin/app&quot;パッケージのapplicationDefaultを使って環境変数(GOOGLE_APPLICATION_CREDENTIALS)からロードする方法</li>
+</ol>
+
+<p>また、Google CloudのIAM上でWorkload Identityを設定することでこの秘密鍵のファイルをダウンロードして本番環境なのに配置したりしなくてもapplicationDefaultを使えばできるらしい(Gemini曰く)。AWSなどを使って行う場合にはこの環境変数をAWS Secret Managerを使ってセットしておいてそれをクライアントのプログラム上から使用するような感じでもできるらしい。だけどAWS使うなら素直にWorkload Identityを設定した方がきっと楽な気がする</p>
+
+<p>これで設定関係は終わり</p>
+<h3 id="section-5">権限の確認</h3>
+<p>Google CloudのIAM管理からCloud Messagingの権限管理で</p>
+
+<p><img src="/images/2026/06/2026062804.png" alt="image" /></p>
+
+<p>っていう感じで上記の秘密鍵のclient_emailで指定されてあるメールアドレスとプリンシパルが一致してるか確認。まぁ大体ちゃんとそうなってるはず</p>
+
+<p>さてここからコーディングを</p>
+<h3 id="section-6">Web側(index.html)</h3><pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;ja&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;title&gt;FCMテスト&lt;/title&gt;
+    &lt;script src=&quot;https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://www.gstatic.com/firebasejs/12.15.0/firebase-messaging-compat.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;token-area&quot;&gt;&lt;/div&gt;
+    &lt;script&gt;
+      const firebaseConfig = {
+        // 省略
+      };
+      firebase.initializeApp(firebaseConfig);
+
+      const messaging = firebase.messaging();
+
+      async function initFCM() {
+        if (!(&#39;serviceWorker&#39; in navigator)) {
+          console.error(&#39;このブラウザは Service Worker をサポートしていません。&#39;);
+          return;
+        }
+
+        try {
+          await navigator.serviceWorker.register(&#39;./firebase-messaging-sw.js&#39;);
+          const swRegistration = await navigator.serviceWorker.ready;
+
+          const permission = await Notification.requestPermission();
+
+          if (permission === &#39;granted&#39;) {
+            const token = await messaging.getToken({
+              vapidKey: &#39;ウェブプッシュ証明書で取得した鍵ペアの値&#39;,
+              serviceWorkerRegistration: swRegistration
+            });
+
+            if (token) {
+              const tokenArea = document.getElementById(&#39;token-area&#39;);
+              tokenArea.innerText = token;
+            } else {
+              console.warn(&#39;トークンが取得できませんでした&#39;);
+            }
+          } else {
+            console.warn(&#39;通知がブロックされています。&#39;);
+          }
+        } catch (error) {
+          console.error(&#39;エラーが発生しました:&#39;, error);
+        }
+      }
+
+      window.addEventListener(&#39;load&#39;, initFCM);
+
+      messaging.onMessage((payload) =&gt; {
+        alert(`【通知受信】\nタイトル: ${payload.notification.title}\n本文: ${payload.notification.body}`);
+      });
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>firebaseConfigに登録したマイアプリのWebタイプのapiKeyなどが含まれるのをここにコピーする。もちろんServiceWorker側も必要なので作っていく</p>
+<h3 id="section-7">Web側(firebase-messaging-sw.js)</h3><pre class="line-numbers"><code class="language-js">importScripts(&#39;https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js&#39;);
+importScripts(&#39;https://www.gstatic.com/firebasejs/12.15.0/firebase-messaging-compat.js&#39;)
+
+const firebaseConfig = {
+  // 省略
+};
+firebase.initializeApp(firebaseConfig)
+firebase.messaging();
+</code></pre>
+<p>本当はWeb側のJSとServiceWorkerでfirebaseConfigを共通化できるようにするべきなんだろうけど</p>
+
+<p>Webサーバーにデプロイしてからこれにアクセスすると画面上にアクセストークンが出るのでそれをコピーしておく</p>
+
+<p>とりあえずちゃんと受信できるかクライアント側を作って実行して送ってみる</p>
+<h3 id="section-8">クライアント側(client.mjs)</h3><div class="note"><i class="fa-solid fa-circle-exclamation"></i><span>"fireabase-admin"のライブラリが必要。普通にnpmでインストールする</span></div>
+
+<pre class="line-numbers"><code class="language-js">import { initializeApp, applicationDefault } from &#39;firebase-admin/app&#39;;
+import { getMessaging } from &#39;firebase-admin/messaging&#39;;
+
+initializeApp({ credential: applicationDefault() });
+
+const message = {
+  notification: { title: &#39;送信&#39;, body: &#39;Hello&#39; },
+  token: &#39;取得したアクセストークン&#39;
+};
+
+getMessaging().send(message).then((response) =&gt; {
+  console.log(&#39;送信成功しました！メッセージID:&#39;, response);
+}).catch((error) =&gt; {
+  console.error(&#39;送信エラー:&#39;, error);
+});
+</code></pre>
+<p>applicationDefaultを使用するため、GOOGLE_APPLICATION_CREDENTIALSの環境変数にダウンロードした秘密鍵.jsonのパスを指定する</p>
+<pre class="line-numbers"><code class="language-bash">GOOGLE_APPLICATION_CREDENTIALS=secret-key.json node client.mjs
+</code></pre>
+<p>これを実行するとブラウザでアクセスしてる場合はブラウザの通知でメッセージが表示される(今回の場合はalertが起きる)。ブラウザがforegroundではない(最小化してるなど)の場合にはOSの通知機能でメッセージが表示されるようになる</p>
+
+<p>ついでにapplicationDefaultを使用しないでファイルを読み込んで使う場合には</p>
+<pre class="line-numbers"><code class="language-js">import { initializeApp, cert } from &#39;firebase-admin/app&#39;;
+import { getMessaging } from &#39;firebase-admin/messaging&#39;;
+import { readFileSync } from &#39;fs&#39;;
+
+const serviceAccount = JSON.parse(readFileSync(new URL(&#39;./secret-key.json&#39;, import.meta.url)));
+initializeApp({ credential: cert(serviceAccount) });
+
+const message = {
+  notification: { title: &#39;送信&#39;, body: &#39;Hello&#39; },
+  token: &#39;取得したアクセストークン&#39;
+};
+
+getMessaging().send(message).then((response) =&gt; {
+  console.log(&#39;送信成功しました！メッセージID:&#39;, response);
+}).catch((error) =&gt; {
+  console.error(&#39;送信エラー:&#39;, error);
+});
+</code></pre>
+<p>という感じでCloud Messagingで通知を送ったりできる。ちなみに後述するAndroidアプリの場合にはtopicSubscripbeっていうこのトピックに接続してる側一括で送信する機能があるのでわざわざアクセストークンを取得してごちゃごちゃする必要はない。しかしWeb版のAPIにはこのtopicSubscribeに該当するAPIが無いので、ユーザーのアクセストークンをDBなどに保存するなどで保管して通知を行う場合にはこのトークンをDBなどから取得して送信処理をするっていうのが必要になる(余談参照)</p>
+<div class="note"><i class="fa-solid fa-circle-exclamation"></i><span>アクセストークンは一定で失効する場合がある。その場合にはgetMessaging().sendを呼ぶときにエラーが起きるようになるらしいので、それが起きた場合にはDBなどからアクセストークンを削除する処理が必要になるかと思う多分...</span></div>
+
+
+<p>まぁWebアプリ版のはこんくらいでAndroidアプリでも受信してみる</p>
+<h3 id="section-9">Firebaseを使うAndroidアプリの環境を設定</h3>
+<p>まずAndroidアプリにFirebase関係のライブラリやらGoogle Serviceに関わるプラグインの設定やらが必要になるので以下をやっていく</p>
+<h3 id="section-10">/build.gradleの設定</h3><pre class="line-numbers"><code class="language-groovy">plugins {
+    id &#39;com.android.application&#39; version &#39;8.2.2&#39; apply false
+    id &#39;org.jetbrains.kotlin.android&#39; version &#39;1.9.22&#39; apply false
+    id &#39;com.google.gms.google-services&#39; version &#39;4.4.1&#39; apply false
+}
+</code></pre>
+<p>んでお次はapp/build.gradleを</p>
+<h3 id="section-11">/app/build.gradle</h3><pre class="line-numbers"><code class="language-groovy">plugins {
+    id &#39;com.android.application&#39;
+    id &#39;org.jetbrains.kotlin.android&#39;
+    id &#39;com.google.gms.google-services&#39;
+}
+
+android {
+    namespace &#39;sample.app&#39;
+    compileSdk 34
+
+    defaultConfig {
+        applicationId &quot;sample.app&quot;
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName &quot;1.0&quot;
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android-optimize.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = &#39;1.8&#39;
+    }
+}
+
+dependencies {
+    implementation platform(&#39;com.google.firebase:firebase-bom:32.7.0&#39;)
+    implementation &#39;com.google.firebase:firebase-messaging-ktx&#39;
+
+    implementation &#39;androidx.core:core-ktx:1.12.0&#39;
+    implementation &#39;androidx.appcompat:appcompat:1.6.1&#39;
+    implementation &#39;com.google.android.material:material:1.11.0&#39;
+    implementation &#39;androidx.constraintlayout:constraintlayout:2.1.4&#39;
+}
+</code></pre>
+<p>applicationIdなどはFirebase ConsoleでAndroidアプリを登録する際に指定したアプリケーションIDのパッケージ名をちゃんと指定する</p>
+
+<p>んで設定のときにダウンロードした&quot;google-services.json&quot;をappディレクトリの直下に入れておく</p>
+
+<p>Service側で受け取って処理するためAndroidManifest.xmlも設定する</p>
+<h3 id="section-12">/app/src/main/AndroidManifest.xml</h3><pre class="line-numbers"><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.POST_NOTIFICATIONS&quot; /&gt;
+    &lt;application
+        android:allowBackup=&quot;true&quot;
+        android:label=&quot;@string/app_name&quot;
+        android:supportsRtl=&quot;true&quot;
+        android:theme=&quot;@style/Theme.AppCompat.Light.DarkActionBar&quot;&gt;
+
+        &lt;activity  android:name=&quot;.MainActivity&quot; android:exported=&quot;true&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+
+        &lt;service android:name=&quot;.MyFirebaseMessagingService&quot; android:exported=&quot;false&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;com.google.firebase.MESSAGING_EVENT&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/service&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+<p>あとはFirebase Cloud Messagingに送信されたデータを受信するためのServiceを作る</p>
+<h3 id="section-13">/app/src/main/java/.../MyFirebaseMessagingService.kt</h3><pre class="line-numbers"><code class="language-kt">package sample.app
+
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
+
+class MyFirebaseMessagingService : FirebaseMessagingService() {
+
+    companion object {
+        private const val CHANNEL_ID = &quot;fcm_topic_channel&quot;
+        private const val CHANNEL_NAME = &quot;FCMトピック通知&quot;
+        private const val NOTIFICATION_ID = 1001
+    }
+
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+    }
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        super.onMessageReceived(remoteMessage)
+        val title = remoteMessage.notification?.title ?: remoteMessage.data[&quot;title&quot;] ?: &quot;新しいメッセージ&quot;
+        val body = remoteMessage.notification?.body ?: remoteMessage.data[&quot;body&quot;] ?: &quot;&quot;
+        showNotification(title, body)
+    }
+
+    private fun showNotification(title: String, body: String) {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        createNotificationChannel(notificationManager)
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun createNotificationChannel(manager: NotificationManager) {
+        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH).apply {
+                description = &quot;FCMトピックから受信した通知チャンネル&quot;
+            }
+            manager.createNotificationChannel(channel)
+        }
+    }
+}
+</code></pre>
+<p>まぁonMessageReceivedで受け取ってそれをNotificationで通知として出してるだけ。ただしここはあくまで受け取るだけ。トピックへの接続などはActivity側でやる</p>
+<h3 id="section-14">/app/src/main/java/.../MainActivity.kt</h3><pre class="line-numbers"><code class="language-kt">package sample.app
+
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.google.firebase.messaging.FirebaseMessaging
+
+class MainActivity : AppCompatActivity() {
+
+    companion object {
+        const val TOPIC = &quot;test-topic&quot;
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted -&gt;
+        val msg = if (isGranted) {
+          &quot;通知の許可が付与されました&quot;
+        } else {
+          &quot;通知の許可が拒否されました&quot;
+        }
+
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        updateStatus()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        askNotificationPermission()
+        subscribeToTopic()
+        updateStatus()
+    }
+
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private fun subscribeToTopic() {
+        FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
+            .addOnCompleteListener { task -&gt;
+                val msg = if (task.isSuccessful) {
+                    &quot;トピック「$TOPIC」にサブスクライブしました&quot;
+                } else {
+                    &quot;サブスクライブ失敗: ${task.exception?.message}&quot;
+                }
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                updateStatus()
+            }
+    }
+
+    private fun updateStatus() {
+        val permissionStatus = if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED
+            ) &quot;✓ 付与済み&quot; else &quot;✗ 未許可&quot;
+        } else {
+            &quot;✓ 不要 (Android 12以下)&quot;
+        }
+
+        findViewById&lt;TextView&gt;(R.id.tv_status).text = &quot;&quot;&quot;
+            通知権限: $permissionStatus
+        &quot;&quot;&quot;.trimIndent()
+    }
+}
+</code></pre>
+<p>&quot;test-topic&quot;っていうFirebase Cloud Messagingのチャンネル(クライアント側とも合わせる)を指定して、クライアントから送られたメーセージを受信できるようにする。ちなみにAndroid13以降からはこういう通知を受け取る許可をアプリ側で承認するようにしないといけないっぽい</p>
+
+<p>まぁこれでAndroidアプリ側で受信できるはずなのでさっきのclient.mjsを以下のように修正して再実行</p>
+<pre class="line-numbers"><code class="language-js">import { initializeApp, applicationDefault } from &#39;firebase-admin/app&#39;;
+import { getMessaging } from &#39;firebase-admin/messaging&#39;;
+
+initializeApp({ credential: applicationDefault() });
+
+const message = {
+  notification: { title: &#39;送信&#39;, body: &#39;Hello&#39; },
+  topic: &quot;test-topic&quot;
+};
+
+getMessaging().send(message).then((response) =&gt; {
+  console.log(&#39;送信成功しました！メッセージID:&#39;, response);
+}).catch((error) =&gt; {
+  console.error(&#39;送信エラー:&#39;, error);
+});
+</code></pre>
+<p>ここでActivityで指定したトピック名(test-topic)を指定して送信。アプリを入れてる側で通知が表示されるようになる(はず)</p>
+
+<p>というようにAndroidなどのスマホアプリ向けのはこのトピックっていう機能を使ってそれに接続してる人に通知を送信したりすることができる。ただしWeb版のAPIにはこれが無いのでそれをやるにはWeb版はアクセストークンの保持が必要になるっていう感じ(余談参照)</p>
+
+<p>以上！</p>
+<h3 id="section-15">余談</h3>
+<p>フロントエンドにはsubscribeToTopicのようなAPIはないが、node.jsなどを利用したサーバープログラム上などではできるらしい。その手法を使って以下のようにすればWeb側でもsubscribeToTopicのようなことはできるらしい</p>
+<pre class="line-numbers"><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;ja&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;title&gt;FCMテスト&lt;/title&gt;
+    &lt;script src=&quot;https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://www.gstatic.com/firebasejs/12.15.0/firebase-messaging-compat.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;script&gt;
+      const firebaseConfig = {
+        // 省略
+      };
+      firebase.initializeApp(firebaseConfig);
+
+      const messaging = firebase.messaging();
+
+      async function initFCM() {
+        if (!(&#39;serviceWorker&#39; in navigator)) {
+          console.error(&#39;このブラウザは Service Worker をサポートしていません。&#39;);
+          return;
+        }
+
+        try {
+          await navigator.serviceWorker.register(&#39;./firebase-messaging-sw.js&#39;);
+          const swRegistration = await navigator.serviceWorker.ready;
+          const permission = await Notification.requestPermission();
+
+          if (permission === &#39;granted&#39;) {
+            const token = await messaging.getToken({
+              vapidKey: &#39;ウェブプッシュ証明書で取得した鍵ペアの値&#39;,
+              serviceWorkerRegistration: swRegistration
+            });
+
+            if (token) {
+              await fetch(&#39;/api/subscribe&#39;, {
+                method: &#39;POST&#39;,
+                headers: { &#39;Content-Type&#39;: &#39;application/json&#39; },
+                body: JSON.stringify({
+                  token: token,
+                  topic: &#39;test-topic&#39;
+                })
+              });
+            } else {
+              console.warn(&#39;トークンが取得できませんでした&#39;);
+            }
+          } else {
+            console.warn(&#39;通知がブロックされています。&#39;);
+          }
+        } catch (error) {
+          console.error(&#39;エラーが発生しました:&#39;, error);
+        }
+      }
+
+      window.addEventListener(&#39;load&#39;, initFCM);
+
+      messaging.onMessage((payload) =&gt; {
+        alert(`【通知受信】\nタイトル: ${payload.notification.title}\n本文: ${payload.notification.body}`);
+      });
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>これがフロントエンドでNode.jsでexpressとfirebaseを使って以下のようなサーバーを作る</p>
+<pre class="line-numbers"><code class="language-js">import express from &#39;express&#39;;
+import { initializeApp, applicationDefault } from &#39;firebase-admin/app&#39;;
+import { getMessaging } from &#39;firebase-admin/messaging&#39;;
+
+initializeApp({ credential: applicationDefault() });
+
+const app = express();
+const PORT = 3000;
+
+app.use(express.json());
+app.use(express.static(&#39;.&#39;));
+
+app.post(&#39;/api/subscribe&#39;, (req, res) =&gt; {
+  const { token, topic } = req.body;
+
+  if (!token || !topic) {
+    return res.status(400).json({ error: &#39;トークンとトピック名は必須です。&#39; });
+  }
+
+  getMessaging().subscribeToTopic([token], topic)
+    .then((response) =&gt; {
+      res.json({
+        success: true,
+        message: `トピック「${topic}」に登録しました。`,
+        details: response
+      });
+    })
+    .catch((error) =&gt; {
+      console.error(&#39;トピック登録エラー:&#39;, error);
+      res.status(500).json({ error: &#39;トピックの登録に失敗しました。&#39;, details: error.message });
+    });
+});
+
+app.listen(PORT, () =&gt; {
+  console.log(`http://localhost:${PORT}`);
+});
+</code></pre>
+<p>というようにすればWebフロントエンド側でもsubscribeToTopicのような感じにすることもできるよってことでｗ</p>
+
+              </div>
+              <div class="post-toc rounded-3 p-2">
+                <h6 class="text-center">Table of Contents</h6>
+                <a href="#section-1" class="d-block p-1 overflow-hidden ms-0">環境の設定</a>
+                <a href="#section-2" class="d-block p-1 overflow-hidden ms-0">マイアプリの登録</a>
+                <a href="#section-3" class="d-block p-1 overflow-hidden ms-0">Webプッシュ証明書を設定</a>
+                <a href="#section-4" class="d-block p-1 overflow-hidden ms-0">送信側クライアントで使用する秘密鍵を取得</a>
+                <a href="#section-5" class="d-block p-1 overflow-hidden ms-0">権限の確認</a>
+                <a href="#section-6" class="d-block p-1 overflow-hidden ms-0">Web側(index.html)</a>
+                <a href="#section-7" class="d-block p-1 overflow-hidden ms-0">Web側(firebase-messaging-sw.js)</a>
+                <a href="#section-8" class="d-block p-1 overflow-hidden ms-0">クライアント側(client.mjs)</a>
+                <a href="#section-9" class="d-block p-1 overflow-hidden ms-0">Firebaseを使うAndroidアプリの環境を設定</a>
+                <a href="#section-10" class="d-block p-1 overflow-hidden ms-0">/build.gradleの設定</a>
+                <a href="#section-11" class="d-block p-1 overflow-hidden ms-0">/app/build.gradle</a>
+                <a href="#section-12" class="d-block p-1 overflow-hidden ms-0">/app/src/main/AndroidManifest.xml</a>
+                <a href="#section-13" class="d-block p-1 overflow-hidden ms-0">/app/src/main/java/.../MyFirebaseMessagingService.kt</a>
+                <a href="#section-14" class="d-block p-1 overflow-hidden ms-0">/app/src/main/java/.../MainActivity.kt</a>
+                <a href="#section-15" class="d-block p-1 overflow-hidden ms-0">余談</a>
+              </div>
+              <div class="post-similarity">
+                <fieldset class="rounded-1 p-2 pb-0">
+                  <legend>関連記事</legend>
+                  <ul>
+                    <li class="my-1">
+                      <a href="/2015/05/serviceworker-push-api.html" class="d-block p-2">ServiceWorkerを使ったPush APIをやってみた</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2014/01/otto-library-and-activity-recognition.html" class="d-block p-2">ottoとActivityRecognition</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/01/android-accountmanager.html" class="d-block p-2">Android AccountManagerで使えるカスタムアカウントを開発する方法</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2013/09/android-oauth-signpost-google-app-engine-oauth.html" class="d-block p-2">oauth-signpost(Android)でGoogle App Engine(+OAuth)</a>
+                    </li>
+                    <li class="my-1">
+                      <a href="/2012/10/android-accessibilityservice.html" class="d-block p-2">android.accessibilityservice.AccessibilityServiceを使用してNotificationを取得する</a>
+                    </li>
+                  </ul>
+                </fieldset>
+              </div>
+            </div>
+            <div class="paginator d-flex my-5">
+              <a href="/2026/07/firebase-3-google-provider-authentication.html" rel="prev">&lt;&nbsp;Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html" rel="next">pluscodeを使って位置情報の近接エリアを取得する方法&nbsp;&gt;</a>
+            </div>
+          </main>
+        </div>
+        <aside class="sidebar col-12 col-lg-4 ms-auto ps-5">
+          <div id="recent_posts">
+            <h4>Recent Posts</h4>
+            <div class="vstack gap-1 mb-3">
+              <a href="/2026/07/firebase-4-email-password-authentication.html">Firebase (4) - Email/Password Authentication -</a>
+              <a href="/2026/07/firebase-3-google-provider-authentication.html">Firebase (3) - Google Provider Authentication -</a>
+              <a href="/2026/06/firebase-2-cloud-messaging.html">Firebase (2) - Cloud Messaging -</a>
+              <a href="/2026/06/adjacent-area-using-pluscode.html">pluscodeを使って位置情報の近接エリアを取得する方法</a>
+              <a href="/2026/06/build-android-app-with-github-actions.html">Github Actionsを使ってAndroidアプリをビルドする</a>
+            </div>
+          </div>
+          <div id="categories">
+            <h4>Categories</h4>
+            <ul class="my-1">
+              <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/java">Java (291)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/sastruts">SAStruts (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/spring-framework">Spring Framework (26)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mahout">Mahout (8)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/gradle">gradle (32)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/java-ee">Java EE (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rxjava">RxJava (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/kotlin">Kotlin (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/struts2">Struts2 (16)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/doma">doma (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/google-app-engine">Google App Engine (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hadoop">Hadoop (28)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/scala">scala (0)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/jax-rs">JAX-RS (22)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/android">Android (102)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/robolectric">robolectric (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/eclipse">Eclipse (6)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/eclipse-birt">Eclipse BIRT (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/php">PHP (70)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/phpunit">PHPUnit (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fuelphp">FuelPHP (33)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/laravel">Laravel (20)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/perl">Perl (10)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/ruby">Ruby (65)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/rspec">rspec (21)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/rails">Rails (34)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/javascript">JavaScript (165)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jquery">jQuery (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/chrome-extension">Chrome Extension (36)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/node-dot-js">Node.js (18)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/backbone-dot-js">Backbone.js (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/webpack">webpack (2)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/typescript">Typescript (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/angular-dot-js">angular.js (40)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/react">React (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/redux">redux (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/electron">Electron (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/docker">Docker (9)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/firebase">Firebase (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/linux">Linux (30)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/squid">squid (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/qmail">qmail (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postfix">postfix (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/nginx">nginx (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/varnish">varnish (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/supervisord">supervisord (4)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/database">Database (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/mysql">MySQL (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/postgresql">PostgreSQL (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/pl-slash-sql">PL/SQL (5)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/oracle">Oracle (13)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/mongodb">MongoDB (15)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/hbase">HBase (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/cassandra">Cassandra (10)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/sonota">その他 (15)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/jenkins">Jenkins (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/graphql">GraphQL (3)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/fluentd">fluentd (4)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/zookeeper">zookeeper (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/git">git (1)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/html5">HTML5 (7)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/css">CSS (7)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c">C (10)</a>
+    <div class="vstack ms-3">
+      <div class="vstack gap-1">
+  <div>
+    <a href="/archives/categories/objective-c">Objective-C (1)</a>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
+    <a href="/archives/categories/shakai">社会 (1)</a>
+  </div>
+</div>
+
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <footer class="text-center mt-5 py-4">Powered by simpress(octopress like site generator)</footer>
+    <a href="#" class="top-elevator btn btn-primary" aria-label="ページトップ">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </body>
+</html>
