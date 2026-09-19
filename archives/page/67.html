@@ -119,13 +119,20 @@
                   <a href="/2010/09/capistrano-app-deployment.html" class="stretched-link fs-2 fw-bold">capistranoでアプリをデプロイ</a>
                 </h3>
                 <p class="card-text">
-                  ```ruby
-set :default_run_options, :pty =&gt; true
-set :application, &quot;test&quot;
-set :repository, &quot;http://svn.example.com/test/trunk&quot;
-set :user, &quot;hoge&quot;
-set :app, &quot;example.com&quot;
-set :deploy_to, &quot;/var/www/test&quot;
+                  set :default_run_options, :pty =&amp;gt; true
+set :application, &amp;quot;test&amp;quot;
+set :repository, &amp;quot;http://svn.example.com/test/trunk&amp;quot;
+set :user, &amp;quot;hoge&amp;quot;
+set :app, &amp;quot;example.com&amp;quot;
+set :deploy_to, &amp;quot;/var/www/test&amp;quot;
+
+role :my, &amp;quot;example.com&amp;quot;
+
+task :deploy, :roles =&amp;gt; :my do
+    sudo &amp;quot;svn --quiet co #{repository} #{deploy_to}&amp;quot;
+end
+
+こんな風に書いたりすればなんとかできるっぽい(sudo権限が無くても配置できる所だったらsudoじゃなくてrunでも良い)
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -225,13 +232,19 @@ set :deploy_to, &quot;/var/www/test&quot;
                   <a href="/2010/08/limititerator.html" class="stretched-link fs-2 fw-bold">LimitIterator</a>
                 </h3>
                 <p class="card-text">
-                  ```php
-&lt;?php
-    $ar = array(&quot;hoge&quot;, &quot;fuga&quot;, &quot;foo&quot;, &quot;bar&quot;);
+                  &amp;lt;?php
+    $ar = array(&amp;quot;hoge&amp;quot;, &amp;quot;fuga&amp;quot;, &amp;quot;foo&amp;quot;, &amp;quot;bar&amp;quot;);
     $itr = new LimitIterator(
         // 最初から2件づつ分割
         new ArrayIterator($ar), 0, 2)
     );
+
+    foreach($itr as $o) {
+        echo $o;
+    }
+?&amp;gt;
+
+現在のページでデータを切り替えるにはLimitIteratorの第2引数を第3引数に指定したオフセットを掛けていけばいい
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -256,11 +269,16 @@ set :deploy_to, &quot;/var/www/test&quot;
                   <a href="/2010/08/memory-stream-wrapper.html" class="stretched-link fs-2 fw-bold">memory_stream_wrapper</a>
                 </h3>
                 <p class="card-text">
-                  ```php
-&lt;?php
-    $fp = fopen(&#39;php://memory&#39;,&#39;r+&#39;);
-    fwrite($fp, &#39;hoge fuga foobar&#39;);
+                  &amp;lt;?php
+    $fp = fopen(&amp;#39;php://memory&amp;#39;,&amp;#39;r+&amp;#39;);
+    fwrite($fp, &amp;#39;hoge fuga foobar&amp;#39;);
     rewind($fp);
+
+    echo stream_get_contents($fp);
+    fclose($fp);
+?&amp;gt;
+
+一時的にファイルリソースが必要な場合とかに使えるかも知れない
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -310,7 +328,7 @@ set :deploy_to, &quot;/var/www/test&quot;
                   <a href="/2010/07/php-calculate-age.html" class="stretched-link fs-2 fw-bold">PHPで年齢算出</a>
                 </h3>
                 <p class="card-text">
-                  ### 方法1
+                  
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -580,14 +598,14 @@ set :deploy_to, &quot;/var/www/test&quot;
     <div class="vstack ms-3">
       <div class="vstack gap-1">
   <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
     <a href="/archives/categories/objective-c">Objective-C (1)</a>
   </div>
 </div>
 
     </div>
-  </div>
-  <div>
-    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
   </div>
   <div>
     <a href="/archives/categories/shakai">社会 (1)</a>

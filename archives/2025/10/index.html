@@ -67,8 +67,26 @@
                   <a href="/2025/10/ffmpeg-rtmp-streaming.html" class="stretched-link fs-2 fw-bold">ffmpegを使ってRTMPストリーミング</a>
                 </h3>
                 <p class="card-text">
-                  [^]: &lt;a href=&quot;/2025/06/ffmpeg-record-rectangular-selection-area.html&quot;&gt;ffmpegを使って矩形選択エリアを録画録音する方法&lt;/a&gt;をベースに
-[^]: RTMPサーバーはnode-media-serverを使用
+                  #!/bin/bash
+
+SLOP=$(slop -q -f &amp;quot;%x %y %w %h&amp;quot;) || exit 1
+read -r X Y W H G ID &amp;lt; &amp;lt;(echo $SLOP)
+ffmpeg -threads 0 -y -f x11grab \
+       -s &amp;quot;$W&amp;quot;x&amp;quot;$H&amp;quot; \
+       -i :0.0+$X,$Y \
+       -f alsa \
+       -i default \
+       -c:v libx264 \
+       -c:a aac \
+       -ac 2 \
+       -r 60 \
+       -crf 20 \
+       -preset faster \
+       -fs 128M \
+       -f flv rtmp://localhost:1935/live/test_stream
+
+最後の -f flv rtmp://localhost:1935/live/test_streamでRTMPサーバーを指定する。
+これで選択した短径エリアをRTMPにストリーミングできる
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -336,14 +354,14 @@
     <div class="vstack ms-3">
       <div class="vstack gap-1">
   <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
     <a href="/archives/categories/objective-c">Objective-C (1)</a>
   </div>
 </div>
 
     </div>
-  </div>
-  <div>
-    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
   </div>
   <div>
     <a href="/archives/categories/shakai">社会 (1)</a>

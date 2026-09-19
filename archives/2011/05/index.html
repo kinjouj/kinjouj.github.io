@@ -93,9 +93,51 @@
                   <a href="/2011/05/libhdfs.html" class="stretched-link fs-2 fw-bold">libhdfs</a>
                 </h3>
                 <p class="card-text">
-                  ```cpp
-#include &lt;iostream&gt;
-#include &quot;hdfs.h&quot;
+                  #include &amp;lt;iostream&amp;gt;
+#include &amp;quot;hdfs.h&amp;quot;
+
+int main(int argc, char** argv) {
+    hdfsFS fs = hdfsConnect(&amp;quot;default&amp;quot;, 0);
+
+    if(!fs) {
+        printf(&amp;quot;error&amp;quot;);
+        exit(0);
+    }
+
+    hdfsFile wFile = hdfsOpenFile(fs, &amp;quot;test.hdfs&amp;quot;, O_WRONLY, 8192, 0, 0);
+
+    if(!wFile) {
+        printf(&amp;quot;error[2]&amp;quot;);
+        exit(0);
+    }
+
+    char* buf1 = (char*)malloc(sizeof(char) * 8192);
+    strcpy(buf1, argv[1]);
+    tSize size1 = 8192;
+    size1 = hdfsWrite(fs, wFile, buf1, size1);
+    free(buf1);
+    hdfsCloseFile(fs, wFile);
+    hdfsFile rFile = hdfsOpenFile(fs, &amp;quot;test.hdfs&amp;quot;, O_RDONLY, 8192, 0, 0);
+
+    if(!rFile) {
+        printf(&amp;quot;error&amp;quot;);
+        exit(0);
+    }
+
+    char* buf2 = (char*)malloc(sizeof(char) * 8192);
+    tSize size2 = 8192;
+    size2 = hdfsRead(fs, rFile, buf2, size2);
+
+    printf(&amp;quot;%s\r\n&amp;quot;, buf2);
+
+    free(buf2);
+    hdfsCloseFile(fs, rFile);
+    hdfsDisconnect(fs);
+
+    return 0;
+}
+
+コンパイルは
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -200,8 +242,7 @@
                   <a href="/2011/05/mahout-4-userbasedrecommender.html" class="stretched-link fs-2 fw-bold">Mahout (4) - UserBasedRecommender -</a>
                 </h3>
                 <p class="card-text">
-                  ```java
-import java.io.File;
+                  
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -522,14 +563,14 @@ import java.io.File;
     <div class="vstack ms-3">
       <div class="vstack gap-1">
   <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
     <a href="/archives/categories/objective-c">Objective-C (1)</a>
   </div>
 </div>
 
     </div>
-  </div>
-  <div>
-    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
   </div>
   <div>
     <a href="/archives/categories/shakai">社会 (1)</a>

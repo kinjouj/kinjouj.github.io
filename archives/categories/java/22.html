@@ -171,7 +171,7 @@
                   <a href="/2012/09/hector-2.html" class="stretched-link fs-2 fw-bold">Hectorを使ってみる (2) - Object Mapper -</a>
                 </h3>
                 <p class="card-text">
-                  &lt;http://hector-client.github.com/hector/build/html/content/HOM/hector-object-mapper.html&gt; をやってみる。そのままある程度はドキュメント通りに
+                  http://hector-client.github.com/hector/build/html/content/HOM/hector-object-mapper.html をやってみる。そのままある程度はドキュメント通りに
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -276,7 +276,37 @@
                   <a href="/2012/08/slim3-respond_to.html" class="stretched-link fs-2 fw-bold">Slim3でrespond_toもどき</a>
                 </h3>
                 <p class="card-text">
-                  ### IndexController.java
+                  package server_director.controller.profile;
+
+import org.slim3.controller.Navigation;
+
+import server_director.controller.ServerDirectorController;
+import server_director.model.Profile;
+import server_director.service.ProfileService;
+
+import com.google.appengine.api.users.User;
+
+public class IndexController extends ServerDirectorController {
+
+    ProfileService service = new ProfileService();
+
+    @Override
+    protected Navigation run() throws Exception {
+        User user = service.getUser();
+
+        if (!service.isLogin() || user == null) {
+            return redirect(service.createLoginURL(&amp;quot;/profile&amp;quot;));
+        }
+
+        Profile profile = service.getProfile();
+
+        requestScope(&amp;quot;profile&amp;quot;, profile);
+
+        return forward(&amp;quot;/WEB-INF/jsp/index.jsp&amp;quot;);
+    }
+}
+
+まぁてな感じで継承しているクラス以外は普通のSlim3コントローラークラス。もちろんコントローラー側でJSONに変換したりっていう処理は含まれない(あるがJSONに変換する処理自体はModelに。それは以下参照)
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -302,8 +332,59 @@
                   <a href="/2012/08/slim3-modeltojson-inversemodellistref.html" class="stretched-link fs-2 fw-bold">modelToJsonでInverseModelListRefを扱う</a>
                 </h3>
                 <p class="card-text">
-                  ```java
-package server_director.model;
+                  package server_director.model;
+
+import java.io.Serializable;
+
+import org.slim3.datastore.Attribute;
+import org.slim3.datastore.InverseModelListRef;
+import org.slim3.datastore.Model;
+
+import server_director.meta.ServerMeta;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.users.User;
+
+@Model
+public class Profile implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Attribute(primaryKey = true)
+    private Key key;
+
+    @Attribute(persistent = true)
+    private User user;
+
+    @Attribute(persistent = false)
+    private InverseModelListRef&amp;lt;Server, Profile&amp;gt; servers = new InverseModelListRef&amp;lt;Server, Profile&amp;gt;(
+        Server.class,
+        ServerMeta.get().profileRef.getName(),
+        this
+    );
+
+    public Key getKey() {
+        return key;
+    }
+
+    public void setKey(Key key) {
+        this.key = key;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public InverseModelListRef&amp;lt;Server, Profile&amp;gt; getServers() {
+        return servers;
+    }
+}
+
+みたいなのがあって、これをmodelToJsonを使ってJSON化するとInverseModelListRefなのはエンコードしたJSONに含まれない(ModelRefの場合はKeyが出るらしい)
                 </p>
               </div>
               <div class="card-footer position-relative mt-3">
@@ -573,14 +654,14 @@ package server_director.model;
     <div class="vstack ms-3">
       <div class="vstack gap-1">
   <div>
+    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
+  </div>
+  <div>
     <a href="/archives/categories/objective-c">Objective-C (1)</a>
   </div>
 </div>
 
     </div>
-  </div>
-  <div>
-    <a href="/archives/categories/c-plus-plus">C++ (6)</a>
   </div>
   <div>
     <a href="/archives/categories/shakai">社会 (1)</a>
