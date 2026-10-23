@@ -30,7 +30,7 @@
   "@context": "https://schema.org",
   "@type": "Article",
   "headline": "angular.jsをやってみる (24) - ng-non-bindable -",
-  "datePublished": "2014-05-12T00:00:00+09:00",
+  "datePublished": "2014-05-12T09:00:00+09:00",
   "author": {
     "@type": "Person",
     "name": "kinjouj"
@@ -107,19 +107,19 @@
     };
   });
 </code></pre>
-<p>んまぁ適当に$scopeに関数を打ち込む。で例えばこのコントローラーの内部にサーバーサイドなテンプレートエンジンを利用してクエリーで指定したデータで&lt;span style=&quot;color: red&quot;&gt;&quot;{% raw %}{{onClick()}}{% endraw %}&quot;&lt;/span&gt;がそのまま参照されたらどうなるのかっていう</p>
+<p>んまぁ適当に$scopeに関数を打ち込む。で例えばこのコントローラーの内部にサーバーサイドなテンプレートエンジンを利用してクエリーで指定したデータで<span style="color: red">&quot;{% raw %}{{onClick()}}{% endraw %}&quot;</span>がそのまま参照されたらどうなるのかっていう</p>
 <h3 id="section-2">app/controllers/sample_controller.rb</h3><pre class="line-numbers"><code class="language-rb">class SamplesController &lt; ApplicationController
   def show
     @query = params[:query]
   end
 end
 </code></pre>
-<p>単純に&lt;http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}&gt;のようなクエリーを送れるような形で、そのデータをビューにバインドする</p>
+<p>単純に<http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}>のようなクエリーを送れるような形で、そのデータをビューにバインドする</p>
 <h3 id="section-3">app/views/sample/show.erb</h3><pre class="line-numbers"><code class="language-erb">&lt;div ng-controller=&quot;SampleController&quot;&gt;
     &lt;h2&gt;&lt;%= @query %&gt;&lt;/h2&gt;
 &lt;/div&gt;
 </code></pre>
-<p>終わり。でこのまま動かしてコントローラーのところに書いてるURL( &lt;http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}&gt; ) にアクセスしてみると$scopeに突っ込んだ関数な処理が発生してしまう。つまりalertが出るっていうオチになる</p>
+<p>終わり。でこのまま動かしてコントローラーのところに書いてるURL( <http://localhost:3000/sample.html?query={% raw %}{{onClick()}}{% endraw %}> ) にアクセスしてみると$scopeに突っ込んだ関数な処理が発生してしまう。つまりalertが出るっていうオチになる</p>
 
 <p>っていうことでサーバーサイドからテンプレートエンジンを用いてレンダリングされる部分において、angular.jsで評価される可能性のあるのはng-non-bindableを指定すればいい模様。なので上記のビューを</p>
 <pre class="line-numbers"><code class="language-erb">&lt;div ng-controller=&quot;SampleController&quot;&gt;
