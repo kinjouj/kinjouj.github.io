@@ -111,17 +111,17 @@ mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --rep
   ]
 })
 </code></pre>
-<p>な感じで設定を行う。で <a href="http://localhost:11001/_replSet" target="_blank" rel="noopener">http://localhost:11001/_replSet</a> でレプリカセットの状態が見れるのでアクセスすると</p>
+<p>な感じで設定を行う。で <a href="http://localhost:11001/_replSet">http://localhost:11001/_replSet</a> でレプリカセットの状態が見れるのでアクセスすると</p>
 
-<p><img src="/images/2013/01/20130123213000.jpg" alt="image" /></p>
+<p><img src="/images/2013/01/20130123213000.jpg" alt="" title="" /></p>
 
 <p>っていう感じっすね。PRIMARYとSECONDARYの2つに分かれてる。でマスターを落とすと</p>
 
-<p><img src="/images/2013/01/20130123213117.jpg" alt="image" /></p>
+<p><img src="/images/2013/01/20130123213117.jpg" alt="" title="" /></p>
 
 <p>てな感じで10001がDOWNになって10003がSECONDARYからPRIMARYになってる(10001は落ちてるので上のWebコンソールは別のサーバーのやつでアクセスする)。でこの状態で現在は10003がPRIMARYなのでこれも落としてみると</p>
 
-<p><img src="/images/2013/01/20130123213344.jpg" alt="image" /></p>
+<p><img src="/images/2013/01/20130123213344.jpg" alt="" title="" /></p>
 
 <p>でそこら辺を柔軟に管理してPRIMARY/SECONDARYを監査してくれる?のがArbiterな模様なので、もう1個MongoDBを起動する</p>
 <pre class="line-numbers"><code class="language-text">mongod --replSet repltest --dbpath /tmp/mongo4 --logpath /tmp/mongo4/mongdb.log --port 10004 --rest
@@ -131,15 +131,15 @@ mongod --dbpath /tmp/mongo3 --logpath /tmp/mongo3/mongodb.log --port 10003 --rep
 </code></pre>
 <p>でArbiterサーバーを設定しておく。で再度Webコンソールを見ると</p>
 
-<p><img src="/images/2013/01/20130123213948.jpg" alt="image" /></p>
+<p><img src="/images/2013/01/20130123213948.jpg" alt="" title="" /></p>
 
 <p>な感じARBITERな項目が増える。でちょっと停止させておいて、既に3つのサーバーをレプリカセットとして認識させているけど、10003だけ起動せずに停止したままにしてみると</p>
 
-<p><img src="/images/2013/01/20130123215449.jpg" alt="image" /></p>
+<p><img src="/images/2013/01/20130123215449.jpg" alt="" title="" /></p>
 
 <p>という風に10003が起動してないのでPRIMARYが決まってない。こういう状況になった場合にArbiterがPRIMARYを監査してくれる模様という事で停止しておいたArbiterを起動すると</p>
 
-<p><img src="/images/2013/01/20130123221002.jpg" alt="image" /></p>
+<p><img src="/images/2013/01/20130123221002.jpg" alt="" title="" /></p>
 
 <p>っていう感じ。まぁPRIMARYかSECONDARYか判断されてないようなケースだとArbiterにそれを委譲するっていう感じなんすかね。はっきりとした理論は無いんですけど</p>
 

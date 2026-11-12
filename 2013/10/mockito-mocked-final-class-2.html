@@ -122,6 +122,7 @@ public class SampleTest {
 }
 </code></pre>
 <p>なんていうテストを普通にぶちかますと</p>
+
 <pre>
 org.mockito.exceptions.base.MockitoException:
 Cannot mock/spy class sample.Sample
@@ -130,7 +131,6 @@ Mockito cannot mock/spy following:
   - anonymous classes
   - primitive types
 </pre>
-
 
 <p>っていうようにfinalクラスはモック化出来ねーよって怒られる訳ですが。で前回だと独自のクラスローダーを利用してjavassistを使ってfinal modifierを消したクラスバイトコードを動的にロードするっていう方式だったんですが、これだとこのクラスローダーからロードしないといけないとかめんどくさいよねっていう事で色々調べつつやってみた。無論上記のコードでテストは一切書き換えないっていう条件付き</p>
 
@@ -212,16 +212,16 @@ Premain-Class: JavaAgent
 <p>を定義して、上記のJavaAgentクラスとSampleClassTransformerクラスをぶち込んでjar化する</p>
 
 <p>終わり。あとは実行時に-javaagent:sample.jar(作成したjarファイル)でテストを実行すると</p>
+
 <pre>
 java.lang.AssertionError:
 Expected: is "hoge fuga foobar"
      but: was "hoge"
 </pre>
 
-
 <p>っていうように「when(sample.say()).thenReturn(&quot;hoge&quot;)」としているのでまぁどっちにしろテストは成功しないけど、モック化してメソッドが返す値をfinalクラスでもぶち込んだり出来るっていう訳</p>
 
-<p>参考: <a href="http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class" target="_blank" rel="noopener">http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class</a></p>
+<p>参考: <a href="http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class">http://stackoverflow.com/questions/13032918/can-java-classloaders-rewrite-the-bytecode-of-only-their-copy-of-system-class</a></p>
 
 <p>[1]: /mockito-mocked-final-class.html</p>
 

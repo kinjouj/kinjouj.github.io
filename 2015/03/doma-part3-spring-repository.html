@@ -175,10 +175,10 @@ public class SampleDaoTest {
 }
 </code></pre>
 <p>まぁsave側でExceptionをスローしているからテストは落ちる。でもその例外が</p>
+
 <blockquote>
 org.springframework.transaction.UnexpectedRollbackException: Transaction rolled back because it has been marked as rollback-only
 </blockquote>
-
 
 <p>となる。詳解な原因がちゃんと特定できた訳じゃないのだけど、恐らくはTransactionInterceptor等によるトランザクションが重なってしまっているのではないかと。要は&lt;tx:annotation-driven /&gt;によるTransactionInterceptorと&lt;aop:advice/&gt;によるTransactionInterceptorによってトランザクションが重なりメソッドで例外を創出するとsetRollbackOnlyはしているので問題なくロールバックはされるが結果的にその上のトランザクションスコープによってcommit実行しようとして結果上記のような例外が送出されてしまうのではないかという予測(あくまで予測なので確証はありません)</p>
 
